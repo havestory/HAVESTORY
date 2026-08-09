@@ -74,7 +74,7 @@ const NAV_SECTIONS = [
   },
 ];
 
-const DARK_KEY = "pb_admin_dark";
+const DARK_KEY = "havestory_admin_dark";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [location, setLocation] = useLocation();
@@ -146,7 +146,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             />
           ) : (
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
-              PB
+              HS
             </div>
           )}
           <div>
@@ -226,7 +226,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   );
 
   return (
-    <div className={`min-h-screen flex transition-colors duration-200 ${dark ? "dark" : ""} ${mainBg}`}>
+    <div className={`havestory-admin-shell min-h-screen flex transition-colors duration-200 ${dark ? "dark" : ""} ${mainBg}`}>
 
       {/* Mobile backdrop — tap outside the drawer to close it */}
       {mobileOpen && (
