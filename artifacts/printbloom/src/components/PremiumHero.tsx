@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ArrowRight, BadgeCheck, Box, BriefcaseBusiness, Headphones,
-  ShoppingCart, Sparkles, Sticker, Truck, UploadCloud
+  Aperture, ArrowRight, BadgeCheck, Camera, Frame, Headphones,
+  Images, Palette, ShoppingCart, Truck, UploadCloud
 } from "lucide-react";
 
 type Props = {
@@ -17,7 +17,7 @@ const defaultCategories = [
   { title: "Story Collages", copy: "Many moments composed into one meaningful frame.", href: "/store" },
   { title: "Gift Collections", copy: "Thoughtful frame sets for the people who matter.", href: "/store" },
 ];
-const categoryIcons = [Sticker, BriefcaseBusiness, Box, Sparkles];
+const categoryIcons = [Frame, Aperture, Images, Palette];
 
 function configuredCategories(settings: any) {
   try {
@@ -52,7 +52,7 @@ export function PremiumHero({ settings, publicStats }: Props) {
   }, [slides.length]);
 
   const visual = slides[slide] || "";
-  const heroTitle = settings?.heroTitle || "Your ideas. Beautifully printed.";
+  const heroTitle = settings?.heroTitle || "Portraits, colour and frames — finished beautifully.";
   const categories = configuredCategories(settings);
 
   return (
@@ -64,24 +64,24 @@ export function PremiumHero({ settings, publicStats }: Props) {
           transition={{ duration: .55 }}
           className="pb-hero-copy"
         >
-          <span className="pb-eyebrow">{settings?.heroBadgeText || "Custom printing, made simple"}</span>
+          <span className="pb-eyebrow">{settings?.heroBadgeText || "Portrait studio · Colour lab · Custom framing"}</span>
           <motion.h1 className="pb-animated-title" initial="hidden" animate="show" variants={{ hidden:{}, show:{ transition:{ staggerChildren:.085, delayChildren:.12 } } }}>
             {heroTitle.split(/\s+/).map((word: string, index: number) => (
               <motion.span key={`${word}-${index}`} variants={{ hidden:{ opacity:0, y:24, filter:"blur(8px)" }, show:{ opacity:1, y:0, filter:"blur(0px)", transition:{ duration:.65, ease:[.22,1,.36,1] } } }}>{word}&nbsp;</motion.span>
             ))}
           </motion.h1>
-          <p>{settings?.heroSubtitle || "Order custom stickers, labels, business cards, packaging and more — all in a few easy steps."}</p>
+          <p>{settings?.heroSubtitle || "From a favourite photograph to a finished frame, our studio brings careful colour, premium materials and a personal eye to every story."}</p>
 
           <div className="pb-hero-actions">
             <Link href={settings?.heroCtaLink || "/custom-project"} className="pb-primary-cta">
-              {settings?.heroCtaText || "Start Your Order"} <ArrowRight size={20} />
+              {settings?.heroCtaText || "Plan Your Frame"} <ArrowRight size={20} />
             </Link>
             <Link href="/store" className="pb-secondary-cta">
-              Browse Products <ArrowRight size={20} />
+              Explore Collections <ArrowRight size={20} />
             </Link>
           </div>
 
-          <div className="pb-upload-note"><UploadCloud size={20} /> Upload your design or let us help.</div>
+          <div className="pb-upload-note"><UploadCloud size={20} /> Upload your photograph or book a studio session.</div>
         </motion.div>
 
         <div className="pb-hero-visual">
@@ -90,7 +90,7 @@ export function PremiumHero({ settings, publicStats }: Props) {
               <motion.img
                 key={visual}
                 src={visual}
-                alt="PrintBloom custom printing samples"
+                alt="HAVESTORY studio portraits and framed photographs"
                 initial={{ opacity: 0, scale: 1.08, x: 28, filter: "blur(6px)" }}
                 animate={{ opacity: 1, scale: 1, x: 0, filter: "blur(0px)" }}
                 exit={{ opacity: 0, scale: 1.035, x: -22, filter: "blur(4px)" }}
@@ -120,10 +120,10 @@ export function PremiumHero({ settings, publicStats }: Props) {
       </div>
 
       <div className="pb-trust-strip">
-        <div><ShoppingCart /><span><strong>Easy Online Ordering</strong><small>Simple steps from upload to checkout.</small></span></div>
-        <div><BadgeCheck /><span><strong>Print-Ready Quality</strong><small>Crisp prints with premium materials.</small></span></div>
+        <div><ShoppingCart /><span><strong>Simple Online Ordering</strong><small>Choose, upload and approve with confidence.</small></span></div>
+        <div><BadgeCheck /><span><strong>Colour-Lab Quality</strong><small>Careful colour, detail and premium materials.</small></span></div>
         <div><Truck /><span><strong>Islandwide Delivery</strong><small>{publicStats?.ordersDelivered ? `${publicStats.ordersDelivered}+ orders delivered.` : "Reliable delivery across Sri Lanka."}</small></span></div>
-        <div><Headphones /><span><strong>Friendly Design Support</strong><small>Real people ready to help you.</small></span></div>
+        <div><Headphones /><span><strong>Studio Guidance</strong><small>Real people helping with portraits and framing.</small></span></div>
       </div>
     </section>
   );
