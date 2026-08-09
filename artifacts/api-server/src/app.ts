@@ -34,7 +34,7 @@ const isProduction = process.env.NODE_ENV === "production";
 
 // Allow the Replit dev host OR a specific FRONTEND_ORIGIN in production.
 // The FRONTEND_ORIGIN env var should be the full URL of your Vercel frontend,
-// e.g. https://printbloom.vercel.app
+// e.g. https://havestory.vercel.app
 const allowedOrigins = process.env.FRONTEND_ORIGIN
   ? process.env.FRONTEND_ORIGIN.split(",").map((o) => o.trim())
   : [];
