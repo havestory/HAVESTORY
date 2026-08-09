@@ -28,7 +28,7 @@ const TABS = [
 
 type TabId = typeof TABS[number]["id"];
 
-const THEME_PRESETS = [
+const THEME_PRESETS = [\n  {\n    id: \"havestory-gallery\",\n    label: \"HAVESTORY Gallery\",\n    desc: \"Warm ivory, walnut & muted bronze\",\n    from: \"#a87842\",\n    to: \"#5c4938\",\n    accent: \"#c39a68\",\n    primary: \"30 43% 46%\",\n    secondary: \"27 24% 29%\",\n  },
   {
     id: "pink-purple",
     label: "Pink & Purple",
