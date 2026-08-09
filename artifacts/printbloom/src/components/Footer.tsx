@@ -49,7 +49,7 @@ export function Footer() {
             {(() => {
               const s = settings as any;
               const logoUrl = s?.logoUrl || "";
-              const businessName = s?.businessName || "PrintBloom";
+              const businessName = s?.businessName || "HAVESTORY";
               const showNameWithLogo = s?.showNameWithLogo !== 0;
               return (
                 <Link href="/" className="flex items-center gap-2 group w-fit">
@@ -74,7 +74,7 @@ export function Footer() {
                         </svg>
                       </div>
                       <span className="font-display font-bold text-xl">
-                        {businessName.includes("PrintBloom")
+                        {businessName.includes("HAVESTORY")
                           ? <>Print<span className="text-primary">Bloom</span></>
                           : businessName}
                       </span>
@@ -160,7 +160,7 @@ export function Footer() {
         </div>
 
         <div className="pt-8 border-t border-gray-200/50 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-          <div><p>© {new Date().getFullYear()} {settings?.businessName || "PrintBloom"}. All rights reserved.</p><div className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-indigo-100 bg-indigo-50/80 px-2.5 py-1 text-xs font-semibold text-indigo-700"><span>PrintBloom</span><span className="text-indigo-300">·</span><span>Operated by <strong>CodeArtix Technologies</strong></span></div></div>
+          <div><p>© {new Date().getFullYear()} {settings?.businessName || "HAVESTORY"}. All rights reserved.</p><div className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-indigo-100 bg-indigo-50/80 px-2.5 py-1 text-xs font-semibold text-indigo-700"><span>HAVESTORY</span><span className="text-indigo-300">·</span><span>Operated by <strong>CodeArtix Technologies</strong></span></div></div>
           {(settings as any)?.designerCredit && (
             <p className="flex items-center gap-1.5">
               Designed by{" "}
