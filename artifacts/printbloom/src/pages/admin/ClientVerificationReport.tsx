@@ -3,6 +3,8 @@ import { useLocation, useParams } from "wouter";
 import { ArrowLeft, CheckCircle2, Download, Printer, ShieldCheck, XCircle } from "lucide-react";
 import { getInvoicePaidAmount } from "@/lib/invoiceTypes";
 import { A4PrintPortal,useA4Print } from "@/components/A4PrintPortal";
+import { useGetSettings } from "@workspace/api-client-react";
+import { getBusinessName } from "@/lib/brand-settings";
 
 type Verification = {
   exists: boolean;
@@ -18,6 +20,8 @@ type Verification = {
 
 export default function ClientVerificationReport() {
   const { active: printActive, print: printA4 } = useA4Print();
+  const { data: settings } = useGetSettings();
+  const businessName = getBusinessName(settings as any);
   const { clientId } = useParams<{ clientId: string }>();
   const [, setLocation] = useLocation();
   const id = Number(clientId);
@@ -78,7 +82,7 @@ export default function ClientVerificationReport() {
 
   const report = <article id="client-verification-report" className="verification-a4 pb-print-flow mx-auto max-w-[900px] rounded-3xl bg-white p-6 shadow-xl sm:p-9">
       <header className="flex flex-wrap items-start justify-between gap-4 border-b-2 border-slate-900 pb-5">
-        <div><div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-pink-600"><ShieldCheck size={18} /> PrintBloom · Operated by CodeArtix Technologies · Owner Confidential</div><h1 className="mt-2 text-3xl font-black text-slate-950">Client Verification Report</h1><p className="mt-1 text-sm text-slate-500">Profile {String(client.id).padStart(4, "0")} · Generated {new Date().toLocaleString("en-LK")}</p></div>
+        <div><div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-pink-600"><ShieldCheck size={18} /> {businessName} · Owner Confidential</div><h1 className="mt-2 text-3xl font-black text-slate-950">Client Verification Report</h1><p className="mt-1 text-sm text-slate-500">Profile {String(client.id).padStart(4, "0")} · Generated {new Date().toLocaleString("en-LK")}</p></div>
         <span className={`rounded-full px-4 py-2 text-xs font-black uppercase ${verification.status === "approved" ? "bg-emerald-100 text-emerald-700" : verification.status === "rejected" ? "bg-red-100 text-red-700" : verification.status === "submitted" ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-600"}`}>{verification.status || "not started"}</span>
       </header>
 

@@ -13,6 +13,7 @@ import {
   EMPTY_CLIENT_VALUE,
   type ClientPickerValue,
 } from "@/components/ClientPicker";
+import { getBusinessName } from "@/lib/brand-settings";
 import {
   DateFilterSelect,
   dateMatchesFilter,
@@ -87,7 +88,7 @@ export default function AdminOrders() {
 
   const buildWhatsAppMessage = (order: any) => {
     const template = (settings as any)?.whatsappOrderTemplate ||
-      "Hi {customerName}!\n\nThank you for choosing *PrintBloom*!\n\nOrder Number: *{orderNumber}*\nTrack your order: {trackingLink}";
+      `Hi {customerName}!\n\nThank you for choosing *${getBusinessName(settings as any)}*!\n\nOrder Number: *{orderNumber}*\nTrack your order: {trackingLink}`;
     const website = (settings as any)?.website?.replace(/^https?:\/\//, "") || "";
     const trackingBase = website ? `https://${website}/track-order` : `${window.location.origin}/track-order`;
     const trackingLink = `${trackingBase}?id=${order.orderId}`;

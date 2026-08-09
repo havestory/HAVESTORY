@@ -746,7 +746,7 @@ export default function ProductDetail() {
               <span className="text-xs text-gray-400 font-medium flex items-center gap-1"><Share2 size={12} /> Share:</span>
               {SOCIALS.map(({ key, Icon, color, label, getUrl }) => {
                 const shareUrl = typeof window !== "undefined" ? window.location.href : "";
-                const href = getUrl(shareUrl, (product as any)?.name || "HAVESTORY Frame");
+                const href = getUrl(shareUrl, (product as any)?.name || "Photo frame");
                 return (
                   <a
                     key={key}

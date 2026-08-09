@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "wouter";
 import { useGetSettings } from "@workspace/api-client-react";
 import { CheckCircle2, Loader2, LockKeyhole, PackageCheck } from "lucide-react";
+import { getBusinessInitials, getBusinessName } from "@/lib/brand-settings";
 
 export default function ShippingVerification() {
   const { token } = useParams<{ token: string }>();
@@ -14,13 +15,14 @@ export default function ShippingVerification() {
       .then(setData).catch(err => setError(err.message));
   }, [token]);
 
-  const name = (settings as any)?.businessName || "PrintBloom";
+  const name = getBusinessName(settings as any);
+  const initials = getBusinessInitials(settings as any);
   const logo = (settings as any)?.logoUrl;
   if (!data && !error) return <div className="flex min-h-screen items-center justify-center bg-gray-50"><Loader2 className="animate-spin text-pink-500" /></div>;
   return (
     <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(236,72,153,0.12),_transparent_40%),#f8f7fb] p-5">
       <div className="w-full max-w-md rounded-3xl border border-white bg-white/90 p-7 text-center shadow-2xl backdrop-blur-xl">
-        {logo ? <img src={logo} alt={name} className="mx-auto h-14 w-14 rounded-xl object-contain" /> : <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 font-black text-white">PB</div>}
+        {logo ? <img src={logo} alt={name} className="mx-auto h-14 w-14 rounded-xl object-contain" /> : <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 font-black text-white">{initials}</div>}
         <h1 className="mt-4 text-xl font-black text-gray-950">{name} Shipping Verification</h1>
         {error ? <div className="mt-6 rounded-2xl border border-red-100 bg-red-50 p-5 text-sm font-semibold text-red-700">{error}</div> : <>
           <div className="mx-auto mt-6 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600"><CheckCircle2 size={30} /></div>

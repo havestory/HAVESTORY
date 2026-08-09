@@ -10,6 +10,7 @@ import {
 import { format } from "date-fns";
 import { InvoicePreview } from "@/components/InvoicePreview";
 import { parseInvoiceMeta, calcShipping, num } from "@/lib/invoiceTypes";
+import { getBusinessName } from "@/lib/brand-settings";
 
 
 function STATUS_INFO(status: string): { label: string; color: string; bg: string; icon: React.ReactNode } {
@@ -239,6 +240,7 @@ export default function TrackOrder() {
   });
 
   const { data: settings } = useGetSettings();
+  const businessName = getBusinessName(settings as any);
   const trackQrUrl: string = (settings as any)?.paymentQrUrl || "";
   const trackBankAccounts: any[] = (() => {
     try {
@@ -278,7 +280,7 @@ export default function TrackOrder() {
             type="text"
             value={orderId}
             onChange={e => setOrderId(e.target.value)}
-            placeholder="e.g. PB-MAR-0001-K7X"
+            placeholder="Enter your order number"
             className="flex-1 px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-800 placeholder:text-gray-400 text-sm outline-none focus:ring-2 focus:ring-purple-200 focus:border-purple-400 transition-all"
           />
           <button
@@ -440,7 +442,7 @@ export default function TrackOrder() {
                         <FileText size={16} className="text-purple-600" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-[10px] font-bold text-purple-500 tracking-widest uppercase mb-0.5">From PrintBloom Team</div>
+                        <div className="text-[10px] font-bold text-purple-500 tracking-widest uppercase mb-0.5">From {businessName} Team</div>
                         <div className="font-bold text-gray-900 text-sm truncate">{tracking.proofFileName || "Design proof attached"}</div>
                         <div className="text-xs text-gray-500 mt-0.5">Your design proof is ready — please review and download</div>
                       </div>

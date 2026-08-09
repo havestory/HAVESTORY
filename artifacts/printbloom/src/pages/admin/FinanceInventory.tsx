@@ -3,6 +3,8 @@ import { AlertTriangle, ArrowDownLeft, ArrowUpRight, Boxes, Loader2, PackagePlus
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { A4PrintPortal,useA4Print } from "@/components/A4PrintPortal";
+import { useGetSettings } from "@workspace/api-client-react";
+import { getBusinessName } from "@/lib/brand-settings";
 
 const today = () => new Date().toISOString().slice(0, 10);
 const currentMonth = () => new Date().toISOString().slice(0, 7);
@@ -19,6 +21,8 @@ type WasteRecord = { id: number; project_id?: string; inventory_name: string; qu
 export default function FinanceInventory() {
   const { active: printActive, print: printA4 } = useA4Print();
   const { toast } = useToast();
+  const { data: settings } = useGetSettings();
+  const businessName = getBusinessName(settings as any);
   const [month, setMonth] = useState(currentMonth());
   const [tab, setTab] = useState<"overview" | "cash" | "waste" | "costs">("overview");
   const [summary, setSummary] = useState<Summary | null>(null);
@@ -238,7 +242,7 @@ export default function FinanceInventory() {
 
     <A4PrintPortal active={printActive}><section id="monthly-cashflow-report" className="pb-print-flow bg-white p-2 text-gray-900">
       <div className="border-b-2 border-gray-900 pb-4">
-        <div className="text-2xl font-black">PrintBloom</div>
+        <div className="text-2xl font-black">{businessName}</div>
         <div className="mt-1 text-lg font-bold">Monthly Cash Flow Report</div>
         <div className="mt-1 text-sm text-gray-500">{reportMonthLabel} · Generated {new Date().toLocaleDateString("en-LK")}</div>
       </div>
@@ -251,7 +255,7 @@ export default function FinanceInventory() {
         <tfoot><tr className="border-t-2 border-gray-900 font-black"><td colSpan={3} className="py-3">MONTH TOTAL</td><td className="py-3 text-right text-emerald-700">{money(reportIncome)}</td><td className="py-3 text-right text-rose-700">{money(reportExpenses)}</td></tr></tfoot>
       </table>
       {transactions.length===0&&<div className="py-12 text-center text-sm text-gray-500">No cash-flow entries for {reportMonthLabel}.</div>}
-      <div className="mt-8 border-t border-gray-300 pt-3 text-[10px] text-gray-500">Private admin report · PrintBloom Finance & Inventory</div>
+      <div className="mt-8 border-t border-gray-300 pt-3 text-[10px] text-gray-500">Private admin report · {businessName} Finance & Inventory</div>
     </section></A4PrintPortal>
 
   </div>;

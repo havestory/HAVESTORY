@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "wouter";
 import { useGetSettings } from "@workspace/api-client-react";
 import { Clock, FileSpreadsheet, Loader2, ShieldCheck } from "lucide-react";
+import { getBusinessInitials, getBusinessName } from "@/lib/brand-settings";
 
 type Section = { id: string; title: string; columns: string[]; rows: Array<{ id: string; cells: string[] }> };
 type PriceList = { title: string; subtitle: string; note: string; sections: Section[]; expiresAt: string | null; updatedAt: string };
@@ -29,7 +30,7 @@ export default function PrivatePriceList() {
   }, [publicId]);
 
   useEffect(() => {
-    if (data?.title) document.title = `${data.title} | ${(settings as any)?.businessName || "PrintBloom"}`;
+    if (data?.title) document.title = `${data.title} | ${getBusinessName(settings as any)}`;
   }, [data?.title, settings]);
 
   if (loading) return <div className="flex min-h-screen items-center justify-center bg-[#f8f7fb]"><Loader2 size={32} className="animate-spin text-pink-500" /></div>;
@@ -39,7 +40,8 @@ export default function PrivatePriceList() {
     </div>
   );
 
-  const businessName = (settings as any)?.businessName || "PrintBloom";
+  const businessName = getBusinessName(settings as any);
+  const businessInitials = getBusinessInitials(settings as any);
   const logoUrl = (settings as any)?.logoUrl;
 
   return (
@@ -48,7 +50,7 @@ export default function PrivatePriceList() {
         <header className="border-b border-gray-100 bg-white/70 px-5 py-6 sm:px-9 sm:py-8">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              {logoUrl ? <img src={logoUrl} alt={businessName} className="h-12 w-12 rounded-xl bg-white object-contain shadow-sm" /> : <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 font-black text-white">PB</div>}
+              {logoUrl ? <img src={logoUrl} alt={businessName} className="h-12 w-12 rounded-xl bg-white object-contain shadow-sm" /> : <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 font-black text-white">{businessInitials}</div>}
               <div><div className="font-bold text-gray-900">{businessName}</div><div className="text-xs text-gray-400">Private Customer Price List</div></div>
             </div>
             <div className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700"><ShieldCheck size={14} /> Secure share link</div>

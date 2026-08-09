@@ -5,6 +5,7 @@ import {
   Aperture, ArrowDownRight, ArrowRight, BadgeCheck, Frame,
   Headphones, Images, Palette, ScanLine, Truck, UploadCloud
 } from "lucide-react";
+import { getBusinessName } from "@/lib/brand-settings";
 
 type Props = {
   settings: any;
@@ -54,6 +55,7 @@ export function PremiumHero({ settings, publicStats }: Props) {
   }, [slides.length]);
 
   const visual = slides[slide] || "";
+  const businessName = getBusinessName(settings);
   const heroTitle = settings?.heroTitle || "Make the moment visible.";
   const categories = configuredCategories(settings);
 
@@ -61,7 +63,7 @@ export function PremiumHero({ settings, publicStats }: Props) {
     <section className="hs-hero">
       <div className="hs-hero-stage">
         <div className="hs-hero-rail" aria-hidden="true">
-          <span>HAVESTORY</span>
+          <span>{businessName}</span>
           <span>STUDIO / COLOUR LAB</span>
           <span>EST. SRI LANKA</span>
         </div>
@@ -119,7 +121,7 @@ export function PremiumHero({ settings, publicStats }: Props) {
                 <motion.img
                   key={visual}
                   src={visual}
-                  alt="HAVESTORY portrait, colour print and frame collection"
+                  alt={`${businessName} portrait, colour print and frame collection`}
                   initial={{ opacity: 0, scale: 1.04 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: .985 }}

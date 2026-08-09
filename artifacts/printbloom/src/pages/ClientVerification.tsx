@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "wouter";
+import { useGetSettings } from "@workspace/api-client-react";
+import { getBusinessName } from "@/lib/brand-settings";
 import { Camera, CheckCircle2, CreditCard, Loader2, ShieldCheck, UserRound, X } from "lucide-react";
 
 type CaptureKey = "selfie" | "idFront" | "idBack";
@@ -9,6 +11,8 @@ const emptyCaptures: CaptureState = { selfie: null, idFront: null, idBack: null 
 
 export default function ClientVerification() {
   const { token } = useParams<{ token: string }>();
+  const { data: settings } = useGetSettings();
+  const businessName = getBusinessName(settings as any);
   const [status, setStatus] = useState<string>("loading");
   const [form, setForm] = useState({ fullName: "", nicNumber: "", dateOfBirth: "", phone: "", email: "", address: "" });
   const [captures, setCaptures] = useState<CaptureState>(emptyCaptures);
@@ -114,7 +118,7 @@ export default function ClientVerification() {
       <div className="w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-2xl">
         <CheckCircle2 className="mx-auto text-emerald-500" size={54} />
         <h1 className="mt-4 text-2xl font-black text-slate-900">{status === "approved" ? "Verification approved" : "Submitted securely"}</h1>
-        <p className="mt-2 text-sm leading-6 text-slate-500">{status === "approved" ? "Your PrintBloom client profile is verified." : "Your details are now waiting for PrintBloom owner review."}</p>
+        <p className="mt-2 text-sm leading-6 text-slate-500">{status === "approved" ? `Your ${businessName} client profile is verified.` : `Your details are now waiting for ${businessName} owner review.`}</p>
       </div>
     </div>;
   }
@@ -129,9 +133,9 @@ export default function ClientVerification() {
   return <main className="min-h-screen bg-[radial-gradient(circle_at_top,#312e81_0,#0f172a_44%,#020617_100%)] px-4 py-8 sm:py-12">
     <div className="mx-auto max-w-2xl overflow-hidden rounded-[2rem] bg-white shadow-2xl">
       <header className="bg-slate-950 px-6 py-7 text-white sm:px-9">
-        <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-pink-400"><ShieldCheck size={18} /> PrintBloom · Secure client profile</div><div className="mt-3 inline-flex rounded-lg border border-indigo-400/30 bg-indigo-400/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-indigo-200">Operated by CodeArtix Technologies</div>
+        <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-pink-400"><ShieldCheck size={18} /> {businessName} · Secure client profile</div>
         <h1 className="mt-3 text-3xl font-black">Verify your client profile</h1>
-        <p className="mt-2 max-w-xl text-sm leading-6 text-slate-300">Capture the three photos live and submit your details. Identity images are encrypted and available only to the PrintBloom owner for review.</p>
+        <p className="mt-2 max-w-xl text-sm leading-6 text-slate-300">Capture the three photos live and submit your details. Identity images are encrypted and available only to the {businessName} owner for review.</p>
       </header>
       <form onSubmit={submit} className="space-y-7 p-6 sm:p-9">
         <section className="grid gap-4 sm:grid-cols-2">

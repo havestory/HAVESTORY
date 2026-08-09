@@ -1,12 +1,17 @@
 import { useGetSettings } from "@workspace/api-client-react";
 import { FileText } from "lucide-react";
+import { getBusinessEmail, getBusinessName, getBusinessWhatsapp } from "@/lib/brand-settings";
 
-const DEFAULT_TERMS = `TERMS OF SERVICE
+function buildDefaultTerms(settings: any): string {
+  const businessName = getBusinessName(settings) || "the business";
+  const email = getBusinessEmail(settings);
+  const whatsapp = getBusinessWhatsapp(settings);
+  return `TERMS OF SERVICE
 
 Last updated: January 2025
 
 ACCEPTANCE OF TERMS
-By placing an order with PrintBloom, you agree to be bound by these Terms of Service. If you do not agree, please do not use our services.
+By placing an order with ${businessName}, you agree to be bound by these Terms of Service. If you do not agree, please do not use our services.
 
 ORDER PLACEMENT
 Orders are confirmed once payment is received and verified. We reserve the right to cancel or refuse any order at our discretion.
@@ -18,10 +23,10 @@ PRICING & PAYMENT
 • Accepted payment methods will be communicated at the time of order
 
 PRODUCTION & TURNAROUND
-Turnaround times begin after your design files are approved and payment is confirmed. PrintBloom is not liable for delays caused by circumstances beyond our control.
+Turnaround times begin after your design files are approved and payment is confirmed. ${businessName} is not liable for delays caused by circumstances beyond our control.
 
 DESIGN FILES
-You are responsible for providing print-ready design files. PrintBloom will not be held responsible for errors in files approved by the customer.
+You are responsible for providing print-ready design files. ${businessName} will not be held responsible for errors in files approved by the customer.
 
 CANCELLATIONS & REFUNDS
 • Orders can be cancelled before production begins for a full refund
@@ -29,19 +34,20 @@ CANCELLATIONS & REFUNDS
 • Defective products will be replaced or refunded at our discretion
 
 INTELLECTUAL PROPERTY
-By submitting design files, you confirm you own or have permission to use the content. PrintBloom is not responsible for copyright infringement by the customer.
+By submitting design files, you confirm you own or have permission to use the content. ${businessName} is not responsible for copyright infringement by the customer.
 
 LIMITATION OF LIABILITY
-PrintBloom's liability is limited to the value of the order placed.
+${businessName}'s liability is limited to the value of the order placed.
 
 CONTACT
 For questions about these Terms of Service, please contact:
-Email: info@printbloom.lk
-WhatsApp: +94 70 000 0000`;
+Email: ${email || "Use the website contact form"}
+WhatsApp: ${whatsapp || "Use the website WhatsApp button"}`;
+}
 
 export default function Terms() {
   const { data: settings } = useGetSettings();
-  const content = (settings as any)?.termsOfService || DEFAULT_TERMS;
+  const content = (settings as any)?.termsOfService || buildDefaultTerms(settings as any);
 
   return (
     <main className="max-w-3xl mx-auto px-4 sm:px-6 py-20">

@@ -1,7 +1,12 @@
 import { useGetSettings } from "@workspace/api-client-react";
 import { Shield } from "lucide-react";
+import { getBusinessEmail, getBusinessName, getBusinessWhatsapp } from "@/lib/brand-settings";
 
-const DEFAULT_POLICY = `PRIVACY POLICY
+function buildDefaultPolicy(settings: any): string {
+  const businessName = getBusinessName(settings) || "the business";
+  const email = getBusinessEmail(settings);
+  const whatsapp = getBusinessWhatsapp(settings);
+  return `PRIVACY POLICY
 
 Last updated: January 2025
 
@@ -26,12 +31,14 @@ You may request to view, update, or delete your personal data at any time by con
 
 CONTACT US
 If you have any questions about this Privacy Policy, please contact us at:
-Email: info@printbloom.lk
-WhatsApp: +94 70 000 0000`;
+Email: ${email || "Use the website contact form"}
+WhatsApp: ${whatsapp || "Use the website WhatsApp button"}`;
+}
 
 export default function Privacy() {
   const { data: settings } = useGetSettings();
-  const content = (settings as any)?.privacyPolicy || DEFAULT_POLICY;
+  const businessName = getBusinessName(settings as any);
+  const content = (settings as any)?.privacyPolicy || buildDefaultPolicy(settings as any);
 
   return (
     <main className="max-w-3xl mx-auto px-4 sm:px-6 py-20">
@@ -40,7 +47,7 @@ export default function Privacy() {
           <Shield size={26} className="text-pink-600" />
         </div>
         <h1 className="text-3xl font-display font-extrabold text-gray-900">Privacy Policy</h1>
-        <p className="text-gray-500 mt-2 text-sm">How PrintBloom collects, uses, and protects your information</p>
+        <p className="text-gray-500 mt-2 text-sm">How {businessName || "the business"} collects, uses, and protects your information</p>
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">

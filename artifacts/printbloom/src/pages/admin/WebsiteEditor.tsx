@@ -31,7 +31,7 @@ type TabId = typeof TABS[number]["id"];
 const THEME_PRESETS = [
   {
     id: "havestory-gallery",
-    label: "HAVESTORY Gallery",
+    label: "Gallery Theme",
     desc: "Warm ivory, walnut & muted bronze",
     from: "#a87842",
     to: "#5c4938",
@@ -455,7 +455,7 @@ export default function WebsiteEditor() {
   const [heroSlideImage3, setHeroSlideImage3] = useState("");
   const [heroSlideImage4, setHeroSlideImage4] = useState("");
   const [heroSlideImage5, setHeroSlideImage5] = useState("");
-  const [designerCredit, setDesignerCredit] = useState("CODEARTIX");
+  const [designerCredit, setDesignerCredit] = useState("");
   const [homeFeatureCards, setHomeFeatureCards] = useState(DEFAULT_HOME_FEATURE_CARDS);
 
   /* ── ABOUT STATE ── */
@@ -572,7 +572,7 @@ export default function WebsiteEditor() {
     setHeroSlideImage3((s as any).heroSlideImage3 || "");
     setHeroSlideImage4((s as any).heroSlideImage4 || "");
     setHeroSlideImage5((s as any).heroSlideImage5 || "");
-    setDesignerCredit(s.designerCredit ?? "CODEARTIX");
+    setDesignerCredit(s.designerCredit ?? "");
     try {
       const parsed = typeof s.homeFeatureCards === "string" ? JSON.parse(s.homeFeatureCards) : s.homeFeatureCards;
       setHomeFeatureCards(Array.isArray(parsed) && parsed.length
@@ -767,7 +767,7 @@ export default function WebsiteEditor() {
 
               <div>
                 <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-1">HOMEPAGE FEATURE CARDS</label>
-                <p className="text-[10px] text-gray-400 mb-3">Edit the four cards directly below the hero, including “Stickers & Labels”. Icons keep the premium PrintBloom design.</p>
+                <p className="text-[10px] text-gray-400 mb-3">Edit the four cards directly below the hero. Titles, descriptions and links are shown exactly as configured here.</p>
                 <div className="grid gap-3 md:grid-cols-2">
                   {homeFeatureCards.map((card, index) => (
                     <div key={index} className="rounded-2xl border border-gray-100 bg-gray-50/60 p-3 space-y-2">
@@ -815,7 +815,7 @@ export default function WebsiteEditor() {
                 <input
                   value={designerCredit}
                   onChange={e => setDesignerCredit(e.target.value)}
-                  placeholder="CODEARTIX"
+                  placeholder="Designer or studio name"
                   className={inp}
                 />
               </div>
@@ -1162,7 +1162,7 @@ HOW WE USE YOUR INFORMATION
 We use the information we collect to process your orders...
 
 CONTACT US
-If you have questions about this Privacy Policy, contact us at info@printbloom.lk`}
+If you have questions about this Privacy Policy, contact us at ${(settings as any)?.email || "the email configured in General Settings"}`}
                 className={`${ta} font-mono text-xs leading-relaxed`}
               />
               <div className="text-[10px] text-gray-400">Public URL: <code className="bg-gray-100 px-1.5 py-0.5 rounded">/privacy</code></div>
@@ -1190,7 +1190,7 @@ If you have questions about this Privacy Policy, contact us at info@printbloom.l
 Last updated: March 2025
 
 ACCEPTANCE OF TERMS
-By placing an order with PrintBloom, you agree to be bound by these terms...
+By placing an order with ${(settings as any)?.businessName || "the business"}, you agree to be bound by these terms...
 
 ORDER & PAYMENT
 All prices are in Sri Lankan Rupees (LKR)...
@@ -1199,7 +1199,7 @@ CANCELLATION POLICY
 Orders may be cancelled within 24 hours of placement...
 
 CONTACT
-For questions about these terms, email us at info@printbloom.lk`}
+For questions about these terms, email us at ${(settings as any)?.email || "the email configured in General Settings"}`}
                 className={`${ta} font-mono text-xs leading-relaxed`}
               />
               <div className="text-[10px] text-gray-400">Public URL: <code className="bg-gray-100 px-1.5 py-0.5 rounded">/terms</code></div>
@@ -1220,7 +1220,7 @@ For questions about these terms, email us at info@printbloom.lk`}
                 <input
                   value={seoTitle}
                   onChange={e => setSeoTitle(e.target.value)}
-                  placeholder="PrintBloom — Premium Printing & Graphic Design Sri Lanka"
+                  placeholder={`${(settings as any)?.businessName || "Your business"} — Studio, Colour Lab & Frames`}
                   className={inp}
                 />
                 <div className="flex items-center justify-between mt-1">
@@ -1235,7 +1235,7 @@ For questions about these terms, email us at info@printbloom.lk`}
                   value={seoDescription}
                   onChange={e => setSeoDescription(e.target.value)}
                   rows={3}
-                  placeholder="PrintBloom offers premium printing and graphic design services in Sri Lanka..."
+                  placeholder={`${(settings as any)?.businessName || "Your business"} offers portrait, colour-lab and framing services in Sri Lanka...`}
                   className={ta}
                 />
                 <div className="flex items-center justify-between mt-1">
@@ -1267,9 +1267,9 @@ For questions about these terms, email us at info@printbloom.lk`}
               <div>
                 <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">GOOGLE PREVIEW</label>
                 <div className="border border-gray-200 rounded-xl p-4 bg-white">
-                  <div className="text-xs text-green-700 mb-0.5">printbloom.lk</div>
-                  <div className="text-blue-700 font-semibold text-base mb-1 truncate">{seoTitle || "PrintBloom — Premium Printing & Graphic Design Sri Lanka"}</div>
-                  <div className="text-gray-600 text-xs leading-relaxed line-clamp-2">{seoDescription || "PrintBloom offers premium printing and graphic design services in Sri Lanka."}</div>
+                  <div className="text-xs text-green-700 mb-0.5">{(settings as any)?.website || "Your configured website"}</div>
+                  <div className="text-blue-700 font-semibold text-base mb-1 truncate">{seoTitle || (settings as any)?.businessName || "Your website title"}</div>
+                  <div className="text-gray-600 text-xs leading-relaxed line-clamp-2">{seoDescription || `Add the SEO description for ${(settings as any)?.businessName || "your business"}.`}</div>
                 </div>
               </div>
             </div>
@@ -1295,7 +1295,7 @@ For questions about these terms, email us at info@printbloom.lk`}
                         <div className="flex items-center gap-1.5 px-3 py-2 bg-white border border-gray-200 rounded-t-lg shadow-sm min-w-[160px] max-w-[200px]">
                           <img src={faviconUrl} alt="favicon" className="w-4 h-4 object-contain shrink-0" />
                           <span className="text-xs text-gray-700 truncate font-medium">
-                            {((settings as any)?.seoTitle || (settings as any)?.businessName || "PrintBloom")}
+                            {((settings as any)?.seoTitle || (settings as any)?.businessName || "Website")}
                           </span>
                           <span className="ml-auto text-gray-400 text-xs shrink-0">×</span>
                         </div>

@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { useGetSettings } from "@workspace/api-client-react";
 import { getSettingsCache } from "@/lib/settings-cache";
+import { getBusinessName } from "@/lib/brand-settings";
 
 function FacebookIcon({ size = 18 }: { size?: number }) {
   return (
@@ -49,7 +50,7 @@ export function Footer() {
             {(() => {
               const s = settings as any;
               const logoUrl = s?.logoUrl || "";
-              const businessName = s?.businessName || "HAVESTORY";
+              const businessName = getBusinessName(s);
               const showNameWithLogo = s?.showNameWithLogo !== 0;
               return (
                 <Link href="/" className="flex items-center gap-2 group w-fit">
@@ -158,7 +159,7 @@ export function Footer() {
         </div>
 
         <div className="pt-8 border-t border-gray-200/50 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-          <p>© {new Date().getFullYear()} {settings?.businessName || "HAVESTORY"}. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {getBusinessName(settings)}. All rights reserved.</p>
           {(settings as any)?.designerCredit && (
             <p className="flex items-center gap-1.5">
               Designed by{" "}

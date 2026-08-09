@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
-import { useListClients, useCreateClient, useUpdateClient, useDeleteClient, useListInvoices } from "@workspace/api-client-react";
+import { useListClients, useCreateClient, useUpdateClient, useDeleteClient, useListInvoices, useGetSettings } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Search, Plus, Download, RefreshCw, X, Users, Phone, MapPin, Mail, FileText, MoreVertical, Pencil, Trash2, UserCircle2, Briefcase, Receipt, ChevronRight, ExternalLink, CheckCircle2, PackageCheck, ShieldCheck, Copy, FileSignature } from "lucide-react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ShippingDetailsModal } from "@/components/admin/ShippingDetailsModal";
 import { getInvoicePaidAmount } from "@/lib/invoiceTypes";
+import { getBusinessName } from "@/lib/brand-settings";
 
 type Client = {
   id: number;
@@ -74,151 +75,44 @@ const invoiceStatusStyle: Record<string, string> = {
   draft: "bg-gray-100 text-gray-500",
 };
 
-const AGREEMENT_TEMPLATES = [
-  { id:"printing", label:"Printing Services — PrintBloom", title:"PrintBloom Printing Services Agreement", direct:false, text:`PRINTING SERVICES AGREEMENT
+const buildAgreementTemplates = (businessName: string) => {
+  const issuer = businessName || "the business";
+  return [
+    {
+      id: "studio",
+      label: "Studio, Print & Frame Services",
+      title: `${issuer} Services Agreement`,
+      text: `STUDIO, PRINT & FRAME SERVICES AGREEMENT
 
 1. Parties & Service
-This agreement covers printing and related production services supplied by PrintBloom, operated by CodeArtix Technologies, to the client named above. The exact items, quantities, sizes, materials, finishes, prices and delivery method are those approved in the relevant quotation/invoice/order confirmation.
+This agreement covers photography, printing, framing and related studio services supplied by ${issuer} to the client named above. The exact items, quantities, sizes, materials, finishes, prices and delivery method are those approved in the relevant quotation, invoice or order confirmation.
 
 2. Artwork & Client Content
 The client confirms that supplied artwork, logos, text, photographs and other content may legally be used for the requested work. The client is responsible for checking spelling, dimensions, contact details and content before approval.
 
 3. Proof & Approval
-Production may begin after the client approves the final proof/artwork where a proof is provided. Changes requested after approval may require additional charges and may change the completion date.
+Production may begin after the client approves the final proof or artwork where a proof is provided. Changes requested after approval may require additional charges and may change the completion date.
 
 4. Colour, Cutting & Production Tolerances
-Screen colours can differ from printed output. Reasonable differences caused by print process, paper/material, finishing, cutting or device calibration are not treated as a defect unless a specific written tolerance was agreed.
+Screen colours can differ from printed output. Reasonable differences caused by print process, paper, material, finishing, cutting or device calibration are not treated as a defect unless a specific written tolerance was agreed.
 
 5. Price & Payment
-Prices follow the approved quotation/invoice. Production may be held until the required advance or full payment is received. Extra work outside the approved scope may be quoted separately.
+Prices follow the approved quotation or invoice. Production may be held until the required advance or full payment is received. Extra work outside the approved scope may be quoted separately.
 
 6. Turnaround & Delivery
-Turnaround starts after required artwork approval and payment. Delivery/courier times are estimates unless a written guaranteed deadline is accepted. Courier charges and third-party delays follow the agreed order terms.
+Turnaround starts after required artwork approval and payment. Delivery times are estimates unless a written guaranteed deadline is accepted. Courier charges and third-party delays follow the agreed order terms.
 
 7. Changes, Cancellation & Reprints
-Cancellation or quantity changes after production has started may incur costs for work/material already used. A genuine production error attributable to the supplier will be reviewed for an appropriate reprint or remedy.
+Cancellation or quantity changes after production has started may incur costs for work or material already used. A genuine production error attributable to ${issuer} will be reviewed for an appropriate reprint or remedy.
 
 8. Intellectual Property & Privacy
-Client-owned content remains the client's content. PrintBloom/CodeArtix Technologies retains rights in its own pre-existing tools, templates and working methods. Personal/order data is handled only for legitimate service and business administration purposes.
+Client-owned content remains the client's content. ${issuer} retains rights in its own pre-existing tools, templates and working methods. Personal and order data is handled only for legitimate service and business administration purposes.
 
 9. Acceptance
-By signing electronically, the signer confirms authority to accept these terms and the approved service scope on behalf of the client.` },
-  { id:"social", label:"Social Media Management — CodeArtix", title:"CodeArtix Social Media Management Agreement", direct:true, text:`SOCIAL MEDIA MANAGEMENT AGREEMENT
-
-1. Parties & Scope
-CodeArtix Technologies will provide the social media management services agreed with the client. The active package/quotation defines platforms, number and type of posts, design/content deliverables, publishing frequency, reporting and any optional services.
-
-2. Client Access & Information
-The client will provide accurate business information, brand assets, offers, product/service details and the platform access or permissions reasonably required. Account credentials/permissions must be kept secure and access should be revoked when no longer needed.
-
-3. Content Approval
-Where approval is required, the client will review drafts within the agreed time. Delayed feedback can move the publishing schedule. Content already approved may be scheduled or published as agreed.
-
-4. Advertising Spend & Third-Party Fees
-Advertising/media spend, influencer costs, stock assets, subscriptions and other third-party charges are excluded unless expressly included in the written package or quotation.
-
-5. Performance
-CodeArtix Technologies will use reasonable professional effort, but does not guarantee a particular follower count, reach, engagement, lead volume, sales result or platform algorithm outcome.
-
-6. Fees & Payment
-Management fees follow the approved package/invoice and are payable on the agreed schedule. Additional campaigns, urgent work or work outside scope may be quoted separately.
-
-7. Brand & Legal Compliance
-The client is responsible for the truth and legality of claims, promotions, prices and business information supplied for publication. CodeArtix Technologies may refuse content reasonably believed to be unlawful, misleading or unsafe.
-
-8. Intellectual Property
-Upon full payment, final client-specific creative deliverables are licensed/transferred as stated in the relevant quotation. Pre-existing templates, systems, processes, fonts, stock assets and third-party material remain subject to their own rights/licences.
-
-9. Confidentiality & Account Security
-Both parties should protect confidential business information. Platform access will be used only for the agreed management work.
-
-10. Termination
-Either party may end ongoing management according to the notice/payment terms in the agreed package. Work completed, scheduled or committed before termination remains chargeable where applicable.
-
-11. Acceptance
-Electronic signature confirms authority to accept this agreement and the selected management package.` },
-  { id:"design", label:"Graphic Design Services — CodeArtix", title:"CodeArtix Graphic Design Services Agreement", direct:true, text:`GRAPHIC DESIGN SERVICES AGREEMENT
-
-1. Scope
-CodeArtix Technologies will create the design deliverables described in the approved brief, quotation or invoice.
-
-2. Brief & Client Materials
-The client will provide final text, logos, images, sizes, brand requirements and other necessary content. The client confirms it has permission to use all supplied material.
-
-3. Concepts & Revisions
-The included number of concepts/revision rounds follows the quotation. New directions or revisions outside the approved scope may be charged separately.
-
-4. Approval
-The client is responsible for final checking of spelling, names, numbers, dimensions and content. Written/electronic approval authorises finalisation or production.
-
-5. Delivery
-Final file formats are those stated in the quotation. Editable/source files are included only when specifically agreed.
-
-6. Fees & Payment
-Payment follows the approved quotation/invoice. Final high-resolution/source deliverables may be withheld until the required payment is received.
-
-7. Intellectual Property
-After full payment, rights/licence for the approved final client-specific design are provided as agreed. Unselected concepts, working files, pre-existing tools/templates and third-party fonts/assets remain with their respective owners/licences.
-
-8. Portfolio Use
-Unless the client requests confidentiality in writing, CodeArtix Technologies may display completed public-facing work for portfolio/business promotion after public release.
-
-9. Acceptance
-Electronic signature confirms acceptance of the brief, commercial terms and these service conditions.` },
-  { id:"branding", label:"Branding & Identity — CodeArtix", title:"CodeArtix Branding & Brand Identity Agreement", direct:true, text:`BRANDING & BRAND IDENTITY AGREEMENT
-
-1. Engagement
-CodeArtix Technologies will develop the brand identity deliverables specified in the approved proposal, which may include naming direction, logo system, colours, typography, guidelines, stationery or digital brand assets.
-
-2. Discovery & Direction
-The client will provide accurate business information, target audience details, preferences and timely feedback. A selected creative direction becomes the basis for later refinements.
-
-3. Concepts & Revisions
-Concept counts and revision rounds are limited to the approved proposal. A major change of direction after selection may require a revised scope and fee.
-
-4. Originality & Third-Party Assets
-CodeArtix Technologies will use reasonable professional care in creating original work. Fonts, stock images, mockups or other licensed third-party assets remain subject to their applicable licence terms.
-
-5. Client Approval
-The client must review names, spelling, legal/business information and final artwork before approval. Trademark/company-name registration and legal clearance are the client's responsibility unless separately contracted.
-
-6. Fees, Milestones & Delivery
-Fees, payment milestones and final deliverables follow the approved proposal/invoice. Final production/source files may be released after required payment.
-
-7. Intellectual Property
-On full payment, rights in the approved final custom identity are transferred/licensed as specified in the proposal. Rejected concepts, internal methods, templates and pre-existing intellectual property remain with CodeArtix Technologies.
-
-8. Portfolio & Confidentiality
-Publicly launched work may be shown in the CodeArtix portfolio unless confidentiality is agreed in writing.
-
-9. Acceptance
-Electronic signature confirms acceptance of the selected scope, creative process and commercial terms.` },
-  { id:"creative", label:"General Creative Services — CodeArtix", title:"CodeArtix Creative Services Agreement", direct:true, text:`GENERAL CREATIVE SERVICES AGREEMENT
-
-1. Scope
-CodeArtix Technologies will provide the creative/digital services described in the approved quotation, proposal, brief or invoice.
-
-2. Deliverables & Revisions
-Deliverables, formats, deadlines and included revisions follow the approved scope. Additional work or a new creative direction may be quoted separately.
-
-3. Client Responsibilities
-The client will provide accurate content, approvals, access and feedback required to complete the work and confirms permission to use all supplied material.
-
-4. Fees & Payment
-Fees and payment stages follow the approved quotation/invoice. Work outside scope may require written approval and an additional fee.
-
-5. Schedule
-Timelines depend on timely client content, feedback and approvals. Third-party/platform delays are outside CodeArtix Technologies' direct control.
-
-6. Intellectual Property
-Rights to final client-specific deliverables are provided after full payment as agreed. Pre-existing tools/templates and third-party licensed material remain subject to their existing rights.
-
-7. Confidentiality
-Both parties should protect confidential information obtained through the engagement and use it only for legitimate project purposes.
-
-8. Acceptance
-Electronic signature confirms authority to accept this agreement and the associated approved project scope.` }
-] as const;
+By signing electronically, the signer confirms authority to accept these terms and the approved service scope on behalf of the client.`,
+    },
+  ];
+};
 
 const EMPTY_FORM: FormState = { name: "", businessName: "", phones: [""], email: "", address: "", notes: "" };
 
@@ -410,6 +304,9 @@ function CardMenu({ onEdit, onDelete, canDelete }: { onEdit: () => void; onDelet
 }
 
 export default function AdminClients() {
+  const { data: settings } = useGetSettings();
+  const businessName = getBusinessName(settings);
+  const agreementTemplates = useMemo(() => buildAgreementTemplates(businessName), [businessName]);
   const [search, setSearch] = useState("");
   const [isOwner,setIsOwner]=useState(false);
   const [showAdd, setShowAdd] = useState(false);
@@ -424,10 +321,9 @@ export default function AdminClients() {
   const [verificationError, setVerificationError] = useState("");
   const [verificationBusy, setVerificationBusy] = useState(false);
   const [agreements,setAgreements]=useState<any[]>([]);
-  const [agreementTemplate,setAgreementTemplate]=useState(AGREEMENT_TEMPLATES[0].id as string);
-  const [agreementTitle,setAgreementTitle]=useState(AGREEMENT_TEMPLATES[0].title);
-  const [agreementText,setAgreementText]=useState(AGREEMENT_TEMPLATES[0].text);
-  const [issueUnderMainCompany,setIssueUnderMainCompany]=useState(false);
+  const [agreementTemplate,setAgreementTemplate]=useState("studio");
+  const [agreementTitle,setAgreementTitle]=useState("Studio, Print & Frame Services Agreement");
+  const [agreementText,setAgreementText]=useState("");
   const [agreementUrl,setAgreementUrl]=useState("");
   const [agreementBusy,setAgreementBusy]=useState(false);
   const [showAgreementForm,setShowAgreementForm]=useState(false);
@@ -469,14 +365,15 @@ export default function AdminClients() {
       .then(r=>r.ok?r.json():[]).then(x=>setAgreements(Array.isArray(x)?x:[])).catch(()=>setAgreements([]));
   },[isOwner,viewingClient?.id]);
 
-  const applyAgreementTemplate=(id:string)=>{const t=AGREEMENT_TEMPLATES.find(x=>x.id===id)||AGREEMENT_TEMPLATES[0];setAgreementTemplate(t.id);setAgreementTitle(t.title);setAgreementText(t.text);setIssueUnderMainCompany(t.direct);};
+  const applyAgreementTemplate=(id:string)=>{const t=agreementTemplates.find(x=>x.id===id)||agreementTemplates[0];setAgreementTemplate(t.id);setAgreementTitle(t.title);setAgreementText(t.text);};
+  useEffect(()=>{const t=agreementTemplates[0];setAgreementTemplate(t.id);setAgreementTitle(t.title);setAgreementText(t.text);},[agreementTemplates]);
   const createAgreement=async(clientId:number)=>{
     setAgreementBusy(true);
     try{
-      const r=await fetch(`/api/admin/clients/${clientId}/agreements`,{method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify({title:agreementTitle,agreementText,brandName:issueUnderMainCompany?"CodeArtix Technologies":"PrintBloom",operatorName:"CodeArtix Technologies"})});
+      const r=await fetch(`/api/admin/clients/${clientId}/agreements`,{method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify({title:agreementTitle,agreementText,brandName:businessName,operatorName:businessName})});
       const b=await r.json().catch(()=>({}));if(!r.ok)throw new Error(b.error||"Could not create agreement");
       const full=new URL(b.path,window.location.origin).toString();setAgreementUrl(full);try{await navigator.clipboard.writeText(full)}catch{}
-      setAgreements(x=>[b,...x]);setShowAgreementForm(false);applyAgreementTemplate(AGREEMENT_TEMPLATES[0].id);
+      setAgreements(x=>[b,...x]);setShowAgreementForm(false);applyAgreementTemplate(agreementTemplates[0].id);
     }catch(e){setVerificationError(e instanceof Error?e.message:"Could not create agreement")}finally{setAgreementBusy(false)}
   };
 
@@ -514,7 +411,7 @@ export default function AdminClients() {
   const { mutate: updateClient, isPending: isUpdating } = useUpdateClient({ mutation: { onSuccess: () => { invalidate(); setEditingClient(null); setForm(EMPTY_FORM); } } });
   const { mutate: deleteClient } = useDeleteClient({ mutation: { onSuccess: () => invalidate() } });
 
-  const clientCode = (c: Client) => `PB${String(c.id).padStart(4, "0")}`;
+  const clientCode = (c: Client) => `C${String(c.id).padStart(4, "0")}`;
 
   // Per-client linked records: prefer clientId match, fall back to case-insensitive name match
   // so legacy rows that only have clientName still show up.
@@ -611,7 +508,7 @@ export default function AdminClients() {
     const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
     const a = document.createElement("a");
     a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
-    a.download = "printbloom-clients.csv";
+    a.download = "clients.csv";
     a.click();
   };
 
@@ -940,10 +837,10 @@ export default function AdminClients() {
                 </div>}
                 {isOwner && <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3 sm:p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2"><div><div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-800"><FileSignature size={14}/> Client Agreements</div><div className="mt-1 text-xs text-gray-500">Owner only · immutable agreement snapshot + secure online e-sign</div></div><button onClick={()=>setShowAgreementForm(v=>!v)} className="rounded-lg bg-slate-950 px-3 py-2 text-xs font-bold text-white">{showAgreementForm?"Cancel":"New agreement"}</button></div>
-                  {showAgreementForm&&<div className="mt-3 space-y-3 rounded-xl border bg-white p-3"><div className="grid gap-2 sm:grid-cols-2"><label className="text-[10px] font-black uppercase tracking-wide text-gray-500">Agreement template<select value={agreementTemplate} onChange={e=>applyAgreementTemplate(e.target.value)} className="mt-1 w-full rounded-lg border px-3 py-2 text-xs normal-case">{AGREEMENT_TEMPLATES.map(t=><option key={t.id} value={t.id}>{t.label}</option>)}</select></label><label className="flex items-center gap-2 rounded-lg border border-indigo-100 bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-800"><input type="checkbox" checked={issueUnderMainCompany} onChange={e=>setIssueUnderMainCompany(e.target.checked)} className="accent-indigo-600"/>Issue directly under main company — CodeArtix Technologies</label></div><div className={`rounded-lg border px-3 py-2 text-xs font-bold ${issueUnderMainCompany?"border-indigo-200 bg-indigo-50 text-indigo-800":"border-pink-200 bg-pink-50 text-pink-800"}`}>{issueUnderMainCompany?"Contracting business: CodeArtix Technologies":"Service brand: PrintBloom · Legal operator: CodeArtix Technologies"}</div><input value={agreementTitle} onChange={e=>setAgreementTitle(e.target.value)} className="w-full rounded-lg border px-3 py-2 text-sm font-bold" placeholder="Agreement title"/><textarea rows={14} value={agreementText} onChange={e=>setAgreementText(e.target.value)} className="w-full rounded-lg border px-3 py-2 text-xs leading-5" placeholder={"Agreement terms"}/><div className="rounded-lg bg-amber-50 p-2 text-[10px] leading-4 text-amber-700">These are editable operational templates, not a substitute for legal advice. Review the final wording for your exact service. Once the secure signing link is created, that agreement snapshot is locked into its audit record.</div><button disabled={agreementBusy||agreementText.trim().length<20||!agreementTitle.trim()} onClick={()=>void createAgreement(c.id)} className="rounded-lg bg-pink-600 px-4 py-2 text-xs font-bold text-white disabled:opacity-40">{agreementBusy?"Creating…":"Create secure signing link"}</button></div>}
+                  {showAgreementForm&&<div className="mt-3 space-y-3 rounded-xl border bg-white p-3"><label className="text-[10px] font-black uppercase tracking-wide text-gray-500">Agreement template<select value={agreementTemplate} onChange={e=>applyAgreementTemplate(e.target.value)} className="mt-1 w-full rounded-lg border px-3 py-2 text-xs normal-case">{agreementTemplates.map(t=><option key={t.id} value={t.id}>{t.label}</option>)}</select></label><div className="rounded-lg border border-pink-200 bg-pink-50 px-3 py-2 text-xs font-bold text-pink-800">Agreement issuer: {businessName || "Set the business name in General Settings"}</div><input value={agreementTitle} onChange={e=>setAgreementTitle(e.target.value)} className="w-full rounded-lg border px-3 py-2 text-sm font-bold" placeholder="Agreement title"/><textarea rows={14} value={agreementText} onChange={e=>setAgreementText(e.target.value)} className="w-full rounded-lg border px-3 py-2 text-xs leading-5" placeholder="Agreement terms"/><div className="rounded-lg bg-amber-50 p-2 text-[10px] leading-4 text-amber-700">These are editable operational templates, not a substitute for legal advice. Review the final wording for your exact service. Once the secure signing link is created, that agreement snapshot is locked into its audit record.</div><button disabled={agreementBusy||agreementText.trim().length<20||!agreementTitle.trim()||!businessName} onClick={()=>void createAgreement(c.id)} className="rounded-lg bg-pink-600 px-4 py-2 text-xs font-bold text-white disabled:opacity-40">{agreementBusy?"Creating…":"Create secure signing link"}</button></div>}
                   {agreementUrl&&<div className="mt-3 flex gap-2"><input readOnly value={agreementUrl} className="min-w-0 flex-1 rounded-lg border bg-white px-3 py-2 text-[11px]"/><button onClick={()=>navigator.clipboard.writeText(agreementUrl).catch(()=>{})} className="rounded-lg border bg-white p-2"><Copy size={14}/></button></div>}
-                  {agreements.length>0&&<div className="mt-3 space-y-2">{agreements.slice(0,5).map(a=><div key={a.id} className="flex items-center justify-between gap-2 rounded-lg bg-white px-3 py-2"><div className="min-w-0"><div className="truncate text-xs font-bold">{a.title}</div><div className="text-[10px] uppercase text-gray-400">{a.status} · {a.brand_name||"PrintBloom"} · {new Date(a.created_at||a.createdAt).toLocaleDateString("en-LK")}</div></div><button onClick={()=>setLocation(`/admin/client-agreement/${a.id}`)} className="shrink-0 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold">Audit / A4</button></div>)}</div>}
-                  <p className="mt-2 text-[10px] leading-4 text-gray-400">Signing records consent, exact document SHA-256, signed time and encrypted audit evidence. PrintBloom is operated by CodeArtix Technologies.</p>
+                  {agreements.length>0&&<div className="mt-3 space-y-2">{agreements.slice(0,5).map(a=><div key={a.id} className="flex items-center justify-between gap-2 rounded-lg bg-white px-3 py-2"><div className="min-w-0"><div className="truncate text-xs font-bold">{a.title}</div><div className="text-[10px] uppercase text-gray-400">{a.status} · {a.brand_name||businessName||"Business name not set"} · {new Date(a.created_at||a.createdAt).toLocaleDateString("en-LK")}</div></div><button onClick={()=>setLocation(`/admin/client-agreement/${a.id}`)} className="shrink-0 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold">Audit / A4</button></div>)}</div>}
+                  <p className="mt-2 text-[10px] leading-4 text-gray-400">Signing records consent, the exact document SHA-256, signed time and encrypted audit evidence. Agreement identity and issuer come from General Settings.</p>
                 </div>}
                                 {/* Projects */}
                 <div>

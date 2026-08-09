@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { getSettingsCache } from "@/lib/settings-cache";
 import { Palette } from "lucide-react";
+import { getBusinessName } from "@/lib/brand-settings";
 
 export function SplashScreen({ onDone }: { onDone: () => void }) {
   const [leaving, setLeaving] = useState(false);
 
   const settings = getSettingsCache() as any;
-  const businessName: string = settings?.businessName || "PrintBloom";
+  const businessName = getBusinessName(settings);
   const logoUrl: string = settings?.logoUrl || "";
-  const tagline: string = settings?.tagline || "Ideas, beautifully printed.";
+  const tagline: string = settings?.tagline || "";
 
   useEffect(() => {
     const startedAt = performance.now();
@@ -53,7 +54,7 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
     <div
       role="status"
       aria-live="polite"
-      aria-label="Loading PrintBloom"
+      aria-label={`Loading ${businessName || "website"}`}
       className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden select-none"
       style={{
         background: "rgba(255, 255, 255, 0.68)",

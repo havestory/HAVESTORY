@@ -2,11 +2,12 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, ChevronDown } from "lucide-react";
 import { useGetSettings } from "@workspace/api-client-react";
+import { getBusinessName } from "@/lib/brand-settings";
 
 const QUICK_REPLIES = [
-  "I'd like to get a price quote for my printing job",
+  "I'd like to get a price quote for a frame or photo print",
   "Can I track my existing order?",
-  "I need help with a custom design project",
+  "I need help with a custom photo or frame project",
   "What are your delivery options?",
 ];
 
@@ -27,6 +28,7 @@ function WhatsAppIcon({ size = 28, className = "" }: { size?: number; className?
 
 export function WhatsAppButton() {
   const { data: settings } = useGetSettings();
+  const businessName = getBusinessName(settings);
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -70,7 +72,7 @@ export function WhatsAppButton() {
                 <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-[#075e54]" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-white text-sm">PrintBloom</p>
+                <p className="font-bold text-white text-sm">{businessName}</p>
                 <p className="text-green-300 text-xs flex items-center gap-1">
                   <span className="w-1.5 h-1.5 bg-green-400 rounded-full inline-block" />
                   Online · Replies instantly
@@ -94,8 +96,8 @@ export function WhatsAppButton() {
                 className="bg-white rounded-2xl rounded-tl-none px-4 py-3 shadow-sm max-w-[85%]"
               >
                 <p className="text-[13px] text-gray-800 leading-relaxed">
-                  Hi there! 👋 Welcome to <strong>PrintBloom</strong>.<br />
-                  How can we help with your printing needs today?
+                  Hi there! 👋 Welcome to <strong>{businessName}</strong>.<br />
+                  How can we help with your studio, print or frame project today?
                 </p>
                 <p className="text-[10px] text-gray-400 text-right mt-1.5">Just now</p>
               </motion.div>

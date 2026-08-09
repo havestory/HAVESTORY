@@ -2,12 +2,16 @@ import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { Lock, User, ShieldCheck, ArrowLeft, KeyRound } from "lucide-react";
+import { useGetSettings } from "@workspace/api-client-react";
+import { getBusinessName } from "@/lib/brand-settings";
 
 /* ── Step 1: Username + Password ── */
 function StepCredentials({
   onSuccess,
+  businessName,
 }: {
   onSuccess: (requiresPin: boolean) => void;
+  businessName: string;
 }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -47,7 +51,7 @@ function StepCredentials({
           <User size={26} className="text-white" />
         </div>
         <h1 className="text-2xl font-display font-bold text-purple-900 mb-1">Studio Console</h1>
-        <p className="text-gray-400 text-sm">Sign in to the HAVESTORY Studio Console</p>
+        <p className="text-gray-400 text-sm">Sign in to the {businessName ? `${businessName} Studio Console` : "Studio Console"}</p>
       </div>
 
       {errorMsg && (
@@ -283,6 +287,8 @@ function StepPin({
 export default function AdminLogin() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
+  const { data: settings } = useGetSettings();
+  const businessName = getBusinessName(settings);
   const [step, setStep] = useState<"credentials" | "pin">("credentials");
 
   const finishLogin = (destination = "/admin") => {
@@ -321,7 +327,7 @@ export default function AdminLogin() {
         </div>
 
         {step === "credentials" ? (
-          <StepCredentials onSuccess={handleCredentialsSuccess} />
+          <StepCredentials onSuccess={handleCredentialsSuccess} businessName={businessName} />
         ) : (
           <StepPin
             onSuccess={() => finishLogin("/admin")}

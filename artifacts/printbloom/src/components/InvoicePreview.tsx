@@ -6,6 +6,7 @@ import { jsPDF } from "jspdf";
 import { FileText, Printer, ImageDown, X, Lock, TrendingUp } from "lucide-react";
 import { type LineItem, type ShippingOption, num, rs } from "@/lib/invoiceTypes";
 import { captureElement } from "@/lib/html2canvas-capture";
+import { getBusinessName } from "@/lib/brand-settings";
 
 /** Reliable cross-browser download: appends anchor to DOM, clicks, then cleans up. */
 function triggerDownload(url: string, filename: string) {
@@ -61,26 +62,26 @@ const STATUS_BADGE: Record<string, { bg: string; border: string; color: string; 
 };
 
 /* ─── Sub-components ─── */
-function InvLogo({ biz, logoUrl }: { biz: string; logoUrl?: string }) {
+function InvLogo({ biz, logoUrl, tagline }: { biz: string; logoUrl?: string; tagline?: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
       {logoUrl ? (
         <img src={logoUrl} alt={biz} style={{ width: 36, height: 36, borderRadius: 10, objectFit: "contain", flexShrink: 0, background: "#f9f9f9" }} />
       ) : (
-        <div style={{ width: 36, height: 36, borderRadius: 10, background: GRAD, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900, fontSize: 12, flexShrink: 0 }}>PB</div>
+        <div style={{ width: 36, height: 36, borderRadius: 10, background: GRAD, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900, fontSize: 12, flexShrink: 0 }}>{biz.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]?.toUpperCase()).join("")}</div>
       )}
       <div>
         <div style={{ fontWeight: 800, fontSize: 15, color: "#111", lineHeight: 1.1 }}>{biz}</div>
-        <div style={{ fontSize: 11, color: "#888" }}>Professional Printing Services</div>
+        {tagline && <div style={{ fontSize: 11, color: "#888" }}>{tagline}</div>}
       </div>
     </div>
   );
 }
 
-function InvFooter({ page, total, website }: { page: number; total: number; website: string }) {
+function InvFooter({ page, total, website, biz }: { page: number; total: number; website: string; biz: string }) {
   return (
     <div style={{ height: FOOT, borderTop: "1px solid #f0f0f0", display: "flex", alignItems: "center", justifyContent: "space-between", padding: `0 ${PAD}px`, fontFamily: "Inter,sans-serif", boxSizing: "border-box" }}>
-      <div><div style={{ fontSize: 9.5, color: "#666" }}>PrintBloom{website ? ` · ${website}` : ""}</div><div style={{ marginTop: 2, fontSize: 9.5, color: "#4338ca", fontWeight: 800 }}>OPERATED BY CODEARTIX TECHNOLOGIES</div></div>
+      <div style={{ fontSize: 9.5, color: "#666" }}>{biz}{website ? ` · ${website}` : ""}</div>
       <div style={{ fontSize: 10, color: "#bbb" }}>Page {page} of {total}</div>
     </div>
   );
@@ -236,17 +237,18 @@ export function InvoicePreview({
   const now  = (createdAtOverride instanceof Date && !isNaN(createdAtOverride.getTime()))
     ? createdAtOverride
     : new Date();
-  const genNo = useRef(`PB-INV-${format(now, "yyyyMMdd")}-${Math.floor(Math.random() * 900 + 100)}`);
+  const genNo = useRef(`INV-${format(now, "yyyyMMdd")}-${Math.floor(Math.random() * 900 + 100)}`);
   const invoiceNo = invoiceNumberOverride || genNo.current;
 
   const dueDays  = Number(s?.paymentDueDays ?? 7);
   const dueDate  = addDays(now, dueDays);
-  const biz      = s?.businessName || "PrintBloom";
-  const bizAddr  = s?.address      || "Colombo, Sri Lanka";
+  const biz      = getBusinessName(s);
+  const bizAddr  = s?.address      || "";
   const bizPhone = s?.phone        || "";
   const bizEmail = s?.email        || "";
   const bizLogo  = s?.logoUrl      || "";
   const website  = s?.website      || "";
+  const tagline  = s?.tagline      || "";
 
   /* Bank details — prefer bankDetails JSON array, fall back to legacy single fields */
   let banks: { bankName: string; accountHolder: string; accountNumber: string; branch: string; swiftBic: string }[] = [];
@@ -258,7 +260,7 @@ export function InvoicePreview({
     banks = [{ bankName: s?.bankName || "", accountHolder: s?.bankAccountHolder || "", accountNumber: s?.bankAccountNumber || "", branch: s?.bankBranch || "", swiftBic: s?.bankSwiftBic || "" }];
   }
 
-  const tcsRaw: string = s?.termsConditions || "Payment is due within 7 days of invoice date.\nAll prices are in Sri Lankan Rupees (LKR).\nPrintBloom is not liable for delays beyond our control.";
+  const tcsRaw: string = s?.termsConditions || `Payment is due within 7 days of invoice date.\nAll prices are in Sri Lankan Rupees (LKR).\n${biz || "The business"} is not liable for delays beyond our control.`;
   const tcs = tcsRaw.split("\n").filter(Boolean);
 
   const shippingLabels: Record<ShippingOption, string> = {
@@ -401,7 +403,7 @@ export function InvoicePreview({
   const FullHeader = () => (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
       <div>
-        <InvLogo biz={biz} logoUrl={bizLogo} />
+        <InvLogo biz={biz} logoUrl={bizLogo} tagline={tagline} />
         <div style={{ fontSize: 11, color: "#666", lineHeight: 1.8, marginTop: 6 }}>
           <div>{bizAddr}</div>
           {bizPhone && <div>{bizPhone}{bizEmail ? ` · ${bizEmail}` : ""}</div>}
@@ -419,7 +421,7 @@ export function InvoicePreview({
 
   const SmallHeader = () => (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-      <InvLogo biz={biz} logoUrl={bizLogo} />
+      <InvLogo biz={biz} logoUrl={bizLogo} tagline={tagline} />
       <div style={{ textAlign: "right" }}>
         <div style={{ fontSize: 12, color: PINK, fontWeight: 800, letterSpacing: 1.5 }}>INVOICE</div>
         <div style={{ fontSize: 10, color: "#888" }}>{invoiceNo} · {format(now, "MMM dd, yyyy")}</div>
@@ -576,7 +578,7 @@ export function InvoicePreview({
                         />
                       )}
                     </div>
-                    <InvFooter page={pageNum} total={totalPages} website={website} />
+                    <InvFooter page={pageNum} total={totalPages} website={website} biz={biz} />
                     </div>
                   </div>
                 );
@@ -652,7 +654,7 @@ export function InvoicePreview({
                     )}
                   </div>
                 </div>
-                <InvFooter page={totalPages} total={totalPages} website={website} />
+                <InvFooter page={totalPages} total={totalPages} website={website} biz={biz} />
               </div>
               </div>
 

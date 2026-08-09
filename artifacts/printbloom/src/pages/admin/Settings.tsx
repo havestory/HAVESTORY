@@ -277,7 +277,7 @@ function BankDetailsManager({ banks, onChange }: { banks: BankEntry[]; onChange:
             </div>
             <div className="min-w-0">
               <label className="text-[11px] text-gray-500 font-semibold block mb-1 whitespace-nowrap">Account Holder</label>
-              <input value={form.accountHolder} onChange={e => f("accountHolder", e.target.value)} placeholder="PrintBloom" className={inp} />
+              <input value={form.accountHolder} onChange={e => f("accountHolder", e.target.value)} placeholder="Account holder name" className={inp} />
             </div>
             <div className="min-w-0">
               <label className="text-[11px] text-gray-500 font-semibold block mb-1 whitespace-nowrap">Account Number *</label>
@@ -427,7 +427,7 @@ export default function AdminSettings() {
     } catch {}
 
     setForm({
-      businessName: settings.businessName || "PrintBloom",
+      businessName: settings.businessName || "",
       ownerName: (settings as any).ownerName || "",
       tagline: settings.tagline || "",
       taglineEnabled: (settings as any).taglineEnabled !== 0,
@@ -665,7 +665,7 @@ export default function AdminSettings() {
       const blob = await res.blob();
       const cd = res.headers.get("content-disposition") || "";
       const match = cd.match(/filename="([^"]+)"/);
-      const filename = match ? match[1] : `printbloom-settings-${new Date().toISOString().slice(0, 10)}.json`;
+      const filename = match ? match[1] : `${(form.businessName || "website").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-settings-${new Date().toISOString().slice(0, 10)}.json`;
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url; a.download = filename; a.style.display = "none";
@@ -776,7 +776,7 @@ export default function AdminSettings() {
       title: "Website & Invoice",
       icon: Globe,
       fields: [
-        { key: "website", label: "Website URL", placeholder: "www.printbloom.lk" },
+        { key: "website", label: "Website URL", placeholder: "www.yourdomain.lk" },
         { key: "paymentDueDays", label: "Invoice Due Days", placeholder: "7" },
         { key: "overdueDays", label: "Overdue Period (days after due date)", placeholder: "30" },
         { key: "termsConditions", label: "Terms & Conditions (one per line)", placeholder: "Payment is due within 7 days of invoice date.\nAll sales are final." },
@@ -786,7 +786,7 @@ export default function AdminSettings() {
       title: "About / Stats Section",
       icon: Users,
       fields: [
-        { key: "aboutStory", label: "Our Story", placeholder: "PrintBloom started in 2018..." },
+        { key: "aboutStory", label: "Our Story", placeholder: "Tell your business story..." },
         { key: "aboutMission", label: "Our Mission", placeholder: "To provide Sri Lanka's best printing experience..." },
         { key: "aboutImage", label: "About Page Image URL", placeholder: "https://..." },
         { key: "ordersCompletedCount", label: "Orders Delivered (Homepage stat display)", placeholder: "500" },
@@ -1193,7 +1193,7 @@ export default function AdminSettings() {
                     value={form.paymentButtonUrl || ""}
                     onChange={e => set("paymentButtonUrl", e.target.value)}
                     onBlur={() => autoSaveField("paymentButtonUrl", form.paymentButtonUrl || "")}
-                    placeholder="https://pay.example.com/printbloom"
+                    placeholder="https://pay.example.com/your-business"
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-200"
                   />
                 </div>
