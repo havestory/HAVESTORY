@@ -123,7 +123,7 @@ function SiteSetup() {
       if (!el) { el = document.createElement("meta"); el.setAttribute(attr, name); document.head.appendChild(el); }
       el.setAttribute("content", content);
     };
-    if (s.seoTitle) document.title = s.seoTitle;
+    document.title = s.seoTitle || s.businessName || "Website";
     if (s.seoDescription) setMeta("description", s.seoDescription);
     if (s.seoKeywords) setMeta("keywords", s.seoKeywords);
     if (s.seoOgImage) { setMeta("og:image", s.seoOgImage, "property"); setMeta("twitter:image", s.seoOgImage); }
