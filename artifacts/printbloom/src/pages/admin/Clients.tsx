@@ -411,7 +411,7 @@ export default function AdminClients() {
   const { mutate: updateClient, isPending: isUpdating } = useUpdateClient({ mutation: { onSuccess: () => { invalidate(); setEditingClient(null); setForm(EMPTY_FORM); } } });
   const { mutate: deleteClient } = useDeleteClient({ mutation: { onSuccess: () => invalidate() } });
 
-  const clientCode = (c: Client) => `PB${String(c.id).padStart(4, "0")}`;
+  const clientCode = (c: Client) => `C${String(c.id).padStart(4, "0")}`;
 
   // Per-client linked records: prefer clientId match, fall back to case-insensitive name match
   // so legacy rows that only have clientName still show up.
