@@ -53,7 +53,7 @@ export const useCart = create<CartStore>()(
       }
     }),
     {
-      name: 'printbloom-cart',
+      name: 'store-cart',
     }
   )
 );
