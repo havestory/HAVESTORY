@@ -353,3 +353,357 @@ h1, h2, h3, h4, h5, h6, .font-display {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+
+/* Professional type scale and mobile density refinements */
+.havestory-public-shell {
+  font-size: 16px;
+  line-height: 1.5;
+}
+.havestory-public-shell p,
+.havestory-public-shell li,
+.havestory-public-shell input,
+.havestory-public-shell textarea,
+.havestory-public-shell select {
+  font-size: 16px;
+  line-height: 1.55;
+}
+.hs-nav-shell .font-display {
+  font-size: 24px !important;
+  line-height: 1 !important;
+}
+.hs-nav-shell nav a {
+  font-size: 12px !important;
+  line-height: 18px;
+}
+.hs-nav-cta,
+.hs-button {
+  font-size: 13px !important;
+  letter-spacing: .015em;
+}
+.hs-hero-copy {
+  max-width: 880px;
+}
+.hs-hero-copy h1 {
+  max-width: 780px;
+  font-size: clamp(44px, 5vw, 64px);
+  line-height: 1;
+  letter-spacing: -.025em;
+}
+.hs-hero-copy > p {
+  max-width: 660px;
+  font-size: clamp(15px, 1.25vw, 18px);
+  line-height: 1.6;
+}
+.hs-kicker {
+  font-size: 10px;
+  line-height: 14px;
+}
+.hs-category-card strong {
+  font-size: clamp(22px, 2vw, 28px);
+  line-height: 1.05;
+}
+.hs-category-card small {
+  font-size: 11px;
+}
+.hs-proof-strip strong {
+  font-size: 12px;
+}
+.hs-proof-strip small {
+  font-size: 10px;
+}
+.hs-home > section:not(.hs-hero) {
+  padding-top: 88px !important;
+  padding-bottom: 88px !important;
+}
+.hs-home > section:not(.hs-hero) h2 {
+  font-size: clamp(32px, 3vw, 40px);
+  line-height: 1.05;
+}
+.hs-home > section:not(.hs-hero) h3 {
+  font-size: 24px;
+  line-height: 1.15;
+}
+.hs-home > section:not(.hs-hero) [class*="uppercase"] {
+  font-size: 12px;
+  letter-spacing: .10em;
+}
+.hs-product-info h2 {
+  font-size: clamp(20px, 1.65vw, 28px);
+}
+.hs-product-info > p {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.hs-product-footer strong {
+  font-size: 14px;
+}
+.hs-store-masthead h1 {
+  font-size: clamp(52px, 7vw, 92px);
+  line-height: .88;
+}
+.hs-store-intro p {
+  font-size: 16px;
+}
+.hs-store-toolbar strong {
+  font-size: 24px;
+}
+.hs-footer {
+  font-size: 14px;
+}
+.hs-footer h3 {
+  font-family: "Hanken Grotesk", system-ui, sans-serif !important;
+  font-size: 12px !important;
+  line-height: 18px;
+  font-weight: 700 !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase;
+}
+.hs-footer .font-display {
+  font-family: "EB Garamond", Georgia, serif !important;
+  font-size: 25px !important;
+}
+
+/* Admin uses an efficient interface scale while sharing the same palette */
+.havestory-admin-shell,
+.havestory-admin-login {
+  font-size: 14px;
+  line-height: 1.45;
+}
+.havestory-admin-shell main h1,
+.havestory-admin-shell main h2,
+.havestory-admin-shell main h3,
+.havestory-admin-shell main h4 {
+  font-family: "Hanken Grotesk", system-ui, sans-serif !important;
+  letter-spacing: -.015em;
+}
+.havestory-admin-shell main h1 {
+  font-size: clamp(24px, 2.4vw, 30px) !important;
+  line-height: 1.15;
+}
+.havestory-admin-shell main h2 {
+  font-size: clamp(18px, 1.8vw, 22px) !important;
+  line-height: 1.2;
+}
+.havestory-admin-shell main h3 {
+  font-size: 16px !important;
+  line-height: 1.3;
+}
+.havestory-admin-shell main p,
+.havestory-admin-shell main label,
+.havestory-admin-shell main td,
+.havestory-admin-shell main button,
+.havestory-admin-shell main input,
+.havestory-admin-shell main textarea,
+.havestory-admin-shell main select {
+  line-height: 1.45;
+}
+.havestory-admin-shell main table {
+  width: 100%;
+}
+.havestory-admin-shell main button {
+  min-height: 36px;
+}
+.havestory-admin-shell main input,
+.havestory-admin-shell main select {
+  min-height: 40px;
+}
+.havestory-admin-shell main textarea {
+  min-height: 84px;
+}
+.havestory-admin-shell aside nav a {
+  min-height: 38px;
+}
+.havestory-admin-shell main [role="dialog"],
+.havestory-admin-shell main .fixed > [class*="max-w-"] {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+
+@media (max-width: 820px) {
+  .hs-nav-shell .font-display {
+    font-size: 21px !important;
+  }
+  .hs-hero-stage {
+    min-height: 570px;
+  }
+  .hs-hero-copy {
+    padding: 76px 18px 46px;
+  }
+  .hs-hero-copy h1 {
+    max-width: 560px;
+    font-size: clamp(38px, 10vw, 48px);
+  }
+  .hs-hero-copy > p {
+    max-width: 540px;
+    font-size: 15px;
+  }
+  .hs-category-card strong {
+    font-size: 23px;
+  }
+  .hs-home > section:not(.hs-hero) {
+    padding-top: 64px !important;
+    padding-bottom: 64px !important;
+  }
+  .hs-home > section:not(.hs-hero) h2 {
+    font-size: 34px;
+  }
+  .hs-store-masthead h1 {
+    font-size: clamp(46px, 12vw, 68px);
+  }
+  .havestory-admin-shell main table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 600px) {
+  .hs-nav-shell {
+    min-height: 60px;
+  }
+  .hs-nav-shell .font-display {
+    max-width: 165px;
+    overflow: hidden;
+    font-size: 20px !important;
+    line-height: 1.05 !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .hs-nav-shell [class*="text-[10px]"] {
+    display: none !important;
+  }
+  .hs-hero-stage {
+    min-height: 535px;
+  }
+  .hs-hero-copy {
+    width: calc(100% - 24px);
+    padding: 68px 6px 40px;
+  }
+  .hs-hero-copy h1 {
+    margin: 18px 0 14px;
+    font-size: clamp(36px, 10.5vw, 42px);
+    line-height: 1.02;
+  }
+  .hs-hero-copy > p {
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .hs-hero-actions {
+    margin-top: 24px;
+    gap: 9px;
+  }
+  .hs-button {
+    width: auto;
+    min-width: 148px;
+    min-height: 44px;
+    padding: 0 17px;
+    font-size: 12px !important;
+  }
+  .hs-kicker {
+    padding: 6px 11px;
+    font-size: 9px;
+  }
+  .hs-category-rail {
+    gap: 8px;
+    padding: 28px 10px;
+  }
+  .hs-category-card {
+    min-height: 190px;
+  }
+  .hs-category-card strong {
+    font-size: 20px;
+  }
+  .hs-proof-strip strong {
+    font-size: 11px;
+  }
+  .hs-proof-strip small {
+    font-size: 9px;
+  }
+  .hs-home > section:not(.hs-hero) {
+    padding-top: 48px !important;
+    padding-bottom: 48px !important;
+  }
+  .hs-home > section:not(.hs-hero) h2 {
+    font-size: 30px;
+  }
+  .hs-home > section:not(.hs-hero) h3 {
+    font-size: 20px;
+  }
+  .hs-home > section:not(.hs-hero) p {
+    font-size: 14px;
+  }
+  .hs-product-card {
+    min-height: 370px;
+  }
+  .hs-product-info h2 {
+    margin-top: 9px;
+    font-size: 17px;
+    line-height: 1.08;
+  }
+  .hs-product-footer strong {
+    font-size: 12px;
+  }
+  .hs-store-masthead {
+    min-height: 380px;
+  }
+  .hs-store-masthead h1 {
+    font-size: clamp(42px, 14vw, 58px);
+  }
+  .hs-store-intro p {
+    font-size: 14px;
+  }
+  .hs-store-toolbar strong {
+    font-size: 21px;
+  }
+  .hs-footer {
+    font-size: 13px;
+  }
+  .havestory-public-shell input,
+  .havestory-public-shell textarea,
+  .havestory-public-shell select {
+    min-height: 44px;
+    font-size: 16px !important;
+  }
+  .havestory-public-shell button,
+  .havestory-public-shell a[class*="px-"] {
+    min-height: 42px;
+  }
+  .havestory-public-shell .fixed.inset-0 > [class*="max-w-"],
+  .havestory-admin-shell .fixed.inset-0 > [class*="max-w-"] {
+    width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - 20px) !important;
+    margin: 10px;
+    overflow-y: auto;
+  }
+  .havestory-admin-shell main h1 {
+    font-size: 23px !important;
+  }
+  .havestory-admin-shell main h2 {
+    font-size: 18px !important;
+  }
+  .havestory-admin-shell main h3 {
+    font-size: 15px !important;
+  }
+  .havestory-admin-shell main {
+    font-size: 13px;
+  }
+  .havestory-admin-shell main button {
+    min-height: 40px;
+  }
+  .havestory-admin-shell main input,
+  .havestory-admin-shell main select,
+  .havestory-admin-shell main textarea {
+    min-height: 44px;
+    font-size: 16px !important;
+  }
+  .havestory-admin-shell main table {
+    font-size: 12px;
+  }
+  .havestory-admin-shell main th,
+  .havestory-admin-shell main td {
+    padding: 10px 12px !important;
+  }
+}
