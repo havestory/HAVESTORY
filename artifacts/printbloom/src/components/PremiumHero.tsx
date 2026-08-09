@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Aperture, ArrowRight, BadgeCheck, Frame, Headphones,
-  Images, Palette, ShoppingCart, Truck, UploadCloud
+  Aperture, ArrowDownRight, ArrowRight, BadgeCheck, Frame,
+  Headphones, Images, Palette, ScanLine, Truck, UploadCloud
 } from "lucide-react";
 
 type Props = {
@@ -12,12 +12,13 @@ type Props = {
 };
 
 const defaultCategories = [
-  { title: "Gallery Frames", copy: "Timeless profiles with a refined archival finish.", href: "/store" },
-  { title: "Glass-Look Frames", copy: "Clean edges and modern depth for every portrait.", href: "/store" },
-  { title: "Story Collages", copy: "Many moments composed into one meaningful frame.", href: "/store" },
-  { title: "Gift Collections", copy: "Thoughtful frame sets for the people who matter.", href: "/store" },
+  { title: "Frame Editions", copy: "Gallery profiles, clean finishes and made-to-fit sizing.", href: "/store" },
+  { title: "Colour Prints", copy: "Carefully balanced photographs with rich, lasting detail.", href: "/store" },
+  { title: "Story Collages", copy: "A thoughtful edit of many moments in one composition.", href: "/store" },
+  { title: "Studio Sessions", copy: "Portraits shaped with calm direction and considered light.", href: "/services" },
 ];
-const categoryIcons = [Frame, Aperture, Images, Palette];
+
+const categoryIcons = [Frame, Palette, Images, Aperture];
 
 function configuredCategories(settings: any) {
   try {
@@ -45,85 +46,135 @@ export function PremiumHero({ settings, publicStats }: Props) {
   ].filter(Boolean) as string[], [settings]);
 
   const [slide, setSlide] = useState(0);
+
   useEffect(() => {
     if (slides.length < 2) return;
-    const timer = window.setInterval(() => setSlide(v => (v + 1) % slides.length), 3800);
+    const timer = window.setInterval(() => setSlide(value => (value + 1) % slides.length), 4600);
     return () => window.clearInterval(timer);
   }, [slides.length]);
 
   const visual = slides[slide] || "";
-  const heroTitle = settings?.heroTitle || "Portraits, colour and frames — finished beautifully.";
+  const heroTitle = settings?.heroTitle || "Make the moment visible.";
   const categories = configuredCategories(settings);
 
   return (
-    <section className="pb-premium-home">
-      <div className="pb-hero-grid">
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: .55 }}
-          className="pb-hero-copy"
-        >
-          <span className="pb-eyebrow">{settings?.heroBadgeText || "Portrait studio · Colour lab · Custom framing"}</span>
-          <motion.h1 className="pb-animated-title" initial="hidden" animate="show" variants={{ hidden:{}, show:{ transition:{ staggerChildren:.085, delayChildren:.12 } } }}>
-            {heroTitle.split(/\s+/).map((word: string, index: number) => (
-              <motion.span key={`${word}-${index}`} variants={{ hidden:{ opacity:0, y:24, filter:"blur(8px)" }, show:{ opacity:1, y:0, filter:"blur(0px)", transition:{ duration:.65, ease:[.22,1,.36,1] } } }}>{word}&nbsp;</motion.span>
-            ))}
-          </motion.h1>
-          <p>{settings?.heroSubtitle || "From a favourite photograph to a finished frame, our studio brings careful colour, premium materials and a personal eye to every story."}</p>
+    <section className="hs-hero">
+      <div className="hs-hero-stage">
+        <div className="hs-hero-rail" aria-hidden="true">
+          <span>HAVESTORY</span>
+          <span>STUDIO / COLOUR LAB</span>
+          <span>EST. SRI LANKA</span>
+        </div>
 
-          <div className="pb-hero-actions">
-            <Link href={settings?.heroCtaLink || "/custom-project"} className="pb-primary-cta">
-              {settings?.heroCtaText || "Plan Your Frame"} <ArrowRight size={20} />
+        <motion.div
+          className="hs-hero-copy"
+          initial={{ opacity: 0, y: 26 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: .7, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <span className="hs-kicker">
+            <ScanLine size={15} /> {settings?.heroBadgeText || "Portraits · Prints · Frames"}
+          </span>
+          <h1>
+            {heroTitle.split(/\s+/).map((word: string, index: number) => (
+              <motion.span
+                key={`${word}-${index}`}
+                initial={{ opacity: 0, y: 34 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: .6, delay: .08 + index * .055, ease: [0.22, 1, 0.36, 1] }}
+              >
+                {word}&nbsp;
+              </motion.span>
+            ))}
+          </h1>
+          <p>
+            {settings?.heroSubtitle || "A modern portrait studio and colour lab for photographs that deserve more than a camera roll."}
+          </p>
+
+          <div className="hs-hero-actions">
+            <Link href={settings?.heroCtaLink || "/custom-project"} className="hs-button hs-button-signal">
+              {settings?.heroCtaText || "Start a project"} <ArrowRight size={18} />
             </Link>
-            <Link href="/store" className="pb-secondary-cta">
-              Explore Collections <ArrowRight size={20} />
+            <Link href="/store" className="hs-button hs-button-ghost">
+              Shop frames <ArrowDownRight size={18} />
             </Link>
           </div>
 
-          <div className="pb-upload-note"><UploadCloud size={20} /> Upload your photograph or book a studio session.</div>
+          <div className="hs-upload-line">
+            <UploadCloud size={17} />
+            <span>Upload a photograph, choose a finish, and approve before production.</span>
+          </div>
         </motion.div>
 
-        <div className="pb-hero-visual">
-          {visual && (
-            <AnimatePresence mode="sync" initial={false}>
-              <motion.img
-                key={visual}
-                src={visual}
-                alt="HAVESTORY studio portraits and framed photographs"
-                initial={{ opacity: 0, scale: 1.08, x: 28, filter: "blur(6px)" }}
-                animate={{ opacity: 1, scale: 1, x: 0, filter: "blur(0px)" }}
-                exit={{ opacity: 0, scale: 1.035, x: -22, filter: "blur(4px)" }}
-                transition={{ duration: 1.15, ease: [0.22, 1, 0.36, 1] }}
-              />
-            </AnimatePresence>
-          )}
+        <div className="hs-hero-media">
+          <div className="hs-media-index">
+            <span>FRAME</span>
+            <strong>{String(slide + 1).padStart(2, "0")}</strong>
+            <span>/ {String(Math.max(slides.length, 1)).padStart(2, "0")}</span>
+          </div>
+
+          <div className="hs-photo-window">
+            {visual ? (
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.img
+                  key={visual}
+                  src={visual}
+                  alt="HAVESTORY portrait, colour print and frame collection"
+                  initial={{ opacity: 0, scale: 1.04 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: .985 }}
+                  transition={{ duration: .85, ease: [0.22, 1, 0.36, 1] }}
+                />
+              </AnimatePresence>
+            ) : (
+              <div className="hs-photo-placeholder">
+                <Frame size={74} strokeWidth={1.2} />
+                <span>Your studio image appears here</span>
+              </div>
+            )}
+            <div className="hs-focus-mark hs-focus-mark-a" />
+            <div className="hs-focus-mark hs-focus-mark-b" />
+          </div>
+
           {slides.length > 1 && (
-            <div className="pb-slide-dots">
-              {slides.map((_, i) => <button key={i} onClick={() => setSlide(i)} className={i === slide ? "active" : ""} aria-label={`Show slide ${i + 1}`} />)}
+            <div className="hs-slide-controls">
+              {slides.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSlide(index)}
+                  className={index === slide ? "active" : ""}
+                  aria-label={`Show studio image ${index + 1}`}
+                >
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                </button>
+              ))}
             </div>
           )}
         </div>
       </div>
 
-      <div className="pb-category-grid">
-        {categories.map(({ title, copy, href }, i) => {
-          const Icon = categoryIcons[i];
+      <div className="hs-service-index">
+        {categories.map(({ title, copy, href }, index) => {
+          const Icon = categoryIcons[index];
           return (
-          <Link href={href} className="pb-category-card" key={`${i}-${title}`}>
-            <span className={i % 2 ? "blue" : "pink"}><Icon size={30} /></span>
-            <div><strong>{title}</strong><p>{copy}</p></div>
-            <ArrowRight size={19} />
-          </Link>
+            <Link href={href} className="hs-service-card" key={`${index}-${title}`}>
+              <span className="hs-service-number">0{index + 1}</span>
+              <Icon size={23} />
+              <div>
+                <strong>{title}</strong>
+                <p>{copy}</p>
+              </div>
+              <ArrowRight size={17} />
+            </Link>
           );
         })}
       </div>
 
-      <div className="pb-trust-strip">
-        <div><ShoppingCart /><span><strong>Simple Online Ordering</strong><small>Choose, upload and approve with confidence.</small></span></div>
-        <div><BadgeCheck /><span><strong>Colour-Lab Quality</strong><small>Careful colour, detail and premium materials.</small></span></div>
-        <div><Truck /><span><strong>Islandwide Delivery</strong><small>{publicStats?.ordersDelivered ? `${publicStats.ordersDelivered}+ orders delivered.` : "Reliable delivery across Sri Lanka."}</small></span></div>
-        <div><Headphones /><span><strong>Studio Guidance</strong><small>Real people helping with portraits and framing.</small></span></div>
+      <div className="hs-proof-strip">
+        <div><BadgeCheck /><span><strong>Colour checked</strong><small>Balanced before production</small></span></div>
+        <div><Frame /><span><strong>Made to fit</strong><small>Frames finished by hand</small></span></div>
+        <div><Truck /><span><strong>Islandwide delivery</strong><small>{publicStats?.ordersDelivered ? `${publicStats.ordersDelivered}+ completed orders` : "Securely packed and tracked"}</small></span></div>
+        <div><Headphones /><span><strong>Human guidance</strong><small>Real help from the studio</small></span></div>
       </div>
     </section>
   );
