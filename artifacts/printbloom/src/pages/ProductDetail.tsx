@@ -746,7 +746,7 @@ export default function ProductDetail() {
               <span className="text-xs text-gray-400 font-medium flex items-center gap-1"><Share2 size={12} /> Share:</span>
               {SOCIALS.map(({ key, Icon, color, label, getUrl }) => {
                 const shareUrl = typeof window !== "undefined" ? window.location.href : "";
-                const href = getUrl(shareUrl, (product as any)?.name || "PrintBloom Product");
+                const href = getUrl(shareUrl, (product as any)?.name || "HAVESTORY Frame");
                 return (
                   <a
                     key={key}
@@ -1336,7 +1336,7 @@ export default function ProductDetail() {
 
             {/* ─── Footer Meta ─── */}
             <div className="border-t border-gray-100 pt-4 space-y-2">
-              <div className="text-xs text-gray-400"><span className="font-medium text-gray-500">SKU:</span> PB-{product.id.toString().padStart(4, "0")}</div>
+              <div className="text-xs text-gray-400"><span className="font-medium text-gray-500">SKU:</span> HS-{product.id.toString().padStart(4, "0")}</div>
               {product.category && (
                 <div className="text-xs text-gray-400">
                   <span className="font-medium text-gray-500">Category:</span>{" "}
