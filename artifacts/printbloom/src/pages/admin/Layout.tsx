@@ -124,11 +124,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const sidebarBg    = dark ? "bg-[#0f1117] border-white/[0.06]" : "bg-white border-gray-200";
   const sidebarSep   = dark ? "border-white/[0.06]" : "border-gray-100";
   const labelColor   = dark ? "text-gray-600" : "text-gray-400";
-  const activeItem   = dark ? "bg-white/[0.08] text-pink-400" : "bg-pink-50 text-pink-600";
+  const activeItem   = dark ? "bg-white/[0.08] text-amber-400" : "bg-amber-50 text-amber-600";
   const inactiveItem = dark ? "text-gray-400 hover:bg-white/[0.05] hover:text-gray-200" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900";
-  const activeIcon   = dark ? "text-pink-400" : "text-pink-500";
+  const activeIcon   = dark ? "text-amber-400" : "text-amber-500";
   const inactiveIcon = dark ? "text-gray-600" : "text-gray-400";
-  const activeDot    = dark ? "bg-pink-400" : "bg-pink-500";
+  const activeDot    = dark ? "bg-amber-400" : "bg-amber-500";
   const bottomLink   = dark ? "text-gray-500 hover:bg-white/[0.05] hover:text-gray-200" : "text-gray-500 hover:bg-gray-50 hover:text-gray-700";
   const mainBg       = dark ? "bg-[#0c0e14]" : "bg-gray-50";
   const topbarBg     = dark ? "bg-[#0f1117]/90 border-white/[0.05]" : "bg-white/80 border-gray-100";
@@ -148,7 +148,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               className={`w-8 h-8 rounded-lg object-contain shrink-0 ${dark ? "bg-white/10" : "bg-gray-50"}`}
             />
           ) : (
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-white font-bold text-sm shrink-0">
               {businessInitials}
             </div>
           )}

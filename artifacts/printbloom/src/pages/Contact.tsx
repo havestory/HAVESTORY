@@ -102,18 +102,18 @@ function ReviewSubmitForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className="text-sm font-semibold text-purple-900 block mb-1.5 ml-1">Your Name *</label>
+        <label className="text-sm font-semibold text-[var(--lux-text-primary)] block mb-1.5 ml-1">Your Name *</label>
         <input
           required
           value={form.customerName}
           onChange={e => setForm(f => ({ ...f, customerName: e.target.value }))}
           placeholder="Enter your name"
-          className="w-full px-5 py-3.5 rounded-xl bg-white/60 border border-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-gray-400"
+          className="w-full px-5 py-3.5 rounded-xl transition-all placeholder:text-[var(--lux-text-muted)]"
         />
       </div>
 
       <div>
-        <label className="text-sm font-semibold text-purple-900 block mb-2 ml-1">Rating *</label>
+        <label className="text-sm font-semibold text-[var(--lux-text-primary)] block mb-2 ml-1">Rating *</label>
         <div className="flex gap-2">
           {[1, 2, 3, 4, 5].map(star => (
             <button
@@ -126,12 +126,12 @@ function ReviewSubmitForm() {
             >
               <Star
                 size={32}
-                className={star <= (hover || form.rating) ? "text-amber-400 fill-amber-400" : "text-gray-300 fill-gray-100"}
+                className={star <= (hover || form.rating) ? "text-[var(--lux-gold-primary)] fill-[var(--lux-gold-primary)]" : "text-gray-600 fill-transparent"}
               />
             </button>
           ))}
           {form.rating > 0 && (
-            <span className="ml-2 text-sm font-semibold text-gray-600 self-center">
+            <span className="ml-2 text-sm font-semibold text-[var(--lux-text-secondary)] self-center">
               {["", "Poor", "Fair", "Good", "Very Good", "Excellent"][form.rating]}
             </span>
           )}
@@ -139,21 +139,21 @@ function ReviewSubmitForm() {
       </div>
 
       <div>
-        <label className="text-sm font-semibold text-purple-900 block mb-1.5 ml-1">Your Review *</label>
+        <label className="text-sm font-semibold text-[var(--lux-text-primary)] block mb-1.5 ml-1">Your Review *</label>
         <textarea
           required
           rows={4}
           value={form.comment}
           onChange={e => setForm(f => ({ ...f, comment: e.target.value }))}
           placeholder="Write your review here"
-          className="w-full px-5 py-3.5 rounded-xl bg-white/60 border border-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-gray-400 resize-none"
+          className="w-full px-5 py-3.5 rounded-xl transition-all placeholder:text-[var(--lux-text-muted)] resize-none"
         />
       </div>
 
       {/* Photo Upload */}
       <div>
-        <label className="text-sm font-semibold text-purple-900 block mb-1.5 ml-1 flex items-center gap-1.5">
-          <ImagePlus size={14} /> Add a Photo <span className="font-normal text-gray-400">(optional)</span>
+        <label className="text-sm font-semibold text-[var(--lux-text-primary)] block mb-1.5 ml-1 flex items-center gap-1.5">
+          <ImagePlus size={14} /> Add a Photo <span className="font-normal text-[var(--lux-text-muted)]">(optional)</span>
         </label>
 
         {previewUrl ? (
@@ -176,10 +176,10 @@ function ReviewSubmitForm() {
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white/60 border-2 border-dashed border-purple-200 hover:border-primary hover:bg-white/80 transition-all text-sm text-gray-500 hover:text-primary w-full justify-center"
+            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white/5 border-2 border-dashed border-[var(--lux-border-subtle)] hover:border-[var(--lux-gold-primary)] hover:bg-white/10 transition-all text-sm text-[var(--lux-text-muted)] hover:text-[var(--lux-gold-primary)] w-full justify-center"
           >
             {uploading ? (
-              <><Loader2 size={16} className="animate-spin text-primary" /> Uploading & cropping…</>
+              <><Loader2 size={16} className="animate-spin text-[var(--lux-gold-primary)]" /> Uploading & cropping…</>
             ) : (
               <><Upload size={16} /> Click to upload a photo</>
             )}
@@ -207,7 +207,7 @@ function ReviewSubmitForm() {
       <button
         type="submit"
         disabled={submitting || uploading}
-        className="w-full btn-gradient py-4 rounded-xl text-base font-bold flex items-center justify-center gap-2"
+        className="w-full hs-button hs-button-primary rounded-xl text-base font-bold flex items-center justify-center gap-2"
       >
         {submitting ? "Submitting..." : "Submit Review"} <Star size={16} fill="currentColor" />
       </button>
@@ -237,7 +237,7 @@ export default function Contact() {
   };
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen pb-24 hs-contact bg-[var(--lux-bg-main)]">
       <PageHeader 
         title="Get in Touch" 
         subtitle="Have a project in mind? We'd love to hear from you."
@@ -248,8 +248,8 @@ export default function Contact() {
           
           {/* Info Side */}
           <div className="lg:col-span-2 space-y-8">
-            <div className="glass-panel p-8 rounded-3xl">
-              <h3 className="text-2xl font-display font-bold text-foreground mb-6">Contact Information</h3>
+            <div className="glass-panel bg-[var(--lux-surface-dark)] border border-[var(--lux-border-subtle)] p-8 rounded-3xl">
+              <h3 className="text-2xl font-display font-bold text-[var(--lux-text-primary)] mb-6">Contact Information</h3>
               
               {!settings?.address && !settings?.email && !settings?.phone ? (
                 <div className="text-center py-6 text-gray-400">
@@ -261,36 +261,36 @@ export default function Contact() {
               <div className="space-y-6">
                 {settings?.address && (
                   <div className="flex gap-4">
-                    <div className="w-12 h-12 rounded-full bg-pink-50 flex items-center justify-center text-primary shrink-0">
+                    <div className="w-12 h-12 rounded-full hs-service-icon-bg flex items-center justify-center text-[var(--lux-gold-primary)] shrink-0">
                       <MapPin size={24} />
                     </div>
                     <div>
-                      <h4 className="font-bold text-purple-900 mb-1">Our Studio</h4>
-                      <p className="text-gray-600 text-sm leading-relaxed">{settings.address}</p>
+                      <h4 className="font-bold text-[var(--lux-text-primary)] mb-1">Our Studio</h4>
+                      <p className="text-[var(--lux-text-secondary)] text-sm leading-relaxed">{settings.address}</p>
                     </div>
                   </div>
                 )}
                 
                 {settings?.email && (
                   <div className="flex gap-4">
-                    <div className="w-12 h-12 rounded-full bg-pink-50 flex items-center justify-center text-primary shrink-0">
+                    <div className="w-12 h-12 rounded-full hs-service-icon-bg flex items-center justify-center text-[var(--lux-gold-primary)] shrink-0">
                       <Mail size={24} />
                     </div>
                     <div>
-                      <h4 className="font-bold text-purple-900 mb-1">Email Us</h4>
-                      <a href={`mailto:${settings.email}`} className="text-gray-600 text-sm hover:text-primary transition-colors">{settings.email}</a>
+                      <h4 className="font-bold text-[var(--lux-text-primary)] mb-1">Email Us</h4>
+                      <a href={`mailto:${settings.email}`} className="text-[var(--lux-text-secondary)] text-sm hover:text-[var(--lux-gold-primary)] transition-colors">{settings.email}</a>
                     </div>
                   </div>
                 )}
 
                 {settings?.phone && (
                   <div className="flex gap-4">
-                    <div className="w-12 h-12 rounded-full bg-pink-50 flex items-center justify-center text-primary shrink-0">
+                    <div className="w-12 h-12 rounded-full hs-service-icon-bg flex items-center justify-center text-[var(--lux-gold-primary)] shrink-0">
                       <Phone size={24} />
                     </div>
                     <div>
-                      <h4 className="font-bold text-purple-900 mb-1">Call Us</h4>
-                      <a href={`tel:${settings.phone}`} className="text-gray-600 text-sm hover:text-primary transition-colors">{settings.phone}</a>
+                      <h4 className="font-bold text-[var(--lux-text-primary)] mb-1">Call Us</h4>
+                      <a href={`tel:${settings.phone}`} className="text-[var(--lux-text-secondary)] text-sm hover:text-[var(--lux-gold-primary)] transition-colors">{settings.phone}</a>
                     </div>
                   </div>
                 )}
@@ -301,7 +301,7 @@ export default function Contact() {
 
           {/* Form Side */}
           <div className="lg:col-span-3">
-            <div className="glass p-8 md:p-10 rounded-3xl shadow-xl shadow-purple-900/5">
+            <div className="glass-panel bg-[var(--lux-surface-dark)] border border-[var(--lux-border-subtle)] p-8 md:p-10 rounded-3xl shadow-xl shadow-black/50">
               {isSuccess ? (
                 <div className="py-16 text-center">
                   <div className="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -314,10 +314,9 @@ export default function Contact() {
                   <button 
                     onClick={() => {
                       setFormData({fullName: "", phone: "", email: "", subject: "", message: ""});
-                      // HACK: just reload page to reset state easily, or use custom reset mechanism
                       window.location.reload();
                     }}
-                    className="btn-glass px-8 py-3 rounded-xl"
+                    className="hs-button hs-button-outline px-8 py-3 rounded-xl"
                   >
                     Send Another Message
                   </button>
@@ -326,24 +325,24 @@ export default function Contact() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-purple-900 ml-1">Full Name</label>
+                      <label className="text-sm font-semibold text-[var(--lux-text-primary)] ml-1">Full Name</label>
                       <input 
                         required
                         type="text" 
                         value={formData.fullName}
                         onChange={e => setFormData({...formData, fullName: e.target.value})}
-                        className="w-full px-5 py-3.5 rounded-xl bg-white/60 border border-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-gray-400"
+                        className="w-full px-5 py-3.5 rounded-xl transition-all placeholder:text-[var(--lux-text-muted)]"
                         placeholder="Enter your name"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-purple-900 ml-1">Phone Number</label>
+                      <label className="text-sm font-semibold text-[var(--lux-text-primary)] ml-1">Phone Number</label>
                       <input 
                         required
                         type="tel" 
                         value={formData.phone}
                         onChange={e => setFormData({...formData, phone: e.target.value})}
-                        className="w-full px-5 py-3.5 rounded-xl bg-white/60 border border-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-gray-400"
+                        className="w-full px-5 py-3.5 rounded-xl transition-all placeholder:text-[var(--lux-text-muted)]"
                         placeholder="Enter your phone number"
                       />
                     </div>
@@ -351,36 +350,36 @@ export default function Contact() {
                   
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-purple-900 ml-1">Email Address (Optional)</label>
+                      <label className="text-sm font-semibold text-[var(--lux-text-primary)] ml-1">Email Address (Optional)</label>
                       <input 
                         type="email" 
                         value={formData.email}
                         onChange={e => setFormData({...formData, email: e.target.value})}
-                        className="w-full px-5 py-3.5 rounded-xl bg-white/60 border border-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-gray-400"
+                        className="w-full px-5 py-3.5 rounded-xl transition-all placeholder:text-[var(--lux-text-muted)]"
                         placeholder="Enter your email address"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-purple-900 ml-1">Subject</label>
+                      <label className="text-sm font-semibold text-[var(--lux-text-primary)] ml-1">Subject</label>
                       <input 
                         required
                         type="text" 
                         value={formData.subject}
                         onChange={e => setFormData({...formData, subject: e.target.value})}
-                        className="w-full px-5 py-3.5 rounded-xl bg-white/60 border border-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-gray-400"
+                        className="w-full px-5 py-3.5 rounded-xl transition-all placeholder:text-[var(--lux-text-muted)]"
                         placeholder="Enter the subject"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-purple-900 ml-1">Message</label>
+                    <label className="text-sm font-semibold text-[var(--lux-text-primary)] ml-1">Message</label>
                     <textarea 
                       required
                       rows={5}
                       value={formData.message}
                       onChange={e => setFormData({...formData, message: e.target.value})}
-                      className="w-full px-5 py-3.5 rounded-xl bg-white/60 border border-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-gray-400 resize-none"
+                      className="w-full px-5 py-3.5 rounded-xl transition-all placeholder:text-[var(--lux-text-muted)] resize-none"
                       placeholder="Write your message here"
                     ></textarea>
                   </div>
@@ -388,7 +387,7 @@ export default function Contact() {
                   <button 
                     type="submit" 
                     disabled={isPending}
-                    className="w-full btn-gradient py-4 rounded-xl text-lg flex items-center justify-center gap-2 mt-4"
+                    className="w-full hs-button hs-button-primary rounded-xl text-lg flex items-center justify-center gap-2 mt-4"
                   >
                     {isPending ? "Sending..." : "Send Message"} <Send size={20} />
                   </button>
@@ -407,10 +406,10 @@ export default function Contact() {
             <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-100 text-amber-600 text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
               <Star size={14} fill="currentColor" /> Share Your Experience
             </div>
-            <h2 className="text-3xl font-display font-bold text-gray-900 mb-2">Leave Us a Review</h2>
-            <p className="text-gray-500">Loved our service? Let others know! Your review helps us grow and helps customers find us.</p>
+            <h2 className="text-3xl font-display font-bold text-[var(--lux-text-primary)] mb-2">Leave Us a Review</h2>
+            <p className="text-[var(--lux-text-secondary)]">Loved our service? Let others know! Your review helps us grow and helps customers find us.</p>
           </div>
-          <div className="glass p-8 rounded-3xl shadow-xl shadow-purple-900/5">
+          <div className="glass-panel bg-[var(--lux-surface-dark)] border border-[var(--lux-border-subtle)] p-8 rounded-3xl shadow-xl shadow-black/50">
             <ReviewSubmitForm />
           </div>
         </div>

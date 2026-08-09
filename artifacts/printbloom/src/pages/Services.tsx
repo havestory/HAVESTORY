@@ -16,21 +16,21 @@ function ServiceCard({ service }: { service: any }) {
   const highlights: string[] = Array.isArray(service.highlights) ? service.highlights : [];
 
   return (
-    <div className="bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
-      <div className="p-6 flex-1 flex flex-col">
+    <div className="hs-service-card group h-full">
+      <div className="h-full flex flex-col">
         {/* Icon / Image */}
-        <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center mb-4 shrink-0 overflow-hidden">
+        <div className="w-10 h-10 rounded-xl hs-service-icon-bg flex items-center justify-center mb-4 shrink-0 overflow-hidden">
           {service.imageUrl
             ? <img src={service.imageUrl} alt="" loading="lazy" className="w-full h-full object-cover" />
-            : <ImageIcon size={18} className="text-purple-400" />
+            : <ImageIcon size={18} className="text-[var(--lux-gold-primary)]" />
           }
         </div>
 
         {/* Name */}
         <div className="flex items-start gap-2 mb-2">
-          <h3 className="font-bold text-gray-900 text-base leading-snug flex-1">{service.name}</h3>
+          <h3 className="font-display font-bold text-[var(--lux-text-primary)] text-base leading-snug flex-1">{service.name}</h3>
           {service.featured && (
-            <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-orange-50 text-orange-500 text-[9px] font-bold rounded-full border border-orange-100 shrink-0 mt-0.5">
+            <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-[var(--lux-gold-primary)]/10 text-[var(--lux-gold-primary)] text-[9px] font-bold rounded-full border border-[var(--lux-gold-primary)]/20 shrink-0 mt-0.5">
               <Star size={8} fill="currentColor" /> Popular
             </span>
           )}
@@ -39,41 +39,39 @@ function ServiceCard({ service }: { service: any }) {
         {/* Description */}
         <DescriptionDisplay
           value={service.description}
-          className="text-sm text-gray-500 mb-4 leading-relaxed"
-          iconClassName="text-pink-400"
+          className="text-sm text-[var(--lux-text-secondary)] mb-4 leading-relaxed"
+          iconClassName="text-[var(--lux-gold-primary)]"
           iconSize={14}
         />
 
         {/* Price */}
         {price ? (
           <div className="mb-4">
-            <span className="text-xl font-bold text-pink-600">{price}</span>
-            {priceUnit && <span className="text-sm text-gray-400 ml-1 capitalize">/ {priceUnit}</span>}
+            <span className="text-xl font-bold hs-price-gradient">{price}</span>
+            {priceUnit && <span className="text-sm text-[var(--lux-text-muted)] ml-1 capitalize">/ {priceUnit}</span>}
           </div>
         ) : (
-          <div className="text-base font-semibold text-gray-400 mb-4">Custom Quote</div>
+          <div className="text-base font-semibold text-[var(--lux-text-muted)] mb-4">Custom Quote</div>
         )}
 
         {/* Highlights */}
         {highlights.length > 0 && (
           <ul className="space-y-1.5 mb-4 flex-1">
             {highlights.map((h, i) => (
-              <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
-                <CheckCircle2 size={15} className="text-pink-400 shrink-0" />
+              <li key={i} className="flex items-center gap-2 text-sm text-[var(--lux-text-secondary)]">
+                <CheckCircle2 size={15} className="text-[var(--lux-gold-primary)] shrink-0" />
                 {h}
               </li>
             ))}
           </ul>
         )}
-      </div>
 
-      {/* Discuss Project Button */}
-      <div className="px-6 pb-5 mt-auto">
-        <div className="border-t border-gray-50 pt-4">
+        {/* Discuss Project Button */}
+        <div className="pt-4 mt-auto border-t border-[var(--lux-border-subtle)]">
           <Link href={`/contact?service=${encodeURIComponent(service.name)}`}>
-            <button className="flex items-center gap-1.5 text-sm font-semibold text-purple-600 hover:text-pink-600 transition-colors group">
+            <button className="flex items-center gap-1.5 text-sm font-semibold text-[var(--lux-gold-primary)] hover:text-[var(--lux-text-primary)] transition-colors group-btn">
               Discuss Project
-              <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight size={15} className="group-btn-hover:translate-x-0.5 transition-transform" />
             </button>
           </Link>
         </div>
@@ -123,7 +121,7 @@ export default function Services() {
   };
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen pb-24 hs-services bg-[var(--lux-bg-main)]">
       <PageHeader
         title="Our Services"
         subtitle="From concept to physical print, we offer comprehensive design and production services tailored to your needs."
@@ -132,7 +130,7 @@ export default function Services() {
 
       {/* Sticky Category Nav */}
       {!isLoading && categories.length > 1 && (
-        <div className="sticky top-16 z-30 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div className="sticky top-16 z-30 bg-[var(--lux-surface-dark)]/90 backdrop-blur-md border-b border-[var(--lux-border-subtle)] shadow-sm">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex gap-2 overflow-x-auto scrollbar-hide py-3 justify-center">
               {categories.map(cat => (
@@ -141,8 +139,8 @@ export default function Services() {
                   onClick={() => scrollTo(cat)}
                   className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold border transition-all ${
                     activeSection === cat
-                      ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white border-transparent"
-                      : "border-gray-200 text-gray-600 hover:border-pink-300 hover:text-pink-600"
+                      ? "bg-[var(--lux-gold-primary)] text-[var(--lux-bg-main)] border-transparent"
+                      : "border-[var(--lux-border-subtle)] text-[var(--lux-text-secondary)] hover:border-[var(--lux-gold-primary)] hover:text-[var(--lux-gold-primary)]"
                   }`}
                 >
                   {cat}
@@ -159,9 +157,9 @@ export default function Services() {
             <Loader2 className="w-12 h-12 text-primary animate-spin" />
           </div>
         ) : activeServices.length === 0 ? (
-          <div className="text-center py-24 text-gray-400">
+          <div className="text-center py-24 text-[var(--lux-text-secondary)]">
             <div className="text-6xl mb-4">🎨</div>
-            <p className="font-medium text-lg">Services coming soon</p>
+            <p className="font-medium text-lg text-[var(--lux-text-primary)]">Services coming soon</p>
             <p className="text-sm mt-2">Check back soon for our service offerings.</p>
           </div>
         ) : (
@@ -171,13 +169,13 @@ export default function Services() {
                 {/* Category Break Divider (between categories only) */}
                 {idx > 0 && (
                   <div className="flex items-center gap-4 my-12">
-                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-pink-200 to-transparent" />
-                    <div className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-100 rounded-full">
-                      <div className="w-1.5 h-1.5 rounded-full bg-pink-400" />
-                      <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                      <div className="w-1.5 h-1.5 rounded-full bg-pink-400" />
+                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[var(--lux-border-subtle)] to-transparent" />
+                    <div className="flex items-center gap-1.5 px-3 py-1 bg-[var(--lux-surface-dark)] border border-[var(--lux-border-subtle)] rounded-full">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[var(--lux-gold-muted)]" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-[var(--lux-gold-primary)]" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-[var(--lux-gold-muted)]" />
                     </div>
-                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-purple-200 to-transparent" />
+                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[var(--lux-border-subtle)] to-transparent" />
                   </div>
                 )}
 
@@ -189,7 +187,7 @@ export default function Services() {
                 >
                   {/* Large Centered Category Heading */}
                   <div className="text-center mb-8">
-                    <h2 className="text-3xl font-display font-bold text-gray-900">{cat}</h2>
+                    <h2 className="text-3xl font-display font-bold text-[var(--lux-text-primary)]">{cat}</h2>
                   </div>
 
                   {/* 3-Column Card Grid */}
@@ -203,11 +201,11 @@ export default function Services() {
             ))}
 
             {/* CTA */}
-            <div className="mt-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-2xl p-8 text-white text-center">
-              <h3 className="font-bold text-xl mb-2">Need a Custom Quote?</h3>
-              <p className="text-white/80 text-sm mb-5">Can't find what you're looking for? We handle custom projects of any scale.</p>
+            <div className="mt-16 hs-service-icon-bg border border-[var(--lux-border-subtle)] rounded-2xl p-8 text-center">
+              <h3 className="font-bold text-xl mb-2 text-[var(--lux-text-primary)]">Need a Custom Quote?</h3>
+              <p className="text-[var(--lux-text-secondary)] text-sm mb-5">Can't find what you're looking for? We handle custom projects of any scale.</p>
               <Link href="/custom-project">
-                <button className="bg-white text-pink-600 font-bold px-8 py-3 rounded-xl hover:bg-pink-50 transition-colors text-sm shadow-lg">
+                <button className="hs-button hs-button-primary shadow-lg">
                   Get a Custom Quote
                 </button>
               </Link>

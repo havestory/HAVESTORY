@@ -60,7 +60,7 @@ export function WhatsAppButton() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", damping: 26, stiffness: 380 }}
-            className="fixed bottom-28 right-4 sm:right-6 z-50 w-[340px] sm:w-[380px] rounded-2xl overflow-hidden shadow-2xl shadow-black/25"
+            className="fixed bottom-28 right-4 sm:right-6 z-[45] w-[340px] sm:w-[380px] rounded-2xl overflow-hidden shadow-2xl shadow-black/25"
             style={{ maxWidth: "calc(100vw - 2rem)" }}
           >
             {/* Header */}
@@ -159,7 +159,7 @@ export function WhatsAppButton() {
       {/* Floating Button — bottom offset honours iOS safe-area-inset-bottom
           so the button doesn't overlap the iPhone home-indicator bar. */}
       <div
-        className="fixed right-4 sm:right-6 z-50"
+        className="fixed right-4 sm:right-6 z-[45]"
         style={{ bottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
       >
         {/* Ping rings */}

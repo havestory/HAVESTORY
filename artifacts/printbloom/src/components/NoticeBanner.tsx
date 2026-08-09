@@ -61,7 +61,7 @@ export default function NoticeBanner() {
   };
 
   return (
-    <div style={{ background: cfg.gradient }} className="py-2 px-4 relative text-white overflow-hidden">
+    <div style={{ background: cfg.gradient }} className="py-2 px-4 relative z-30 text-white overflow-hidden">
       <div className="max-w-7xl mx-auto flex items-center justify-center gap-3 text-sm font-medium">
         {notices.length > 1 && (
           <button onClick={prev} className="opacity-70 hover:opacity-100 transition-opacity shrink-0">

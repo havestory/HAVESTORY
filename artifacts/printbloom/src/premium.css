@@ -776,3 +776,54 @@ h1, h2, h3, h4, h5, h6, .font-display {
   .havestory-admin-shell main table { font-size: 12px; }
   .havestory-admin-shell main th, .havestory-admin-shell main td { padding: 10px 12px !important; }
 }
+
+/* --- HAVESTORY PUBLIC COMPONENTS OVERRIDES --- */
+.hs-service-card {
+  background: var(--lux-surface-dark);
+  border: 1px solid var(--lux-border-subtle);
+  border-radius: 22px;
+  padding: 4px;
+  transition: all 0.3s ease;
+}
+.hs-service-card > div {
+  background: var(--lux-surface-dark);
+  border-radius: 18px;
+  padding: 24px;
+}
+.hs-service-card:hover {
+  border-color: var(--lux-gold-primary);
+  background: var(--lux-bg-main);
+}
+.hs-service-icon-bg {
+  background: linear-gradient(135deg, rgba(201, 169, 110, 0.15) 0%, rgba(201, 169, 110, 0.05) 100%);
+  border: 1px solid rgba(201, 169, 110, 0.2);
+}
+.hs-price-gradient {
+  color: var(--lux-gold-primary);
+  background: none;
+  -webkit-text-fill-color: initial;
+}
+.hs-about, .hs-contact {
+  background: var(--lux-bg-main);
+  color: var(--lux-text-primary);
+  min-height: 100vh;
+}
+.hs-about .glass-panel, .hs-contact .glass-panel {
+  background: var(--lux-surface-dark);
+  border: 1px solid var(--lux-border-subtle);
+}
+.hs-about h1, .hs-contact h1, .hs-about h2, .hs-contact h2 {
+  color: var(--lux-text-primary);
+  font-family: var(--font-lux-heading);
+}
+.hs-about p, .hs-contact p, .hs-about .text-gray-600, .hs-contact .text-gray-600, .hs-contact .text-gray-700 {
+  color: var(--lux-text-secondary);
+}
+.hs-contact input, .hs-contact textarea {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--lux-border-subtle);
+  color: var(--lux-text-primary);
+}
+.hs-contact input:focus, .hs-contact textarea:focus {
+  border-color: var(--lux-gold-primary);
+}
