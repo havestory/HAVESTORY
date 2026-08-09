@@ -12,10 +12,10 @@ type Props = {
 };
 
 const defaultCategories = [
-  { title: "Stickers & Labels", copy: "Custom shapes, any size, any finish.", href: "/store" },
-  { title: "Business Cards", copy: "Premium cards that leave an impression.", href: "/store" },
-  { title: "Packaging", copy: "Custom boxes and labels that stand out.", href: "/store" },
-  { title: "Marketing Prints", copy: "Flyers, posters and more for your brand.", href: "/store" },
+  { title: "Gallery Frames", copy: "Timeless profiles with a refined archival finish.", href: "/store" },
+  { title: "Glass-Look Frames", copy: "Clean edges and modern depth for every portrait.", href: "/store" },
+  { title: "Story Collages", copy: "Many moments composed into one meaningful frame.", href: "/store" },
+  { title: "Gift Collections", copy: "Thoughtful frame sets for the people who matter.", href: "/store" },
 ];
 const categoryIcons = [Sticker, BriefcaseBusiness, Box, Sparkles];
 

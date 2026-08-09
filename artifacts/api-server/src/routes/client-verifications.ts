@@ -20,7 +20,7 @@ type ProfileData = {
 function encryptionKey(): Buffer {
   const secret = process.env.SESSION_SECRET;
   if (!secret) throw new Error("SESSION_SECRET is required for client verification encryption");
-  return crypto.createHash("sha256").update("printbloom:client-verification:v1:").update(secret).digest();
+  return crypto.createHash("sha256").update("havestory:client-verification:v1:").update(secret).digest();
 }
 
 function encrypt(value: Buffer | string): string {

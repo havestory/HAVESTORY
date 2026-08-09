@@ -19,7 +19,7 @@ import { ensureTeamTables, hashStaffPassword, verifyStaffPassword, STAFF_PERMISS
 
 const router = Router();
 
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "Admin.PrintBloom";
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "Admin.HAVESTORY";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
 const ADMIN_PIN      = process.env.ADMIN_PIN      || "";
 
@@ -584,13 +584,13 @@ CREATE TABLE IF NOT EXISTS "notices" (
 );
 CREATE TABLE IF NOT EXISTS "settings" (
   "id" serial PRIMARY KEY NOT NULL,
-  "business_name" text DEFAULT 'PrintBloom' NOT NULL,
-  "tagline" text DEFAULT 'Premium Printing & Graphic Design' NOT NULL,
+  "business_name" text DEFAULT 'HAVESTORY' NOT NULL,
+  "tagline" text DEFAULT 'Premium Photo Frames & Story Galleries' NOT NULL,
   "hero_title" text DEFAULT 'Premium Printing for Every Vision' NOT NULL,
   "hero_subtitle" text DEFAULT 'From business cards to large banners, we bring your vision to life with precision and care.' NOT NULL,
   "whatsapp_number" text DEFAULT '94700000000' NOT NULL,
-  "whatsapp_message" text DEFAULT 'Hi! I''d like to place an order with PrintBloom.' NOT NULL,
-  "about_story" text DEFAULT 'PrintBloom is your trusted printing partner.' NOT NULL,
+  "whatsapp_message" text DEFAULT 'Hi! I''d like to place an order with HAVESTORY.' NOT NULL,
+  "about_story" text DEFAULT 'HAVESTORY is your trusted printing partner.' NOT NULL,
   "about_mission" text DEFAULT 'Our mission is simple: to deliver exceptional prints on time, every time.' NOT NULL,
   "about_image" text,
   "orders_completed_count" integer DEFAULT 10 NOT NULL,
@@ -621,8 +621,8 @@ CREATE TABLE IF NOT EXISTS "settings" (
   "about_location" text DEFAULT 'Sri Lanka' NOT NULL,
   "privacy_policy" text,
   "terms_of_service" text,
-  "seo_title" text DEFAULT 'PrintBloom — Premium Printing & Graphic Design Sri Lanka' NOT NULL,
-  "seo_description" text DEFAULT 'PrintBloom offers premium printing services in Sri Lanka.' NOT NULL,
+  "seo_title" text DEFAULT 'HAVESTORY — Premium Photo Frames & Story Galleries Sri Lanka' NOT NULL,
+  "seo_description" text DEFAULT 'HAVESTORY offers premium custom photo frames in Sri Lanka.' NOT NULL,
   "seo_keywords" text DEFAULT 'printing sri lanka, graphic design, business cards, banners' NOT NULL,
   "seo_og_image" text,
   "theme_preset" text DEFAULT 'pink-purple' NOT NULL,

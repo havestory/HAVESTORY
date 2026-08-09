@@ -125,7 +125,7 @@ router.post("/test-email", requireAdmin, async (req, res) => {
     const overridePass = typeof req.body?.gmailAppPassword === "string" ? req.body.gmailAppPassword : null;
     const result = await sendTestEmail({
       recipients,
-      businessName: settings.businessName || "PrintBloom",
+      businessName: settings.businessName || "HAVESTORY",
       credentials: {
         user: overrideUser ?? (settings as any).gmailUser ?? null,
         pass: overridePass ?? (settings as any).gmailAppPassword ?? null,
@@ -147,7 +147,7 @@ router.post("/test-email", requireAdmin, async (req, res) => {
 router.post("/upload-image", requireAdmin, siteUpload.single("file"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
-    const { url: fileUrl } = await uploadToCloudinary(req.file.buffer, "printbloom/site-images", req.file.originalname);
+    const { url: fileUrl } = await uploadToCloudinary(req.file.buffer, "havestory/site-images", req.file.originalname);
     res.json({ url: fileUrl, originalName: req.file.originalname });
   } catch (err) {
     req.log.error(err);
@@ -164,7 +164,7 @@ router.get("/backup", requireAdmin, async (req, res) => {
       settings,
     };
     const json = JSON.stringify(backup, null, 2);
-    const filename = `printbloom-settings-${new Date().toISOString().slice(0, 10)}.json`;
+    const filename = `havestory-settings-${new Date().toISOString().slice(0, 10)}.json`;
     res.setHeader("Content-Type", "application/json");
     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
     res.send(json);

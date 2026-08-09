@@ -6,13 +6,13 @@ import { requireAdmin } from "../lib/auth-cookie";
 const router = Router();
 
 const DEFAULT_LABEL_CONFIG = {
-  qrBaseUrl: "https://www.printbloom.shop",
+  qrBaseUrl: process.env.FRONTEND_ORIGIN?.split(",")[0]?.trim() || "https://havestory.vercel.app",
   labelTitle: "Shipping Label",
   senderName: "",
   senderPhone: "",
   senderWhatsapp: "",
   senderAddress: "",
-  footerText: "Thank you for choosing PrintBloom",
+  footerText: "Thank you for choosing HAVESTORY",
   accentColor: "#111111",
   defaultSize: "standard",
   showLogo: true,

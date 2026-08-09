@@ -30,6 +30,16 @@ type TabId = typeof TABS[number]["id"];
 
 const THEME_PRESETS = [
   {
+    id: "havestory-gallery",
+    label: "HAVESTORY Gallery",
+    desc: "Warm ivory, walnut & muted bronze",
+    from: "#a87842",
+    to: "#5c4938",
+    accent: "#c39a68",
+    primary: "30 43% 46%",
+    secondary: "27 24% 29%",
+  },
+  {
     id: "pink-purple",
     label: "Pink & Purple",
     desc: "Default — romantic & vibrant",

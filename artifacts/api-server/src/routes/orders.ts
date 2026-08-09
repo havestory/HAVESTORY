@@ -247,7 +247,7 @@ router.post("/", async (req, res) => {
 
         await sendOrderNotificationEmail({
           recipients,
-          businessName: settingsRow?.businessName || "PrintBloom",
+          businessName: settingsRow?.businessName || "HAVESTORY",
           credentials: {
             user: (settingsRow as any)?.gmailUser ?? null,
             pass: (settingsRow as any)?.gmailAppPassword ?? null,
@@ -308,7 +308,7 @@ router.post("/", async (req, res) => {
 
           await sendCustomerConfirmationEmail({
             customerEmail,
-            businessName: settingsRow?.businessName || "PrintBloom",
+            businessName: settingsRow?.businessName || "HAVESTORY",
             shippingCost: shipCost,
             discountAmount: disc,
             bankDetails,
@@ -603,7 +603,7 @@ router.post("/track/:orderId/design-files", upload.array("files", 10), async (re
 
     const existing = parseArr(order.attachments) as any[];
     const uploaded = await Promise.all(
-      files.map((f) => uploadToCloudinary(f.buffer, "printbloom/design-files", f.originalname))
+      files.map((f) => uploadToCloudinary(f.buffer, "havestory/design-files", f.originalname))
     );
     const newFiles = uploaded.map((u) => ({ url: u.url, name: u.name }));
     const merged = [...existing, ...newFiles];
@@ -628,7 +628,7 @@ router.post("/track/:orderId/payment-proof", upload.single("file"), async (req, 
     const [order] = await db.select().from(ordersTable).where(eq(ordersTable.orderId, orderId));
     if (!order) return res.status(404).json({ error: "Order not found" });
 
-    const { url: fileUrl } = await uploadToCloudinary(req.file.buffer, "printbloom/payment-proofs", req.file.originalname);
+    const { url: fileUrl } = await uploadToCloudinary(req.file.buffer, "havestory/payment-proofs", req.file.originalname);
     await db.update(ordersTable)
       .set({ paymentProofUrl: fileUrl, updatedAt: new Date() })
       .where(eq(ordersTable.orderId, orderId));
@@ -660,7 +660,7 @@ router.post("/:id/online-files", upload.array("files", 20), async (req, res) => 
     const existingFiles = parseArr(order.onlineDeliveryFiles);
     const uploadedFiles = await Promise.all(
       (req.files as Express.Multer.File[]).map((f) =>
-        uploadToCloudinary(f.buffer, "printbloom/delivery-files", f.originalname)
+        uploadToCloudinary(f.buffer, "havestory/delivery-files", f.originalname)
       )
     );
     const newFiles = uploadedFiles.map((u) => ({ url: u.url, name: u.name }));
@@ -719,7 +719,7 @@ router.post("/:id/proof-file", upload.single("file"), async (req, res) => {
 
     if (!order) return res.status(404).json({ error: "Order not found" });
 
-    const { url: fileUrl } = await uploadToCloudinary(req.file.buffer, "printbloom/proof-files", req.file.originalname);
+    const { url: fileUrl } = await uploadToCloudinary(req.file.buffer, "havestory/proof-files", req.file.originalname);
     await db.update(ordersTable)
       .set({ proofFileUrl: fileUrl, proofFileName: req.file.originalname, updatedAt: new Date() })
       .where(eq(ordersTable.id, order.id));
@@ -861,7 +861,7 @@ router.put("/:id", requireAdmin, async (req, res) => {
 
             await sendOrderCompletionEmail({
               customerEmail: order.customerEmail!,
-              businessName: settingsRow?.businessName || "PrintBloom",
+              businessName: settingsRow?.businessName || "HAVESTORY",
               trackingUrl,
               credentials: {
                 user: (settingsRow as any)?.gmailUser ?? null,
