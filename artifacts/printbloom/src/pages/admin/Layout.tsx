@@ -39,7 +39,7 @@ const NAV_SECTIONS = [
     ],
   },
   {
-    label: "CATALOG",
+    label: "STUDIO CATALOG",
     items: [
       { name: "Products", href: "/admin/products", icon: Package, permission: "products_view" },
       { name: "Private Price Lists", href: "/admin/price-lists", icon: FileSpreadsheet, permission: "price_lists_view" },
@@ -151,7 +151,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           )}
           <div>
             <div className={`leading-tight ${nameText}`}>{settings?.businessName || "HAVESTORY"}</div>
-            <div className={`text-[10px] leading-tight ${logoSub}`}>{session?.role === "staff" ? "Staff Panel" : "Owner Admin Panel"}</div>
+            <div className={`text-[10px] leading-tight ${logoSub}`}>{session?.role === "staff" ? "Staff Studio Console" : "Owner Studio Console"}</div>
           </div>
         </div>
         <button
