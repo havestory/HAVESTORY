@@ -1,10 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Aperture, ArrowDownRight, ArrowRight, BadgeCheck, Frame,
-  Headphones, Images, Palette, ScanLine, Truck, UploadCloud
-} from "lucide-react";
+import { ArrowRight, BadgeCheck, Frame, Palette, Truck, Sparkles } from "lucide-react";
 import { getBusinessName } from "@/lib/brand-settings";
 
 type Props = {
@@ -18,8 +15,6 @@ const defaultCategories = [
   { title: "Story Collages", copy: "A thoughtful edit of many moments in one composition.", href: "/store" },
   { title: "Studio Sessions", copy: "Portraits shaped with calm direction and considered light.", href: "/services" },
 ];
-
-const categoryIcons = [Frame, Palette, Images, Aperture];
 
 function configuredCategories(settings: any) {
   try {
@@ -44,139 +39,78 @@ export function PremiumHero({ settings, publicStats }: Props) {
     settings?.heroSlideImage3,
     settings?.heroSlideImage4,
     settings?.heroSlideImage5,
+    settings?.heroBgImage,
   ].filter(Boolean) as string[], [settings]);
-
   const [slide, setSlide] = useState(0);
 
   useEffect(() => {
     if (slides.length < 2) return;
-    const timer = window.setInterval(() => setSlide(value => (value + 1) % slides.length), 4600);
+    const timer = window.setInterval(() => setSlide(value => (value + 1) % slides.length), 5200);
     return () => window.clearInterval(timer);
   }, [slides.length]);
 
-  const visual = slides[slide] || "";
   const businessName = getBusinessName(settings);
-  const heroTitle = settings?.heroTitle || "Make the moment visible.";
+  const heroTitle = settings?.heroTitle || "Capturing Stories, Framing Memories";
   const categories = configuredCategories(settings);
+  const categoryImages = [slides[1], slides[2], slides[3], slides[4] || slides[0]];
 
   return (
     <section className="hs-hero">
       <div className="hs-hero-stage">
-        <div className="hs-hero-rail" aria-hidden="true">
-          <span>{businessName}</span>
-          <span>STUDIO / COLOUR LAB</span>
-          <span>EST. SRI LANKA</span>
+        <div className="hs-hero-backdrop">
+          {slides.length ? (
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.img
+                key={slides[slide]}
+                src={slides[slide]}
+                alt={`${businessName || "Studio"} photography studio`}
+                initial={{ opacity: 0, scale: 1.035 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1.15, ease: [0.22, 1, 0.36, 1] }}
+              />
+            </AnimatePresence>
+          ) : <div className="hs-hero-placeholder"><Frame size={74} strokeWidth={1} /><span>Add a hero image in Website Editor</span></div>}
         </div>
+        <div className="hs-hero-overlay" />
 
         <motion.div
           className="hs-hero-copy"
-          initial={{ opacity: 0, y: 26 }}
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: .7, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: .75, ease: [0.22, 1, 0.36, 1] }}
         >
-          <span className="hs-kicker">
-            <ScanLine size={15} /> {settings?.heroBadgeText || "Portraits · Prints · Frames"}
-          </span>
-          <h1>
-            {heroTitle.split(/\s+/).map((word: string, index: number) => (
-              <motion.span
-                key={`${word}-${index}`}
-                initial={{ opacity: 0, y: 34 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: .6, delay: .08 + index * .055, ease: [0.22, 1, 0.36, 1] }}
-              >
-                {word}&nbsp;
-              </motion.span>
-            ))}
-          </h1>
-          <p>
-            {settings?.heroSubtitle || "A modern portrait studio and colour lab for photographs that deserve more than a camera roll."}
-          </p>
-
+          <span className="hs-kicker"><Sparkles size={13} /> {settings?.heroBadgeText || "Premium Studio"}</span>
+          <h1>{heroTitle}</h1>
+          <p>{settings?.heroSubtitle || "Archival-quality photographs, carefully balanced colour and frames finished for the moments worth keeping."}</p>
           <div className="hs-hero-actions">
-            <Link href={settings?.heroCtaLink || "/custom-project"} className="hs-button hs-button-signal">
-              {settings?.heroCtaText || "Start a project"} <ArrowRight size={18} />
+            <Link href={settings?.heroCtaLink || "/custom-project"} className="hs-button hs-button-primary">
+              {settings?.heroCtaText || "Start Your Project"}
             </Link>
-            <Link href="/store" className="hs-button hs-button-ghost">
-              Shop frames <ArrowDownRight size={18} />
-            </Link>
-          </div>
-
-          <div className="hs-upload-line">
-            <UploadCloud size={17} />
-            <span>Upload a photograph, choose a finish, and approve before production.</span>
+            <Link href="/store" className="hs-button hs-button-outline">Shop Frames</Link>
           </div>
         </motion.div>
 
-        <div className="hs-hero-media">
-          <div className="hs-media-index">
-            <span>FRAME</span>
-            <strong>{String(slide + 1).padStart(2, "0")}</strong>
-            <span>/ {String(Math.max(slides.length, 1)).padStart(2, "0")}</span>
-          </div>
-
-          <div className="hs-photo-window">
-            {visual ? (
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.img
-                  key={visual}
-                  src={visual}
-                  alt={`${businessName} portrait, colour print and frame collection`}
-                  initial={{ opacity: 0, scale: 1.04 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: .985 }}
-                  transition={{ duration: .85, ease: [0.22, 1, 0.36, 1] }}
-                />
-              </AnimatePresence>
-            ) : (
-              <div className="hs-photo-placeholder">
-                <Frame size={74} strokeWidth={1.2} />
-                <span>Your studio image appears here</span>
-              </div>
-            )}
-            <div className="hs-focus-mark hs-focus-mark-a" />
-            <div className="hs-focus-mark hs-focus-mark-b" />
-          </div>
-
-          {slides.length > 1 && (
-            <div className="hs-slide-controls">
-              {slides.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSlide(index)}
-                  className={index === slide ? "active" : ""}
-                  aria-label={`Show studio image ${index + 1}`}
-                >
-                  <span>{String(index + 1).padStart(2, "0")}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        {slides.length > 1 && <div className="hs-slide-controls" aria-label="Hero images">
+          {slides.map((_, index) => <button key={index} className={index === slide ? "active" : ""} onClick={() => setSlide(index)} aria-label={`Show image ${index + 1}`} />)}
+        </div>}
       </div>
 
-      <div className="hs-service-index">
-        {categories.map(({ title, copy, href }, index) => {
-          const Icon = categoryIcons[index];
-          return (
-            <Link href={href} className="hs-service-card" key={`${index}-${title}`}>
-              <span className="hs-service-number">0{index + 1}</span>
-              <Icon size={23} />
-              <div>
-                <strong>{title}</strong>
-                <p>{copy}</p>
-              </div>
-              <ArrowRight size={17} />
-            </Link>
-          );
-        })}
+      <div className="hs-category-rail">
+        {categories.map((category, index) => (
+          <Link href={category.href} className="hs-category-card" key={`${category.title}-${index}`}>
+            {categoryImages[index] ? <img src={categoryImages[index]} alt="" /> : <div className="hs-category-placeholder"><Frame strokeWidth={1.2} /></div>}
+            <span className="hs-category-shade" />
+            <div><strong>{category.title}</strong><small>{category.copy}</small></div>
+          </Link>
+        ))}
       </div>
 
       <div className="hs-proof-strip">
-        <div><BadgeCheck /><span><strong>Colour checked</strong><small>Balanced before production</small></span></div>
-        <div><Frame /><span><strong>Made to fit</strong><small>Frames finished by hand</small></span></div>
-        <div><Truck /><span><strong>Islandwide delivery</strong><small>{publicStats?.ordersDelivered ? `${publicStats.ordersDelivered}+ completed orders` : "Securely packed and tracked"}</small></span></div>
-        <div><Headphones /><span><strong>Human guidance</strong><small>Real help from the studio</small></span></div>
+        <div><Palette /><span><strong>Colour Checked Production</strong><small>Balanced before every final print.</small></span></div>
+        <div><Frame /><span><strong>Made-to-fit Framing</strong><small>Considered profiles and precise finishing.</small></span></div>
+        <div><Truck /><span><strong>Islandwide Delivery</strong><small>{publicStats?.ordersDelivered ? `${publicStats.ordersDelivered}+ completed orders` : "Securely packed and tracked."}</small></span></div>
+        <div><BadgeCheck /><span><strong>Studio Guidance</strong><small>Human support from image to frame.</small></span></div>
       </div>
     </section>
   );
