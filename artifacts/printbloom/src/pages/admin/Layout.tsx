@@ -5,7 +5,7 @@ import {
   LayoutDashboard, ShoppingBag, Sparkles, Users,
   Receipt, BarChart2, Package, Wrench, FlaskConical,
   Bell, Settings, LogOut, ExternalLink, Search, ChevronUp, ChevronDown,
-  Mail, Star, PenSquare, Moon, Sun, Menu, X, Tag, Calculator, FileSpreadsheet, PackageCheck, Landmark, ShieldCheck, CalendarCheck, Factory,
+  Mail, Star, PenSquare, Moon, Sun, Menu, X, Tag, FileSpreadsheet, PackageCheck, Landmark, ShieldCheck, CalendarCheck, Factory,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import AdminNotificationBell from "../../components/AdminNotificationBell";
@@ -44,7 +44,6 @@ const NAV_SECTIONS = [
       { name: "Products", href: "/admin/products", icon: Package, permission: "products_view" },
       { name: "Private Price Lists", href: "/admin/price-lists", icon: FileSpreadsheet, permission: "price_lists_view" },
       { name: "Shipping Labels", href: "/admin/shipping-labels", icon: PackageCheck, permission: "shipping" },
-      { name: "Smart Calculator", href: "/admin/label-calculator", icon: Calculator, permission: "catalog" },
       { name: "Services", href: "/admin/services", icon: Wrench, permission: "catalog" },
     ],
   },
