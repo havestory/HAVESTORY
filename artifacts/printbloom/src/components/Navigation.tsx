@@ -7,6 +7,7 @@ import { CartDrawer } from "@/components/CartDrawer";
 import { cn } from "@/lib/utils";
 import { useGetSettings } from "@workspace/api-client-react";
 import { getSettingsCache } from "@/lib/settings-cache";
+import { getBusinessName } from "@/lib/brand-settings";
 
 const links = [
   { name: "Home", href: "/" },
@@ -37,7 +38,7 @@ export function Navigation() {
 
   const s = settings as any;
   const logoUrl          = s?.logoUrl || "";
-  const businessName     = s?.businessName || "HAVESTORY";
+  const businessName     = getBusinessName(s);
   const tagline          = s?.tagline || "";
   const taglineEnabled   = s?.taglineEnabled !== 0;
   const showNameWithLogo = s?.showNameWithLogo !== 0;
