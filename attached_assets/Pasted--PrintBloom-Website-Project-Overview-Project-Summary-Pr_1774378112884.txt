@@ -1,0 +1,981 @@
+# PrintBloom Website Project Overview
+
+## Project Summary
+
+PrintBloom needs a modern, premium website for a printing and graphic design business. The website should have a **pink–purple light glass** visual style with a **creative, modern, user-friendly interface**, attractive animations, and a polished Web UI.
+
+The site should help customers:
+
+* Explore products and services
+* Place custom print orders easily
+* Track orders
+* View the company portfolio
+* Contact the business quickly
+* Reach the business through WhatsApp and contact forms
+
+The platform should also include a strong **admin panel** so the PrintBloom team can manage products, services, portfolio items, customer messages, reviews, counts, images, and website content in one place.
+
+---
+
+## Main Website Goals
+
+1. Create a premium and trustworthy brand presence
+2. Make ordering custom print products simple
+3. Present services in a clear categorized structure
+4. Showcase the company’s portfolio beautifully
+5. Display live business statistics in real time
+6. Improve communication through forms, WhatsApp, and message management
+7. Give admins full control over content and updates
+
+---
+
+## Design Direction
+
+### Visual Style
+
+* Pink–purple premium theme
+* Light glass / glassmorphism look
+* Modern typography
+* Smooth transitions and motion effects
+* Creative but clean layout
+* Mobile-friendly responsive design
+
+### User Experience Goals
+
+* Fast and easy navigation
+* Clear call-to-action buttons
+* Attractive homepage sections
+* Smooth ordering flow
+* Easy product browsing by category
+* Friendly and professional look
+
+---
+
+## Main Navigation
+
+The top navigation bar should include:
+
+* Home
+* Store
+* Services
+* Portfolio
+* Track Order
+* About
+* Contact
+* **Order Now** button highlighted at the top
+
+Optional enhancement:
+
+* Sticky header on scroll
+* Mobile menu with elegant animation
+
+---
+
+## Homepage Structure
+
+### 1. Hero Section
+
+A premium hero section should include:
+
+* Strong brand headline
+* Short supporting text
+* Attractive background visuals
+* Two primary CTA buttons:
+
+  * **Order Now**
+  * **Custom Project**
+
+### 2. Live Stats Section
+
+Display key business numbers attractively with animation:
+
+* Happy Clients
+* Product Types
+* Orders Delivered
+* Star Rating
+
+These should update in real time based on admin panel data:
+
+* **Happy Clients** → total approved client count from the client database
+* **Product Types** → count of products/services created by admin
+* **Orders Delivered** → total completed orders from website orders and admin-created custom orders
+* **Star Rating** → pulled from website editor/admin review settings and approved review data
+
+### 3. Features / Why Choose Us Section
+
+Add these with matching premium icons:
+
+* **Premium Quality** – Top-tier materials and industry-leading printing technology for every order
+* **Island-wide Delivery** – Fast and reliable shipping to your doorstep anywhere in Sri Lanka
+* **100% Satisfaction** – Dedicated customer support to ensure your prints are always perfect
+
+### 4. Featured Products Section
+
+* Show the best 4 featured products
+* Each product card should allow the user to place an order directly
+* Include a **View All** button to open the full store page
+* Featured products should be selectable from the admin panel
+
+### 5. Services Preview Section
+
+* Show highlighted service categories
+* Link to full services page
+* Use icons, pricing preview, and short descriptions
+
+### 6. Portfolio Preview Section
+
+* Show selected portfolio works
+* Link to full portfolio page
+* Use a premium grid / masonry-style layout if possible
+
+### 7. Client Reviews Section
+
+Title: **What Our Clients Say**
+
+Requirements:
+
+* Show the latest 4 approved customer reviews on the homepage
+* Option for admin to manually choose the best 4 featured reviews
+* Show average star rating dynamically based on approved reviews
+* Users can submit reviews from the website
+* Reviews should only appear publicly after admin approval
+
+### 8. WhatsApp Contact Popup
+
+* Floating WhatsApp icon on all pages
+* Default message panel included
+* One-click quick message option
+
+---
+
+## Store / Product Ordering System
+
+The store should allow users to browse products by category, add multiple items to the cart, and submit them together in one request.
+
+### Product Category Structure
+
+Everything should be organized separately by category. Example categories:
+
+* Business Cards
+* Flyers
+* Posters
+* Banners
+* Stickers
+* Invitations
+* Packaging
+* Custom Print Items
+
+Admins should be able to:
+
+* Add new categories
+* Add products inside categories
+* Edit/delete products
+* Set featured products
+* Manage pricing and images
+
+### Cart and Order Request Flow
+
+Customers should be able to add multiple items to the cart and submit them as one order.
+
+### Required Order Form Fields
+
+For each order submission, include:
+
+#### Your Details
+
+* Full Name
+* Phone Number
+* Email Address (Optional)
+* Address
+
+#### Reference Design Files & Links (Optional)
+
+* Upload files directly
+* Multiple file upload support
+* File preview / file list view
+* Download icon for uploaded files in admin panel
+* Optional design reference links
+
+#### Final Action
+
+* **Submit Order Request** button
+
+### Order Submission Result
+
+After submitting an order:
+
+* Show a success confirmation
+* Tell the user: **We’ll respond within 24 hours with a custom quote tailored to your order**
+* Automatically generate a unique Order ID in this format:
+
+  * **PB-MAR-0001-XXX**
+  * `XXX` = unique uppercase letter and number mix
+
+Example:
+
+* PB-MAR-0001-A7K
+
+Optional improvement:
+
+* Use month-based codes dynamically, for example:
+
+  * PB-MAR-2026-A7K
+
+---
+
+## Services Page
+
+The Services page should support flexible admin-managed service creation.
+
+### Admin Service Management
+
+Admins should be able to:
+
+* Add new services
+* Create main categories
+* Add sub-items under categories
+* Edit prices and descriptions
+* Create packages and custom price types
+
+### Service Content Structure Option 01
+
+* Name
+* Description
+* Price
+* Pricing type:
+
+  * Per design
+  * Per item
+  * Custom quote
+
+#### Key Highlights
+
+* Premium quality material
+* Fast turnaround time
+
+### Service Content Structure Option 02
+
+Example package format:
+
+**Main Category Topic**
+
+**Package 1: Starter Logo Pack**
+
+* Price: Rs. 5,000
+* Ideal for: Small new businesses
+* What’s Included:
+
+  * 2 Unique Logo Concepts
+  * High-Resolution Files (JPG & Transparent PNG)
+  * 2 Revisions
+  * 3 Days Delivery Time
+* CTA Button: **Order Starter Pack**
+
+This structure should be reusable for all service packages.
+
+---
+
+## Portfolio Page
+
+The portfolio should be visually beautiful and fully manageable from the admin panel.
+
+### Portfolio Requirements
+
+Admins should be able to:
+
+* Add new portfolio entries
+* Edit portfolio details
+* Delete entries
+* Upload and change images
+* Set categories/tags
+* Mark selected works as featured
+
+### Suggested Portfolio Fields
+
+* Project title
+* Category
+* Client name (optional)
+* Description
+* Before/after images (optional)
+* Gallery images
+* Completion date
+* Tags
+
+Optional enhancements:
+
+* Filter by category
+* Lightbox image preview
+* Animated project cards
+
+---
+
+## About Page
+
+The About page should feel premium, warm, and trustworthy.
+
+### About Content
+
+#### Our Story
+
+**Quality printing done right.**
+
+PrintBloom is your trusted printing partner, delivering high-quality prints for all your business and personal needs. From business cards to large banners, we bring your vision to life with precision and care.
+
+Our mission is simple: to deliver exceptional prints on time, every time. Whether you need a small batch of business cards or large format banners for an event, we treat every project with the utmost care and precision.
+
+### Highlight Counters
+
+* **10+ Orders Completed**
+* **99% Happy Clients**
+
+### Admin Control
+
+Everything on the About page should be editable from the admin panel, including:
+
+* Text
+* Images
+* Counters
+* Section titles
+* Story content
+
+---
+
+## Contact Page
+
+The Contact page should be clean, attractive, and easy to use.
+
+### Contact Form Behavior
+
+Every message sent by a customer should:
+
+* Generate a unique Message ID
+* Be saved in the admin panel under messages/inbox
+* Allow the admin to review and contact the customer if necessary
+
+### Suggested Contact Form Fields
+
+* Full Name
+* Phone Number
+* Email Address
+* Subject
+* Message
+
+### Admin Message Panel
+
+Admins should be able to:
+
+* View all messages
+* Search/filter messages
+* See message IDs
+* Mark messages as read/unread
+* Reply manually outside the system if needed
+* Export message data if required
+
+---
+
+## Track Order Page
+
+Customers should be able to track their orders using the generated Order ID.
+
+### Track Order Features
+
+* Enter Order ID
+* View order progress/status
+* Show timestamps and progress stages
+
+### Suggested Order Statuses
+
+* Request Submitted
+* Reviewing Details
+* Quote Sent
+* Confirmed
+* In Production
+* Ready for Delivery / Pickup
+* Completed
+* Cancelled
+
+Optional enhancement:
+
+* Show estimated completion date
+
+---
+
+## Admin Panel Requirements
+
+The admin panel should be the complete control center for the entire website, giving admins access to manage **all website content, customer activity, order flow, finance records, reports, agreements, catalog items, inventory, notices, and settings**.
+
+### Core Admin Access Principle
+
+* Admin must be able to update **all website details** without coding
+* All approved changes should reflect on the website in real time or immediately after saving/publishing
+* Admin permissions should allow full content editing, management, and monitoring
+* Website editor should be a **separate section inside the admin panel** for easier content control
+* Admin should be able to preview changes before publishing where needed
+* Every important update should be saved securely in the system database
+
+### Main Admin Sidebar Structure
+
+The admin panel navigation should include:
+
+* Dashboard
+* Orders
+
+  * All Orders
+  * Custom Projects
+* Clients
+* Projects
+* Finance
+
+  * Invoices
+  * Reports
+  * Agreement Create Facility
+* Catalog
+
+  * Products
+  * Services
+* Inventory
+
+  * Raw Materials
+* Website
+
+  * Full Website Editor
+  * Notice
+  * Settings
+* Track Order
+* View Website
+* Sign Out
+
+### Admin Modules
+
+#### 1. Dashboard
+
+The dashboard should provide a full business overview in one place.
+
+Features:
+
+* Total orders
+* Pending orders
+* Completed orders
+* New custom project requests
+* Messages count
+* Product count
+* Service count
+* Review count
+* Client count
+* Project/portfolio count
+* Invoice summary
+* Recent activities feed
+* Low stock alerts for raw materials
+* Quick access cards for key admin actions
+* Live stats overview
+* Revenue summary
+* Monthly order chart
+* Quote conversion summary
+* Recent customer inquiries
+
+#### 2. Orders
+
+This section should manage all standard orders and custom project requests.
+
+Subsections:
+
+* All Orders
+* Custom Projects
+
+Features:
+
+* View all order requests
+* View cart-based order submissions
+* View custom print/project requests separately
+* View uploaded files
+* Download attached files
+* Update order status
+* Add admin notes
+* Assign internal processing stage
+* Create custom/manual orders
+* Mark orders as completed
+* Attach quotation references
+* Search/filter orders by date, status, customer, order ID
+* Print order details
+* Export order reports
+* Track payment status
+* Link invoices to orders
+
+#### 3. Clients
+
+This section should manage all customer/client records.
+
+Features:
+
+* Store full client records
+* Add/edit/delete client profiles
+* View order history per client
+* View completed projects per client
+* Track repeat customers
+* Mark active/inactive clients
+* Manage happy client count automatically
+* Save customer contact details
+* Search/filter client data
+* Add private notes for internal admin use
+
+#### 4. Projects
+
+This section should manage custom projects and portfolio-style client work.
+
+Features:
+
+* Add/edit/delete project records
+* Link projects to clients
+* Track project stages
+* Upload project files/images
+* Add deadlines and completion dates
+* Mark projects as featured for portfolio
+* Move completed work into the website portfolio section
+* Maintain internal project notes
+* Search/filter projects by type, status, client, and date
+
+#### 5. Finance
+
+This should be a major admin section for business operations, payment records, reports, and formal documentation.
+
+Subsections:
+
+* Invoices
+* Reports
+* Agreement Create Facility
+
+##### Invoices
+
+Features:
+
+* Create invoices manually
+* Generate invoices from orders
+* Generate invoices from custom projects
+* Edit invoice details
+* Add customer billing info
+* Add itemized line items
+* Add taxes, discounts, subtotals, and totals
+* Mark invoice as paid/unpaid/partial
+* Download or print invoice
+* Save invoice history
+* Link invoices with order IDs and project IDs
+
+##### Reports
+
+This section should include all important reports needed for business management, bank processes, and tax purposes.
+
+Suggested report types:
+
+* Sales reports
+* Order reports
+* Customer reports
+* Invoice reports
+* Payment reports
+* Expense reports
+* Profit summary reports
+* Tax summary reports
+* Monthly reports
+* Quarterly reports
+* Annual reports
+* Outstanding payment reports
+* Completed order reports
+* Custom project reports
+* Product performance reports
+* Service performance reports
+* Inventory usage reports
+
+Use cases:
+
+* Internal business tracking
+* Bank statement/process support
+* Tax filing preparation
+* Financial review and auditing
+
+##### Agreement Create Facility
+
+Admins should be able to create formal business agreements/documents.
+
+Features:
+
+* Create agreement templates
+* Generate customer agreements
+* Generate project agreements
+* Add client details automatically
+* Add project/order details automatically
+* Add terms and conditions
+* Export agreement as PDF
+* Save agreement history
+* Print agreements
+* Reuse templates for future clients
+
+#### 6. Catalog
+
+This section should manage all website catalog data.
+
+Subsections:
+
+* Products
+* Services
+
+##### Products
+
+Features:
+
+* Add/edit/delete categories
+* Add/edit/delete products
+* Set featured products
+* Upload product images
+* Manage pricing
+* Manage descriptions
+* Set product availability
+* Add size/material options
+* Add custom order notes
+* Organize products by category
+* Control homepage featured products
+
+##### Services
+
+Features:
+
+* Add main categories
+* Add sub-services
+* Create packages
+* Edit descriptions and prices
+* Add pricing type options
+* Set featured services
+* Organize services by category
+* Show/hide services on homepage or service page
+
+#### 7. Inventory
+
+This section should manage raw materials and stock usage.
+
+Subsection:
+
+* Raw Materials
+
+Features:
+
+* Add/edit/delete raw materials
+* Track material quantity
+* Track unit type (sheets, meters, rolls, packs, etc.)
+* Set low stock alerts
+* Update stock manually
+* Record stock in/out
+* Link material use to products/orders if needed
+* Track supplier information
+* View inventory history
+* Generate inventory usage reports
+
+#### 8. Website
+
+This should be a separate major admin section for full website control.
+
+Subsections:
+
+* Full Website Editor
+* Notice
+* Settings
+
+##### Full Website Editor
+
+Admins should be able to edit the complete website content from one place.
+
+Editable sections should include:
+
+* Homepage hero section
+* Headlines and subtitles
+* CTA button text
+* Homepage counters
+* Featured product section
+* Service preview section
+* Portfolio preview section
+* Review section
+* About page content
+* Contact page content
+* Store banners
+* Service page content
+* Portfolio page content
+* Footer content
+* Social media links
+* WhatsApp number and message
+* Images, icons, banners, and media
+* SEO meta titles and descriptions
+
+Advanced editor abilities:
+
+* Enable/disable sections
+* Reorder homepage sections
+* Update text, images, links, and icons
+* Edit notices/banners/promotions
+* Manage testimonials shown on the website
+* Edit legal pages such as privacy policy and terms
+* Save drafts before publishing
+* Preview updates before publishing
+* Publish instantly for real-time updates
+
+##### Notice
+
+Features:
+
+* Create website notices
+* Show promotional banners
+* Add delivery notices
+* Add holiday closure notices
+* Schedule notices by date
+* Enable/disable active notices
+
+##### Settings
+
+Features:
+
+* Website name
+* Logo and favicon
+* Business contact details
+* Email settings
+* WhatsApp settings
+* Social media links
+* Currency settings
+* Tax settings
+* Delivery settings
+* Pickup settings
+* Notification settings
+* Admin profile settings
+* Security settings
+* User role permissions if needed in future
+
+#### 9. Track Order
+
+This admin section should allow staff to manage public order tracking.
+
+Features:
+
+* Search by order ID
+* Update tracking stages
+* Add progress timestamps
+* Add delivery/pickup note
+* Add estimated completion date
+* Make updates visible instantly on the customer track order page
+
+#### 10. View Website
+
+* One-click access to open and review the live website
+* Useful for checking real-time updates after publishing content
+
+#### 11. Sign Out
+
+* Secure admin logout
+* Session protection
+* Optional auto logout after inactivity
+
+## Real-Time Dynamic Data Requirements
+
+The following website and admin data should update automatically from backend/admin data:
+
+* Happy Clients
+* Product Types
+* Orders Delivered
+* Star Rating
+* Featured products
+* Featured services
+* Latest approved reviews
+* Active notices
+* Order tracking statuses
+* Portfolio/project updates
+* Invoice/payment status where applicable
+
+### Real-Time Update Principle
+
+* Any content saved by admin should update on the website immediately or after publish confirmation
+* Approved reviews should appear automatically in the review section
+* Newly featured products/services should reflect on homepage sections instantly
+* Order tracking updates should be visible immediately to customers
+* Notice changes should display across the website based on active status
+* Dashboard counts should refresh automatically
+* Finance summaries and reports should use current saved data
+
+### Logic Suggestions
+
+* Happy Clients = number of approved/active clients in database
+* Product Types = number of active products + service types
+* Orders Delivered = number of orders marked completed
+* Star Rating = average approved rating from reviews or admin override setting
+* Active Notices = notices enabled and valid by schedule/date
+* Project Count = active or completed projects saved by admin
+
+## Review System Requirements
+
+Users should be able to submit reviews on the website.
+
+### Review Submission Fields
+
+* Name
+* Rating (1 to 5 stars)
+* Review text
+* Optional photo
+
+### Review Workflow
+
+* User submits review
+* Review enters pending approval
+* Admin approves/rejects
+* Only approved reviews appear publicly
+* Homepage shows latest 4 approved reviews or admin-selected featured reviews
+
+---
+
+## WhatsApp Integration
+
+Add a WhatsApp floating button on the website.
+
+### WhatsApp Popup Features
+
+* Floating icon visible on all pages
+* Default welcome message
+* Quick open chat option
+* Optional pre-filled text such as:
+
+  * “Hello PrintBloom, I’d like to place an order.”
+
+---
+
+## Suggested Additional Features
+
+These were not fully specified, but they would improve the project significantly:
+
+### 1. Quote Management
+
+* Allow admin to send quotation details for custom orders
+* Save quote history in admin panel
+
+### 2. Email Notifications
+
+* Send confirmation email after order request submission
+* Send status update emails when the order changes
+
+### 3. SMS / WhatsApp Notifications
+
+* Optional order update alerts for customers
+
+### 4. Downloadable Quotations / Invoices
+
+* Generate PDF quote or invoice from admin panel
+
+### 5. SEO Setup
+
+* Basic SEO for all pages
+* Meta titles and descriptions
+* Schema for local business
+
+### 6. Performance Optimization
+
+* Fast-loading images
+* Lazy loading for portfolio and store images
+* Optimized mobile speed
+
+### 7. Security
+
+* Spam protection for forms
+* Secure file uploads
+* Admin authentication and role protection
+
+### 8. Analytics
+
+* Track orders, contact form submissions, and product popularity
+* Google Analytics / Meta Pixel integration if needed
+
+### 9. Multi-language Support
+
+* English / Sinhala / Tamil support in the future if needed
+
+### 10. Delivery / Pickup Options
+
+* Customer can choose delivery or self-pickup during order request
+
+---
+
+## Recommended Technical Structure
+
+### Frontend
+
+* Modern responsive web application
+* Smooth animations
+* Premium UI components
+
+### Backend
+
+* Admin dashboard
+* Product/service/order/message/review management
+* Real-time counters
+* File upload handling
+
+### Database
+
+Suggested collections/tables:
+
+* users/admins
+* products
+* product_categories
+* services
+* service_categories
+* orders
+* order_items
+* messages
+* reviews
+* clients
+* portfolio_items
+* homepage_settings
+* about_settings
+* featured_sections
+
+---
+
+## Recommended Project Pages
+
+1. Home
+2. Store
+3. Services
+4. Portfolio
+5. Track Order
+6. About
+7. Contact
+8. Admin Login
+9. Admin Dashboard
+
+---
+
+## Corrected and Improved Key Text Snippets
+
+### Order Confirmation Message
+
+“We’ll respond within 24 hours with a custom quote tailored to your order.”
+
+### About Heading
+
+“Quality printing done right.”
+
+### Homepage Service Buttons
+
+* Order Now
+* Custom Project
+
+### Review Section Title
+
+“What Our Clients Say”
+
+---
+
+## Final Recommendation
+
+This project should be built as a **premium business website with a full admin-driven content system**, not just a simple static website.
+
+The most important success points are:
+
+* Strong premium design
+* Smooth custom order experience
+* Live data counters
+* Fully manageable admin panel
+* High-quality portfolio and reviews
+* Easy communication through contact forms and WhatsApp
+
+If built properly, PrintBloom will have a professional platform that increases trust, improves order handling, and helps convert more visitors into paying customers.

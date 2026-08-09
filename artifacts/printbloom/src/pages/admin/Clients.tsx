@@ -1,0 +1,1111 @@
+import { useState, useRef, useEffect, useMemo } from "react";
+import { useLocation } from "wouter";
+import { useListClients, useCreateClient, useUpdateClient, useDeleteClient, useListInvoices } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { Search, Plus, Download, RefreshCw, X, Users, Phone, MapPin, Mail, FileText, MoreVertical, Pencil, Trash2, UserCircle2, Briefcase, Receipt, ChevronRight, ExternalLink, CheckCircle2, PackageCheck, ShieldCheck, Copy, FileSignature } from "lucide-react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { ShippingDetailsModal } from "@/components/admin/ShippingDetailsModal";
+import { getInvoicePaidAmount } from "@/lib/invoiceTypes";
+
+type Client = {
+  id: number;
+  name: string;
+  businessName?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  notes?: string | null;
+  approved?: boolean;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+};
+
+type CrmProject = {
+  id: number;
+  projectId: string;
+  title: string;
+  clientName: string;
+  clientId?: number | null;
+  status: string;
+  totalValue?: number | null;
+  amountPaid?: number | null;
+  dueDate?: string | null;
+  createdAt?: string | null;
+};
+
+type InvoiceLite = {
+  id: number;
+  invoiceNumber: string;
+  clientName: string;
+  clientId?: number | null;
+  amount: string | number;
+  status: string;
+  metadata?: string | null;
+  dueDate?: string | null;
+  createdAt?: string | null;
+};
+
+type FormState = {
+  name: string;
+  businessName: string;
+  phones: string[];
+  email: string;
+  address: string;
+  notes: string;
+};
+
+const rs = (v: number) => `LKR ${Math.round(v).toLocaleString("en-IN")}`;
+const num = (v: unknown): number => {
+  const n = typeof v === "string" ? parseFloat(v) : Number(v);
+  return Number.isFinite(n) ? n : 0;
+};
+const projectStatusStyle: Record<string, string> = {
+  planning: "bg-blue-100 text-blue-600",
+  in_progress: "bg-purple-100 text-purple-600",
+  review: "bg-yellow-100 text-yellow-600",
+  completed: "bg-green-100 text-green-600",
+  on_hold: "bg-gray-100 text-gray-500",
+};
+const invoiceStatusStyle: Record<string, string> = {
+  pending: "bg-yellow-100 text-yellow-600",
+  paid: "bg-green-100 text-green-600",
+  overdue: "bg-red-100 text-red-600",
+  draft: "bg-gray-100 text-gray-500",
+};
+
+const AGREEMENT_TEMPLATES = [
+  { id:"printing", label:"Printing Services — PrintBloom", title:"PrintBloom Printing Services Agreement", direct:false, text:`PRINTING SERVICES AGREEMENT
+
+1. Parties & Service
+This agreement covers printing and related production services supplied by PrintBloom, operated by CodeArtix Technologies, to the client named above. The exact items, quantities, sizes, materials, finishes, prices and delivery method are those approved in the relevant quotation/invoice/order confirmation.
+
+2. Artwork & Client Content
+The client confirms that supplied artwork, logos, text, photographs and other content may legally be used for the requested work. The client is responsible for checking spelling, dimensions, contact details and content before approval.
+
+3. Proof & Approval
+Production may begin after the client approves the final proof/artwork where a proof is provided. Changes requested after approval may require additional charges and may change the completion date.
+
+4. Colour, Cutting & Production Tolerances
+Screen colours can differ from printed output. Reasonable differences caused by print process, paper/material, finishing, cutting or device calibration are not treated as a defect unless a specific written tolerance was agreed.
+
+5. Price & Payment
+Prices follow the approved quotation/invoice. Production may be held until the required advance or full payment is received. Extra work outside the approved scope may be quoted separately.
+
+6. Turnaround & Delivery
+Turnaround starts after required artwork approval and payment. Delivery/courier times are estimates unless a written guaranteed deadline is accepted. Courier charges and third-party delays follow the agreed order terms.
+
+7. Changes, Cancellation & Reprints
+Cancellation or quantity changes after production has started may incur costs for work/material already used. A genuine production error attributable to the supplier will be reviewed for an appropriate reprint or remedy.
+
+8. Intellectual Property & Privacy
+Client-owned content remains the client's content. PrintBloom/CodeArtix Technologies retains rights in its own pre-existing tools, templates and working methods. Personal/order data is handled only for legitimate service and business administration purposes.
+
+9. Acceptance
+By signing electronically, the signer confirms authority to accept these terms and the approved service scope on behalf of the client.` },
+  { id:"social", label:"Social Media Management — CodeArtix", title:"CodeArtix Social Media Management Agreement", direct:true, text:`SOCIAL MEDIA MANAGEMENT AGREEMENT
+
+1. Parties & Scope
+CodeArtix Technologies will provide the social media management services agreed with the client. The active package/quotation defines platforms, number and type of posts, design/content deliverables, publishing frequency, reporting and any optional services.
+
+2. Client Access & Information
+The client will provide accurate business information, brand assets, offers, product/service details and the platform access or permissions reasonably required. Account credentials/permissions must be kept secure and access should be revoked when no longer needed.
+
+3. Content Approval
+Where approval is required, the client will review drafts within the agreed time. Delayed feedback can move the publishing schedule. Content already approved may be scheduled or published as agreed.
+
+4. Advertising Spend & Third-Party Fees
+Advertising/media spend, influencer costs, stock assets, subscriptions and other third-party charges are excluded unless expressly included in the written package or quotation.
+
+5. Performance
+CodeArtix Technologies will use reasonable professional effort, but does not guarantee a particular follower count, reach, engagement, lead volume, sales result or platform algorithm outcome.
+
+6. Fees & Payment
+Management fees follow the approved package/invoice and are payable on the agreed schedule. Additional campaigns, urgent work or work outside scope may be quoted separately.
+
+7. Brand & Legal Compliance
+The client is responsible for the truth and legality of claims, promotions, prices and business information supplied for publication. CodeArtix Technologies may refuse content reasonably believed to be unlawful, misleading or unsafe.
+
+8. Intellectual Property
+Upon full payment, final client-specific creative deliverables are licensed/transferred as stated in the relevant quotation. Pre-existing templates, systems, processes, fonts, stock assets and third-party material remain subject to their own rights/licences.
+
+9. Confidentiality & Account Security
+Both parties should protect confidential business information. Platform access will be used only for the agreed management work.
+
+10. Termination
+Either party may end ongoing management according to the notice/payment terms in the agreed package. Work completed, scheduled or committed before termination remains chargeable where applicable.
+
+11. Acceptance
+Electronic signature confirms authority to accept this agreement and the selected management package.` },
+  { id:"design", label:"Graphic Design Services — CodeArtix", title:"CodeArtix Graphic Design Services Agreement", direct:true, text:`GRAPHIC DESIGN SERVICES AGREEMENT
+
+1. Scope
+CodeArtix Technologies will create the design deliverables described in the approved brief, quotation or invoice.
+
+2. Brief & Client Materials
+The client will provide final text, logos, images, sizes, brand requirements and other necessary content. The client confirms it has permission to use all supplied material.
+
+3. Concepts & Revisions
+The included number of concepts/revision rounds follows the quotation. New directions or revisions outside the approved scope may be charged separately.
+
+4. Approval
+The client is responsible for final checking of spelling, names, numbers, dimensions and content. Written/electronic approval authorises finalisation or production.
+
+5. Delivery
+Final file formats are those stated in the quotation. Editable/source files are included only when specifically agreed.
+
+6. Fees & Payment
+Payment follows the approved quotation/invoice. Final high-resolution/source deliverables may be withheld until the required payment is received.
+
+7. Intellectual Property
+After full payment, rights/licence for the approved final client-specific design are provided as agreed. Unselected concepts, working files, pre-existing tools/templates and third-party fonts/assets remain with their respective owners/licences.
+
+8. Portfolio Use
+Unless the client requests confidentiality in writing, CodeArtix Technologies may display completed public-facing work for portfolio/business promotion after public release.
+
+9. Acceptance
+Electronic signature confirms acceptance of the brief, commercial terms and these service conditions.` },
+  { id:"branding", label:"Branding & Identity — CodeArtix", title:"CodeArtix Branding & Brand Identity Agreement", direct:true, text:`BRANDING & BRAND IDENTITY AGREEMENT
+
+1. Engagement
+CodeArtix Technologies will develop the brand identity deliverables specified in the approved proposal, which may include naming direction, logo system, colours, typography, guidelines, stationery or digital brand assets.
+
+2. Discovery & Direction
+The client will provide accurate business information, target audience details, preferences and timely feedback. A selected creative direction becomes the basis for later refinements.
+
+3. Concepts & Revisions
+Concept counts and revision rounds are limited to the approved proposal. A major change of direction after selection may require a revised scope and fee.
+
+4. Originality & Third-Party Assets
+CodeArtix Technologies will use reasonable professional care in creating original work. Fonts, stock images, mockups or other licensed third-party assets remain subject to their applicable licence terms.
+
+5. Client Approval
+The client must review names, spelling, legal/business information and final artwork before approval. Trademark/company-name registration and legal clearance are the client's responsibility unless separately contracted.
+
+6. Fees, Milestones & Delivery
+Fees, payment milestones and final deliverables follow the approved proposal/invoice. Final production/source files may be released after required payment.
+
+7. Intellectual Property
+On full payment, rights in the approved final custom identity are transferred/licensed as specified in the proposal. Rejected concepts, internal methods, templates and pre-existing intellectual property remain with CodeArtix Technologies.
+
+8. Portfolio & Confidentiality
+Publicly launched work may be shown in the CodeArtix portfolio unless confidentiality is agreed in writing.
+
+9. Acceptance
+Electronic signature confirms acceptance of the selected scope, creative process and commercial terms.` },
+  { id:"creative", label:"General Creative Services — CodeArtix", title:"CodeArtix Creative Services Agreement", direct:true, text:`GENERAL CREATIVE SERVICES AGREEMENT
+
+1. Scope
+CodeArtix Technologies will provide the creative/digital services described in the approved quotation, proposal, brief or invoice.
+
+2. Deliverables & Revisions
+Deliverables, formats, deadlines and included revisions follow the approved scope. Additional work or a new creative direction may be quoted separately.
+
+3. Client Responsibilities
+The client will provide accurate content, approvals, access and feedback required to complete the work and confirms permission to use all supplied material.
+
+4. Fees & Payment
+Fees and payment stages follow the approved quotation/invoice. Work outside scope may require written approval and an additional fee.
+
+5. Schedule
+Timelines depend on timely client content, feedback and approvals. Third-party/platform delays are outside CodeArtix Technologies' direct control.
+
+6. Intellectual Property
+Rights to final client-specific deliverables are provided after full payment as agreed. Pre-existing tools/templates and third-party licensed material remain subject to their existing rights.
+
+7. Confidentiality
+Both parties should protect confidential information obtained through the engagement and use it only for legitimate project purposes.
+
+8. Acceptance
+Electronic signature confirms authority to accept this agreement and the associated approved project scope.` }
+] as const;
+
+const EMPTY_FORM: FormState = { name: "", businessName: "", phones: [""], email: "", address: "", notes: "" };
+
+const splitPhones = (raw?: string | null): string[] => {
+  if (!raw) return [""];
+  const parts = raw.split(",").map(p => p.trim()).filter(Boolean);
+  return parts.length > 0 ? parts : [""];
+};
+
+const joinPhones = (arr: string[]): string => arr.map(p => p.trim()).filter(Boolean).join(", ");
+
+function ClientFormModal({
+  title,
+  form,
+  setForm,
+  onSubmit,
+  onClose,
+  isSaving,
+}: {
+  title: string;
+  form: FormState;
+  setForm: (updater: (prev: FormState) => FormState) => void;
+  onSubmit: () => void;
+  onClose: () => void;
+  isSaving: boolean;
+}) {
+  const updatePhone = (index: number, value: string) => {
+    setForm(prev => {
+      const phones = [...prev.phones];
+      phones[index] = value;
+      return { ...prev, phones };
+    });
+  };
+  const addPhone = () => setForm(prev => ({ ...prev, phones: [...prev.phones, ""] }));
+  const removePhone = (index: number) =>
+    setForm(prev => {
+      const phones = prev.phones.filter((_, i) => i !== index);
+      return { ...prev, phones: phones.length ? phones : [""] };
+    });
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm">
+      <div className="flex min-h-full items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md" style={{ maxHeight: "calc(100vh - 48px)" }}>
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+            <h2 className="font-bold text-gray-900 text-lg">{title}</h2>
+            <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
+              <X size={18} className="text-gray-400" />
+            </button>
+          </div>
+          <div className="p-6 space-y-4 overflow-y-auto" style={{ maxHeight: "calc(100vh - 130px)" }}>
+            <div>
+              <label className="text-xs font-semibold text-gray-500 block mb-1">Full Name <span className="text-pink-500">*</span></label>
+              <input
+                value={form.name}
+                onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+                placeholder="Enter full name"
+                className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-pink-400 transition-colors"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-500 block mb-1">Business Name</label>
+              <input
+                value={form.businessName}
+                onChange={e => setForm(p => ({ ...p, businessName: e.target.value }))}
+                placeholder="Enter business name"
+                className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-pink-400 transition-colors"
+              />
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-semibold text-gray-500">Phone Numbers</label>
+                <button
+                  type="button"
+                  onClick={addPhone}
+                  className="flex items-center gap-1 text-[11px] font-semibold text-pink-600 hover:text-pink-700"
+                >
+                  <Plus size={11} /> Add another
+                </button>
+              </div>
+              <div className="space-y-2">
+                {form.phones.map((p, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <div className="flex items-center flex-1 border border-gray-200 rounded-xl pl-3 pr-1 focus-within:border-pink-400 transition-colors">
+                      <Phone size={13} className="text-gray-300 shrink-0" />
+                      <input
+                        value={p}
+                        onChange={e => updatePhone(i, e.target.value)}
+                        placeholder={i === 0 ? "Primary phone number" : `Phone ${i + 1}`}
+                        className="flex-1 px-2 py-2.5 text-sm outline-none bg-transparent"
+                        inputMode="tel"
+                      />
+                    </div>
+                    {form.phones.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removePhone(i)}
+                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        aria-label="Remove phone"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-500 block mb-1">Email</label>
+              <input
+                value={form.email}
+                onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+                placeholder="Enter email address"
+                type="email"
+                className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-pink-400 transition-colors"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-500 block mb-1">Address</label>
+              <textarea
+                value={form.address}
+                onChange={e => setForm(p => ({ ...p, address: e.target.value }))}
+                placeholder={"House / Building\nStreet / Area\nCity"}
+                rows={3}
+                className="w-full resize-y border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm leading-relaxed outline-none focus:border-pink-400 transition-colors"
+              />
+              <p className="mt-1 text-[10px] leading-relaxed text-gray-400">Use a new line for each address part. Line breaks will be kept on customer cards and shipping labels.</p>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-500 block mb-1">Notes</label>
+              <textarea
+                value={form.notes}
+                onChange={e => setForm(p => ({ ...p, notes: e.target.value }))}
+                placeholder="Add notes about this client"
+                rows={3}
+                className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-pink-400 transition-colors resize-none"
+              />
+            </div>
+            <button
+              onClick={onSubmit}
+              disabled={isSaving || !form.name.trim()}
+              className="w-full py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-bold rounded-xl hover:opacity-90 disabled:opacity-60 transition-all"
+            >
+              {isSaving ? "Saving..." : title}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CardMenu({ onEdit, onDelete, canDelete }: { onEdit: () => void; onDelete: () => void; canDelete:boolean }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handle = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={e => { e.stopPropagation(); setOpen(o => !o); }}
+        className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+      >
+        <MoreVertical size={16} />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-8 z-20 bg-white border border-gray-100 rounded-xl shadow-lg py-1 w-32 text-sm">
+          <button
+            onClick={() => { setOpen(false); onEdit(); }}
+            className="flex items-center gap-2 w-full px-3 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <Pencil size={13} className="text-blue-500" /> Edit
+          </button>
+          {canDelete&&<button
+            onClick={() => { setOpen(false); onDelete(); }}
+            className="flex items-center gap-2 w-full px-3 py-2 text-red-500 hover:bg-red-50 transition-colors"
+          >
+            <Trash2 size={13} /> Delete
+          </button>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function AdminClients() {
+  const [search, setSearch] = useState("");
+  const [isOwner,setIsOwner]=useState(false);
+  const [showAdd, setShowAdd] = useState(false);
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [deleteConfirm, setDeleteConfirm] = useState<Client | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [viewingClient, setViewingClient] = useState<Client | null>(null);
+  const [shippingClient, setShippingClient] = useState<Client | null>(null);
+  const [verification, setVerification] = useState<any>(null);
+  const [verificationUrl, setVerificationUrl] = useState("");
+  const [verificationError, setVerificationError] = useState("");
+  const [verificationBusy, setVerificationBusy] = useState(false);
+  const [agreements,setAgreements]=useState<any[]>([]);
+  const [agreementTemplate,setAgreementTemplate]=useState(AGREEMENT_TEMPLATES[0].id as string);
+  const [agreementTitle,setAgreementTitle]=useState(AGREEMENT_TEMPLATES[0].title);
+  const [agreementText,setAgreementText]=useState(AGREEMENT_TEMPLATES[0].text);
+  const [issueUnderMainCompany,setIssueUnderMainCompany]=useState(false);
+  const [agreementUrl,setAgreementUrl]=useState("");
+  const [agreementBusy,setAgreementBusy]=useState(false);
+  const [showAgreementForm,setShowAgreementForm]=useState(false);
+  const [, setLocation] = useLocation();
+
+  const { data: rawClients, refetch, isFetching } = useListClients();
+  const { data: rawInvoices, refetch: refetchInvoices } = useListInvoices();
+  const clients = (rawClients ?? []) as Client[];
+  const invoices = (rawInvoices ?? []) as InvoiceLite[];
+
+  // CRM projects (no generated hook — fetch directly)
+  const [crmProjects, setCrmProjects] = useState<CrmProject[]>([]);
+  const fetchCrmProjects = async () => {
+    try {
+      const res = await fetch("/api/crm-projects");
+      if (res.ok) setCrmProjects(await res.json());
+    } catch {}
+  };
+  useEffect(() => { fetchCrmProjects(); fetch("/api/admin/me",{credentials:"include",cache:"no-store"}).then(r=>r.json()).then(s=>setIsOwner(s?.role!=="staff")).catch(()=>setIsOwner(false)); }, []);
+
+  useEffect(() => {
+    setVerification(null);
+    setVerificationUrl("");
+    setVerificationError("");
+    if (!isOwner || !viewingClient) return;
+    fetch(`/api/admin/clients/${viewingClient.id}/verification`, { credentials: "include", cache: "no-store" })
+      .then(async response => {
+        if (!response.ok) throw new Error((await response.json().catch(() => ({})))?.error || "Could not load identity verification");
+        return response.json();
+      })
+      .then(setVerification)
+      .catch(error => setVerificationError(error instanceof Error ? error.message : "Could not load identity verification"));
+  }, [isOwner, viewingClient?.id]);
+
+  useEffect(()=>{
+    setAgreements([]);setAgreementUrl("");setShowAgreementForm(false);
+    if(!isOwner||!viewingClient)return;
+    fetch(`/api/admin/clients/${viewingClient.id}/agreements`,{credentials:"include",cache:"no-store"})
+      .then(r=>r.ok?r.json():[]).then(x=>setAgreements(Array.isArray(x)?x:[])).catch(()=>setAgreements([]));
+  },[isOwner,viewingClient?.id]);
+
+  const applyAgreementTemplate=(id:string)=>{const t=AGREEMENT_TEMPLATES.find(x=>x.id===id)||AGREEMENT_TEMPLATES[0];setAgreementTemplate(t.id);setAgreementTitle(t.title);setAgreementText(t.text);setIssueUnderMainCompany(t.direct);};
+  const createAgreement=async(clientId:number)=>{
+    setAgreementBusy(true);
+    try{
+      const r=await fetch(`/api/admin/clients/${clientId}/agreements`,{method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify({title:agreementTitle,agreementText,brandName:issueUnderMainCompany?"CodeArtix Technologies":"PrintBloom",operatorName:"CodeArtix Technologies"})});
+      const b=await r.json().catch(()=>({}));if(!r.ok)throw new Error(b.error||"Could not create agreement");
+      const full=new URL(b.path,window.location.origin).toString();setAgreementUrl(full);try{await navigator.clipboard.writeText(full)}catch{}
+      setAgreements(x=>[b,...x]);setShowAgreementForm(false);applyAgreementTemplate(AGREEMENT_TEMPLATES[0].id);
+    }catch(e){setVerificationError(e instanceof Error?e.message:"Could not create agreement")}finally{setAgreementBusy(false)}
+  };
+
+  const generateVerificationLink = async (clientId: number) => {
+    setVerificationBusy(true);
+    setVerificationError("");
+    try {
+      const response = await fetch(`/api/admin/clients/${clientId}/verification-link`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body?.error || "Could not create secure link");
+      const fullUrl = new URL(body.path, window.location.origin).toString();
+      setVerificationUrl(fullUrl);
+      setVerification((current: any) => ({ ...(current || {}), exists: true, status: body.status }));
+      await navigator.clipboard?.writeText(fullUrl).catch(() => undefined);
+    } catch (error) {
+      setVerificationError(error instanceof Error ? error.message : "Could not create secure link");
+    } finally {
+      setVerificationBusy(false);
+    }
+  };
+
+  const copyVerificationLink = async () => {
+    if (!verificationUrl) return;
+    await navigator.clipboard?.writeText(verificationUrl).catch(() => undefined);
+  };
+
+  const queryClient = useQueryClient();
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+
+  const { mutate: createClient, isPending: isCreating } = useCreateClient({ mutation: { onSuccess: () => { invalidate(); setShowAdd(false); setForm(EMPTY_FORM); } } });
+  const { mutate: updateClient, isPending: isUpdating } = useUpdateClient({ mutation: { onSuccess: () => { invalidate(); setEditingClient(null); setForm(EMPTY_FORM); } } });
+  const { mutate: deleteClient } = useDeleteClient({ mutation: { onSuccess: () => invalidate() } });
+
+  const clientCode = (c: Client) => `PB${String(c.id).padStart(4, "0")}`;
+
+  // Per-client linked records: prefer clientId match, fall back to case-insensitive name match
+  // so legacy rows that only have clientName still show up.
+  const clientStats = useMemo(() => {
+    const map = new Map<number, {
+      projects: CrmProject[];
+      invoices: InvoiceLite[];
+      invoiced: number;
+      paid: number;
+    }>();
+    for (const c of clients) {
+      const nameKey = (c.name || "").trim().toLowerCase();
+      const projects = crmProjects.filter(p =>
+        (p.clientId != null && p.clientId === c.id) ||
+        (p.clientId == null && (p.clientName || "").trim().toLowerCase() === nameKey && nameKey !== "")
+      );
+      const invs = invoices.filter(inv =>
+        (inv.clientId != null && inv.clientId === c.id) ||
+        (inv.clientId == null && (inv.clientName || "").trim().toLowerCase() === nameKey && nameKey !== "")
+      );
+      const invoiced = invs.reduce((s, i) => s + num(i.amount), 0);
+      const paid = invs.reduce((s, i) => s + getInvoicePaidAmount(i as any), 0);
+      map.set(c.id, { projects, invoices: invs, invoiced, paid });
+    }
+    return map;
+  }, [clients, crmProjects, invoices]);
+
+  const statsFor = (c: Client) => clientStats.get(c.id) ?? { projects: [], invoices: [], invoiced: 0, paid: 0 };
+
+  const openAdd = () => { setForm(EMPTY_FORM); setShowAdd(true); };
+  const openEdit = (c: Client) => {
+    setForm({
+      name: c.name || "",
+      businessName: c.businessName || "",
+      phones: splitPhones(c.phone),
+      email: c.email || "",
+      address: c.address || "",
+      notes: c.notes || "",
+    });
+    setEditingClient(c);
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/invoices"] });
+      await Promise.all([refetch(), refetchInvoices(), fetchCrmProjects()]);
+    } finally {
+      setTimeout(() => setRefreshing(false), 400);
+    }
+  };
+
+  const blank = (s: string) => (s.trim() === "" ? null : s.trim());
+
+  const handleCreate = () => {
+    if (!form.name.trim()) return;
+    const phoneStr = joinPhones(form.phones);
+    createClient({ data: {
+      name: form.name.trim(),
+      businessName: blank(form.businessName),
+      phone: blank(phoneStr),
+      email: blank(form.email),
+      address: blank(form.address),
+      notes: blank(form.notes),
+    } } as any);
+  };
+
+  const handleUpdate = () => {
+    if (!form.name.trim() || !editingClient) return;
+    const phoneStr = joinPhones(form.phones);
+    updateClient({ id: editingClient.id, data: {
+      name: form.name.trim(),
+      businessName: blank(form.businessName),
+      phone: blank(phoneStr),
+      email: blank(form.email),
+      address: blank(form.address),
+      notes: blank(form.notes),
+    } } as any);
+  };
+
+  const exportCsv = () => {
+    const header = ["Client ID", "Full Name", "Business Name", "Phones", "Email", "Address", "Notes", "Added"];
+    const rows = [header, ...clients.map(c => [
+      clientCode(c),
+      c.name,
+      c.businessName || "",
+      c.phone || "",
+      c.email || "",
+      c.address || "",
+      c.notes || "",
+      c.createdAt ? format(new Date(c.createdAt), "yyyy-MM-dd") : "",
+    ])];
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const a = document.createElement("a");
+    a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+    a.download = "printbloom-clients.csv";
+    a.click();
+  };
+
+  const filtered = clients.filter(c => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (
+      c.name?.toLowerCase().includes(q) ||
+      c.businessName?.toLowerCase().includes(q) ||
+      c.phone?.includes(q) ||
+      c.email?.toLowerCase().includes(q) ||
+      clientCode(c).toLowerCase().includes(q)
+    );
+  });
+
+  const withBusiness = clients.filter(c => c.businessName).length;
+  const withEmail = clients.filter(c => c.email).length;
+  const withPhone = clients.filter(c => c.phone).length;
+
+  const isSpinning = refreshing || isFetching;
+
+  return (
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-start sm:items-center justify-between gap-3 flex-wrap">
+        <div>
+          <div className="flex items-center gap-2">
+            <Users size={22} className="text-pink-500" />
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Clients</h1>
+          </div>
+          <p className="text-xs sm:text-sm text-gray-400 mt-0.5">Manage your client database</p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={handleRefresh}
+            disabled={isSpinning}
+            aria-label="Refresh clients"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-60"
+          >
+            <RefreshCw size={14} className={isSpinning ? "animate-spin" : ""} />
+            <span className="hidden sm:inline">Refresh</span>
+          </button>
+          <button onClick={exportCsv} className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+            <Download size={13} /><span className="hidden sm:inline">Export CSV</span><span className="sm:hidden">CSV</span>
+          </button>
+          <button onClick={openAdd} className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-semibold shadow-sm hover:opacity-90 transition-all whitespace-nowrap">
+            <Plus size={14} /> New Client
+          </button>
+        </div>
+      </div>
+
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {[
+          { label: "Total Clients", val: clients.length, color: "from-pink-500 to-purple-600" },
+          { label: "With Business", val: withBusiness, color: "from-purple-500 to-blue-500" },
+          { label: "With Email", val: withEmail, color: "from-blue-500 to-cyan-500" },
+          { label: "With Phone", val: withPhone, color: "from-orange-400 to-pink-500" },
+        ].map(c => (
+          <div key={c.label} className="bg-white border border-gray-100 rounded-xl px-3 sm:px-5 py-3 sm:py-4 shadow-sm">
+            <div className={`text-lg sm:text-2xl font-bold bg-gradient-to-r ${c.color} bg-clip-text text-transparent`}>{c.val}</div>
+            <div className="text-xs sm:text-sm text-gray-400 mt-0.5">{c.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Search */}
+      <div className="bg-white border border-gray-100 rounded-xl shadow-sm">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3">
+          <Search size={15} className="text-gray-400 shrink-0" />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search clients..."
+            className="flex-1 min-w-0 text-sm outline-none placeholder:text-gray-400"
+          />
+          {search && (
+            <button onClick={() => setSearch("")} className="text-gray-400 hover:text-gray-600">
+              <X size={14} />
+            </button>
+          )}
+          <span className="text-[10px] sm:text-xs text-gray-400 shrink-0">{filtered.length} of {clients.length}</span>
+        </div>
+      </div>
+
+      {/* Client Cards Grid */}
+      {filtered.length === 0 ? (
+        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm py-20 text-center">
+          <Users size={40} className="mx-auto mb-3 text-gray-200" />
+          <p className="font-medium text-gray-400">{search ? "No clients match your search" : "No clients yet"}</p>
+          {!search && <p className="text-xs text-gray-300 mt-1">Click "New Client" to add your first client</p>}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          {filtered.map(client => {
+            const code = clientCode(client);
+            const createdMs = client.createdAt ? new Date(client.createdAt).getTime() : 0;
+            const updatedMs = client.updatedAt ? new Date(client.updatedAt).getTime() : 0;
+            const wasEdited = updatedMs > 0 && createdMs > 0 && updatedMs - createdMs > 60_000;
+            const dateLabel = wasEdited
+              ? `Updated ${format(new Date(client.updatedAt!), "dd MMM yyyy")}`
+              : client.createdAt ? format(new Date(client.createdAt), "dd MMM yyyy") : null;
+            const phones = splitPhones(client.phone).filter(Boolean);
+
+            const stats = statsFor(client);
+            return (
+              <div
+                key={client.id}
+                onClick={() => setViewingClient(client)}
+                className="h-full min-h-[245px] bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md hover:border-purple-100 transition-all p-3 sm:p-5 flex flex-col gap-2 sm:gap-3 cursor-pointer"
+              >
+                {/* Top row: avatar + name + menu */}
+                <div className="flex items-start justify-between gap-2 sm:gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center shrink-0">
+                      <UserCircle2 size={20} className="text-purple-400 sm:hidden" />
+                      <UserCircle2 size={24} className="text-purple-400 hidden sm:block" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-semibold text-gray-900 text-[13px] sm:text-sm leading-snug truncate">{client.name}</div>
+                      <div className="text-[10px] sm:text-xs text-gray-400 font-medium mt-0.5">{code}</div>
+                    </div>
+                  </div>
+                  <div onClick={e => e.stopPropagation()}>
+                    <CardMenu canDelete={isOwner} onEdit={() => openEdit(client)} onDelete={() => setDeleteConfirm(client)} />
+                  </div>
+                </div>
+
+                {/* Consistent identity row keeps every card aligned */}
+                <div className={`min-h-5 font-bold text-[13px] sm:text-[15px] leading-snug truncate ${client.businessName ? "text-gray-900" : "text-gray-300"}`}>
+                  {client.businessName || "Individual customer"}
+                </div>
+
+                {/* Phones (one row per number) */}
+                {phones.length > 0 && (
+                  <div className="space-y-1">
+                    {phones.map((ph, i) => (
+                      <a
+                        key={i}
+                        href={`tel:${ph.replace(/\s+/g, "")}`}
+                        onClick={e => e.stopPropagation()}
+                        className="flex items-center gap-1.5 sm:gap-2 text-[12px] sm:text-sm text-gray-700 hover:text-pink-600 transition-colors"
+                      >
+                        <Phone size={12} className="text-red-400 shrink-0" />
+                        <span className="truncate">{ph}</span>
+                      </a>
+                    ))}
+                  </div>
+                )}
+
+                {/* Address */}
+                {client.address && (
+                  <div className="flex items-start gap-1.5 sm:gap-2 text-[12px] sm:text-sm text-gray-600 leading-snug">
+                    <MapPin size={12} className="text-red-400 shrink-0 mt-0.5" />
+                    <span className="line-clamp-3 whitespace-pre-line break-words">{client.address}</span>
+                  </div>
+                )}
+
+                {/* Email (if no phone/address) */}
+                {phones.length === 0 && !client.address && client.email && (
+                  <div className="text-[12px] sm:text-sm text-gray-500 truncate">{client.email}</div>
+                )}
+
+                {/* Activity stats — projects · invoiced row, paid row right
+                    below it (left-aligned with a green check icon), chevron
+                    stays on the far right. Stacking the paid amount avoids
+                    the mobile overflow we used to see on grid-cols-2 cards. */}
+                {(stats.projects.length > 0 || stats.invoices.length > 0) && (
+                  <div className="pt-2 mt-auto border-t border-gray-100">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex flex-col gap-1 min-w-0 flex-1">
+                        <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-[11px] sm:text-xs">
+                          {stats.projects.length > 0 && (
+                            <div className="flex items-center gap-1 text-purple-600 font-semibold">
+                              <Briefcase size={11} className="shrink-0" />
+                              <span>{stats.projects.length} {stats.projects.length === 1 ? "project" : "projects"}</span>
+                            </div>
+                          )}
+                          {stats.invoices.length > 0 && (
+                            <>
+                              {stats.projects.length > 0 && <span className="text-gray-300">·</span>}
+                              <div className="flex items-center gap-1 text-pink-600 font-semibold min-w-0">
+                                <Receipt size={11} className="shrink-0" />
+                                <span className="truncate">{rs(stats.invoiced)}</span>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                        {stats.paid > 0 && (
+                          <div className="flex items-center gap-1 text-[11px] sm:text-xs text-green-600 font-semibold min-w-0">
+                            <CheckCircle2 size={11} className="shrink-0" />
+                            <span className="truncate">{rs(stats.paid)} paid</span>
+                          </div>
+                        )}
+                      </div>
+                      <ChevronRight size={12} className="text-gray-300 shrink-0" />
+                    </div>
+                  </div>
+                )}
+
+                {/* Empty stats — keep the original simple footer */}
+                {stats.projects.length === 0 && stats.invoices.length === 0 && (
+                  <div className="flex items-center justify-between gap-1 pt-2 mt-auto border-t border-gray-100">
+                    <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs text-gray-400 min-w-0">
+                      <FileText size={11} className="text-gray-300 shrink-0" />
+                      <span className="truncate">No activity yet</span>
+                    </div>
+                    {dateLabel && (
+                      <div className={`text-[10px] sm:text-xs shrink-0 truncate ${wasEdited ? "text-pink-500 font-semibold" : "text-gray-400"}`}>{dateLabel}</div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {shippingClient && <ShippingDetailsModal client={shippingClient} onClose={() => setShippingClient(null)} />}
+
+      {/* Viewing Modal — projects + invoices for a single client */}
+      {viewingClient && (() => {
+        const c = viewingClient;
+        const code = clientCode(c);
+        const stats = statsFor(c);
+        const sortedProjects = [...stats.projects].sort((a, b) => {
+          const ad = new Date(a.createdAt || 0).getTime();
+          const bd = new Date(b.createdAt || 0).getTime();
+          return bd - ad;
+        });
+        const sortedInvoices = [...stats.invoices].sort((a, b) => {
+          const ad = new Date(a.createdAt || 0).getTime();
+          const bd = new Date(b.createdAt || 0).getTime();
+          return bd - ad;
+        });
+        return (
+          <div className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setViewingClient(null)}>
+            <div
+              className="bg-white w-full sm:max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-xl max-h-[92vh] sm:max-h-[85vh] flex flex-col"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-start justify-between gap-3 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-100 sticky top-0 bg-white rounded-t-2xl">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center shrink-0">
+                    <UserCircle2 size={22} className="text-purple-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-semibold text-gray-900 text-[15px] sm:text-base leading-snug truncate">{c.name}</div>
+                    <div className="text-[11px] sm:text-xs text-gray-400 font-medium mt-0.5">{code}{c.businessName ? ` · ${c.businessName}` : ""}</div>
+                  </div>
+                </div>
+                <button onClick={() => setViewingClient(null)} aria-label="Close" className="text-gray-400 hover:text-gray-600 shrink-0 p-1 -mr-1">
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Summary stats */}
+              <div className="grid grid-cols-3 gap-2 sm:gap-3 px-4 sm:px-5 py-3 border-b border-gray-100 bg-gray-50/50">
+                <div className="text-center">
+                  <div className="text-lg sm:text-xl font-bold text-purple-600">{stats.projects.length}</div>
+                  <div className="text-[10px] sm:text-xs text-gray-500 mt-0.5">Projects</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm sm:text-lg font-bold text-pink-600 truncate">{rs(stats.invoiced)}</div>
+                  <div className="text-[10px] sm:text-xs text-gray-500 mt-0.5">Invoiced</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm sm:text-lg font-bold text-green-600 truncate">{rs(stats.paid)}</div>
+                  <div className="text-[10px] sm:text-xs text-gray-500 mt-0.5">Paid</div>
+                </div>
+              </div>
+
+              {/* Scrollable content */}
+              <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-5">
+                {/* Full customer profile */}
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      <UserCircle2 size={13} className="text-purple-500" /> Customer Details
+                    </div>
+                    <button onClick={() => { setViewingClient(null); setShippingClient(c); }} className="flex items-center gap-1 rounded-lg bg-blue-50 px-2.5 py-1.5 text-[11px] font-bold text-blue-700 hover:bg-blue-100">
+                      <PackageCheck size={12}/> Shipping Details
+                    </button>
+                  </div>
+                  <div className="grid gap-2 rounded-2xl border border-gray-100 bg-gray-50/70 p-3 sm:grid-cols-2">
+                    <div className="rounded-xl bg-white p-3">
+                      <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Customer</div>
+                      <div className="mt-1 text-sm font-bold text-gray-900">{c.name}</div>
+                      <div className="text-xs text-gray-500">{c.businessName || "Individual customer"}</div>
+                    </div>
+                    <div className="rounded-xl bg-white p-3">
+                      <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Phone Numbers</div>
+                      <div className="mt-1 space-y-1">{splitPhones(c.phone).filter(Boolean).map((phone,index)=><a key={index} href={`tel:${phone.replace(/\s+/g,"")}`} className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 hover:text-pink-600"><Phone size={12} className="text-pink-500"/>{phone}</a>)}
+                      {!c.phone&&<div className="text-xs text-gray-400">Not added</div>}</div>
+                    </div>
+                    <div className="rounded-xl bg-white p-3">
+                      <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Email</div>
+                      <div className="mt-1 flex items-start gap-1.5 break-all text-xs text-gray-700"><Mail size={12} className="mt-0.5 shrink-0 text-blue-500"/>{c.email||"Not added"}</div>
+                    </div>
+                    <div className="rounded-xl bg-white p-3">
+                      <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Main Address</div>
+                      <div className="mt-1 flex items-start gap-1.5 text-xs leading-relaxed text-gray-700"><MapPin size={12} className="mt-0.5 shrink-0 text-red-400"/><span className="whitespace-pre-line break-words">{c.address||"Not added"}</span></div>
+                    </div>
+                    {c.notes&&<div className="rounded-xl bg-white p-3 sm:col-span-2"><div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Notes</div><div className="mt-1 whitespace-pre-wrap text-xs leading-relaxed text-gray-700">{c.notes}</div></div>}
+                  </div>
+                </div>
+                {isOwner && <div className="rounded-2xl border border-violet-100 bg-violet-50/60 p-3 sm:p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-violet-700"><ShieldCheck size={14}/> Identity Verification</div>
+                      <div className="mt-1 text-xs text-gray-500">Owner only · encrypted live selfie + ID front/back</div>
+                    </div>
+                    <span className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase ${verification?.status === "approved" ? "bg-emerald-100 text-emerald-700" : verification?.status === "submitted" ? "bg-amber-100 text-amber-700" : verification?.status === "rejected" ? "bg-red-100 text-red-700" : "bg-white text-gray-500"}`}>{verification?.status || "not started"}</span>
+                  </div>
+                  {verificationError && <div className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-600">{verificationError}</div>}
+                  {verificationUrl && <div className="mt-3 flex items-center gap-2">
+                    <input readOnly value={verificationUrl} className="min-w-0 flex-1 rounded-lg border border-violet-100 bg-white px-3 py-2 text-[11px] text-gray-600" />
+                    <button onClick={() => void copyVerificationLink()} className="rounded-lg bg-white p-2 text-violet-700" title="Copy secure verification link"><Copy size={15}/></button>
+                  </div>}
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {!["submitted","approved"].includes(verification?.status) && <button disabled={verificationBusy} onClick={() => void generateVerificationLink(c.id)} className="rounded-lg bg-violet-600 px-3 py-2 text-xs font-bold text-white disabled:opacity-60">{verificationBusy ? "Creating…" : verification?.status === "rejected" ? "Create new verification link" : "Generate secure link"}</button>}
+                    {verification?.exists && <button onClick={() => setLocation(`/admin/client-verification/${c.id}`)} className="rounded-lg border border-violet-200 bg-white px-3 py-2 text-xs font-bold text-violet-700">Open A4 report / review</button>}
+                  </div>
+                  <p className="mt-2 text-[10px] leading-4 text-gray-400">The share token is shown only when generated. The customer link never exposes saved Client data.</p>
+                </div>}
+                {isOwner && <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3 sm:p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2"><div><div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-800"><FileSignature size={14}/> Client Agreements</div><div className="mt-1 text-xs text-gray-500">Owner only · immutable agreement snapshot + secure online e-sign</div></div><button onClick={()=>setShowAgreementForm(v=>!v)} className="rounded-lg bg-slate-950 px-3 py-2 text-xs font-bold text-white">{showAgreementForm?"Cancel":"New agreement"}</button></div>
+                  {showAgreementForm&&<div className="mt-3 space-y-3 rounded-xl border bg-white p-3"><div className="grid gap-2 sm:grid-cols-2"><label className="text-[10px] font-black uppercase tracking-wide text-gray-500">Agreement template<select value={agreementTemplate} onChange={e=>applyAgreementTemplate(e.target.value)} className="mt-1 w-full rounded-lg border px-3 py-2 text-xs normal-case">{AGREEMENT_TEMPLATES.map(t=><option key={t.id} value={t.id}>{t.label}</option>)}</select></label><label className="flex items-center gap-2 rounded-lg border border-indigo-100 bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-800"><input type="checkbox" checked={issueUnderMainCompany} onChange={e=>setIssueUnderMainCompany(e.target.checked)} className="accent-indigo-600"/>Issue directly under main company — CodeArtix Technologies</label></div><div className={`rounded-lg border px-3 py-2 text-xs font-bold ${issueUnderMainCompany?"border-indigo-200 bg-indigo-50 text-indigo-800":"border-pink-200 bg-pink-50 text-pink-800"}`}>{issueUnderMainCompany?"Contracting business: CodeArtix Technologies":"Service brand: PrintBloom · Legal operator: CodeArtix Technologies"}</div><input value={agreementTitle} onChange={e=>setAgreementTitle(e.target.value)} className="w-full rounded-lg border px-3 py-2 text-sm font-bold" placeholder="Agreement title"/><textarea rows={14} value={agreementText} onChange={e=>setAgreementText(e.target.value)} className="w-full rounded-lg border px-3 py-2 text-xs leading-5" placeholder={"Agreement terms"}/><div className="rounded-lg bg-amber-50 p-2 text-[10px] leading-4 text-amber-700">These are editable operational templates, not a substitute for legal advice. Review the final wording for your exact service. Once the secure signing link is created, that agreement snapshot is locked into its audit record.</div><button disabled={agreementBusy||agreementText.trim().length<20||!agreementTitle.trim()} onClick={()=>void createAgreement(c.id)} className="rounded-lg bg-pink-600 px-4 py-2 text-xs font-bold text-white disabled:opacity-40">{agreementBusy?"Creating…":"Create secure signing link"}</button></div>}
+                  {agreementUrl&&<div className="mt-3 flex gap-2"><input readOnly value={agreementUrl} className="min-w-0 flex-1 rounded-lg border bg-white px-3 py-2 text-[11px]"/><button onClick={()=>navigator.clipboard.writeText(agreementUrl).catch(()=>{})} className="rounded-lg border bg-white p-2"><Copy size={14}/></button></div>}
+                  {agreements.length>0&&<div className="mt-3 space-y-2">{agreements.slice(0,5).map(a=><div key={a.id} className="flex items-center justify-between gap-2 rounded-lg bg-white px-3 py-2"><div className="min-w-0"><div className="truncate text-xs font-bold">{a.title}</div><div className="text-[10px] uppercase text-gray-400">{a.status} · {a.brand_name||"PrintBloom"} · {new Date(a.created_at||a.createdAt).toLocaleDateString("en-LK")}</div></div><button onClick={()=>setLocation(`/admin/client-agreement/${a.id}`)} className="shrink-0 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold">Audit / A4</button></div>)}</div>}
+                  <p className="mt-2 text-[10px] leading-4 text-gray-400">Signing records consent, exact document SHA-256, signed time and encrypted audit evidence. PrintBloom is operated by CodeArtix Technologies.</p>
+                </div>}
+                                {/* Projects */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      <Briefcase size={13} className="text-purple-500" />
+                      Projects ({sortedProjects.length})
+                    </div>
+                    {sortedProjects.length > 0 && (
+                      <button
+                        onClick={() => setLocation("/admin/crm-projects")}
+                        className="text-[11px] text-purple-600 font-semibold hover:underline flex items-center gap-0.5"
+                      >
+                        View all <ChevronRight size={12} />
+                      </button>
+                    )}
+                  </div>
+                  {sortedProjects.length === 0 ? (
+                    <div className="text-center py-6 text-xs text-gray-400 bg-gray-50 rounded-xl">No projects linked yet</div>
+                  ) : (
+                    <div className="space-y-1.5">
+                      {sortedProjects.map(p => {
+                        const due = p.dueDate ? new Date(p.dueDate) : null;
+                        return (
+                          <div key={p.id} className="flex items-center gap-2 sm:gap-3 px-3 py-2.5 bg-gray-50 hover:bg-purple-50 border border-gray-100 rounded-xl transition-colors">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-[11px] font-mono text-gray-400 shrink-0">{p.projectId}</span>
+                                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold capitalize ${projectStatusStyle[p.status] || "bg-gray-100 text-gray-600"}`}>
+                                  {p.status.replace("_", " ")}
+                                </span>
+                              </div>
+                              <div className="text-[13px] font-semibold text-gray-800 truncate mt-0.5">{p.title}</div>
+                              <div className="flex items-center gap-2 text-[11px] text-gray-500 mt-0.5 flex-wrap">
+                                <span className="font-medium text-pink-600">{rs(num(p.totalValue))}</span>
+                                {num(p.amountPaid) > 0 && <span className="text-green-600">· {rs(num(p.amountPaid))} paid</span>}
+                                {due && <span>· due {format(due, "dd MMM")}</span>}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => { setViewingClient(null); setLocation(`/admin/crm-projects?edit=${p.id}`); }}
+                              aria-label={`Open project ${p.projectId}`}
+                              className="shrink-0 w-8 h-8 rounded-lg bg-white border border-gray-200 hover:bg-purple-100 hover:border-purple-300 text-purple-600 flex items-center justify-center transition-colors"
+                            >
+                              <ExternalLink size={14} />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Invoices */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      <Receipt size={13} className="text-pink-500" />
+                      Invoices ({sortedInvoices.length})
+                    </div>
+                    {sortedInvoices.length > 0 && (
+                      <button
+                        onClick={() => setLocation("/admin/invoices")}
+                        className="text-[11px] text-pink-600 font-semibold hover:underline flex items-center gap-0.5"
+                      >
+                        View all <ChevronRight size={12} />
+                      </button>
+                    )}
+                  </div>
+                  {sortedInvoices.length === 0 ? (
+                    <div className="text-center py-6 text-xs text-gray-400 bg-gray-50 rounded-xl">No invoices linked yet</div>
+                  ) : (
+                    <div className="space-y-1.5">
+                      {sortedInvoices.map(inv => {
+                        const due = inv.dueDate ? new Date(inv.dueDate) : null;
+                        const created = inv.createdAt ? new Date(inv.createdAt) : null;
+                        return (
+                          <div key={inv.id} className="flex items-center gap-2 sm:gap-3 px-3 py-2.5 bg-gray-50 hover:bg-pink-50 border border-gray-100 rounded-xl transition-colors">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-[11px] font-mono text-gray-400 truncate">{inv.invoiceNumber}</span>
+                                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold capitalize ${invoiceStatusStyle[inv.status] || "bg-gray-100 text-gray-600"}`}>
+                                  {inv.status}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 text-[12px] text-gray-700 mt-0.5 flex-wrap">
+                                <span className="font-bold text-pink-600">{rs(num(inv.amount))}</span>
+                                {due && <span className="text-[11px] text-gray-500">· due {format(due, "dd MMM")}</span>}
+                                {!due && created && <span className="text-[11px] text-gray-400">· {format(created, "dd MMM yyyy")}</span>}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => { setViewingClient(null); setLocation(`/admin/invoices?edit=${inv.id}`); }}
+                              aria-label={`Open invoice ${inv.invoiceNumber}`}
+                              className="shrink-0 w-8 h-8 rounded-lg bg-white border border-gray-200 hover:bg-pink-100 hover:border-pink-300 text-pink-600 flex items-center justify-center transition-colors"
+                            >
+                              <ExternalLink size={14} />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Footer actions */}
+              <div className="flex gap-2 px-4 sm:px-5 py-3 border-t border-gray-100 bg-white">
+                <button onClick={() => { setViewingClient(null); setShippingClient(c); }} className="flex-1 px-3 py-2.5 rounded-xl border border-blue-100 bg-blue-50 text-blue-700 text-xs sm:text-sm font-semibold hover:bg-blue-100 transition-colors flex items-center justify-center gap-1.5">
+                  <PackageCheck size={13}/> Shipping
+                </button>
+                <button
+                  onClick={() => { const cc = c; setViewingClient(null); openEdit(cc); }}
+                  className="flex-1 px-3 py-2.5 rounded-xl bg-gray-100 text-gray-700 text-xs sm:text-sm font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-1.5"
+                >
+                  <Pencil size={13} /> Edit Client
+                </button>
+                <button
+                  onClick={() => setViewingClient(null)}
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-semibold hover:opacity-90 transition-all"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Add Modal */}
+      {showAdd && (
+        <ClientFormModal
+          title="Add New Client"
+          form={form}
+          setForm={setForm}
+          onSubmit={handleCreate}
+          onClose={() => { setShowAdd(false); setForm(EMPTY_FORM); }}
+          isSaving={isCreating}
+        />
+      )}
+
+      {/* Edit Modal */}
+      {editingClient && (
+        <ClientFormModal
+          title="Edit Client"
+          form={form}
+          setForm={setForm}
+          onSubmit={handleUpdate}
+          onClose={() => { setEditingClient(null); setForm(EMPTY_FORM); }}
+          isSaving={isUpdating}
+        />
+      )}
+
+      {/* Delete Confirm */}
+      <ConfirmDialog
+        open={!!deleteConfirm}
+        title="Delete Client"
+        message={deleteConfirm ? `Are you sure you want to permanently delete ${deleteConfirm.name} (${clientCode(deleteConfirm)})?` : ""}
+        confirmLabel="Delete Client"
+        onConfirm={() => { if (deleteConfirm) deleteClient({ id: deleteConfirm.id }); }}
+        onCancel={() => setDeleteConfirm(null)}
+      />
+    </div>
+  );
+}

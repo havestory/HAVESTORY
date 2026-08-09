@@ -1,0 +1,42 @@
+Based on the screenshot, it looks like you are dealing with a CSS rendering issue during the PDF/JPG generation process. When a webpage is converted to a static file, some background elements or text alignments often break because the "Print" or "Export" styling doesn't match the live website.
+
+Here is why this is happening and how you can fix it:
+
+Why this is happening
+CSS Flexbox/Grid Issues: Many PDF libraries (like wkhtmltopdf or older versions of Dompdf) struggle with modern CSS layouts like display: flex or display: grid. This causes text to shift or overlap.
+
+Background Graphics Disabled: By default, many browsers and PDF generators disable background colors and images to save ink. This is likely why your report background or text isn't aligning correctly.
+
+Viewport Mismatch: The "Total Revenue" bar in your image is quite wide. If the PDF generator uses a narrow "virtual screen," the text will wrap or misalign.
+
+Potential Solutions
+1. Force Background Graphics
+If you are using a "Print to PDF" function, you must explicitly tell the browser to include backgrounds. Add this to your CSS:
+
+CSS
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+2. Fix the Alignment for Export
+Avoid using complex layouts for the elements that need to be in the PDF. Use standard block positioning for the total revenue row:
+
+Instead of Flex: Use float: right or text-align: right for the "Rs. 150" value.
+
+Fixed Widths: Give your table columns specific percentage widths (e.g., width: 20%) so they don't collapse during the download.
+
+3. Use a Modern Library
+If you are building this website yourself and using a library to generate these files, ensure you are using one that supports modern Chrome-based rendering:
+
+Recommended: Use Puppeteer or Playwright. They use a real headless Chrome browser, so the PDF/JPG will look exactly like what you see on your screen.
+
+Avoid: Older versions of jsPDF or html2canvas for complex tables, as they often "guess" the alignment and get it wrong.
+
+4. Check for Overlapping Containers
+In your screenshot, the pink background bar for "Total Revenue" seems to be a separate div. If the text inside it is not aligned, ensure the container has:
+
+line-height equal to its height.
+
+padding instead of absolute positioning.

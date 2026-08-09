@@ -1,0 +1,74 @@
+modules = ["nodejs-24", "postgresql-16"]
+
+[[artifacts]]
+id = "artifacts/api-server"
+
+[[artifacts]]
+id = "artifacts/mockup-sandbox"
+
+[deployment]
+router = "application"
+deploymentTarget = "autoscale"
+
+[deployment.postBuild]
+args = ["pnpm", "store", "prune"]
+env = { "CI" = "true" }
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start API Server"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start PrintBloom"
+
+[[workflows.workflow]]
+name = "Start API Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "PORT=8080 pnpm --filter @workspace/api-server run dev"
+waitForPort = 8080
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow]]
+name = "Start PrintBloom"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "PORT=20092 BASE_PATH=/ pnpm --filter @workspace/printbloom run dev"
+waitForPort = 20092
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[agent]
+stack = "PNPM_WORKSPACE"
+expertMode = true
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 20000
+
+[nix]
+channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+ADMIN_USERNAME = "Admin.PrintBloom"
+ADMIN_PASSWORD = "PBioT#789Klm"
+ADMIN_PIN = "0160"
+NEON_DATABASE_URL = "postgresql://neondb_owner:npg_4MeQXA6EnDNB@ep-young-river-ajpez5um-pooler.c-3.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"

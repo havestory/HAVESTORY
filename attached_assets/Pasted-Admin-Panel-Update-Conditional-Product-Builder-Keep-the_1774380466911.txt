@@ -1,0 +1,48 @@
+Admin Panel Update: Conditional Product Builder
+Keep the current basic information fields (Product Name, Description, Images) exactly as they are. The changes should only happen in the Pricing Section.
+
+1. The Product Type Selector (The Trigger)
+At the very top of the pricing section, introduce a mandatory toggle or radio button selection:
+
+( ) Standard Product (For static, ready-made items like a pre-printed mug)
+
+(•) Custom Print Product (For dynamic items like business cards or stickers)
+
+2. View A: "Standard Product" Selected
+If the admin chooses this, the system behaves exactly as your current setup does. It only displays the basic inputs:
+
+Regular Price: [ Rs. ______ ]
+
+Stock Quantity: [ ______ ]
+
+3. View B: "Custom Print Product" Selected (The New Feature)
+If the admin chooses this, the standard "Regular Price" box is hidden. In its place, a new "Price & Options Builder" expands. To keep the interface organized, this builder should be divided into two tabs:
+
+Tab 1: Base Pricing Setup
+This is where the admin defines how the foundation price is calculated before any extras are added.
+
+Pricing Model Dropdown:
+
+Option A: Fixed Quantities (Opens a table to set exact prices for 100, 250, 500 cards).
+
+Option B: Range / Per Unit (Opens a table to set per-sheet prices for ranges like 1-5, 6-10).
+
+Tab 2: Custom Options / Add-ons
+This is where the admin builds the extra selectable features (like Board Type or Lamination).
+
+Clicking an [ + Add New Option Group ] button dynamically generates a new input block:
+
+Option Title: [ e.g., Lamination ]
+
+Choices:
+
+Choice 1: Name: [ Matte ] | Price: [ + Rs. 500 ] | Charge Type: [ Dropdown: Flat Fee OR Per Unit ]
+
+Choice 2: Name: [ Gloss ] | Price: [ + Rs. 400 ] | Charge Type: [ Dropdown: Flat Fee OR Per Unit ]
+
+UI/UX Rules for the Developer
+To make sure the Admin Panel doesn't become a mess of empty boxes, give your developer these two rules:
+
+Keep it Clutter-Free: Do not display 10 empty rows by default. New rows or option blocks should only appear when the admin explicitly clicks the [ + Add New ] buttons.
+
+Drag-and-Drop Sorting: The admin should be able to click and drag the option blocks (e.g., dragging "Lamination" to appear above "Board Type") to easily change the order they are displayed on the live customer website.

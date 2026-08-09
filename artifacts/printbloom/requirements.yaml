@@ -1,0 +1,25 @@
+packages:
+  "framer-motion": "For premium smooth animations and page transitions"
+  "zustand": "For simple global cart state management"
+  "date-fns": "For formatting dates in admin and order tracking"
+  "recharts": "For admin dashboard analytics"
+  "clsx": "For conditional tailwind classes"
+  "tailwind-merge": "For merging tailwind classes"
+
+images:
+  - path: "artifacts/printbloom/public/images/hero-mesh.png"
+    description: "Premium abstract 3D gradient mesh background in soft pastel pink, deep purple, and translucent glass white, elegant, highly detailed, 8k"
+    aspect_ratio: "16:9"
+  - path: "artifacts/printbloom/public/images/about-vision.png"
+    description: "Abstract modern graphic design studio representation, elegant minimal workspace with floating glass panels, pink and purple ambient lighting"
+    aspect_ratio: "16:9"
+  - path: "artifacts/printbloom/public/images/placeholder-product.png"
+    description: "Elegant minimalist product packaging mockup, soft pink background, premium lighting"
+    aspect_ratio: "1:1"
+  - path: "artifacts/printbloom/public/images/placeholder-service.png"
+    description: "Abstract geometric shapes representing digital services, premium glassmorphism style, purple and pink"
+    aspect_ratio: "16:9"
+
+notes:
+  - "Theme: Pink-purple premium glassmorphism with light aesthetics"
+  - "Importing API hooks from @workspace/api-client-react"

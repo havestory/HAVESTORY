@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "PrintBloom"
+version = "1.0.0"
+id = "artifacts/printbloom"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20092
+
+[services.development]
+run = "pnpm --filter @workspace/printbloom run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/printbloom", "run", "build" ]
+publicDir = "artifacts/printbloom/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20092"
+BASE_PATH = "/"

@@ -1,0 +1,61 @@
+Front-End Requirement: Single Product Page (Custom Print Layout)
+When a customer clicks on a "Custom Print Product" (like Business Cards), the page must load a Two-Column Layout with a real-time price calculation engine.
+
+1. Left Column: Product Visuals
+Breadcrumbs: Navigation path at the top (e.g., HOME / STATIONARY PRINTING / BUSINESS CARDS).
+
+Image Gallery: A large main product image (mockup) with a zoom facility on hover.
+
+2. Right Column: Product Details & Dynamic Form
+This section must react in real-time to the user's inputs based on the data fed from the Admin Panel.
+
+Header Info:
+
+Product Title: (e.g., Business Card Printing)
+
+Price Range: Displays the minimum to maximum possible price per unit (e.g., Rs. 12.00 – Rs. 26.50).
+
+Short Description & Delivery Time: (e.g., Production time 2-7 working days, Standard Size: 9 cm x 5 cm).
+
+Artwork Guide Link: A clickable text link to download the blank design template (PDF/AI).
+
+Dynamic Selection Dropdowns (Fed from Admin):
+Each option must be a clean dropdown. When changed, it triggers a price update.
+
+Print sides (e.g., Single side, Double side)
+
+Lamination (e.g., No lamination, Matte, Gloss)
+
+Board type (e.g., 350gsm Art board)
+
+Rounded Corners (Yes/No)
+
+Service type (Printing only / Designing and Printing)
+
+3. Real-Time Price Calculation Engine (Crucial UI Element)
+This is the most important part of the layout. The user must see exactly how their total is calculated without refreshing the page.
+
+Live Unit Price Display: Just below the main dropdowns, display the calculated price for a single item based on the current selections (e.g., Rs. 13.50).
+
+The "Math" Summary Box: A distinct box showing the final calculation before the add to cart button:
+
+Row 1: PRODUCT PRICE [Live Unit Price] X [Quantity] = [Calculated Subtotal]
+
+Row 2 (Bold): TOTAL = [Final Total]
+
+4. Action Area
+Quantity Selector: An input box with [ - ] and [ + ] buttons.
+
+Developer Note: It must respect the "Minimum Order Quantity" (MOQ) set in the admin panel (e.g., default starts at 100, and perhaps increases in steps of 50 or 100).
+
+Primary CTA Button: A prominent, high-contrast [ ADD TO CART ] button.
+
+5. Footer Meta Data
+SKU, Categories, Tags: Displayed purely for SEO and store organization.
+
+Social Share Icons: Facebook, Twitter, Email, Pinterest, LinkedIn.
+
+Developer Instruction for the "Total Math" Box:
+Please tell your developer to pay special attention to the Summary Box (PRODUCT PRICE RS. 13.50 X 100 = RS. 1,350.00).
+
+This is an excellent UX feature because it stops customers from getting confused about whether the price shown is for one card or the whole box of cards.

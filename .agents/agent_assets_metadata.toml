@@ -1,0 +1,14 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "fQJJZ0oT1Hx6YXVagczI5"
+uri = "file://DEPLOY.md"
+type = "text"
+title = "PrintBloom — Vercel Deployment Guide (A to Z)"
+
+[[outputs]]
+id = "kL2Y6ArQ2MCTkZyRScp7k"
+uri = "file://NEON_SETUP.md"
+type = "text"
+title = "Neon PostgreSQL — Account Setup Guide (A to Z)"
