@@ -1,6 +1,6 @@
 # Neon PostgreSQL — Account Setup Guide (A to Z)
 
-Neon is the cloud database that powers PrintBloom. This guide walks you through creating a production-ready Neon account and database from scratch.
+Neon is the cloud database that powers HAVESTORY. This guide walks you through creating a production-ready Neon account and database from scratch.
 
 ---
 
@@ -18,7 +18,7 @@ Neon is the cloud database that powers PrintBloom. This guide walks you through 
 
 1. Click **New Project**
 2. Fill in the details:
-   - **Project name:** `printbloom-production` (or anything you like)
+   - **Project name:** `havestory-production` (or anything you like)
    - **Postgres version:** Leave as default (latest)
    - **Region:** Choose the closest to your customers — for Sri Lanka, select **Singapore** (`aws-ap-southeast-1`) or **Mumbai** (`aws-ap-south-1`)
    - **Compute size:** Leave as default (0.25 CU — free tier)
@@ -61,7 +61,7 @@ After creating the project, Neon shows connection details. You need **two versio
 1. In the Neon dashboard, click on your project
 2. Go to the **Tables** tab in the left sidebar
 3. It should show an empty database — that's correct
-4. PrintBloom automatically creates all tables on the first deploy
+4. HAVESTORY automatically creates all tables on the first deploy
 
 ---
 
@@ -80,10 +80,10 @@ Both variables point to the same string. `DATABASE_URL` is used by the app for a
 
 ## Step 6 — What Happens on First Deploy
 
-When PrintBloom starts for the first time on a fresh database:
+When HAVESTORY starts for the first time on a fresh database:
 
 - All tables are created automatically (orders, settings, products, reviews, sessions, etc.)
-- Default settings are applied (business name "PrintBloom", default theme, etc.)
+- Default settings are applied (business name "HAVESTORY", default theme, etc.)
 - You log in to the admin panel and customise everything from there
 
 Nothing manual is needed — the app handles its own database setup.
@@ -109,7 +109,7 @@ A printing business site with hundreds of orders per month will comfortably fit 
 ## Important: Keep Your Credentials Safe
 
 - **Never share** your connection string — it contains your database password
-- **Do not commit** it to GitHub (PrintBloom's code doesn't — credentials go in Vercel env vars only)
+- **Do not commit** it to GitHub (HAVESTORY's code doesn't — credentials go in Vercel env vars only)
 - If credentials are ever exposed, go to Neon dashboard → **Settings → Reset password** immediately
 
 ---
