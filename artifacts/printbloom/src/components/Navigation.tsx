@@ -52,13 +52,14 @@ export function Navigation() {
     <>
       <header
         className={cn(
+          "hs-nav",
           "inset-x-0 transition-all duration-300",
           isScrolled ? "py-2" : "py-4"
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className={cn(
-            "flex items-center justify-between px-6 py-3 rounded-2xl transition-all duration-300",
+            "hs-nav-shell flex items-center justify-between px-6 py-3 transition-all duration-300",
             isScrolled ? "glass" : "bg-white/40 backdrop-blur-sm border border-white/20"
           )}>
             {/* Logo */}
@@ -90,7 +91,7 @@ export function Navigation() {
                 </>
               ) : (
                 <>
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-pink-500/20 group-hover:scale-105 transition-transform">
+                  <div className="hs-logo-mark w-10 h-10 flex items-center justify-center text-white shadow-lg shadow-pink-500/20 group-hover:scale-105 transition-transform">
                     <Frame size={20} />
                   </div>
                   <div>
@@ -149,7 +150,7 @@ export function Navigation() {
 
               <Link
                 href="/store"
-                className="hidden md:block btn-gradient px-5 py-2.5 rounded-xl text-sm"
+                className="hs-nav-cta hidden md:block px-5 py-2.5 text-sm"
               >
                 Create a Frame
               </Link>
