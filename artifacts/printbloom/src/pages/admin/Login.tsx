@@ -46,8 +46,8 @@ function StepCredentials({
         <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-purple-200">
           <User size={26} className="text-white" />
         </div>
-        <h1 className="text-2xl font-display font-bold text-purple-900 mb-1">Admin Portal</h1>
-        <p className="text-gray-400 text-sm">Sign in to manage PrintBloom</p>
+        <h1 className="text-2xl font-display font-bold text-purple-900 mb-1">Studio Console</h1>
+        <p className="text-gray-400 text-sm">Sign in to the HAVESTORY Studio Console</p>
       </div>
 
       {errorMsg && (
@@ -296,7 +296,7 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
+    <div className="havestory-admin-login min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-purple-600/20 -z-10" />
       <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-pink-400/10 rounded-full blur-3xl -z-10" />
