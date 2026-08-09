@@ -373,8 +373,8 @@ h1, h2, h3, h4, h5, h6, .font-display {
   line-height: 1 !important;
 }
 .hs-nav-shell nav a {
-  font-size: 12px !important;
-  line-height: 18px;
+  font-size: 14px !important;
+  line-height: 20px;
 }
 .hs-nav-cta,
 .hs-button {
@@ -706,4 +706,11 @@ h1, h2, h3, h4, h5, h6, .font-display {
   .havestory-admin-shell main td {
     padding: 10px 12px !important;
   }
+}
+
+@media (min-width: 1280px) and (max-width: 1399px) {
+  .hs-nav-shell { padding-inline: 32px !important; }
+  .hs-nav-shell nav { gap: 10px !important; }
+  .hs-nav-shell nav a { font-size: 13.5px !important; }
+  .hs-nav-cta { padding-inline: 16px !important; }
 }
