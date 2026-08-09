@@ -31,7 +31,7 @@ type TabId = typeof TABS[number]["id"];
 const THEME_PRESETS = [
   {
     id: "havestory-gallery",
-    label: "HAVESTORY Gallery",
+    label: "Gallery Theme",
     desc: "Warm ivory, walnut & muted bronze",
     from: "#a87842",
     to: "#5c4938",
@@ -455,7 +455,7 @@ export default function WebsiteEditor() {
   const [heroSlideImage3, setHeroSlideImage3] = useState("");
   const [heroSlideImage4, setHeroSlideImage4] = useState("");
   const [heroSlideImage5, setHeroSlideImage5] = useState("");
-  const [designerCredit, setDesignerCredit] = useState("CODEARTIX");
+  const [designerCredit, setDesignerCredit] = useState("");
   const [homeFeatureCards, setHomeFeatureCards] = useState(DEFAULT_HOME_FEATURE_CARDS);
 
   /* ── ABOUT STATE ── */
@@ -572,7 +572,7 @@ export default function WebsiteEditor() {
     setHeroSlideImage3((s as any).heroSlideImage3 || "");
     setHeroSlideImage4((s as any).heroSlideImage4 || "");
     setHeroSlideImage5((s as any).heroSlideImage5 || "");
-    setDesignerCredit(s.designerCredit ?? "CODEARTIX");
+    setDesignerCredit(s.designerCredit ?? "");
     try {
       const parsed = typeof s.homeFeatureCards === "string" ? JSON.parse(s.homeFeatureCards) : s.homeFeatureCards;
       setHomeFeatureCards(Array.isArray(parsed) && parsed.length
@@ -815,7 +815,7 @@ export default function WebsiteEditor() {
                 <input
                   value={designerCredit}
                   onChange={e => setDesignerCredit(e.target.value)}
-                  placeholder="CODEARTIX"
+                  placeholder="Designer or studio name"
                   className={inp}
                 />
               </div>
