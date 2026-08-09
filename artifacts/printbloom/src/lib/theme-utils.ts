@@ -1,5 +1,6 @@
 export const THEME_VARS: Record<string, { from: string; to: string; accent: string; primary: string; secondary: string }> = {
-  "havestory-gallery": { from: "#a87842", to: "#5c4938", accent: "#c39a68", primary: "30 43% 46%", secondary: "27 24% 29%" },\n  "pink-purple":  { from: "#ec4899", to: "#9333ea", accent: "#d946ef", primary: "330 85% 55%", secondary: "270 70% 60%" },
+  "havestory-gallery": { from: "#a87842", to: "#5c4938", accent: "#c39a68", primary: "30 43% 46%", secondary: "27 24% 29%" },
+  "pink-purple":  { from: "#ec4899", to: "#9333ea", accent: "#d946ef", primary: "330 85% 55%", secondary: "270 70% 60%" },
   "blue-indigo":  { from: "#3b82f6", to: "#6366f1", accent: "#4f46e5", primary: "217 91% 60%", secondary: "239 84% 67%" },
   "green-teal":   { from: "#22c55e", to: "#14b8a6", accent: "#10b981", primary: "142 71% 45%", secondary: "174 72% 40%" },
   "orange-red":   { from: "#f97316", to: "#ef4444", accent: "#f59e0b", primary: "25 95% 53%",  secondary: "0 84% 60%"   },
