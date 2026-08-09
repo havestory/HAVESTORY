@@ -33,12 +33,12 @@ const inp =
   "w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-pink-400 transition-colors placeholder:text-gray-400";
 
 // Format a client's numeric DB id as the user-facing customer code, matching
-// the format used on the admin Clients page (e.g. id 1 → "PB0001"). Keeping
+// the format used on the admin Clients page (e.g. id 1 → "C0001"). Keeping
 // this in sync means admins can copy a code from one screen and search for
 // it in another.
-const formatClientCode = (id: number) => `PB${String(id).padStart(4, "0")}`;
+const formatClientCode = (id: number) => `C${String(id).padStart(4, "0")}`;
 
-// Canonicalize a phone number for comparison. PrintBloom is a Sri Lankan
+// Canonicalize a phone number for comparison. The business operates in Sri Lanka and
 // business, so we treat `+94XXXXXXXXX`, `0094XXXXXXXXX`, `94XXXXXXXXX` and
 // the local `0XXXXXXXXX` form as the same number. Returns the 9-digit
 // subscriber portion when it can be detected, otherwise the full digit
@@ -118,19 +118,19 @@ export function ClientPicker({
     ? normalizePhone(trimmedSearchRaw)
     : "";
   // Customer-code search prep — strip whitespace, leading "#", "id" prefix
-  // and uppercase so "pb0001", "PB0001", "#PB0001", "id PB0001" and "pb1"
+  // and uppercase so "c0001", "C0001", "#C0001", "id C0001" and "c1"
   // all collapse to a comparable form. We extract the numeric portion and
   // drop leading zeros so partial typing still finds the row regardless of
-  // padding (e.g. "PB1", "PB01", "PB001", "PB0001" all match id 1).
+  // padding (e.g. "C1", "C01", "C001", "C0001" all match id 1).
   const codeSearch = trimmedSearchRaw
     .replace(/^#/, "")
     .replace(/^id[:\s]*/i, "")
     .replace(/\s+/g, "")
     .toUpperCase();
-  const codeMatch = /^PB(\d*)$/.exec(codeSearch);
+  const codeMatch = /^C(\d*)$/.exec(codeSearch);
   const looksLikeCode = !!codeMatch;
   // Numeric portion stripped of leading zeros — "" when the user only
-  // typed "PB" (which we treat as "show every PB code", i.e. no filter).
+  // typed "C" (which we treat as "show every customer code", i.e. no filter).
   const codeIdDigits = codeMatch ? codeMatch[1].replace(/^0+/, "") : "";
 
   const filtered = useMemo(() => {
@@ -140,11 +140,11 @@ export function ClientPicker({
       if (c.name.toLowerCase().includes(q)) return true;
       if ((c.businessName || "").toLowerCase().includes(q)) return true;
       if ((c.email || "").toLowerCase().includes(q)) return true;
-      // Customer ID search — supports the user-facing "PB0001" code as well
+      // Customer ID search — supports the user-facing "C0001" code as well
       // as the raw integer id ("123", "#123", "id 123") so admins can paste
-      // a code from the Clients page and find the same record here. PB-code
+      // a code from the Clients page and find the same record here. customer-code
       // partial matches compare on the numeric portion with leading zeros
-      // stripped so PB1 / PB01 / PB001 / PB0001 all match id 1.
+      // stripped so C1 / C01 / C001 / C0001 all match id 1.
       if (looksLikeCode && codeIdDigits && String(c.id) === codeIdDigits) return true;
       if (searchDigits && String(c.id) === searchDigits) return true;
       // Phone search — first try a substring match against the saved phone
@@ -163,7 +163,7 @@ export function ClientPicker({
   // client list is intentionally hidden until the admin types a query so
   // the dropdown stays compact (and so customer details aren't broadcast
   // by default). Typing surfaces matches by name, phone, email, business
-  // or PB-code/numeric ID.
+  // or customer-code/numeric ID.
   const visible = trimmedSearch ? filtered : [];
 
   // When the admin types a known phone number into the search box (select
@@ -383,7 +383,7 @@ export function ClientPicker({
                 placeholder={
                   value.clientId
                     ? `Selected: ${value.name}`
-                    : "Search by name, phone, email, business, or PB0001…"
+                    : "Search by name, phone, email, business, or C0001…"
                 }
                 className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-pink-200 placeholder:text-gray-400"
               />
@@ -419,7 +419,7 @@ export function ClientPicker({
                 {!trimmedSearch && (
                   <div className="px-4 py-3 text-xs text-gray-400 italic flex items-center gap-2">
                     <Search size={12} className="text-gray-300" />
-                    Type to search by name, phone, email, business, or PB-code.
+                    Type to search by name, phone, email, business, or customer-code.
                     {clients.length > 0 && (
                       <span className="ml-auto text-[11px] text-gray-300 not-italic tabular-nums">
                         {clients.length} saved
