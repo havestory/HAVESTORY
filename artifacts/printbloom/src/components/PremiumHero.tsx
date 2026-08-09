@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Aperture, ArrowRight, BadgeCheck, Camera, Frame, Headphones,
+  Aperture, ArrowRight, BadgeCheck, Frame, Headphones,
   Images, Palette, ShoppingCart, Truck, UploadCloud
 } from "lucide-react";
 
