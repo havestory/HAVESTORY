@@ -55,7 +55,6 @@ import AdminSettings from "@/pages/admin/Settings";
 import AdminRevenue from "@/pages/admin/Revenue";
 import AdminCoupons from "@/pages/admin/Coupons";
 import AdminWebsiteEditor from "@/pages/admin/WebsiteEditor";
-import AdminLabelCalculator from "@/pages/admin/LabelCalculator";
 import AdminPriceLists from "@/pages/admin/PriceLists";
 import AdminShippingLabels from "@/pages/admin/ShippingLabels";
 import AdminFinanceInventory from "@/pages/admin/FinanceInventory";
@@ -219,7 +218,6 @@ const RouteSettings       = () => <ProtectedAdminRoute component={AdminSettings}
 const RouteWebsiteEditor  = () => <ProtectedAdminRoute component={AdminWebsiteEditor} permission="website" />;
 const RouteRevenue        = () => <ProtectedAdminRoute component={AdminRevenue} permission="reports" />;
 const RouteCoupons        = () => <ProtectedAdminRoute component={AdminCoupons} permission="owner" />;
-const RouteLabelCalculator = () => <ProtectedAdminRoute component={AdminLabelCalculator} permission="catalog" />;
 const RoutePriceLists      = () => <ProtectedAdminRoute component={AdminPriceLists} permission="price_lists_view" />;
 const RouteShippingLabels  = () => <ProtectedAdminRoute component={AdminShippingLabels} permission="shipping" />;
 const RouteFinanceInventory = () => <ProtectedAdminRoute component={AdminFinanceInventory} permission="finance" />;
@@ -262,7 +260,6 @@ function Router() {
       <Route path="/admin/website-editor" component={RouteWebsiteEditor} />
       <Route path="/admin/revenue" component={RouteRevenue} />
       <Route path="/admin/coupons" component={RouteCoupons} />
-      <Route path="/admin/label-calculator" component={RouteLabelCalculator} />
       <Route path="/admin/price-lists" component={RoutePriceLists} />
       <Route path="/admin/shipping-labels" component={RouteShippingLabels} />
       <Route path="/admin/finance-inventory" component={RouteFinanceInventory} />
