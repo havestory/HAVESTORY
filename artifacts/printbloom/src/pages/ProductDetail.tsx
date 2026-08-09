@@ -686,7 +686,7 @@ export default function ProductDetail() {
   // ─── Loading / Error ───
   if (isLoading) {
     return (
-      <div className="min-h-screen pt-24 pb-12">
+      <div className="hs-product-page min-h-screen pt-24 pb-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 animate-pulse">
             <div className="aspect-square bg-gray-100 rounded-2xl" />
@@ -704,7 +704,7 @@ export default function ProductDetail() {
 
   if (error || !product) {
     return (
-      <div className="min-h-screen pt-24 flex items-center justify-center">
+      <div className="hs-product-page min-h-screen pt-24 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-bold text-gray-700 mb-2">Product not found</h2>
           <Link href="/store" className="text-primary underline">Back to Store</Link>
@@ -714,7 +714,7 @@ export default function ProductDetail() {
   }
 
   return (
-    <div className="min-h-screen pt-20 sm:pt-24 pb-12 sm:pb-16 bg-gray-50/50">
+    <div className="hs-product-page min-h-screen pt-20 sm:pt-24 pb-12 sm:pb-16">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-1.5 text-[11px] sm:text-xs text-gray-400 font-medium mb-6 sm:mb-8 min-w-0">
