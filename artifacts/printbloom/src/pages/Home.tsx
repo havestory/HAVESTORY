@@ -12,7 +12,6 @@ import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { ProductCard } from "@/components/ProductCard";
 import { ServiceCard } from "@/components/ServiceCard";
 import { PremiumHero } from "@/components/PremiumHero";
-import { LabelCalculator } from "@/components/LabelCalculator";
 import {
   getHomeProductsCache, setHomeProductsCache,
   getHomeServicesCache, setHomeServicesCache,
@@ -136,9 +135,8 @@ export default function Home() {
   };
 
   return (
-    <main>
+    <main className="hs-home">
       <PremiumHero settings={settings} publicStats={publicStats} />
-      <LabelCalculator />
 
       {/* Frame and print collections */}
       <section className="py-24 relative">

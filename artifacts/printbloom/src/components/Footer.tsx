@@ -37,7 +37,7 @@ export function Footer() {
   } });
 
   return (
-    <footer className="relative mt-0 overflow-hidden">
+    <footer className="hs-footer relative mt-0 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-purple-50/80 -z-10" />
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500" />
       
@@ -74,9 +74,7 @@ export function Footer() {
                         </svg>
                       </div>
                       <span className="font-display font-bold text-xl">
-                        {businessName.includes("HAVESTORY")
-                          ? <>Print<span className="text-primary">Bloom</span></>
-                          : businessName}
+                        {businessName}
                       </span>
                     </>
                   )}
@@ -160,7 +158,7 @@ export function Footer() {
         </div>
 
         <div className="pt-8 border-t border-gray-200/50 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-          <div><p>© {new Date().getFullYear()} {settings?.businessName || "HAVESTORY"}. All rights reserved.</p><div className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-[#a97945]/20 bg-[#fffaf2]/70 px-2.5 py-1 text-xs font-semibold text-[#4a3428]"><span>HAVESTORY</span><span className="text-[#c8a173]">·</span><span>Operated by <strong>CodeArtix Technologies</strong></span></div></div>
+          <p>© {new Date().getFullYear()} {settings?.businessName || "HAVESTORY"}. All rights reserved.</p>
           {(settings as any)?.designerCredit && (
             <p className="flex items-center gap-1.5">
               Designed by{" "}
