@@ -166,7 +166,7 @@ function ProtectedAdminRoute({ component: Component, permission }: { component: 
 
   if (isLoading) return (
     <div className="h-screen flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-[#c8a173] border-t-[#4a3428] rounded-full animate-spin" />
+      <div className="w-8 h-8 border-2 border-[#c8d9d7] border-t-[#ff5e3a] rounded-full animate-spin" />
     </div>
   );
 
