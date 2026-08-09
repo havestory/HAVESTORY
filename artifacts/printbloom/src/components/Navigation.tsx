@@ -95,9 +95,7 @@ export function Navigation() {
                   </div>
                   <div>
                     <span className="font-display font-bold text-xl tracking-tight text-foreground">
-                      {businessName.includes("PrintBloom")
-                        ? <>Print<span className="text-primary">Bloom</span></>
-                        : businessName}
+                      {businessName}
                     </span>
                     {taglineEnabled && tagline && (
                       <p className="text-[10px] text-gray-400 leading-none mt-0.5 font-medium tracking-wide hidden sm:block">
