@@ -1,13 +1,15 @@
 import { useGetSettings } from "@workspace/api-client-react";
 import { PageHeader } from "@/components/PageHeader";
+import { getBusinessName } from "@/lib/brand-settings";
 
 export default function About() {
   const { data: settings } = useGetSettings();
+  const businessName = getBusinessName(settings);
 
   return (
     <div className="min-h-screen pb-24">
       <PageHeader 
-        title="About HAVESTORY" 
+        title={`About ${businessName}`} 
         subtitle="Passionate creators dedicated to making your brand stand out."
       />
 
@@ -39,7 +41,7 @@ export default function About() {
                 Crafting visual excellence since day one.
               </h3>
               <p className="text-gray-600 leading-relaxed whitespace-pre-line">
-                {settings?.aboutStory || "HAVESTORY began with one idea: photographs deserve to live where people can see and feel them. We bring portrait direction, careful colour work and considered framing together under one studio.\n\nEvery piece is handled with a human eye—from the first image check to the final finish—so the result feels personal, balanced and made to last."}
+                {settings?.aboutStory || `${businessName || "Our studio"} began with one idea: photographs deserve to live where people can see and feel them. We bring portrait direction, careful colour work and considered framing together under one studio.\n\nEvery piece is handled with a human eye—from the first image check to the final finish—so the result feels personal, balanced and made to last.`}
               </p>
             </div>
 
