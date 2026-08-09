@@ -7,7 +7,7 @@ export default function About() {
   return (
     <div className="min-h-screen pb-24">
       <PageHeader 
-        title="About PrintBloom" 
+        title="About HAVESTORY" 
         subtitle="Passionate creators dedicated to making your brand stand out."
       />
 
@@ -39,7 +39,7 @@ export default function About() {
                 Crafting visual excellence since day one.
               </h3>
               <p className="text-gray-600 leading-relaxed whitespace-pre-line">
-                {settings?.aboutStory || "PrintBloom started with a simple vision: to bridge the gap between creative design and high-quality physical production. We believe that every business, regardless of size, deserves access to premium branding materials.\n\nOur team of dedicated designers and print specialists work tirelessly to ensure every color pops, every cut is precise, and every client is thrilled with the result."}
+                {settings?.aboutStory || "HAVESTORY began with one idea: photographs deserve to live where people can see and feel them. We bring portrait direction, careful colour work and considered framing together under one studio.\n\nEvery piece is handled with a human eye—from the first image check to the final finish—so the result feels personal, balanced and made to last."}
               </p>
             </div>
 
