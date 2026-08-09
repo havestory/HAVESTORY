@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { CalendarCheck, Check, Clock3, LogIn, LogOut, Printer, RefreshCw, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useGetSettings } from "@workspace/api-client-react";
+import { getBusinessName } from "@/lib/brand-settings";
 
 type AttendanceRecord={
   id:number; staff_id:number; staff_name:string; username:string; attendance_date:string;
@@ -16,6 +18,8 @@ const dateKey=(value:string)=>String(value).slice(0,10);
 
 export default function Attendance(){
   const {toast}=useToast();
+  const {data:settings}=useGetSettings();
+  const businessName=getBusinessName(settings as any);
   const [month,setMonth]=useState(currentMonth());
   const [role,setRole]=useState<"owner"|"staff">("staff");
   const [today,setToday]=useState("");
@@ -98,24 +102,24 @@ export default function Attendance(){
     {checkoutOpen&&<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"><div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"><div className="flex items-start justify-between"><div><h2 className="text-xl font-black">Confirm Check Out</h2><p className="mt-1 text-sm text-gray-500">Your current time will be saved.</p></div><button onClick={()=>setCheckoutOpen(false)} className="rounded-full p-2 text-gray-400 hover:bg-gray-100"><X size={18}/></button></div><label className="mt-5 flex items-start gap-3 rounded-2xl border bg-gray-50 p-4"><input type="checkbox" checked={earlyCheckout} onChange={e=>setEarlyCheckout(e.target.checked)} className="mt-0.5 h-4 w-4 accent-rose-500"/><span><b className="text-sm">I am leaving early today</b><span className="mt-1 block text-xs text-gray-500">A reason is required so the Owner can review it.</span></span></label>{earlyCheckout&&<label className="mt-4 block text-xs font-bold text-gray-600">Reason *<textarea value={checkoutNote} onChange={e=>setCheckoutNote(e.target.value)} maxLength={300} rows={3} placeholder="e.g. Medical appointment" className="mt-2 w-full resize-none rounded-2xl border p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-pink-200"/></label>}<div className="mt-5 flex gap-2"><button onClick={()=>setCheckoutOpen(false)} className="flex-1 rounded-xl border py-3 text-sm font-bold text-gray-600">Cancel</button><button disabled={busy||earlyCheckout&&!checkoutNote.trim()} onClick={submitCheckout} className="flex-1 rounded-xl bg-gray-900 py-3 text-sm font-black text-white disabled:opacity-40">Confirm Check Out</button></div></div></div>}
 
     {selectedStaff&&role==="owner"&&<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-3 sm:p-6"><div className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-3xl bg-white p-5 shadow-2xl sm:p-7"><div className="flex items-start justify-between"><div><div className="text-xs font-black uppercase tracking-widest text-pink-500">Attendance Calendar · {month}</div><h2 className="mt-1 text-2xl font-black">{selectedStaff.name}</h2><p className="text-sm text-gray-500">{selectedStaff.days} approved days · {duration(selectedStaff.minutes)}</p></div><button onClick={()=>setSelectedStaff(null)} className="rounded-full p-2 text-gray-400 hover:bg-gray-100"><X size={20}/></button></div><div className="mt-5 grid grid-cols-7 gap-1 text-center text-[10px] font-black uppercase text-gray-400">{["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(day=><div key={day} className="py-2">{day}</div>)}</div><div className="grid grid-cols-7 gap-1">{Array.from({length:leading}).map((_,i)=><div key={`blank-${i}`} />)}{calendarDays.map(day=>{const key=`${month}-${String(day).padStart(2,"0")}`;const record=recordByDate.get(key);return <button key={day} type="button" onClick={()=>record&&setSelectedDay(record)} className={`min-h-16 rounded-xl border p-1.5 text-left transition sm:min-h-20 sm:p-2 ${record?.status==="approved"?"border-emerald-200 bg-emerald-50":record?.status==="pending"?"border-amber-200 bg-amber-50":record?.status==="rejected"?"border-rose-200 bg-rose-50":"border-gray-100 bg-gray-50"} ${record?"hover:ring-2 hover:ring-pink-200":"cursor-default"}`}><span className="text-xs font-black">{day}</span>{record&&<><div className="mt-1 truncate text-[9px] font-bold uppercase sm:text-[10px]">{record.status}</div><div className="hidden text-[10px] text-gray-500 sm:block">{formatTime(record.check_in_at)}–{formatTime(record.check_out_at)}</div>{record.early_checkout&&<div className="mt-1 text-[8px] font-black text-rose-600 sm:text-[9px]">LEFT EARLY</div>}</>}</button>})}</div><div className="mt-5 rounded-2xl border bg-gray-50 p-4">{selectedDay?<div className="grid gap-3 sm:grid-cols-4"><div><div className="text-[10px] font-bold text-gray-400">DATE</div><b>{dateKey(selectedDay.attendance_date)}</b></div><div><div className="text-[10px] font-bold text-gray-400">CHECK IN</div><b>{formatTime(selectedDay.check_in_at)}</b></div><div><div className="text-[10px] font-bold text-gray-400">CHECK OUT</div><b>{formatTime(selectedDay.check_out_at)}</b></div><div><div className="text-[10px] font-bold text-gray-400">RECORDED TIME</div><b>{duration(selectedDay.duration_minutes)}</b></div>{selectedDay.checkout_note&&<div className="sm:col-span-4 rounded-xl bg-rose-50 p-3 text-sm text-rose-700"><b>Early checkout reason:</b> {selectedDay.checkout_note}</div>}{selectedDay.owner_note&&<div className="sm:col-span-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-700"><b>Owner note:</b> {selectedDay.owner_note}</div>}</div>:<p className="text-sm text-gray-500">Select an attended day to see check-in, check-out and notes.</p>}</div></div></div>}
-    {printMode&&createPortal(<AttendancePrintReport month={month} role={role} records={records} byStaff={byStaff} approvedCount={approved.length} totalMinutes={totalMinutes}/>,document.body)}
+    {printMode&&createPortal(<AttendancePrintReport month={month} role={role} records={records} byStaff={byStaff} approvedCount={approved.length} totalMinutes={totalMinutes} businessName={businessName}/>,document.body)}
   </div>;
 }
 
 
-function AttendancePrintReport({month,role,records,byStaff,approvedCount,totalMinutes}:{month:string;role:"owner"|"staff";records:AttendanceRecord[];byStaff:StaffSummary[];approvedCount:number;totalMinutes:number}){
+function AttendancePrintReport({month,role,records,byStaff,approvedCount,totalMinutes,businessName}:{month:string;role:"owner"|"staff";records:AttendanceRecord[];byStaff:StaffSummary[];approvedCount:number;totalMinutes:number;businessName:string}){
   const pending=records.filter(r=>r.status==="pending").length;
   const rejected=records.filter(r=>r.status==="rejected").length;
   return <main className="attendance-print-root hidden font-sans">
     <header className="print-keep border-b-[3px] border-slate-950 pb-4">
       <div className="flex items-start justify-between gap-5">
         <div>
-          <div className="text-[9pt] font-black uppercase tracking-[0.18em] text-pink-600">PrintBloom · Attendance Administration</div>
+          <div className="text-[9pt] font-black uppercase tracking-[0.18em] text-pink-600">{businessName} · Attendance Administration</div>
           <h1 className="mt-1 text-[22pt] font-black leading-tight text-slate-950">{role==="owner"?"Monthly Attendance Report":"My Monthly Attendance Report"}</h1>
           <p className="mt-1 text-[9pt] text-slate-500">Reporting period: <b className="text-slate-800">{month}</b> · Generated {new Date().toLocaleString("en-LK")}</p>
         </div>
         <div className="rounded-lg border border-indigo-100 bg-indigo-50 px-3 py-2 text-right text-[7.5pt] font-bold leading-4 text-indigo-700">
-          PRINTBLOOM<br/><span className="font-black">OPERATED BY CODEARTIX TECHNOLOGIES</span>
+          {businessName}
         </div>
       </div>
     </header>
@@ -159,7 +163,7 @@ function AttendancePrintReport({month,role,records,byStaff,approvedCount,totalMi
     </section>
 
     <footer className="print-keep mt-6 border-t border-slate-300 pt-2 text-[7pt] leading-4 text-slate-400">
-      Internal attendance report · PrintBloom is operated by CodeArtix Technologies · Generated from approved/pending attendance records for {month}.
+      Internal attendance report · {businessName} · Generated from approved/pending attendance records for {month}.
     </footer>
   </main>
 }
