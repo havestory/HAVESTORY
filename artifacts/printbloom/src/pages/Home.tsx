@@ -140,13 +140,13 @@ export default function Home() {
       <PremiumHero settings={settings} publicStats={publicStats} />
       <LabelCalculator />
 
-      {/* Featured Products */}
+      {/* Frame and print collections */}
       <section className="py-24 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-end mb-12">
             <div>
-              <span className="text-primary font-bold tracking-wider uppercase text-sm mb-2 block">Top Picks</span>
-              <h2 className="text-4xl font-display font-bold">Featured Products</h2>
+              <span className="text-primary font-bold tracking-wider uppercase text-sm mb-2 block">Curated for You</span>
+              <h2 className="text-4xl font-display font-bold">Frame & Print Collections</h2>
             </div>
             <Link href="/store" className="hidden sm:flex items-center gap-2 text-purple-700 font-semibold hover:text-primary transition-colors">
               View All <ArrowUpRight size={20} />
@@ -183,7 +183,7 @@ export default function Home() {
           
           <div className="mt-8 text-center sm:hidden">
             <Link href="/store" className="btn-glass px-6 py-3 rounded-xl inline-flex items-center gap-2">
-              View All Products <ArrowRight size={16} />
+              View All Collections <ArrowRight size={16} />
             </Link>
           </div>
         </div>
@@ -195,7 +195,7 @@ export default function Home() {
           <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-primary font-bold tracking-wider uppercase text-sm mb-2 block">Expertise</span>
             <h2 className="text-4xl font-display font-bold mb-4">Our Services</h2>
-            <p className="text-gray-600">From concept to physical print, we offer comprehensive design and production services tailored to your needs.</p>
+            <p className="text-gray-600">From studio portraits and colour-accurate photo printing to handcrafted framing, every service is tuned to your story.</p>
           </div>
 
           {!Array.isArray(services) ? (
@@ -424,16 +424,16 @@ export default function Home() {
             ✦ Got something special in mind?
           </div>
           <h2 className="text-4xl md:text-5xl font-display font-extrabold text-white mb-5 leading-tight">
-            Have a Unique Project?
+            Create Something Worth Keeping
           </h2>
           <p className="text-white/80 text-lg max-w-xl mx-auto mb-10 leading-relaxed">
-            Our team handles everything from brochures to large format banners. Submit a custom project brief and we'll get back to you with a quote.
+            Bring us a portrait, an old photograph or a wall-gallery idea. We will shape the colour, format and frame, then return with a thoughtful quote.
           </p>
           <a
             href="/custom-project"
             className="inline-flex items-center gap-2 bg-white text-purple-700 font-bold px-8 py-4 rounded-2xl text-base shadow-xl shadow-purple-900/20 hover:shadow-2xl hover:scale-105 transition-all duration-200"
           >
-            Start Custom Project →
+            Plan Your Project →
           </a>
         </div>
       </section>
