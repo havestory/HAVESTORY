@@ -4,6 +4,7 @@ import { format, startOfWeek, startOfMonth, startOfYear, subDays, parseISO, endO
 import { Download, BarChart2, Loader2, Calendar, FileText, Truck } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { captureElement } from "@/lib/html2canvas-capture";
+import { getBusinessInitials, getBusinessName } from "@/lib/brand-settings";
 import {
   getInvoicePaidAmount,
   getInvoiceAdvance,
@@ -68,6 +69,9 @@ export default function AdminReports() {
   const { data: orders }   = useListOrders({}, POLL);
   const { data: invoices } = useListInvoices({}, POLL);
   const { data: settings } = useGetSettings();
+  const businessName = getBusinessName(settings as any);
+  const businessInitials = getBusinessInitials(settings as any);
+  const reportFilePrefix = businessName.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "business";
 
   const invoiceByOrderId = new Map<string, any>();
   (invoices ?? []).forEach(inv => { if (inv.orderId) invoiceByOrderId.set(inv.orderId, inv); });
@@ -247,7 +251,7 @@ export default function AdminReports() {
       const pdfW   = pdf.internal.pageSize.getWidth();
       const pdfH   = pdf.internal.pageSize.getHeight();
       pdf.addImage(canvas.toDataURL("image/jpeg", 0.93), "JPEG", 0, 0, pdfW, pdfH);
-      savePDF(pdf, `PrintBloom-Report-${new Date().toISOString().slice(0, 10)}.pdf`);
+      savePDF(pdf, `${reportFilePrefix}-Report-${new Date().toISOString().slice(0, 10)}.pdf`);
     } finally { setGenerating(false); }
   };
 
@@ -264,7 +268,7 @@ export default function AdminReports() {
         if (i > 0) pdf.addPage();
         pdf.addImage(canvas.toDataURL("image/jpeg", 0.93), "JPEG", 0, 0, pdfW, pdfH);
       }
-      savePDF(pdf, `PrintBloom-Full-Report-${new Date().toISOString().slice(0, 10)}.pdf`);
+      savePDF(pdf, `${reportFilePrefix}-Full-Report-${new Date().toISOString().slice(0, 10)}.pdf`);
     } finally { setGeneratingFull(false); }
   };
 
@@ -275,7 +279,7 @@ export default function AdminReports() {
       display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 36px",
     }}>
       <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "10px" }}>
-        © {now.getFullYear()} PrintBloom · Revenue figures reflect invoice amounts · Sri Lanka
+        © {now.getFullYear()} {businessName} · Revenue figures reflect invoice amounts · Sri Lanka
       </div>
       <div style={{ color: "rgba(255,255,255,0.5)", fontSize: "9px", letterSpacing: "1px" }}>
         CONFIDENTIAL · Page {page} of {total}
@@ -330,10 +334,10 @@ export default function AdminReports() {
                 width: "36px", height: "36px", borderRadius: "9px",
                 background: "rgba(255,255,255,0.2)", display: "flex",
                 alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: "13px",
-              }}>PB</div>
+              }}>{businessInitials}</div>
             )}
             <div>
-              <div style={{ color: "#ffffff", fontWeight: 800, fontSize: "17px" }}>{settings?.businessName || "PrintBloom"}</div>
+              <div style={{ color: "#ffffff", fontWeight: 800, fontSize: "17px" }}>{businessName}</div>
               <div style={{ color: "rgba(255,255,255,0.7)", fontSize: "10px" }}>Professional Printing Services · Sri Lanka</div>
             </div>
           </div>
@@ -567,9 +571,9 @@ export default function AdminReports() {
             background: "linear-gradient(135deg, #be185d 0%, #7c3aed 100%)",
             display: "flex", alignItems: "center", justifyContent: "center",
             color: "#fff", fontWeight: 800, fontSize: "10px",
-          }}>PB</div>
+          }}>{businessInitials}</div>
           <div>
-            <div style={{ fontSize: "13px", fontWeight: 800, color: "#111827" }}>PrintBloom</div>
+            <div style={{ fontSize: "13px", fontWeight: 800, color: "#111827" }}>{businessName}</div>
             <div style={{ fontSize: "9px", color: "#9ca3af" }}>Business Report — Full Order Details</div>
           </div>
         </div>
@@ -704,7 +708,7 @@ export default function AdminReports() {
               <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center font-extrabold text-sm shrink-0">PB</div>
             )}
             <div className="min-w-0">
-              <div className="font-extrabold text-base truncate">{settings?.businessName || "PrintBloom"}</div>
+              <div className="font-extrabold text-base truncate">{businessName}</div>
               <div className="text-[11px] text-white/70 truncate">Professional Printing Services · Sri Lanka</div>
             </div>
           </div>
