@@ -601,3 +601,284 @@ main .glass-card:hover img {
 .pb-price-breakdown>div.unit { border:0;color:#0c63f2;font-weight:700; }
 .pb-price-breakdown>div.unit b { color:#0c63f2; }
 @media(max-width:520px){.pb-required-summary{grid-template-columns:1fr;padding:14px}.pb-required-summary>svg{transform:rotate(90deg);margin:auto}.pb-required-summary>div strong{font-size:18px}}
+
+
+/* ==========================================================================
+   HAVESTORY Studio + Colour Lab — premium visual system
+   Public storefront and admin surfaces only; business logic is unchanged.
+   ========================================================================== */
+
+:root {
+  --hs-ivory: #f7f1e7;
+  --hs-paper: #fffaf2;
+  --hs-linen: #e9ddcd;
+  --hs-walnut: #4a3428;
+  --hs-walnut-deep: #2f241f;
+  --hs-charcoal: #202421;
+  --hs-bronze: #a97945;
+  --hs-bronze-light: #c8a173;
+  --hs-sage: #72786c;
+  --hs-glass: rgba(255, 250, 242, 0.76);
+  --hs-line: rgba(74, 52, 40, 0.14);
+  --hs-shadow: 0 24px 70px rgba(47, 36, 31, 0.12);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  color: var(--hs-charcoal);
+  background:
+    radial-gradient(circle at 8% 8%, rgba(200, 161, 115, .16), transparent 30rem),
+    radial-gradient(circle at 92% 28%, rgba(114, 120, 108, .10), transparent 28rem),
+    var(--hs-ivory);
+  font-family: "Manrope", "Inter", system-ui, sans-serif;
+}
+h1, h2, h3, .font-display, .pb-animated-title {
+  font-family: "Cormorant Garamond", Georgia, serif !important;
+  letter-spacing: -.025em;
+}
+::selection { color: #fff; background: var(--hs-bronze); }
+
+/* Navigation */
+header .glass-panel {
+  border-color: rgba(74, 52, 40, .13);
+  background: rgba(255, 250, 242, .80);
+  box-shadow: 0 12px 42px rgba(47, 36, 31, .09);
+}
+header [class*="from-pink-500"][class*="to-purple-600"] {
+  background-image: linear-gradient(135deg, var(--hs-bronze), var(--hs-walnut));
+}
+header nav a[class*="text-purple"],
+header nav a:hover { color: var(--hs-walnut); }
+header .btn-gradient {
+  color: #fff;
+  background: linear-gradient(135deg, var(--hs-bronze), var(--hs-walnut));
+  box-shadow: 0 10px 28px rgba(74, 52, 40, .2);
+}
+
+/* Hero — portrait mat, walnut frame and colour-lab accents */
+.pb-premium-home {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(255,250,242,.94), rgba(239,229,214,.70)),
+    var(--hs-ivory);
+}
+.pb-premium-home::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .32;
+  background-image: radial-gradient(rgba(74,52,40,.22) .55px, transparent .55px);
+  background-size: 18px 18px;
+  mask-image: linear-gradient(to bottom, #000, transparent 82%);
+}
+.pb-hero-grid { position: relative; z-index: 1; }
+.pb-eyebrow {
+  color: var(--hs-walnut);
+  border: 1px solid rgba(169,121,69,.30);
+  background: rgba(255,250,242,.72);
+  box-shadow: 0 8px 25px rgba(74,52,40,.07);
+}
+.pb-eyebrow::before { background: var(--hs-bronze); }
+.pb-animated-title {
+  color: var(--hs-charcoal) !important;
+  background: none !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-wrap: balance;
+}
+.pb-hero-copy > p { color: #625b55; max-width: 38rem; }
+.pb-primary-cta {
+  color: #fff !important;
+  background: linear-gradient(135deg, var(--hs-bronze), var(--hs-walnut)) !important;
+  box-shadow: 0 15px 35px rgba(74,52,40,.22) !important;
+}
+.pb-primary-cta:hover { transform: translateY(-3px); box-shadow: 0 20px 45px rgba(74,52,40,.28) !important; }
+.pb-secondary-cta {
+  color: var(--hs-walnut) !important;
+  border-color: rgba(74,52,40,.20) !important;
+  background: rgba(255,250,242,.70) !important;
+}
+.pb-upload-note { color: var(--hs-sage) !important; }
+.pb-upload-note svg { color: var(--hs-bronze); }
+.pb-hero-visual {
+  isolation: isolate;
+  border: 14px solid var(--hs-walnut);
+  border-radius: 3px !important;
+  background: #e7ddce !important;
+  box-shadow:
+    inset 0 0 0 8px rgba(255,250,242,.95),
+    0 30px 80px rgba(47,36,31,.26) !important;
+  transform: rotate(1.1deg);
+}
+.pb-hero-visual::before {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  z-index: 2;
+  pointer-events: none;
+  border: 10px solid rgba(255,250,242,.92);
+  box-shadow: inset 0 0 24px rgba(47,36,31,.12);
+}
+.pb-hero-visual img { filter: saturate(.94) contrast(1.03); }
+.pb-slide-dots button { background: rgba(255,250,242,.65) !important; }
+.pb-slide-dots button.active { width: 28px; background: var(--hs-bronze) !important; }
+
+/* Collections, content cards and forms */
+.pb-category-grid { position: relative; z-index: 2; }
+.pb-category-card,
+.glass,
+.glass-panel,
+[class*="product-card"] {
+  border-color: var(--hs-line) !important;
+  background: var(--hs-glass);
+  box-shadow: 0 14px 40px rgba(47,36,31,.08);
+  backdrop-filter: blur(18px);
+}
+.pb-category-card { border-radius: 3px !important; }
+.pb-category-card:hover {
+  border-color: rgba(169,121,69,.46) !important;
+  box-shadow: var(--hs-shadow);
+  transform: translateY(-6px);
+}
+.pb-category-card > span,
+.pb-category-card > span.blue,
+.pb-category-card > span.pink {
+  color: var(--hs-walnut) !important;
+  background: linear-gradient(145deg, #eadac6, #fffaf2) !important;
+  border: 1px solid rgba(169,121,69,.22);
+}
+.pb-category-card > svg { color: var(--hs-bronze); }
+.pb-trust-strip {
+  border-color: var(--hs-line) !important;
+  background: rgba(255,250,242,.68) !important;
+}
+.pb-trust-strip svg { color: var(--hs-bronze) !important; }
+
+main section [class*="text-primary"],
+main section [class*="text-purple-7"],
+main section [class*="text-purple-9"],
+main section [class*="text-pink-"] { color: var(--hs-walnut) !important; }
+main section [class*="bg-pink-50"],
+main section [class*="bg-purple-50"] { background-color: rgba(233,221,205,.60) !important; }
+main section [class*="from-pink-"][class*="to-purple-"],
+main section [class*="from-pink-"][class*="via-fuchsia-"] {
+  background-image: linear-gradient(135deg, var(--hs-bronze), var(--hs-walnut-deep)) !important;
+}
+main section input:focus,
+main section select:focus,
+main section textarea:focus { border-color: var(--hs-bronze) !important; box-shadow: 0 0 0 3px rgba(169,121,69,.14) !important; }
+
+/* Footer */
+footer {
+  color: var(--hs-charcoal);
+  background: linear-gradient(180deg, rgba(247,241,231,.4), #e8dccb);
+  border-top: 1px solid var(--hs-line);
+}
+footer > div:first-child { background: transparent !important; }
+footer > div:nth-child(2) {
+  height: 3px !important;
+  background: linear-gradient(90deg, var(--hs-walnut), var(--hs-bronze-light), var(--hs-walnut)) !important;
+}
+footer [class*="from-pink-"][class*="to-purple-"] {
+  background-image: linear-gradient(135deg, var(--hs-bronze), var(--hs-walnut)) !important;
+}
+
+/* Admin console */
+.havestory-admin-shell {
+  --admin-cream: #f4eee5;
+  --admin-card: rgba(255, 251, 245, .88);
+  --admin-ink: #232522;
+  --admin-muted: #777069;
+  --admin-accent: #a97945;
+  background:
+    radial-gradient(circle at 90% 0, rgba(200,161,115,.16), transparent 28rem),
+    var(--admin-cream) !important;
+  font-family: "Manrope", "Inter", system-ui, sans-serif;
+}
+.havestory-admin-shell aside {
+  color: #ece5dc;
+  border-color: rgba(200,161,115,.17) !important;
+  background: linear-gradient(180deg, #242824, #1a1e1b) !important;
+  box-shadow: 15px 0 50px rgba(25,28,25,.14);
+}
+.havestory-admin-shell aside [class*="from-pink-"][class*="to-purple-"] {
+  background-image: linear-gradient(135deg, var(--hs-bronze-light), var(--hs-walnut)) !important;
+}
+.havestory-admin-shell aside [class*="bg-pink-"],
+.havestory-admin-shell aside [class*="text-pink-"] {
+  color: #f0c995 !important;
+  background-color: rgba(200,161,115,.12) !important;
+}
+.havestory-admin-shell main { color: var(--admin-ink); }
+.havestory-admin-shell main > div:last-child { position: relative; }
+.havestory-admin-shell main [class~="bg-white"],
+.havestory-admin-shell main [class*="bg-white/"],
+.havestory-admin-shell main .glass,
+.havestory-admin-shell main .glass-panel {
+  border-color: rgba(74,52,40,.11) !important;
+  background-color: var(--admin-card) !important;
+  box-shadow: 0 12px 35px rgba(47,36,31,.065);
+}
+.havestory-admin-shell main [class*="text-pink-"],
+.havestory-admin-shell main [class*="text-purple-"] { color: var(--admin-accent) !important; }
+.havestory-admin-shell main [class*="bg-pink-"],
+.havestory-admin-shell main [class*="bg-purple-"] { background-color: rgba(169,121,69,.11) !important; }
+.havestory-admin-shell main [class*="from-pink-"][class*="to-purple-"] {
+  background-image: linear-gradient(135deg, var(--hs-bronze), var(--hs-walnut)) !important;
+}
+.havestory-admin-shell main button,
+.havestory-admin-shell main a,
+.havestory-admin-shell main input,
+.havestory-admin-shell main select,
+.havestory-admin-shell main textarea { transition: border-color .2s ease, background-color .2s ease, color .2s ease, box-shadow .2s ease, transform .2s ease; }
+.havestory-admin-shell main input:focus,
+.havestory-admin-shell main select:focus,
+.havestory-admin-shell main textarea:focus {
+  outline: none;
+  border-color: var(--admin-accent) !important;
+  box-shadow: 0 0 0 3px rgba(169,121,69,.14) !important;
+}
+.havestory-admin-shell table { border-color: rgba(74,52,40,.10); }
+.havestory-admin-shell thead { color: #5d554f; background: rgba(233,221,205,.50); }
+
+.havestory-admin-shell.dark {
+  --admin-card: rgba(39,43,39,.92);
+  --admin-ink: #eee7de;
+  --admin-muted: #aaa198;
+  color-scheme: dark;
+  background: #171a18 !important;
+}
+.havestory-admin-shell.dark main { color: var(--admin-ink); }
+.havestory-admin-shell.dark main [class~="bg-white"],
+.havestory-admin-shell.dark main [class*="bg-white/"] { background-color: var(--admin-card) !important; }
+.havestory-admin-shell.dark main input,
+.havestory-admin-shell.dark main select,
+.havestory-admin-shell.dark main textarea { color: #f1eae1; background: #202420; border-color: rgba(255,255,255,.11); }
+
+.havestory-admin-login {
+  color: var(--hs-charcoal);
+  background:
+    radial-gradient(circle at 18% 20%, rgba(200,161,115,.22), transparent 24rem),
+    radial-gradient(circle at 85% 75%, rgba(114,120,108,.17), transparent 26rem),
+    linear-gradient(135deg, #f7f1e7, #e7dbcb) !important;
+}
+.havestory-admin-login .glass-panel {
+  border: 1px solid rgba(74,52,40,.14);
+  background: rgba(255,250,242,.78);
+  box-shadow: 0 35px 90px rgba(47,36,31,.18);
+}
+.havestory-admin-login [class*="from-pink-"][class*="to-purple-"],
+.havestory-admin-login [class*="from-pink-"][class*="to-purple-600"] {
+  background-image: linear-gradient(135deg, var(--hs-bronze), var(--hs-walnut)) !important;
+}
+.havestory-admin-login [class*="text-purple-"],
+.havestory-admin-login [class*="text-pink-"] { color: var(--hs-walnut) !important; }
+.havestory-admin-login input:focus { border-color: var(--hs-bronze) !important; box-shadow: 0 0 0 3px rgba(169,121,69,.15) !important; }
+
+@media (max-width: 900px) {
+  .pb-hero-visual { transform: none; border-width: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}

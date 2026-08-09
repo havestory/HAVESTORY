@@ -84,7 +84,7 @@ export function Footer() {
               );
             })()}
             <p className="text-gray-600 text-sm leading-relaxed">
-              {settings?.tagline || "Premium printing and graphic design services crafted with passion and precision."}
+              {settings?.tagline || "Portrait studio, colour lab and custom framing — crafted to preserve the moments that matter."}
             </p>
             <div className="flex items-center gap-3 mt-3">
               {settings?.facebookUrl && (
@@ -115,9 +115,9 @@ export function Footer() {
           <div>
             <h3 className="font-display font-bold text-lg mb-4">Quick Links</h3>
             <ul className="flex flex-col gap-3 text-sm text-gray-600">
-              <li><Link href="/store" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="hover:text-primary transition-colors">Print Store</Link></li>
-              <li><Link href="/services" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="hover:text-primary transition-colors">Design Services</Link></li>
-              <li><Link href="/portfolio" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="hover:text-primary transition-colors">Our Portfolio</Link></li>
+              <li><Link href="/store" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="hover:text-primary transition-colors">Frames & Prints</Link></li>
+              <li><Link href="/services" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="hover:text-primary transition-colors">Studio Services</Link></li>
+              <li><Link href="/portfolio" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="hover:text-primary transition-colors">Gallery</Link></li>
               <li><Link href="/track-order" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="hover:text-primary transition-colors">Track Order</Link></li>
             </ul>
           </div>
@@ -160,7 +160,7 @@ export function Footer() {
         </div>
 
         <div className="pt-8 border-t border-gray-200/50 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-          <div><p>© {new Date().getFullYear()} {settings?.businessName || "HAVESTORY"}. All rights reserved.</p><div className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-indigo-100 bg-indigo-50/80 px-2.5 py-1 text-xs font-semibold text-indigo-700"><span>HAVESTORY</span><span className="text-indigo-300">·</span><span>Operated by <strong>CodeArtix Technologies</strong></span></div></div>
+          <div><p>© {new Date().getFullYear()} {settings?.businessName || "HAVESTORY"}. All rights reserved.</p><div className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-[#a97945]/20 bg-[#fffaf2]/70 px-2.5 py-1 text-xs font-semibold text-[#4a3428]"><span>HAVESTORY</span><span className="text-[#c8a173]">·</span><span>Operated by <strong>CodeArtix Technologies</strong></span></div></div>
           {(settings as any)?.designerCredit && (
             <p className="flex items-center gap-1.5">
               Designed by{" "}

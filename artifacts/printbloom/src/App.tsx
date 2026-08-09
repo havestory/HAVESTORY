@@ -116,7 +116,7 @@ function SiteSetup() {
     setSettingsCache(s);
 
     /* Apply color theme */
-    applyThemeVars(s.themePreset ?? "pink-purple");
+    applyThemeVars(s.themePreset ?? "havestory-gallery");
 
     /* Apply SEO meta tags */
     const setMeta = (name: string, content: string, attr: "name" | "property" = "name") => {
@@ -167,7 +167,7 @@ function ProtectedAdminRoute({ component: Component, permission }: { component: 
 
   if (isLoading) return (
     <div className="h-screen flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-pink-300 border-t-pink-600 rounded-full animate-spin" />
+      <div className="w-8 h-8 border-2 border-[#c8a173] border-t-[#4a3428] rounded-full animate-spin" />
     </div>
   );
 
