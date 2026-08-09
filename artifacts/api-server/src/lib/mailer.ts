@@ -115,7 +115,7 @@ function renderHtml(p: OrderEmailPayload, businessName: string): string {
   return `<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif">
 <div style="max-width:600px;margin:0 auto;background:#ffffff;padding:0">
-  <div style="background:linear-gradient(135deg,#ec4899,#a855f7);padding:24px 28px;color:#ffffff">
+  <div style="background:linear-gradient(135deg,#a87842,#5c4938);padding:24px 28px;color:#ffffff">
     <div style="font-size:13px;letter-spacing:2px;opacity:0.85">NEW ORDER</div>
     <div style="font-size:24px;font-weight:700;margin-top:4px">${esc(p.orderId)}</div>
     <div style="font-size:13px;opacity:0.9;margin-top:6px">${esc(businessName)} \u2014 ${new Date().toLocaleString("en-LK", { dateStyle: "medium", timeStyle: "short" })}</div>
@@ -125,8 +125,8 @@ function renderHtml(p: OrderEmailPayload, businessName: string): string {
     <h2 style="margin:0 0 12px;font-size:16px;color:#111827">Customer</h2>
     <table style="width:100%;border-collapse:collapse;font-size:14px;color:#374151">
       <tr><td style="padding:4px 0;color:#6b7280;width:120px">Name</td><td style="padding:4px 0;font-weight:600;color:#111827">${esc(p.customerName)}</td></tr>
-      ${p.customerPhone ? `<tr><td style="padding:4px 0;color:#6b7280">Phone</td><td style="padding:4px 0"><a href="tel:${esc(p.customerPhone)}" style="color:#ec4899;text-decoration:none">${esc(p.customerPhone)}</a></td></tr>` : ""}
-      ${p.customerEmail ? `<tr><td style="padding:4px 0;color:#6b7280">Email</td><td style="padding:4px 0"><a href="mailto:${esc(p.customerEmail)}" style="color:#ec4899;text-decoration:none">${esc(p.customerEmail)}</a></td></tr>` : ""}
+      ${p.customerPhone ? `<tr><td style="padding:4px 0;color:#6b7280">Phone</td><td style="padding:4px 0"><a href="tel:${esc(p.customerPhone)}" style="color:#a87842;text-decoration:none">${esc(p.customerPhone)}</a></td></tr>` : ""}
+      ${p.customerEmail ? `<tr><td style="padding:4px 0;color:#6b7280">Email</td><td style="padding:4px 0"><a href="mailto:${esc(p.customerEmail)}" style="color:#a87842;text-decoration:none">${esc(p.customerEmail)}</a></td></tr>` : ""}
       ${p.customerAddress ? `<tr><td style="padding:4px 0;color:#6b7280;vertical-align:top">Address</td><td style="padding:4px 0;white-space:pre-line">${esc(p.customerAddress)}</td></tr>` : ""}
       <tr><td style="padding:4px 0;color:#6b7280">Shipping</td><td style="padding:4px 0">${esc(shippingLabel)}</td></tr>
       ${p.orderType ? `<tr><td style="padding:4px 0;color:#6b7280">Type</td><td style="padding:4px 0;text-transform:capitalize">${esc(p.orderType)}</td></tr>` : ""}
@@ -151,7 +151,7 @@ function renderHtml(p: OrderEmailPayload, businessName: string): string {
 
     ${p.notes ? `<h2 style="margin:24px 0 8px;font-size:16px;color:#111827">Notes</h2><div style="padding:12px;background:#fef3c7;border:1px solid #fde68a;border-radius:8px;font-size:14px;color:#78350f;white-space:pre-line">${esc(p.notes)}</div>` : ""}
 
-    ${p.storefrontUrl ? `<div style="margin-top:24px;text-align:center"><a href="${esc(p.storefrontUrl)}" style="display:inline-block;background:linear-gradient(135deg,#ec4899,#a855f7);color:#ffffff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">Open Admin Dashboard</a></div>` : ""}
+    ${p.storefrontUrl ? `<div style="margin-top:24px;text-align:center"><a href="${esc(p.storefrontUrl)}" style="display:inline-block;background:linear-gradient(135deg,#a87842,#5c4938);color:#ffffff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">Open Admin Dashboard</a></div>` : ""}
   </div>
 
   <div style="padding:20px 28px;background:#f9fafb;border-top:1px solid #e5e7eb;font-size:12px;color:#9ca3af;text-align:center">
@@ -204,7 +204,7 @@ export interface SendOrderEmailOpts {
  */
 export async function sendOrderNotificationEmail(opts: SendOrderEmailOpts): Promise<boolean> {
   const { recipients, payload, log, errorLog } = opts;
-  const businessName = opts.businessName || "PrintBloom";
+  const businessName = opts.businessName || "HAVESTORY";
   const to = (recipients || []).map(s => s.trim()).filter(Boolean);
   if (to.length === 0) {
     if (log) log("[mailer] no recipients configured; skipping");
@@ -301,7 +301,7 @@ function renderCustomerHtml(p: OrderEmailPayload, businessName: string, shipping
   return `<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif">
 <div style="max-width:600px;margin:0 auto;background:#ffffff;padding:0">
-  <div style="background:linear-gradient(135deg,#ec4899,#a855f7);padding:28px 28px;color:#ffffff;text-align:center">
+  <div style="background:linear-gradient(135deg,#a87842,#5c4938);padding:28px 28px;color:#ffffff;text-align:center">
     <div style="font-size:28px;font-weight:700">Thank You!</div>
     <div style="font-size:14px;opacity:0.9;margin-top:6px">Your order has been received</div>
   </div>
@@ -365,7 +365,7 @@ function renderCustomerHtml(p: OrderEmailPayload, businessName: string, shipping
 
     ${trackingUrl ? `
     <div style="margin-top:20px;text-align:center">
-      <a href="${esc(trackingUrl)}" style="display:inline-block;background:linear-gradient(135deg,#ec4899,#a855f7);color:#ffffff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">\uD83D\uDCE6 Track Your Order</a>
+      <a href="${esc(trackingUrl)}" style="display:inline-block;background:linear-gradient(135deg,#a87842,#5c4938);color:#ffffff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">\uD83D\uDCE6 Track Your Order</a>
     </div>` : ""}
 
     <p style="color:#6b7280;font-size:13px;line-height:1.5;margin:20px 0 0;text-align:center">
@@ -425,7 +425,7 @@ function renderCustomerText(p: OrderEmailPayload, businessName: string, shipping
 
 export async function sendCustomerConfirmationEmail(opts: CustomerConfirmationOpts): Promise<boolean> {
   const { customerEmail, payload, log, errorLog } = opts;
-  const businessName = opts.businessName || "PrintBloom";
+  const businessName = opts.businessName || "HAVESTORY";
   const shippingCost = opts.shippingCost ?? 0;
   const discountAmount = opts.discountAmount ?? 0;
   const to = (customerEmail || "").trim();
@@ -580,7 +580,7 @@ function renderCompletionText(p: OrderEmailPayload, businessName: string, tracki
  */
 export async function sendOrderCompletionEmail(opts: OrderCompletionOpts): Promise<boolean> {
   const { customerEmail, payload, log, errorLog } = opts;
-  const businessName = opts.businessName || "PrintBloom";
+  const businessName = opts.businessName || "HAVESTORY";
   const trackingUrl = opts.trackingUrl ?? "";
   const to = (customerEmail || "").trim();
   if (!to) {
@@ -609,7 +609,7 @@ export async function sendOrderCompletionEmail(opts: OrderCompletionOpts): Promi
  * Send a one-shot test email so the admin can verify SMTP is configured.
  */
 export async function sendTestEmail(opts: { recipients: string[]; businessName?: string; credentials?: MailerCredentials; log?: (msg: string, extra?: Record<string, unknown>) => void; errorLog?: (msg: string, extra?: Record<string, unknown>) => void }): Promise<{ ok: boolean; reason?: string }> {
-  const businessName = opts.businessName || "PrintBloom";
+  const businessName = opts.businessName || "HAVESTORY";
   const to = (opts.recipients || []).map(s => s.trim()).filter(Boolean);
   if (to.length === 0) return { ok: false, reason: "no_recipients" };
   const transport = getTransport(opts.credentials, opts.log);
@@ -621,7 +621,7 @@ export async function sendTestEmail(opts: { recipients: string[]; businessName?:
       to: to.join(", "),
       subject: `\u2705 ${businessName} test email`,
       text: `This is a test email from ${businessName}. If you can read this, order notifications are working.`,
-      html: `<div style="font-family:-apple-system,sans-serif;padding:24px;text-align:center"><h2 style="color:#ec4899;margin:0 0 8px">\u2705 SMTP test successful</h2><p style="color:#374151">Order notifications from <strong>${escapeHtml(businessName)}</strong> are working. You can close this email.</p></div>`,
+      html: `<div style="font-family:-apple-system,sans-serif;padding:24px;text-align:center"><h2 style="color:#a87842;margin:0 0 8px">\u2705 SMTP test successful</h2><p style="color:#374151">Order notifications from <strong>${escapeHtml(businessName)}</strong> are working. You can close this email.</p></div>`,
     });
     return { ok: true };
   } catch (err) {
