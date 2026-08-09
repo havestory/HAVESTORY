@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useAdminLogout, useGetSettings } from "@workspace/api-client-react";
 import { getSettingsCache } from "@/lib/settings-cache";
+import { getBusinessInitials, getBusinessName } from "@/lib/brand-settings";
 import {
   LayoutDashboard, ShoppingBag, Sparkles, Users,
   Receipt, BarChart2, Package, Wrench, FlaskConical,
@@ -92,6 +93,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     initialDataUpdatedAt: 0,
   } });
 
+  const businessName = getBusinessName(settings);
+  const businessInitials = getBusinessInitials(settings);
+
   useEffect(() => {
     try { localStorage.setItem(DARK_KEY, dark ? "1" : "0"); } catch {}
   }, [dark]);
@@ -140,16 +144,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {settings?.logoUrl ? (
             <img
               src={settings.logoUrl}
-              alt={settings.businessName || "Logo"}
+              alt={businessName || "Business logo"}
               className={`w-8 h-8 rounded-lg object-contain shrink-0 ${dark ? "bg-white/10" : "bg-gray-50"}`}
             />
           ) : (
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
-              HS
+              {businessInitials}
             </div>
           )}
           <div>
-            <div className={`leading-tight ${nameText}`}>{settings?.businessName || "HAVESTORY"}</div>
+            <div className={`leading-tight ${nameText}`}>{businessName}</div>
             <div className={`text-[10px] leading-tight ${logoSub}`}>{session?.role === "staff" ? "Staff Studio Console" : "Owner Studio Console"}</div>
           </div>
         </div>
