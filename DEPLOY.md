@@ -1,169 +1,138 @@
-# PrintBloom — Vercel Deployment Guide (A to Z)
+# HAVESTORY — Neon, Cloudinary and Vercel Deployment (A to Z)
 
-This guide deploys the entire PrintBloom site (frontend + API + admin panel) as a single Vercel project. No separate server needed.
+This repository deploys the customer website, admin panel and Express API as one Vercel project.
 
----
+> Isolation rule: create brand-new HAVESTORY services. Never reuse a PrintBloom database, Cloudinary product environment, Vercel project, session secret or admin password.
 
-## What You Need (Accounts)
+## 1. Before deployment
 
-| Service | Purpose | Cost |
-|---|---|---|
-| [github.com](https://github.com) | Source code | Free |
-| [neon.tech](https://neon.tech) | PostgreSQL database | Free tier |
-| [cloudinary.com](https://cloudinary.com) | File & image storage | Free tier |
-| [vercel.com](https://vercel.com) | Hosting (frontend + API) | Free tier |
+1. Review and merge the active HAVESTORY foundation pull request into `main`.
+2. Confirm the GitHub repository is `kleraandria35-coder/HAVESTORY`.
+3. Keep all credentials outside GitHub. Add them only as Vercel environment variables.
 
----
+## 2. Create the HAVESTORY Neon database
 
-## Step 1 — Neon Database
+1. Sign in at https://console.neon.tech.
+2. Choose **New Project**.
+3. Project name: `havestory-production`.
+4. Region: choose Singapore or the closest available region to Sri Lanka.
+5. Create the project.
+6. Open the project and click **Connect**.
+7. Select the main database and owner role.
+8. Enable **Pooled connection**. The hostname normally contains `-pooler`.
+9. Copy the complete connection string.
+10. Save it privately. Use the same pooled value for:
+   - `DATABASE_URL`
+   - `NEON_DATABASE_URL`
 
-1. Go to [neon.tech](https://neon.tech) → **Sign up / Log in**
-2. Click **New Project** → give it a name (e.g. `printbloom-prod`) → **Create**
-3. Once created, click **Connection Details**
-4. Set **Connection string** format to **Pooled** (important for serverless!)
-5. Copy the full connection string — it looks like:
-   ```
-   postgresql://user:password@ep-something.us-east-2.aws.neon.tech/neondb?sslmode=require
-   ```
-6. **Save it** — you'll need this as `DATABASE_URL`
+Do not manually copy PrintBloom tables or data. HAVESTORY starts against its own empty database and creates the required structure during startup.
 
-> If you already have a Neon database from development, you can use the same one.
-> The first deploy will automatically create any missing tables (including the sessions table).
+Official reference: https://neon.com/docs/connect/choose-connection
 
----
+## 3. Create the HAVESTORY Cloudinary account/environment
 
-## Step 2 — Cloudinary Credentials
+1. Sign in or create a separate account at https://console.cloudinary.com.
+2. Use a HAVESTORY-owned email address where possible.
+3. On the Dashboard, note the **Cloud name**.
+4. Open **Settings → API Keys**.
+5. Generate or select a key pair dedicated to HAVESTORY production.
+6. Record:
+   - `CLOUDINARY_CLOUD_NAME`
+   - `CLOUDINARY_API_KEY`
+   - `CLOUDINARY_API_SECRET`
+7. Never place the API secret in frontend code, screenshots, chat messages or GitHub.
+8. HAVESTORY uploads are stored under `havestory/...` folders by the application.
 
-1. Go to [cloudinary.com](https://cloudinary.com) → **Log in**
-2. On the dashboard home page you'll see your credentials:
-   - **Cloud Name** → e.g. `dxyz123abc`
-   - **API Key** → e.g. `123456789012345`
-   - **API Secret** → e.g. `AbCdEfGhIjKlMnOpQrStUvWxYz`
-3. Save all three — you'll need them as env vars
+Official reference: https://cloudinary.com/documentation/finding_your_credentials_tutorial
 
----
+## 4. Create private login secrets
 
-## Step 3 — Generate a Session Secret
+Create:
 
-The admin login uses a secure session. You need a strong random secret.
+- `SESSION_SECRET`: a random value of at least 64 characters
+- `ADMIN_USERNAME`: for example `Admin.HAVESTORY`
+- `ADMIN_PASSWORD`: a new unique strong password
+- `ADMIN_PIN`: a new four-digit PIN that is not reused elsewhere
 
-**Option A — Use any online generator:**
-Go to [generate-secret.vercel.app/64](https://generate-secret.vercel.app/64) and copy the result.
+A local terminal can generate the session secret with:
 
-**Option B — Use your terminal:**
 ```bash
 openssl rand -hex 32
 ```
 
-Save the output — this will be your `SESSION_SECRET`.
+Do not use PrintBloom login values.
 
----
+## 5. Import HAVESTORY into Vercel
 
-## Step 4 — Deploy to Vercel
+1. Sign in at https://vercel.com using the GitHub account that can access the private repository.
+2. Select **Add New → Project**.
+3. Import `kleraandria35-coder/HAVESTORY`.
+4. Set project name to `havestory` or another HAVESTORY-only name.
+5. **Framework Preset:** Other.
+6. **Root Directory:** `.` (repository root).
+7. Do not override the build or install commands. The repository's `vercel.json` uses:
+   - install: `pnpm install --frozen-lockfile`
+   - build: `pnpm run build:vercel`
+8. Do not connect the existing PrintBloom Vercel project.
 
-### 4.1 Import the GitHub Repo
+Official reference: https://vercel.com/docs/git/vercel-for-github
 
-1. Go to [vercel.com](https://vercel.com) → **Log in** (use GitHub to log in — easiest)
-2. Click **Add New → Project**
-3. Find `PrintBloom` in the repo list → click **Import**
+## 6. Add Vercel environment variables
 
-### 4.2 Configure the Project
+Before the first deployment, add these under **Project → Settings → Environment Variables**:
 
-On the "Configure Project" screen:
-
-- **Framework Preset:** Select **Other** (not Next.js, not Vite)
-- **Root Directory:** Leave as `.` (the root — do NOT change this)
-- **Build Command:** Leave blank — Vercel reads it from `vercel.json` automatically
-- **Output Directory:** Leave blank — also in `vercel.json`
-
-### 4.3 Add Environment Variables
-
-Scroll down to **Environment Variables** and add all of these:
-
-| Variable Name | Value | Notes |
+| Variable | Value | Required |
 |---|---|---|
-| `DATABASE_URL` | Your Neon connection string | From Step 1 |
-| `NEON_DATABASE_URL` | Same Neon connection string | Needed for session store |
-| `CLOUDINARY_CLOUD_NAME` | Your cloud name | From Step 2 |
-| `CLOUDINARY_API_KEY` | Your API key | From Step 2 |
-| `CLOUDINARY_API_SECRET` | Your API secret | From Step 2 |
-| `ADMIN_USERNAME` | `Admin.PrintBloom` | Or whatever you want |
-| `ADMIN_PASSWORD` | Your admin password | Keep this private! |
-| `ADMIN_PIN` | Your 4-digit PIN | Keep this private! |
-| `SESSION_SECRET` | Random 64-char string | From Step 3 |
-| `NODE_ENV` | `production` | Exactly as written |
+| `DATABASE_URL` | HAVESTORY pooled Neon URL | Yes |
+| `NEON_DATABASE_URL` | Same HAVESTORY pooled Neon URL | Yes |
+| `CLOUDINARY_CLOUD_NAME` | HAVESTORY cloud name | Yes |
+| `CLOUDINARY_API_KEY` | HAVESTORY API key | Yes |
+| `CLOUDINARY_API_SECRET` | HAVESTORY API secret | Yes |
+| `SESSION_SECRET` | New random 64+ character secret | Yes |
+| `ADMIN_USERNAME` | `Admin.HAVESTORY` or your choice | Yes |
+| `ADMIN_PASSWORD` | New strong password | Yes |
+| `ADMIN_PIN` | New four-digit PIN | Yes |
+| `GMAIL_USER` | Notification Gmail address | Optional |
+| `GMAIL_APP_PASSWORD` | Gmail App Password | Optional |
 
-> **Important:** Add each variable and tick all three environment checkboxes: **Production, Preview, Development**
+Apply required variables to **Production**. Use separate values for Preview/Development if you enable those environments. Do not put production secrets into Preview unless you intentionally want preview builds to access production services.
 
-### 4.4 Deploy
+Vercel sets `NODE_ENV=production`; do not add it manually.
 
-Click **Deploy**. The first build takes about 2–3 minutes.
+Official reference: https://vercel.com/docs/environment-variables
 
-When it finishes you'll see a live URL like:
-```
-https://printbloom-xyz.vercel.app
-```
+## 7. First deployment
 
----
+1. Click **Deploy**.
+2. Wait for both the frontend build and API function build to finish.
+3. Copy the final production URL, for example `https://havestory-xxxx.vercel.app`.
+4. Add `FRONTEND_ORIGIN` in Vercel with that exact origin and no trailing slash.
+5. Redeploy from **Deployments → latest deployment → Redeploy** so the API receives the origin value.
 
-## Step 5 — Verify It Works
+## 8. Verify everything
 
-1. Open your Vercel URL in a browser — you should see the PrintBloom homepage
-2. Go to `https://your-url.vercel.app/admin` — you should see the admin login
-3. Log in with your `ADMIN_USERNAME` and `ADMIN_PASSWORD`, then the PIN
-4. Go to **Settings** and update your business name, WhatsApp number, logo, etc.
+1. Open the home page.
+2. Open `/admin/login`.
+3. Log in with `ADMIN_USERNAME`, `ADMIN_PASSWORD` and `ADMIN_PIN`.
+4. Add one test product and image.
+5. Confirm the image appears inside the HAVESTORY Cloudinary environment.
+6. Create a test coupon and validate it in the storefront.
+7. Create a test customer/order and confirm it appears in the admin panel.
+8. Check the Neon Tables view and confirm the data exists only in `havestory-production`.
+9. Test logout/login again to confirm the secure session works.
+10. Delete test records if they are no longer needed.
 
----
+## 9. Add a custom domain later
 
-## Step 6 — Custom Domain (Optional)
+1. Open **Vercel Project → Settings → Domains**.
+2. Add the HAVESTORY domain.
+3. Follow the exact DNS records Vercel displays.
+4. After the domain verifies, change `FRONTEND_ORIGIN` to the final HTTPS domain.
+5. Redeploy.
+6. Update the website URL and shipping/verification links in the HAVESTORY admin settings.
 
-1. In Vercel dashboard → your project → **Settings → Domains**
-2. Type your domain (e.g. `printbloom.lk` or `www.printbloom.lk`) → **Add**
-3. Vercel will show you DNS records to set in your domain registrar:
-   - For **root domain** (`printbloom.lk`): Add an **A record** pointing to Vercel's IP
-   - For **www** (`www.printbloom.lk`): Add a **CNAME** pointing to `cname.vercel-dns.com`
-4. DNS changes take 10 minutes to a few hours
-5. Vercel automatically handles HTTPS/SSL — nothing to configure
+Official reference: https://vercel.com/docs/projects/domains
 
-After your custom domain is live, go to **Admin → Settings → Website URL** and update it to your real domain so tracking links work correctly.
+## 10. Future updates
 
----
-
-## Updating the Site Later
-
-Every time you push code to the `main` branch on GitHub, Vercel automatically rebuilds and redeploys. Zero manual steps needed.
-
-To push updates from Replit:
-1. Make your changes in Replit
-2. Ask the agent to push to GitHub
-3. Vercel detects the push and deploys automatically within ~2 minutes
-
----
-
-## Environment Variables Summary (Quick Copy)
-
-```
-DATABASE_URL=postgresql://...your neon string...
-NEON_DATABASE_URL=postgresql://...same neon string...
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-ADMIN_USERNAME=Admin.PrintBloom
-ADMIN_PASSWORD=your_admin_password
-ADMIN_PIN=your_pin
-SESSION_SECRET=your_64_char_random_string
-NODE_ENV=production
-```
-
----
-
-## Troubleshooting
-
-| Problem | Fix |
-|---|---|
-| Build fails | Check the build log in Vercel — usually a missing env var |
-| Admin login fails | Double-check `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_PIN` env vars |
-| Images not uploading | Check Cloudinary env vars are correct |
-| Session keeps logging out | Make sure `SESSION_SECRET` is set and `NODE_ENV=production` |
-| Database errors | Make sure `DATABASE_URL` uses the **Pooled** connection string from Neon |
-| CORS errors in browser | Ensure `NODE_ENV=production` is set |
+After the Vercel project is linked, pushes merged into `main` create production deployments automatically. Pull request branches create preview deployments when Git integration is enabled. Keep Preview connected only to non-production test services if it needs database or upload access.
