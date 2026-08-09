@@ -10,9 +10,9 @@ import { getSettingsCache } from "@/lib/settings-cache";
 
 const links = [
   { name: "Home", href: "/" },
-  { name: "Store", href: "/store" },
-  { name: "Services", href: "/services" },
-  { name: "Portfolio", href: "/portfolio" },
+  { name: "Frames & Prints", href: "/store" },
+  { name: "Studio Services", href: "/services" },
+  { name: "Gallery", href: "/portfolio" },
   { name: "Track Order", href: "/track-order" },
   { name: "About", href: "/about" },
   { name: "Contact", href: "/contact" },
@@ -151,7 +151,7 @@ export function Navigation() {
                 href="/store"
                 className="hidden md:block btn-gradient px-5 py-2.5 rounded-xl text-sm"
               >
-                Order Now
+                Create a Frame
               </Link>
 
               <button
@@ -213,7 +213,7 @@ export function Navigation() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="btn-gradient w-full py-3 rounded-xl flex items-center justify-center"
                   >
-                    Order Now
+                    Create a Frame
                   </Link>
                 </div>
               </div>
