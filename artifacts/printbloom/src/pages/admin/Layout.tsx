@@ -150,7 +150,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           )}
           <div>
-            <div className={`leading-tight ${nameText}`}>{settings?.businessName || "PrintBloom"}</div>
+            <div className={`leading-tight ${nameText}`}>{settings?.businessName || "HAVESTORY"}</div>
             <div className={`text-[10px] leading-tight ${logoSub}`}>{session?.role === "staff" ? "Staff Panel" : "Owner Admin Panel"}</div>
           </div>
         </div>
