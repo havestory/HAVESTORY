@@ -186,7 +186,7 @@ function ProtectedAdminRoute({ component: Component, permission }: { component: 
 
 function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="havestory-public-shell flex flex-col min-h-screen">
       <div className="sticky top-0 z-40">
         <NoticeBanner />
         <Navigation />
