@@ -1,12 +1,13 @@
 import { motion } from "framer-motion";
 import { useGetSettings } from "@workspace/api-client-react";
 import { Clock, Mail, Phone, MessageCircle } from "lucide-react";
+import { getBusinessName } from "@/lib/brand-settings";
 
 export default function SiteClosed() {
   const { data: settings } = useGetSettings();
   const s = settings as any;
 
-  const businessName = s?.businessName || "PrintBloom";
+  const businessName = getBusinessName(s);
   const message = s?.siteClosedMessage || "We are currently closed for maintenance. We will be back soon!";
   const email = s?.email || "";
   const phone = s?.phone || "";
