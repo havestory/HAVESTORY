@@ -11,7 +11,7 @@ const adminRouter = Router();
 function key(): Buffer {
   const secret=process.env.SESSION_SECRET;
   if(!secret) throw new Error("SESSION_SECRET is required for agreement encryption");
-  return crypto.createHash("sha256").update("printbloom:client-agreement:v1:").update(secret).digest();
+  return crypto.createHash("sha256").update("havestory:client-agreement:v1:").update(secret).digest();
 }
 function encrypt(value:Buffer|string){
   const iv=crypto.randomBytes(12), cipher=crypto.createCipheriv("aes-256-gcm",key(),iv);
@@ -35,8 +35,8 @@ async function ensureTable(){
     title TEXT NOT NULL,
     agreement_text TEXT NOT NULL,
     document_hash TEXT NOT NULL,
-    brand_name TEXT NOT NULL DEFAULT 'PrintBloom',
-    operator_name TEXT NOT NULL DEFAULT 'CodeArtix Technologies',
+    brand_name TEXT NOT NULL DEFAULT 'HAVESTORY',
+    operator_name TEXT NOT NULL DEFAULT 'HAVESTORY',
     client_name_snapshot TEXT NOT NULL,
     client_business_snapshot TEXT,
     status TEXT NOT NULL DEFAULT 'pending',
@@ -94,7 +94,7 @@ adminRouter.post("/clients/:clientId/agreements",async(req,res)=>{
   if(!c){res.status(404).json({error:"Client not found"});return;}
   const title=safe(req.body.title,180),text=safe(req.body.agreementText,30000);
   if(!title||text.length<20){res.status(400).json({error:"Agreement title and full terms are required"});return;}
-  const brandName=safe(req.body.brandName,120)||"PrintBloom",operatorName=safe(req.body.operatorName,180)||"CodeArtix Technologies";
+  const brandName=safe(req.body.brandName,120)||"HAVESTORY",operatorName=safe(req.body.operatorName,180)||"HAVESTORY";
   const snap={title,agreement_text:text,brand_name:brandName,operator_name:operatorName,client_name_snapshot:c.name,client_business_snapshot:c.business_name||""};
   const token=crypto.randomBytes(32).toString("base64url"),docHash=sha(documentPayload(snap));
   const q=await pool.query(`INSERT INTO client_agreements(client_id,token_hash,title,agreement_text,document_hash,brand_name,operator_name,client_name_snapshot,client_business_snapshot)
