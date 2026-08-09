@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ShoppingBag, Palette } from "lucide-react";
+import { Menu, X, ShoppingBag, Frame } from "lucide-react";
 import { useCart } from "@/store/use-cart";
 import { CartDrawer } from "@/components/CartDrawer";
 import { cn } from "@/lib/utils";
@@ -37,7 +37,7 @@ export function Navigation() {
 
   const s = settings as any;
   const logoUrl          = s?.logoUrl || "";
-  const businessName     = s?.businessName || "PrintBloom";
+  const businessName     = s?.businessName || "HAVESTORY";
   const tagline          = s?.tagline || "";
   const taglineEnabled   = s?.taglineEnabled !== 0;
   const showNameWithLogo = s?.showNameWithLogo !== 0;
@@ -91,7 +91,7 @@ export function Navigation() {
               ) : (
                 <>
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-pink-500/20 group-hover:scale-105 transition-transform">
-                    <Palette size={20} />
+                    <Frame size={20} />
                   </div>
                   <div>
                     <span className="font-display font-bold text-xl tracking-tight text-foreground">
