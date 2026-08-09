@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, BadgeCheck, Frame, Palette, Truck, Sparkles } from "lucide-react";
+import { BadgeCheck, Frame, Palette, Truck, Sparkles } from "lucide-react";
 import { getBusinessName } from "@/lib/brand-settings";
 
 type Props = {
