@@ -110,7 +110,7 @@ export function Navigation() {
             </Link>
 
             {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden xl:flex items-center gap-1">
               {links.map((link) => (
                 <Link
                   key={link.name}
@@ -151,13 +151,13 @@ export function Navigation() {
 
               <Link
                 href="/store"
-                className="hs-nav-cta hidden md:block px-5 py-2.5 text-sm"
+                className="hs-nav-cta hidden xl:block px-5 py-2.5 text-sm"
               >
                 Create a Frame
               </Link>
 
               <button
-                className="md:hidden p-2 text-gray-700"
+                className="xl:hidden p-2 text-gray-700"
                 onClick={() => setMobileMenuOpen(true)}
               >
                 <Menu size={24} />
@@ -173,7 +173,7 @@ export function Navigation() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="fixed inset-0 z-50 p-4 md:hidden"
+              className="fixed inset-0 z-50 p-4 xl:hidden"
             >
               <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
               <div className="relative glass-panel rounded-3xl p-6 flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
