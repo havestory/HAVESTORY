@@ -36,7 +36,7 @@ export default function About() {
             <div>
               <h2 className="text-3xl font-serif mb-6 text-foreground">Our Story</h2>
               <div className="prose prose-p:text-muted-foreground prose-p:leading-relaxed prose-headings:font-serif">
-                <p>{settings?.aboutStory || 'Founded by a team of passionate designers and print specialists, PrintBloom was born out of a desire to bring true craftsmanship back to the printing industry in Sri Lanka.'}</p>
+                <p>{settings?.aboutStory || 'Founded by a team of passionate designers and print specialists, HAVESTORY was born out of a desire to bring true craftsmanship back to the printing industry in Sri Lanka.'}</p>
                 <p>We combine traditional techniques with modern technology to deliver stunning results for our clients. Whether you're a startup looking for your first set of business cards or a couple planning the wedding of your dreams, we approach every project with the same level of dedication and care.</p>
               </div>
             </div>

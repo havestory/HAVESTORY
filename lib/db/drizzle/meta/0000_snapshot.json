@@ -926,7 +926,7 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'PrintBloom'"
+          "default": "'HAVESTORY'"
         },
         "tagline": {
           "name": "tagline",
@@ -961,14 +961,14 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'Hi! I''d like to place an order with PrintBloom.'"
+          "default": "'Hi! I''d like to place an order with HAVESTORY.'"
         },
         "about_story": {
           "name": "about_story",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'PrintBloom is your trusted printing partner, delivering high-quality prints for all your business and personal needs.'"
+          "default": "'HAVESTORY is your trusted photo frame studio, delivering high-quality prints for all your business and personal needs.'"
         },
         "about_mission": {
           "name": "about_mission",
@@ -1168,21 +1168,21 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'PrintBloom — Premium Printing & Graphic Design Sri Lanka'"
+          "default": "'HAVESTORY — Premium Photo Frames & Story Galleries Sri Lanka'"
         },
         "seo_description": {
           "name": "seo_description",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'PrintBloom offers premium printing and graphic design services in Sri Lanka. Business cards, banners, labels, and more.'"
+          "default": "'HAVESTORY creates premium custom photo frames services in Sri Lanka. Business cards, banners, labels, and more.'"
         },
         "seo_keywords": {
           "name": "seo_keywords",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'printing sri lanka, graphic design, business cards, banners, labels, printbloom'"
+          "default": "'photo frames sri lanka, custom frames, story galleries, havestory'"
         },
         "seo_og_image": {
           "name": "seo_og_image",
@@ -1320,7 +1320,8 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'Hi {customerName}! 🌸\n\nThank you for choosing *PrintBloom*! Your order has been received and is being processed.\n\nOrder Number: *{orderNumber}*\n\nTrack your order status here:\n{trackingLink}\n\nIf you have any questions, feel free to contact us anytime.\n\nWarm regards,\n*PrintBloom* 🌸'"
+          "default": "'Hi {customerName}! 🌸\n\nThank you for choosing *HAVESTORY*! Your order has been received and is being processed.\n\nOrder Number: *{orderNumber}*\n\nTrack your order status here:\n{trackingLink}\n\nIf you have any questions, feel free to contact us anytime.\n\nWarm regards,
+*HAVESTORY* 🌸'"
         },
         "updated_at": {
           "name": "updated_at",
