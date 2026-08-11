@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useListProducts, useListCategories, useCreateOrder } from '@workspace/api-client-react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -8,8 +7,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingCart, Plus, Minus, Trash2, Search, CheckCircle2 } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Trash2, Search, CheckCircle2, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Link } from 'wouter';
 
 export default function Store() {
   const { data: categories } = useListCategories();
@@ -60,7 +60,6 @@ export default function Store() {
         }
         return item;
       });
-      // Remove items with quantity <= 0
       return updated.filter(item => item.quantity > 0);
     });
   };
@@ -100,14 +99,13 @@ export default function Store() {
         status: 'pending',
         totalAmount: cartTotal.toString(),
         description: desc,
-        items: orderItems as any // The backend might have a different type, but API expects body
+        items: orderItems as any 
       }
     }, {
       onSuccess: () => {
         setCart([]);
         setIsCheckoutOpen(false);
         setIsSuccessOpen(true);
-        // Reset form
         setCustomerName('');
         setCustomerPhone('');
         setCustomerEmail('');
@@ -121,28 +119,30 @@ export default function Store() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Store Header */}
-      <div className="bg-primary text-primary-foreground py-16">
-        <div className="max-w-7xl mx-auto px-6">
-          <h1 className="text-4xl lg:text-5xl font-serif font-bold mb-4">Print Store</h1>
-          <p className="text-lg text-primary-foreground/80 max-w-2xl font-light leading-relaxed">
-            Browse our standard print products and premium frames. Need something custom? <a href="/contact" className="text-secondary font-semibold hover:underline underline-offset-4">Get a bespoke quote</a>.
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Page Header */}
+      <div className="bg-primary py-24 text-center noise relative overflow-hidden">
+        <div className="relative z-10 max-w-4xl mx-auto px-6">
+          <span className="section-label text-secondary block mb-4">OUR COLLECTION</span>
+          <h1 className="text-4xl lg:text-5xl font-serif font-bold text-white mb-6">
+            <span className="heading-underline">Browse Frames</span>
+          </h1>
+          <p className="text-primary-foreground/70 max-w-xl mx-auto font-light text-lg">
+            Find the perfect frame or print product. Add items to your inquiry cart to request a customized quote.
           </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col lg:flex-row gap-12">
+      <div className="max-w-7xl mx-auto px-6 py-16 flex flex-col lg:flex-row gap-12 w-full flex-1">
         {/* Categories Sidebar */}
         <aside className="lg:w-64 shrink-0">
           <div className="sticky top-28">
-            <h3 className="font-sans uppercase tracking-widest text-xs font-bold mb-6 text-foreground/50">Categories</h3>
+            <h3 className="section-label mb-6 text-muted-foreground">Categories</h3>
             
-            {/* Mobile Chips */}
             <div className="flex overflow-x-auto pb-4 gap-2 lg:hidden mb-6 no-scrollbar">
               <button 
                 onClick={() => setActiveCategory('all')}
-                className={`whitespace-nowrap px-5 py-2 rounded-full border text-sm font-semibold transition-colors ${activeCategory === 'all' ? 'bg-primary text-primary-foreground border-primary' : 'bg-transparent border-border hover:bg-muted text-foreground'}`}
+                className={`whitespace-nowrap px-4 py-1.5 rounded-[0.25rem] border text-xs font-semibold uppercase tracking-wider transition-colors ${activeCategory === 'all' ? 'bg-primary text-primary-foreground border-primary' : 'bg-transparent border-border hover:bg-muted text-foreground'}`}
               >
                 All Products
               </button>
@@ -150,18 +150,17 @@ export default function Store() {
                 <button 
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id.toString())}
-                  className={`whitespace-nowrap px-5 py-2 rounded-full border text-sm font-semibold transition-colors ${activeCategory === cat.id.toString() ? 'bg-primary text-primary-foreground border-primary' : 'bg-transparent border-border hover:bg-muted text-foreground'}`}
+                  className={`whitespace-nowrap px-4 py-1.5 rounded-[0.25rem] border text-xs font-semibold uppercase tracking-wider transition-colors ${activeCategory === cat.id.toString() ? 'bg-primary text-primary-foreground border-primary' : 'bg-transparent border-border hover:bg-muted text-foreground'}`}
                 >
                   {cat.name}
                 </button>
               ))}
             </div>
 
-            {/* Desktop List */}
-            <div className="hidden lg:flex flex-col gap-1 border-l-2 border-border/50">
+            <div className="hidden lg:flex flex-col gap-1 border-l border-border/50 pl-4">
               <button 
                 onClick={() => setActiveCategory('all')}
-                className={`text-left px-4 py-3 transition-colors text-sm font-semibold -ml-[2px] border-l-2 ${activeCategory === 'all' ? 'border-primary text-primary bg-primary/5' : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                className={`text-left py-2 transition-colors text-sm font-semibold uppercase tracking-wide ${activeCategory === 'all' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 All Products
               </button>
@@ -169,7 +168,7 @@ export default function Store() {
                 <button 
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id.toString())}
-                  className={`text-left px-4 py-3 transition-colors text-sm font-semibold -ml-[2px] border-l-2 ${activeCategory === cat.id.toString() ? 'border-primary text-primary bg-primary/5' : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                  className={`text-left py-2 transition-colors text-sm font-semibold uppercase tracking-wide ${activeCategory === cat.id.toString() ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
                 >
                   {cat.name}
                 </button>
@@ -180,15 +179,14 @@ export default function Store() {
 
         {/* Product Area */}
         <main className="flex-1">
-          {/* Controls Bar */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
             <div className="relative w-full sm:max-w-xs">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input 
                 placeholder="Search frames..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 border-border rounded-none h-11 bg-card focus-visible:ring-primary focus-visible:border-primary"
+                className="pl-10 border-border rounded-[0.25rem] h-11 bg-card focus-visible:ring-primary focus-visible:border-primary"
               />
             </div>
             
@@ -197,20 +195,20 @@ export default function Store() {
               
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="default" className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90 gap-2 relative h-11 px-6 shadow-sm">
+                  <Button variant="default" className="rounded-[0.25rem] bg-secondary text-secondary-foreground hover:bg-secondary/90 gap-2 relative h-11 px-6 shadow-sm font-bold uppercase tracking-wider text-xs border-none">
                     <ShoppingCart className="w-4 h-4" />
-                    <span className="font-semibold">Cart</span>
+                    <span>Inquiry Cart</span>
                     {cart.length > 0 && (
-                      <span className="absolute -top-2 -right-2 w-5 h-5 bg-secondary text-secondary-foreground rounded-full flex items-center justify-center text-[10px] font-bold shadow-sm">
+                      <span className="absolute -top-2 -right-2 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-[10px] font-bold shadow-sm border-2 border-background">
                         {cart.reduce((a, b) => a + b.quantity, 0)}
                       </span>
                     )}
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="w-full sm:max-w-md bg-background border-l-border flex flex-col p-0">
-                  <div className="p-6 border-b border-border bg-muted/30">
+                <SheetContent className="w-full sm:max-w-md bg-background border-l-border flex flex-col p-0 rounded-l-[0.25rem]">
+                  <div className="p-6 border-b border-border bg-primary text-primary-foreground">
                     <SheetHeader>
-                      <SheetTitle className="font-serif text-2xl">Your Inquiry Cart</SheetTitle>
+                      <SheetTitle className="font-serif text-2xl text-white">Your Inquiry Cart</SheetTitle>
                     </SheetHeader>
                   </div>
                   
@@ -221,34 +219,34 @@ export default function Store() {
                           <ShoppingCart className="w-8 h-8 opacity-40" />
                         </div>
                         <p className="font-medium text-lg text-foreground">Your cart is empty.</p>
-                        <p className="text-sm">Add some beautiful frames to your cart to begin.</p>
+                        <p className="text-sm">Add some beautiful frames to begin.</p>
                       </div>
                     ) : (
-                      <div className="space-y-6">
+                      <div className="space-y-4">
                         {cart.map(item => (
-                          <div key={item.product.id} className="flex gap-4 p-4 border border-border bg-card shadow-sm group">
-                            <div className="w-24 h-24 bg-muted shrink-0 overflow-hidden">
+                          <div key={item.product.id} className="flex gap-4 p-4 border border-border bg-card shadow-sm rounded-[0.25rem]">
+                            <div className="w-20 h-20 bg-muted shrink-0 overflow-hidden rounded-[0.25rem]">
                               <img 
                                 src={item.product.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400&q=80'} 
                                 alt={item.product.name} 
-                                className="w-full h-full object-cover transition-transform group-hover:scale-105" 
+                                className="w-full h-full object-cover" 
                               />
                             </div>
                             <div className="flex-1 flex flex-col">
-                              <h4 className="font-serif font-bold text-lg leading-tight mb-1">{item.product.name}</h4>
-                              <p className="text-sm text-primary font-semibold mb-auto">Rs. {item.product.price}</p>
+                              <h4 className="font-serif font-bold text-base leading-tight mb-1">{item.product.name}</h4>
+                              <p className="text-sm text-secondary font-semibold mb-auto">Rs. {item.product.price}</p>
                               
-                              <div className="flex items-center justify-between mt-4">
-                                <div className="flex items-center border border-border bg-background">
-                                  <button onClick={() => updateQuantity(item.product.id, -1)} className="w-8 h-8 flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
+                              <div className="flex items-center justify-between mt-3">
+                                <div className="flex items-center border border-border bg-background rounded-[0.25rem] overflow-hidden">
+                                  <button onClick={() => updateQuantity(item.product.id, -1)} className="w-7 h-7 flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
                                     <Minus className="w-3 h-3" />
                                   </button>
-                                  <span className="w-8 text-center text-sm font-semibold">{item.quantity}</span>
-                                  <button onClick={() => updateQuantity(item.product.id, 1)} className="w-8 h-8 flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
+                                  <span className="w-8 text-center text-xs font-semibold">{item.quantity}</span>
+                                  <button onClick={() => updateQuantity(item.product.id, 1)} className="w-7 h-7 flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
                                     <Plus className="w-3 h-3" />
                                   </button>
                                 </div>
-                                <button onClick={() => removeFromCart(item.product.id)} className="w-8 h-8 flex items-center justify-center text-destructive/70 hover:text-destructive hover:bg-destructive/10 rounded-full transition-colors">
+                                <button onClick={() => removeFromCart(item.product.id)} className="w-7 h-7 flex items-center justify-center text-destructive/70 hover:text-destructive hover:bg-destructive/10 rounded-full transition-colors">
                                   <Trash2 className="w-4 h-4" />
                                 </button>
                               </div>
@@ -267,9 +265,9 @@ export default function Store() {
                       </div>
                       <Button 
                         onClick={() => setIsCheckoutOpen(true)}
-                        className="w-full rounded-none h-14 bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold text-base tracking-wide shadow-sm"
+                        className="w-full rounded-[0.25rem] h-14 bg-primary text-primary-foreground hover:bg-primary/90 font-bold uppercase tracking-widest text-sm shadow-sm"
                       >
-                        Proceed to Checkout
+                        Proceed to Inquiry
                       </Button>
                     </div>
                   )}
@@ -282,23 +280,19 @@ export default function Store() {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="flex flex-col gap-4">
-                  <Skeleton className="aspect-[4/3] w-full rounded-none" />
+                  <Skeleton className="aspect-[4/3] w-full rounded-[0.25rem]" />
                   <Skeleton className="h-6 w-3/4" />
                   <Skeleton className="h-4 w-1/2" />
-                  <div className="flex justify-between mt-4">
-                    <Skeleton className="h-8 w-20" />
-                    <Skeleton className="h-10 w-32" />
-                  </div>
                 </div>
               ))}
             </div>
           ) : filteredProducts?.length === 0 ? (
-            <div className="text-center py-32 border-2 border-dashed border-border bg-muted/20">
+            <div className="text-center py-32 border border-dashed border-border bg-muted/20 rounded-[0.25rem]">
               <h3 className="font-serif text-2xl font-bold text-foreground mb-2">No frames found</h3>
-              <p className="text-muted-foreground">Try adjusting your category or search filters.</p>
+              <p className="text-muted-foreground text-sm">Try adjusting your category or search filters.</p>
               <Button 
                 variant="outline" 
-                className="mt-6 border-primary text-primary hover:bg-primary/5"
+                className="mt-6 border-primary text-primary hover:bg-primary/5 rounded-[0.25rem] font-semibold text-xs uppercase tracking-widest"
                 onClick={() => { setActiveCategory('all'); setSearchQuery(''); }}
               >
                 Clear Filters
@@ -309,46 +303,41 @@ export default function Store() {
               {filteredProducts?.map((product, i) => (
                 <motion.div
                   key={product.id}
-                  initial={{ opacity:0, y:40 }}
+                  initial={{ opacity:0, y:32 }}
                   whileInView={{ opacity:1, y:0 }}
                   viewport={{ once:true }}
                   transition={{ duration:0.7, delay: (i % 6) * 0.1 }}
                 >
-                  <Card onClick={() => addToCart(product)} className="rounded-none border-border overflow-hidden card-3d flex flex-col group bg-card h-full cursor-pointer relative">
-                    <div className="aspect-[4/3] bg-muted relative overflow-hidden">
+                  <div className="card-3d group relative overflow-hidden bg-card border border-border flex flex-col h-full rounded-[0.25rem]">
+                    <div className="aspect-[4/3] relative overflow-hidden bg-muted">
                       <img 
-                        src={product.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400&q=80'} 
+                        src={product.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&q=80'} 
                         alt={product.name} 
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
                       />
                       {product.category && (
-                        <Badge className="absolute top-4 right-4 rounded-none bg-background/95 text-foreground backdrop-blur-md border border-border/50 shadow-sm font-semibold border-none">
+                        <Badge className="absolute top-4 right-4 rounded-none bg-background/95 text-foreground backdrop-blur-md shadow-sm font-semibold uppercase tracking-wider text-[10px] border-none">
                           {product.category.name}
                         </Badge>
                       )}
-                      <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                        <div className="bg-secondary text-secondary-foreground py-3 text-center font-bold text-sm tracking-wide">
-                          View Details →
-                        </div>
+                      
+                      <button 
+                        onClick={(e) => { e.preventDefault(); addToCart(product); }}
+                        className="absolute inset-x-0 bottom-0 bg-secondary/95 py-3 px-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out text-secondary-foreground text-sm font-bold flex items-center justify-between z-20 cursor-pointer w-full text-left border-none"
+                      >
+                        <span>Add to Inquiry</span>
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <div className="pt-4 pb-4 px-4 flex flex-col flex-1">
+                      <h3 className="font-serif text-xl font-bold mb-1 line-clamp-1">{product.name}</h3>
+                      <p className="text-xs text-muted-foreground mb-4 line-clamp-2 leading-relaxed">{product.description}</p>
+                      <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
+                        <p className="font-bold text-foreground">Rs. {product.price}</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mt-0.5">per {product.priceType}</p>
                       </div>
                     </div>
-                    <CardContent className="p-6 flex flex-col flex-1">
-                      <h3 className="font-serif text-xl font-bold mb-2 line-clamp-1">{product.name}</h3>
-                      <p className="text-sm text-muted-foreground mb-6 line-clamp-2 leading-relaxed">{product.description}</p>
-                      <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
-                        <div>
-                          <p className="font-bold text-lg text-foreground">Rs. {product.price}</p>
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mt-0.5">per {product.priceType}</p>
-                        </div>
-                        <Button 
-                          onClick={(e) => { e.stopPropagation(); addToCart(product); }} 
-                          className="rounded-none bg-amber-500 text-black hover:bg-amber-600 gap-2 h-10 px-4 shadow-sm font-semibold border-none"
-                        >
-                          <ShoppingCart className="w-4 h-4" /> Add
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  </div>
                 </motion.div>
               ))}
             </div>
@@ -358,12 +347,12 @@ export default function Store() {
 
       {/* Checkout Dialog */}
       <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
-        <DialogContent className="sm:max-w-[600px] rounded-none border-border p-0 overflow-hidden bg-background">
+        <DialogContent className="sm:max-w-[600px] rounded-[0.25rem] border-border p-0 overflow-hidden bg-background">
           <div className="p-6 bg-primary text-primary-foreground">
             <DialogHeader>
-              <DialogTitle className="font-serif text-2xl font-bold">Complete Your Inquiry</DialogTitle>
-              <DialogDescription className="text-primary-foreground/80">
-                Please provide your details. We will contact you shortly to confirm the order.
+              <DialogTitle className="font-serif text-2xl font-bold text-white">Complete Your Inquiry</DialogTitle>
+              <DialogDescription className="text-primary-foreground/80 mt-2">
+                Provide your details. We will contact you shortly to confirm the order and discuss any custom requirements.
               </DialogDescription>
             </DialogHeader>
           </div>
@@ -371,69 +360,69 @@ export default function Store() {
           <form onSubmit={handleCheckoutSubmit} className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-bold">Full Name *</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Full Name *</label>
                 <Input 
                   required 
                   value={customerName} 
                   onChange={(e) => setCustomerName(e.target.value)} 
                   placeholder="John Doe"
-                  className="rounded-none border-border focus-visible:ring-primary h-11 bg-muted/30"
+                  className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-secondary h-11 bg-muted/30 px-3"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold">Phone Number *</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Phone Number *</label>
                 <Input 
                   required 
                   value={customerPhone} 
                   onChange={(e) => setCustomerPhone(e.target.value)} 
                   placeholder="077 123 4567"
-                  className="rounded-none border-border focus-visible:ring-primary h-11 bg-muted/30"
+                  className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-secondary h-11 bg-muted/30 px-3"
                 />
               </div>
             </div>
             
             <div className="space-y-2">
-              <label className="text-sm font-bold">Email Address</label>
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Email Address</label>
               <Input 
                 type="email" 
                 value={customerEmail} 
                 onChange={(e) => setCustomerEmail(e.target.value)} 
                 placeholder="john@example.com"
-                className="rounded-none border-border focus-visible:ring-primary h-11 bg-muted/30"
+                className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-secondary h-11 bg-muted/30 px-3"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold">Shipping Address *</label>
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Shipping Address *</label>
               <Input 
                 required 
                 value={customerAddress} 
                 onChange={(e) => setCustomerAddress(e.target.value)} 
                 placeholder="123 Main St, Colombo"
-                className="rounded-none border-border focus-visible:ring-primary h-11 bg-muted/30"
+                className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-secondary h-11 bg-muted/30 px-3"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold">Order Notes / Custom Requests</label>
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Order Notes / Custom Requests</label>
               <textarea 
                 value={orderDescription} 
                 onChange={(e) => setOrderDescription(e.target.value)}
-                className="flex w-full rounded-none border border-border bg-muted/30 px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary min-h-[100px] resize-y"
+                className="flex w-full rounded-none border-b-2 border-t-0 border-x-0 border-border bg-muted/30 px-3 py-3 text-sm focus-visible:outline-none focus-visible:ring-0 focus-visible:border-secondary min-h-[100px] resize-y"
                 placeholder="Any special instructions for framing?"
               />
             </div>
 
-            <div className="bg-muted p-4 border border-border flex justify-between items-center">
-              <span className="font-semibold text-muted-foreground">Order Total:</span>
+            <div className="bg-muted p-4 rounded-[0.25rem] border border-border flex justify-between items-center">
+              <span className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Estimated Total:</span>
               <span className="font-serif text-2xl font-bold text-foreground">Rs. {cartTotal.toFixed(2)}</span>
             </div>
 
-            <div className="flex gap-4 pt-4 border-t border-border">
-              <Button type="button" variant="outline" onClick={() => setIsCheckoutOpen(false)} className="flex-1 rounded-none border-border h-12 font-semibold">
+            <div className="flex gap-4 pt-2">
+              <Button type="button" variant="outline" onClick={() => setIsCheckoutOpen(false)} className="flex-1 rounded-[0.25rem] border-border h-12 font-bold uppercase tracking-widest text-xs">
                 Cancel
               </Button>
-              <Button type="submit" disabled={createOrder.isPending} className="flex-1 rounded-none bg-primary text-primary-foreground hover:bg-primary/90 h-12 font-bold shadow-sm">
+              <Button type="submit" disabled={createOrder.isPending} className="flex-1 rounded-[0.25rem] bg-secondary text-secondary-foreground hover:bg-secondary/90 h-12 font-bold uppercase tracking-widest text-xs shadow-sm">
                 {createOrder.isPending ? 'Submitting...' : 'Submit Inquiry'}
               </Button>
             </div>
@@ -443,16 +432,16 @@ export default function Store() {
 
       {/* Success Dialog */}
       <Dialog open={isSuccessOpen} onOpenChange={setIsSuccessOpen}>
-        <DialogContent className="sm:max-w-[400px] rounded-none border-border text-center p-10 bg-background">
-          <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 className="w-10 h-10" />
+        <DialogContent className="sm:max-w-[400px] rounded-[0.25rem] border-border text-center p-10 bg-background">
+          <div className="w-16 h-16 bg-secondary/20 text-secondary rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 className="w-8 h-8" />
           </div>
           <h2 className="font-serif text-3xl font-bold mb-4">Inquiry Received!</h2>
-          <p className="text-muted-foreground mb-8 text-lg">
-            Thank you for your interest. Our team will review your order and contact you shortly with confirmation.
+          <p className="text-muted-foreground mb-8 text-sm leading-relaxed">
+            Thank you for your interest. Our team will review your order and contact you shortly.
           </p>
-          <Button onClick={() => setIsSuccessOpen(false)} className="w-full rounded-none bg-primary text-primary-foreground h-12 font-bold text-base">
-            Continue Shopping
+          <Button onClick={() => setIsSuccessOpen(false)} className="w-full rounded-[0.25rem] bg-primary text-primary-foreground h-12 font-bold uppercase tracking-widest text-xs">
+            Continue Browsing
           </Button>
         </DialogContent>
       </Dialog>

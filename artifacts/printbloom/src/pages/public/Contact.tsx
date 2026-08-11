@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Send, MessageCircle } from 'lucide-react';
 
 const contactSchema = z.object({
   fullName: z.string().min(2, 'Name is required'),
@@ -48,51 +48,89 @@ export default function Contact() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <div className="bg-primary text-primary-foreground py-16 lg:py-24">
-        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <h1 className="text-4xl lg:text-6xl font-serif mb-6 leading-[1.1]">Let's discuss your next project.</h1>
-            <p className="text-lg text-primary-foreground/80 font-light max-w-md">
-              Whether it's a bespoke wedding invitation or a large-scale commercial banner run, our workshop is ready.
-            </p>
-          </div>
-          <div className="grid sm:grid-cols-2 gap-8 lg:pl-12 lg:border-l border-primary-foreground/20">
-            <div>
-              <div className="flex items-center gap-3 mb-3 text-secondary">
-                <MapPin className="w-5 h-5" />
-                <h4 className="font-sans uppercase tracking-widest text-xs font-semibold">Workshop</h4>
-              </div>
-              <p className="text-sm leading-relaxed opacity-90">{settings?.address || '123 Printing Ave, Colombo, Sri Lanka'}</p>
-            </div>
-            <div>
-              <div className="flex items-center gap-3 mb-3 text-secondary">
-                <Clock className="w-5 h-5" />
-                <h4 className="font-sans uppercase tracking-widest text-xs font-semibold">Hours</h4>
-              </div>
-              <p className="text-sm leading-relaxed opacity-90">Mon - Fri: 9:00 AM - 6:00 PM<br/>Sat: 9:00 AM - 1:00 PM<br/>Sun: Closed</p>
-            </div>
-            <div>
-              <div className="flex items-center gap-3 mb-3 text-secondary">
-                <Phone className="w-5 h-5" />
-                <h4 className="font-sans uppercase tracking-widest text-xs font-semibold">Call Us</h4>
-              </div>
-              <p className="text-sm leading-relaxed opacity-90">{settings?.phone || '+94 11 234 5678'}</p>
-            </div>
-            <div>
-              <div className="flex items-center gap-3 mb-3 text-secondary">
-                <Mail className="w-5 h-5" />
-                <h4 className="font-sans uppercase tracking-widest text-xs font-semibold">Email</h4>
-              </div>
-              <p className="text-sm leading-relaxed opacity-90">{settings?.email || 'hello@havestory.com'}</p>
-            </div>
-          </div>
+      <div className="bg-primary text-primary-foreground py-24 lg:py-32 noise relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
+          <span className="section-label text-secondary block mb-4">GET IN TOUCH</span>
+          <h1 className="text-5xl lg:text-6xl font-serif font-bold text-white mb-6">Contact the Studio</h1>
+          <p className="text-lg text-primary-foreground/70 font-light max-w-xl mx-auto">
+            Whether it's a bespoke gallery wall or a single custom frame, our artisans are ready to help.
+          </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-20 w-full flex-1">
-        <div className="max-w-3xl mx-auto bg-card border border-border p-8 lg:p-12 shadow-sm">
-          <div className="mb-10 text-center">
-            <h2 className="text-3xl font-serif mb-3">Send an Inquiry</h2>
+      <div className="max-w-7xl mx-auto px-6 py-20 w-full flex-1 grid lg:grid-cols-5 gap-16">
+        
+        {/* Contact Info (Left) */}
+        <div className="lg:col-span-2 space-y-10">
+          <div>
+            <h3 className="font-serif text-3xl font-bold mb-6">Visit Us</h3>
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-primary/5 text-primary rounded-full flex items-center justify-center shrink-0">
+                  <MapPin className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs uppercase tracking-widest mb-1 text-muted-foreground">Workshop</h4>
+                  <p className="text-sm font-medium">{settings?.address || '123 Printing Ave, Colombo, Sri Lanka'}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-primary/5 text-primary rounded-full flex items-center justify-center shrink-0">
+                  <Clock className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs uppercase tracking-widest mb-1 text-muted-foreground">Hours</h4>
+                  <p className="text-sm font-medium">Mon - Fri: 9:00 AM - 6:00 PM<br/>Sat: 9:00 AM - 1:00 PM</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="gold-rule" />
+
+          <div>
+            <h3 className="font-serif text-3xl font-bold mb-6">Reach Out</h3>
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-primary/5 text-primary rounded-full flex items-center justify-center shrink-0">
+                  <Phone className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs uppercase tracking-widest mb-1 text-muted-foreground">Call Us</h4>
+                  <p className="text-sm font-medium">{settings?.phone || '+94 11 234 5678'}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-primary/5 text-primary rounded-full flex items-center justify-center shrink-0">
+                  <Mail className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs uppercase tracking-widest mb-1 text-muted-foreground">Email</h4>
+                  <p className="text-sm font-medium">{settings?.email || 'hello@havestory.com'}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {settings?.whatsappNumber && (
+            <div className="pt-4">
+              <a 
+                href={`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-center gap-3 w-full bg-[#25D366] text-white py-4 rounded-[0.25rem] font-bold uppercase tracking-widest text-xs hover:bg-[#20bd5a] transition-colors shadow-sm"
+              >
+                <MessageCircle className="w-5 h-5" />
+                Chat on WhatsApp
+              </a>
+            </div>
+          )}
+        </div>
+
+        {/* Form (Right) */}
+        <div className="lg:col-span-3 bg-card border border-border p-10 rounded-[0.25rem] shadow-sm">
+          <div className="mb-8">
+            <h2 className="text-2xl font-serif font-bold mb-2">Send an Inquiry</h2>
             <p className="text-muted-foreground text-sm">Fill out the form below and our team will get back to you within 24 hours.</p>
           </div>
 
@@ -104,11 +142,11 @@ export default function Contact() {
                   name="fullName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="uppercase text-[10px] tracking-widest text-muted-foreground font-semibold">Full Name</FormLabel>
+                      <FormLabel className="uppercase text-[10px] tracking-widest text-muted-foreground font-bold">Full Name *</FormLabel>
                       <FormControl>
-                        <Input placeholder="John Doe" className="rounded-none border-b-2 focus-visible:ring-0 focus-visible:border-secondary bg-transparent px-0" {...field} />
+                        <Input placeholder="John Doe" className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-secondary bg-transparent px-0 text-foreground" {...field} />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -117,11 +155,11 @@ export default function Contact() {
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="uppercase text-[10px] tracking-widest text-muted-foreground font-semibold">Phone Number</FormLabel>
+                      <FormLabel className="uppercase text-[10px] tracking-widest text-muted-foreground font-bold">Phone Number *</FormLabel>
                       <FormControl>
-                        <Input placeholder="+94 77 123 4567" className="rounded-none border-b-2 focus-visible:ring-0 focus-visible:border-secondary bg-transparent px-0" {...field} />
+                        <Input placeholder="+94 77 123 4567" className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-secondary bg-transparent px-0 text-foreground" {...field} />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -133,11 +171,11 @@ export default function Contact() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="uppercase text-[10px] tracking-widest text-muted-foreground font-semibold">Email (Optional)</FormLabel>
+                      <FormLabel className="uppercase text-[10px] tracking-widest text-muted-foreground font-bold">Email (Optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="john@example.com" className="rounded-none border-b-2 focus-visible:ring-0 focus-visible:border-secondary bg-transparent px-0" {...field} />
+                        <Input placeholder="john@example.com" className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-secondary bg-transparent px-0 text-foreground" {...field} />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -146,11 +184,11 @@ export default function Contact() {
                   name="subject"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="uppercase text-[10px] tracking-widest text-muted-foreground font-semibold">Subject</FormLabel>
+                      <FormLabel className="uppercase text-[10px] tracking-widest text-muted-foreground font-bold">Subject *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Business Cards Inquiry" className="rounded-none border-b-2 focus-visible:ring-0 focus-visible:border-secondary bg-transparent px-0" {...field} />
+                        <Input placeholder="Custom Frame Inquiry" className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-secondary bg-transparent px-0 text-foreground" {...field} />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -161,21 +199,21 @@ export default function Contact() {
                 name="message"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="uppercase text-[10px] tracking-widest text-muted-foreground font-semibold">Message Details</FormLabel>
+                    <FormLabel className="uppercase text-[10px] tracking-widest text-muted-foreground font-bold">Message Details *</FormLabel>
                     <FormControl>
                       <Textarea 
-                        placeholder="Tell us about your project, quantity needed, and any specific materials you have in mind..." 
-                        className="rounded-none border-b-2 focus-visible:ring-0 focus-visible:border-secondary bg-transparent px-0 min-h-[120px] resize-none" 
+                        placeholder="Tell us about your project, dimensions, and any specific materials you have in mind..." 
+                        className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-secondary bg-transparent px-0 min-h-[120px] resize-y text-foreground" 
                         {...field} 
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs" />
                   </FormItem>
                 )}
               />
 
-              <div className="pt-4 flex justify-end">
-                <Button type="submit" size="lg" className="rounded-none h-14 px-10 gap-3" disabled={submitMessage.isPending}>
+              <div className="pt-2">
+                <Button type="submit" size="lg" className="w-full sm:w-auto rounded-[0.25rem] h-12 px-10 gap-3 btn-glow bg-secondary text-secondary-foreground uppercase tracking-widest font-bold text-xs border-none shadow-sm" disabled={submitMessage.isPending}>
                   {submitMessage.isPending ? 'Sending...' : 'Send Message'}
                   {!submitMessage.isPending && <Send className="w-4 h-4" />}
                 </Button>

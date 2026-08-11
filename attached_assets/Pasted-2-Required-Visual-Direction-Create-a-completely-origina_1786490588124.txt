@@ -1,0 +1,996 @@
+2. Required Visual Direction
+
+Create a completely original premium studio and colour-lab interface.
+
+Design character
+Modern photography studio
+Premium colour lab
+Editorial photo-gallery feeling
+Clean but distinctive
+Professional rather than overly decorative
+Strong photographic presentation
+Warm and trustworthy
+Recommended colour system
+Warm Ivory: main background
+Soft Cream: secondary background
+Walnut Brown: primary dark colour
+Charcoal: text and admin navigation
+Muted Bronze: highlights and premium accents
+Soft Olive or Sage: optional status accent
+White transparent glass panels
+Dark studio areas for gallery presentation
+Visual effects
+Subtle glassmorphism
+Soft shadows
+Fine borders
+Smooth page transitions
+Image reveal animations
+Hover zoom on photographs
+Animated gallery transitions
+Smooth drawers and modals
+Skeleton loading states
+Reduced-motion accessibility support
+
+Avoid excessive pink/purple gradients. The new design should clearly look like a studio, colour lab and framing brand.
+
+3. Public Website Structure
+3.1 Global Website Header
+
+The navigation header must contain:
+
+Dynamic business logo
+Dynamic business name
+Optional tagline
+Home
+Frames & Prints
+Studio Services
+Gallery
+Track Order
+About
+Contact
+Shopping cart
+Mobile menu
+Notice banner above navigation when enabled
+Header behaviour
+Sticky navigation
+Transparent or glass appearance over hero section
+More solid background after scrolling
+Mobile-friendly menu
+Active page indicator
+Dynamic cart item count
+Logo, name and tagline controlled through Settings
+3.2 Splash/Loading Screen
+
+Public website refresh can show a short branded splash screen.
+
+It should contain:
+
+Dynamic logo
+Dynamic business name
+Optional tagline
+Minimal loading animation
+Smooth fade-out
+
+Do not show the splash screen repeatedly during normal navigation.
+
+3.3 Home Page
+
+The homepage should present HAVESTORY as a premium studio, colour lab and frame store.
+
+Hero section
+
+Required content:
+
+Up to five configurable hero images
+Dynamic business name
+Hero badge text
+Main hero title
+Hero subtitle
+Primary call-to-action button
+CTA destination link
+Secondary “Shop Frames” button
+Image slider indicators
+Smooth image transitions
+Studio/category rail or editorial index
+Upload/project guidance message
+Homepage service/category cards
+
+Four editable cards can be used for:
+
+Frame Editions
+Colour Prints
+Story Collages
+Studio Sessions
+
+Each card should support:
+
+Title
+Description
+Link
+Icon or image
+Hover animation
+Trust/proof strip
+
+Possible items:
+
+Colour checked before production
+Made-to-fit framing
+Islandwide delivery
+Human studio guidance
+Completed-order count
+Additional homepage areas
+Featured products
+Featured services
+Current offers
+Portfolio preview
+Customer reviews
+Custom-project CTA
+Instagram/social preview if required
+Contact/WhatsApp CTA
+
+Homepage content should be editable through Website Editor and product/service admin sections.
+
+3.4 Store / Frames & Prints Page
+
+The store sells photo frames, prints and related studio products.
+
+Store functions
+Product grid
+Product categories
+Search
+Category filtering
+Product image
+Product name
+Price or “starting from” price
+Sale price
+Offer badge
+Availability status
+Featured-product indicator
+Product detail link
+Responsive two-column mobile layout where practical
+Product Detail Page
+
+Must support:
+
+Main product image
+Additional gallery images
+Image carousel
+Product name
+Description
+Base price
+Sale price
+Variants/options
+Size selection
+Quantity
+Custom customer notes
+Photo/image upload when applicable
+Add to cart
+Related products
+Social-sharing buttons
+Availability information
+
+The UI must be suitable for glass frames, plymount/glass-look products, standard prints, collage frames and custom sizes.
+
+3.5 Cart and Order Flow
+Cart drawer/page
+Product image
+Product name
+Selected options
+Quantity
+Uploaded-image reference
+Unit price
+Line total
+Remove item
+Change quantity
+Cart subtotal
+Coupon field if applicable
+Continue shopping
+Proceed to order/checkout
+Customer order form
+
+Possible customer details:
+
+Full name
+Phone number
+Alternative phone
+Email
+Business name where applicable
+Multi-line delivery address
+Customer notes
+Delivery method
+Payment information
+Uploaded artwork/photo
+Order confirmation
+After order submission
+Generate a unique order ID
+Save order in admin panel
+Display confirmation
+Allow order tracking
+Send applicable notifications/email if configured
+3.6 Studio Services Page
+
+Display photography, printing, editing, framing and colour-lab services.
+
+Each service may contain:
+
+Service name
+Category
+Image
+Short description
+Full description
+Starting price or optional price
+Turnaround time
+Active/inactive status
+Enquiry or booking CTA
+3.7 Gallery / Portfolio Page
+
+Required features:
+
+Premium photographic grid
+Masonry or editorial layout
+Portfolio categories
+Category filters
+Image lightbox
+Project title
+Description
+Multiple images where needed
+Smooth image loading
+Mobile swipe support
+
+Gallery images and details must be manageable from Website Editor.
+
+3.8 Custom Project Page
+
+Customers can request custom work that does not fit a standard store product.
+
+Suggested fields:
+
+Customer name
+Phone
+Email
+Business name
+Project type
+Required size
+Quantity
+Budget
+Deadline
+Description
+Reference image/file upload
+Delivery address
+Additional notes
+
+Submitted requests must appear in the admin Custom Projects section.
+
+3.9 Track Order Page
+
+Customers should be able to enter an order ID and view:
+
+Order status
+Order date
+Current production stage
+Payment status where appropriate
+Delivery/tracking status
+Estimated completion
+Status timeline
+Safe customer-facing message
+
+Do not expose private customer or internal financial information.
+
+3.10 About Page
+
+Content controlled from Website Editor:
+
+Dynamic “About [Business Name]” title
+Studio story
+Mission
+Vision
+Founded year
+Team size
+Location
+Main image
+Completed-project count
+3.11 Contact Page
+
+Display Settings-based information:
+
+Business name
+Phone
+WhatsApp
+Email
+Address
+Website
+Social links
+Business hours if configured
+Contact form
+Map/location option
+
+Contact-form submissions must appear in Admin → Messages.
+
+3.12 Reviews
+
+Public review area can display:
+
+Customer name
+Rating
+Review text
+Date
+Optional customer image
+Approved reviews only
+
+Admin must be able to review, approve, hide or delete submissions.
+
+3.13 Notices and Promotions
+
+The system supports:
+
+Top notice banner
+Popup notice
+Promotional title
+Description
+CTA text
+CTA link
+Start/end period
+Active/inactive status
+
+Design the banner and popup so they do not obstruct the mobile experience.
+
+3.14 Other Public Pages
+Privacy Policy
+Editable policy content
+Settings-based business name
+Settings-based email and WhatsApp details
+Terms of Service
+Editable terms
+Settings-based business identity and contact details
+Site Closed Page
+
+When enabled:
+
+Public website pages show a maintenance/closed notice
+Admin panel remains accessible
+Message and business identity come from Settings
+Private Price List
+
+Accessible only through a unique share link.
+
+Can display:
+
+Price-list title
+Customer/client name
+Columns and rows
+Notes
+Validity details
+Business identity
+Print-friendly layout
+Shipping Verification
+
+Secure token-based page that verifies a shipping label without exposing full customer information.
+
+Client Verification
+
+Secure customer identity-verification page.
+
+Possible fields:
+
+Full legal name
+NIC/ID details
+Date of birth
+Phone
+Email
+Address
+Emergency contact
+Live selfie
+ID front image
+ID back image
+Consent confirmation
+Staff Verification
+
+Similar secure identity-verification workflow for staff accounts.
+
+Client Agreement Signing
+Secure agreement link
+Agreement title
+Full terms
+Customer details
+Digital/electronic signature
+Consent
+Signed date/time
+Locked agreement snapshot
+4. Admin Panel Structure
+4.1 Admin Login
+
+Two-stage authentication interface:
+
+Username and password
+Four-digit security PIN when enabled
+
+Requirements:
+
+Dynamic business name
+Studio Console identity
+Error messages
+Loading state
+Login-attempt protection
+Secure session cookies
+Mobile-friendly layout
+4.2 Admin Layout
+Desktop
+Collapsible sidebar
+Fixed top bar
+Search
+Notification bell
+Owner/staff identity
+Light/dark mode
+Website shortcut
+Logout
+Mobile
+Drawer navigation
+Large touch targets
+Sticky header
+Clearly separated modules
+Navigation groups
+Overview
+Orders
+CRM
+Finance
+Studio Catalog
+Inventory
+Team
+Website
+5. Admin Modules
+5.1 Dashboard
+
+Dashboard should provide a quick business overview:
+
+New orders
+Pending orders
+Completed orders
+Revenue summary
+Outstanding invoices
+Recent customers
+Low-stock warnings
+Recent messages
+Recent reviews
+Production activity
+Attendance status
+Quick-action buttons
+
+Use cards and charts, but keep it operational and easy to read.
+
+5.2 Orders
+
+Functions to preserve:
+
+View all orders
+Search and filter
+Order status
+Payment status
+Customer details
+Product line items
+Uploaded customer images/files
+Customer notes
+Delivery details
+Link order to existing client
+Create a new client when necessary
+Prevent accidental duplicate clients
+Create/link invoice
+Send/copy WhatsApp order message
+Edit order
+Update production status
+Mark complete
+Delivery/tracking details
+Owner-controlled deletion workflow
+5.3 Custom Projects
+View submitted custom requests
+Create project manually
+Link to client
+Project title
+Description
+Reference files
+Deadline
+Status
+Quoted value
+Amount paid
+Due amount
+Notes
+Convert/link to invoice
+WhatsApp message
+Production progress
+5.4 CRM Projects
+
+A dedicated client-project management module:
+
+Project ID
+Project title
+Client
+Service type
+Status
+Total value
+Amount paid
+Due amount
+Start date
+Due date
+Notes
+Related invoices
+Timeline/progress
+5.5 Clients
+Search by name, phone, email, business name or customer code
+Add client
+Edit client
+Multiple phone numbers
+Email
+Multi-line address
+Notes
+Client approval/status
+Linked orders
+Linked projects
+Linked invoices
+Shipping details
+CSV export
+Duplicate-phone warning
+Client identity verification
+Generate secure verification link
+Approve/reject verification
+Client agreement creation
+Secure signing link
+Agreement audit report
+Owner-only delete
+
+Customer codes should remain brand-neutral.
+
+5.6 Invoices
+Create invoice
+Edit invoice
+Select existing/new client
+Invoice number
+Issue date
+Due date
+Line items
+Quantity
+Unit price
+Discount
+Tax if applicable
+Amount paid
+Outstanding balance
+Draft/pending/paid/overdue status
+Payment date
+Prevent duplicate finance entries
+Link to order/project
+Add item-production costs
+Add material usage
+Add waste quantity
+Print/PDF preview
+Customer share link
+Shipping-label connection
+Owner-controlled invoice deletion
+
+Invoice preview must use General Settings for business identity.
+
+5.7 Finance & Inventory
+Finance
+Initial balance
+Revenue entries
+Expense entries
+Paid-invoice income
+Monthly filtering
+Cash-flow summary
+Net profit
+Project/invoice costing
+Expense categories
+Date-based reporting
+Printable monthly report
+Prevent duplicate income entries
+Inventory
+Raw materials
+Packs purchased
+Sheets/items per pack
+Purchase cost
+Unit cost calculation
+Current stock
+Material usage
+Waste
+Low-stock warnings
+Purchase history
+Invoice/project-linked consumption
+Manual adjustment with audit information
+5.8 Production Usage
+
+Staff/owner can record:
+
+Invoice/project
+Material used
+Quantity
+Waste quantity
+Production date
+Notes
+Staff member
+
+Inventory should update automatically when usage is confirmed.
+
+5.9 Raw Materials
+Material name
+Category
+Unit type
+Pack quantity
+Pack sheet/item count
+Purchase price
+Cost per unit
+Printing/processing cost
+Current stock
+Minimum stock
+Purchase history
+Edit/archive/delete controls
+Special confirmation for destructive actions
+5.10 Reports
+
+Reports may include:
+
+Revenue
+Expenses
+Profit
+Orders
+Invoices
+Payments
+Clients
+Inventory
+Production usage
+Waste
+Monthly summaries
+Date-range filtering
+Print-friendly A4 layout
+Dynamic business name and logo
+CSV/PDF/print options where implemented
+5.11 Coupons and Offers
+
+Must preserve:
+
+Coupon code
+Description
+Percentage or fixed discount
+Minimum order amount
+Maximum discount
+Start date
+Expiry date
+Usage limit
+Active/inactive
+Product/category applicability
+Customer-facing offer display
+Owner-only management
+5.12 Products
+Add/edit product
+Product name
+Slug
+Category
+Description
+Main image
+Multiple gallery images
+Base price
+Sale price
+Product options/variants
+Sizes
+Stock/availability
+Featured status
+Publish/unpublish
+Sort order
+Upload requirements
+Product-specific notes
+Cost information where applicable
+5.13 Services
+Service categories
+Service title
+Image
+Short/full description
+Optional price
+Turnaround time
+Publish/unpublish
+Sort order
+Enquiry CTA
+5.14 Private Price Lists
+Create price list
+Title
+Client/customer
+Configurable columns
+Rows and prices
+Notes
+Admin-only or shareable
+Publish/unpublish
+Unique private link
+Copy link
+Print view
+Delete/duplicate
+5.15 Shipping Labels
+
+Support two label sizes:
+
+Standard 10 × 14.8 cm
+Large A5
+
+Features:
+
+Business name
+Business phone
+Customer name
+Customer phone
+Alternative phone
+Multi-line address
+Invoice number
+Barcode
+Secure QR verification link
+Fragile indicator
+Urgent indicator
+Optional date and time
+Custom footer text
+Font-size controls
+Save label
+Print label
+Download image
+Existing/new customer selection
+Duplicate-phone warning
+5.16 Team Access
+
+Owner-only functions:
+
+Create staff account
+Username
+Password/reset
+Four-digit PIN
+Active/paused status
+Permission selection
+Last login
+Activity information
+Staff profile
+Staff identity verification
+Secure verification link
+Owner approval/rejection
+Permission groups
+
+Possible permissions include:
+
+Dashboard
+Orders
+Customers
+Invoices
+Reports
+Products view
+Catalog
+Inventory
+Production
+Finance
+Shipping
+Price lists
+Website management
+
+Settings, coupons, team management and sensitive verification reports should remain owner-only.
+
+5.17 Attendance
+Staff attendance request/check-in
+Date
+Start time
+End time
+Owner approval
+Early/late notes
+Attendance calendar
+Monthly filtering
+Total worked time
+Staff and owner views
+Printable attendance report
+5.18 Staff Profile and CV
+Personal information
+Employment information
+Emergency contact
+Professional headline
+Summary
+Career objective
+Skills
+Languages
+Education
+Work experience
+Certifications
+Projects
+References
+Professional links
+Printable professional CV
+Dynamic business identity in reports
+5.19 Messages
+Contact-form submissions
+Customer name
+Email
+Phone
+Subject
+Message
+Read/unread
+Date
+Delete/archive
+Reply/contact shortcuts
+5.20 Reviews
+View submitted reviews
+Rating
+Customer name
+Review text
+Approval status
+Publish/hide
+Delete
+Featured review option where required
+5.21 Notices
+Banner or popup type
+Title
+Message
+CTA text
+CTA link
+Active/inactive
+Start/end dates
+Preview
+Delete
+6. Website Editor
+
+The Website Editor should contain separate tabs.
+
+Home Page tab
+Hero images 1–5
+Hero title
+Hero subtitle
+Badge text
+Highlight word if used
+CTA text
+CTA link
+Feature cards
+Optional customer/avatar images
+Footer designer credit
+Live preview guidance
+About tab
+About image
+Story
+Mission
+Vision
+Founded year
+Team size
+Location
+Portfolio tab
+Add item
+Edit item
+Delete item
+Category
+Name
+Description
+Image
+Sort order
+Privacy tab
+Rich-text policy editor
+Settings-based contact preview
+Terms tab
+Rich-text terms editor
+Settings-based business details
+SEO tab
+Page/browser title
+Meta description
+Keywords
+Social-share image
+Google preview
+Website URL preview
+Website Icon tab
+Favicon upload
+Current-icon preview
+Browser-tab preview
+Replace/remove controls
+Colour Theme tab
+Theme presets
+Colour preview
+Button/text/badge preview
+Live theme switching
+Save theme
+
+The redesign can improve this editor but must preserve these controls.
+
+7. General Settings
+
+General Settings is the single source of truth for business identity.
+
+Required settings include:
+
+Business name
+Logo
+Show/hide business name beside logo
+Tagline
+Show/hide tagline
+Email
+Phone
+WhatsApp number
+Address
+Website URL
+Facebook link
+Instagram link
+TikTok link
+Other supported social links
+Theme preset
+Site-closed toggle
+Site-closed message
+SEO values
+Favicon
+Order/completed-project counters where applicable
+Business-level operational defaults
+
+Changing Settings must update the public website, admin identity, documents, reports, invoices, agreements and shipping labels without code changes.
+
+8. Security and Data Requirements
+Separate HAVESTORY Neon PostgreSQL database
+Separate HAVESTORY Cloudinary account
+Separate HAVESTORY Vercel project
+Secure environment variables
+Password and PIN-based admin access
+Session-secret protection
+Secure cookies
+Owner/staff roles
+Permission checks on frontend and backend
+Sensitive identity images not publicly accessible
+Token-based verification links
+Do not expose customer data through shipping QR codes
+Confirm destructive operations
+Avoid duplicate financial entries
+Preserve audit records for agreements and verification
+Responsive error, empty and loading states
+9. UI Screens the Design AI Should Produce
+
+Request designs for the following screens:
+
+Public website
+Homepage desktop
+Homepage mobile
+Store desktop
+Store mobile
+Product detail
+Cart drawer
+Customer order form
+Studio services
+Gallery
+Custom-project form
+Track-order result
+About
+Contact
+Private price list
+Shipping verification
+Client verification
+Agreement-signing page
+Site-closed page
+Admin panel
+Admin login and PIN
+Dashboard desktop
+Dashboard mobile
+Orders list
+Order-detail/edit drawer
+Clients list
+Client full profile
+Invoice list
+Invoice editor
+Invoice print preview
+Finance dashboard
+Inventory/material screen
+Production usage
+Products
+Services
+Coupons
+Private price lists
+Shipping-label editor
+Reports
+Website Editor
+General Settings
+Team Access
+Attendance
+Messages
+Reviews
+Notices
+Verification report
+Staff profile/CV
+10. Final Instructions for the UI Designer
+Redesign the visual interface only.
+Do not remove, rename or simplify existing business functions without approval.
+Do not add a Smart Print Calculator.
+Keep all Settings-driven values dynamic.
+Do not hardcode HAVESTORY contact or business information.
+Provide desktop and mobile designs.
+Include empty, loading, error, success and confirmation states.
+Include drawers, modals, tables, cards, forms and print layouts.
+Use consistent spacing, typography, buttons, status badges and form fields.
+Make daily admin operations quicker than the current interface.
+Use photography and framing terminology rather than generic printing-company terminology.
+Preserve offers, coupons, products, services, orders, CRM, invoices, finance, inventory, shipping, staff and website-management capabilities.
+Use a completely original HAVESTORY visual system.

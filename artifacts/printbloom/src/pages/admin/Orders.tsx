@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useListOrders, useUpdateOrder, useDeleteOrder } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Trash2, Eye, MessageCircle, AlertTriangle } from 'lucide-react';
@@ -55,7 +54,7 @@ export default function Orders() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-serif font-bold text-foreground">Orders</h1>
@@ -75,23 +74,23 @@ export default function Orders() {
               <SelectItem value="cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
-          <Button className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90 btn-glow uppercase text-xs tracking-widest px-5 h-9 font-semibold">
             Create Order
           </Button>
         </div>
       </div>
 
-      <Card className="rounded-none border-border shadow-sm">
+      <Card className="rounded-none border border-border shadow-sm">
         <CardContent className="p-0">
-          <Table>
-            <TableHeader className="bg-muted/50">
-              <TableRow>
-                <TableHead className="font-semibold text-foreground">Order ID</TableHead>
-                <TableHead className="font-semibold text-foreground">Customer</TableHead>
-                <TableHead className="font-semibold text-foreground">Date</TableHead>
-                <TableHead className="font-semibold text-foreground">Type</TableHead>
-                <TableHead className="font-semibold text-foreground">Status</TableHead>
-                <TableHead className="text-right font-semibold text-foreground">Actions</TableHead>
+          <Table className="admin-table">
+            <TableHeader className="bg-muted/50 border-b border-border">
+              <TableRow className="hover:bg-muted/50">
+                <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Order ID</TableHead>
+                <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Customer</TableHead>
+                <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Date</TableHead>
+                <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Type</TableHead>
+                <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Status</TableHead>
+                <TableHead className="text-right font-semibold text-xs uppercase tracking-wider text-muted-foreground">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -102,58 +101,58 @@ export default function Orders() {
               ) : orders?.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-12">
-                    <AlertTriangle className="w-8 h-8 text-muted-foreground/50 mx-auto mb-3" />
+                    <AlertTriangle className="w-8 h-8 text-muted-foreground/30 mx-auto mb-3" />
                     <p className="text-muted-foreground">No orders found.</p>
                   </TableCell>
                 </TableRow>
               ) : (
                 orders?.map((order) => (
-                  <TableRow key={order.id} className="hover:bg-muted/30">
-                    <TableCell className="font-medium">{order.orderId}</TableCell>
+                  <TableRow key={order.id} className="hover:bg-muted/40 transition-colors">
+                    <TableCell className="font-mono text-sm">{order.orderId}</TableCell>
                     <TableCell>
                       <div>
-                        <p>{order.customerName}</p>
-                        <p className="text-xs text-muted-foreground">{order.customerPhone}</p>
+                        <p className="font-medium text-foreground">{order.customerName}</p>
+                        <p className="text-xs text-muted-foreground font-mono">{order.customerPhone}</p>
                       </div>
                     </TableCell>
-                    <TableCell>{format(new Date(order.createdAt), 'MMM d, yyyy')}</TableCell>
-                    <TableCell className="capitalize">{order.orderType}</TableCell>
+                    <TableCell className="text-sm">{format(new Date(order.createdAt), 'MMM d, yyyy')}</TableCell>
+                    <TableCell className="capitalize text-sm">{order.orderType}</TableCell>
                     <TableCell>
                       <Select 
                         defaultValue={order.status} 
                         onValueChange={(val) => handleStatusChange(order.id, val)}
                       >
-                        <SelectTrigger className={`w-[130px] h-8 text-xs rounded-none border-none font-bold uppercase tracking-wider ${getStatusColor(order.status)}`}>
+                        <SelectTrigger className={`w-[130px] h-7 text-[10px] rounded-none border-none font-bold uppercase tracking-widest ${getStatusColor(order.status)}`}>
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="rounded-none">
-                          <SelectItem value="pending">PENDING</SelectItem>
-                          <SelectItem value="processing">PROCESSING</SelectItem>
-                          <SelectItem value="shipped">SHIPPED</SelectItem>
-                          <SelectItem value="completed">COMPLETED</SelectItem>
-                          <SelectItem value="cancelled">CANCELLED</SelectItem>
+                        <SelectContent className="rounded-none border-border">
+                          <SelectItem value="pending" className="text-[10px] font-bold uppercase tracking-widest">PENDING</SelectItem>
+                          <SelectItem value="processing" className="text-[10px] font-bold uppercase tracking-widest">PROCESSING</SelectItem>
+                          <SelectItem value="shipped" className="text-[10px] font-bold uppercase tracking-widest">SHIPPED</SelectItem>
+                          <SelectItem value="completed" className="text-[10px] font-bold uppercase tracking-widest">COMPLETED</SelectItem>
+                          <SelectItem value="cancelled" className="text-[10px] font-bold uppercase tracking-widest text-red-600">CANCELLED</SelectItem>
                         </SelectContent>
                       </Select>
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0 rounded-none">
+                          <Button variant="ghost" className="h-8 w-8 p-0 rounded-none text-muted-foreground hover:text-foreground">
                             <span className="sr-only">Open menu</span>
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="rounded-none border-border">
-                          <DropdownMenuItem className="cursor-pointer">
+                        <DropdownMenuContent align="end" className="rounded-none border-border shadow-md">
+                          <DropdownMenuItem className="cursor-pointer text-xs uppercase tracking-widest font-medium">
                             <Eye className="mr-2 h-4 w-4" /> View Details
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer" onClick={() => {
+                          <DropdownMenuItem className="cursor-pointer text-xs uppercase tracking-widest font-medium" onClick={() => {
                             const num = order.customerPhone.replace(/[^0-9]/g, '');
                             window.open(`https://wa.me/${num}`, '_blank');
                           }}>
                             <MessageCircle className="mr-2 h-4 w-4 text-green-600" /> WhatsApp
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive" onClick={() => handleDelete(order.id)}>
+                          <DropdownMenuItem className="cursor-pointer text-xs uppercase tracking-widest font-medium text-destructive focus:bg-destructive/10 focus:text-destructive" onClick={() => handleDelete(order.id)}>
                             <Trash2 className="mr-2 h-4 w-4" /> Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>

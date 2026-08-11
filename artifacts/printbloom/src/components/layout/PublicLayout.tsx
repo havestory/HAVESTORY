@@ -17,7 +17,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
       setScrolledPast200(window.scrollY > 200);
-      setScrolledPastHero(window.scrollY > 500);
+      setScrolledPastHero(window.scrollY > 600);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -32,33 +32,38 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     { href: '/services', label: 'Services' },
     { href: '/portfolio', label: 'Portfolio' },
     { href: '/store', label: 'Store' },
-    { href: '/track-order', label: 'Track Order' },
     { href: '/about', label: 'About' },
     { href: '/contact', label: 'Contact' },
   ];
 
   const isHome = location === '/';
-  const headerClasses = isHome && !scrolled 
-    ? 'bg-transparent py-6 border-transparent shadow-none text-primary-foreground' 
-    : 'bg-background/95 backdrop-blur-md py-4 border-b border-border shadow-sm text-foreground';
+  const isTransparent = isHome && !scrolled;
+  const headerClasses = isTransparent
+    ? 'bg-transparent py-3 border-transparent shadow-none text-white' 
+    : 'bg-background/95 backdrop-blur-sm py-3 border-b border-border shadow-sm text-foreground';
 
-  const linkActiveClasses = isHome && !scrolled ? 'after:bg-secondary text-primary-foreground hover:text-white' : 'after:bg-secondary text-foreground hover:text-secondary';
-  const logoBgClasses = isHome && !scrolled ? 'bg-white text-primary hover:bg-secondary hover:text-white' : 'bg-primary text-primary-foreground hover:bg-secondary hover:text-secondary-foreground';
+  const linkClasses = (href: string) => {
+    const isActive = location === href;
+    const base = 'font-sans text-sm uppercase tracking-wider transition-colors pb-0.5';
+    const active = isActive ? 'text-secondary border-b border-secondary' : '';
+    const inactive = isTransparent ? 'text-white/90 hover:text-secondary' : 'text-foreground/80 hover:text-secondary';
+    return `${base} ${isActive ? active : inactive}`;
+  };
 
   return (
     <div className="min-h-[100dvh] flex flex-col bg-background selection:bg-secondary selection:text-secondary-foreground relative">
-      {/* Top Bar - Hidden on Mobile */}
-      <div className="hidden md:flex bg-primary text-primary-foreground py-2.5 px-6 justify-between items-center text-xs tracking-wider border-b border-white/10 z-50 relative">
-        <div className="flex items-center gap-6 font-medium">
+      {/* Top Bar - Desktop only */}
+      <div className="hidden md:flex bg-primary text-primary-foreground py-2 px-8 justify-between items-center text-xs tracking-wide z-50 relative border-b border-white/10">
+        <div className="flex items-center gap-6">
           {settings?.phone && (
             <div className="flex items-center gap-2">
-              <Phone className="w-3.5 h-3.5 opacity-70" />
+              <Phone className="w-3.5 h-3.5" />
               <span>{settings.phone}</span>
             </div>
           )}
           {settings?.email && (
             <div className="flex items-center gap-2">
-              <Mail className="w-3.5 h-3.5 opacity-70" />
+              <Mail className="w-3.5 h-3.5" />
               <span>{settings.email}</span>
             </div>
           )}
@@ -78,75 +83,65 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       </div>
 
       {/* Main Navbar */}
-      <header className={`fixed w-full z-40 transition-all duration-300 top-0 md:top-[38px] ${headerClasses}`}>
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+      <header className={`fixed w-full z-40 transition-all duration-300 top-0 md:top-[34px] h-16 ${headerClasses}`}>
+        <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
           <Link href="/" className="flex items-center gap-4 group">
-            <div className={`w-11 h-11 rounded-none flex items-center justify-center transition-colors shadow-sm ${logoBgClasses}`}>
-              <Printer className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="font-serif text-2xl lg:text-3xl font-bold block leading-none tracking-tight">{settings?.businessName || 'HAVESTORY'}</span>
-              <span className={`text-[9px] uppercase tracking-[0.2em] font-bold ${isHome && !scrolled ? 'text-white/70' : 'text-muted-foreground'}`}>{settings?.tagline || 'Master Printers'}</span>
+            <div className="flex flex-col justify-center">
+              <span className="font-serif font-bold text-xl leading-none">{settings?.businessName || 'HAVESTORY'}</span>
+              <span className="section-label mt-1.5 leading-none !text-[9px] !tracking-[0.2em]">{settings?.tagline || 'PREMIUM FRAMES'}</span>
             </div>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-10">
-            {navLinks.map((link) => {
-              const isActive = location === link.href;
-              return (
-                <Link 
-                  key={link.href} 
-                  href={link.href}
-                  className={`text-sm font-bold tracking-wide transition-colors relative after:absolute after:bottom-[-6px] after:left-0 after:h-[2px] after:w-full after:scale-x-0 hover:after:scale-x-100 after:origin-left after:transition-transform ${linkActiveClasses} ${isActive ? 'after:scale-x-100 text-secondary' : ''}`}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
+          <nav className="hidden lg:flex items-center gap-8">
+            {navLinks.map((link) => (
+              <Link key={link.href} href={link.href} className={linkClasses(link.href)}>
+                {link.label}
+              </Link>
+            ))}
           </nav>
 
           <div className="hidden lg:block">
-            <Button asChild className={`rounded-none px-8 tracking-wider font-bold shadow-sm ${isHome && !scrolled ? 'bg-white text-primary hover:bg-secondary hover:text-white' : 'bg-primary text-primary-foreground hover:bg-primary/90'}`}>
+            <Button asChild className="bg-secondary text-secondary-foreground btn-glow text-xs uppercase tracking-widest px-5 h-9 rounded-[0.25rem] border-none font-semibold">
               <Link href="/contact">Get a Quote</Link>
             </Button>
           </div>
 
           <button 
-            className={`lg:hidden p-2 transition-colors ${isHome && !scrolled ? 'text-white' : 'text-foreground'}`}
+            className="lg:hidden p-2 transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            {mobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </header>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 top-[73px] md:top-[111px] z-50 bg-background flex flex-col lg:hidden border-t border-border overflow-y-auto">
-          <nav className="flex flex-col p-8 gap-6">
+        <div className="fixed inset-0 top-[64px] md:top-[98px] z-50 bg-background flex flex-col lg:hidden border-t border-border overflow-y-auto">
+          <nav className="flex flex-col p-8 gap-8">
             {navLinks.map((link) => (
               <Link 
                 key={link.href} 
                 href={link.href}
-                className={`text-2xl font-serif font-bold ${location === link.href ? 'text-secondary border-b-2 border-secondary inline-block w-max pb-1' : 'text-foreground'}`}
+                className={`font-serif text-3xl font-bold ${location === link.href ? 'text-secondary' : 'text-foreground'}`}
               >
                 {link.label}
               </Link>
             ))}
             <div className="pt-8 border-t border-border mt-4">
-              <Button asChild className="w-full rounded-none h-14 text-lg font-bold bg-primary text-primary-foreground shadow-sm">
+              <Button asChild className="w-full bg-secondary text-secondary-foreground h-12 text-sm uppercase tracking-widest font-bold shadow-sm">
                 <Link href="/contact">Get a Quote</Link>
               </Button>
             </div>
             
             <div className="mt-auto pt-8 flex gap-6 text-muted-foreground">
               {settings?.instagramUrl && (
-                <a href={settings.instagramUrl} target="_blank" rel="noreferrer" className="hover:text-foreground">
+                <a href={settings.instagramUrl} target="_blank" rel="noreferrer" className="hover:text-secondary">
                   <Instagram className="w-6 h-6" />
                 </a>
               )}
               {settings?.facebookUrl && (
-                <a href={settings.facebookUrl} target="_blank" rel="noreferrer" className="hover:text-foreground">
+                <a href={settings.facebookUrl} target="_blank" rel="noreferrer" className="hover:text-secondary">
                   <Facebook className="w-6 h-6" />
                 </a>
               )}
@@ -156,81 +151,87 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       )}
 
       {/* Main Content Spacer for fixed nav */}
-      <div className={`${isHome ? 'pt-0' : 'pt-[73px] md:pt-[111px]'}`}></div>
+      <div className={`${isHome ? 'pt-0' : 'pt-[64px] md:pt-[98px]'}`}></div>
 
       <main className="flex-1 flex flex-col">
         {children}
       </main>
 
       {/* Footer */}
-      <footer className="bg-primary text-primary-foreground pt-20 pb-8 border-t-[6px] border-secondary relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay"></div>
+      <footer className="bg-primary text-primary-foreground pt-20 pb-10 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-12 mb-16 relative z-10">
-          <div className="md:col-span-5">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-10 h-10 bg-secondary text-secondary-foreground rounded-none flex items-center justify-center shadow-sm">
-                <Printer className="w-5 h-5" />
-              </div>
-              <span className="font-serif text-3xl font-bold tracking-tight">{settings?.businessName || 'HAVESTORY'}</span>
-            </div>
-            <p className="text-primary-foreground/70 max-w-sm mb-8 leading-relaxed text-base font-light">
+          <div className="md:col-span-4">
+            <h3 className="font-serif text-3xl font-bold mb-4">{settings?.businessName || 'HAVESTORY'}</h3>
+            <p className="text-primary-foreground/70 max-w-sm mb-6 leading-relaxed text-sm font-light">
               {settings?.aboutStory?.substring(0, 160) || 'Premium photo framing and gallery wall design studio. We bring your best memories to life with unmatched craftsmanship and archival materials.'}...
             </p>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 text-secondary">
               {settings?.instagramUrl && (
-                <a href={settings.instagramUrl} target="_blank" rel="noreferrer" className="w-10 h-10 border border-white/20 rounded-full flex items-center justify-center hover:bg-secondary hover:border-secondary hover:text-black transition-all">
+                <a href={settings.instagramUrl} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-secondary/20 transition-all">
                   <Instagram className="w-4 h-4" />
                 </a>
               )}
               {settings?.facebookUrl && (
-                <a href={settings.facebookUrl} target="_blank" rel="noreferrer" className="w-10 h-10 border border-white/20 rounded-full flex items-center justify-center hover:bg-secondary hover:border-secondary hover:text-black transition-all">
+                <a href={settings.facebookUrl} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-secondary/20 transition-all">
                   <Facebook className="w-4 h-4" />
                 </a>
               )}
             </div>
           </div>
           
-          <div className="md:col-span-3">
-            <h4 className="font-sans uppercase tracking-widest text-xs font-bold mb-8 text-secondary">Quick Links</h4>
-            <ul className="space-y-4">
-              {navLinks.slice(0, 6).map(link => (
+          <div className="md:col-span-2 md:col-start-6">
+            <h4 className="font-sans uppercase tracking-widest text-xs font-bold mb-6 text-secondary">Quick Links</h4>
+            <ul className="space-y-3">
+              {navLinks.slice(0, 4).map(link => (
                 <li key={link.href}>
-                  <Link href={link.href} className="text-primary-foreground/80 hover:text-white transition-colors font-medium">
+                  <Link href={link.href} className="text-primary-foreground/80 hover:text-white transition-colors text-sm">
                     {link.label}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
+
+          <div className="md:col-span-2">
+            <h4 className="font-sans uppercase tracking-widest text-xs font-bold mb-6 text-secondary">Services</h4>
+            <ul className="space-y-3">
+              <li><Link href="/services" className="text-primary-foreground/80 hover:text-white transition-colors text-sm">Custom Framing</Link></li>
+              <li><Link href="/services" className="text-primary-foreground/80 hover:text-white transition-colors text-sm">Gallery Walls</Link></li>
+              <li><Link href="/services" className="text-primary-foreground/80 hover:text-white transition-colors text-sm">Photo Printing</Link></li>
+              <li><Link href="/services" className="text-primary-foreground/80 hover:text-white transition-colors text-sm">Bespoke Mirrors</Link></li>
+            </ul>
+          </div>
           
-          <div className="md:col-span-4">
-            <h4 className="font-sans uppercase tracking-widest text-xs font-bold mb-8 text-secondary">Studio Contact</h4>
-            <ul className="space-y-6 text-primary-foreground/80">
+          <div className="md:col-span-3">
+            <h4 className="font-sans uppercase tracking-widest text-xs font-bold mb-6 text-secondary">Contact</h4>
+            <ul className="space-y-4 text-primary-foreground/80 text-sm">
               {settings?.address && (
-                <li className="flex items-start gap-4">
-                  <MapPin className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
-                  <span className="leading-relaxed font-medium">{settings.address}</span>
+                <li className="flex items-start gap-3">
+                  <MapPin className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
+                  <span className="leading-relaxed">{settings.address}</span>
                 </li>
               )}
               {settings?.phone && (
-                <li className="flex items-center gap-4">
-                  <Phone className="w-5 h-5 text-secondary shrink-0" />
-                  <span className="font-medium">{settings.phone}</span>
+                <li className="flex items-center gap-3">
+                  <Phone className="w-4 h-4 text-secondary shrink-0" />
+                  <span>{settings.phone}</span>
                 </li>
               )}
               {settings?.email && (
-                <li className="flex items-center gap-4">
-                  <Mail className="w-5 h-5 text-secondary shrink-0" />
-                  <span className="font-medium">{settings.email}</span>
+                <li className="flex items-center gap-3">
+                  <Mail className="w-4 h-4 text-secondary shrink-0" />
+                  <span>{settings.email}</span>
                 </li>
               )}
             </ul>
           </div>
         </div>
         
-        <div className="max-w-7xl mx-auto px-6 border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-primary-foreground/50 font-medium tracking-wide relative z-10">
-          <p>© {new Date().getFullYear()} {settings?.businessName || 'HAVESTORY'}. All rights reserved.</p>
-          <p className="mt-4 md:mt-0 uppercase tracking-widest">Designed for precision.</p>
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="gold-rule mb-6" />
+          <p className="text-xs text-primary-foreground/50 text-center tracking-wide">
+            © {new Date().getFullYear()} {settings?.businessName || 'HAVESTORY'}. All rights reserved.
+          </p>
         </div>
       </footer>
 
@@ -241,10 +242,10 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           target="_blank"
           rel="noreferrer"
           title="Chat with us"
-          className={`fixed bottom-6 right-6 w-16 h-16 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-[0_4px_20px_rgba(37,211,102,0.4)] hover:scale-110 transition-all duration-300 z-40 animate-pulse-ring ${scrolledPast200 ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'}`}
+          className={`fixed bottom-24 right-6 w-14 h-14 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-all duration-300 z-40 animate-pulse-ring ${scrolledPast200 ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'}`}
           aria-label="Chat on WhatsApp"
         >
-          <svg viewBox="0 0 24 24" className="w-8 h-8 fill-current">
+          <svg viewBox="0 0 24 24" className="w-7 h-7 fill-current">
             <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.334.101.154.453.721.969 1.18.665.59 1.221.77 1.378.857.156.087.248.072.338-.029.091-.101.393-.457.497-.614.104-.157.208-.13.346-.079l2.179 1.031c.144.072.239.116.275.18.036.065.036.375-.108.78z"/>
           </svg>
         </a>
@@ -259,10 +260,10 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           scale: scrolledPastHero ? 1 : 0.9,
           pointerEvents: scrolledPastHero ? 'auto' : 'none'
         }}
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:bottom-28 md:translate-x-0 z-50"
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:translate-x-0 z-50"
       >
-        <Link href="/store" className="flex items-center gap-2 bg-secondary text-secondary-foreground rounded-full px-6 py-3 font-bold text-sm cta-pulse shadow-xl hover:scale-105 transition-transform whitespace-nowrap border-none">
-          🖼 Order a Frame <ArrowRight className="w-4 h-4" />
+        <Link href="/store" className="flex items-center justify-center gap-2 bg-secondary text-secondary-foreground rounded-full px-6 py-3 font-semibold text-sm cta-pulse shadow-xl hover:scale-105 transition-transform border-none">
+          <span>🖼 Order a Frame</span> <ArrowRight className="w-4 h-4 ml-1" />
         </Link>
       </motion.div>
     </div>

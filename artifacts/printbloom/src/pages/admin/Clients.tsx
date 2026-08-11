@@ -24,26 +24,26 @@ export default function Clients() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-serif font-bold text-foreground">Clients</h1>
           <p className="text-muted-foreground mt-1">Manage client records and profiles.</p>
         </div>
-        <Button className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90">
+        <Button className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90 btn-glow uppercase text-xs tracking-widest px-5 h-9 font-semibold">
           Add Client
         </Button>
       </div>
 
-      <Card className="rounded-none border-border shadow-sm">
+      <Card className="rounded-none border border-border shadow-sm bg-card">
         <CardContent className="p-0">
-          <Table>
-            <TableHeader className="bg-muted/50">
-              <TableRow>
-                <TableHead className="font-semibold">Name / Business</TableHead>
-                <TableHead className="font-semibold">Contact</TableHead>
-                <TableHead className="font-semibold">Status</TableHead>
-                <TableHead className="text-right font-semibold">Actions</TableHead>
+          <Table className="admin-table">
+            <TableHeader className="bg-muted/50 border-b border-border">
+              <TableRow className="hover:bg-muted/50">
+                <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Name / Business</TableHead>
+                <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Contact</TableHead>
+                <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Status</TableHead>
+                <TableHead className="text-right font-semibold text-xs uppercase tracking-wider text-muted-foreground">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -52,35 +52,35 @@ export default function Clients() {
               ) : clients?.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center py-12">
-                    <Users className="w-8 h-8 text-muted-foreground/50 mx-auto mb-3" />
+                    <Users className="w-8 h-8 text-muted-foreground/30 mx-auto mb-3" />
                     <p className="text-muted-foreground">No clients found.</p>
                   </TableCell>
                 </TableRow>
               ) : (
                 clients?.map(client => (
-                  <TableRow key={client.id} className="hover:bg-muted/30">
+                  <TableRow key={client.id} className="hover:bg-muted/40 transition-colors">
                     <TableCell>
-                      <div className="font-medium">{client.name}</div>
-                      {client.businessName && <div className="text-xs text-muted-foreground">{client.businessName}</div>}
+                      <div className="font-medium text-foreground">{client.name}</div>
+                      {client.businessName && <div className="text-xs text-muted-foreground mt-0.5">{client.businessName}</div>}
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm">{client.email || '-'}</div>
-                      <div className="text-sm text-muted-foreground">{client.phone || '-'}</div>
+                      <div className="text-sm font-mono">{client.email || '-'}</div>
+                      <div className="text-sm text-muted-foreground font-mono">{client.phone || '-'}</div>
                     </TableCell>
                     <TableCell>
-                      <span className={`px-2 py-0.5 text-[10px] uppercase font-bold tracking-widest ${client.approved ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>
+                      <span className={`px-2 py-1 text-[9px] uppercase font-bold tracking-widest ${client.approved ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>
                         {client.approved ? 'Approved' : 'Pending'}
                       </span>
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0 rounded-none"><MoreHorizontal className="h-4 w-4" /></Button>
+                          <Button variant="ghost" className="h-8 w-8 p-0 rounded-none text-muted-foreground hover:text-foreground"><MoreHorizontal className="h-4 w-4" /></Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="rounded-none border-border">
-                          <DropdownMenuItem className="cursor-pointer"><Edit2 className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer"><FileText className="mr-2 h-4 w-4" /> View Invoices</DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer text-destructive" onClick={() => handleDelete(client.id)}>
+                        <DropdownMenuContent align="end" className="rounded-none border-border shadow-md">
+                          <DropdownMenuItem className="cursor-pointer text-xs uppercase tracking-widest font-medium"><Edit2 className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
+                          <DropdownMenuItem className="cursor-pointer text-xs uppercase tracking-widest font-medium"><FileText className="mr-2 h-4 w-4" /> View Invoices</DropdownMenuItem>
+                          <DropdownMenuItem className="cursor-pointer text-xs uppercase tracking-widest font-medium text-destructive focus:bg-destructive/10 focus:text-destructive" onClick={() => handleDelete(client.id)}>
                             <Trash2 className="mr-2 h-4 w-4" /> Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
