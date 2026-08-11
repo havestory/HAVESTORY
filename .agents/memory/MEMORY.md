@@ -1,0 +1,2 @@
+- [Dark Gold Theme](dark-gold-theme.md) — intentional overhaul: deep darkroom black + rich gold (#C9A84C) as the HAVESTORY design language; do not revert to light/ivory palette
+- [Custom Cursor](custom-cursor.md) — gold dot + ring follower via RAF lerp; `cursor: none !important` on all elements, restored to `text` on inputs; hidden in prefers-reduced-motion
