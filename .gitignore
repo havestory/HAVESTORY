@@ -44,6 +44,9 @@ Thumbs.db
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
 
+# Vercel build output (regenerated on each deploy)
+.vercel/output/
+
 # Replit
 .cache/
 .local/

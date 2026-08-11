@@ -1,22 +1,46 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: HAVESTORY API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: products
+    description: Product management
+  - name: categories
+    description: Category management
+  - name: services
+    description: Service management
+  - name: portfolio
+    description: Portfolio management
+  - name: orders
+    description: Order management
+  - name: reviews
+    description: Review management
+  - name: messages
+    description: Contact messages
+  - name: clients
+    description: Client management
+  - name: settings
+    description: Site settings
+  - name: stats
+    description: Site statistics
+  - name: admin
+    description: Admin operations
+  - name: invoices
+    description: Invoice management
+  - name: inventory
+    description: Inventory management
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +48,1094 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ─── CATEGORIES ───────────────────────────────────────────────────────────
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [categories]
+      summary: List all product categories
+      responses:
+        "200":
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+    post:
+      operationId: createCategory
+      tags: [categories]
+      summary: Create a product category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+
+  /categories/{id}:
+    put:
+      operationId: updateCategory
+      tags: [categories]
+      summary: Update a category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+    delete:
+      operationId: deleteCategory
+      tags: [categories]
+      summary: Delete a category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ─── PRODUCTS ─────────────────────────────────────────────────────────────
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List products
+      parameters:
+        - name: categoryId
+          in: query
+          schema:
+            type: integer
+        - name: featured
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+    post:
+      operationId: createProduct
+      tags: [products]
+      summary: Create a product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /products/{id}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+    put:
+      operationId: updateProduct
+      tags: [products]
+      summary: Update a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+    delete:
+      operationId: deleteProduct
+      tags: [products]
+      summary: Delete a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ─── SERVICES ─────────────────────────────────────────────────────────────
+  /services:
+    get:
+      operationId: listServices
+      tags: [services]
+      summary: List services
+      parameters:
+        - name: featured
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: List of services
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Service"
+    post:
+      operationId: createService
+      tags: [services]
+      summary: Create a service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateServiceBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Service"
+
+  /services/{id}:
+    put:
+      operationId: updateService
+      tags: [services]
+      summary: Update a service
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateServiceBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Service"
+    delete:
+      operationId: deleteService
+      tags: [services]
+      summary: Delete a service
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ─── PORTFOLIO ────────────────────────────────────────────────────────────
+  /portfolio:
+    get:
+      operationId: listPortfolio
+      tags: [portfolio]
+      summary: List portfolio items
+      parameters:
+        - name: featured
+          in: query
+          schema:
+            type: boolean
+        - name: category
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Portfolio items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PortfolioItem"
+    post:
+      operationId: createPortfolioItem
+      tags: [portfolio]
+      summary: Create a portfolio item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePortfolioItemBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PortfolioItem"
+
+  /portfolio/{id}:
+    put:
+      operationId: updatePortfolioItem
+      tags: [portfolio]
+      summary: Update a portfolio item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePortfolioItemBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PortfolioItem"
+    delete:
+      operationId: deletePortfolioItem
+      tags: [portfolio]
+      summary: Delete a portfolio item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ─── ORDERS ───────────────────────────────────────────────────────────────
+  /orders:
+    get:
+      operationId: listOrders
+      tags: [orders]
+      summary: List orders
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [standard, custom]
+      responses:
+        "200":
+          description: Orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Submit an order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderBody"
+      responses:
+        "201":
+          description: Order submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /orders/{id}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      summary: Get an order by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+    put:
+      operationId: updateOrder
+      tags: [orders]
+      summary: Update an order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOrderBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+    delete:
+      operationId: deleteOrder
+      tags: [orders]
+      summary: Delete an order by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+
+  /orders/track/{orderId}:
+    get:
+      operationId: trackOrder
+      tags: [orders]
+      summary: Track an order by order ID string
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Order tracking info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderTracking"
+        "404":
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ─── REVIEWS ──────────────────────────────────────────────────────────────
+  /reviews:
+    get:
+      operationId: listReviews
+      tags: [reviews]
+      summary: List reviews
+      parameters:
+        - name: approved
+          in: query
+          schema:
+            type: boolean
+        - name: featured
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Review"
+    post:
+      operationId: submitReview
+      tags: [reviews]
+      summary: Submit a review
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReviewBody"
+      responses:
+        "201":
+          description: Review submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+
+  /reviews/{id}:
+    put:
+      operationId: updateReview
+      tags: [reviews]
+      summary: Update a review (approve/feature)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateReviewBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+    delete:
+      operationId: deleteReview
+      tags: [reviews]
+      summary: Delete a review
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ─── MESSAGES ─────────────────────────────────────────────────────────────
+  /messages:
+    get:
+      operationId: listMessages
+      tags: [messages]
+      summary: List contact messages
+      parameters:
+        - name: read
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
+    post:
+      operationId: submitMessage
+      tags: [messages]
+      summary: Submit a contact message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMessageBody"
+      responses:
+        "201":
+          description: Message submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+
+  /messages/{id}:
+    put:
+      operationId: updateMessage
+      tags: [messages]
+      summary: Update a message (mark read)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMessageBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+    delete:
+      operationId: deleteMessage
+      tags: [messages]
+      summary: Delete a message
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ─── CLIENTS ──────────────────────────────────────────────────────────────
+  /clients:
+    get:
+      operationId: listClients
+      tags: [clients]
+      summary: List clients
+      responses:
+        "200":
+          description: Clients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Client"
+    post:
+      operationId: createClient
+      tags: [clients]
+      summary: Create a client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateClientBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+
+  /clients/{id}/invoices:
+    get:
+      operationId: listClientInvoices
+      tags: [clients]
+      summary: List invoices for a single client (matched strictly by clientId)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Client invoice history with summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientInvoiceHistory"
+
+  /clients/{id}:
+    put:
+      operationId: updateClient
+      tags: [clients]
+      summary: Update a client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateClientBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+    delete:
+      operationId: deleteClient
+      tags: [clients]
+      summary: Delete a client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ─── SETTINGS ─────────────────────────────────────────────────────────────
+  /settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get site settings
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteSettings"
+    put:
+      operationId: updateSettings
+      tags: [settings]
+      summary: Update site settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSettingsBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteSettings"
+
+  # ─── STATS ────────────────────────────────────────────────────────────────
+  /stats:
+    get:
+      operationId: getSiteStats
+      tags: [stats]
+      summary: Get live site statistics
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteStats"
+
+  # ─── INVOICES ─────────────────────────────────────────────────────────────
+  /invoices:
+    get:
+      operationId: listInvoices
+      tags: [invoices]
+      summary: List invoices
+      responses:
+        "200":
+          description: Invoices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Invoice"
+    post:
+      operationId: createInvoice
+      tags: [invoices]
+      summary: Create an invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInvoiceBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+
+  /invoices/{id}:
+    put:
+      operationId: updateInvoice
+      tags: [invoices]
+      summary: Update an invoice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInvoiceBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+    delete:
+      operationId: deleteInvoice
+      tags: [invoices]
+      summary: Delete an invoice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ─── INVENTORY ────────────────────────────────────────────────────────────
+  /inventory:
+    get:
+      operationId: listInventory
+      tags: [inventory]
+      summary: List inventory items
+      responses:
+        "200":
+          description: Inventory
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InventoryItem"
+    post:
+      operationId: createInventoryItem
+      tags: [inventory]
+      summary: Create an inventory item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInventoryItemBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InventoryItem"
+
+  /inventory/{id}:
+    put:
+      operationId: updateInventoryItem
+      tags: [inventory]
+      summary: Update an inventory item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInventoryItemBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InventoryItem"
+    delete:
+      operationId: deleteInventoryItem
+      tags: [inventory]
+      summary: Delete an inventory item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ─── ADMIN AUTH ────────────────────────────────────────────────────────────
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminLoginBody"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminLoginResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/logout:
+    post:
+      operationId: adminLogout
+      tags: [admin]
+      summary: Admin logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /admin/me:
+    get:
+      operationId: getAdminMe
+      tags: [admin]
+      summary: Get current admin session
+      responses:
+        "200":
+          description: Admin info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminMeResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ─── NOTICES (multi) ───────────────────────────────────────────────────────
+  /notices:
+    get:
+      operationId: getNotices
+      tags: [settings]
+      summary: Get all notices (banners + popups)
+      responses:
+        "200":
+          description: List of notices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notice"
+    post:
+      operationId: createNotice
+      tags: [settings]
+      summary: Create a new notice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateNoticeBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notice"
+
+  /notices/{id}:
+    put:
+      operationId: updateNoticeById
+      tags: [settings]
+      summary: Update a notice by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateNoticeBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notice"
+    delete:
+      operationId: deleteNoticeById
+      tags: [settings]
+      summary: Delete a notice by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ─── NOTICE ────────────────────────────────────────────────────────────────
+  /notice:
+    get:
+      operationId: getNotice
+      tags: [settings]
+      summary: Get site notice/announcement
+      responses:
+        "200":
+          description: Notice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteNotice"
+    put:
+      operationId: updateNotice
+      tags: [settings]
+      summary: Update site notice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SiteNotice"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteNotice"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +1143,1281 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required: [success]
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+      required: [id, name, sortOrder, createdAt]
+
+    CreateCategoryBody:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        sortOrder:
+          type: integer
+      required: [name]
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        categoryId:
+          type: integer
+          nullable: true
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: string
+        priceType:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        featured:
+          type: boolean
+        active:
+          type: boolean
+        sortOrder:
+          type: integer
+        customConfig:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+        category:
+          $ref: "#/components/schemas/Category"
+          nullable: true
+      required: [id, name, description, price, priceType, featured, active, sortOrder, createdAt]
+
+    CreateProductBody:
+      type: object
+      properties:
+        categoryId:
+          type: integer
+          nullable: true
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: string
+        priceType:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        featured:
+          type: boolean
+        active:
+          type: boolean
+        sortOrder:
+          type: integer
+        customConfig:
+          type: string
+          nullable: true
+      required: [name, description, price, priceType]
+
+    Service:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: string
+          nullable: true
+        priceType:
+          type: string
+        packageDetails:
+          type: string
+          nullable: true
+        highlights:
+          type: array
+          items:
+            type: string
+        imageUrl:
+          type: string
+          nullable: true
+        featured:
+          type: boolean
+        active:
+          type: boolean
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+      required: [id, name, description, priceType, highlights, featured, active, sortOrder, createdAt]
+
+    CreateServiceBody:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: string
+          nullable: true
+        priceType:
+          type: string
+        packageDetails:
+          type: string
+          nullable: true
+        highlights:
+          type: array
+          items:
+            type: string
+        imageUrl:
+          type: string
+          nullable: true
+        featured:
+          type: boolean
+        active:
+          type: boolean
+        sortOrder:
+          type: integer
+      required: [name, description, priceType, highlights]
+
+    PortfolioItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        category:
+          type: string
+        clientName:
+          type: string
+          nullable: true
+        description:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        galleryImages:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            type: string
+        featured:
+          type: boolean
+        completedAt:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+      required: [id, title, category, description, galleryImages, tags, featured, createdAt]
+
+    CreatePortfolioItemBody:
+      type: object
+      properties:
+        title:
+          type: string
+        category:
+          type: string
+        clientName:
+          type: string
+          nullable: true
+        description:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        galleryImages:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            type: string
+        featured:
+          type: boolean
+        completedAt:
+          type: string
+          nullable: true
+      required: [title, category, description, galleryImages, tags]
+
+    OrderItem:
+      type: object
+      properties:
+        productId:
+          type: integer
+          nullable: true
+        productName:
+          type: string
+        quantity:
+          type: integer
+        notes:
+          type: string
+          nullable: true
+      required: [productName, quantity]
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+        orderId:
+          type: string
+        customerName:
+          type: string
+        customerPhone:
+          type: string
+        customerEmail:
+          type: string
+          nullable: true
+        customerAddress:
+          type: string
+        orderType:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        designLinks:
+          type: array
+          items:
+            type: string
+        attachments:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+        adminNotes:
+          type: string
+          nullable: true
+        estimatedCompletion:
+          type: string
+          nullable: true
+        dueDate:
+          type: string
+          nullable: true
+        startDate:
+          type: string
+          nullable: true
+        priority:
+          type: string
+          nullable: true
+        discountAmount:
+          type: integer
+        advancePaid:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required: [id, orderId, customerName, customerPhone, customerAddress, orderType, items, designLinks, attachments, status, discountAmount, advancePaid, tags, createdAt, updatedAt]
+
+    CreateOrderBody:
+      type: object
+      properties:
+        customerName:
+          type: string
+        customerPhone:
+          type: string
+        customerEmail:
+          type: string
+          nullable: true
+        customerAddress:
+          type: string
+        orderType:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        designLinks:
+          type: array
+          items:
+            type: string
+        attachments:
+          type: array
+          items:
+            type: string
+        notes:
+          type: string
+          nullable: true
+        dueDate:
+          type: string
+          nullable: true
+        startDate:
+          type: string
+          nullable: true
+        priority:
+          type: string
+          nullable: true
+        discountAmount:
+          type: integer
+          nullable: true
+        advancePaid:
+          type: integer
+          nullable: true
+        tags:
+          type: array
+          nullable: true
+          items:
+            type: string
+      required: [customerName, customerPhone, customerAddress, orderType, items, designLinks, attachments]
+
+    UpdateOrderBody:
+      type: object
+      properties:
+        status:
+          type: string
+        adminNotes:
+          type: string
+          nullable: true
+        estimatedCompletion:
+          type: string
+          nullable: true
+      required: []
+
+    OrderTracking:
+      type: object
+      properties:
+        orderId:
+          type: string
+        customerName:
+          type: string
+        customerPhone:
+          type: string
+          nullable: true
+        status:
+          type: string
+        estimatedCompletion:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        orderDescription:
+          type: string
+          nullable: true
+        deliveryMethod:
+          type: string
+          nullable: true
+        courierName:
+          type: string
+          nullable: true
+        courierTrackingNumber:
+          type: string
+          nullable: true
+        courierTrackingUrl:
+          type: string
+          nullable: true
+        paymentProofUrl:
+          type: string
+          nullable: true
+        proofFileUrl:
+          type: string
+          nullable: true
+        proofFileName:
+          type: string
+          nullable: true
+        attachments:
+          type: array
+          items: {}
+        onlineDeliveryFiles:
+          type: array
+          items: {}
+        onlineDeliveryLinks:
+          type: array
+          items:
+            type: string
+        statusHistory:
+          type: array
+          items:
+            type: object
+            properties:
+              status:
+                type: string
+              timestamp:
+                type: string
+              note:
+                type: string
+                nullable: true
+            required: [status, timestamp]
+        invoice:
+          type: object
+          nullable: true
+          properties:
+            invoiceNumber:
+              type: string
+            amount:
+              type: string
+            status:
+              type: string
+          required: [invoiceNumber, amount, status]
+      required: [orderId, customerName, status, createdAt, updatedAt, statusHistory, attachments, onlineDeliveryFiles, onlineDeliveryLinks]
+
+    Review:
+      type: object
+      properties:
+        id:
+          type: integer
+        customerName:
+          type: string
+        rating:
+          type: integer
+        comment:
+          type: string
+        approved:
+          type: boolean
+        featured:
+          type: boolean
+        createdAt:
+          type: string
+      required: [id, customerName, rating, comment, approved, featured, createdAt]
+
+    CreateReviewBody:
+      type: object
+      properties:
+        customerName:
+          type: string
+        rating:
+          type: integer
+        comment:
+          type: string
+      required: [customerName, rating, comment]
+
+    UpdateReviewBody:
+      type: object
+      properties:
+        approved:
+          type: boolean
+        featured:
+          type: boolean
+      required: []
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+        messageId:
+          type: string
+        fullName:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+          nullable: true
+        subject:
+          type: string
+        message:
+          type: string
+        isRead:
+          type: boolean
+        createdAt:
+          type: string
+      required: [id, messageId, fullName, phone, subject, message, isRead, createdAt]
+
+    CreateMessageBody:
+      type: object
+      properties:
+        fullName:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+          nullable: true
+        subject:
+          type: string
+        message:
+          type: string
+      required: [fullName, phone, subject, message]
+
+    UpdateMessageBody:
+      type: object
+      properties:
+        isRead:
+          type: boolean
+      required: []
+
+    Client:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        businessName:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        approved:
+          type: boolean
+        notes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+          nullable: true
+      required: [id, name, approved, createdAt]
+
+    CreateClientBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        approved:
+          type: boolean
+        notes:
+          type: string
+          nullable: true
+      required: [name]
+
+    SiteSettings:
+      type: object
+      properties:
+        id:
+          type: integer
+        businessName:
+          type: string
+        tagline:
+          type: string
+        heroTitle:
+          type: string
+        heroSubtitle:
+          type: string
+        whatsappNumber:
+          type: string
+        whatsappMessage:
+          type: string
+        aboutStory:
+          type: string
+        aboutMission:
+          type: string
+        aboutImage:
+          type: string
+          nullable: true
+        ordersCompletedCount:
+          type: integer
+        happyClientsPercent:
+          type: integer
+        starRating:
+          type: number
+        facebookUrl:
+          type: string
+          nullable: true
+        instagramUrl:
+          type: string
+          nullable: true
+        tiktokUrl:
+          type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        website:
+          type: string
+          nullable: true
+        taglineEnabled:
+          type: boolean
+        showNameWithLogo:
+          type: boolean
+        logoUrl:
+          type: string
+          nullable: true
+        faviconUrl:
+          type: string
+          nullable: true
+        ownerName:
+          type: string
+          nullable: true
+        designerCredit:
+          type: string
+          nullable: true
+        themePreset:
+          type: string
+          nullable: true
+        bankName:
+          type: string
+          nullable: true
+        bankAccountHolder:
+          type: string
+          nullable: true
+        bankAccountNumber:
+          type: string
+          nullable: true
+        bankBranch:
+          type: string
+          nullable: true
+        bankSwiftBic:
+          type: string
+          nullable: true
+        bankDetails:
+          type: string
+          nullable: true
+        paymentDueDays:
+          type: integer
+        courierServices:
+          type: string
+          nullable: true
+        courierCharge:
+          type: string
+          nullable: true
+        slPostCharge:
+          type: string
+          nullable: true
+        invoiceStandardRate:
+          type: string
+          nullable: true
+        invoiceExpressRate:
+          type: string
+          nullable: true
+        invoiceWeightFirstKg:
+          type: string
+          nullable: true
+        invoiceWeightAddKg:
+          type: string
+          nullable: true
+        termsConditions:
+          type: string
+          nullable: true
+        termsOfService:
+          type: string
+          nullable: true
+        privacyPolicy:
+          type: string
+          nullable: true
+        heroBgImage:
+          type: string
+          nullable: true
+        heroCtaText:
+          type: string
+          nullable: true
+        heroCtaLink:
+          type: string
+          nullable: true
+        heroBadgeText:
+          type: string
+          nullable: true
+        heroHighlightWord:
+          type: string
+          nullable: true
+        heroAvatarImage1:
+          type: string
+          nullable: true
+        heroAvatarImage2:
+          type: string
+          nullable: true
+        heroAvatarImage3:
+          type: string
+          nullable: true
+        heroAvatarImage4:
+          type: string
+          nullable: true
+        heroSlideImage1:
+          type: string
+          nullable: true
+        heroSlideImage2:
+          type: string
+          nullable: true
+        heroSlideImage3:
+          type: string
+          nullable: true
+        heroSlideImage4:
+          type: string
+          nullable: true
+        heroSlideImage5:
+          type: string
+          nullable: true
+        aboutVision:
+          type: string
+          nullable: true
+        aboutFoundedYear:
+          type: string
+          nullable: true
+        aboutTeamSize:
+          type: string
+          nullable: true
+        aboutLocation:
+          type: string
+          nullable: true
+        seoTitle:
+          type: string
+          nullable: true
+        seoDescription:
+          type: string
+          nullable: true
+        seoKeywords:
+          type: string
+          nullable: true
+        seoOgImage:
+          type: string
+          nullable: true
+        whatsappOrderTemplate:
+          type: string
+          nullable: true
+        paymentQrUrl:
+          type: string
+          nullable: true
+        paymentButtonUrl:
+          type: string
+          nullable: true
+        paymentButtonLabel:
+          type: string
+          nullable: true
+        googlePayEnabled:
+          type: integer
+        googlePayNumber:
+          type: string
+          nullable: true
+        googlePayQrUrl:
+          type: string
+          nullable: true
+        googlePayInstructions:
+          type: string
+          nullable: true
+        updatedAt:
+          type: string
+      required: [id, businessName, tagline, heroTitle, heroSubtitle, whatsappNumber, whatsappMessage, aboutStory, aboutMission, ordersCompletedCount, happyClientsPercent, starRating, updatedAt]
+
+    UpdateSettingsBody:
+      type: object
+      properties:
+        businessName:
+          type: string
+        tagline:
+          type: string
+        heroTitle:
+          type: string
+        heroSubtitle:
+          type: string
+        whatsappNumber:
+          type: string
+        whatsappMessage:
+          type: string
+        aboutStory:
+          type: string
+        aboutMission:
+          type: string
+        aboutImage:
+          type: string
+          nullable: true
+        ordersCompletedCount:
+          type: integer
+        happyClientsPercent:
+          type: integer
+        starRating:
+          type: number
+        facebookUrl:
+          type: string
+          nullable: true
+        instagramUrl:
+          type: string
+          nullable: true
+        tiktokUrl:
+          type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        website:
+          type: string
+          nullable: true
+        taglineEnabled:
+          type: boolean
+        showNameWithLogo:
+          type: boolean
+        logoUrl:
+          type: string
+          nullable: true
+        faviconUrl:
+          type: string
+          nullable: true
+        ownerName:
+          type: string
+          nullable: true
+        designerCredit:
+          type: string
+          nullable: true
+        themePreset:
+          type: string
+          nullable: true
+        bankName:
+          type: string
+          nullable: true
+        bankAccountHolder:
+          type: string
+          nullable: true
+        bankAccountNumber:
+          type: string
+          nullable: true
+        bankBranch:
+          type: string
+          nullable: true
+        bankSwiftBic:
+          type: string
+          nullable: true
+        bankDetails:
+          type: string
+          nullable: true
+        paymentDueDays:
+          type: integer
+        courierServices:
+          type: string
+          nullable: true
+        courierCharge:
+          type: string
+          nullable: true
+        slPostCharge:
+          type: string
+          nullable: true
+        invoiceStandardRate:
+          type: string
+          nullable: true
+        invoiceExpressRate:
+          type: string
+          nullable: true
+        invoiceWeightFirstKg:
+          type: string
+          nullable: true
+        invoiceWeightAddKg:
+          type: string
+          nullable: true
+        termsConditions:
+          type: string
+          nullable: true
+        termsOfService:
+          type: string
+          nullable: true
+        privacyPolicy:
+          type: string
+          nullable: true
+        heroBgImage:
+          type: string
+          nullable: true
+        heroCtaText:
+          type: string
+          nullable: true
+        heroCtaLink:
+          type: string
+          nullable: true
+        heroBadgeText:
+          type: string
+          nullable: true
+        heroHighlightWord:
+          type: string
+          nullable: true
+        heroAvatarImage1:
+          type: string
+          nullable: true
+        heroAvatarImage2:
+          type: string
+          nullable: true
+        heroAvatarImage3:
+          type: string
+          nullable: true
+        heroAvatarImage4:
+          type: string
+          nullable: true
+        heroSlideImage1:
+          type: string
+          nullable: true
+        heroSlideImage2:
+          type: string
+          nullable: true
+        heroSlideImage3:
+          type: string
+          nullable: true
+        heroSlideImage4:
+          type: string
+          nullable: true
+        heroSlideImage5:
+          type: string
+          nullable: true
+        aboutVision:
+          type: string
+          nullable: true
+        aboutFoundedYear:
+          type: string
+          nullable: true
+        aboutTeamSize:
+          type: string
+          nullable: true
+        aboutLocation:
+          type: string
+          nullable: true
+        seoTitle:
+          type: string
+          nullable: true
+        seoDescription:
+          type: string
+          nullable: true
+        seoKeywords:
+          type: string
+          nullable: true
+        seoOgImage:
+          type: string
+          nullable: true
+        whatsappOrderTemplate:
+          type: string
+          nullable: true
+        paymentQrUrl:
+          type: string
+          nullable: true
+        paymentButtonUrl:
+          type: string
+          nullable: true
+        paymentButtonLabel:
+          type: string
+          nullable: true
+        googlePayEnabled:
+          type: integer
+        googlePayNumber:
+          type: string
+          nullable: true
+        googlePayQrUrl:
+          type: string
+          nullable: true
+        googlePayInstructions:
+          type: string
+          nullable: true
+      required: []
+
+    SiteStats:
+      type: object
+      properties:
+        happyClients:
+          type: integer
+        productTypes:
+          type: integer
+        ordersDelivered:
+          type: integer
+        starRating:
+          type: number
+        totalOrders:
+          type: integer
+        pendingOrders:
+          type: integer
+        completedOrders:
+          type: integer
+        totalReviews:
+          type: integer
+        totalMessages:
+          type: integer
+        unreadMessages:
+          type: integer
+        lowStockItems:
+          type: integer
+      required: [happyClients, productTypes, ordersDelivered, starRating, totalOrders, pendingOrders, completedOrders, totalReviews, totalMessages, unreadMessages, lowStockItems]
+
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: integer
+        invoiceNumber:
+          type: string
+        clientName:
+          type: string
+        clientId:
+          type: integer
+          nullable: true
+        clientPhone:
+          type: string
+          nullable: true
+        clientEmail:
+          type: string
+          nullable: true
+        orderId:
+          type: string
+          nullable: true
+        amount:
+          type: string
+        status:
+          type: string
+        dueDate:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        metadata:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+      required: [id, invoiceNumber, clientName, amount, status, createdAt]
+
+    ClientInvoiceHistory:
+      type: object
+      properties:
+        invoices:
+          type: array
+          items:
+            $ref: "#/components/schemas/Invoice"
+        summary:
+          type: object
+          properties:
+            count:
+              type: integer
+            invoiced:
+              type: number
+            paid:
+              type: number
+            outstanding:
+              type: number
+            statusCounts:
+              type: object
+              additionalProperties:
+                type: integer
+          required: [count, invoiced, paid, outstanding, statusCounts]
+      required: [invoices, summary]
+
+    CreateInvoiceBody:
+      type: object
+      properties:
+        clientName:
+          type: string
+        clientId:
+          type: integer
+          nullable: true
+        clientPhone:
+          type: string
+          nullable: true
+        clientEmail:
+          type: string
+          nullable: true
+        orderId:
+          type: string
+          nullable: true
+        amount:
+          type: string
+        status:
+          type: string
+        dueDate:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        metadata:
+          type: string
+          nullable: true
+      required: [clientName, amount, status]
+
+    InventoryItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        quantity:
+          type: integer
+        unit:
+          type: string
+        lowStockThreshold:
+          type: integer
+        cost:
+          type: string
+          nullable: true
+        supplier:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required: [id, name, quantity, unit, lowStockThreshold, createdAt, updatedAt]
+
+    CreateInventoryItemBody:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        quantity:
+          type: integer
+        unit:
+          type: string
+        lowStockThreshold:
+          type: integer
+        cost:
+          type: string
+          nullable: true
+        supplier:
+          type: string
+          nullable: true
+      required: [name, quantity, unit, lowStockThreshold]
+
+    AdminLoginBody:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required: [username, password]
+
+    AdminLoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required: [success, message]
+
+    AdminMeResponse:
+      type: object
+      properties:
+        authenticated:
+          type: boolean
+        username:
+          type: string
+          nullable: true
+      required: [authenticated]
+
+    Notice:
+      type: object
+      properties:
+        id:
+          type: integer
+        message:
+          type: string
+        style:
+          type: string
+        placement:
+          type: string
+        enabled:
+          type: boolean
+        sortOrder:
+          type: integer
+        topic:
+          type: string
+          nullable: true
+        imageUrl:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required: [id, message, style, placement, enabled, sortOrder]
+
+    CreateNoticeBody:
+      type: object
+      properties:
+        message:
+          type: string
+        style:
+          type: string
+        placement:
+          type: string
+        enabled:
+          type: boolean
+        sortOrder:
+          type: integer
+        topic:
+          type: string
+          nullable: true
+        imageUrl:
+          type: string
+          nullable: true
+      required: [message, style, placement]
+
+    SiteNotice:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        message:
+          type: string
+        type:
+          type: string
+      required: [enabled, message, type]
