@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useGetSettings } from '@workspace/api-client-react';
-import { Menu, X, Printer, Phone, MapPin, Mail, Instagram, Facebook, ArrowRight } from 'lucide-react';
+import { Menu, X, Phone, Mail, Instagram, Facebook, ArrowRight, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 
@@ -9,261 +9,310 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const { data: settings } = useGetSettings();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [scrolledPast200, setScrolledPast200] = useState(false);
-  const [scrolledPastHero, setScrolledPastHero] = useState(false);
+  const [scrolled, setScrolled]             = useState(false);
+  const [showWa, setShowWa]                 = useState(false);
+  const [showCta, setShowCta]               = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-      setScrolledPast200(window.scrollY > 200);
-      setScrolledPastHero(window.scrollY > 600);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 30);
+      setShowWa(window.scrollY > 200);
+      setShowCta(window.scrollY > 600);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [location]);
+  useEffect(() => { setMobileMenuOpen(false); }, [location]);
 
   const navLinks = [
-    { href: '/', label: 'Home' },
-    { href: '/services', label: 'Services' },
-    { href: '/portfolio', label: 'Portfolio' },
-    { href: '/store', label: 'Store' },
-    { href: '/about', label: 'About' },
-    { href: '/contact', label: 'Contact' },
+    { href: '/',              label: 'Home' },
+    { href: '/store',         label: 'Frames & Prints' },
+    { href: '/services',      label: 'Studio Services' },
+    { href: '/gallery',       label: 'Gallery' },
+    { href: '/track-order',   label: 'Track Order' },
+    { href: '/about',         label: 'About' },
+    { href: '/contact',       label: 'Contact' },
   ];
 
-  const isHome = location === '/';
-  const isTransparent = isHome && !scrolled;
-  const headerClasses = isTransparent
-    ? 'bg-transparent py-3 border-transparent shadow-none text-white' 
-    : 'bg-background/95 backdrop-blur-sm py-3 border-b border-border shadow-sm text-foreground';
-
-  const linkClasses = (href: string) => {
-    const isActive = location === href;
-    const base = 'font-sans text-sm uppercase tracking-wider transition-colors pb-0.5';
-    const active = isActive ? 'text-secondary border-b border-secondary' : '';
-    const inactive = isTransparent ? 'text-white/90 hover:text-secondary' : 'text-foreground/80 hover:text-secondary';
-    return `${base} ${isActive ? active : inactive}`;
+  // route matching — gallery maps to /portfolio, store to /store, services to /services
+  const isActive = (href: string) => {
+    if (href === '/') return location === '/';
+    if (href === '/gallery')  return location === '/gallery' || location === '/portfolio';
+    if (href === '/store')    return location === '/store' || location === '/frames-and-prints';
+    if (href === '/services') return location === '/services' || location === '/studio-services';
+    return location.startsWith(href);
   };
 
+  const isHome        = location === '/';
+  const isTransparent = isHome && !scrolled;
+
+  const headerBase = 'fixed w-full z-40 transition-all duration-300 h-16';
+  const headerTheme = isTransparent
+    ? 'bg-transparent border-transparent text-white'
+    : 'bg-background/96 backdrop-blur-md border-b border-border shadow-sm text-foreground';
+
+  const linkCls = (href: string) => {
+    const active = isActive(href);
+    const base   = 'text-xs font-semibold uppercase tracking-widest transition-colors duration-200 pb-0.5';
+    const color  = active
+      ? 'text-secondary border-b border-secondary'
+      : isTransparent ? 'text-white/85 hover:text-white' : 'text-foreground/70 hover:text-secondary';
+    return `${base} ${color}`;
+  };
+
+  const topBarOffset = 'top-0 md:top-[34px]';
+
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-background selection:bg-secondary selection:text-secondary-foreground relative">
-      {/* Top Bar - Desktop only */}
+    <div className="min-h-[100dvh] flex flex-col bg-background relative">
+
+      {/* ── Top info bar ── */}
       <div className="hidden md:flex bg-primary text-primary-foreground py-2 px-8 justify-between items-center text-xs tracking-wide z-50 relative border-b border-white/10">
         <div className="flex items-center gap-6">
           {settings?.phone && (
-            <div className="flex items-center gap-2">
-              <Phone className="w-3.5 h-3.5" />
-              <span>{settings.phone}</span>
-            </div>
+            <a href={`tel:${settings.phone}`} className="flex items-center gap-1.5 hover:text-secondary transition-colors">
+              <Phone className="w-3 h-3 opacity-60" />{settings.phone}
+            </a>
           )}
           {settings?.email && (
-            <div className="flex items-center gap-2">
-              <Mail className="w-3.5 h-3.5" />
-              <span>{settings.email}</span>
-            </div>
+            <a href={`mailto:${settings.email}`} className="flex items-center gap-1.5 hover:text-secondary transition-colors">
+              <Mail className="w-3 h-3 opacity-60" />{settings.email}
+            </a>
           )}
         </div>
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-4">
           {settings?.instagramUrl && (
-            <a href={settings.instagramUrl} target="_blank" rel="noreferrer" className="hover:text-secondary transition-colors">
-              <Instagram className="w-4 h-4" />
-            </a>
+            <a href={settings.instagramUrl} target="_blank" rel="noreferrer" className="hover:text-secondary transition-colors"><Instagram className="w-3.5 h-3.5" /></a>
           )}
           {settings?.facebookUrl && (
-            <a href={settings.facebookUrl} target="_blank" rel="noreferrer" className="hover:text-secondary transition-colors">
-              <Facebook className="w-4 h-4" />
-            </a>
+            <a href={settings.facebookUrl} target="_blank" rel="noreferrer" className="hover:text-secondary transition-colors"><Facebook className="w-3.5 h-3.5" /></a>
           )}
         </div>
       </div>
 
-      {/* Main Navbar */}
-      <header className={`fixed w-full z-40 transition-all duration-300 top-0 md:top-[34px] h-16 ${headerClasses}`}>
-        <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-4 group">
-            <div className="flex flex-col justify-center">
-              <span className="font-serif font-bold text-xl leading-none">{settings?.businessName || 'HAVESTORY'}</span>
-              <span className="section-label mt-1.5 leading-none !text-[9px] !tracking-[0.2em]">{settings?.tagline || 'PREMIUM FRAMES'}</span>
+      {/* ── Main navbar ── */}
+      <header className={`${headerBase} ${headerTheme} ${topBarOffset}`}>
+        <div className="max-w-7xl mx-auto px-5 h-full flex items-center justify-between gap-6">
+
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-3 shrink-0">
+            {settings?.logo
+              ? <img src={settings.logo} alt={settings.businessName || 'HAVESTORY'} className="h-8 w-auto object-contain" />
+              : (
+                <div className={`w-8 h-8 flex items-center justify-center font-serif font-bold text-sm border ${isTransparent ? 'bg-white/10 border-white/30 text-white' : 'bg-primary text-primary-foreground border-primary'}`}>
+                  HS
+                </div>
+              )
+            }
+            <div className="hidden sm:block">
+              <div className={`font-serif font-bold text-base leading-none ${isTransparent ? 'text-white' : 'text-foreground'}`}>
+                {settings?.businessName || 'HAVESTORY'}
+              </div>
+              {settings?.tagline && (
+                <div className={`text-[9px] uppercase tracking-[0.2em] leading-none mt-0.5 ${isTransparent ? 'text-white/50' : 'text-muted-foreground'}`}>
+                  {settings.tagline}
+                </div>
+              )}
             </div>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <Link key={link.href} href={link.href} className={linkClasses(link.href)}>
-                {link.label}
-              </Link>
+          {/* Desktop nav */}
+          <nav className="hidden lg:flex items-center gap-6">
+            {navLinks.map(l => (
+              <Link key={l.href} href={l.href} className={linkCls(l.href)}>{l.label}</Link>
             ))}
           </nav>
 
-          <div className="hidden lg:block">
-            <Button asChild className="bg-secondary text-secondary-foreground btn-glow text-xs uppercase tracking-widest px-5 h-9 rounded-[0.25rem] border-none font-semibold">
+          {/* Right actions */}
+          <div className="flex items-center gap-3 shrink-0">
+            {/* Cart icon → /store */}
+            <Link href="/store" className={`relative p-2 hover:text-secondary transition-colors ${isTransparent ? 'text-white/80' : 'text-foreground/70'}`} title="Frames & Prints">
+              <ShoppingBag className="w-5 h-5" />
+            </Link>
+
+            <Button asChild size="sm" className={`hidden lg:flex items-center gap-2 uppercase text-[10px] tracking-widest font-bold h-9 px-5 btn-glow rounded-none border-none ${isTransparent ? 'bg-white/15 text-white hover:bg-white hover:text-primary' : 'bg-secondary text-secondary-foreground hover:bg-secondary/90'}`}>
               <Link href="/contact">Get a Quote</Link>
             </Button>
-          </div>
 
-          <button 
-            className="lg:hidden p-2 transition-colors"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+            {/* Hamburger */}
+            <button
+              className={`lg:hidden p-2 ${isTransparent ? 'text-white' : 'text-foreground'}`}
+              onClick={() => setMobileMenuOpen(v => !v)}
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Mobile Menu Overlay */}
+      {/* ── Mobile drawer ── */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 top-[64px] md:top-[98px] z-50 bg-background flex flex-col lg:hidden border-t border-border overflow-y-auto">
-          <nav className="flex flex-col p-8 gap-8">
-            {navLinks.map((link) => (
-              <Link 
-                key={link.href} 
-                href={link.href}
-                className={`font-serif text-3xl font-bold ${location === link.href ? 'text-secondary' : 'text-foreground'}`}
-              >
-                {link.label}
+        <div className="fixed inset-0 z-50 lg:hidden" onClick={() => setMobileMenuOpen(false)}>
+          <div className="absolute inset-0 bg-black/40" />
+          <div
+            className="absolute right-0 top-0 h-full w-72 bg-primary text-primary-foreground flex flex-col shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
+              <span className="font-serif font-bold text-lg">{settings?.businessName || 'HAVESTORY'}</span>
+              <button onClick={() => setMobileMenuOpen(false)}><X className="w-5 h-5 text-white/70" /></button>
+            </div>
+            <nav className="flex-1 px-6 py-8 flex flex-col gap-1">
+              {navLinks.map(l => (
+                <Link
+                  key={l.href} href={l.href}
+                  className={`py-3 font-serif text-2xl font-semibold transition-colors border-b border-white/8 ${isActive(l.href) ? 'text-secondary' : 'text-primary-foreground/80 hover:text-white'}`}
+                >
+                  {l.label}
+                </Link>
+              ))}
+              <Link href="/custom-project" className="py-3 font-serif text-2xl font-semibold text-primary-foreground/80 hover:text-white border-b border-white/8 transition-colors">
+                Custom Project
               </Link>
-            ))}
-            <div className="pt-8 border-t border-border mt-4">
-              <Button asChild className="w-full bg-secondary text-secondary-foreground h-12 text-sm uppercase tracking-widest font-bold shadow-sm">
+            </nav>
+            <div className="px-6 pb-8">
+              {settings?.phone && (
+                <a href={`tel:${settings.phone}`} className="flex items-center gap-2 text-sm text-primary-foreground/60 hover:text-white mb-2 transition-colors">
+                  <Phone className="w-4 h-4" />{settings.phone}
+                </a>
+              )}
+              <Button asChild className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 uppercase tracking-widest text-xs font-bold h-12 rounded-none mt-4">
                 <Link href="/contact">Get a Quote</Link>
               </Button>
             </div>
-            
-            <div className="mt-auto pt-8 flex gap-6 text-muted-foreground">
-              {settings?.instagramUrl && (
-                <a href={settings.instagramUrl} target="_blank" rel="noreferrer" className="hover:text-secondary">
-                  <Instagram className="w-6 h-6" />
-                </a>
-              )}
-              {settings?.facebookUrl && (
-                <a href={settings.facebookUrl} target="_blank" rel="noreferrer" className="hover:text-secondary">
-                  <Facebook className="w-6 h-6" />
-                </a>
-              )}
-            </div>
-          </nav>
+          </div>
         </div>
       )}
 
-      {/* Main Content Spacer for fixed nav */}
-      <div className={`${isHome ? 'pt-0' : 'pt-[64px] md:pt-[98px]'}`}></div>
-
-      <main className="flex-1 flex flex-col">
+      {/* ── Page content ── */}
+      <main className="flex-1 pt-16 md:pt-[calc(4rem+34px)]">
         {children}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-primary text-primary-foreground pt-20 pb-10 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-12 mb-16 relative z-10">
-          <div className="md:col-span-4">
-            <h3 className="font-serif text-3xl font-bold mb-4">{settings?.businessName || 'HAVESTORY'}</h3>
-            <p className="text-primary-foreground/70 max-w-sm mb-6 leading-relaxed text-sm font-light">
-              {settings?.aboutStory?.substring(0, 160) || 'Premium photo framing and gallery wall design studio. We bring your best memories to life with unmatched craftsmanship and archival materials.'}...
-            </p>
-            <div className="flex items-center gap-4 text-secondary">
-              {settings?.instagramUrl && (
-                <a href={settings.instagramUrl} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-secondary/20 transition-all">
-                  <Instagram className="w-4 h-4" />
-                </a>
-              )}
-              {settings?.facebookUrl && (
-                <a href={settings.facebookUrl} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-secondary/20 transition-all">
-                  <Facebook className="w-4 h-4" />
+      {/* ── Footer ── */}
+      <footer className="bg-primary text-primary-foreground pt-16 pb-8">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12">
+
+            {/* Brand */}
+            <div className="md:col-span-1">
+              <div className="font-serif text-2xl font-bold mb-2">{settings?.businessName || 'HAVESTORY'}</div>
+              {settings?.tagline && <p className="text-primary-foreground/55 text-sm mb-4">{settings.tagline}</p>}
+              <p className="text-primary-foreground/50 text-xs leading-relaxed mb-5">
+                Premium photo frames, colour lab prints and custom studio work. Crafted in Sri Lanka.
+              </p>
+              <div className="flex items-center gap-3">
+                {settings?.instagramUrl && (
+                  <a href={settings.instagramUrl} target="_blank" rel="noreferrer" className="w-8 h-8 border border-white/20 flex items-center justify-center text-primary-foreground/60 hover:text-secondary hover:border-secondary transition-colors">
+                    <Instagram className="w-4 h-4" />
+                  </a>
+                )}
+                {settings?.facebookUrl && (
+                  <a href={settings.facebookUrl} target="_blank" rel="noreferrer" className="w-8 h-8 border border-white/20 flex items-center justify-center text-primary-foreground/60 hover:text-secondary hover:border-secondary transition-colors">
+                    <Facebook className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* Quick links */}
+            <div>
+              <p className="section-label text-secondary mb-4">Quick Links</p>
+              <ul className="space-y-2">
+                {[
+                  { href: '/',              label: 'Home' },
+                  { href: '/store',         label: 'Frames & Prints' },
+                  { href: '/services',      label: 'Studio Services' },
+                  { href: '/gallery',       label: 'Gallery' },
+                  { href: '/custom-project',label: 'Custom Project' },
+                ].map(l => (
+                  <li key={l.href}>
+                    <Link href={l.href} className="text-primary-foreground/55 hover:text-secondary text-sm transition-colors">{l.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Info */}
+            <div>
+              <p className="section-label text-secondary mb-4">Information</p>
+              <ul className="space-y-2">
+                {[
+                  { href: '/about',        label: 'About Us' },
+                  { href: '/contact',      label: 'Contact' },
+                  { href: '/track-order',  label: 'Track Your Order' },
+                  { href: '/privacy',      label: 'Privacy Policy' },
+                  { href: '/terms',        label: 'Terms of Service' },
+                ].map(l => (
+                  <li key={l.href}>
+                    <Link href={l.href} className="text-primary-foreground/55 hover:text-secondary text-sm transition-colors">{l.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <p className="section-label text-secondary mb-4">Contact</p>
+              <ul className="space-y-3 text-sm text-primary-foreground/60">
+                {settings?.phone && (
+                  <li><a href={`tel:${settings.phone}`} className="hover:text-secondary transition-colors flex items-center gap-2"><Phone className="w-3.5 h-3.5 shrink-0" />{settings.phone}</a></li>
+                )}
+                {settings?.email && (
+                  <li><a href={`mailto:${settings.email}`} className="hover:text-secondary transition-colors flex items-center gap-2"><Mail className="w-3.5 h-3.5 shrink-0" />{settings.email}</a></li>
+                )}
+                {settings?.address && (
+                  <li className="leading-relaxed">{settings.address}</li>
+                )}
+              </ul>
+              {settings?.whatsappNumber && (
+                <a
+                  href={`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`}
+                  target="_blank" rel="noreferrer"
+                  className="inline-flex items-center gap-2 mt-5 bg-[#25D366]/15 border border-[#25D366]/30 text-[#25D366] text-xs uppercase tracking-widest font-semibold px-4 py-2 hover:bg-[#25D366] hover:text-white transition-colors"
+                >
+                  WhatsApp Us
                 </a>
               )}
             </div>
           </div>
-          
-          <div className="md:col-span-2 md:col-start-6">
-            <h4 className="font-sans uppercase tracking-widest text-xs font-bold mb-6 text-secondary">Quick Links</h4>
-            <ul className="space-y-3">
-              {navLinks.slice(0, 4).map(link => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-primary-foreground/80 hover:text-white transition-colors text-sm">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
 
-          <div className="md:col-span-2">
-            <h4 className="font-sans uppercase tracking-widest text-xs font-bold mb-6 text-secondary">Services</h4>
-            <ul className="space-y-3">
-              <li><Link href="/services" className="text-primary-foreground/80 hover:text-white transition-colors text-sm">Custom Framing</Link></li>
-              <li><Link href="/services" className="text-primary-foreground/80 hover:text-white transition-colors text-sm">Gallery Walls</Link></li>
-              <li><Link href="/services" className="text-primary-foreground/80 hover:text-white transition-colors text-sm">Photo Printing</Link></li>
-              <li><Link href="/services" className="text-primary-foreground/80 hover:text-white transition-colors text-sm">Bespoke Mirrors</Link></li>
-            </ul>
-          </div>
-          
-          <div className="md:col-span-3">
-            <h4 className="font-sans uppercase tracking-widest text-xs font-bold mb-6 text-secondary">Contact</h4>
-            <ul className="space-y-4 text-primary-foreground/80 text-sm">
-              {settings?.address && (
-                <li className="flex items-start gap-3">
-                  <MapPin className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
-                  <span className="leading-relaxed">{settings.address}</span>
-                </li>
-              )}
-              {settings?.phone && (
-                <li className="flex items-center gap-3">
-                  <Phone className="w-4 h-4 text-secondary shrink-0" />
-                  <span>{settings.phone}</span>
-                </li>
-              )}
-              {settings?.email && (
-                <li className="flex items-center gap-3">
-                  <Mail className="w-4 h-4 text-secondary shrink-0" />
-                  <span>{settings.email}</span>
-                </li>
-              )}
-            </ul>
-          </div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-6">
           <div className="gold-rule mb-6" />
-          <p className="text-xs text-primary-foreground/50 text-center tracking-wide">
-            © {new Date().getFullYear()} {settings?.businessName || 'HAVESTORY'}. All rights reserved.
+          <p className="text-xs text-primary-foreground/40 text-center tracking-wide">
+            © {new Date().getFullYear()} {settings?.businessName || 'HAVESTORY'}. All rights reserved. · Sri Lanka
           </p>
         </div>
       </footer>
 
-      {/* Floating WhatsApp Button */}
+      {/* ── WhatsApp FAB ── */}
       {settings?.whatsappNumber && (
-        <a 
+        <a
           href={`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`}
-          target="_blank"
-          rel="noreferrer"
-          title="Chat with us"
-          className={`fixed bottom-24 right-6 w-14 h-14 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-all duration-300 z-40 animate-pulse-ring ${scrolledPast200 ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'}`}
+          target="_blank" rel="noreferrer"
+          className={`fixed bottom-24 right-5 w-13 h-13 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-lg z-40 animate-pulse-ring transition-all duration-300 ${showWa ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'}`}
+          style={{ width: 52, height: 52 }}
           aria-label="Chat on WhatsApp"
         >
-          <svg viewBox="0 0 24 24" className="w-7 h-7 fill-current">
+          <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current">
             <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.334.101.154.453.721.969 1.18.665.59 1.221.77 1.378.857.156.087.248.072.338-.029.091-.101.393-.457.497-.614.104-.157.208-.13.346-.079l2.179 1.031c.144.072.239.116.275.18.036.065.036.375-.108.78z"/>
           </svg>
         </a>
       )}
 
-      {/* Floating STICKY 'Order Now' button */}
+      {/* ── Sticky "Order a Frame" CTA ── */}
       <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.9 }}
-        animate={{ 
-          opacity: scrolledPastHero ? 1 : 0, 
-          y: scrolledPastHero ? 0 : 20, 
-          scale: scrolledPastHero ? 1 : 0.9,
-          pointerEvents: scrolledPastHero ? 'auto' : 'none'
-        }}
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:translate-x-0 z-50"
+        initial={false}
+        animate={{ opacity: showCta ? 1 : 0, y: showCta ? 0 : 16, scale: showCta ? 1 : 0.92 }}
+        transition={{ duration: 0.3 }}
+        style={{ pointerEvents: showCta ? 'auto' : 'none' }}
+        className="fixed bottom-5 left-1/2 -translate-x-1/2 md:left-auto md:right-5 md:translate-x-0 z-50"
       >
-        <Link href="/store" className="flex items-center justify-center gap-2 bg-secondary text-secondary-foreground rounded-full px-6 py-3 font-semibold text-sm cta-pulse shadow-xl hover:scale-105 transition-transform border-none">
-          <span>🖼 Order a Frame</span> <ArrowRight className="w-4 h-4 ml-1" />
+        <Link
+          href="/store"
+          className="flex items-center gap-2 bg-secondary text-secondary-foreground rounded-full px-6 py-3 text-sm font-semibold shadow-xl cta-pulse border-0 whitespace-nowrap"
+        >
+          🖼 Order a Frame <ArrowRight className="w-4 h-4" />
         </Link>
       </motion.div>
     </div>

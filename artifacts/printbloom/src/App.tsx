@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useState, useEffect, useCallback } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
@@ -13,6 +13,7 @@ import {
 import { PublicLayout } from './components/layout/PublicLayout';
 import { AdminLayout } from './components/layout/AdminLayout';
 import { AuthGuard } from './components/layout/AuthGuard';
+import { SplashScreen } from './components/SplashScreen';
 
 // Public Pages
 import Home from './pages/public/Home';
@@ -22,6 +23,9 @@ import Portfolio from './pages/public/Portfolio';
 import TrackOrder from './pages/public/TrackOrder';
 import About from './pages/public/About';
 import Contact from './pages/public/Contact';
+import CustomProject from './pages/public/CustomProject';
+import Privacy from './pages/public/Privacy';
+import Terms from './pages/public/Terms';
 
 // Admin Pages
 import AdminLogin from './pages/admin/Login';
@@ -41,17 +45,25 @@ import Settings from './pages/admin/Settings';
 
 const queryClient = new QueryClient();
 
+const SPLASH_KEY = 'hs_splash_shown';
+
 function PublicRoutes() {
   return (
     <PublicLayout>
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/store" component={Store} />
+        <Route path="/frames-and-prints" component={Store} />
         <Route path="/services" component={Services} />
+        <Route path="/studio-services" component={Services} />
         <Route path="/portfolio" component={Portfolio} />
+        <Route path="/gallery" component={Portfolio} />
         <Route path="/track-order" component={TrackOrder} />
         <Route path="/about" component={About} />
         <Route path="/contact" component={Contact} />
+        <Route path="/custom-project" component={CustomProject} />
+        <Route path="/privacy" component={Privacy} />
+        <Route path="/terms" component={Terms} />
         <Route component={NotFound} />
       </Switch>
     </PublicLayout>
@@ -110,10 +122,24 @@ function RoutedErrorBoundary({ children }: { children: ReactNode }) {
 }
 
 function App() {
+  const [showSplash, setShowSplash] = useState(() => {
+    try {
+      return !sessionStorage.getItem(SPLASH_KEY);
+    } catch {
+      return false;
+    }
+  });
+
+  const handleSplashDone = useCallback(() => {
+    try { sessionStorage.setItem(SPLASH_KEY, '1'); } catch {}
+    setShowSplash(false);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+          {showSplash && <SplashScreen onDone={handleSplashDone} />}
           <Router />
         </WouterRouter>
         <Toaster />
