@@ -1,388 +1,563 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'wouter';
-import { motion, useInView } from 'framer-motion';
-import { 
-  useGetSettings, 
-  useListProducts, 
-  useListServices, 
-  useGetNotices, 
-  useListPortfolio, 
-  useListReviews 
+import { motion, useInView, AnimatePresence } from 'framer-motion';
+import {
+  useGetSettings, useListProducts, useListServices,
+  useGetNotices, useListPortfolio, useListReviews,
 } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { 
-  X, ArrowRight, Shield, Truck, Star, Zap, Printer, PenTool, Layout, Package, Layers, Image as ImageIcon, ChevronRight, Quote
+import {
+  X, ArrowRight, Shield, Truck, Star, Zap,
+  Printer, PenTool, Layout, Package, Layers,
+  Image as ImageIcon, ChevronLeft, ChevronRight,
+  Quote, Play, Pause,
 } from 'lucide-react';
 
-function AnimatedCounter({ end, duration = 1800, suffix = '', decimals = 0 }: { end: number, duration?: number, suffix?: string, decimals?: number }) {
+/* ─────────────────────────── Hero slides ─────────────────────────── */
+const HERO_SLIDES = [
+  {
+    img: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=format&fit=crop&w=1920&q=85',
+    label: 'Gallery Walls',
+    headline: 'Where\nMemories\nBecome Art',
+    sub: 'Premium photo frames crafted for Sri Lankan homes and studios.',
+  },
+  {
+    img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1920&q=85',
+    label: 'Colour Lab',
+    headline: 'Colour\nPerfected\nPrinted',
+    sub: 'State-of-the-art colour lab with archival-grade print finishes.',
+  },
+  {
+    img: 'https://images.unsplash.com/photo-1526779259212-939e64788e3c?auto=format&fit=crop&w=1920&q=85',
+    label: 'Studio Photography',
+    headline: 'Every\nFrame\nTells a Story',
+    sub: 'Professional studio photography for portraits, products and events.',
+  },
+  {
+    img: 'https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?auto=format&fit=crop&w=1920&q=85',
+    label: 'Custom Frames',
+    headline: 'Crafted\nWith\nPrecision',
+    sub: 'Bespoke frame sizes, materials and finishes — your vision, our craft.',
+  },
+  {
+    img: 'https://images.unsplash.com/photo-1490750967868-88df5691892e?auto=format&fit=crop&w=1920&q=85',
+    label: 'Fine Art Prints',
+    headline: 'Art That\nLasts\nForever',
+    sub: 'Museum-grade prints that preserve your moments for generations.',
+  },
+];
+
+/* ─────────────────────────── AnimatedCounter ─────────────────────── */
+function AnimatedCounter({ end, suffix = '', decimals = 0, duration = 1800 }:
+  { end: number; suffix?: string; decimals?: number; duration?: number }) {
   const [count, setCount] = useState(0);
-  const ref = useRef(null);
+  const ref    = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true });
-  
   useEffect(() => {
     if (!inView) return;
-    let startTimestamp: number | null = null;
-    let animationFrameId: number;
-
-    const step = (timestamp: number) => {
-      if (!startTimestamp) startTimestamp = timestamp;
-      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-      const easeProgress = 1 - Math.pow(1 - progress, 3); // cubic ease out
-      
-      setCount(easeProgress * end);
-      
-      if (progress < 1) {
-        animationFrameId = requestAnimationFrame(step);
-      } else {
-        setCount(end);
-      }
+    let start: number | null = null;
+    let id: number;
+    const step = (ts: number) => {
+      if (!start) start = ts;
+      const p = Math.min((ts - start) / duration, 1);
+      const e = 1 - Math.pow(1 - p, 3);
+      setCount(e * end);
+      if (p < 1) id = requestAnimationFrame(step); else setCount(end);
     };
-    
-    animationFrameId = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(animationFrameId);
+    id = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(id);
   }, [inView, end, duration]);
-  
   return <span ref={ref}>{count.toFixed(decimals)}{suffix}</span>;
 }
 
+/* ─────────────────────────── Main ────────────────────────────────── */
 export default function Home() {
   const { data: settings } = useGetSettings();
-  const { data: products } = useListProducts();
-  const { data: services } = useListServices();
-  const { data: notices } = useGetNotices();
+  const { data: products  } = useListProducts();
+  const { data: services  } = useListServices();
+  const { data: notices   } = useGetNotices();
   const { data: portfolio } = useListPortfolio();
-  const { data: reviews } = useListReviews();
+  const { data: reviews   } = useListReviews();
 
   const [dismissedNotices, setDismissedNotices] = useState<number[]>([]);
+  const [slide,  setSlide]  = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [loaded, setLoaded] = useState<boolean[]>(HERO_SLIDES.map(() => false));
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const activeNotices = notices?.filter(n => n.isActive && !dismissedNotices.includes(n.id)) || [];
-  const heroProducts = products?.slice(0, 3) || [];
+  const activeNotices   = notices?.filter(n => n.isActive && !dismissedNotices.includes(n.id)) || [];
   const featuredProducts = products?.filter(p => p.featured).slice(0, 6) || products?.slice(0, 6) || [];
-  const displayServices = services?.slice(0, 6) || [];
-  const displayPortfolio = portfolio?.slice(0, 6) || [];
-  const displayReviews = reviews?.filter(r => r.isApproved).slice(0, 3) || [];
+  const displayServices  = services?.slice(0, 6) || [];
+  const displayPortfolio = portfolio?.slice(0, 8) || [];
+  const displayReviews   = reviews?.filter(r => r.isApproved).slice(0, 3) || [];
 
-  const icons = [Printer, PenTool, Layout, Package, Layers, ImageIcon];
-  const reasons = [
-    { icon: Shield, title: 'Premium Materials', desc: 'Museum-grade mounting, archival mats, and solid wood frames.' },
-    { icon: Truck, title: 'Island-wide Delivery', desc: 'Securely packaged and safely tracked to your doorstep.' },
-    { icon: Star, title: '5-Star Rated', desc: 'Loved and recommended by hundreds of happy clients.' },
-    { icon: Zap, title: '48hr Express', desc: 'Fast-track framing available on request for urgent needs.' }
-  ];
+  const serviceIcons = [Printer, PenTool, Layout, Package, Layers, ImageIcon];
+
+  const nextSlide = useCallback(() => setSlide(s => (s + 1) % HERO_SLIDES.length), []);
+  const prevSlide = useCallback(() => setSlide(s => (s - 1 + HERO_SLIDES.length) % HERO_SLIDES.length), []);
+
+  // Auto-advance
+  useEffect(() => {
+    if (paused) { if (intervalRef.current) clearInterval(intervalRef.current); return; }
+    intervalRef.current = setInterval(nextSlide, 5500);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [paused, nextSlide]);
 
   const marqueeItems = [
-    '⭐ 5-Star Rated', 
-    '🖼 1,200+ Frames', 
-    '✅ Sri Lankan Made', 
-    '📦 Island-wide Delivery', 
-    '🎨 Custom Designs', 
-    '⚡ 48hr Express'
+    '⭐ 5-Star Rated', '🖼 1,200+ Frames', '✅ Sri Lankan Made',
+    '📦 Island-wide Delivery', '🎨 Custom Designs', '⚡ 48hr Express',
   ];
 
+  const reasons = [
+    { icon: Shield, title: 'Premium Materials',    desc: 'Museum-grade mounting, archival mats and solid wood frames.' },
+    { icon: Truck,  title: 'Island-wide Delivery', desc: 'Securely packaged and tracked to your doorstep.' },
+    { icon: Star,   title: '5-Star Rated',         desc: 'Loved and recommended by hundreds of happy clients.' },
+    { icon: Zap,    title: '48hr Express',         desc: 'Fast-track framing for urgent needs — just ask.' },
+  ];
+
+  /* ── Slide helpers ── */
+  const currentSlide = HERO_SLIDES[slide];
+  const headlineLines = currentSlide.headline.split('\n');
+
   return (
-    <div className="flex flex-col min-h-[100dvh]">
-      {/* SECTION A — NOTICES */}
-      {activeNotices.map((notice) => (
-        <div key={notice.id} className="bg-secondary text-secondary-foreground py-2 px-6 relative flex justify-center items-center overflow-hidden">
-          <div className="flex items-center gap-2 max-w-7xl mx-auto w-full justify-between">
-            <div className="flex items-center gap-3">
-              <span className="font-bold text-[10px] uppercase tracking-widest px-2 py-0.5 bg-black/10 rounded-[0.25rem]">{notice.title}</span>
-              <span className="text-xs font-medium">{notice.message}</span>
-            </div>
-            <button
-              onClick={() => setDismissedNotices([...dismissedNotices, notice.id])}
-              className="p-1 hover:bg-black/10 rounded-full transition-colors shrink-0"
-              aria-label="Dismiss"
-            >
-              <X className="w-4 h-4" />
-            </button>
+    <div className="bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
+
+      {/* ══════════════════════════════════════════ NOTICES */}
+      <AnimatePresence>
+        {activeNotices.map(n => (
+          <motion.div
+            key={n.id}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="bg-[#C9A84C]/10 border-b border-[#C9A84C]/20 text-sm text-[hsl(var(--foreground)/0.85)] px-6 py-3 flex items-center justify-between relative z-30"
+          >
+            <span>{n.message}</span>
+            <button onClick={() => setDismissedNotices(d => [...d, n.id])} className="ml-4 text-[hsl(var(--muted-foreground))] hover:text-[#C9A84C]"><X className="w-4 h-4" /></button>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+
+      {/* ══════════════════════════════════════════ HERO SLIDER */}
+      <section
+        className="relative h-[100svh] min-h-[600px] max-h-[960px] overflow-hidden"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
+        {/* Slides */}
+        <AnimatePresence mode="crossfade">
+          <motion.div
+            key={slide}
+            className="absolute inset-0"
+            initial={{ opacity: 0, scale: 1.04 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <img
+              src={currentSlide.img}
+              alt={currentSlide.label}
+              className="w-full h-full object-cover"
+              onLoad={() => setLoaded(l => { const n = [...l]; n[slide] = true; return n; })}
+            />
+            {/* Dark vignette */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Slide label */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`label-${slide}`}
+            initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="absolute top-10 right-10 bg-[#C9A84C]/15 border border-[#C9A84C]/30 backdrop-blur-sm px-4 py-2 z-20"
+          >
+            <span className="text-[#C9A84C] text-[10px] font-bold uppercase tracking-[0.22em]">{currentSlide.label}</span>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Hero copy */}
+        <div className="absolute inset-0 z-20 flex flex-col justify-center px-8 md:px-20 max-w-7xl mx-auto left-0 right-0">
+          {/* Gold accent bar */}
+          <motion.div
+            initial={{ scaleX: 0 }} animate={{ scaleX: 1 }}
+            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            className="w-16 h-[2px] bg-gradient-to-r from-[#C9A84C] to-[#C9A84C]/30 origin-left mb-8"
+          />
+
+          <div className="overflow-hidden mb-6">
+            <AnimatePresence mode="wait">
+              <motion.div key={`headline-${slide}`}>
+                {headlineLines.map((line, i) => (
+                  <motion.h1
+                    key={i}
+                    initial={{ y: 60, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -40, opacity: 0 }}
+                    transition={{ duration: 0.75, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                    className="font-serif text-white leading-none font-bold"
+                    style={{ fontSize: 'clamp(3.2rem, 9vw, 7.5rem)' }}
+                  >
+                    {i === 0 ? line : <span className="text-gradient italic">{line}</span>}
+                  </motion.h1>
+                ))}
+              </motion.div>
+            </AnimatePresence>
           </div>
-        </div>
-      ))}
 
-      {/* SECTION B — HERO */}
-      <section className="relative bg-primary text-primary-foreground min-h-[100dvh] flex items-center py-32 overflow-hidden noise">
-        {/* Decorative blur circles */}
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-secondary/15 blur-[120px] rounded-full translate-x-1/3 -translate-y-1/3 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent/10 blur-[100px] rounded-full -translate-x-1/3 translate-y-1/3 pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto px-6 relative z-10 w-full grid lg:grid-cols-2 gap-12 items-center">
-          {/* LEFT COLUMN */}
-          <div className="max-w-2xl">
-            <motion.div initial={{ opacity:0, x:-20 }} animate={{ opacity:1, x:0 }} transition={{ duration:0.5, delay:0.1 }} className="mb-8">
-              <span className="section-label text-secondary">Premium Frame Studio · Sri Lanka</span>
-            </motion.div>
-            
-            <motion.div variants={{ visible: { transition: { staggerChildren: 0.08 } } }} initial="hidden" animate="visible" className="text-[clamp(3.5rem,8vw,7rem)] font-serif font-bold leading-[0.95] text-white mb-8">
-              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5 } } }}>
-                Frame
-              </motion.div>
-              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5 } } }}>
-                Your Best
-              </motion.div>
-              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5 } } }}>
-                <span className="text-gradient italic">Story.</span>
-              </motion.div>
-            </motion.div>
-            
-            <motion.p initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:0.7, duration:1 }} className="text-lg text-primary-foreground/75 font-light mb-10 max-w-md leading-relaxed">
-              {settings?.heroSubtitle || 'Bespoke photo frames and gallery walls designed to make your memories last a lifetime.'}
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={`sub-${slide}`}
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.65, delay: 0.3 }}
+              className="text-white/65 text-lg md:text-xl max-w-lg leading-relaxed mb-10"
+            >
+              {currentSlide.sub}
             </motion.p>
-            
-            <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.9, duration:0.5 }} className="flex flex-wrap gap-4 items-center mb-12">
-              <Button asChild size="lg" className="rounded-[0.25rem] bg-secondary text-secondary-foreground hover:bg-secondary/90 px-8 h-12 text-xs uppercase tracking-widest font-semibold btn-glow border-none">
-                <Link href="/store">Order a Frame</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="rounded-[0.25rem] border border-white/30 text-white hover:bg-white hover:text-primary px-8 h-12 text-xs uppercase tracking-widest font-semibold transition-colors">
-                <Link href="/portfolio">View Work</Link>
-              </Button>
-            </motion.div>
-            
-            <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:1.1, duration:1 }} className="flex items-center gap-4">
-              <div className="flex -space-x-3">
-                <div className="w-10 h-10 rounded-full border-[3px] border-primary bg-amber-200 flex items-center justify-center font-bold text-black text-xs z-30">AS</div>
-                <div className="w-10 h-10 rounded-full border-[3px] border-primary bg-emerald-200 flex items-center justify-center font-bold text-black text-xs z-20">MK</div>
-                <div className="w-10 h-10 rounded-full border-[3px] border-primary bg-blue-200 flex items-center justify-center font-bold text-black text-xs z-10">RN</div>
-              </div>
-              <p className="text-sm text-primary-foreground/80 font-medium">1,200+ happy clients</p>
-            </motion.div>
-          </div>
+          </AnimatePresence>
 
-          {/* RIGHT COLUMN */}
-          <motion.div initial={{ opacity:0, x:50 }} animate={{ opacity:1, x:0 }} transition={{ duration:1, delay:0.3 }} className="hidden lg:block relative h-[600px] w-full perspective-[1000px]">
-            {/* Front Card */}
-            <div 
-              className="absolute top-16 right-4 w-64 border-[6px] border-white shadow-2xl aspect-[3/4] overflow-hidden bg-muted animate-float z-30"
-              style={{ '--rot': '2deg' } as React.CSSProperties}
-            >
-              <img src={heroProducts[0]?.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=600&q=80'} alt="Frame Preview" className="w-full h-full object-cover" />
-            </div>
-            {/* Mid Card */}
-            <div 
-              className="absolute top-32 right-32 w-52 border-[6px] border-white shadow-2xl aspect-[3/4] overflow-hidden bg-muted animate-float-delay opacity-90 z-20"
-              style={{ '--rot': '-3deg' } as React.CSSProperties}
-            >
-              <img src={heroProducts[1]?.imageUrl || 'https://images.unsplash.com/photo-1544457070-4cd773b4d71e?w=600&q=80'} alt="Frame Preview 2" className="w-full h-full object-cover" />
-            </div>
-            {/* Back Card */}
-            <div 
-              className="absolute top-48 right-56 w-44 border-[6px] border-white shadow-2xl aspect-[3/4] overflow-hidden bg-muted animate-float-delay-2 opacity-75 z-10"
-              style={{ '--rot': '4deg' } as React.CSSProperties}
-            >
-              <img src={heroProducts[2]?.imageUrl || 'https://images.unsplash.com/photo-1577083552431-5e839e55e505?w=600&q=80'} alt="Frame Preview 3" className="w-full h-full object-cover" />
-            </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65, delay: 0.45 }}
+            className="flex flex-wrap items-center gap-4"
+          >
+            <Link href="/store" className="inline-flex items-center gap-3 bg-[#C9A84C] text-[#0A0907] font-bold text-sm uppercase tracking-widest px-8 py-4 btn-glow hover:bg-[#D4B55E] transition-colors">
+              Shop Frames <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link href="/custom-project" className="inline-flex items-center gap-3 border border-white/30 text-white text-sm uppercase tracking-widest px-8 py-4 hover:border-[#C9A84C] hover:text-[#C9A84C] transition-colors backdrop-blur-sm">
+              Custom Order
+            </Link>
           </motion.div>
         </div>
+
+        {/* Prev / Next arrows */}
+        <button
+          onClick={prevSlide}
+          className="absolute left-5 top-1/2 -translate-y-1/2 z-30 w-11 h-11 border border-white/20 bg-black/30 backdrop-blur-sm text-white hover:border-[#C9A84C] hover:text-[#C9A84C] transition-all flex items-center justify-center"
+          aria-label="Previous slide"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <button
+          onClick={nextSlide}
+          className="absolute right-5 top-1/2 -translate-y-1/2 z-30 w-11 h-11 border border-white/20 bg-black/30 backdrop-blur-sm text-white hover:border-[#C9A84C] hover:text-[#C9A84C] transition-all flex items-center justify-center"
+          aria-label="Next slide"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+
+        {/* Dots + pause */}
+        <div className="absolute bottom-8 left-0 right-0 z-30 flex items-center justify-center gap-4">
+          <div className="flex items-center gap-2">
+            {HERO_SLIDES.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setSlide(i)}
+                className={`transition-all duration-500 ${i === slide ? 'w-8 h-[2px] bg-[#C9A84C]' : 'w-2 h-[2px] bg-white/30 hover:bg-white/60'}`}
+                aria-label={`Slide ${i + 1}`}
+              />
+            ))}
+          </div>
+          <button
+            onClick={() => setPaused(p => !p)}
+            className="w-7 h-7 border border-white/20 flex items-center justify-center text-white/50 hover:text-[#C9A84C] hover:border-[#C9A84C]/40 transition-colors"
+            aria-label={paused ? 'Play' : 'Pause'}
+          >
+            {paused ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}
+          </button>
+        </div>
+
+        {/* Slide counter */}
+        <div className="absolute bottom-8 right-10 z-30 font-serif text-white/40 text-sm">
+          <span className="text-[#C9A84C]">0{slide + 1}</span> / 0{HERO_SLIDES.length}
+        </div>
       </section>
 
-      {/* SECTION C — MARQUEE */}
-      <section className="bg-secondary text-secondary-foreground py-4 overflow-hidden border-y border-black/10">
+      {/* ══════════════════════════════════════════ MARQUEE TICKER */}
+      <div className="bg-[#C9A84C] py-3 overflow-hidden select-none border-y border-[#D4B55E]/30">
         <div className="marquee-track animate-marquee">
-          {[...marqueeItems, ...marqueeItems, ...marqueeItems].map((item, i) => (
-            <div key={i} className="flex items-center">
-              <span className="font-bold text-sm tracking-widest uppercase mx-8 whitespace-nowrap">{item}</span>
-              <span className="text-secondary-foreground/40 font-black">·</span>
-            </div>
+          {[...marqueeItems, ...marqueeItems].map((item, i) => (
+            <span key={i} className="px-8 text-[#0A0907] text-[11px] font-bold uppercase tracking-widest whitespace-nowrap">
+              {item}
+            </span>
           ))}
         </div>
-      </section>
+      </div>
 
-      {/* SECTION D — ANIMATED STATS BAR */}
-      <section className="bg-background border-b border-border py-20 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12 text-center relative z-10">
-          <div>
-            <h3 className="text-6xl font-serif font-bold text-primary mb-2">
-              <AnimatedCounter end={settings?.ordersCompletedCount || 1200} />
-            </h3>
-            <p className="section-label">Frames Crafted</p>
-            <div className="w-8 mx-auto mt-4 gold-rule" />
-          </div>
-          <div>
-            <h3 className="text-6xl font-serif font-bold text-primary mb-2">
-              <AnimatedCounter end={settings?.happyClientsPercent || 98} suffix="%" />
-            </h3>
-            <p className="section-label">Happy Clients</p>
-            <div className="w-8 mx-auto mt-4 gold-rule" />
-          </div>
-          <div>
-            <h3 className="text-6xl font-serif font-bold text-primary mb-2 flex items-center justify-center gap-2">
-              <AnimatedCounter end={settings?.starRating || 4.9} decimals={1} />
-              <Star className="w-8 h-8 fill-primary text-primary" />
-            </h3>
-            <p className="section-label">Star Rating</p>
-            <div className="w-8 mx-auto mt-4 gold-rule" />
-          </div>
-          <div>
-            <h3 className="text-6xl font-serif font-bold text-primary mb-2">
-              <AnimatedCounter end={settings?.aboutFoundedYear ? parseInt(settings.aboutFoundedYear) : 2019} duration={1000} />
-            </h3>
-            <p className="section-label">Years Est.</p>
-            <div className="w-8 mx-auto mt-4 gold-rule" />
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION E — FEATURED FRAMES */}
-      <section className="py-24 bg-background">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <span className="section-label block mb-4">COLLECTION</span>
-            <h2 className="text-5xl font-serif font-bold text-foreground mb-2"><span className="heading-underline">Our Collection</span></h2>
-            <p className="text-muted-foreground mt-6">Curated pieces for every style.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredProducts.map((product, i) => (
-              <motion.div 
-                key={product.id}
-                initial={{ opacity:0, y:32 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ duration:0.7, delay: i * 0.1 }}
+      {/* ══════════════════════════════════════════ STATS */}
+      <section className="py-20 border-b border-[#1E1A14]">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-[#1E1A14]">
+            {[
+              { end: 1200, suffix: '+', label: 'Frames Made' },
+              { end: 8,    suffix: '+', label: 'Years of Craft' },
+              { end: 98,   suffix: '%', label: 'Happy Clients' },
+              { end: 48,   suffix: 'h', label: 'Express Service' },
+            ].map((s, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                className="text-center py-8 px-4"
               >
-                <div className="card-3d group relative overflow-hidden bg-card border border-border flex flex-col h-full cursor-pointer rounded-[0.25rem]">
-                  <div className="aspect-[4/3] relative overflow-hidden bg-muted">
-                    <img src={product.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&q=80'} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                    
-                    <div className="absolute inset-x-0 bottom-0 bg-secondary/95 py-3 px-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out text-secondary-foreground text-sm font-semibold flex items-center justify-between z-10">
-                      <span>Quick Order</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </div>
-                  </div>
-                  <div className="pt-4 pb-4 px-4 flex flex-col flex-1">
-                    <h3 className="font-serif text-xl text-foreground font-semibold">{product.name}</h3>
-                    <div className="mt-2 flex items-center justify-between">
-                      <p className="text-secondary font-semibold text-sm">Rs. {product.price}</p>
-                      <Button asChild variant="ghost" className="h-8 px-2 text-[10px] uppercase tracking-widest font-bold text-muted-foreground hover:text-foreground">
-                        <Link href="/store">Add to Inquiry</Link>
-                      </Button>
-                    </div>
-                  </div>
-                  <Link href="/store" className="absolute inset-0 z-0"><span className="sr-only">View {product.name}</span></Link>
+                <div className="font-serif text-5xl md:text-6xl font-bold text-gradient leading-none mb-2">
+                  <AnimatedCounter end={s.end} suffix={s.suffix} />
                 </div>
+                <p className="section-label">{s.label}</p>
               </motion.div>
             ))}
           </div>
-          
-          <div className="mt-16 text-center">
-            <Button asChild variant="outline" className="rounded-[0.25rem] border-foreground text-foreground hover:bg-foreground hover:text-background px-8 h-12 text-xs uppercase tracking-widest font-semibold transition-colors">
-               <Link href="/store">Explore All Frames →</Link>
-            </Button>
-          </div>
         </div>
       </section>
 
-      {/* SECTION F — WHY HAVESTORY */}
-      <section className="bg-primary text-primary-foreground py-20 noise relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <div className="section-label text-secondary mb-4 block">WHY CHOOSE US</div>
-            <h2 className="font-serif text-4xl text-white">The HAVESTORY Standard</h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12">
-            {reasons.map((reason, i) => {
-              const Icon = reason.icon;
-              return (
-                <motion.div key={i} initial={{ opacity:0, y:32 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ duration:0.7, delay: i * 0.1 }} className="flex flex-col items-center text-center">
-                  <div className="w-12 h-12 rounded-full bg-secondary/20 text-secondary flex items-center justify-center mb-6">
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <h4 className="font-serif text-xl font-bold text-white mb-3">{reason.title}</h4>
-                  <p className="text-primary-foreground/70 text-sm leading-relaxed">{reason.desc}</p>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION G — SERVICES */}
-      <section className="bg-background py-24 border-t border-border">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col lg:flex-row gap-16">
-          <div className="lg:w-2/5">
-            <span className="section-label block mb-4">SERVICES</span>
-            <h2 className="text-4xl md:text-5xl font-serif font-bold text-foreground mb-6">What We Craft</h2>
-            <p className="text-muted-foreground text-lg mb-8 leading-relaxed pr-8">Beyond standard framing, we offer a complete suite of services for artists, brands, and homes designed to perfection.</p>
-            <Button asChild variant="link" className="px-0 text-foreground hover:text-secondary font-bold text-sm tracking-widest uppercase">
-              <Link href="/services">See All Services →</Link>
-            </Button>
-          </div>
-          
-          <div className="lg:w-3/5 grid sm:grid-cols-2 gap-6">
-            {displayServices.map((service, i) => {
-               const Icon = icons[i % icons.length];
-               return (
-                 <motion.div key={service.id} initial={{ opacity:0, y:32 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ duration:0.7, delay: i * 0.1 }} className="bg-card border border-border p-6 hover:border-secondary transition-colors hover-lift relative group rounded-[0.25rem]">
-                   <div className="w-10 h-10 bg-primary/5 text-primary rounded-[0.25rem] flex items-center justify-center mb-5 group-hover:bg-secondary/10 group-hover:text-secondary transition-colors">
-                     <Icon className="w-5 h-5" />
-                   </div>
-                   <h3 className="text-xl font-serif font-semibold mb-2">{service.name}</h3>
-                   <p className="text-muted-foreground text-sm line-clamp-2">{service.description}</p>
-                   <Link href="/services" className="absolute inset-0 z-10"><span className="sr-only">View Service</span></Link>
-                 </motion.div>
-               );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION H — PORTFOLIO GALLERY */}
-      {displayPortfolio.length > 0 && (
-        <section className="bg-muted/50 py-24 border-t border-border">
+      {/* ══════════════════════════════════════════ FEATURED PRODUCTS */}
+      {featuredProducts.length > 0 && (
+        <section className="py-24">
           <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-16">
-              <span className="section-label block mb-4">GALLERY</span>
-              <h2 className="text-4xl md:text-5xl font-serif font-bold text-foreground mb-4">Our Portfolio</h2>
-              <p className="text-muted-foreground">A selection of recent installations and framing projects.</p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }} className="flex items-end justify-between mb-14"
+            >
+              <div>
+                <p className="section-label mb-3">Our Collection</p>
+                <h2 className="font-serif text-4xl md:text-5xl font-bold text-[hsl(var(--foreground))] heading-underline">
+                  Frames & Prints
+                </h2>
+              </div>
+              <Link href="/store" className="hidden md:flex items-center gap-2 text-[#C9A84C] text-xs font-bold uppercase tracking-widest hover:text-[#D4B55E] transition-colors">
+                View All <ArrowRight className="w-4 h-4" />
+              </Link>
+            </motion.div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 auto-rows-[200px] gap-4">
-              {displayPortfolio.map((item, i) => (
-                <motion.div 
-                  key={item.id} 
-                  initial={{ opacity:0, scale:0.95 }} whileInView={{ opacity:1, scale:1 }} viewport={{ once:true }} transition={{ duration:0.7, delay: i * 0.1 }}
-                  className={`relative group overflow-hidden bg-muted rounded-[0.25rem] ${i === 0 ? 'col-span-1 row-span-2' : ''}`}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {featuredProducts.map((p, i) => (
+                <motion.div
+                  key={p.id}
+                  initial={{ opacity: 0, y: 32 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.07 }}
+                  className="group card-gold-hover bg-[hsl(var(--card))] overflow-hidden card-3d"
                 >
-                  <img src={item.imageUrl || ''} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
-                  <div className="absolute bottom-4 left-4 right-4 translate-y-3 group-hover:translate-y-0 transition-transform duration-300 pointer-events-none">
-                    <h3 className="text-white font-serif text-lg font-bold drop-shadow-md">{item.title}</h3>
-                    <p className="text-white/80 text-xs mt-1 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">{item.description}</p>
+                  <div className="aspect-[4/3] bg-[hsl(var(--muted))] overflow-hidden relative">
+                    {p.image
+                      ? <img src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                      : <div className="w-full h-full flex items-center justify-center"><ImageIcon className="w-10 h-10 text-[hsl(var(--muted-foreground))/0.3]" /></div>
+                    }
+                    {/* Gold overlay on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#C9A84C]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-400">
+                      <Link href="/store" className="block w-full text-center bg-[#C9A84C] text-[#0A0907] text-xs font-bold uppercase tracking-widest py-2.5">
+                        Quick Order
+                      </Link>
+                    </div>
                   </div>
-                  <Link href="/portfolio" className="absolute inset-0 z-10"><span className="sr-only">View Project</span></Link>
+                  <div className="p-5">
+                    <h3 className="font-serif text-lg font-semibold text-[hsl(var(--foreground))] mb-1 group-hover:text-[#C9A84C] transition-colors">{p.name}</h3>
+                    {p.description && <p className="text-xs text-[hsl(var(--muted-foreground))] line-clamp-2 mb-3">{p.description}</p>}
+                    <div className="flex items-center justify-between">
+                      {p.basePrice && (
+                        <span className="font-serif text-xl font-semibold text-[#C9A84C]">
+                          LKR {Number(p.basePrice).toLocaleString()}
+                        </span>
+                      )}
+                      {p.category && (
+                        <span className="text-[9px] uppercase tracking-widest text-[hsl(var(--muted-foreground))] border border-[#2A2418] px-2 py-1">
+                          {p.category}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </motion.div>
               ))}
             </div>
-            
-            <div className="mt-12 text-center">
-              <Button asChild variant="link" className="text-foreground hover:text-secondary font-bold text-sm tracking-widest uppercase">
-                <Link href="/portfolio">View Full Portfolio →</Link>
-              </Button>
+
+            <div className="text-center mt-10">
+              <Link href="/store" className="inline-flex items-center gap-2 border border-[#2A2418] text-[hsl(var(--foreground)/0.65)] text-xs font-bold uppercase tracking-widest px-8 py-3 hover:border-[#C9A84C] hover:text-[#C9A84C] transition-colors">
+                View All Frames & Prints <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
           </div>
         </section>
       )}
 
-      {/* SECTION I — REVIEWS */}
-      {displayReviews.length > 0 && (
-        <section className="bg-primary text-primary-foreground py-24 noise relative">
+      {/* ══════════════════════════════════════════ SERVICES */}
+      {displayServices.length > 0 && (
+        <section className="py-24 bg-[#070604] border-y border-[#1E1A14]">
           <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-16">
-              <span className="section-label text-secondary block mb-4">TESTIMONIALS</span>
-              <h2 className="text-4xl md:text-5xl font-serif font-bold text-white">Words from our Clients</h2>
+            <motion.div
+              initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }} className="text-center mb-14"
+            >
+              <p className="section-label mb-3">What We Offer</p>
+              <h2 className="font-serif text-4xl md:text-5xl font-bold text-[hsl(var(--foreground))] heading-underline inline-block">
+                Studio Services
+              </h2>
+            </motion.div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {displayServices.map((svc, i) => {
+                const Icon = serviceIcons[i % serviceIcons.length];
+                return (
+                  <motion.div
+                    key={svc.id}
+                    initial={{ opacity: 0, y: 24 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.06 }}
+                    className="group bg-[hsl(var(--card))] border border-[#1E1A14] p-7 hover:border-[#C9A84C]/40 transition-all duration-400 relative overflow-hidden"
+                  >
+                    <div className="absolute -right-4 -top-4 w-24 h-24 bg-[#C9A84C]/5 rounded-full transition-all duration-500 group-hover:scale-150 group-hover:bg-[#C9A84C]/8" />
+                    <div className="w-11 h-11 bg-[#C9A84C]/10 border border-[#C9A84C]/20 flex items-center justify-center mb-5 group-hover:bg-[#C9A84C]/20 transition-colors">
+                      <Icon className="w-5 h-5 text-[#C9A84C]" />
+                    </div>
+                    <h3 className="font-serif text-xl font-semibold text-[hsl(var(--foreground))] mb-2 group-hover:text-[#C9A84C] transition-colors">{svc.name}</h3>
+                    {svc.description && <p className="text-xs text-[hsl(var(--muted-foreground))] leading-relaxed mb-4 line-clamp-3">{svc.description}</p>}
+                    {svc.basePrice && (
+                      <p className="font-serif text-lg text-[#C9A84C] font-semibold">from LKR {Number(svc.basePrice).toLocaleString()}</p>
+                    )}
+                  </motion.div>
+                );
+              })}
             </div>
+            <div className="text-center mt-10">
+              <Link href="/services" className="inline-flex items-center gap-2 text-[#C9A84C] text-xs font-bold uppercase tracking-widest hover:text-[#D4B55E] transition-colors">
+                All Studio Services <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {displayReviews.map((review, i) => (
-                <motion.div key={review.id} initial={{ opacity:0, y:32 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ duration:0.7, delay: i * 0.1 }} className="border border-white/10 bg-white/5 p-8 hover:bg-white/10 transition-colors rounded-[0.25rem] flex flex-col">
-                  <div className="flex gap-1 mb-6">
-                    {Array.from({ length: 5 }).map((_, idx) => (
-                      <Star key={idx} className={`w-4 h-4 ${idx < review.rating ? 'fill-secondary text-secondary' : 'fill-white/20 text-white/20'}`} />
+      {/* ══════════════════════════════════════════ WHY HAVESTORY */}
+      <section className="py-24">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            <motion.div initial={{ opacity: 0, x: -32 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }}>
+              <p className="section-label mb-3">Why Choose Us</p>
+              <h2 className="font-serif text-4xl md:text-5xl font-bold text-[hsl(var(--foreground))] mb-6 leading-tight heading-underline">
+                Crafted for<br /><span className="text-gradient italic">Perfection</span>
+              </h2>
+              <p className="text-[hsl(var(--muted-foreground))] text-base leading-relaxed mb-8">
+                HAVESTORY combines traditional Sri Lankan craftsmanship with modern precision — every frame is built to last, every print calibrated for colour accuracy.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {reasons.map((r, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.08 }}
+                    className="flex items-start gap-3 p-4 border border-[#1E1A14] hover:border-[#C9A84C]/30 transition-colors"
+                  >
+                    <div className="w-9 h-9 bg-[#C9A84C]/10 flex items-center justify-center shrink-0">
+                      <r.icon className="w-4 h-4 text-[#C9A84C]" />
+                    </div>
+                    <div>
+                      <p className="font-serif font-semibold text-sm text-[hsl(var(--foreground))] mb-0.5">{r.title}</p>
+                      <p className="text-[11px] text-[hsl(var(--muted-foreground))] leading-relaxed">{r.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Decorative frame grid */}
+            <motion.div
+              initial={{ opacity: 0, x: 32 }} whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }} transition={{ duration: 0.8 }}
+              className="relative hidden md:block"
+            >
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { src: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=600&q=80', cls: 'row-span-2 aspect-[3/4]' },
+                  { src: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80', cls: 'aspect-square' },
+                  { src: 'https://images.unsplash.com/photo-1490750967868-88df5691892e?w=600&q=80', cls: 'aspect-square' },
+                ].map((img, i) => (
+                  <div key={i} className={`${img.cls} bg-[hsl(var(--muted))] overflow-hidden border border-[#2A2418]`}>
+                    <img src={img.src} alt="" className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-500 hover:scale-105 transition-transform" />
+                  </div>
+                ))}
+              </div>
+              {/* Gold corner accent */}
+              <div className="absolute -top-3 -left-3 w-10 h-10 border-t-2 border-l-2 border-[#C9A84C]" />
+              <div className="absolute -bottom-3 -right-3 w-10 h-10 border-b-2 border-r-2 border-[#C9A84C]" />
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════ PORTFOLIO */}
+      {displayPortfolio.length > 0 && (
+        <section className="py-24 bg-[#070604] border-y border-[#1E1A14]">
+          <div className="max-w-7xl mx-auto px-6">
+            <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="flex items-end justify-between mb-14">
+              <div>
+                <p className="section-label mb-3">Our Work</p>
+                <h2 className="font-serif text-4xl md:text-5xl font-bold text-[hsl(var(--foreground))] heading-underline">Gallery</h2>
+              </div>
+              <Link href="/gallery" className="hidden md:flex items-center gap-2 text-[#C9A84C] text-xs font-bold uppercase tracking-widest hover:text-[#D4B55E] transition-colors">
+                Full Gallery <ArrowRight className="w-4 h-4" />
+              </Link>
+            </motion.div>
+            <div className="columns-2 md:columns-3 lg:columns-4 gap-3 space-y-3">
+              {displayPortfolio.map((item, i) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.04 }}
+                  className="group break-inside-avoid bg-[hsl(var(--card))] border border-[#1E1A14] overflow-hidden hover:border-[#C9A84C]/40 transition-colors"
+                >
+                  {item.image
+                    ? <img src={item.image} alt={item.title || ''} className="w-full object-cover transition-transform duration-600 group-hover:scale-105" />
+                    : <div className="aspect-square bg-[hsl(var(--muted))] flex items-center justify-center"><ImageIcon className="w-8 h-8 text-[hsl(var(--muted-foreground))/0.3]" /></div>
+                  }
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ══════════════════════════════════════════ REVIEWS */}
+      {displayReviews.length > 0 && (
+        <section className="py-24">
+          <div className="max-w-7xl mx-auto px-6">
+            <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-14">
+              <p className="section-label mb-3">Client Love</p>
+              <h2 className="font-serif text-4xl md:text-5xl font-bold text-[hsl(var(--foreground))] heading-underline inline-block">What They Say</h2>
+            </motion.div>
+            <div className="grid md:grid-cols-3 gap-6">
+              {displayReviews.map((r, i) => (
+                <motion.div
+                  key={r.id}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className="bg-[hsl(var(--card))] border border-[#1E1A14] p-7 relative hover:border-[#C9A84C]/30 transition-colors"
+                >
+                  <Quote className="w-8 h-8 text-[#C9A84C]/25 absolute top-5 right-5" />
+                  <div className="flex gap-1 mb-4">
+                    {Array.from({ length: r.rating || 5 }).map((_, j) => (
+                      <Star key={j} className="w-3.5 h-3.5 text-[#C9A84C] fill-[#C9A84C]" />
                     ))}
                   </div>
-                  <Quote className="w-8 h-8 text-secondary/30 mb-4" />
-                  <p className="text-lg font-serif italic text-primary-foreground/90 leading-relaxed mb-8 flex-1">"{review.comment}"</p>
-                  <div className="mt-auto">
-                    <p className="font-semibold text-xs tracking-widest uppercase text-secondary">{review.customerName}</p>
+                  <p className="text-[hsl(var(--foreground)/0.7)] text-sm leading-relaxed mb-6 italic">&ldquo;{r.review}&rdquo;</p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-[#C9A84C]/10 border border-[#C9A84C]/20 flex items-center justify-center font-serif font-bold text-sm text-[#C9A84C]">
+                      {(r.clientName || '?')[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-[hsl(var(--foreground))]">{r.clientName}</p>
+                      {r.service && <p className="text-[10px] text-[hsl(var(--muted-foreground))] uppercase tracking-widest">{r.service}</p>}
+                    </div>
                   </div>
                 </motion.div>
               ))}
@@ -391,54 +566,40 @@ export default function Home() {
         </section>
       )}
 
-      {/* SECTION J — ABOUT TEASER */}
-      <section className="py-24 bg-background border-t border-border">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-20 items-center">
-            <motion.div initial={{ opacity:0, x:-32 }} whileInView={{ opacity:1, x:0 }} viewport={{ once:true }} transition={{ duration:0.8 }} className="relative w-full max-w-md mx-auto lg:max-w-none">
-              <div className="absolute -bottom-4 -right-4 inset-0 bg-secondary/20 rounded-[0.25rem]" />
-              <img 
-                src={settings?.aboutImage || 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=800&q=80'} 
-                alt="Our Studio" 
-                className="relative z-10 w-full h-[400px] object-cover rounded-[0.25rem] border border-border"
-              />
-            </motion.div>
-            
-            <motion.div initial={{ opacity:0, y:32 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ duration:0.8 }}>
-              <span className="section-label block mb-4">OUR STORY</span>
-              <h2 className="text-4xl lg:text-5xl font-serif font-bold text-foreground mb-6">Crafting since 2019</h2>
-              <div className="text-muted-foreground text-lg leading-relaxed mb-8 space-y-4">
-                <p>{settings?.aboutStory || 'We started with a simple belief: every great moment deserves to be framed beautifully. Based in Sri Lanka, we merge traditional craftsmanship with modern design to deliver frames that elevate your space.'}</p>
-                {settings?.aboutMission && <p>{settings.aboutMission}</p>}
-              </div>
-              <Button asChild variant="ghost" className="px-0 hover:bg-transparent text-foreground hover:text-secondary font-bold text-sm tracking-widest uppercase">
-                <Link href="/about">About HAVESTORY →</Link>
-              </Button>
-            </motion.div>
-          </div>
+      {/* ══════════════════════════════════════════ CTA BANNER */}
+      <section className="relative py-28 overflow-hidden border-y border-[#1E1A14]">
+        <div className="absolute inset-0 bg-[#070604]" />
+        <div className="absolute inset-0 opacity-10">
+          <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=1600&q=60" className="w-full h-full object-cover" alt="" />
         </div>
-      </section>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0A0907] via-[#0A0907]/80 to-[#0A0907]" />
+        {/* Gold line top / bottom */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C] to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C] to-transparent" />
 
-      {/* SECTION K — FINAL CTA BANNER */}
-      <section className="py-32 bg-primary text-primary-foreground text-center relative overflow-hidden noise">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-secondary/20 rounded-full blur-3xl pointer-events-none" />
-        
-        <motion.div initial={{ opacity:0, scale:0.95 }} whileInView={{ opacity:1, scale:1 }} viewport={{ once:true }} transition={{ duration:0.8 }} className="max-w-3xl mx-auto px-6 relative z-10">
-          <span className="section-label text-secondary block mb-4">READY TO START?</span>
-          <h2 className="text-5xl md:text-6xl font-serif font-bold text-white mb-6 leading-tight">Ready to Frame Your Story?</h2>
-          <p className="text-lg text-primary-foreground/70 mb-10 font-light max-w-lg mx-auto">Let us help you preserve your most cherished memories with a frame that perfectly fits your space and style.</p>
-          
-          <Button asChild size="lg" className="rounded-[0.25rem] bg-secondary text-secondary-foreground hover:bg-secondary/90 h-14 px-12 text-sm font-semibold uppercase tracking-widest btn-glow mx-auto mb-8 border-none">
-            <Link href="/contact">Get a Custom Quote</Link>
-          </Button>
-          
-          <div className="flex justify-center items-center gap-6 text-xs text-primary-foreground/50 tracking-wide font-medium">
-            <span>✓ No commitment</span>
-            <span>✓ Reply within 2 hours</span>
-            <span>✓ Free design consultation</span>
+        <motion.div
+          initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="relative z-10 text-center max-w-3xl mx-auto px-6"
+        >
+          <p className="section-label mb-4">Get Started Today</p>
+          <h2 className="font-serif text-5xl md:text-7xl font-bold text-[hsl(var(--foreground))] mb-6 leading-none">
+            Ready to Frame<br /><span className="text-gradient italic">Your Story?</span>
+          </h2>
+          <p className="text-[hsl(var(--foreground)/0.55)] text-lg mb-10">
+            Visit our studio, browse the collection or submit a custom order — we'll handle the rest.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link href="/store" className="inline-flex items-center gap-3 bg-[#C9A84C] text-[#0A0907] font-bold text-sm uppercase tracking-widest px-10 py-4 btn-glow hover:bg-[#D4B55E] transition-colors">
+              Browse Frames <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link href="/contact" className="inline-flex items-center gap-3 border border-[#2A2418] text-[hsl(var(--foreground)/0.7)] text-sm uppercase tracking-widest px-10 py-4 hover:border-[#C9A84C] hover:text-[#C9A84C] transition-colors">
+              Contact Studio
+            </Link>
           </div>
         </motion.div>
       </section>
+
     </div>
   );
 }
