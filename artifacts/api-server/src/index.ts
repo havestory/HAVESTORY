@@ -1,5 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { pool } from "@workspace/db";
+import { runStartupMigrations } from "./lib/startup-migrations";
 
 const rawPort = process.env["PORT"];
 
@@ -22,4 +24,24 @@ app.listen(port, (err) => {
   }
 
   logger.info({ port }, "Server listening");
+
+  /* Warm up the Neon database connection immediately so the first user
+     request doesn't hit a cold start. Also keep the connection alive
+     with a periodic ping every 4 minutes (Neon idles after 5 min). */
+  const warmup = async () => {
+    try {
+      const client = await pool.connect();
+      await client.query("SELECT 1");
+      client.release();
+      logger.info("Database connection warmed up");
+    } catch (e) {
+      logger.warn({ err: e }, "DB warmup failed — will retry on first request");
+    }
+  };
+
+  warmup();
+  setInterval(warmup, 4 * 60 * 1000); // ping every 4 minutes
+
+  /* Ensure all columns exist — idempotent, safe to run on every start */
+  runStartupMigrations(msg => logger.info(msg));
 });

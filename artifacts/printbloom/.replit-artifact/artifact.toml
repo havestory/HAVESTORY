@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "PrintBloom"
+description = "PrintBloom is a premium Sri Lankan printing & graphic design business platform. It has a full customer-facing website (home, store, services, portfolio, order tracking, about, contact) and a comprehensive admin panel for managing products, orders, clients, invoices, inventory, CRM projects, notices, settings and more."
+version = "1.0.0"
+id = "artifacts/printbloom"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20092
+
+[services.development]
+run = "pnpm --filter @workspace/printbloom run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/printbloom", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/printbloom/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20092"
+BASE_PATH = "/"
