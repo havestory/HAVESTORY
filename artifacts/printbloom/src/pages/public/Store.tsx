@@ -4,13 +4,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingCart, Plus, Minus, Trash2, ArrowRight, Search, CheckCircle2 } from 'lucide-react';
-import { z } from 'zod';
-import { useForm } from 'react-form';
+import { ShoppingCart, Plus, Minus, Trash2, Search, CheckCircle2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function Store() {
   const { data: categories } = useListCategories();
@@ -307,37 +306,50 @@ export default function Store() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-              {filteredProducts?.map(product => (
-                <Card key={product.id} className="rounded-none border-border overflow-hidden hover-lift flex flex-col group bg-card">
-                  <div className="aspect-[4/3] bg-muted relative overflow-hidden">
-                    <img 
-                      src={product.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400&q=80'} 
-                      alt={product.name} 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                    />
-                    {product.category && (
-                      <Badge className="absolute top-4 right-4 rounded-none bg-background/95 text-foreground backdrop-blur-md border border-border/50 shadow-sm font-semibold">
-                        {product.category.name}
-                      </Badge>
-                    )}
-                  </div>
-                  <CardContent className="p-6 flex flex-col flex-1">
-                    <h3 className="font-serif text-xl font-bold mb-2 line-clamp-1">{product.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-6 line-clamp-2 leading-relaxed">{product.description}</p>
-                    <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
-                      <div>
-                        <p className="font-bold text-lg text-foreground">Rs. {product.price}</p>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mt-0.5">per {product.priceType}</p>
+              {filteredProducts?.map((product, i) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity:0, y:40 }}
+                  whileInView={{ opacity:1, y:0 }}
+                  viewport={{ once:true }}
+                  transition={{ duration:0.7, delay: (i % 6) * 0.1 }}
+                >
+                  <Card onClick={() => addToCart(product)} className="rounded-none border-border overflow-hidden card-3d flex flex-col group bg-card h-full cursor-pointer relative">
+                    <div className="aspect-[4/3] bg-muted relative overflow-hidden">
+                      <img 
+                        src={product.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400&q=80'} 
+                        alt={product.name} 
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                      />
+                      {product.category && (
+                        <Badge className="absolute top-4 right-4 rounded-none bg-background/95 text-foreground backdrop-blur-md border border-border/50 shadow-sm font-semibold border-none">
+                          {product.category.name}
+                        </Badge>
+                      )}
+                      <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                        <div className="bg-secondary text-secondary-foreground py-3 text-center font-bold text-sm tracking-wide">
+                          View Details →
+                        </div>
                       </div>
-                      <Button 
-                        onClick={() => addToCart(product)} 
-                        className="rounded-none bg-amber-500 text-black hover:bg-amber-600 gap-2 h-10 px-4 shadow-sm font-semibold"
-                      >
-                        <ShoppingCart className="w-4 h-4" /> Add
-                      </Button>
                     </div>
-                  </CardContent>
-                </Card>
+                    <CardContent className="p-6 flex flex-col flex-1">
+                      <h3 className="font-serif text-xl font-bold mb-2 line-clamp-1">{product.name}</h3>
+                      <p className="text-sm text-muted-foreground mb-6 line-clamp-2 leading-relaxed">{product.description}</p>
+                      <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
+                        <div>
+                          <p className="font-bold text-lg text-foreground">Rs. {product.price}</p>
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mt-0.5">per {product.priceType}</p>
+                        </div>
+                        <Button 
+                          onClick={(e) => { e.stopPropagation(); addToCart(product); }} 
+                          className="rounded-none bg-amber-500 text-black hover:bg-amber-600 gap-2 h-10 px-4 shadow-sm font-semibold border-none"
+                        >
+                          <ShoppingCart className="w-4 h-4" /> Add
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               ))}
             </div>
           )}

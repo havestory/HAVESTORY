@@ -1,17 +1,24 @@
 import { type ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useGetSettings } from '@workspace/api-client-react';
-import { Menu, X, Printer, Phone, MapPin, Mail, Instagram, Facebook } from 'lucide-react';
+import { Menu, X, Printer, Phone, MapPin, Mail, Instagram, Facebook, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 
 export function PublicLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const { data: settings } = useGetSettings();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [scrolledPast200, setScrolledPast200] = useState(false);
+  const [scrolledPastHero, setScrolledPastHero] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+      setScrolledPast200(window.scrollY > 200);
+      setScrolledPastHero(window.scrollY > 500);
+    };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -234,7 +241,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           target="_blank"
           rel="noreferrer"
           title="Chat with us"
-          className="fixed bottom-6 right-6 w-16 h-16 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-[0_4px_20px_rgba(37,211,102,0.4)] hover:scale-110 transition-transform z-50 animate-in fade-in slide-in-from-bottom-4 animate-pulse-ring"
+          className={`fixed bottom-6 right-6 w-16 h-16 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-[0_4px_20px_rgba(37,211,102,0.4)] hover:scale-110 transition-all duration-300 z-40 animate-pulse-ring ${scrolledPast200 ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'}`}
           aria-label="Chat on WhatsApp"
         >
           <svg viewBox="0 0 24 24" className="w-8 h-8 fill-current">
@@ -242,6 +249,22 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           </svg>
         </a>
       )}
+
+      {/* Floating STICKY 'Order Now' button */}
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.9 }}
+        animate={{ 
+          opacity: scrolledPastHero ? 1 : 0, 
+          y: scrolledPastHero ? 0 : 20, 
+          scale: scrolledPastHero ? 1 : 0.9,
+          pointerEvents: scrolledPastHero ? 'auto' : 'none'
+        }}
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:bottom-28 md:translate-x-0 z-50"
+      >
+        <Link href="/store" className="flex items-center gap-2 bg-secondary text-secondary-foreground rounded-full px-6 py-3 font-bold text-sm cta-pulse shadow-xl hover:scale-105 transition-transform whitespace-nowrap border-none">
+          🖼 Order a Frame <ArrowRight className="w-4 h-4" />
+        </Link>
+      </motion.div>
     </div>
   );
 }
