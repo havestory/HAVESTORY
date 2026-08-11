@@ -21,6 +21,7 @@ import labelCalculatorRouter from "./label-calculator";
 import priceListsRouter from "./price-lists";
 import shippingLabelsRouter from "./shipping-labels";
 import financeInventoryRouter from "./finance-inventory";
+import reportsRouter from "./reports";
 import deletionRequestsRouter from "./deletion-requests";
 import clientVerificationsRouter, { publicClientVerificationsRouter } from "./client-verifications";
 import staffVerificationsRouter, { publicStaffVerificationsRouter } from "./staff-verifications";
@@ -66,5 +67,6 @@ router.use("/label-calculator", labelCalculatorRouter);
 router.use("/price-lists", priceListsRouter);
 router.use("/shipping-labels", shippingLabelsRouter);
 router.use("/finance-inventory", financeInventoryRouter);
+router.use("/reports", reportsRouter);
 
 export default router;

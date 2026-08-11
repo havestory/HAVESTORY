@@ -16,7 +16,9 @@ import {
   Star,
   Bell,
   Layers,
-  Box
+  Box,
+  DollarSign,
+  BarChart2
 } from 'lucide-react';
 import { useAdminLogout, useGetAdminMe } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
@@ -100,6 +102,12 @@ export function AdminLayout({ children }: { children: ReactNode }) {
               <NavItem href="/admin/reviews" label="Reviews" icon={Star} />
               <NavItem href="/admin/messages" label="Messages" icon={MessageSquare} />
               <NavItem href="/admin/notices" label="Notices" icon={Bell} />
+            </div>
+
+            <div className="space-y-1">
+              <div className="section-label text-sidebar-foreground/30 px-3 pt-2 pb-1 text-[9px]">FINANCE</div>
+              <NavItem href="/admin/finance" label="Finance" icon={DollarSign} />
+              <NavItem href="/admin/reports" label="Reports" icon={BarChart2} />
             </div>
 
             <div className="space-y-1 pb-4">

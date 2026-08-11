@@ -38,6 +38,8 @@ import Reviews         from './pages/admin/Reviews';
 import Messages        from './pages/admin/Messages';
 import Notices         from './pages/admin/Notices';
 import Settings        from './pages/admin/Settings';
+import Finance from './pages/admin/Finance';
+import Reports from './pages/admin/Reports';
 
 const queryClient = new QueryClient();
 const SPLASH_KEY  = 'hs_splash_v2';
@@ -70,19 +72,21 @@ function AdminRoutes() {
     <AuthGuard>
       <AdminLayout>
         <Switch>
-          <Route path="/admin"                component={Dashboard} />
-          <Route path="/admin/orders"         component={Orders} />
+          <Route path="/admin"                 component={Dashboard} />
+          <Route path="/admin/orders"          component={Orders} />
           <Route path="/admin/custom-projects" component={CustomProjects} />
-          <Route path="/admin/clients"        component={Clients} />
-          <Route path="/admin/invoices"       component={Invoices} />
-          <Route path="/admin/products"       component={Products} />
-          <Route path="/admin/services"       component={AdminServices} />
-          <Route path="/admin/portfolio"      component={AdminPortfolio} />
-          <Route path="/admin/raw-materials"  component={RawMaterials} />
-          <Route path="/admin/reviews"        component={Reviews} />
-          <Route path="/admin/messages"       component={Messages} />
-          <Route path="/admin/notices"        component={Notices} />
-          <Route path="/admin/settings"       component={Settings} />
+          <Route path="/admin/clients"         component={Clients} />
+          <Route path="/admin/invoices"        component={Invoices} />
+          <Route path="/admin/products"        component={Products} />
+          <Route path="/admin/services"        component={AdminServices} />
+          <Route path="/admin/portfolio"       component={AdminPortfolio} />
+          <Route path="/admin/raw-materials"   component={RawMaterials} />
+          <Route path="/admin/reviews"         component={Reviews} />
+          <Route path="/admin/messages"        component={Messages} />
+          <Route path="/admin/notices"         component={Notices} />
+          <Route path="/admin/settings"        component={Settings} />
+          <Route path="/admin/finance"         component={Finance} />
+          <Route path="/admin/reports"         component={Reports} />
           <Route component={NotFound} />
         </Switch>
       </AdminLayout>
