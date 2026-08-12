@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import {
-  Truck, Search, Printer, AlertTriangle, Zap, Package2, ChevronDown, User
+  Truck, Search, Printer, AlertTriangle, Zap, Package2, ChevronDown, User, Download
 } from 'lucide-react';
+import html2canvas from 'html2canvas';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -309,6 +310,32 @@ export default function ShippingLabels() {
     setLookupPhone('');
   }
 
+  async function handleDownload() {
+    const labelEl = document.querySelector<HTMLElement>('.label-print-target');
+    if (!labelEl) {
+      toast({ title: 'Nothing to download', variant: 'destructive' });
+      return;
+    }
+    try {
+      const canvas = await html2canvas(labelEl, {
+        useCORS: true,
+        allowTaint: true,
+        scale: 2, // 2× for crisp output on high-dpi screens / WhatsApp
+        backgroundColor: '#ffffff',
+      });
+      const dataUrl = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      const slug = (form.recipientName || 'label').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const date = new Date().toISOString().slice(0, 10);
+      a.download = `label-${slug}-${date}.png`;
+      a.href = dataUrl;
+      a.click();
+      toast({ title: 'Label downloaded', description: `${a.download}` });
+    } catch (err: any) {
+      toast({ title: 'Download failed', description: err?.message ?? 'Unknown error', variant: 'destructive' });
+    }
+  }
+
   const inputClass = 'rounded-none border-0 border-b-2 border-border focus-visible:ring-0 focus-visible:border-secondary bg-transparent px-0 text-sm shadow-none h-9';
   const labelClass = 'text-[9px] uppercase tracking-widest font-semibold text-muted-foreground';
 
@@ -322,6 +349,9 @@ export default function ShippingLabels() {
         <div className="flex gap-3">
           <Button variant="outline" onClick={handleClear} className="rounded-none border-border h-9 font-bold uppercase tracking-widest text-xs">
             Clear
+          </Button>
+          <Button variant="outline" onClick={handleDownload} className="rounded-none border-border h-9 font-bold uppercase tracking-widest text-xs gap-2">
+            <Download className="w-4 h-4" /> Download Image
           </Button>
           <Button onClick={handlePrint} className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90 btn-glow uppercase text-xs tracking-widest px-5 h-9 font-semibold gap-2">
             <Printer className="w-4 h-4" /> Print Label
