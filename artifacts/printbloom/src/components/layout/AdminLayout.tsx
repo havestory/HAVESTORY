@@ -26,6 +26,9 @@ import {
   CalendarCheck,
   Sun,
   Moon,
+  PanelTop,
+  Factory,
+  FolderKanban,
 } from 'lucide-react';
 import { useAdminLogout, useGetAdminMe } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
@@ -52,7 +55,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
   };
 
   const handleLogout = () => {
-    logout.mutate({}, { onSuccess: () => setLocation('/admin/login') });
+    logout.mutate(undefined, { onSuccess: () => setLocation('/admin/login') });
   };
 
   const NavItem = ({ href, label, icon: Icon }: { href: string; label: string; icon: any }) => {
@@ -118,6 +121,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
               <NavItem href="/admin/orders"          label="Orders"          icon={ShoppingCart} />
               <NavItem href="/admin/custom-projects" label="Custom Projects" icon={PenTool} />
               <NavItem href="/admin/clients"         label="Clients"         icon={Users} />
+              <NavItem href="/admin/crm-projects"    label="CRM Projects"    icon={FolderKanban} />
               <NavItem href="/admin/invoices"        label="Invoices"        icon={FileText} />
             </div>
 
@@ -147,6 +151,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
               <NavItem href="/admin/coupons"         label="Coupons"         icon={Tag} />
               <NavItem href="/admin/shipping-labels" label="Shipping Labels" icon={Truck} />
               <NavItem href="/admin/price-lists"     label="Price Lists"     icon={List} />
+              <NavItem href="/admin/production-usage" label="Production Usage" icon={Factory} />
             </div>
 
             {admin?.role === 'owner' && (
@@ -165,6 +170,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
             <div className="space-y-1 pb-4">
               <p className="px-3 pt-1 pb-1 text-[9px] font-semibold uppercase tracking-widest text-sidebar-foreground/30">System</p>
+              <NavItem href="/admin/website-editor" label="Website Editor" icon={PanelTop} />
               <NavItem href="/admin/settings" label="Settings" icon={Settings} />
             </div>
           </nav>

@@ -15,7 +15,7 @@ export default function TrackOrder() {
     query: {
       enabled: !!searchId,
       retry: false
-    }
+    } as any
   });
 
   const handleSearch = (e: React.FormEvent) => {

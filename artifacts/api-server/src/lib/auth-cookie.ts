@@ -1,8 +1,8 @@
 import crypto from "node:crypto";
 import type { NextFunction, Request, Response } from "express";
 
-const COOKIE_PENDING = "pb_pending";
-const COOKIE_ADMIN   = "pb_admin";
+const COOKIE_PENDING = "hs_pending";
+const COOKIE_ADMIN   = "hs_admin";
 const PENDING_TTL_MS = 10 * 60 * 1000;  // 10 minutes
 const ADMIN_TTL_MS   = 24 * 60 * 60 * 1000; // 24 hours
 

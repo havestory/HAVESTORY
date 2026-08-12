@@ -40,7 +40,7 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-6 text-center relative z-10">
           <span className="section-label text-secondary block mb-4">OUR STORY</span>
           <h1 className="text-5xl lg:text-7xl font-serif font-bold text-white mb-6 leading-tight">
-            Crafting memories <br/><span className="text-secondary italic">since 2019.</span>
+            Crafting memories <br/><span className="text-secondary italic">since {settings?.aboutFoundedYear || '2020'}.</span>
           </h1>
         </div>
       </div>
@@ -49,6 +49,9 @@ export default function About() {
       <div className="max-w-7xl mx-auto px-6 py-24">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div>
+            {settings?.aboutImage && (
+              <img src={settings.aboutImage} alt={`${settings.businessName || 'HAVESTORY'} studio`} className="w-full aspect-[4/3] object-cover mb-8 border border-border" />
+            )}
             <blockquote className="text-3xl lg:text-4xl font-serif italic text-primary leading-relaxed border-l-4 border-secondary pl-8">
               "We believe that every picture holds a story, and every story deserves to be framed beautifully."
             </blockquote>
@@ -78,7 +81,7 @@ export default function About() {
             <span className="section-label mb-4 block">OUR VISION</span>
             <h3 className="font-serif text-2xl font-bold mb-4">A Legacy of Craft</h3>
             <p className="text-muted-foreground leading-relaxed">
-              To be the premier destination for custom framing in Sri Lanka, recognized for uncompromising quality, sustainable practices, and artistic integrity.
+              {settings?.aboutVision || 'To be the premier destination for custom framing in Sri Lanka, recognized for uncompromising quality, sustainable practices, and artistic integrity.'}
             </p>
           </div>
         </div>

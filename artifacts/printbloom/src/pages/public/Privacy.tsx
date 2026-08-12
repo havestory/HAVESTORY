@@ -27,6 +27,9 @@ export default function Privacy() {
       {/* Content */}
       <div className="max-w-3xl mx-auto px-6 py-16">
         <div className="prose prose-stone max-w-none">
+          {settings?.privacyPolicy ? (
+            <div className="whitespace-pre-wrap text-muted-foreground leading-relaxed">{settings.privacyPolicy}</div>
+          ) : <>
           <p className="lead text-muted-foreground text-lg">
             This Privacy Policy explains how <strong>{biz}</strong> collects, uses and protects your personal information when you use our website or services.
           </p>
@@ -86,6 +89,7 @@ export default function Privacy() {
             {email && <p>Email: <a href={`mailto:${email}`} className="text-secondary hover:underline">{email}</a></p>}
             {whatsapp && <p>WhatsApp: <a href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="text-secondary hover:underline">{whatsapp}</a></p>}
           </div>
+          </>}
         </div>
 
         <div className="mt-12 pt-8 border-t border-border flex gap-4">

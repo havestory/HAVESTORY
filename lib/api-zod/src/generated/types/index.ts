@@ -8,7 +8,9 @@
 
 export * from './adminLoginBody';
 export * from './adminLoginResponse';
+export * from './adminLoginResponseRole';
 export * from './adminMeResponse';
+export * from './adminMeResponseRole';
 export * from './category';
 export * from './client';
 export * from './clientInvoiceHistory';

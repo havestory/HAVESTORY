@@ -151,14 +151,14 @@ CREATE TABLE "notices" (
 --> statement-breakpoint
 CREATE TABLE "settings" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"business_name" text DEFAULT 'PrintBloom' NOT NULL,
-	"tagline" text DEFAULT 'Premium Printing & Graphic Design' NOT NULL,
-	"hero_title" text DEFAULT 'Premium Printing for Every Vision' NOT NULL,
-	"hero_subtitle" text DEFAULT 'From business cards to large banners, we bring your vision to life with precision and care.' NOT NULL,
+	"business_name" text DEFAULT 'HAVESTORY' NOT NULL,
+	"tagline" text DEFAULT 'Studio, Colour Lab & Fine Framing' NOT NULL,
+	"hero_title" text DEFAULT 'Capturing Stories. Framing Memories.' NOT NULL,
+	"hero_subtitle" text DEFAULT 'Archival photo prints, studio services and made-to-fit frames crafted with care.' NOT NULL,
 	"whatsapp_number" text DEFAULT '94700000000' NOT NULL,
-	"whatsapp_message" text DEFAULT 'Hi! I''d like to place an order with PrintBloom.' NOT NULL,
-	"about_story" text DEFAULT 'PrintBloom is your trusted printing partner, delivering high-quality prints for all your business and personal needs.' NOT NULL,
-	"about_mission" text DEFAULT 'Our mission is simple: to deliver exceptional prints on time, every time.' NOT NULL,
+	"whatsapp_message" text DEFAULT 'Hi! I''d like to start a photo, print or frame project with HAVESTORY.' NOT NULL,
+	"about_story" text DEFAULT 'HAVESTORY is an independent photography studio, colour lab and framing workshop dedicated to preserving meaningful images.' NOT NULL,
+	"about_mission" text DEFAULT 'Our mission is to turn photographs into beautifully printed and framed stories that last.' NOT NULL,
 	"about_image" text,
 	"orders_completed_count" integer DEFAULT 10 NOT NULL,
 	"happy_clients_percent" integer DEFAULT 99 NOT NULL,
@@ -180,19 +180,19 @@ CREATE TABLE "settings" (
 	"hero_bg_image" text,
 	"hero_cta_text" text DEFAULT 'Start Your Order' NOT NULL,
 	"hero_cta_link" text DEFAULT '/custom-project' NOT NULL,
-	"hero_badge_text" text DEFAULT '🌸 Premium Printing in Sri Lanka' NOT NULL,
-	"hero_highlight_word" text DEFAULT 'Vision' NOT NULL,
+	"hero_badge_text" text DEFAULT 'Premium Photo Studio & Colour Lab' NOT NULL,
+	"hero_highlight_word" text DEFAULT 'Memories' NOT NULL,
 	"about_vision" text,
 	"about_founded_year" text DEFAULT '2020' NOT NULL,
 	"about_team_size" text DEFAULT '10+' NOT NULL,
 	"about_location" text DEFAULT 'Sri Lanka' NOT NULL,
 	"privacy_policy" text,
 	"terms_of_service" text,
-	"seo_title" text DEFAULT 'PrintBloom — Premium Printing & Graphic Design Sri Lanka' NOT NULL,
-	"seo_description" text DEFAULT 'PrintBloom offers premium printing and graphic design services in Sri Lanka. Business cards, banners, labels, and more.' NOT NULL,
-	"seo_keywords" text DEFAULT 'printing sri lanka, graphic design, business cards, banners, labels, printbloom' NOT NULL,
+	"seo_title" text DEFAULT 'HAVESTORY — Photo Studio, Colour Lab & Fine Framing' NOT NULL,
+	"seo_description" text DEFAULT 'HAVESTORY creates archival photo prints, studio portraits, story collages and made-to-fit frames in Sri Lanka.' NOT NULL,
+	"seo_keywords" text DEFAULT 'photo studio sri lanka, colour lab, photo frames, archival prints, studio portraits, havestory' NOT NULL,
 	"seo_og_image" text,
-	"theme_preset" text DEFAULT 'pink-purple' NOT NULL,
+	"theme_preset" text DEFAULT 'havestory-gallery' NOT NULL,
 	"hero_avatar_image1" text,
 	"hero_avatar_image2" text,
 	"hero_avatar_image3" text,
@@ -211,9 +211,9 @@ CREATE TABLE "settings" (
 	"tagline_enabled" integer DEFAULT 1 NOT NULL,
 	"show_name_with_logo" integer DEFAULT 1 NOT NULL,
 	"favicon_url" text,
-	"whatsapp_order_template" text DEFAULT 'Hi {customerName}! 🌸
+	"whatsapp_order_template" text DEFAULT 'Hi {customerName}!
 
-Thank you for choosing *PrintBloom*! Your order has been received and is being processed.
+Thank you for choosing *HAVESTORY*! Your order has been received and is being processed.
 
 Order Number: *{orderNumber}*
 
@@ -223,7 +223,7 @@ Track your order status here:
 If you have any questions, feel free to contact us anytime.
 
 Warm regards,
-*PrintBloom* 🌸' NOT NULL,
+*HAVESTORY*' NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint

@@ -167,7 +167,7 @@ router.get("/:id", async (req, res) => {
 
 router.put("/:id", requireOwner, async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(String(req.params.id), 10);
     if (!Number.isFinite(id)) return res.status(400).json({ error: "Invalid product id" });
     const { categoryId, name, invoiceName, description, price, priceType, imageUrl, galleryImages, artworkGuideUrl, artworkGuideName, featured, active, sortOrder, customConfig } = req.body;
     const updateData: any = {};
@@ -206,7 +206,7 @@ router.put("/:id", requireOwner, async (req, res) => {
 
 router.delete("/:id", requireOwner, async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(String(req.params.id), 10);
     if (!Number.isFinite(id)) return res.status(400).json({ error: "Invalid product id" });
     await db.delete(productsTable).where(eq(productsTable.id, id));
     res.json({ success: true });

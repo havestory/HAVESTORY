@@ -4,7 +4,7 @@ import { settingsTable, noticeTable, noticesTable } from "@workspace/db/schema";
 import { eq, asc } from "drizzle-orm";
 import multer from "multer";
 import { uploadToCloudinary } from "../lib/cloudinary";
-import { requireAdmin } from "../lib/auth-cookie";
+import { getAdminAuth, requireAdmin } from "../lib/auth-cookie";
 import { parseIdParam } from "../lib/parse-id";
 import { sendTestEmail } from "../lib/mailer";
 
@@ -32,7 +32,22 @@ async function getOrCreateNotice() {
 router.get("/", async (req, res) => {
   try {
     const settings = await getOrCreateSettings();
-    res.json(settings);
+    if (getAdminAuth(req)) {
+      return res.json(settings);
+    }
+
+    // This endpoint powers the public website. Never expose operational
+    // credentials or private notification recipients to anonymous visitors.
+    const {
+      gmailUser: _gmailUser,
+      gmailAppPassword: _gmailAppPassword,
+      ipayToken: _ipayToken,
+      ipaySecret: _ipaySecret,
+      orderEmailRecipients: _orderEmailRecipients,
+      financeReportEmailRecipient: _financeReportEmailRecipient,
+      ...publicSettings
+    } = settings;
+    return res.json(publicSettings);
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to fetch settings" });
@@ -61,7 +76,7 @@ router.put("/", requireAdmin, async (req, res) => {
       "invoiceStandardRate","invoiceExpressRate","invoiceWeightFirstKg","invoiceWeightAddKg",
       "faviconUrl",
       "whatsappOrderTemplate",
-      "heroSlideImage1","heroSlideImage2","heroSlideImage3","heroSlideImage4","heroSlideImage5","homeFeatureCards","homeFeatureCards",
+      "heroSlideImage1","heroSlideImage2","heroSlideImage3","heroSlideImage4","heroSlideImage5","homeFeatureCards",
       "paymentQrUrl","paymentButtonUrl","paymentButtonLabel",
       "siteClosedMessage",
       "ipayToken","ipaySecret",
@@ -203,11 +218,13 @@ router.post("/restore", requireAdmin, async (req, res) => {
       "courierCharge","slPostCharge",
       "invoiceStandardRate","invoiceExpressRate","invoiceWeightFirstKg","invoiceWeightAddKg",
       "faviconUrl","taglineEnabled","showNameWithLogo",
-      "heroSlideImage1","heroSlideImage2","heroSlideImage3","heroSlideImage4","heroSlideImage5",
+      "heroSlideImage1","heroSlideImage2","heroSlideImage3","heroSlideImage4","heroSlideImage5","homeFeatureCards",
       "paymentQrUrl","paymentButtonUrl","paymentButtonLabel",
       "siteClosedEnabled","siteClosedMessage",
       "ipayToken","ipaySecret","ipayEnabled","ipaySandbox",
       "payButtonVisible","googlePayEnabled","googlePayNumber","googlePayQrUrl","googlePayInstructions",
+      "orderEmailNotificationsEnabled","orderEmailRecipients","gmailUser","gmailAppPassword",
+      "financeReportEmailEnabled","financeReportEmailRecipient",
     ];
     for (const f of fields) {
       if (incoming[f] !== undefined) updateData[f] = incoming[f];

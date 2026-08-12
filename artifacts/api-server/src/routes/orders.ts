@@ -39,11 +39,11 @@ async function generateOrderId(): Promise<string> {
   const allOrders = await db.select({ orderId: ordersTable.orderId }).from(ordersTable);
 
   // Find the highest sequential number used so far (supports all formats:
-  //   legacy: PB-MON-NNNN, PB-MON-NNNN-XXX
+  //   accepted: BRAND-MON-NNNN and BRAND-MON-NNNN-XXX
   //   current: MON-NNNN-XXX)
   let maxSeq = 0;
   for (const o of allOrders) {
-    const match = o.orderId?.match(/(?:PB-)?[A-Z]+-(\d{4})(?:-[A-Z0-9]+)?$/);
+    const match = o.orderId?.match(/(?:[A-Z]{2}-)?[A-Z]+-(\d{4})(?:-[A-Z0-9]+)?$/);
     if (match) {
       const n = parseInt(match[1], 10);
       if (n > maxSeq) maxSeq = n;
@@ -55,7 +55,7 @@ async function generateOrderId(): Promise<string> {
   const padded = String(nextSeq).padStart(4, "0");
   // Append a 3-char random alphanumeric suffix so customers cannot enumerate
   // adjacent order IDs and access other customers' details
-  return `PB-${month}-${padded}-${randomSuffix()}`;
+  return `HS-${month}-${padded}-${randomSuffix()}`;
 }
 
 function serializeOrder(o: any) {
@@ -147,7 +147,7 @@ async function generateInvoiceNumber(): Promise<string> {
   // invoice number — the DB has a unique constraint on `invoiceNumber`.
   for (let attempt = 0; attempt < 8; attempt++) {
     const suffix = Math.floor(Math.random() * 900 + 100);
-    const candidate = `PB-INV-${yyyyMMdd}-${suffix}`;
+    const candidate = `HS-INV-${yyyyMMdd}-${suffix}`;
     const [existing] = await db
       .select({ id: invoicesTable.id })
       .from(invoicesTable)
@@ -155,7 +155,7 @@ async function generateInvoiceNumber(): Promise<string> {
       .limit(1);
     if (!existing) return candidate;
   }
-  return `PB-INV-${yyyyMMdd}-${Date.now().toString().slice(-6)}`;
+  return `HS-INV-${yyyyMMdd}-${Date.now().toString().slice(-6)}`;
 }
 
 router.post("/", async (req, res) => {
@@ -608,7 +608,7 @@ router.post("/", async (req, res) => {
 // IMPORTANT: named routes must be before /:id
 router.get("/track/:orderId", async (req, res) => {
   try {
-    const { orderId } = req.params;
+    const orderId = String(req.params.orderId);
     const [order] = await db.select().from(ordersTable).where(eq(ordersTable.orderId, orderId));
     if (!order) return res.status(404).json({ error: "Order not found" });
 
@@ -675,7 +675,7 @@ router.get("/track/:orderId", async (req, res) => {
 // Customer uploads design files (no auth)
 router.post("/track/:orderId/design-files", upload.array("files", 10), async (req, res) => {
   try {
-    const { orderId } = req.params;
+    const orderId = String(req.params.orderId);
     const files = req.files as Express.Multer.File[];
     if (!files || files.length === 0) return res.status(400).json({ error: "No files uploaded" });
 
@@ -703,7 +703,7 @@ router.post("/track/:orderId/design-files", upload.array("files", 10), async (re
 // Customer uploads payment proof (no auth)
 router.post("/track/:orderId/payment-proof", upload.single("file"), async (req, res) => {
   try {
-    const { orderId } = req.params;
+    const orderId = String(req.params.orderId);
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
     const [order] = await db.select().from(ordersTable).where(eq(ordersTable.orderId, orderId));
@@ -726,7 +726,7 @@ router.post("/:id/online-files", upload.array("files", 20), async (req, res) => 
   try {
     if (!getAdminAuth(req)) return res.status(401).json({ error: "Unauthorized" });
 
-    const id = req.params.id;
+    const id = String(req.params.id);
     if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
       return res.status(400).json({ error: "No files uploaded" });
     }
@@ -763,7 +763,7 @@ router.delete("/:id/online-files", async (req, res) => {
   try {
     if (!getAdminAuth(req)) return res.status(401).json({ error: "Unauthorized" });
 
-    const id = req.params.id;
+    const id = String(req.params.id);
     const { url } = req.body;
 
     const idNum = parseInt(id);
@@ -790,7 +790,7 @@ router.post("/:id/proof-file", upload.single("file"), async (req, res) => {
   try {
     if (!getAdminAuth(req)) return res.status(401).json({ error: "Unauthorized" });
 
-    const id = req.params.id;
+    const id = String(req.params.id);
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
     const idNum = parseInt(id);
@@ -814,7 +814,7 @@ router.post("/:id/proof-file", upload.single("file"), async (req, res) => {
 
 router.get("/:id", requireAdmin, async (req, res) => {
   try {
-    const id = req.params.id;
+    const id = String(req.params.id);
     const idNum = parseInt(id);
     const [order] = isNaN(idNum)
       ? await db.select().from(ordersTable).where(eq(ordersTable.orderId, id))
@@ -829,7 +829,7 @@ router.get("/:id", requireAdmin, async (req, res) => {
 
 router.put("/:id", requireAdmin, async (req, res) => {
   try {
-    const id = req.params.id;
+    const id = String(req.params.id);
     const idNum = parseInt(id);
     const {
       status, adminNotes, estimatedCompletion,

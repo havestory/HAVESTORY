@@ -349,6 +349,21 @@ export interface SiteSettings {
   googlePayNumber?: string | null;
   googlePayQrUrl?: string | null;
   googlePayInstructions?: string | null;
+  overdueDays?: number;
+  homeFeatureCards?: string | null;
+  siteClosedEnabled?: boolean;
+  siteClosedMessage?: string | null;
+  ipayEnabled?: boolean;
+  ipaySandbox?: boolean;
+  ipayToken?: string | null;
+  ipaySecret?: string | null;
+  payButtonVisible?: boolean;
+  orderEmailNotificationsEnabled?: boolean;
+  orderEmailRecipients?: string | null;
+  gmailUser?: string | null;
+  gmailAppPassword?: string | null;
+  financeReportEmailEnabled?: boolean;
+  financeReportEmailRecipient?: string | null;
   updatedAt: string;
 }
 
@@ -426,6 +441,21 @@ export interface UpdateSettingsBody {
   googlePayNumber?: string | null;
   googlePayQrUrl?: string | null;
   googlePayInstructions?: string | null;
+  overdueDays?: number;
+  homeFeatureCards?: string | null;
+  siteClosedEnabled?: boolean;
+  siteClosedMessage?: string | null;
+  ipayEnabled?: boolean;
+  ipaySandbox?: boolean;
+  ipayToken?: string | null;
+  ipaySecret?: string | null;
+  payButtonVisible?: boolean;
+  orderEmailNotificationsEnabled?: boolean;
+  orderEmailRecipients?: string | null;
+  gmailUser?: string | null;
+  gmailAppPassword?: string | null;
+  financeReportEmailEnabled?: boolean;
+  financeReportEmailRecipient?: string | null;
 }
 
 export interface SiteStats {
@@ -514,14 +544,35 @@ export interface AdminLoginBody {
   password: string;
 }
 
+export type AdminLoginResponseRole = typeof AdminLoginResponseRole[keyof typeof AdminLoginResponseRole];
+
+
+export const AdminLoginResponseRole = {
+  owner: 'owner',
+  staff: 'staff',
+} as const;
+
 export interface AdminLoginResponse {
   success: boolean;
-  message: string;
+  message?: string;
+  requiresPin?: boolean;
+  role?: AdminLoginResponseRole;
 }
+
+export type AdminMeResponseRole = typeof AdminMeResponseRole[keyof typeof AdminMeResponseRole] | null;
+
+
+export const AdminMeResponseRole = {
+  owner: 'owner',
+  staff: 'staff',
+} as const;
 
 export interface AdminMeResponse {
   authenticated: boolean;
   username?: string | null;
+  role?: AdminMeResponseRole;
+  staffId?: number | null;
+  permissions?: string[];
 }
 
 export interface Notice {

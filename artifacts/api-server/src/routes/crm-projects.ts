@@ -16,11 +16,11 @@ async function generateProjectId(): Promise<string> {
   for (let attempt = 0; attempt < 8; attempt++) {
     let suffix = "";
     for (let i = 0; i < 4; i++) suffix += chars[Math.floor(Math.random() * chars.length)];
-    const candidate = `PB-CRM-${suffix}`;
+    const candidate = `HS-CRM-${suffix}`;
     const [existing] = await db.select({ id: crmProjectsTable.id }).from(crmProjectsTable).where(eq(crmProjectsTable.projectId, candidate)).limit(1);
     if (!existing) return candidate;
   }
-  return `PB-CRM-${Date.now().toString(36).toUpperCase().slice(-4)}`;
+  return `HS-CRM-${Date.now().toString(36).toUpperCase().slice(-4)}`;
 }
 
 router.get("/", async (req, res) => {

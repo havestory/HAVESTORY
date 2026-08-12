@@ -25,6 +25,9 @@ export default function Terms() {
 
       <div className="max-w-3xl mx-auto px-6 py-16">
         <div className="prose prose-stone max-w-none">
+          {settings?.termsOfService ? (
+            <div className="whitespace-pre-wrap text-muted-foreground leading-relaxed">{settings.termsOfService}</div>
+          ) : <>
           <p className="lead text-muted-foreground text-lg">
             These Terms of Service govern your use of the <strong>{biz}</strong> website and services. By placing an order or using our services, you agree to these terms.
           </p>
@@ -83,6 +86,7 @@ export default function Terms() {
             <p className="font-semibold text-foreground">{biz}</p>
             {email && <p>Email: <a href={`mailto:${email}`} className="text-secondary hover:underline">{email}</a></p>}
           </div>
+          </>}
         </div>
 
         <div className="mt-12 pt-8 border-t border-border flex gap-4">

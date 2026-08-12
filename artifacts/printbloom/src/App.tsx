@@ -22,6 +22,9 @@ import Contact        from './pages/public/Contact';
 import CustomProject  from './pages/public/CustomProject';
 import Privacy        from './pages/public/Privacy';
 import Terms          from './pages/public/Terms';
+import ClientVerification from './pages/ClientVerification';
+import StaffVerification  from './pages/StaffVerification';
+import ClientAgreement    from './pages/ClientAgreement';
 
 // Admin Pages
 import AdminLogin      from './pages/admin/Login';
@@ -29,15 +32,16 @@ import Dashboard       from './pages/admin/Dashboard';
 import Orders          from './pages/admin/Orders';
 import CustomProjects  from './pages/admin/CustomProjects';
 import Clients         from './pages/admin/Clients';
+import CRMProjects     from './pages/admin/CRMProjects';
 import Invoices        from './pages/admin/Invoices';
 import Products        from './pages/admin/Products';
 import AdminServices   from './pages/admin/Services';
-import AdminPortfolio  from './pages/admin/Portfolio';
 import RawMaterials    from './pages/admin/RawMaterials';
 import Reviews         from './pages/admin/Reviews';
 import Messages        from './pages/admin/Messages';
 import Notices         from './pages/admin/Notices';
 import Settings        from './pages/admin/Settings';
+import WebsiteEditor   from './pages/admin/WebsiteEditor';
 import Finance         from './pages/admin/Finance';
 import Reports         from './pages/admin/Reports';
 import Coupons         from './pages/admin/Coupons';
@@ -46,6 +50,10 @@ import PriceLists      from './pages/admin/PriceLists';
 import Team            from './pages/admin/Team';
 import Attendance      from './pages/admin/Attendance';
 import StaffProfile    from './pages/admin/StaffProfile';
+import ProductionUsage from './pages/admin/ProductionUsage';
+import ClientVerificationReport from './pages/admin/ClientVerificationReport';
+import StaffVerificationReport  from './pages/admin/StaffVerificationReport';
+import ClientAgreementReport    from './pages/admin/ClientAgreementReport';
 
 // Public (unlisted)
 import PriceListView   from './pages/public/PriceListView';
@@ -79,6 +87,9 @@ function PublicRoutes() {
         <Route path="/terms"             component={Terms} />
         <Route path="/price-list/:publicId" component={PriceListView} />
         <Route path="/verify-shipping/:token" component={ShippingVerify} />
+        <Route path="/client-verification/:token" component={ClientVerification} />
+        <Route path="/staff-verification/:token" component={StaffVerification} />
+        <Route path="/client-agreement/:token" component={ClientAgreement} />
         <Route component={NotFound} />
       </Switch>
     </PublicLayout>
@@ -94,14 +105,16 @@ function AdminRoutes() {
           <Route path="/admin/orders"          component={Orders} />
           <Route path="/admin/custom-projects" component={CustomProjects} />
           <Route path="/admin/clients"         component={Clients} />
+          <Route path="/admin/crm-projects"    component={CRMProjects} />
           <Route path="/admin/invoices"        component={Invoices} />
           <Route path="/admin/products"        component={Products} />
           <Route path="/admin/services"        component={AdminServices} />
-          <Route path="/admin/portfolio"       component={AdminPortfolio} />
+          <Route path="/admin/portfolio"       component={WebsiteEditor} />
           <Route path="/admin/raw-materials"   component={RawMaterials} />
           <Route path="/admin/reviews"         component={Reviews} />
           <Route path="/admin/messages"        component={Messages} />
           <Route path="/admin/notices"         component={Notices} />
+          <Route path="/admin/website-editor"  component={WebsiteEditor} />
           <Route path="/admin/settings"        component={Settings} />
           <Route path="/admin/finance"         component={Finance} />
           <Route path="/admin/reports"         component={Reports} />
@@ -111,6 +124,10 @@ function AdminRoutes() {
           <Route path="/admin/team"              component={Team} />
           <Route path="/admin/team/:id/profile"  component={StaffProfile} />
           <Route path="/admin/attendance"        component={Attendance} />
+          <Route path="/admin/production-usage"  component={ProductionUsage} />
+          <Route path="/admin/client-verification/:clientId" component={ClientVerificationReport} />
+          <Route path="/admin/staff-verification/:staffId" component={StaffVerificationReport} />
+          <Route path="/admin/client-agreement/:agreementId" component={ClientAgreementReport} />
           <Route component={NotFound} />
         </Switch>
       </AdminLayout>
