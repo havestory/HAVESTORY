@@ -25,12 +25,21 @@ const PRICE_TYPES = [
 function useCats() {
   const [cats, setCats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const load = () => {
     setLoading(true);
-    fetch("/api/service-categories").then(r => r.json()).then(d => { setCats(d); setLoading(false); }).catch(() => setLoading(false));
+    setError("");
+    fetch("/api/service-categories")
+      .then(async r => {
+        const body = await r.json().catch(() => null);
+        if (!r.ok || !Array.isArray(body)) throw new Error(body?.error || "Could not load service categories");
+        setCats(body);
+      })
+      .catch(err => { setCats([]); setError(err instanceof Error ? err.message : "Could not load service categories"); })
+      .finally(() => setLoading(false));
   };
   useEffect(() => { load(); }, []);
-  return { cats, loading, reload: load };
+  return { cats, loading, error, reload: load };
 }
 
 export default function AdminServices() {
@@ -46,8 +55,9 @@ export default function AdminServices() {
   const [savingCat, setSavingCat] = useState(false);
   const [deletingCatId, setDeletingCatId] = useState<number | null>(null);
 
-  const { data: services } = useListServices();
-  const { cats, reload: reloadCats } = useCats();
+  const { data: services, isError: servicesFailed, refetch: refetchServices } = useListServices();
+  const { cats, error: categoriesError, reload: reloadCats } = useCats();
+  const serviceList = Array.isArray(services) ? services : [];
   const queryClient = useQueryClient();
   const inv = { queryKey: ["/api/services"] };
 
@@ -107,13 +117,13 @@ export default function AdminServices() {
 
   const grouped: Record<string, any[]> = { "Uncategorized": [] };
   cats.forEach(c => { grouped[c.name] = []; });
-  (services ?? []).filter(s => s.active).forEach(s => {
+  serviceList.filter(s => s.active).forEach(s => {
     const categoryId = (s as any).categoryId;
     const catName = categoryId ? (catMap[categoryId] || "Uncategorized") : "Uncategorized";
     if (!grouped[catName]) grouped[catName] = [];
     grouped[catName].push(s);
   });
-  const allGrouped = (services ?? []).reduce((acc: Record<string, any[]>, s) => {
+  const allGrouped = serviceList.reduce((acc: Record<string, any[]>, s) => {
     const categoryId = (s as any).categoryId;
     const catName = categoryId ? (catMap[categoryId] || "Uncategorized") : "Uncategorized";
     if (!acc[catName]) acc[catName] = [];
@@ -162,6 +172,14 @@ export default function AdminServices() {
       </div>
 
       {/* CATEGORIES TAB */}
+      {(servicesFailed || categoriesError) && (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="font-semibold">Services data could not be loaded.</div>
+          <div className="mt-0.5 text-xs">{categoriesError || "The services API returned an error."}</div>
+          <button onClick={() => { void refetchServices(); reloadCats(); }} className="mt-2 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-bold">Try again</button>
+        </div>
+      )}
+
       {tab === "categories" && (
         <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
           {cats.length === 0 ? (
@@ -183,7 +201,7 @@ export default function AdminServices() {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {cats.map(cat => {
-                  const count = (services ?? []).filter(s => (s as any).categoryId === cat.id).length;
+                  const count = serviceList.filter(s => (s as any).categoryId === cat.id).length;
                   return (
                     <tr key={cat.id} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-3 sm:px-5 py-3">
