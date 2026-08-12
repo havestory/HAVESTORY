@@ -5,7 +5,8 @@ import { Check, Layers } from 'lucide-react';
 import { Link } from 'wouter';
 
 export default function Services() {
-  const { data: services, isLoading } = useListServices();
+  const { data: services, isLoading, isError, refetch } = useListServices();
+  const serviceList = Array.isArray(services) ? services : [];
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -26,9 +27,17 @@ export default function Services() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1,2,3].map(i => <div key={i} className="h-96 bg-muted animate-pulse rounded-[0.25rem]"></div>)}
           </div>
+        ) : isError ? (
+          <div className="mx-auto max-w-lg border border-border bg-card p-8 text-center">
+            <h2 className="font-serif text-2xl font-bold">Services are temporarily unavailable</h2>
+            <p className="mt-2 text-sm text-muted-foreground">Please try loading this section again.</p>
+            <Button onClick={() => void refetch()} className="mt-5 rounded-[0.25rem]">Try again</Button>
+          </div>
+        ) : serviceList.length === 0 ? (
+          <div className="py-16 text-center text-muted-foreground">No services are published yet.</div>
         ) : (
           <div className="grid md:grid-cols-2 gap-10">
-            {services?.map(service => (
+            {serviceList.map(service => (
               <Card key={service.id} className="rounded-[0.25rem] border border-border overflow-hidden hover-lift bg-card border-l-4 border-l-secondary">
                 <div className="flex flex-col h-full sm:flex-row">
                   {service.imageUrl && (
@@ -50,7 +59,7 @@ export default function Services() {
                       </div>
                     )}
 
-                    {service.highlights && service.highlights.length > 0 && (
+                    {Array.isArray(service.highlights) && service.highlights.length > 0 && (
                       <ul className="space-y-3 mb-8">
                         {service.highlights.map((h: string, i: number) => (
                           <li key={i} className="flex items-start gap-3 text-sm text-foreground">

@@ -8,6 +8,42 @@ import { pool } from "@workspace/db";
 export async function runStartupMigrations(log: (msg: string) => void = console.log): Promise<void> {
   const client = await pool.connect();
   try {
+    // Isolated from the rest of startup DDL so an unrelated legacy index
+    // cannot roll back the services compatibility repair.
+    await client.query(`
+      -- Keep the services module compatible with databases created before
+      -- service categories and the extended service fields were introduced.
+      CREATE TABLE IF NOT EXISTS service_categories (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE TABLE IF NOT EXISTS services (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        description TEXT NOT NULL DEFAULT '',
+        price TEXT,
+        price_type TEXT NOT NULL DEFAULT 'custom_quote',
+        package_details TEXT,
+        highlights TEXT NOT NULL DEFAULT '[]',
+        image_url TEXT,
+        featured BOOLEAN NOT NULL DEFAULT FALSE,
+        active BOOLEAN NOT NULL DEFAULT TRUE,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        category_id INTEGER,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      ALTER TABLE services
+        ADD COLUMN IF NOT EXISTS package_details TEXT,
+        ADD COLUMN IF NOT EXISTS highlights TEXT NOT NULL DEFAULT '[]',
+        ADD COLUMN IF NOT EXISTS image_url TEXT,
+        ADD COLUMN IF NOT EXISTS featured BOOLEAN NOT NULL DEFAULT FALSE,
+        ADD COLUMN IF NOT EXISTS active BOOLEAN NOT NULL DEFAULT TRUE,
+        ADD COLUMN IF NOT EXISTS sort_order INTEGER NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS category_id INTEGER;
+    `);
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS admin_staff (
         id SERIAL PRIMARY KEY,

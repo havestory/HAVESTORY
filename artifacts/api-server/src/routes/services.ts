@@ -2,19 +2,29 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { servicesTable, serviceCategoriesTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
-import { requireAdmin } from "../lib/auth-cookie";
+import { getAdminAuth, requireAdmin } from "../lib/auth-cookie";
 import { parseIdParam } from "../lib/parse-id";
 
 const router = Router();
 
-function parseHighlights(h: string): string[] {
-  try { return JSON.parse(h); } catch { return []; }
+function parseHighlights(h: unknown): string[] {
+  if (Array.isArray(h)) return h.map(String);
+  if (typeof h !== "string" || !h.trim()) return [];
+  try {
+    const parsed = JSON.parse(h);
+    return Array.isArray(parsed) ? parsed.map(String) : [];
+  } catch {
+    return [];
+  }
 }
 
 router.get("/", async (req, res) => {
   try {
     const { featured } = req.query;
-    const conditions: any[] = [eq(servicesTable.active, true)];
+    const conditions: any[] = [];
+    // Public visitors only receive visible services. Admins must also receive
+    // hidden entries so they can edit or reactivate them.
+    if (!getAdminAuth(req)) conditions.push(eq(servicesTable.active, true));
     if (featured !== undefined) conditions.push(eq(servicesTable.featured, featured === "true"));
     const services = await db.select().from(servicesTable)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
