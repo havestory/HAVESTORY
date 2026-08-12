@@ -154,6 +154,40 @@ export async function runStartupMigrations(log: (msg: string) => void = console.
         ADD COLUMN IF NOT EXISTS invoice_name TEXT;
     `);
     log("[migrations] Schema columns verified/added successfully");
+
+    // Indexes for reports date-range queries.
+    // Partial (WHERE deleted_at IS NULL) keeps index size small and matches
+    // the deleted_at IS NULL filter used in every reports query.
+    // Composite indexes cover both the range predicate and the GROUP BY /
+    // JOIN column used in the clients CTE aggregations.
+    await client.query(`
+      -- Orders: range scans for orders/clients reports
+      CREATE INDEX IF NOT EXISTS idx_orders_created_at_active
+        ON orders(created_at DESC) WHERE deleted_at IS NULL;
+      -- Composite: covers created_at range filter + GROUP BY customer_phone
+      -- (used by range_orders CTE in clients report)
+      CREATE INDEX IF NOT EXISTS idx_orders_date_phone_active
+        ON orders(created_at, customer_phone) WHERE deleted_at IS NULL;
+      -- Supports all_orders CTE (lifetime phone-based aggregation)
+      CREATE INDEX IF NOT EXISTS idx_orders_phone_active
+        ON orders(customer_phone) WHERE deleted_at IS NULL;
+
+      -- Invoices: range scans for invoices/clients reports
+      CREATE INDEX IF NOT EXISTS idx_invoices_created_at_active
+        ON invoices(created_at DESC) WHERE deleted_at IS NULL;
+      -- Composite: covers created_at range filter + GROUP BY client_id
+      -- (used by range_invoices CTE in clients report)
+      CREATE INDEX IF NOT EXISTS idx_invoices_date_client_active
+        ON invoices(created_at, client_id) WHERE deleted_at IS NULL;
+      -- Supports all_invoices CTE (lifetime client-based aggregation)
+      CREATE INDEX IF NOT EXISTS idx_invoices_client_active
+        ON invoices(client_id) WHERE deleted_at IS NULL;
+
+      -- Clients: range scans for clients report
+      CREATE INDEX IF NOT EXISTS idx_clients_created_at_active
+        ON clients(created_at DESC) WHERE deleted_at IS NULL;
+    `);
+    log("[migrations] Report indexes verified/created");
   } catch (e) {
     // Log but don't crash — the app can still serve requests even if migration fails
     console.warn("[migrations] Startup migration warning:", e);

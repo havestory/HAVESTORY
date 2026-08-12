@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import {
-  Truck, Search, Printer, AlertTriangle, Zap, Package2, ChevronDown, User
+  Truck, Search, Printer, AlertTriangle, Zap, Package2, ChevronDown, User, Download
 } from 'lucide-react';
+import html2canvas from 'html2canvas';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -200,6 +201,8 @@ export default function ShippingLabels() {
   const [form, setForm] = useState<LabelForm>(EMPTY_FORM);
   const [lookupPhone, setLookupPhone] = useState('');
   const [qrUrl, setQrUrl] = useState('');
+  const [clientId, setClientId] = useState<number | null>(null);
+  const [detailsSaved, setDetailsSaved] = useState(false);
   const [labelSettings, setLabelSettings] = useState<LabelSettings>({
     senderName: '', senderPhone: '', senderWhatsapp: '', senderAddress: '',
     footerText: 'Thank you for choosing HAVESTORY', defaultSize: 'standard',
@@ -229,8 +232,11 @@ export default function ShippingLabels() {
     onSuccess: (data) => {
       if (!data) {
         toast({ title: 'Not found', description: 'No client found with this phone number.' });
+        setClientId(null);
         return;
       }
+      setClientId(data.clientId);
+      setDetailsSaved(false);
       setForm(f => ({
         ...f,
         recipientName: data.details.recipientName || '',
@@ -245,6 +251,29 @@ export default function ShippingLabels() {
       toast({ title: 'Client found', description: 'Shipping details pre-filled.' });
     },
     onError: () => toast({ title: 'Lookup failed', variant: 'destructive' }),
+  });
+
+  const saveDetailsMut = useMutation({
+    mutationFn: (id: number) =>
+      apiFetch(`/api/shipping-labels/client-details/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipientName: form.recipientName,
+          phone: form.phone,
+          alternatePhone: form.alternatePhone,
+          address: form.address,
+          city: form.city,
+          district: form.district,
+          postalCode: form.postalCode,
+          deliveryNotes: form.deliveryNotes,
+        }),
+      }),
+    onSuccess: () => {
+      setDetailsSaved(true);
+      toast({ title: 'Details saved', description: 'Shipping details saved to client record.' });
+    },
+    onError: (e: any) => toast({ title: 'Save failed', description: e.message, variant: 'destructive' }),
   });
 
   const tokenMut = useMutation({
@@ -263,6 +292,10 @@ export default function ShippingLabels() {
   });
 
   function handlePrint() {
+    // Auto-save details to the client record when a client is linked
+    if (clientId !== null) {
+      saveDetailsMut.mutate(clientId);
+    }
     const labelEl = document.querySelector('.label-print-target');
     if (!labelEl) {
       window.print();
@@ -307,6 +340,34 @@ export default function ShippingLabels() {
     setForm(f => ({ ...EMPTY_FORM, labelSize: f.labelSize }));
     setQrUrl('');
     setLookupPhone('');
+    setClientId(null);
+    setDetailsSaved(false);
+  }
+
+  async function handleDownload() {
+    const labelEl = document.querySelector<HTMLElement>('.label-print-target');
+    if (!labelEl) {
+      toast({ title: 'Nothing to download', variant: 'destructive' });
+      return;
+    }
+    try {
+      const canvas = await html2canvas(labelEl, {
+        useCORS: true,
+        allowTaint: true,
+        scale: 2, // 2× for crisp output on high-dpi screens / WhatsApp
+        backgroundColor: '#ffffff',
+      });
+      const dataUrl = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      const slug = (form.recipientName || 'label').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const date = new Date().toISOString().slice(0, 10);
+      a.download = `label-${slug}-${date}.png`;
+      a.href = dataUrl;
+      a.click();
+      toast({ title: 'Label downloaded', description: `${a.download}` });
+    } catch (err: any) {
+      toast({ title: 'Download failed', description: err?.message ?? 'Unknown error', variant: 'destructive' });
+    }
   }
 
   const inputClass = 'rounded-none border-0 border-b-2 border-border focus-visible:ring-0 focus-visible:border-secondary bg-transparent px-0 text-sm shadow-none h-9';
@@ -322,6 +383,9 @@ export default function ShippingLabels() {
         <div className="flex gap-3">
           <Button variant="outline" onClick={handleClear} className="rounded-none border-border h-9 font-bold uppercase tracking-widest text-xs">
             Clear
+          </Button>
+          <Button variant="outline" onClick={handleDownload} className="rounded-none border-border h-9 font-bold uppercase tracking-widest text-xs gap-2">
+            <Download className="w-4 h-4" /> Download Image
           </Button>
           <Button onClick={handlePrint} className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90 btn-glow uppercase text-xs tracking-widest px-5 h-9 font-semibold gap-2">
             <Printer className="w-4 h-4" /> Print Label
@@ -409,6 +473,32 @@ export default function ShippingLabels() {
                 <Label className={labelClass}>Delivery Notes</Label>
                 <Input value={form.deliveryNotes} onChange={e => setForm(f => ({ ...f, deliveryNotes: e.target.value }))} placeholder="Leave at gate..." className={inputClass} />
               </div>
+
+              {/* Save to client record */}
+              {clientId !== null && (
+                <div className="flex items-center justify-between pt-1">
+                  {detailsSaved ? (
+                    <span className="flex items-center gap-1.5 text-xs text-emerald-500 font-semibold">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                      Details saved to client record
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Client linked — save details to their record</span>
+                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => saveDetailsMut.mutate(clientId)}
+                    disabled={saveDetailsMut.isPending}
+                    className="rounded-none border-border h-8 font-bold uppercase tracking-widest text-xs gap-1.5 shrink-0"
+                  >
+                    {saveDetailsMut.isPending ? 'Saving…' : 'Save Details'}
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 

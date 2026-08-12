@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   FileText, Download, Printer, ShoppingCart,
-  Users, Box, CreditCard, ChevronLeft, ChevronRight
+  Users, Box, CreditCard, ChevronDown
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -99,40 +99,98 @@ export default function Reports() {
   const [from, setFrom] = useState(defaultRange.from);
   const [to, setTo] = useState(defaultRange.to);
   const [statusFilter, setStatusFilter] = useState('all');
-  const [ordersPage, setOrdersPage] = useState(1);
-  const [invoicesPage, setInvoicesPage] = useState(1);
-  const PAGE_LIMIT = 200;
+
+  // Per-tab offsets for load-more pagination
+  const [ordersOffset, setOrdersOffset] = useState(0);
+  const [invoicesOffset, setInvoicesOffset] = useState(0);
+  const [clientsOffset, setClientsOffset] = useState(0);
+
+  // Accumulated rows across pages
+  const [ordersRows, setOrdersRows] = useState<any[]>([]);
+  const [invoicesRows, setInvoicesRows] = useState<any[]>([]);
+  const [clientsRows, setClientsRows] = useState<any[]>([]);
+
+  // Summaries are only returned by the API on the first page (offset=0).
+  // We store them in state so they remain visible while the user loads more rows.
+  const [ordersSummary, setOrdersSummary] = useState<any>(null);
+  const [invoicesSummary, setInvoicesSummary] = useState<any>(null);
+  const [clientsSummary, setClientsSummary] = useState<any>(null);
+
+  // hasMore flags from the latest page response
+  const [ordersHasMore, setOrdersHasMore] = useState(false);
+  const [invoicesHasMore, setInvoicesHasMore] = useState(false);
+  const [clientsHasMore, setClientsHasMore] = useState(false);
 
   const { data: settings } = useGetSettings();
 
+  // Reset pagination when filters change
+  const resetPagination = () => {
+    setOrdersOffset(0);
+    setInvoicesOffset(0);
+    setClientsOffset(0);
+    setOrdersRows([]);
+    setInvoicesRows([]);
+    setClientsRows([]);
+    setOrdersSummary(null);
+    setInvoicesSummary(null);
+    setClientsSummary(null);
+    setOrdersHasMore(false);
+    setInvoicesHasMore(false);
+    setClientsHasMore(false);
+  };
+
   // ── Orders report ──────────────────────────────────────────────────
-  const { data: ordersData, isLoading: ordersLoading } = useQuery({
-    queryKey: ['report-orders', from, to, statusFilter, ordersPage],
-    queryFn: () => {
-      const params = new URLSearchParams({ from, to, page: String(ordersPage), limit: String(PAGE_LIMIT) });
+  const { isLoading: ordersLoading } = useQuery({
+    queryKey: ['report-orders', from, to, statusFilter, ordersOffset],
+    queryFn: async () => {
+      const params = new URLSearchParams({ from, to, offset: String(ordersOffset) });
       if (statusFilter !== 'all') params.set('status', statusFilter);
-      return apiFetch<any>(`/api/reports/orders?${params}`);
+      const data = await apiFetch<any>(`/api/reports/orders?${params}`);
+      if (ordersOffset === 0) {
+        setOrdersRows(data.rows ?? []);
+      } else {
+        setOrdersRows(prev => [...prev, ...(data.rows ?? [])]);
+      }
+      if (data.summary != null) setOrdersSummary(data.summary);
+      setOrdersHasMore(!!data.hasMore);
+      return data;
     },
     enabled: tab === 'orders',
-    keepPreviousData: true,
   });
 
   // ── Invoices report ────────────────────────────────────────────────
-  const { data: invoicesData, isLoading: invoicesLoading } = useQuery({
-    queryKey: ['report-invoices', from, to, statusFilter, invoicesPage],
-    queryFn: () => {
-      const params = new URLSearchParams({ from, to, page: String(invoicesPage), limit: String(PAGE_LIMIT) });
+  const { isLoading: invoicesLoading } = useQuery({
+    queryKey: ['report-invoices', from, to, statusFilter, invoicesOffset],
+    queryFn: async () => {
+      const params = new URLSearchParams({ from, to, offset: String(invoicesOffset) });
       if (statusFilter !== 'all') params.set('status', statusFilter);
-      return apiFetch<any>(`/api/reports/invoices?${params}`);
+      const data = await apiFetch<any>(`/api/reports/invoices?${params}`);
+      if (invoicesOffset === 0) {
+        setInvoicesRows(data.rows ?? []);
+      } else {
+        setInvoicesRows(prev => [...prev, ...(data.rows ?? [])]);
+      }
+      if (data.summary != null) setInvoicesSummary(data.summary);
+      setInvoicesHasMore(!!data.hasMore);
+      return data;
     },
     enabled: tab === 'invoices',
-    keepPreviousData: true,
   });
 
   // ── Clients report ─────────────────────────────────────────────────
-  const { data: clientsData, isLoading: clientsLoading } = useQuery({
-    queryKey: ['report-clients', from, to],
-    queryFn: () => apiFetch<any>(`/api/reports/clients?from=${from}&to=${to}`),
+  const { isLoading: clientsLoading } = useQuery({
+    queryKey: ['report-clients', from, to, clientsOffset],
+    queryFn: async () => {
+      const data = await apiFetch<any>(`/api/reports/clients?from=${from}&to=${to}&offset=${clientsOffset}`);
+      if (clientsOffset === 0) {
+        setClientsRows(data.rows ?? []);
+      } else {
+        setClientsRows(prev => [...prev, ...(data.rows ?? [])]);
+      }
+      if (data.summary != null) setClientsSummary(data.summary);
+      setClientsHasMore(!!data.hasMore);
+      return data;
+    },
     enabled: tab === 'clients',
   });
 
@@ -145,29 +203,29 @@ export default function Reports() {
 
   const isLoading = ordersLoading || invoicesLoading || clientsLoading || inventoryLoading;
 
-  // ── CSV Export ─────────────────────────────────────────────────────
+  // ── CSV Export — uses accumulated rows so all loaded pages are included ──
   const handleExport = () => {
-    if (tab === 'orders' && ordersData?.rows) {
+    if (tab === 'orders' && ordersRows.length) {
       exportCSV(`orders-${from}-${to}.csv`,
         ['Order #', 'Customer', 'Phone', 'Date', 'Type', 'Status', 'Amount (LKR)', 'Advance (LKR)'],
-        ordersData.rows.map((r: any) => [
+        ordersRows.map((r: any) => [
           r.order_id, r.customer_name, r.customer_phone ?? '',
           fmtDate(r.created_at), r.order_type ?? 'order', r.status,
           String(r.amount ?? 0), String(r.advance_paid ?? 0),
         ])
       );
-    } else if (tab === 'invoices' && invoicesData?.rows) {
+    } else if (tab === 'invoices' && invoicesRows.length) {
       exportCSV(`invoices-${from}-${to}.csv`,
         ['Invoice #', 'Client', 'Phone', 'Date', 'Due Date', 'Status', 'Amount (LKR)'],
-        invoicesData.rows.map((r: any) => [
+        invoicesRows.map((r: any) => [
           r.invoice_number, r.client_name, r.client_phone ?? '',
           fmtDate(r.created_at), r.due_date ?? '', r.status, String(r.amount ?? 0),
         ])
       );
-    } else if (tab === 'clients' && clientsData?.rows) {
+    } else if (tab === 'clients' && clientsRows.length) {
       exportCSV(`clients-${from}-${to}.csv`,
         ['Name', 'Phone', 'Email', 'Joined', 'Type', 'Orders', 'Invoices', 'Revenue (LKR)'],
-        clientsData.rows.map((r: any) => [
+        clientsRows.map((r: any) => [
           r.name, r.phone ?? '', r.email ?? '', fmtDate(r.created_at),
           r.client_type, String(r.order_count), String(r.invoice_count), String(r.total_revenue ?? 0),
         ])
@@ -187,88 +245,30 @@ export default function Reports() {
 
   const businessName = settings?.businessName ?? 'HAVESTORY';
 
-  // Reset pages when filters change
-  const handleFromChange = (v: string) => { setFrom(v); setOrdersPage(1); setInvoicesPage(1); };
-  const handleToChange   = (v: string) => { setTo(v);   setOrdersPage(1); setInvoicesPage(1); };
-  const handleStatusChange = (v: string) => { setStatusFilter(v); setOrdersPage(1); setInvoicesPage(1); };
-
-  // ── Pagination controls ────────────────────────────────────────────
-  const PaginationBar = ({
-    page, totalPages, totalCount, pageCount, onPrev, onNext,
-  }: {
-    page: number; totalPages: number; totalCount: number; pageCount: number;
-    onPrev: () => void; onNext: () => void;
-  }) => {
-    if (totalPages <= 1) return null;
-    const start = (page - 1) * PAGE_LIMIT + 1;
-    const end   = start + pageCount - 1;
-    return (
-      <div className="flex items-center justify-between px-4 py-3 border-t border-border text-xs text-muted-foreground">
-        <span>
-          Showing <span className="font-semibold text-foreground">{start}–{end}</span> of{' '}
-          <span className="font-semibold text-foreground">{totalCount.toLocaleString()}</span>
-        </span>
-        <div className="flex items-center gap-1">
-          <button
-            disabled={page <= 1}
-            onClick={onPrev}
-            className="h-7 w-7 flex items-center justify-center border border-border hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            <ChevronLeft className="w-3.5 h-3.5" />
-          </button>
-          <span className="px-2 font-medium text-foreground">{page} / {totalPages}</span>
-          <button
-            disabled={page >= totalPages}
-            onClick={onNext}
-            className="h-7 w-7 flex items-center justify-center border border-border hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
-    );
-  };
-
   // ── Summary stats for current tab ─────────────────────────────────
   const renderSummary = () => {
-    if (tab === 'orders' && ordersData?.summary) {
-      const s = ordersData.summary;
-      const p = ordersData.pagination;
+    if (tab === 'orders' && ordersSummary) {
+      const s = ordersSummary;
       return (
-        <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
-          <span className="text-muted-foreground">
-            <span className="font-semibold text-foreground">{s.count.toLocaleString()}</span> orders total
-          </span>
-          <span className="text-muted-foreground">Revenue: <span className="font-semibold text-foreground">LKR {fmtAmount(s.totalAmount)}</span></span>
+        <div className="flex gap-6 text-sm">
+          <span className="text-muted-foreground"><span className="font-semibold text-foreground">{s.count}</span> orders</span>
+          <span className="text-muted-foreground">Total: <span className="font-semibold text-foreground">LKR {fmtAmount(s.totalAmount)}</span></span>
           <span className="text-muted-foreground">Advance: <span className="font-semibold text-foreground">LKR {fmtAmount(s.totalAdvance)}</span></span>
-          {p && p.totalPages > 1 && (
-            <span className="text-secondary text-[10px] font-semibold uppercase tracking-widest self-center">
-              Page {p.page}/{p.totalPages}
-            </span>
-          )}
         </div>
       );
     }
-    if (tab === 'invoices' && invoicesData?.summary) {
-      const s = invoicesData.summary;
-      const p = invoicesData.pagination;
+    if (tab === 'invoices' && invoicesSummary) {
+      const s = invoicesSummary;
       return (
-        <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
-          <span className="text-muted-foreground">
-            <span className="font-semibold text-foreground">{s.count.toLocaleString()}</span> invoices total
-          </span>
+        <div className="flex gap-6 text-sm">
+          <span className="text-muted-foreground"><span className="font-semibold text-foreground">{s.count}</span> invoices</span>
           <span className="text-muted-foreground">Total: <span className="font-semibold text-foreground">LKR {fmtAmount(s.totalAmount)}</span></span>
           <span className="text-muted-foreground">Paid: <span className="font-semibold text-emerald-600">LKR {fmtAmount(s.totalPaid)}</span> ({s.paidCount})</span>
-          {p && p.totalPages > 1 && (
-            <span className="text-secondary text-[10px] font-semibold uppercase tracking-widest self-center">
-              Page {p.page}/{p.totalPages}
-            </span>
-          )}
         </div>
       );
     }
-    if (tab === 'clients' && clientsData?.summary) {
-      const s = clientsData.summary;
+    if (tab === 'clients' && clientsSummary) {
+      const s = clientsSummary;
       return (
         <div className="flex gap-6 text-sm">
           <span className="text-muted-foreground"><span className="font-semibold text-foreground">{s.totalCount}</span> clients</span>
@@ -324,7 +324,7 @@ export default function Reports() {
           {TABS.map(t => (
             <button
               key={t.id}
-              onClick={() => { setTab(t.id); setStatusFilter('all'); }}
+              onClick={() => { setTab(t.id); setStatusFilter('all'); resetPagination(); }}
               className={`flex items-center gap-2 px-4 py-2.5 text-xs uppercase tracking-widest font-semibold border-b-2 transition-colors ${tab === t.id ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
             >
               <t.icon className="w-3.5 h-3.5" />
@@ -339,16 +339,16 @@ export default function Reports() {
             <div className="flex flex-wrap gap-4 items-end">
               <div>
                 <Label className="text-xs uppercase tracking-widest font-semibold">From</Label>
-                <Input type="date" className="rounded-none mt-1 h-9 w-36" value={from} onChange={e => handleFromChange(e.target.value)} />
+                <Input type="date" className="rounded-none mt-1 h-9 w-36" value={from} onChange={e => { setFrom(e.target.value); resetPagination(); }} />
               </div>
               <div>
                 <Label className="text-xs uppercase tracking-widest font-semibold">To</Label>
-                <Input type="date" className="rounded-none mt-1 h-9 w-36" value={to} onChange={e => handleToChange(e.target.value)} />
+                <Input type="date" className="rounded-none mt-1 h-9 w-36" value={to} onChange={e => { setTo(e.target.value); resetPagination(); }} />
               </div>
               {(tab === 'orders' || tab === 'invoices') && (
                 <div>
                   <Label className="text-xs uppercase tracking-widest font-semibold">Status</Label>
-                  <Select value={statusFilter} onValueChange={handleStatusChange}>
+                  <Select value={statusFilter} onValueChange={v => { setStatusFilter(v); resetPagination(); }}>
                     <SelectTrigger className="rounded-none mt-1 h-9 w-36">
                       <SelectValue placeholder="All" />
                     </SelectTrigger>
@@ -386,46 +386,67 @@ export default function Reports() {
         <Card className="rounded-none border border-border shadow-sm bg-card">
           <CardContent className="p-0">
             {tab === 'orders' && (
-              <>
-                <OrdersTable rows={ordersData?.rows ?? []} isLoading={ordersLoading} />
-                <PaginationBar
-                  page={ordersPage}
-                  totalPages={ordersData?.pagination?.totalPages ?? 1}
-                  totalCount={ordersData?.pagination?.totalCount ?? 0}
-                  pageCount={(ordersData?.rows ?? []).length}
-                  onPrev={() => setOrdersPage(p => Math.max(1, p - 1))}
-                  onNext={() => setOrdersPage(p => p + 1)}
-                />
-              </>
+              <OrdersTable rows={ordersRows} isLoading={ordersLoading} />
             )}
             {tab === 'invoices' && (
-              <>
-                <InvoicesTable rows={invoicesData?.rows ?? []} isLoading={invoicesLoading} />
-                <PaginationBar
-                  page={invoicesPage}
-                  totalPages={invoicesData?.pagination?.totalPages ?? 1}
-                  totalCount={invoicesData?.pagination?.totalCount ?? 0}
-                  pageCount={(invoicesData?.rows ?? []).length}
-                  onPrev={() => setInvoicesPage(p => Math.max(1, p - 1))}
-                  onNext={() => setInvoicesPage(p => p + 1)}
-                />
-              </>
+              <InvoicesTable rows={invoicesRows} isLoading={invoicesLoading} />
             )}
             {tab === 'clients' && (
-              <ClientsTable rows={clientsData?.rows ?? []} isLoading={clientsLoading} />
+              <ClientsTable rows={clientsRows} isLoading={clientsLoading} />
             )}
             {tab === 'inventory' && (
               <InventoryTable rows={inventoryData?.usageRows ?? []} isLoading={inventoryLoading} />
             )}
           </CardContent>
         </Card>
+
+        {/* Load more */}
+        {tab === 'orders' && ordersHasMore && (
+          <div className="flex justify-center pt-2">
+            <Button
+              variant="outline"
+              className="rounded-none h-9 text-xs uppercase tracking-widest font-semibold"
+              onClick={() => setOrdersOffset(ordersRows.length)}
+              disabled={ordersLoading}
+            >
+              <ChevronDown className="w-4 h-4 mr-2" />
+              {ordersLoading ? 'Loading…' : `Load more (showing ${ordersRows.length} of ${ordersSummary?.count ?? '…'})`}
+            </Button>
+          </div>
+        )}
+        {tab === 'invoices' && invoicesHasMore && (
+          <div className="flex justify-center pt-2">
+            <Button
+              variant="outline"
+              className="rounded-none h-9 text-xs uppercase tracking-widest font-semibold"
+              onClick={() => setInvoicesOffset(invoicesRows.length)}
+              disabled={invoicesLoading}
+            >
+              <ChevronDown className="w-4 h-4 mr-2" />
+              {invoicesLoading ? 'Loading…' : `Load more (showing ${invoicesRows.length} of ${invoicesSummary?.count ?? '…'})`}
+            </Button>
+          </div>
+        )}
+        {tab === 'clients' && clientsHasMore && (
+          <div className="flex justify-center pt-2">
+            <Button
+              variant="outline"
+              className="rounded-none h-9 text-xs uppercase tracking-widest font-semibold"
+              onClick={() => setClientsOffset(clientsRows.length)}
+              disabled={clientsLoading}
+            >
+              <ChevronDown className="w-4 h-4 mr-2" />
+              {clientsLoading ? 'Loading…' : `Load more (showing ${clientsRows.length} of ${clientsSummary?.totalCount ?? '…'})`}
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* ── Print table (always rendered, screen: hidden) ─────────────── */}
       <div className="hidden print:block">
-        {tab === 'orders' && <OrdersTable rows={ordersData?.rows ?? []} isLoading={false} />}
-        {tab === 'invoices' && <InvoicesTable rows={invoicesData?.rows ?? []} isLoading={false} />}
-        {tab === 'clients' && <ClientsTable rows={clientsData?.rows ?? []} isLoading={false} />}
+        {tab === 'orders' && <OrdersTable rows={ordersRows} isLoading={false} />}
+        {tab === 'invoices' && <InvoicesTable rows={invoicesRows} isLoading={false} />}
+        {tab === 'clients' && <ClientsTable rows={clientsRows} isLoading={false} />}
         {tab === 'inventory' && <InventoryTable rows={inventoryData?.usageRows ?? []} isLoading={false} />}
         <p className="text-xs text-gray-400 mt-6 text-center">
           Printed {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} · {businessName}
