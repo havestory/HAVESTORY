@@ -1,6 +1,6 @@
-import { type ReactNode, useState, useCallback, lazy, Suspense } from 'react';
+import { type ComponentType, type ReactNode, useState, useCallback, lazy, Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ErrorBoundary } from '@/components/error-boundary';
+import { ErrorBoundary, type ErrorFallbackProps } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
@@ -13,51 +13,75 @@ import { CustomCursor }   from './components/CustomCursor';
 
 // Public Pages
 import Home           from './pages/public/Home';
-const Store = lazy(() => import('./pages/public/Store'));
-const Services = lazy(() => import('./pages/public/Services'));
-const Portfolio = lazy(() => import('./pages/public/Portfolio'));
-const TrackOrder = lazy(() => import('./pages/public/TrackOrder'));
-const About = lazy(() => import('./pages/public/About'));
-const Contact = lazy(() => import('./pages/public/Contact'));
-const CustomProject = lazy(() => import('./pages/public/CustomProject'));
-const Privacy = lazy(() => import('./pages/public/Privacy'));
-const Terms = lazy(() => import('./pages/public/Terms'));
-const ClientVerification = lazy(() => import('./pages/ClientVerification'));
-const StaffVerification = lazy(() => import('./pages/StaffVerification'));
-const ClientAgreement = lazy(() => import('./pages/ClientAgreement'));
+
+// A user can keep the admin open while Vercel replaces a deployment. The old
+// page may then request a hashed lazy chunk that no longer exists. Retry once
+// with the current index instead of dropping the whole app into a blank error
+// screen. Genuine component errors still reach the section error boundary.
+function lazyWithRecovery<T extends { default: ComponentType<any> }>(loader: () => Promise<T>) {
+  return lazy(async () => {
+    const key = `hs-chunk-recovery:${window.location.pathname}`;
+    try {
+      const module = await loader();
+      sessionStorage.removeItem(key);
+      return module;
+    } catch (error) {
+      if (!sessionStorage.getItem(key)) {
+        sessionStorage.setItem(key, String(Date.now()));
+        window.location.reload();
+        return new Promise<T>(() => undefined);
+      }
+      sessionStorage.removeItem(key);
+      throw error;
+    }
+  });
+}
+
+const Store = lazyWithRecovery(() => import('./pages/public/Store'));
+const Services = lazyWithRecovery(() => import('./pages/public/Services'));
+const Portfolio = lazyWithRecovery(() => import('./pages/public/Portfolio'));
+const TrackOrder = lazyWithRecovery(() => import('./pages/public/TrackOrder'));
+const About = lazyWithRecovery(() => import('./pages/public/About'));
+const Contact = lazyWithRecovery(() => import('./pages/public/Contact'));
+const CustomProject = lazyWithRecovery(() => import('./pages/public/CustomProject'));
+const Privacy = lazyWithRecovery(() => import('./pages/public/Privacy'));
+const Terms = lazyWithRecovery(() => import('./pages/public/Terms'));
+const ClientVerification = lazyWithRecovery(() => import('./pages/ClientVerification'));
+const StaffVerification = lazyWithRecovery(() => import('./pages/StaffVerification'));
+const ClientAgreement = lazyWithRecovery(() => import('./pages/ClientAgreement'));
 
 // Admin Pages
-const AdminLogin = lazy(() => import('./pages/admin/Login'));
-const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
-const Orders = lazy(() => import('./pages/admin/Orders'));
-const CustomProjects = lazy(() => import('./pages/admin/CustomProjects'));
-const Clients = lazy(() => import('./pages/admin/Clients'));
-const CRMProjects = lazy(() => import('./pages/admin/CRMProjects'));
-const Invoices = lazy(() => import('./pages/admin/Invoices'));
-const Products = lazy(() => import('./pages/admin/Products'));
-const AdminServices = lazy(() => import('./pages/admin/Services'));
-const RawMaterials = lazy(() => import('./pages/admin/RawMaterials'));
-const Reviews = lazy(() => import('./pages/admin/Reviews'));
-const Messages = lazy(() => import('./pages/admin/Messages'));
-const Notices = lazy(() => import('./pages/admin/Notices'));
-const Settings = lazy(() => import('./pages/admin/Settings'));
-const WebsiteEditor = lazy(() => import('./pages/admin/WebsiteEditor'));
-const Finance = lazy(() => import('./pages/admin/Finance'));
-const Reports = lazy(() => import('./pages/admin/Reports'));
-const Coupons = lazy(() => import('./pages/admin/Coupons'));
-const ShippingLabels = lazy(() => import('./pages/admin/ShippingLabels'));
-const PriceLists = lazy(() => import('./pages/admin/PriceLists'));
-const Team = lazy(() => import('./pages/admin/Team'));
-const Attendance = lazy(() => import('./pages/admin/Attendance'));
-const StaffProfile = lazy(() => import('./pages/admin/StaffProfile'));
-const ProductionUsage = lazy(() => import('./pages/admin/ProductionUsage'));
-const ClientVerificationReport = lazy(() => import('./pages/admin/ClientVerificationReport'));
-const StaffVerificationReport = lazy(() => import('./pages/admin/StaffVerificationReport'));
-const ClientAgreementReport = lazy(() => import('./pages/admin/ClientAgreementReport'));
+const AdminLogin = lazyWithRecovery(() => import('./pages/admin/Login'));
+const Dashboard = lazyWithRecovery(() => import('./pages/admin/Dashboard'));
+const Orders = lazyWithRecovery(() => import('./pages/admin/Orders'));
+const CustomProjects = lazyWithRecovery(() => import('./pages/admin/CustomProjects'));
+const Clients = lazyWithRecovery(() => import('./pages/admin/Clients'));
+const CRMProjects = lazyWithRecovery(() => import('./pages/admin/CRMProjects'));
+const Invoices = lazyWithRecovery(() => import('./pages/admin/Invoices'));
+const Products = lazyWithRecovery(() => import('./pages/admin/Products'));
+const AdminServices = lazyWithRecovery(() => import('./pages/admin/Services'));
+const RawMaterials = lazyWithRecovery(() => import('./pages/admin/RawMaterials'));
+const Reviews = lazyWithRecovery(() => import('./pages/admin/Reviews'));
+const Messages = lazyWithRecovery(() => import('./pages/admin/Messages'));
+const Notices = lazyWithRecovery(() => import('./pages/admin/Notices'));
+const Settings = lazyWithRecovery(() => import('./pages/admin/Settings'));
+const WebsiteEditor = lazyWithRecovery(() => import('./pages/admin/WebsiteEditor'));
+const Finance = lazyWithRecovery(() => import('./pages/admin/Finance'));
+const Reports = lazyWithRecovery(() => import('./pages/admin/Reports'));
+const Coupons = lazyWithRecovery(() => import('./pages/admin/Coupons'));
+const ShippingLabels = lazyWithRecovery(() => import('./pages/admin/ShippingLabels'));
+const PriceLists = lazyWithRecovery(() => import('./pages/admin/PriceLists'));
+const Team = lazyWithRecovery(() => import('./pages/admin/Team'));
+const Attendance = lazyWithRecovery(() => import('./pages/admin/Attendance'));
+const StaffProfile = lazyWithRecovery(() => import('./pages/admin/StaffProfile'));
+const ProductionUsage = lazyWithRecovery(() => import('./pages/admin/ProductionUsage'));
+const ClientVerificationReport = lazyWithRecovery(() => import('./pages/admin/ClientVerificationReport'));
+const StaffVerificationReport = lazyWithRecovery(() => import('./pages/admin/StaffVerificationReport'));
+const ClientAgreementReport = lazyWithRecovery(() => import('./pages/admin/ClientAgreementReport'));
 
 // Public (unlisted)
-const PriceListView = lazy(() => import('./pages/public/PriceListView'));
-const ShippingVerify = lazy(() => import('./pages/public/ShippingVerify'));
+const PriceListView = lazyWithRecovery(() => import('./pages/public/PriceListView'));
+const ShippingVerify = lazyWithRecovery(() => import('./pages/public/ShippingVerify'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -82,6 +106,23 @@ function RouteLoader() {
           {[0, 1, 2].map(i => <div key={i} className="h-24 animate-pulse rounded bg-muted" />)}
         </div>
         <div className="h-48 animate-pulse rounded bg-muted" />
+      </div>
+    </div>
+  );
+}
+
+function AdminRouteFallback({ error, resetError }: ErrorFallbackProps) {
+  return (
+    <div className="flex min-h-[55vh] items-center justify-center px-4">
+      <div className="w-full max-w-lg rounded-2xl border border-red-200 bg-card p-8 text-center shadow-sm">
+        <div className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-red-50 text-lg font-black text-red-600">!</div>
+        <h1 className="mt-4 font-serif text-2xl font-bold text-foreground">This section needs another try</h1>
+        <p className="mt-2 text-sm text-muted-foreground">The admin shell is still running. Retry this section, or return to the dashboard without losing your session.</p>
+        <div className="mt-5 flex flex-wrap justify-center gap-2">
+          <button type="button" onClick={resetError} className="rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground">Try again</button>
+          <a href="/admin" className="rounded-lg border border-border bg-background px-4 py-2.5 text-sm font-bold text-foreground">Dashboard</a>
+        </div>
+        <p className="mt-4 text-[10px] text-muted-foreground">Error reference: {error.name || "SectionError"}</p>
       </div>
     </div>
   );
@@ -124,11 +165,13 @@ function PublicRoutes() {
 }
 
 function AdminRoutes() {
+  const [location] = useLocation();
   return (
     <AuthGuard>
       <AdminLayout>
-        <Suspense fallback={<RouteLoader />}>
-          <Switch>
+        <ErrorBoundary resetKey={location} FallbackComponent={AdminRouteFallback}>
+          <Suspense fallback={<RouteLoader />}>
+            <Switch>
           <Route path="/admin"                 component={Dashboard} />
           <Route path="/admin/orders"          component={Orders} />
           <Route path="/admin/custom-projects" component={CustomProjects} />
@@ -156,9 +199,10 @@ function AdminRoutes() {
           <Route path="/admin/client-verification/:clientId" component={ClientVerificationReport} />
           <Route path="/admin/staff-verification/:staffId" component={StaffVerificationReport} />
           <Route path="/admin/client-agreement/:agreementId" component={ClientAgreementReport} />
-            <Route component={NotFound} />
-          </Switch>
-        </Suspense>
+              <Route component={NotFound} />
+            </Switch>
+          </Suspense>
+        </ErrorBoundary>
       </AdminLayout>
     </AuthGuard>
   );
