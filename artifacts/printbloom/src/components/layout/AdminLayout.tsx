@@ -31,6 +31,9 @@ import {
   FolderKanban,
   Circle,
   PlusCircle,
+  ChevronRight,
+  Command,
+  Clock3,
 } from 'lucide-react';
 import { useAdminLogout, useGetAdminMe } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
@@ -80,13 +83,15 @@ export function AdminLayout({ children }: { children: ReactNode }) {
     const isActive = location === href || (href !== '/admin' && location.startsWith(href));
     return (
       <Link href={href}>
-        <div className={`flex items-center gap-3 px-3 py-2.5 rounded-sm transition-colors cursor-pointer
+          <div className={`group relative flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all cursor-pointer
           ${isActive
-            ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold'
-            : 'text-sidebar-foreground font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'}`}
+            ? 'bg-sidebar-primary/12 text-sidebar-accent-foreground font-bold shadow-[inset_0_0_0_1px_rgba(201,168,76,0.12)]'
+            : 'text-sidebar-foreground font-semibold hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'}`}
         >
-          <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-sidebar-primary' : ''}`} />
-          <span className="text-[14px] font-semibold">{label}</span>
+          {isActive && <span className="absolute -left-3 h-7 w-0.5 rounded-full bg-sidebar-primary" />}
+          <Icon className={`w-[17px] h-[17px] shrink-0 transition-transform group-hover:scale-105 ${isActive ? 'text-sidebar-primary' : 'text-sidebar-foreground/70'}`} />
+          <span className="text-[13px] tracking-[0.01em]">{label}</span>
+          {isActive && <ChevronRight className="ml-auto h-3.5 w-3.5 text-sidebar-primary" />}
         </div>
       </Link>
     );
@@ -96,7 +101,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
     <div
       data-admin-panel=""
       data-admin-theme={theme}
-      className="min-h-screen flex bg-background"
+      className="min-h-screen flex bg-background text-foreground selection:bg-secondary/20"
     >
       {/* Mobile overlay */}
       {sidebarOpen && (
@@ -107,19 +112,19 @@ export function AdminLayout({ children }: { children: ReactNode }) {
       )}
 
       {/* ── Sidebar ─────────────────────────────────────────────── */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col bg-sidebar border-r border-sidebar-border
+      <aside className={`fixed inset-y-0 left-0 z-50 w-72 flex flex-col bg-sidebar border-r border-sidebar-border
         transition-transform duration-300 lg:translate-x-0 lg:static lg:flex
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         {/* Logo header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-sidebar-border shrink-0">
+        <div className="h-[4.75rem] flex items-center justify-between px-5 border-b border-sidebar-border shrink-0 bg-gradient-to-br from-sidebar to-sidebar-accent/40">
           <Link href="/admin" className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-secondary text-secondary-foreground font-serif font-bold flex items-center justify-center text-sm shrink-0">
-              HS
+            <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-secondary-foreground font-serif font-bold text-sm shadow-[0_8px_25px_rgba(201,168,76,0.22)]">
+              HS<span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-sidebar bg-emerald-400" />
             </div>
             <div className="flex flex-col">
-              <span className="text-sidebar-primary font-serif font-semibold text-base leading-tight">HAVESTORY</span>
-              <span className="text-sidebar-foreground/70 font-semibold text-[10px] uppercase tracking-widest leading-tight">Admin Panel</span>
+              <span className="text-sidebar-primary font-serif font-bold text-lg leading-tight tracking-wide">HAVESTORY</span>
+              <span className="text-sidebar-foreground/60 font-bold text-[9px] uppercase tracking-[0.24em] leading-tight">Studio OS</span>
             </div>
           </Link>
           <button className="lg:hidden text-sidebar-foreground/60 hover:text-sidebar-foreground" onClick={() => setSidebarOpen(false)}>
@@ -195,7 +200,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
         </ScrollArea>
 
         {/* Footer — user + controls */}
-        <div className="h-16 border-t border-sidebar-border px-3 flex items-center gap-2 bg-sidebar shrink-0">
+        <div className="border-t border-sidebar-border px-4 py-4 flex items-center gap-2 bg-gradient-to-t from-sidebar to-sidebar-accent/20 shrink-0">
           {/* Avatar + name */}
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <div className="w-8 h-8 rounded-full bg-secondary/20 text-sidebar-primary font-bold text-xs flex items-center justify-center uppercase shrink-0 border border-sidebar-border">
@@ -249,19 +254,23 @@ export function AdminLayout({ children }: { children: ReactNode }) {
         </header>
 
         {/* Desktop workspace bar */}
-        <header className="hidden h-16 shrink-0 items-center justify-between border-b border-border bg-card/95 px-6 backdrop-blur lg:flex">
-          <div>
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground"><span>Admin</span><span>/</span><span className="text-secondary">{currentTitle}</span></div>
-            <div className="mt-0.5 text-sm font-bold text-foreground">{currentTitle}</div>
+        <header className="hidden h-20 shrink-0 items-center justify-between border-b border-border bg-background/80 px-8 backdrop-blur-xl lg:flex">
+          <div className="flex items-center gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-secondary shadow-sm"><Command size={17} /></div>
+            <div>
+              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground"><span>Workspace</span><ChevronRight size={11}/><span className="text-secondary">{currentTitle}</span></div>
+              <div className="mt-1 text-lg font-bold tracking-tight text-foreground">{currentTitle}</div>
+            </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="hidden items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700 xl:flex"><Circle size={7} fill="currentColor" /> System online</div>
-            {canAccess('orders') && <Link href="/admin/orders" className="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-xs font-bold text-primary-foreground shadow-sm hover:opacity-90"><PlusCircle size={15}/> New order</Link>}
-            <button onClick={toggleTheme} className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground hover:text-secondary" title={theme === 'light' ? 'Night mode' : 'Day mode'}>{theme === 'light' ? <Moon size={16}/> : <Sun size={16}/>}</button>
+            <div className="hidden items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground xl:flex"><Clock3 size={13} className="text-secondary" /> {new Intl.DateTimeFormat('en-LK', { weekday: 'short', day: '2-digit', month: 'short' }).format(new Date())}</div>
+            <div className="hidden items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-emerald-700 xl:flex"><Circle size={7} fill="currentColor" /> System online</div>
+            {canAccess('orders') && <Link href="/admin/orders" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground shadow-[0_8px_20px_rgba(15,23,42,0.12)] hover:-translate-y-0.5 hover:opacity-90 transition-all"><PlusCircle size={15}/> New order</Link>}
+            <button onClick={toggleTheme} className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground shadow-sm hover:text-secondary hover:border-secondary/50" title={theme === 'light' ? 'Night mode' : 'Day mode'}>{theme === 'light' ? <Moon size={16}/> : <Sun size={16}/>}</button>
           </div>
         </header>
 
-        <div className="flex-1 overflow-auto p-4 animate-in fade-in slide-in-from-bottom-4 sm:p-6 lg:p-8">
+        <div className="flex-1 overflow-auto bg-[radial-gradient(circle_at_top_right,hsl(var(--secondary)/0.05),transparent_32rem)] p-4 animate-in fade-in slide-in-from-bottom-4 sm:p-6 lg:p-10">
           {children}
         </div>
       </main>

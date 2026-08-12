@@ -142,6 +142,32 @@
 
 /* ─── Admin panel: always use system cursor ─────────────────────────────── */
 [data-admin-panel] *          { cursor: auto    !important; }
+[data-admin-panel] {
+  font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  text-rendering: optimizeLegibility;
+}
+[data-admin-panel] h1,
+[data-admin-panel] h2,
+[data-admin-panel] h3,
+[data-admin-panel] h4,
+[data-admin-panel] button,
+[data-admin-panel] label {
+  font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+}
+[data-admin-panel] h1,
+[data-admin-panel] h2,
+[data-admin-panel] h3 { font-weight: 800; letter-spacing: -0.025em; }
+[data-admin-panel] input,
+[data-admin-panel] textarea,
+[data-admin-panel] select,
+[data-admin-panel] button { transition: box-shadow 180ms ease, border-color 180ms ease, transform 180ms ease, background-color 180ms ease; }
+[data-admin-panel] input:focus,
+[data-admin-panel] textarea:focus,
+[data-admin-panel] select:focus { box-shadow: 0 0 0 3px hsl(var(--secondary) / 0.14); }
+[data-admin-panel] .rounded-2xl.border,
+[data-admin-panel] .rounded-xl.border { box-shadow: 0 12px 30px rgba(15, 23, 42, 0.035); }
 [data-admin-panel] button,
 [data-admin-panel] a,
 [data-admin-panel] [role="button"],

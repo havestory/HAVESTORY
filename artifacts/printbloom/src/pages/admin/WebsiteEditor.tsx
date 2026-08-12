@@ -455,6 +455,11 @@ export default function WebsiteEditor() {
   const [heroSlideImage3, setHeroSlideImage3] = useState("");
   const [heroSlideImage4, setHeroSlideImage4] = useState("");
   const [heroSlideImage5, setHeroSlideImage5] = useState("");
+  const [heroSlideImage6, setHeroSlideImage6] = useState("");
+  const [heroSlideImage7, setHeroSlideImage7] = useState("");
+  const [heroSlideImage8, setHeroSlideImage8] = useState("");
+  const [heroSlideImage9, setHeroSlideImage9] = useState("");
+  const [heroSlideImage10, setHeroSlideImage10] = useState("");
   const [designerCredit, setDesignerCredit] = useState("");
   const [homeFeatureCards, setHomeFeatureCards] = useState(DEFAULT_HOME_FEATURE_CARDS);
 
@@ -572,6 +577,11 @@ export default function WebsiteEditor() {
     setHeroSlideImage3((s as any).heroSlideImage3 || "");
     setHeroSlideImage4((s as any).heroSlideImage4 || "");
     setHeroSlideImage5((s as any).heroSlideImage5 || "");
+    setHeroSlideImage6((s as any).heroSlideImage6 || "");
+    setHeroSlideImage7((s as any).heroSlideImage7 || "");
+    setHeroSlideImage8((s as any).heroSlideImage8 || "");
+    setHeroSlideImage9((s as any).heroSlideImage9 || "");
+    setHeroSlideImage10((s as any).heroSlideImage10 || "");
     setDesignerCredit(s.designerCredit ?? "");
     try {
       const parsed = typeof s.homeFeatureCards === "string" ? JSON.parse(s.homeFeatureCards) : s.homeFeatureCards;
@@ -597,7 +607,7 @@ export default function WebsiteEditor() {
   }, [settings]);
 
   /* ── SAVE HANDLERS ── */
-  const homeFields = { heroBgImage, heroTitle, heroSubtitle, heroBadgeText, heroHighlightWord, heroCtaText, heroCtaLink, heroAvatarImage1, heroAvatarImage2, heroAvatarImage3, heroAvatarImage4, heroSlideImage1, heroSlideImage2, heroSlideImage3, heroSlideImage4, heroSlideImage5, designerCredit, homeFeatureCards: JSON.stringify(homeFeatureCards) };
+  const homeFields = { heroBgImage, heroTitle, heroSubtitle, heroBadgeText, heroHighlightWord, heroCtaText, heroCtaLink, heroAvatarImage1, heroAvatarImage2, heroAvatarImage3, heroAvatarImage4, heroSlideImage1, heroSlideImage2, heroSlideImage3, heroSlideImage4, heroSlideImage5, heroSlideImage6, heroSlideImage7, heroSlideImage8, heroSlideImage9, heroSlideImage10, designerCredit, homeFeatureCards: JSON.stringify(homeFeatureCards) };
   const { save: saveHome, saving: savingHome, saved: savedHome } = useSave(async () => {
     await updateSettings({ data: homeFields });
     broadcastAdminSave();
@@ -784,15 +794,26 @@ export default function WebsiteEditor() {
               <div>
                 <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-1">HERO SLIDESHOW IMAGES</label>
                 <p className="text-[10px] text-gray-400 mb-3">
-                  Up to 5 images shown in the stacked card area on the right side of the homepage. They auto-swipe every 3 seconds.
+                  Add up to 10 images. The homepage pins this story and transitions between each frame as visitors scroll; after the final frame, the page continues naturally into the store sections.
                   Ideal size: <strong>800 × 1000 px</strong> (portrait, 4:5 ratio). Use frame, print, studio or gallery photography for best results.
                 </p>
-                <div className="grid grid-cols-1 gap-3">
-                  <SiteImageUpload label="Slide 1" value={heroSlideImage1} onChange={setHeroSlideImage1} sizeHint="800 × 1000 px recommended (portrait)" hint="First slide — shown by default" />
-                  <SiteImageUpload label="Slide 2" value={heroSlideImage2} onChange={setHeroSlideImage2} sizeHint="800 × 1000 px recommended (portrait)" />
-                  <SiteImageUpload label="Slide 3" value={heroSlideImage3} onChange={setHeroSlideImage3} sizeHint="800 × 1000 px recommended (portrait)" />
-                  <SiteImageUpload label="Slide 4" value={heroSlideImage4} onChange={setHeroSlideImage4} sizeHint="800 × 1000 px recommended (portrait)" />
-                  <SiteImageUpload label="Slide 5" value={heroSlideImage5} onChange={setHeroSlideImage5} sizeHint="800 × 1000 px recommended (portrait)" />
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {[
+                    ["Slide 1", heroSlideImage1, setHeroSlideImage1, "First slide — shown by default"],
+                    ["Slide 2", heroSlideImage2, setHeroSlideImage2, ""],
+                    ["Slide 3", heroSlideImage3, setHeroSlideImage3, ""],
+                    ["Slide 4", heroSlideImage4, setHeroSlideImage4, ""],
+                    ["Slide 5", heroSlideImage5, setHeroSlideImage5, ""],
+                    ["Slide 6", heroSlideImage6, setHeroSlideImage6, ""],
+                    ["Slide 7", heroSlideImage7, setHeroSlideImage7, ""],
+                    ["Slide 8", heroSlideImage8, setHeroSlideImage8, ""],
+                    ["Slide 9", heroSlideImage9, setHeroSlideImage9, ""],
+                    ["Slide 10", heroSlideImage10, setHeroSlideImage10, ""]
+                  ].map(([label, value, onChange, hint]) => (
+                    <div key={label as string} className="rounded-2xl border border-gray-100 bg-gray-50/60 p-3">
+                      <SiteImageUpload label={label as string} value={value as string} onChange={onChange as (url: string) => void} sizeHint="800 × 1000 px portrait" hint={hint as string || undefined} />
+                    </div>
+                  ))}
                 </div>
               </div>
 

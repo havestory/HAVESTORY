@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'wouter';
-import { motion, useInView, AnimatePresence } from 'framer-motion';
+import { motion, useInView, AnimatePresence, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';
+import type { MotionValue } from 'framer-motion';
 import {
   useGetSettings, useListProducts, useListServices,
   useGetNotices, useListPortfolio, useListReviews,
@@ -15,36 +16,16 @@ import {
 
 /* ─────────────────────────── Hero slides ─────────────────────────── */
 const DEFAULT_HERO_SLIDES = [
-  {
-    img: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=format&fit=crop&w=1920&q=85',
-    label: 'Gallery Walls',
-    headline: 'Where\nMemories\nBecome Art',
-    sub: 'Premium photo frames crafted for Sri Lankan homes and studios.',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1920&q=85',
-    label: 'Colour Lab',
-    headline: 'Colour\nPerfected\nPrinted',
-    sub: 'State-of-the-art colour lab with archival-grade print finishes.',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1526779259212-939e64788e3c?auto=format&fit=crop&w=1920&q=85',
-    label: 'Studio Photography',
-    headline: 'Every\nFrame\nTells a Story',
-    sub: 'Professional studio photography for portraits, products and events.',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?auto=format&fit=crop&w=1920&q=85',
-    label: 'Custom Frames',
-    headline: 'Crafted\nWith\nPrecision',
-    sub: 'Bespoke frame sizes, materials and finishes — your vision, our craft.',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1490750967868-88df5691892e?auto=format&fit=crop&w=1920&q=85',
-    label: 'Fine Art Prints',
-    headline: 'Art That\nLasts\nForever',
-    sub: 'Museum-grade prints that preserve your moments for generations.',
-  },
+  { img: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=format&fit=crop&w=1920&q=85', label: 'Gallery Walls', headline: 'Where\nMemories\nBecome Art', sub: 'Premium photo frames crafted for Sri Lankan homes and studios.' },
+  { img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1920&q=85', label: 'Colour Lab', headline: 'Colour\nPerfected\nPrinted', sub: 'State-of-the-art colour lab with archival-grade print finishes.' },
+  { img: 'https://images.unsplash.com/photo-1526779259212-939e64788e3c?auto=format&fit=crop&w=1920&q=85', label: 'Studio Photography', headline: 'Every\nFrame\nTells a Story', sub: 'Professional studio photography for portraits, products and events.' },
+  { img: 'https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?auto=format&fit=crop&w=1920&q=85', label: 'Custom Frames', headline: 'Crafted\nWith\nPrecision', sub: 'Bespoke frame sizes, materials and finishes — your vision, our craft.' },
+  { img: 'https://images.unsplash.com/photo-1490750967868-88df5691892e?auto=format&fit=crop&w=1920&q=85', label: 'Fine Art Prints', headline: 'Art That\nLasts\nForever', sub: 'Museum-grade prints that preserve your moments for generations.' },
+  { img: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1920&q=85', label: 'The Edit', headline: 'Your Story,\nBeautifully\nFramed', sub: 'A considered edit of materials, tones and proportions for your space.' },
+  { img: 'https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1920&q=85', label: 'Print Studio', headline: 'Bring Light\nInto The\nRoom', sub: 'Rich, dimensional prints made to live with you every day.' },
+  { img: 'https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&w=1920&q=85', label: 'Material Stories', headline: 'Made By\nHand, Made\nTo Keep', sub: 'Thoughtful details and honest materials that age with grace.' },
+  { img: 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1920&q=85', label: 'Gallery Finish', headline: 'Make Space\nFor What\nMatters', sub: 'Design-led framing for milestones, people and places worth remembering.' },
+  { img: 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?auto=format&fit=crop&w=1920&q=85', label: 'The Archive', headline: 'Keep The\nMoment\nClose', sub: 'From the first photograph to the final frame, we take care of the story.' },
 ];
 
 /* ─────────────────────────── AnimatedCounter ─────────────────────── */
@@ -70,6 +51,79 @@ function AnimatedCounter({ end, suffix = '', decimals = 0, duration = 1800 }:
   return <span ref={ref}>{count.toFixed(decimals)}{suffix}</span>;
 }
 
+type HeroSlide = { img: string; label: string; headline: string; sub: string };
+
+function ScrollHeroSlide({ slide, index, total, progress }: { slide: HeroSlide; index: number; total: number; progress: MotionValue<number> }) {
+  const start = index / total;
+  const end = (index + 1) / total;
+  const opacity = useTransform(progress, [Math.max(0, start - 0.045), start, Math.min(1, end - 0.045), end], [0, 1, 1, 0]);
+  const scale = useTransform(progress, [start, end], [1.08, 1]);
+  const y = useTransform(progress, [start, end], [index === 0 ? 0 : 42, index === total - 1 ? 0 : -42]);
+
+  return (
+    <motion.div className="absolute inset-0" style={{ opacity, scale, y }} aria-hidden="true">
+      <img src={slide.img} alt="" className="h-full w-full object-cover" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-black/10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/25" />
+    </motion.div>
+  );
+}
+
+function HeroScrollSequence({ slides, settings }: { slides: HeroSlide[]; settings?: any }) {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end end'] });
+  const [activeSlide, setActiveSlide] = useState(0);
+  const progressPercent = useTransform(scrollYProgress, [0, 1], [0, 100]);
+
+  useMotionValueEvent(scrollYProgress, 'change', latest => {
+    const next = Math.min(slides.length - 1, Math.floor(latest * slides.length));
+    setActiveSlide(current => current === next ? current : next);
+  });
+
+  const current = slides[activeSlide] || slides[0];
+  const headline = current.headline.split('\n');
+  const highlight = activeSlide === 0 ? settings?.heroHighlightWord?.trim() : '';
+
+  return (
+    <section ref={sectionRef} className="relative h-[1000svh] bg-[#070604]" aria-label="HAVESTORY story slideshow">
+      <div className="sticky top-0 h-[100svh] min-h-[600px] max-h-[960px] overflow-hidden">
+        {slides.map((item, index) => <ScrollHeroSlide key={`${item.label}-${index}`} slide={item} index={index} total={slides.length} progress={scrollYProgress} />)}
+
+        <div className="absolute inset-0 z-20 mx-auto flex max-w-7xl flex-col justify-center px-8 md:px-20 pointer-events-none">
+          <AnimatePresence mode="wait">
+            <motion.div key={`hero-copy-${activeSlide}`} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}>
+              <div className="mb-7 flex items-center gap-3"><span className="h-px w-14 bg-[#C9A84C]" /><span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#C9A84C]">{current.label}</span></div>
+              <div className="mb-7 overflow-hidden">
+                {headline.map((line, lineIndex) => {
+                  const matchIndex = highlight ? line.toLocaleLowerCase().indexOf(highlight.toLocaleLowerCase()) : -1;
+                  const rendered = matchIndex >= 0
+                    ? <>{line.slice(0, matchIndex)}<span className="text-gradient italic">{line.slice(matchIndex, matchIndex + highlight.length)}</span>{line.slice(matchIndex + highlight.length)}</>
+                    : lineIndex === 0 ? line : <span className="text-gradient italic">{line}</span>;
+                  return <motion.h1 key={`${activeSlide}-${lineIndex}`} initial={{ y: 55, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: lineIndex * 0.07, duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="font-serif text-5xl font-bold leading-[0.92] text-white sm:text-7xl md:text-8xl">{rendered}</motion.h1>;
+                })}
+              </div>
+              <p className="max-w-lg text-base font-medium leading-relaxed text-white/80 md:text-xl">{current.sub}</p>
+              <div className="mt-9 flex items-center gap-4">
+                <Link href={settings?.heroCtaLink || '/store'} className="pointer-events-auto inline-flex items-center gap-3 bg-[#C9A84C] px-7 py-3.5 text-xs font-bold uppercase tracking-[0.18em] text-[#0A0907] btn-glow hover:bg-[#D4B55E]">{settings?.heroCtaText || 'Find Your Frame'} <ArrowRight className="h-4 w-4" /></Link>
+                <span className="hidden text-[10px] font-bold uppercase tracking-[0.2em] text-white/45 sm:inline">Scroll to explore</span>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        <div className="absolute right-6 top-1/2 z-30 hidden -translate-y-1/2 flex-col items-end gap-3 md:flex">
+          {slides.map((item, index) => <div key={item.label} className="flex items-center gap-3"><span className={`text-[9px] font-bold uppercase tracking-[0.2em] transition-colors ${index === activeSlide ? 'text-[#C9A84C]' : 'text-white/35'}`}>{String(index + 1).padStart(2, '0')}</span><span className={`h-px transition-all duration-500 ${index === activeSlide ? 'w-10 bg-[#C9A84C]' : 'w-4 bg-white/25'}`} /></div>)}
+        </div>
+
+        <div className="absolute bottom-8 left-8 right-8 z-30 flex items-end justify-between md:left-20 md:right-20">
+          <div className="flex items-center gap-3 text-white/60"><span className="text-[10px] font-bold uppercase tracking-[0.25em]">Scroll story</span><div className="h-px w-24 overflow-hidden bg-white/20"><motion.div className="h-full origin-left bg-[#C9A84C]" style={{ scaleX: useTransform(progressPercent, [0, 100], [0, 1]) }} /></div></div>
+          <div className="font-serif text-sm text-white/55"><span className="text-[#C9A84C]">{String(activeSlide + 1).padStart(2, '0')}</span> / {String(slides.length).padStart(2, '0')}</div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ─────────────────────────── Main ────────────────────────────────── */
 export default function Home() {
   const { data: settings } = useGetSettings();
@@ -80,19 +134,12 @@ export default function Home() {
   const { data: reviews   } = useListReviews();
 
   const [dismissedNotices, setDismissedNotices] = useState<number[]>([]);
-  const [slide,  setSlide]  = useState(0);
-  const [paused, setPaused] = useState(false);
-  const [loaded, setLoaded] = useState<boolean[]>(DEFAULT_HERO_SLIDES.map(() => false));
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const heroSlideImages = [
-    settings?.heroSlideImage1,
-    settings?.heroSlideImage2,
-    settings?.heroSlideImage3,
-    settings?.heroSlideImage4,
-    settings?.heroSlideImage5,
+    settings?.heroSlideImage1, settings?.heroSlideImage2, settings?.heroSlideImage3, settings?.heroSlideImage4, settings?.heroSlideImage5,
+    (settings as any)?.heroSlideImage6, (settings as any)?.heroSlideImage7, (settings as any)?.heroSlideImage8, (settings as any)?.heroSlideImage9, (settings as any)?.heroSlideImage10,
   ];
-  const heroSlides = DEFAULT_HERO_SLIDES.map((item, index) => ({
+  const heroSlides: HeroSlide[] = DEFAULT_HERO_SLIDES.map((item, index) => ({
     ...item,
     img: heroSlideImages[index] || (index === 0 ? settings?.heroBgImage : null) || item.img,
     label: index === 0 && settings?.heroBadgeText ? settings.heroBadgeText : item.label,
@@ -100,23 +147,17 @@ export default function Home() {
     sub: index === 0 && settings?.heroSubtitle ? settings.heroSubtitle : item.sub,
   }));
 
-  const activeNotices   = notices?.filter(n => n.enabled && !dismissedNotices.includes(n.id)) || [];
-  const featuredProducts = products?.filter(p => p.featured).slice(0, 6) || products?.slice(0, 6) || [];
-  const displayServices  = services?.slice(0, 6) || [];
-  const displayPortfolio = portfolio?.slice(0, 8) || [];
-  const displayReviews   = reviews?.filter(r => r.approved).slice(0, 3) || [];
+  const activeNotices = (Array.isArray(notices) ? notices : []).filter(n => n.enabled && !dismissedNotices.includes(n.id));
+  const productList = Array.isArray(products) ? products : [];
+  const serviceList = Array.isArray(services) ? services : [];
+  const portfolioList = Array.isArray(portfolio) ? portfolio : [];
+  const reviewList = Array.isArray(reviews) ? reviews : [];
+  const featuredProducts = productList.filter(p => p.featured).slice(0, 6);
+  const displayServices  = serviceList.slice(0, 6);
+  const displayPortfolio = portfolioList.slice(0, 8);
+  const displayReviews   = reviewList.filter(r => r.approved).slice(0, 3);
 
   const serviceIcons = [Printer, PenTool, Layout, Package, Layers, ImageIcon];
-
-  const nextSlide = useCallback(() => setSlide(s => (s + 1) % DEFAULT_HERO_SLIDES.length), []);
-  const prevSlide = useCallback(() => setSlide(s => (s - 1 + DEFAULT_HERO_SLIDES.length) % DEFAULT_HERO_SLIDES.length), []);
-
-  // Auto-advance
-  useEffect(() => {
-    if (paused) { if (intervalRef.current) clearInterval(intervalRef.current); return; }
-    intervalRef.current = setInterval(nextSlide, 5500);
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [paused, nextSlide]);
 
   const marqueeItems = [
     '⭐ 5-Star Rated', '🖼 1,200+ Frames', '✅ Sri Lankan Made',
@@ -144,17 +185,7 @@ export default function Home() {
     featureCards = defaultFeatureCards;
   }
 
-  /* ── Slide helpers ── */
-  const currentSlide = heroSlides[slide];
-  const headlineLines = currentSlide.headline.split('\n');
-  const renderHeadlineLine = (line: string, lineIndex: number) => {
-    const highlight = slide === 0 ? settings?.heroHighlightWord?.trim() : '';
-    const matchIndex = highlight ? line.toLocaleLowerCase().indexOf(highlight.toLocaleLowerCase()) : -1;
-    if (highlight && matchIndex >= 0) {
-      return <>{line.slice(0, matchIndex)}<span className="text-gradient italic">{line.slice(matchIndex, matchIndex + highlight.length)}</span>{line.slice(matchIndex + highlight.length)}</>;
-    }
-    return lineIndex === 0 ? line : <span className="text-gradient italic">{line}</span>;
-  };
+
 
   return (
     <div className="bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
@@ -175,142 +206,8 @@ export default function Home() {
         ))}
       </AnimatePresence>
 
-      {/* ══════════════════════════════════════════ HERO SLIDER */}
-      <section
-        className="relative h-[100svh] min-h-[600px] max-h-[960px] overflow-hidden"
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
-      >
-        {/* Slides */}
-        <AnimatePresence mode="sync">
-          <motion.div
-            key={slide}
-            className="absolute inset-0"
-            initial={{ opacity: 0, scale: 1.04 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <img
-              src={currentSlide.img}
-              alt={currentSlide.label}
-              className="w-full h-full object-cover"
-              onLoad={() => setLoaded(l => { const n = [...l]; n[slide] = true; return n; })}
-            />
-            {/* Dark vignette */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/20" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Slide label */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`label-${slide}`}
-            initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            className="absolute top-10 right-10 bg-[#C9A84C]/15 border border-[#C9A84C]/30 backdrop-blur-sm px-4 py-2 z-20"
-          >
-            <span className="text-[#C9A84C] text-[10px] font-bold uppercase tracking-[0.22em]">{currentSlide.label}</span>
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Hero copy */}
-        <div className="absolute inset-0 z-20 flex flex-col justify-center px-8 md:px-20 max-w-7xl mx-auto left-0 right-0">
-          {/* Gold accent bar */}
-          <motion.div
-            initial={{ scaleX: 0 }} animate={{ scaleX: 1 }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-            className="w-16 h-[2px] bg-gradient-to-r from-[#C9A84C] to-[#C9A84C]/30 origin-left mb-8"
-          />
-
-          <div className="overflow-hidden mb-6">
-            <AnimatePresence mode="wait">
-              <motion.div key={`headline-${slide}`}>
-                {headlineLines.map((line, i) => (
-                  <motion.h1
-                    key={i}
-                    initial={{ y: 60, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: -40, opacity: 0 }}
-                    transition={{ duration: 0.75, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                    className="font-serif text-white leading-none font-bold"
-                    style={{ fontSize: 'clamp(3.2rem, 9vw, 7.5rem)' }}
-                  >
-                    {renderHeadlineLine(line, i)}
-                  </motion.h1>
-                ))}
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          <AnimatePresence mode="wait">
-            <motion.p
-              key={`sub-${slide}`}
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.65, delay: 0.3 }}
-              className="text-white/85 font-medium text-lg md:text-xl max-w-lg leading-relaxed mb-10"
-            >
-              {currentSlide.sub}
-            </motion.p>
-          </AnimatePresence>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, delay: 0.45 }}
-            className="flex flex-wrap items-center gap-4"
-          >
-            <Link href={settings?.heroCtaLink || '/store'} className="inline-flex items-center gap-3 bg-[#C9A84C] text-[#0A0907] font-bold text-sm uppercase tracking-widest px-8 py-4 btn-glow hover:bg-[#D4B55E] transition-colors">
-              {settings?.heroCtaText || 'Shop Frames'} <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link href="/custom-project" className="inline-flex items-center gap-3 border border-white/30 text-white text-sm uppercase tracking-widest px-8 py-4 hover:border-[#C9A84C] hover:text-[#C9A84C] transition-colors backdrop-blur-sm">
-              Custom Order
-            </Link>
-          </motion.div>
-        </div>
-
-        {/* Prev / Next arrows */}
-        <button
-          onClick={prevSlide}
-          className="absolute left-5 top-1/2 -translate-y-1/2 z-30 w-11 h-11 border border-white/20 bg-black/30 backdrop-blur-sm text-white hover:border-[#C9A84C] hover:text-[#C9A84C] transition-all flex items-center justify-center"
-          aria-label="Previous slide"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-        <button
-          onClick={nextSlide}
-          className="absolute right-5 top-1/2 -translate-y-1/2 z-30 w-11 h-11 border border-white/20 bg-black/30 backdrop-blur-sm text-white hover:border-[#C9A84C] hover:text-[#C9A84C] transition-all flex items-center justify-center"
-          aria-label="Next slide"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
-
-        {/* Dots + pause */}
-        <div className="absolute bottom-8 left-0 right-0 z-30 flex items-center justify-center gap-4">
-          <div className="flex items-center gap-2">
-            {heroSlides.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setSlide(i)}
-                className={`transition-all duration-500 ${i === slide ? 'w-8 h-[2px] bg-[#C9A84C]' : 'w-2 h-[2px] bg-white/30 hover:bg-white/60'}`}
-                aria-label={`Slide ${i + 1}`}
-              />
-            ))}
-          </div>
-          <button
-            onClick={() => setPaused(p => !p)}
-            className="w-7 h-7 border border-white/20 flex items-center justify-center text-white/50 hover:text-[#C9A84C] hover:border-[#C9A84C]/40 transition-colors"
-            aria-label={paused ? 'Play' : 'Pause'}
-          >
-            {paused ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}
-          </button>
-        </div>
-
-        {/* Slide counter */}
-        <div className="absolute bottom-8 right-10 z-30 font-serif text-white/40 text-sm">
-          <span className="text-[#C9A84C]">0{slide + 1}</span> / 0{heroSlides.length}
-        </div>
-      </section>
+      {/* ══════════════════════════════════════════ SCROLL STORY HERO */}
+      <HeroScrollSequence slides={heroSlides} settings={settings} />
 
       {/* ══════════════════════════════════════════ MARQUEE TICKER */}
       <div className="bg-[#C9A84C] py-3 overflow-hidden select-none border-y border-[#D4B55E]/30">

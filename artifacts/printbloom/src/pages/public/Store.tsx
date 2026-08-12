@@ -7,7 +7,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingCart, Plus, Minus, Trash2, Search, CheckCircle2, ArrowRight, Tag, X } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Trash2, Search, CheckCircle2, ArrowRight, Tag, X, Sparkles, ShieldCheck, Clock3, Ruler, Heart, Star, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'wouter';
 
@@ -47,7 +47,9 @@ export default function Store() {
   const [couponResult, setCouponResult] = useState<CouponResult | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
 
-  const filteredProducts = products?.filter(p => {
+  const productList = Array.isArray(products) ? products : [];
+  const categoryList = Array.isArray(categories) ? categories : [];
+  const filteredProducts = productList.filter(p => {
     const matchesCategory = activeCategory === 'all' || p.categoryId?.toString() === activeCategory;
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -181,20 +183,24 @@ export default function Store() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Page Header */}
-      <div className="bg-primary py-24 text-center noise relative overflow-hidden">
-        <div className="relative z-10 max-w-4xl mx-auto px-6">
-          <span className="section-label text-secondary block mb-4">OUR COLLECTION</span>
-          <h1 className="text-4xl lg:text-5xl font-serif font-bold text-white mb-6">
-            <span className="heading-underline">Browse Frames</span>
-          </h1>
-          <p className="text-primary-foreground/70 max-w-xl mx-auto font-light text-lg">
-            Find the perfect frame or print product. Add items to your inquiry cart to request a customized quote.
-          </p>
+      {/* Premium collection hero */}
+      <div className="relative overflow-hidden bg-primary noise">
+        <div className="absolute -right-24 -top-32 h-96 w-96 rounded-full bg-secondary/15 blur-3xl" />
+        <div className="relative z-10 mx-auto grid max-w-7xl gap-10 px-6 py-20 lg:grid-cols-[1fr_auto] lg:items-end lg:px-10 lg:py-24">
+          <div>
+            <div className="mb-6 flex items-center gap-3"><span className="h-px w-10 bg-secondary" /><span className="section-label text-secondary">THE HAVESTORY EDIT</span></div>
+            <h1 className="max-w-3xl text-5xl font-serif font-bold leading-[0.95] text-white sm:text-6xl lg:text-8xl">Objects made<br /><span className="text-gradient italic">to hold meaning.</span></h1>
+            <p className="mt-7 max-w-xl text-base leading-relaxed text-primary-foreground/70 sm:text-lg">Choose a frame, build a collection, and let our studio turn your favourite moments into something you will want to keep close.</p>
+            <div className="mt-9 flex flex-wrap gap-3"><span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-white/75"><Sparkles size={13} className="text-secondary" /> Made to order</span><span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-white/75"><ShieldCheck size={13} className="text-secondary" /> Studio quality</span></div>
+          </div>
+          <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 text-white/80 sm:grid-cols-4 lg:grid-cols-2">
+            {[['48h', 'express options', Clock3], ['1:1', 'design guidance', Ruler], ['5.0', 'client rating', Star], ['Island-wide', 'delivery', Heart]].map(([value, label, Icon]) => <div key={label as string} className="min-w-[125px] bg-black/20 p-4 backdrop-blur">{(() => { const StatIcon = Icon as typeof ShieldCheck; return <StatIcon size={15} className="mb-5 text-secondary" />; })()}<div className="text-lg font-bold text-white">{value as string}</div><div className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-white/45">{label as string}</div></div>)}
+          </div>
         </div>
       </div>
+      <div className="border-b border-border bg-card/60"><div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-border px-6 sm:grid-cols-4 lg:px-10"><div className="flex items-center gap-3 px-3 py-4 text-xs font-semibold text-muted-foreground"><ShieldCheck size={16} className="text-secondary" /> Secure packaging</div><div className="flex items-center gap-3 px-3 py-4 text-xs font-semibold text-muted-foreground"><Ruler size={16} className="text-secondary" /> Custom sizing</div><div className="hidden items-center gap-3 px-3 py-4 text-xs font-semibold text-muted-foreground sm:flex"><MessageCircle size={16} className="text-secondary" /> Friendly guidance</div><div className="hidden items-center gap-3 px-3 py-4 text-xs font-semibold text-muted-foreground sm:flex"><Heart size={16} className="text-secondary" /> Made with care</div></div></div>
 
-      <div className="max-w-7xl mx-auto px-6 py-16 flex flex-col lg:flex-row gap-12 w-full flex-1">
+      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-12 px-6 py-16 lg:flex-row lg:px-10">
         {/* Categories Sidebar */}
         <aside className="lg:w-64 shrink-0">
           <div className="sticky top-28">
@@ -207,7 +213,7 @@ export default function Store() {
               >
                 All Products
               </button>
-              {categories?.map(cat => (
+              {categoryList.map(cat => (
                 <button 
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id.toString())}
@@ -225,7 +231,7 @@ export default function Store() {
               >
                 All Products
               </button>
-              {categories?.map(cat => (
+              {categoryList.map(cat => (
                 <button 
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id.toString())}
@@ -384,7 +390,7 @@ export default function Store() {
                       
                       <button 
                         onClick={(e) => { e.preventDefault(); addToCart(product); }}
-                        className="absolute inset-x-0 bottom-0 bg-secondary/95 py-3 px-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out text-secondary-foreground text-sm font-bold flex items-center justify-between z-20 cursor-pointer w-full text-left border-none"
+                        className="absolute inset-x-0 bottom-0 z-20 flex w-full cursor-pointer items-center justify-between border-none bg-secondary/95 px-4 py-3 text-left text-sm font-bold text-secondary-foreground transition-transform duration-300 ease-out md:translate-y-full md:group-hover:translate-y-0"
                       >
                         <span>Add to Inquiry</span>
                         <Plus className="w-4 h-4" />
@@ -405,6 +411,15 @@ export default function Store() {
           )}
         </main>
       </div>
+
+      {cart.length > 0 && (
+        <div className="fixed inset-x-4 bottom-5 z-40 mx-auto max-w-2xl animate-in slide-in-from-bottom-4 sm:inset-x-auto">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-secondary/30 bg-primary/95 px-4 py-3 text-primary-foreground shadow-[0_18px_60px_rgba(0,0,0,0.28)] backdrop-blur-xl sm:px-5">
+            <div className="flex min-w-0 items-center gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground"><ShoppingCart size={17} /></div><div className="min-w-0"><div className="truncate text-sm font-bold">{cart.reduce((a, b) => a + b.quantity, 0)} {cart.reduce((a, b) => a + b.quantity, 0) === 1 ? 'piece' : 'pieces'} selected</div><div className="text-[10px] uppercase tracking-[0.16em] text-primary-foreground/55">Estimated Rs. {cartTotal.toLocaleString('en-IN')}</div></div></div>
+            <Button onClick={() => setIsCheckoutOpen(true)} className="shrink-0 rounded-xl bg-secondary px-4 text-xs font-bold uppercase tracking-wider text-secondary-foreground hover:bg-secondary/90">Start order <ArrowRight size={14} /></Button>
+          </div>
+        </div>
+      )}
 
       {/* Checkout Dialog */}
       <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>

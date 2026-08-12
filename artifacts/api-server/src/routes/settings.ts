@@ -16,7 +16,14 @@ let settingsCompatibilityReady: Promise<void> | null = null;
 
 function ensureSettingsCompatibility(): Promise<void> {
   if (!settingsCompatibilityReady) {
-    settingsCompatibilityReady = pool.query("ALTER TABLE settings ADD COLUMN IF NOT EXISTS home_feature_cards TEXT NOT NULL DEFAULT '[]'")
+    settingsCompatibilityReady = pool.query(`
+      ALTER TABLE settings ADD COLUMN IF NOT EXISTS home_feature_cards TEXT NOT NULL DEFAULT '[]';
+      ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image6 TEXT;
+      ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image7 TEXT;
+      ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image8 TEXT;
+      ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image9 TEXT;
+      ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image10 TEXT;
+    `)
       .then(() => undefined)
       .catch(error => {
         settingsCompatibilityReady = null;
@@ -90,7 +97,7 @@ router.put("/", requireAdmin, async (req, res) => {
       "invoiceStandardRate","invoiceExpressRate","invoiceWeightFirstKg","invoiceWeightAddKg",
       "faviconUrl",
       "whatsappOrderTemplate",
-      "heroSlideImage1","heroSlideImage2","heroSlideImage3","heroSlideImage4","heroSlideImage5","homeFeatureCards",
+      "heroSlideImage1","heroSlideImage2","heroSlideImage3","heroSlideImage4","heroSlideImage5","heroSlideImage6","heroSlideImage7","heroSlideImage8","heroSlideImage9","heroSlideImage10","homeFeatureCards",
       "paymentQrUrl","paymentButtonUrl","paymentButtonLabel",
       "siteClosedMessage",
       "ipayToken","ipaySecret",
@@ -232,7 +239,7 @@ router.post("/restore", requireAdmin, async (req, res) => {
       "courierCharge","slPostCharge",
       "invoiceStandardRate","invoiceExpressRate","invoiceWeightFirstKg","invoiceWeightAddKg",
       "faviconUrl","taglineEnabled","showNameWithLogo",
-      "heroSlideImage1","heroSlideImage2","heroSlideImage3","heroSlideImage4","heroSlideImage5","homeFeatureCards",
+      "heroSlideImage1","heroSlideImage2","heroSlideImage3","heroSlideImage4","heroSlideImage5","heroSlideImage6","heroSlideImage7","heroSlideImage8","heroSlideImage9","heroSlideImage10","homeFeatureCards",
       "paymentQrUrl","paymentButtonUrl","paymentButtonLabel",
       "siteClosedEnabled","siteClosedMessage",
       "ipayToken","ipaySecret","ipayEnabled","ipaySandbox",
