@@ -43,6 +43,9 @@ import Reports         from './pages/admin/Reports';
 import Coupons         from './pages/admin/Coupons';
 import ShippingLabels  from './pages/admin/ShippingLabels';
 import PriceLists      from './pages/admin/PriceLists';
+import Team            from './pages/admin/Team';
+import Attendance      from './pages/admin/Attendance';
+import StaffProfile    from './pages/admin/StaffProfile';
 
 // Public (unlisted)
 import PriceListView   from './pages/public/PriceListView';
@@ -96,9 +99,12 @@ function AdminRoutes() {
           <Route path="/admin/settings"        component={Settings} />
           <Route path="/admin/finance"         component={Finance} />
           <Route path="/admin/reports"         component={Reports} />
-          <Route path="/admin/coupons"         component={Coupons} />
-          <Route path="/admin/shipping-labels" component={ShippingLabels} />
-          <Route path="/admin/price-lists"     component={PriceLists} />
+          <Route path="/admin/coupons"             component={Coupons} />
+          <Route path="/admin/shipping-labels"   component={ShippingLabels} />
+          <Route path="/admin/price-lists"       component={PriceLists} />
+          <Route path="/admin/team"              component={Team} />
+          <Route path="/admin/team/:id/profile"  component={StaffProfile} />
+          <Route path="/admin/attendance"        component={Attendance} />
           <Route component={NotFound} />
         </Switch>
       </AdminLayout>

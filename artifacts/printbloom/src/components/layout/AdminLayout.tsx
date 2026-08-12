@@ -21,7 +21,9 @@ import {
   BarChart2,
   Tag,
   Truck,
-  List
+  List,
+  UserCog,
+  CalendarCheck
 } from 'lucide-react';
 import { useAdminLogout, useGetAdminMe } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
@@ -119,6 +121,20 @@ export function AdminLayout({ children }: { children: ReactNode }) {
               <NavItem href="/admin/shipping-labels" label="Shipping Labels" icon={Truck} />
               <NavItem href="/admin/price-lists"     label="Price Lists"     icon={List} />
             </div>
+
+            {admin?.role === 'owner' && (
+              <div className="space-y-1">
+                <div className="section-label text-sidebar-foreground/30 px-3 pt-2 pb-1 text-[9px]">TEAM</div>
+                <NavItem href="/admin/team"       label="Team Access" icon={UserCog} />
+                <NavItem href="/admin/attendance" label="Attendance"  icon={CalendarCheck} />
+              </div>
+            )}
+            {admin?.role === 'staff' && (
+              <div className="space-y-1">
+                <div className="section-label text-sidebar-foreground/30 px-3 pt-2 pb-1 text-[9px]">TEAM</div>
+                <NavItem href="/admin/attendance" label="Attendance" icon={CalendarCheck} />
+              </div>
+            )}
 
             <div className="space-y-1 pb-4">
               <div className="section-label text-sidebar-foreground/30 px-3 pt-2 pb-1 text-[9px]">SYSTEM</div>

@@ -325,6 +325,15 @@ router.patch("/team/:id", requireOwner, async (req: Request, res: Response) => {
   }
 });
 
+router.delete("/team/:id", requireOwner, async (req: Request, res: Response) => {
+  await ensureTeamTables();
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: "Invalid staff ID" });
+  const result = await pool.query("DELETE FROM admin_staff WHERE id=$1 RETURNING id", [id]);
+  if (!result.rowCount) return res.status(404).json({ error: "Staff account not found" });
+  res.json({ success: true });
+});
+
 router.post("/team/:id/reset-password", requireOwner, async (req: Request, res: Response) => {
   await ensureTeamTables();
   const id = Number(req.params.id);
