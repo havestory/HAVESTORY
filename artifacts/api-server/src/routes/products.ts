@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { productsTable, categoriesTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
-import { requireAdmin, requireOwner } from "../lib/auth-cookie";
+import { getAdminAuth, requireAdmin, requireOwner } from "../lib/auth-cookie";
 import { parseIdParam } from "../lib/parse-id";
 
 const router = Router();
@@ -55,6 +55,10 @@ router.get("/", async (req, res) => {
   try {
     const { categoryId, featured } = req.query;
     const conditions: any[] = [];
+    // Public visitors should only see products that are explicitly published.
+    // Authenticated admins still receive inactive products so they can edit or
+    // reactivate them from the catalog manager.
+    if (!getAdminAuth(req)) conditions.push(eq(productsTable.active, true));
     if (categoryId) conditions.push(eq(productsTable.categoryId, parseInt(categoryId as string)));
     if (featured !== undefined) conditions.push(eq(productsTable.featured, featured === "true"));
 
