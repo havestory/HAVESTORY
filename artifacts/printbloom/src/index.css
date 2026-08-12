@@ -132,8 +132,13 @@
 /* ─── Base ─────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
-/* Hide default cursor sitewide — custom cursor takes over */
-* { cursor: none !important; }
+/* Hide the native cursor only where the public custom cursor is mounted. */
+[data-public-site],
+[data-public-site] *,
+[data-public-site] *::before,
+[data-public-site] *::after {
+  cursor: none !important;
+}
 
 /* ─── Admin panel: always use system cursor ─────────────────────────────── */
 [data-admin-panel] *          { cursor: auto    !important; }
