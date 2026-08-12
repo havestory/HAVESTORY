@@ -48,6 +48,7 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+
 // ─── types ──────────────────────────────────────────────────────────────────
 
 interface RevenueBreakdown {
@@ -165,6 +166,7 @@ export default function Finance() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['finance-summary', month] });
       qc.invalidateQueries({ queryKey: ['finance-transactions', month] });
+      qc.invalidateQueries({ queryKey: ['finance-breakdown', month] });
       toast({ title: 'Entry added' });
       setShowAdd(false);
       setForm({ type: 'income', category: 'sales', description: '', amount: '', transactionDate: new Date().toISOString().slice(0, 10) });
@@ -177,6 +179,7 @@ export default function Finance() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['finance-summary', month] });
       qc.invalidateQueries({ queryKey: ['finance-transactions', month] });
+      qc.invalidateQueries({ queryKey: ['finance-breakdown', month] });
       toast({ title: 'Entry deleted' });
     },
     onError: (e: any) => toast({ title: 'Error', description: e.message, variant: 'destructive' }),

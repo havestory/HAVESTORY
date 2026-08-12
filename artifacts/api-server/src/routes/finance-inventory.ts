@@ -463,6 +463,7 @@ router.delete("/cost-values/:id", async (req, res) => {
 /* ── Revenue breakdown ───────────────────────────────────────────── */
 router.get("/revenue-breakdown", async (req, res) => {
   try {
+    await ensureStorage();
     const month = /^\d{4}-(0[1-9]|1[0-2])$/.test(String(req.query.month ?? ""))
       ? String(req.query.month)
       : new Date().toISOString().slice(0, 7);
@@ -483,25 +484,48 @@ router.get("/revenue-breakdown", async (req, res) => {
          ORDER BY total DESC
       `, [monthStart]),
 
-      // Top products from orders (parse items JSON)
+      // Top products from orders — supports storefront items (productId/unitPrice/quantity),
+      // admin items (name/price/qty), and mixed legacy shapes. Joins products table by
+      // productId to resolve the name when no inline name field is present.
       pool.query<{ product_name: string; revenue: string; qty: string }>(`
         SELECT
-          TRIM(item ->> 'name')                                           AS product_name,
+          TRIM(COALESCE(
+            NULLIF(item ->> 'name', ''),
+            NULLIF(item ->> 'productName', ''),
+            p.name,
+            'Unknown'
+          ))                                                              AS product_name,
           SUM(
-            COALESCE(NULLIF(item ->> 'price', '')::numeric, 0) *
-            COALESCE(NULLIF(item ->> 'quantity', '')::numeric, 1)
+            COALESCE(NULLIF(item ->> 'unitPrice', '')::numeric,
+                     NULLIF(item ->> 'price',     '')::numeric, 0) *
+            COALESCE(NULLIF(item ->> 'quantity',  '')::numeric,
+                     NULLIF(item ->> 'qty',       '')::numeric, 1)
           )                                                               AS revenue,
-          SUM(COALESCE(NULLIF(item ->> 'quantity', '')::numeric, 1))     AS qty
-        FROM orders,
-             json_array_elements(
-               CASE WHEN items ~ '^\\s*\\[' THEN items::json
-                    ELSE '[]'::json
-               END
-             ) AS item
-        WHERE status NOT IN ('cancelled', 'refunded')
-          AND DATE(created_at) >= $1::date
-          AND DATE(created_at)  < ($1::date + INTERVAL '1 month')
-          AND TRIM(COALESCE(item ->> 'name', '')) <> ''
+          SUM(
+            COALESCE(NULLIF(item ->> 'quantity', '')::numeric,
+                     NULLIF(item ->> 'qty',      '')::numeric, 1)
+          )                                                               AS qty
+        FROM orders
+        CROSS JOIN LATERAL json_array_elements(
+          CASE WHEN items ~ '^\\s*\\[' THEN items::json
+               ELSE '[]'::json
+          END
+        ) AS item
+        LEFT JOIN products p
+          ON p.id = CASE
+                      WHEN item ->> 'productId' ~ '^[0-9]+$'
+                      THEN (item ->> 'productId')::integer
+                    END
+        WHERE orders.deleted_at IS NULL
+          AND orders.status NOT IN ('cancelled', 'refunded')
+          AND DATE(orders.created_at) >= $1::date
+          AND DATE(orders.created_at)  < ($1::date + INTERVAL '1 month')
+          AND COALESCE(
+                NULLIF(TRIM(item ->> 'name'), ''),
+                NULLIF(TRIM(item ->> 'productName'), ''),
+                NULLIF(item ->> 'productId', ''),
+                p.name
+              ) IS NOT NULL
         GROUP BY product_name
         ORDER BY revenue DESC
         LIMIT 10
