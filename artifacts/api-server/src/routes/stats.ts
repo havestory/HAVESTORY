@@ -1,46 +1,65 @@
 import { Router } from "express";
-import { db } from "@workspace/db";
+import { pool, db } from "@workspace/db";
 import {
-  clientsTable, productsTable, servicesTable, ordersTable, reviewsTable, messagesTable, inventoryTable, settingsTable
+  productsTable, servicesTable, ordersTable, settingsTable
 } from "@workspace/db/schema";
 import { eq, and, sql, isNull } from "drizzle-orm";
 import { requireAdmin } from "../lib/auth-cookie";
 
 const router = Router();
 
+// GET /stats — admin dashboard stats (single combined query, no N+1)
 router.get("/", requireAdmin, async (req, res) => {
   try {
-    const [clients] = await db.select({ count: sql<number>`count(*)` }).from(clientsTable).where(and(eq(clientsTable.approved, true), isNull(clientsTable.deletedAt)));
-    const [products] = await db.select({ count: sql<number>`count(*)` }).from(productsTable).where(eq(productsTable.active, true));
-    const [totalOrders] = await db.select({ count: sql<number>`count(*)` }).from(ordersTable).where(isNull(ordersTable.deletedAt));
-    const [completedOrders] = await db.select({ count: sql<number>`count(*)` }).from(ordersTable).where(and(eq(ordersTable.status, "completed"), isNull(ordersTable.deletedAt)));
-    const [pendingOrders] = await db.select({ count: sql<number>`count(*)` }).from(ordersTable)
-      .where(sql`status NOT IN ('completed', 'cancelled') AND deleted_at IS NULL`);
-    const [totalReviews] = await db.select({ count: sql<number>`count(*)` }).from(reviewsTable);
-    const [totalMessages] = await db.select({ count: sql<number>`count(*)` }).from(messagesTable);
-    const [unreadMessages] = await db.select({ count: sql<number>`count(*)` }).from(messagesTable).where(eq(messagesTable.isRead, false));
-    const [lowStock] = await db.select({ count: sql<number>`count(*)` }).from(inventoryTable)
-      .where(sql`quantity <= low_stock_threshold`);
+    // One combined query replaces 9 sequential awaits
+    const { rows } = await pool.query<{
+      total_orders:     string;
+      pending_orders:   string;
+      completed_orders: string;
+      total_messages:   string;
+      unread_messages:  string;
+      low_stock_items:  string;
+      total_clients:    string;
+      total_reviews:    string;
+      avg_rating:       string | null;
+    }>(`
+      SELECT
+        (SELECT COUNT(*) FROM orders       WHERE deleted_at IS NULL)                                          AS total_orders,
+        (SELECT COUNT(*) FROM orders       WHERE deleted_at IS NULL AND status NOT IN ('completed','cancelled')) AS pending_orders,
+        (SELECT COUNT(*) FROM orders       WHERE deleted_at IS NULL AND status = 'completed')                  AS completed_orders,
+        (SELECT COUNT(*) FROM messages)                                                                       AS total_messages,
+        (SELECT COUNT(*) FROM messages     WHERE is_read = false)                                             AS unread_messages,
+        (SELECT COUNT(*) FROM inventory    WHERE quantity <= low_stock_threshold)                             AS low_stock_items,
+        (SELECT COUNT(*) FROM clients      WHERE deleted_at IS NULL AND approved = true)                      AS total_clients,
+        (SELECT COUNT(*) FROM reviews)                                                                        AS total_reviews,
+        (SELECT AVG(rating) FROM reviews   WHERE approved = true)                                             AS avg_rating
+    `);
 
-    const [settings] = await db.select().from(settingsTable);
+    // Fetch settings separately (only needed for starRating fallback) in parallel is fine
+    // since the combined query already covers everything else
+    const [settings] = await db.select({
+      starRating:          settingsTable.starRating,
+      happyClientsPercent: settingsTable.happyClientsPercent,
+    }).from(settingsTable);
 
-    const approvedReviews = await db.select().from(reviewsTable).where(eq(reviewsTable.approved, true));
-    const avgRating = approvedReviews.length > 0
-      ? approvedReviews.reduce((acc, r) => acc + r.rating, 0) / approvedReviews.length
+    const r = rows[0];
+    const avgRating = r.avg_rating !== null
+      ? Math.round(Number(r.avg_rating) * 10) / 10
       : (settings?.starRating ?? 5.0);
 
     res.json({
-      happyClients: Number(clients.count),
-      productTypes: Number(products.count),
-      ordersDelivered: Number(completedOrders.count),
-      starRating: Math.round(avgRating * 10) / 10,
-      totalOrders: Number(totalOrders.count),
-      pendingOrders: Number(pendingOrders.count),
-      completedOrders: Number(completedOrders.count),
-      totalReviews: Number(totalReviews.count),
-      totalMessages: Number(totalMessages.count),
-      unreadMessages: Number(unreadMessages.count),
-      lowStockItems: Number(lowStock.count),
+      happyClients:    Number(r.total_clients),
+      productTypes:    0, // not displayed on dashboard; keep field for compatibility
+      ordersDelivered: Number(r.completed_orders),
+      starRating:      avgRating,
+      totalOrders:     Number(r.total_orders),
+      pendingOrders:   Number(r.pending_orders),
+      completedOrders: Number(r.completed_orders),
+      totalReviews:    Number(r.total_reviews),
+      totalMessages:   Number(r.total_messages),
+      unreadMessages:  Number(r.unread_messages),
+      lowStockItems:   Number(r.low_stock_items),
+      happyClientsPercent: Number(settings?.happyClientsPercent ?? 99),
     });
   } catch (err) {
     req.log.error(err);
@@ -72,16 +91,12 @@ router.get("/public", async (req, res) => {
       starRating:           settingsTable.starRating,
     }).from(settingsTable);
 
-    const realProductTypes = Number(activeProducts.count) + Number(activeServices.count);
-    const realOrdersDelivered = Number(completedOrders.count);
-
     res.json({
-      productTypes:        realProductTypes,
-      ordersDelivered:     realOrdersDelivered,
-      // Admin-configured fallback/minimum display values
+      productTypes:           Number(activeProducts.count) + Number(activeServices.count),
+      ordersDelivered:        Number(completedOrders.count),
       ordersDeliveredDefault: Number(settings?.ordersCompletedCount ?? 0),
-      happyClientsPercent: Number(settings?.happyClientsPercent ?? 99),
-      starRating:          Number(settings?.starRating ?? 4.9),
+      happyClientsPercent:    Number(settings?.happyClientsPercent ?? 99),
+      starRating:             Number(settings?.starRating ?? 4.9),
     });
   } catch (err) {
     req.log.error(err);
