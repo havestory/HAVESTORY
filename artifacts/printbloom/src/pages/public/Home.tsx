@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 /* ─────────────────────────── Hero slides ─────────────────────────── */
-const HERO_SLIDES = [
+const DEFAULT_HERO_SLIDES = [
   {
     img: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=format&fit=crop&w=1920&q=85',
     label: 'Gallery Walls',
@@ -82,19 +82,34 @@ export default function Home() {
   const [dismissedNotices, setDismissedNotices] = useState<number[]>([]);
   const [slide,  setSlide]  = useState(0);
   const [paused, setPaused] = useState(false);
-  const [loaded, setLoaded] = useState<boolean[]>(HERO_SLIDES.map(() => false));
+  const [loaded, setLoaded] = useState<boolean[]>(DEFAULT_HERO_SLIDES.map(() => false));
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const activeNotices   = notices?.filter(n => n.isActive && !dismissedNotices.includes(n.id)) || [];
+  const heroSlideImages = [
+    settings?.heroSlideImage1,
+    settings?.heroSlideImage2,
+    settings?.heroSlideImage3,
+    settings?.heroSlideImage4,
+    settings?.heroSlideImage5,
+  ];
+  const heroSlides = DEFAULT_HERO_SLIDES.map((item, index) => ({
+    ...item,
+    img: heroSlideImages[index] || (index === 0 ? settings?.heroBgImage : null) || item.img,
+    label: index === 0 && settings?.heroBadgeText ? settings.heroBadgeText : item.label,
+    headline: index === 0 && settings?.heroTitle ? settings.heroTitle : item.headline,
+    sub: index === 0 && settings?.heroSubtitle ? settings.heroSubtitle : item.sub,
+  }));
+
+  const activeNotices   = notices?.filter(n => n.enabled && !dismissedNotices.includes(n.id)) || [];
   const featuredProducts = products?.filter(p => p.featured).slice(0, 6) || products?.slice(0, 6) || [];
   const displayServices  = services?.slice(0, 6) || [];
   const displayPortfolio = portfolio?.slice(0, 8) || [];
-  const displayReviews   = reviews?.filter(r => r.isApproved).slice(0, 3) || [];
+  const displayReviews   = reviews?.filter(r => r.approved).slice(0, 3) || [];
 
   const serviceIcons = [Printer, PenTool, Layout, Package, Layers, ImageIcon];
 
-  const nextSlide = useCallback(() => setSlide(s => (s + 1) % HERO_SLIDES.length), []);
-  const prevSlide = useCallback(() => setSlide(s => (s - 1 + HERO_SLIDES.length) % HERO_SLIDES.length), []);
+  const nextSlide = useCallback(() => setSlide(s => (s + 1) % DEFAULT_HERO_SLIDES.length), []);
+  const prevSlide = useCallback(() => setSlide(s => (s - 1 + DEFAULT_HERO_SLIDES.length) % DEFAULT_HERO_SLIDES.length), []);
 
   // Auto-advance
   useEffect(() => {
@@ -115,9 +130,31 @@ export default function Home() {
     { icon: Zap,    title: '48hr Express',         desc: 'Fast-track framing for urgent needs — just ask.' },
   ];
 
+  const defaultFeatureCards = [
+    { title: 'Frame Editions', copy: 'Made-to-measure frames in refined timber finishes.', href: '/store' },
+    { title: 'Colour Prints', copy: 'Colour-checked archival prints for lasting clarity.', href: '/store' },
+    { title: 'Story Collages', copy: 'Thoughtful multi-image layouts for meaningful moments.', href: '/custom-project' },
+    { title: 'Studio Sessions', copy: 'Portrait and product photography with a gallery finish.', href: '/services' },
+  ];
+  let featureCards = defaultFeatureCards;
+  try {
+    const parsed = JSON.parse(settings?.homeFeatureCards || '[]');
+    if (Array.isArray(parsed) && parsed.length) featureCards = parsed.slice(0, 4);
+  } catch {
+    featureCards = defaultFeatureCards;
+  }
+
   /* ── Slide helpers ── */
-  const currentSlide = HERO_SLIDES[slide];
+  const currentSlide = heroSlides[slide];
   const headlineLines = currentSlide.headline.split('\n');
+  const renderHeadlineLine = (line: string, lineIndex: number) => {
+    const highlight = slide === 0 ? settings?.heroHighlightWord?.trim() : '';
+    const matchIndex = highlight ? line.toLocaleLowerCase().indexOf(highlight.toLocaleLowerCase()) : -1;
+    if (highlight && matchIndex >= 0) {
+      return <>{line.slice(0, matchIndex)}<span className="text-gradient italic">{line.slice(matchIndex, matchIndex + highlight.length)}</span>{line.slice(matchIndex + highlight.length)}</>;
+    }
+    return lineIndex === 0 ? line : <span className="text-gradient italic">{line}</span>;
+  };
 
   return (
     <div className="bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
@@ -145,7 +182,7 @@ export default function Home() {
         onMouseLeave={() => setPaused(false)}
       >
         {/* Slides */}
-        <AnimatePresence mode="crossfade">
+        <AnimatePresence mode="sync">
           <motion.div
             key={slide}
             className="absolute inset-0"
@@ -200,7 +237,7 @@ export default function Home() {
                     className="font-serif text-white leading-none font-bold"
                     style={{ fontSize: 'clamp(3.2rem, 9vw, 7.5rem)' }}
                   >
-                    {i === 0 ? line : <span className="text-gradient italic">{line}</span>}
+                    {renderHeadlineLine(line, i)}
                   </motion.h1>
                 ))}
               </motion.div>
@@ -223,8 +260,8 @@ export default function Home() {
             transition={{ duration: 0.65, delay: 0.45 }}
             className="flex flex-wrap items-center gap-4"
           >
-            <Link href="/store" className="inline-flex items-center gap-3 bg-[#C9A84C] text-[#0A0907] font-bold text-sm uppercase tracking-widest px-8 py-4 btn-glow hover:bg-[#D4B55E] transition-colors">
-              Shop Frames <ArrowRight className="w-4 h-4" />
+            <Link href={settings?.heroCtaLink || '/store'} className="inline-flex items-center gap-3 bg-[#C9A84C] text-[#0A0907] font-bold text-sm uppercase tracking-widest px-8 py-4 btn-glow hover:bg-[#D4B55E] transition-colors">
+              {settings?.heroCtaText || 'Shop Frames'} <ArrowRight className="w-4 h-4" />
             </Link>
             <Link href="/custom-project" className="inline-flex items-center gap-3 border border-white/30 text-white text-sm uppercase tracking-widest px-8 py-4 hover:border-[#C9A84C] hover:text-[#C9A84C] transition-colors backdrop-blur-sm">
               Custom Order
@@ -251,7 +288,7 @@ export default function Home() {
         {/* Dots + pause */}
         <div className="absolute bottom-8 left-0 right-0 z-30 flex items-center justify-center gap-4">
           <div className="flex items-center gap-2">
-            {HERO_SLIDES.map((_, i) => (
+            {heroSlides.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setSlide(i)}
@@ -271,7 +308,7 @@ export default function Home() {
 
         {/* Slide counter */}
         <div className="absolute bottom-8 right-10 z-30 font-serif text-white/40 text-sm">
-          <span className="text-[#C9A84C]">0{slide + 1}</span> / 0{HERO_SLIDES.length}
+          <span className="text-[#C9A84C]">0{slide + 1}</span> / 0{heroSlides.length}
         </div>
       </section>
 
@@ -285,6 +322,24 @@ export default function Home() {
           ))}
         </div>
       </div>
+
+      {/* ══════════════════════════════════════════ EDITABLE FEATURE CARDS */}
+      <section className="border-b border-[#1E1A14] bg-[#070604]">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          {featureCards.map((card, index) => (
+            <Link
+              key={`${card.title}-${index}`}
+              href={card.href || '/store'}
+              className="group p-7 border-b sm:border-r border-[#1E1A14] last:border-r-0 hover:bg-[#C9A84C]/5 transition-colors"
+            >
+              <span className="text-[10px] text-[#C9A84C] font-bold tracking-[0.2em]">0{index + 1}</span>
+              <h2 className="font-serif text-xl text-white mt-3 group-hover:text-[#C9A84C] transition-colors">{card.title}</h2>
+              <p className="text-xs text-white/45 leading-relaxed mt-2">{card.copy}</p>
+              <ArrowRight className="w-4 h-4 text-[#C9A84C] mt-5 transition-transform group-hover:translate-x-1" />
+            </Link>
+          ))}
+        </div>
+      </section>
 
       {/* ══════════════════════════════════════════ STATS */}
       <section className="py-20 border-b border-[#1E1A14]">
@@ -344,8 +399,8 @@ export default function Home() {
                   className="group card-gold-hover bg-[hsl(var(--card))] overflow-hidden card-3d"
                 >
                   <div className="aspect-[4/3] bg-[hsl(var(--muted))] overflow-hidden relative">
-                    {p.image
-                      ? <img src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                    {p.imageUrl
+                      ? <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                       : <div className="w-full h-full flex items-center justify-center"><ImageIcon className="w-10 h-10 text-[hsl(var(--muted-foreground))/0.3]" /></div>
                     }
                     {/* Gold overlay on hover */}
@@ -360,14 +415,14 @@ export default function Home() {
                     <h3 className="font-serif text-lg font-semibold text-[hsl(var(--foreground))] mb-1 group-hover:text-[#C9A84C] transition-colors">{p.name}</h3>
                     {p.description && <p className="text-xs text-[hsl(var(--muted-foreground))] line-clamp-2 mb-3">{p.description}</p>}
                     <div className="flex items-center justify-between">
-                      {p.basePrice && (
+                      {p.price && (
                         <span className="font-serif text-xl font-semibold text-[#C9A84C]">
-                          LKR {Number(p.basePrice).toLocaleString()}
+                          LKR {Number(p.price).toLocaleString()}
                         </span>
                       )}
                       {p.category && (
                         <span className="text-[9px] uppercase tracking-widest text-[hsl(var(--muted-foreground))] border border-[#2A2418] px-2 py-1">
-                          {p.category}
+                          {p.category.name}
                         </span>
                       )}
                     </div>
@@ -416,8 +471,8 @@ export default function Home() {
                     </div>
                     <h3 className="font-serif text-xl font-semibold text-[hsl(var(--foreground))] mb-2 group-hover:text-[#C9A84C] transition-colors">{svc.name}</h3>
                     {svc.description && <p className="text-xs text-[hsl(var(--muted-foreground))] leading-relaxed mb-4 line-clamp-3">{svc.description}</p>}
-                    {svc.basePrice && (
-                      <p className="font-serif text-lg text-[#C9A84C] font-semibold">from LKR {Number(svc.basePrice).toLocaleString()}</p>
+                    {svc.price && (
+                      <p className="font-serif text-lg text-[#C9A84C] font-semibold">from LKR {Number(svc.price).toLocaleString()}</p>
                     )}
                   </motion.div>
                 );
@@ -514,8 +569,8 @@ export default function Home() {
                   transition={{ delay: i * 0.04 }}
                   className="group break-inside-avoid bg-[hsl(var(--card))] border border-[#1E1A14] overflow-hidden hover:border-[#C9A84C]/40 transition-colors"
                 >
-                  {item.image
-                    ? <img src={item.image} alt={item.title || ''} className="w-full object-cover transition-transform duration-600 group-hover:scale-105" />
+                  {item.imageUrl
+                    ? <img src={item.imageUrl} alt={item.title || ''} className="w-full object-cover transition-transform duration-600 group-hover:scale-105" />
                     : <div className="aspect-square bg-[hsl(var(--muted))] flex items-center justify-center"><ImageIcon className="w-8 h-8 text-[hsl(var(--muted-foreground))/0.3]" /></div>
                   }
                 </motion.div>
@@ -549,14 +604,13 @@ export default function Home() {
                       <Star key={j} className="w-3.5 h-3.5 text-[#C9A84C] fill-[#C9A84C]" />
                     ))}
                   </div>
-                  <p className="text-[hsl(var(--foreground)/0.7)] text-sm leading-relaxed mb-6 italic">&ldquo;{r.review}&rdquo;</p>
+                  <p className="text-[hsl(var(--foreground)/0.7)] text-sm leading-relaxed mb-6 italic">&ldquo;{r.comment}&rdquo;</p>
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 bg-[#C9A84C]/10 border border-[#C9A84C]/20 flex items-center justify-center font-serif font-bold text-sm text-[#C9A84C]">
-                      {(r.clientName || '?')[0].toUpperCase()}
+                      {(r.customerName || '?')[0].toUpperCase()}
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-[hsl(var(--foreground))]">{r.clientName}</p>
-                      {r.service && <p className="text-[10px] text-[hsl(var(--muted-foreground))] uppercase tracking-widest">{r.service}</p>}
+                      <p className="text-sm font-semibold text-[hsl(var(--foreground))]">{r.customerName}</p>
                     </div>
                   </div>
                 </motion.div>

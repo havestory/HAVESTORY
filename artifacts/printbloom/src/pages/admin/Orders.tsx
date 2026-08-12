@@ -20,7 +20,7 @@ export default function Orders() {
   const { toast } = useToast();
 
   const handleStatusChange = (orderId: number, newStatus: string) => {
-    updateOrder.mutate({ id: orderId, data: { status: newStatus } }, {
+    updateOrder.mutate({ id: String(orderId), data: { status: newStatus } }, {
       onSuccess: () => {
         toast({ title: 'Order Updated', description: `Status changed to ${newStatus}` });
         refetch();
@@ -33,7 +33,7 @@ export default function Orders() {
 
   const handleDelete = (orderId: number) => {
     if (confirm('Are you sure you want to delete this order? This cannot be undone.')) {
-      deleteOrder.mutate({ id: orderId }, {
+      deleteOrder.mutate({ id: String(orderId) }, {
         onSuccess: () => {
           toast({ title: 'Order Deleted' });
           refetch();

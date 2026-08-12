@@ -27,8 +27,8 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
       {/* Logo mark */}
       <div className="relative z-10 flex flex-col items-center gap-6">
         <div className="w-16 h-16 rounded-full bg-secondary/20 border border-secondary/30 flex items-center justify-center animate-fade-up" style={{ animationDelay: '0ms' }}>
-          {settings?.logo
-            ? <img src={settings.logo} alt="logo" className="w-10 h-10 object-contain" />
+          {settings?.logoUrl
+            ? <img src={settings.logoUrl} alt="logo" className="w-10 h-10 object-contain" />
             : <Printer className="w-8 h-8 text-secondary" />}
         </div>
 
@@ -36,7 +36,7 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
           <h1 className="font-serif text-4xl font-bold text-primary-foreground tracking-tight">
             {settings?.businessName || 'HAVESTORY'}
           </h1>
-          {settings?.tagline && (
+          {settings?.taglineEnabled !== false && settings?.tagline && (
             <p className="text-primary-foreground/60 text-sm mt-1 tracking-widest font-light">
               {settings.tagline}
             </p>

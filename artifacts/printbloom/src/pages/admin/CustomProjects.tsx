@@ -21,7 +21,7 @@ export default function CustomProjects() {
   const { toast } = useToast();
 
   const handleStatusChange = (orderId: number, newStatus: string) => {
-    updateOrder.mutate({ id: orderId, data: { status: newStatus } }, {
+    updateOrder.mutate({ id: String(orderId), data: { status: newStatus } }, {
       onSuccess: () => {
         toast({ title: 'Project Updated', description: `Status changed to ${newStatus}` });
         refetch();
@@ -34,7 +34,7 @@ export default function CustomProjects() {
 
   const handleDelete = (orderId: number) => {
     if (confirm('Are you sure you want to delete this project?')) {
-      deleteOrder.mutate({ id: orderId }, {
+      deleteOrder.mutate({ id: String(orderId) }, {
         onSuccess: () => {
           toast({ title: 'Project Deleted' });
           refetch();

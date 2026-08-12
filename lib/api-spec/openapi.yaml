@@ -1950,6 +1950,44 @@ components:
         googlePayInstructions:
           type: string
           nullable: true
+        overdueDays:
+          type: integer
+        homeFeatureCards:
+          type: string
+          nullable: true
+        siteClosedEnabled:
+          type: boolean
+        siteClosedMessage:
+          type: string
+          nullable: true
+        ipayEnabled:
+          type: boolean
+        ipaySandbox:
+          type: boolean
+        ipayToken:
+          type: string
+          nullable: true
+        ipaySecret:
+          type: string
+          nullable: true
+        payButtonVisible:
+          type: boolean
+        orderEmailNotificationsEnabled:
+          type: boolean
+        orderEmailRecipients:
+          type: string
+          nullable: true
+        gmailUser:
+          type: string
+          nullable: true
+        gmailAppPassword:
+          type: string
+          nullable: true
+        financeReportEmailEnabled:
+          type: boolean
+        financeReportEmailRecipient:
+          type: string
+          nullable: true
         updatedAt:
           type: string
       required: [id, businessName, tagline, heroTitle, heroSubtitle, whatsappNumber, whatsappMessage, aboutStory, aboutMission, ordersCompletedCount, happyClientsPercent, starRating, updatedAt]
@@ -2161,6 +2199,44 @@ components:
         googlePayInstructions:
           type: string
           nullable: true
+        overdueDays:
+          type: integer
+        homeFeatureCards:
+          type: string
+          nullable: true
+        siteClosedEnabled:
+          type: boolean
+        siteClosedMessage:
+          type: string
+          nullable: true
+        ipayEnabled:
+          type: boolean
+        ipaySandbox:
+          type: boolean
+        ipayToken:
+          type: string
+          nullable: true
+        ipaySecret:
+          type: string
+          nullable: true
+        payButtonVisible:
+          type: boolean
+        orderEmailNotificationsEnabled:
+          type: boolean
+        orderEmailRecipients:
+          type: string
+          nullable: true
+        gmailUser:
+          type: string
+          nullable: true
+        gmailAppPassword:
+          type: string
+          nullable: true
+        financeReportEmailEnabled:
+          type: boolean
+        financeReportEmailRecipient:
+          type: string
+          nullable: true
       required: []
 
     SiteStats:
@@ -2351,7 +2427,12 @@ components:
           type: boolean
         message:
           type: string
-      required: [success, message]
+        requiresPin:
+          type: boolean
+        role:
+          type: string
+          enum: [owner, staff]
+      required: [success]
 
     AdminMeResponse:
       type: object
@@ -2361,6 +2442,17 @@ components:
         username:
           type: string
           nullable: true
+        role:
+          type: string
+          enum: [owner, staff]
+          nullable: true
+        staffId:
+          type: integer
+          nullable: true
+        permissions:
+          type: array
+          items:
+            type: string
       required: [authenticated]
 
     Notice:

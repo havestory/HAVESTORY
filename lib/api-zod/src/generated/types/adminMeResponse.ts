@@ -5,8 +5,12 @@
  * HAVESTORY API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { AdminMeResponseRole } from './adminMeResponseRole';
 
 export interface AdminMeResponse {
   authenticated: boolean;
   username?: string | null;
+  role?: AdminMeResponseRole;
+  staffId?: number | null;
+  permissions?: string[];
 }

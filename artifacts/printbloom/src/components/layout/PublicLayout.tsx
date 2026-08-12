@@ -3,6 +3,7 @@ import { Link, useLocation } from 'wouter';
 import { useGetSettings } from '@workspace/api-client-react';
 import { Menu, X, Phone, Mail, Instagram, Facebook, ArrowRight, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { applyThemeVars } from '@/lib/theme-utils';
 
 export function PublicLayout({ children }: { children: ReactNode }) {
   const [location]   = useLocation();
@@ -23,6 +24,54 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => { setMenuOpen(false); }, [location]);
+
+  useEffect(() => {
+    if (!settings) return;
+    applyThemeVars(settings.themePreset || 'havestory-gallery');
+    document.title = settings.seoTitle || `${settings.businessName || 'HAVESTORY'} — Premium Photo Frames`;
+
+    const setMeta = (selector: string, attribute: 'name' | 'property', key: string, content?: string | null) => {
+      if (!content) return;
+      let element = document.head.querySelector<HTMLMetaElement>(selector);
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute(attribute, key);
+        document.head.appendChild(element);
+      }
+      element.content = content;
+    };
+    setMeta('meta[name="description"]', 'name', 'description', settings.seoDescription);
+    setMeta('meta[name="keywords"]', 'name', 'keywords', settings.seoKeywords);
+    setMeta('meta[property="og:image"]', 'property', 'og:image', settings.seoOgImage);
+
+    if (settings.faviconUrl) {
+      let icon = document.head.querySelector<HTMLLinkElement>('link[rel="icon"]');
+      if (!icon) {
+        icon = document.createElement('link');
+        icon.rel = 'icon';
+        document.head.appendChild(icon);
+      }
+      icon.href = settings.faviconUrl;
+    }
+  }, [settings]);
+
+  if (settings?.siteClosedEnabled) {
+    return (
+      <main className="min-h-[100dvh] bg-[#0A0907] text-white flex items-center justify-center px-6">
+        <div className="max-w-xl text-center border border-[#C9A84C]/25 bg-[#C9A84C]/5 p-10 sm:p-14">
+          <div className="w-12 h-px bg-[#C9A84C] mx-auto mb-8" />
+          <p className="text-[#C9A84C] text-[10px] font-bold uppercase tracking-[0.24em] mb-4">Studio Notice</p>
+          <h1 className="font-serif text-4xl sm:text-5xl font-semibold">{settings.businessName || 'HAVESTORY'}</h1>
+          <p className="text-white/60 leading-relaxed mt-6">{settings.siteClosedMessage || 'Our website is temporarily unavailable. Please check back soon.'}</p>
+          {settings.whatsappNumber && (
+            <a href={`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`} className="inline-flex mt-8 bg-[#C9A84C] text-[#0A0907] px-6 py-3 text-xs font-bold uppercase tracking-widest">
+              Contact on WhatsApp
+            </a>
+          )}
+        </div>
+      </main>
+    );
+  }
 
   const navLinks = [
     { href: '/',             label: 'Home' },
@@ -80,24 +129,24 @@ export function PublicLayout({ children }: { children: ReactNode }) {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 shrink-0 group">
-            {settings?.logo
-              ? <img src={settings.logo} alt={settings.businessName || 'HAVESTORY'} className="h-9 w-auto object-contain" />
+            {settings?.logoUrl
+              ? <img src={settings.logoUrl} alt={settings.businessName || 'HAVESTORY'} className="h-9 w-auto object-contain" />
               : (
                 <div className="w-10 h-10 bg-[#C9A84C]/10 border border-[#C9A84C]/25 flex items-center justify-center transition-all group-hover:border-[#C9A84C]/60">
                   <span className="font-serif font-bold text-sm text-[#C9A84C]">HS</span>
                 </div>
               )
             }
-            <div className="hidden sm:block">
+            {settings?.showNameWithLogo !== false && <div className="hidden sm:block">
               <div className="font-serif font-bold text-[17px] leading-none text-[hsl(var(--foreground))] tracking-tight group-hover:text-[#C9A84C] transition-colors">
                 {settings?.businessName || 'HAVESTORY'}
               </div>
-              {settings?.tagline && (
+              {settings?.taglineEnabled !== false && settings?.tagline && (
                 <div className="text-[9px] uppercase tracking-[0.22em] leading-none mt-0.5 text-[hsl(var(--muted-foreground))]">
                   {settings.tagline}
                 </div>
               )}
-            </div>
+            </div>}
           </Link>
 
           {/* Desktop nav */}

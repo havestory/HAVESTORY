@@ -48,7 +48,7 @@ function cleanSections(value: unknown): PriceListSection[] {
       columns,
       rows: (Array.isArray(section?.rows) ? section.rows : []).slice(0, 200).map((row: any, rowIndex: number) => ({
         id: String(row?.id || `row-${rowIndex + 1}`).slice(0, 80),
-        cells: columns.map((_, columnIndex) => String(row?.cells?.[columnIndex] ?? "").trim().slice(0, 200)),
+        cells: columns.map((_column: string, columnIndex: number) => String(row?.cells?.[columnIndex] ?? "").trim().slice(0, 200)),
       })),
     };
   });

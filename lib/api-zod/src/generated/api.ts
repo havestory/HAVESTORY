@@ -1036,6 +1036,21 @@ export const GetSettingsResponse = zod.object({
   "googlePayNumber": zod.string().nullish(),
   "googlePayQrUrl": zod.string().nullish(),
   "googlePayInstructions": zod.string().nullish(),
+  "overdueDays": zod.int().optional(),
+  "homeFeatureCards": zod.string().nullish(),
+  "siteClosedEnabled": zod.boolean().optional(),
+  "siteClosedMessage": zod.string().nullish(),
+  "ipayEnabled": zod.boolean().optional(),
+  "ipaySandbox": zod.boolean().optional(),
+  "ipayToken": zod.string().nullish(),
+  "ipaySecret": zod.string().nullish(),
+  "payButtonVisible": zod.boolean().optional(),
+  "orderEmailNotificationsEnabled": zod.boolean().optional(),
+  "orderEmailRecipients": zod.string().nullish(),
+  "gmailUser": zod.string().nullish(),
+  "gmailAppPassword": zod.string().nullish(),
+  "financeReportEmailEnabled": zod.boolean().optional(),
+  "financeReportEmailRecipient": zod.string().nullish(),
   "updatedAt": zod.string()
 })
 
@@ -1116,7 +1131,22 @@ export const UpdateSettingsBody = zod.object({
   "googlePayEnabled": zod.int().optional(),
   "googlePayNumber": zod.string().nullish(),
   "googlePayQrUrl": zod.string().nullish(),
-  "googlePayInstructions": zod.string().nullish()
+  "googlePayInstructions": zod.string().nullish(),
+  "overdueDays": zod.int().optional(),
+  "homeFeatureCards": zod.string().nullish(),
+  "siteClosedEnabled": zod.boolean().optional(),
+  "siteClosedMessage": zod.string().nullish(),
+  "ipayEnabled": zod.boolean().optional(),
+  "ipaySandbox": zod.boolean().optional(),
+  "ipayToken": zod.string().nullish(),
+  "ipaySecret": zod.string().nullish(),
+  "payButtonVisible": zod.boolean().optional(),
+  "orderEmailNotificationsEnabled": zod.boolean().optional(),
+  "orderEmailRecipients": zod.string().nullish(),
+  "gmailUser": zod.string().nullish(),
+  "gmailAppPassword": zod.string().nullish(),
+  "financeReportEmailEnabled": zod.boolean().optional(),
+  "financeReportEmailRecipient": zod.string().nullish()
 })
 
 export const UpdateSettingsResponse = zod.object({
@@ -1194,6 +1224,21 @@ export const UpdateSettingsResponse = zod.object({
   "googlePayNumber": zod.string().nullish(),
   "googlePayQrUrl": zod.string().nullish(),
   "googlePayInstructions": zod.string().nullish(),
+  "overdueDays": zod.int().optional(),
+  "homeFeatureCards": zod.string().nullish(),
+  "siteClosedEnabled": zod.boolean().optional(),
+  "siteClosedMessage": zod.string().nullish(),
+  "ipayEnabled": zod.boolean().optional(),
+  "ipaySandbox": zod.boolean().optional(),
+  "ipayToken": zod.string().nullish(),
+  "ipaySecret": zod.string().nullish(),
+  "payButtonVisible": zod.boolean().optional(),
+  "orderEmailNotificationsEnabled": zod.boolean().optional(),
+  "orderEmailRecipients": zod.string().nullish(),
+  "gmailUser": zod.string().nullish(),
+  "gmailAppPassword": zod.string().nullish(),
+  "financeReportEmailEnabled": zod.boolean().optional(),
+  "financeReportEmailRecipient": zod.string().nullish(),
   "updatedAt": zod.string()
 })
 
@@ -1419,7 +1464,9 @@ export const AdminLoginBody = zod.object({
 
 export const AdminLoginResponse = zod.object({
   "success": zod.boolean(),
-  "message": zod.string()
+  "message": zod.string().optional(),
+  "requiresPin": zod.boolean().optional(),
+  "role": zod.enum(['owner', 'staff']).optional()
 })
 
 
@@ -1437,7 +1484,10 @@ export const AdminLogoutResponse = zod.object({
  */
 export const GetAdminMeResponse = zod.object({
   "authenticated": zod.boolean(),
-  "username": zod.string().nullish()
+  "username": zod.string().nullish(),
+  "role": zod.enum(['owner', 'staff']).nullish(),
+  "staffId": zod.int().nullish(),
+  "permissions": zod.array(zod.string()).optional()
 })
 
 

@@ -8,9 +8,9 @@ const LIVE_INTERVAL = 30_000; // refresh every 30 s
 const liveQuery = { refetchInterval: LIVE_INTERVAL, refetchIntervalInBackground: false };
 
 export default function Dashboard() {
-  const { data: stats, isLoading: statsLoading, dataUpdatedAt } = useGetSiteStats({ query: liveQuery });
-  const { data: recentOrders, isLoading: ordersLoading } = useListOrders({ status: 'pending' }, { query: liveQuery });
-  const { data: unreadMessages, isLoading: messagesLoading } = useListMessages({ read: false }, { query: liveQuery });
+  const { data: stats, isLoading: statsLoading, dataUpdatedAt } = useGetSiteStats({ query: liveQuery as any });
+  const { data: recentOrders, isLoading: ordersLoading } = useListOrders({ status: 'pending' }, { query: liveQuery as any });
+  const { data: unreadMessages, isLoading: messagesLoading } = useListMessages({ read: false }, { query: liveQuery as any });
   const { data: settings } = useGetSettings();
 
   const statCards = [

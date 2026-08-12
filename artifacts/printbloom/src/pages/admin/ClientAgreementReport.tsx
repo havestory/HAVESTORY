@@ -1,0 +1,17 @@
+import { useEffect,useState } from "react";
+import { useLocation,useParams } from "wouter";
+import { ArrowLeft,FileSignature,Printer,ShieldCheck } from "lucide-react";
+import { A4PrintPortal,useA4Print } from "@/components/A4PrintPortal";
+export default function ClientAgreementReport(){
+ const{agreementId}=useParams<{agreementId:string}>();const[,go]=useLocation(),[a,setA]=useState<any>(null),[error,setError]=useState("");const{active:printActive,print:printA4}=useA4Print();
+ useEffect(()=>{fetch(`/api/admin/client-agreements/${agreementId}`,{credentials:"include",cache:"no-store"}).then(async r=>{const b=await r.json().catch(()=>({}));if(!r.ok)throw new Error(b.error||"Could not load agreement");return b}).then(setA).catch(e=>setError(e.message))},[agreementId]);
+ if(error)return <div className="p-8 text-red-600">{error}</div>;if(!a)return <div className="p-8 text-slate-500">Loading signed agreement…</div>;
+ const report=<article className="a4 pb-print-flow mx-auto max-w-[900px] rounded-3xl bg-white p-8 shadow-xl"><header className="border-b-2 border-slate-950 pb-5"><div className="flex items-center gap-2 text-xs font-black uppercase tracking-[.18em] text-amber-600"><ShieldCheck size={17}/>{a.brandName}{a.operatorName && a.operatorName !== a.brandName ? ` · operated by ${a.operatorName}` : " · main company"}</div><h1 className="mt-3 text-3xl font-black">{a.title}</h1><p className="mt-2 text-sm text-slate-500">Client: {a.clientName}{a.clientBusiness?` · ${a.clientBusiness}`:""} · Status: <b>{a.status.toUpperCase()}</b></p></header>
+ <section className="whitespace-pre-wrap border-b py-6 text-sm leading-7 text-slate-700">{a.agreementText}</section>
+ <section className="grid gap-5 border-b py-6 sm:grid-cols-2"><Block title="Signer" rows={[["Name",a.signer?.name],["NIC / ID",a.signer?.nic],["Phone",a.signer?.phone],["Email",a.signer?.email],["Signed at",a.signedAt?new Date(a.signedAt).toLocaleString("en-LK"):"—"]]}/><Block title="Audit evidence" rows={[["Document SHA-256",a.documentHash],["Consent",a.consentText],["IP",a.audit?.ip],["Browser/device",a.audit?.userAgent]]}/></section>
+ {a.hasSignature&&<section className="py-6"><h2 className="mb-3 text-sm font-black uppercase">Electronic signature</h2><div className="inline-block rounded-xl border bg-white p-3"><img src={`/api/admin/client-agreements/${a.id}/signature`} alt="Electronic signature" className="h-24 max-w-[320px] object-contain"/></div></section>}
+ <footer className="mt-6 border-t pt-3 text-[10px] text-slate-400">Signed record · Document fingerprint {a.documentHash} · This audit report preserves the exact agreement snapshot and signing evidence.</footer></article>;
+ return <main className="min-h-screen bg-slate-100 p-4"><div className="no-print mx-auto mb-4 flex max-w-[900px] justify-between"><button onClick={()=>go("/admin/clients")} className="rounded-xl bg-white px-4 py-2 font-bold"><ArrowLeft className="mr-2 inline" size={16}/>Clients</button><button onClick={printA4} className="rounded-xl bg-slate-950 px-4 py-2 font-bold text-white"><Printer className="mr-2 inline" size={16}/>Print A4</button></div>
+ {report}<A4PrintPortal active={printActive}>{report}</A4PrintPortal></main>
+}
+function Block({title,rows}:{title:string;rows:Array<[string,any]>}){return <div><h2 className="mb-3 text-sm font-black uppercase">{title}</h2><dl className="space-y-2">{rows.map(([l,v])=><div key={l}><dt className="text-[10px] font-bold uppercase text-slate-400">{l}</dt><dd className="break-words text-sm font-semibold">{String(v||"—")}</dd></div>)}</dl></div>}
