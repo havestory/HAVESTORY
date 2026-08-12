@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Star, CheckCircle, XCircle, Trash2, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { AdminTableError, AdminTableLoading } from '@/components/admin/AdminPageState';
 
 export default function Reviews() {
-  const { data: reviews, isLoading, refetch } = useListReviews();
+  const { data: reviews, isLoading, isError, refetch } = useListReviews();
   const updateReview = useUpdateReview();
   const deleteReview = useDeleteReview();
   const { toast } = useToast();
@@ -50,7 +51,9 @@ export default function Reviews() {
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+                <AdminTableLoading columns={5} />
+              ) : isError ? (
+                <AdminTableError columns={5} onRetry={() => void refetch()} />
               ) : reviews?.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-12">

@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Bell, Trash2, Edit2, MoreHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { AdminTableError, AdminTableLoading } from '@/components/admin/AdminPageState';
 
 export default function Notices() {
-  const { data: notices, isLoading, refetch } = useGetNotices();
+  const { data: notices, isLoading, isError, refetch } = useGetNotices();
   const deleteNotice = useDeleteNoticeById();
   const { toast } = useToast();
 
@@ -40,7 +41,9 @@ export default function Notices() {
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+                <AdminTableLoading columns={4} />
+              ) : isError ? (
+                <AdminTableError columns={4} onRetry={() => void refetch()} />
               ) : notices?.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center py-12"><Bell className="w-8 h-8 text-muted-foreground/30 mx-auto mb-3" /><p className="text-muted-foreground">No notices active.</p></TableCell>

@@ -3,7 +3,7 @@ import { useLocation } from 'wouter';
 import { useGetAdminMe } from '@workspace/api-client-react';
 
 export function AuthGuard({ children }: { children: ReactNode }) {
-  const { data, isLoading, isError } = useGetAdminMe();
+  const { data, isLoading, isError } = useGetAdminMe({ query: { staleTime: 5 * 60_000, retry: false, refetchOnWindowFocus: false } as any });
   const [, setLocation] = useLocation();
 
   useEffect(() => {

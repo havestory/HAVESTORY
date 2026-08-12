@@ -12,7 +12,9 @@ const positiveNumber = (value: unknown) => { const parsed = Number(value); retur
 const positiveInteger = (value: unknown) => { const parsed = Number(value); return Number.isInteger(parsed) && parsed > 0 ? parsed : null; };
 const text = (value: unknown, max = 500) => String(value || "").trim().slice(0, max);
 
-async function ensureStorage() {
+let storageReady: Promise<void> | null = null;
+
+async function initializeStorage() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS finance_settings (
       id INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
@@ -91,6 +93,18 @@ async function ensureStorage() {
     CREATE INDEX IF NOT EXISTS material_waste_project_idx ON material_waste(project_id);
   `);
 }
+
+function ensureStorage(): Promise<void> {
+  if (!storageReady) {
+    storageReady = initializeStorage().catch(error => {
+      storageReady = null;
+      throw error;
+    });
+  }
+  return storageReady;
+}
+
+export { ensureStorage as ensureFinanceStorage };
 
 export async function syncInvoiceFinance(invoice: any) {
   await ensureStorage();

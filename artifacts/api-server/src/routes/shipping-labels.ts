@@ -95,7 +95,9 @@ function cleanDetails(value: any) {
   };
 }
 
-async function ensureStorage() {
+let storageReady: Promise<void> | null = null;
+
+async function initializeStorage() {
   await pool.query("ALTER TABLE clients ADD COLUMN IF NOT EXISTS shipping_details TEXT NOT NULL DEFAULT '{}'");
   await pool.query(`
     CREATE TABLE IF NOT EXISTS shipping_label_tokens (
@@ -119,6 +121,16 @@ async function ensureStorage() {
      ON CONFLICT (id) DO NOTHING`,
     [JSON.stringify(DEFAULT_LABEL_CONFIG)]
   );
+}
+
+function ensureStorage(): Promise<void> {
+  if (!storageReady) {
+    storageReady = initializeStorage().catch(error => {
+      storageReady = null;
+      throw error;
+    });
+  }
+  return storageReady;
 }
 
 router.get("/settings", requireAdmin, async (req, res) => {

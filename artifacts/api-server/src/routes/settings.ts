@@ -12,10 +12,24 @@ const siteUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize:
 
 const router = Router();
 
+let settingsCompatibilityReady: Promise<void> | null = null;
+
+function ensureSettingsCompatibility(): Promise<void> {
+  if (!settingsCompatibilityReady) {
+    settingsCompatibilityReady = pool.query("ALTER TABLE settings ADD COLUMN IF NOT EXISTS home_feature_cards TEXT NOT NULL DEFAULT '[]'")
+      .then(() => undefined)
+      .catch(error => {
+        settingsCompatibilityReady = null;
+        throw error;
+      });
+  }
+  return settingsCompatibilityReady;
+}
+
 async function getOrCreateSettings() {
   // Additive runtime compatibility for existing production databases. No
   // existing settings values are rewritten.
-  await pool.query("ALTER TABLE settings ADD COLUMN IF NOT EXISTS home_feature_cards TEXT NOT NULL DEFAULT '[]'");
+  await ensureSettingsCompatibility();
   const [existing] = await db.select().from(settingsTable);
   if (existing) return existing;
   const [created] = await db.insert(settingsTable).values({}).returning();

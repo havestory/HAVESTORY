@@ -6,9 +6,10 @@ import { Trash2, CheckCircle, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AdminTableError, AdminTableLoading } from '@/components/admin/AdminPageState';
 
 export default function Messages() {
-  const { data: messages, isLoading, refetch } = useListMessages();
+  const { data: messages, isLoading, isError, refetch } = useListMessages();
   const updateMsg = useUpdateMessage();
   const deleteMsg = useDeleteMessage();
   const { toast } = useToast();
@@ -51,7 +52,9 @@ export default function Messages() {
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+                <AdminTableLoading columns={5} />
+              ) : isError ? (
+                <AdminTableError columns={5} onRetry={() => void refetch()} />
               ) : messages?.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-12">

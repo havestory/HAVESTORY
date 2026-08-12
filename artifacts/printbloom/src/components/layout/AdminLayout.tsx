@@ -29,6 +29,8 @@ import {
   PanelTop,
   Factory,
   FolderKanban,
+  Circle,
+  PlusCircle,
 } from 'lucide-react';
 import { useAdminLogout, useGetAdminMe } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
@@ -44,9 +46,24 @@ function loadTheme(): AdminTheme {
 export function AdminLayout({ children }: { children: ReactNode }) {
   const [location, setLocation] = useLocation();
   const logout = useAdminLogout();
-  const { data: admin } = useGetAdminMe();
+  const { data: admin } = useGetAdminMe({ query: { staleTime: 5 * 60_000, retry: false, refetchOnWindowFocus: false } as any });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [theme, setTheme] = useState<AdminTheme>(loadTheme);
+  const permissions = Array.isArray(admin?.permissions) ? admin.permissions.map(String) : [];
+  const canAccess = (permission?: string) => !permission || admin?.role === 'owner' || permissions.includes(permission);
+
+  const routeTitles = [
+    ['/admin/custom-projects', 'Custom Projects'], ['/admin/crm-projects', 'CRM Projects'],
+    ['/admin/shipping-labels', 'Shipping Labels'], ['/admin/production-usage', 'Production Usage'],
+    ['/admin/website-editor', 'Website Editor'], ['/admin/raw-materials', 'Inventory'],
+    ['/admin/price-lists', 'Price Lists'], ['/admin/attendance', 'Attendance'],
+    ['/admin/invoices', 'Invoices'], ['/admin/products', 'Products'], ['/admin/services', 'Services'],
+    ['/admin/portfolio', 'Portfolio'], ['/admin/reviews', 'Reviews'], ['/admin/messages', 'Messages'],
+    ['/admin/notices', 'Notices'], ['/admin/finance', 'Finance'], ['/admin/reports', 'Reports'],
+    ['/admin/coupons', 'Coupons'], ['/admin/clients', 'Clients'], ['/admin/orders', 'Orders'],
+    ['/admin/team', 'Team Access'], ['/admin/settings', 'Settings'], ['/admin', 'Dashboard'],
+  ] as const;
+  const currentTitle = routeTitles.find(([path]) => path === '/admin' ? location === path : location.startsWith(path))?.[1] || 'Admin';
 
   const toggleTheme = () => {
     const next: AdminTheme = theme === 'light' ? 'dark' : 'light';
@@ -58,7 +75,8 @@ export function AdminLayout({ children }: { children: ReactNode }) {
     logout.mutate(undefined, { onSuccess: () => setLocation('/admin/login') });
   };
 
-  const NavItem = ({ href, label, icon: Icon }: { href: string; label: string; icon: any }) => {
+  const NavItem = ({ href, label, icon: Icon, permission }: { href: string; label: string; icon: any; permission?: string }) => {
+    if (!canAccess(permission)) return null;
     const isActive = location === href || (href !== '/admin' && location.startsWith(href));
     return (
       <Link href={href}>
@@ -113,45 +131,45 @@ export function AdminLayout({ children }: { children: ReactNode }) {
         <ScrollArea className="flex-1">
           <nav className="px-3 py-4 space-y-5">
             <div>
-              <NavItem href="/admin" label="Dashboard" icon={LayoutDashboard} />
+              <NavItem href="/admin" label="Dashboard" icon={LayoutDashboard} permission="dashboard" />
             </div>
 
             <div className="space-y-1">
               <p className="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/70">Orders</p>
-              <NavItem href="/admin/orders"          label="Orders"          icon={ShoppingCart} />
-              <NavItem href="/admin/custom-projects" label="Custom Projects" icon={PenTool} />
-              <NavItem href="/admin/clients"         label="Clients"         icon={Users} />
-              <NavItem href="/admin/crm-projects"    label="CRM Projects"    icon={FolderKanban} />
-              <NavItem href="/admin/invoices"        label="Invoices"        icon={FileText} />
+              <NavItem href="/admin/orders"          label="Orders"          icon={ShoppingCart} permission="orders" />
+              <NavItem href="/admin/custom-projects" label="Custom Projects" icon={PenTool} permission="orders" />
+              <NavItem href="/admin/clients"         label="Clients"         icon={Users} permission="customers" />
+              <NavItem href="/admin/crm-projects"    label="CRM Projects"    icon={FolderKanban} permission="customers" />
+              <NavItem href="/admin/invoices"        label="Invoices"        icon={FileText} permission="invoices" />
             </div>
 
             <div className="space-y-1">
               <p className="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/70">Catalogue</p>
-              <NavItem href="/admin/products"      label="Products"  icon={Package} />
-              <NavItem href="/admin/services"      label="Services"  icon={Layers} />
-              <NavItem href="/admin/portfolio"     label="Portfolio" icon={ImageIcon} />
-              <NavItem href="/admin/raw-materials" label="Inventory" icon={Box} />
+              <NavItem href="/admin/products"      label="Products"  icon={Package} permission="products_view" />
+              <NavItem href="/admin/services"      label="Services"  icon={Layers} permission="catalog" />
+              <NavItem href="/admin/portfolio"     label="Portfolio" icon={ImageIcon} permission="website" />
+              <NavItem href="/admin/raw-materials" label="Inventory" icon={Box} permission="inventory" />
             </div>
 
             <div className="space-y-1">
               <p className="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/70">Engagement</p>
-              <NavItem href="/admin/reviews"  label="Reviews"  icon={Star} />
-              <NavItem href="/admin/messages" label="Messages" icon={MessageSquare} />
-              <NavItem href="/admin/notices"  label="Notices"  icon={Bell} />
+              <NavItem href="/admin/reviews"  label="Reviews"  icon={Star} permission="website" />
+              <NavItem href="/admin/messages" label="Messages" icon={MessageSquare} permission="website" />
+              <NavItem href="/admin/notices"  label="Notices"  icon={Bell} permission="website" />
             </div>
 
             <div className="space-y-1">
               <p className="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/70">Finance</p>
-              <NavItem href="/admin/finance"  label="Finance" icon={DollarSign} />
-              <NavItem href="/admin/reports"  label="Reports" icon={BarChart2} />
+              <NavItem href="/admin/finance"  label="Finance" icon={DollarSign} permission="finance" />
+              <NavItem href="/admin/reports"  label="Reports" icon={BarChart2} permission="reports" />
             </div>
 
             <div className="space-y-1">
               <p className="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/70">Studio Tools</p>
-              <NavItem href="/admin/coupons"         label="Coupons"         icon={Tag} />
-              <NavItem href="/admin/shipping-labels" label="Shipping Labels" icon={Truck} />
-              <NavItem href="/admin/price-lists"     label="Price Lists"     icon={List} />
-              <NavItem href="/admin/production-usage" label="Production Usage" icon={Factory} />
+              <NavItem href="/admin/coupons"         label="Coupons"         icon={Tag} permission="owner" />
+              <NavItem href="/admin/shipping-labels" label="Shipping Labels" icon={Truck} permission="shipping" />
+              <NavItem href="/admin/price-lists"     label="Price Lists"     icon={List} permission="price_lists_view" />
+              <NavItem href="/admin/production-usage" label="Production Usage" icon={Factory} permission="production" />
             </div>
 
             {admin?.role === 'owner' && (
@@ -170,8 +188,8 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
             <div className="space-y-1 pb-4">
               <p className="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/70">System</p>
-              <NavItem href="/admin/website-editor" label="Website Editor" icon={PanelTop} />
-              <NavItem href="/admin/settings" label="Settings" icon={Settings} />
+              <NavItem href="/admin/website-editor" label="Website Editor" icon={PanelTop} permission="website" />
+              <NavItem href="/admin/settings" label="Settings" icon={Settings} permission="owner" />
             </div>
           </nav>
         </ScrollArea>
@@ -230,7 +248,20 @@ export function AdminLayout({ children }: { children: ReactNode }) {
           </button>
         </header>
 
-        <div className="flex-1 p-6 lg:p-8 overflow-auto animate-in fade-in slide-in-from-bottom-4">
+        {/* Desktop workspace bar */}
+        <header className="hidden h-16 shrink-0 items-center justify-between border-b border-border bg-card/95 px-6 backdrop-blur lg:flex">
+          <div>
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground"><span>Admin</span><span>/</span><span className="text-secondary">{currentTitle}</span></div>
+            <div className="mt-0.5 text-sm font-bold text-foreground">{currentTitle}</div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="hidden items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700 xl:flex"><Circle size={7} fill="currentColor" /> System online</div>
+            {canAccess('orders') && <Link href="/admin/orders" className="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-xs font-bold text-primary-foreground shadow-sm hover:opacity-90"><PlusCircle size={15}/> New order</Link>}
+            <button onClick={toggleTheme} className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground hover:text-secondary" title={theme === 'light' ? 'Night mode' : 'Day mode'}>{theme === 'light' ? <Moon size={16}/> : <Sun size={16}/>}</button>
+          </div>
+        </header>
+
+        <div className="flex-1 overflow-auto p-4 animate-in fade-in slide-in-from-bottom-4 sm:p-6 lg:p-8">
           {children}
         </div>
       </main>
