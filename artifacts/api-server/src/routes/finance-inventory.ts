@@ -460,6 +460,73 @@ router.delete("/cost-values/:id", async (req, res) => {
   }
 });
 
+/* ── Revenue breakdown ───────────────────────────────────────────── */
+router.get("/revenue-breakdown", async (req, res) => {
+  try {
+    const month = /^\d{4}-(0[1-9]|1[0-2])$/.test(String(req.query.month ?? ""))
+      ? String(req.query.month)
+      : new Date().toISOString().slice(0, 7);
+
+    const monthStart = `${month}-01`;
+
+    const [catRows, productRows] = await Promise.all([
+      // Income by category from finance_transactions
+      pool.query<{ category: string; total: string; count: string }>(`
+        SELECT category,
+               SUM(amount)  AS total,
+               COUNT(*)     AS count
+          FROM finance_transactions
+         WHERE type = 'income'
+           AND transaction_date >= $1::date
+           AND transaction_date  < ($1::date + INTERVAL '1 month')
+         GROUP BY category
+         ORDER BY total DESC
+      `, [monthStart]),
+
+      // Top products from orders (parse items JSON)
+      pool.query<{ product_name: string; revenue: string; qty: string }>(`
+        SELECT
+          TRIM(item ->> 'name')                                           AS product_name,
+          SUM(
+            COALESCE(NULLIF(item ->> 'price', '')::numeric, 0) *
+            COALESCE(NULLIF(item ->> 'quantity', '')::numeric, 1)
+          )                                                               AS revenue,
+          SUM(COALESCE(NULLIF(item ->> 'quantity', '')::numeric, 1))     AS qty
+        FROM orders,
+             json_array_elements(
+               CASE WHEN items ~ '^\\s*\\[' THEN items::json
+                    ELSE '[]'::json
+               END
+             ) AS item
+        WHERE status NOT IN ('cancelled', 'refunded')
+          AND DATE(created_at) >= $1::date
+          AND DATE(created_at)  < ($1::date + INTERVAL '1 month')
+          AND TRIM(COALESCE(item ->> 'name', '')) <> ''
+        GROUP BY product_name
+        ORDER BY revenue DESC
+        LIMIT 10
+      `, [monthStart]),
+    ]);
+
+    const categories = catRows.rows.map(r => ({
+      category: r.category,
+      total: Number(r.total),
+      count: Number(r.count),
+    }));
+
+    const products = productRows.rows.map(r => ({
+      name: r.product_name,
+      revenue: Number(r.revenue),
+      qty: Number(r.qty),
+    }));
+
+    res.json({ month, categories, products });
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to fetch revenue breakdown" });
+  }
+});
+
 /* ── Monthly report: manual trigger ─────────────────────────────── */
 router.post("/send-report", async (req, res) => {
   try {

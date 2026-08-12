@@ -3,8 +3,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   TrendingUp, TrendingDown, DollarSign, Wallet,
   Plus, Trash2, Printer, ChevronLeft, ChevronRight,
-  AlertCircle, Lock, Edit2
+  AlertCircle, Lock, Edit2, BarChart2, ShoppingBag
 } from 'lucide-react';
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell
+} from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -46,6 +49,12 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 // ─── types ──────────────────────────────────────────────────────────────────
+
+interface RevenueBreakdown {
+  month: string;
+  categories: Array<{ category: string; total: number; count: number }>;
+  products: Array<{ name: string; revenue: number; qty: number }>;
+}
 
 interface FinanceSummary {
   month: string;
@@ -140,6 +149,11 @@ export default function Finance() {
   const { data: transactions, isLoading: txLoading } = useQuery<Transaction[]>({
     queryKey: ['finance-transactions', month],
     queryFn: () => apiFetch(`/api/finance-inventory/transactions?month=${month}`),
+  });
+
+  const { data: breakdown } = useQuery<RevenueBreakdown>({
+    queryKey: ['finance-breakdown', month],
+    queryFn: () => apiFetch(`/api/finance-inventory/revenue-breakdown?month=${month}`),
   });
 
   const addTx = useMutation({
@@ -354,6 +368,123 @@ export default function Finance() {
             sub={`Current balance: LKR ${fmtAmount(summary?.currentBalance ?? 0)}`}
           />
         </div>
+
+        {/* ── Revenue Breakdown ─────────────────────────────────────── */}
+        {breakdown && (breakdown.categories.length > 0 || breakdown.products.length > 0) && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+            {/* Income by category — horizontal bar chart */}
+            <Card className="rounded-none border border-border shadow-sm bg-card">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <BarChart2 className="w-4 h-4 text-secondary" />
+                  <p className="text-[9px] uppercase tracking-widest font-semibold text-muted-foreground">Revenue by Category</p>
+                </div>
+                {breakdown.categories.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-6">No income recorded</p>
+                ) : (
+                  <ResponsiveContainer width="100%" height={Math.max(120, breakdown.categories.length * 40)}>
+                    <BarChart
+                      data={breakdown.categories.map(c => ({
+                        name: CATEGORY_LABELS[c.category] ?? c.category.replace(/_/g, ' '),
+                        total: c.total,
+                        count: c.count,
+                      }))}
+                      layout="vertical"
+                      margin={{ top: 0, right: 8, left: 0, bottom: 0 }}
+                    >
+                      <XAxis
+                        type="number"
+                        tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+                        tickFormatter={v => `${(v / 1000).toFixed(0)}k`}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        type="category"
+                        dataKey="name"
+                        width={90}
+                        tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <Tooltip
+                        cursor={{ fill: 'hsl(var(--muted) / 0.4)' }}
+                        contentStyle={{
+                          background: 'hsl(var(--card))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: 0,
+                          fontSize: 12,
+                        }}
+                        formatter={(value: number, _: any, props: any) => [
+                          `LKR ${fmtAmount(value)}`,
+                          `${props.payload.count} entr${props.payload.count === 1 ? 'y' : 'ies'}`,
+                        ]}
+                      />
+                      <Bar dataKey="total" radius={0} maxBarSize={18}>
+                        {breakdown.categories.map((_, i) => (
+                          <Cell
+                            key={i}
+                            fill={i === 0
+                              ? 'hsl(var(--secondary))'
+                              : `hsl(43 62% ${Math.max(30, 50 - i * 6)}%)`
+                            }
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Top products from orders */}
+            <Card className="rounded-none border border-border shadow-sm bg-card">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <ShoppingBag className="w-4 h-4 text-secondary" />
+                  <p className="text-[9px] uppercase tracking-widest font-semibold text-muted-foreground">Top Products &amp; Services</p>
+                  <span className="ml-auto text-[9px] text-muted-foreground/60 uppercase tracking-widest">from orders</span>
+                </div>
+                {breakdown.products.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-6">No orders this month</p>
+                ) : (
+                  <div className="space-y-2">
+                    {(() => {
+                      const maxRev = breakdown.products[0]?.revenue ?? 1;
+                      return breakdown.products.map((p, i) => (
+                        <div key={i} className="space-y-0.5">
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="text-[9px] font-bold text-muted-foreground/50 w-4 shrink-0">
+                                {String(i + 1).padStart(2, '0')}
+                              </span>
+                              <span className="truncate text-foreground font-medium">{p.name}</span>
+                            </div>
+                            <div className="flex items-center gap-3 shrink-0 ml-2">
+                              <span className="text-muted-foreground text-[10px]">
+                                ×{p.qty % 1 === 0 ? p.qty : p.qty.toFixed(1)}
+                              </span>
+                              <span className="font-mono font-semibold text-emerald-600 text-[11px]">
+                                LKR {fmtAmount(p.revenue)}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="h-1 bg-muted overflow-hidden">
+                            <div
+                              className="h-full bg-secondary/70 transition-all duration-500"
+                              style={{ width: `${Math.round((p.revenue / maxRev) * 100)}%` }}
+                            />
+                          </div>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Transaction Table */}
         <Card className="rounded-none border border-border shadow-sm bg-card">
