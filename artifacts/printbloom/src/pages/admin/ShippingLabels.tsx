@@ -201,6 +201,8 @@ export default function ShippingLabels() {
   const [form, setForm] = useState<LabelForm>(EMPTY_FORM);
   const [lookupPhone, setLookupPhone] = useState('');
   const [qrUrl, setQrUrl] = useState('');
+  const [clientId, setClientId] = useState<number | null>(null);
+  const [detailsSaved, setDetailsSaved] = useState(false);
   const [labelSettings, setLabelSettings] = useState<LabelSettings>({
     senderName: '', senderPhone: '', senderWhatsapp: '', senderAddress: '',
     footerText: 'Thank you for choosing HAVESTORY', defaultSize: 'standard',
@@ -230,8 +232,11 @@ export default function ShippingLabels() {
     onSuccess: (data) => {
       if (!data) {
         toast({ title: 'Not found', description: 'No client found with this phone number.' });
+        setClientId(null);
         return;
       }
+      setClientId(data.clientId);
+      setDetailsSaved(false);
       setForm(f => ({
         ...f,
         recipientName: data.details.recipientName || '',
@@ -246,6 +251,29 @@ export default function ShippingLabels() {
       toast({ title: 'Client found', description: 'Shipping details pre-filled.' });
     },
     onError: () => toast({ title: 'Lookup failed', variant: 'destructive' }),
+  });
+
+  const saveDetailsMut = useMutation({
+    mutationFn: (id: number) =>
+      apiFetch(`/api/shipping-labels/client-details/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipientName: form.recipientName,
+          phone: form.phone,
+          alternatePhone: form.alternatePhone,
+          address: form.address,
+          city: form.city,
+          district: form.district,
+          postalCode: form.postalCode,
+          deliveryNotes: form.deliveryNotes,
+        }),
+      }),
+    onSuccess: () => {
+      setDetailsSaved(true);
+      toast({ title: 'Details saved', description: 'Shipping details saved to client record.' });
+    },
+    onError: (e: any) => toast({ title: 'Save failed', description: e.message, variant: 'destructive' }),
   });
 
   const tokenMut = useMutation({
@@ -264,6 +292,10 @@ export default function ShippingLabels() {
   });
 
   function handlePrint() {
+    // Auto-save details to the client record when a client is linked
+    if (clientId !== null) {
+      saveDetailsMut.mutate(clientId);
+    }
     const labelEl = document.querySelector('.label-print-target');
     if (!labelEl) {
       window.print();
@@ -308,6 +340,8 @@ export default function ShippingLabels() {
     setForm(f => ({ ...EMPTY_FORM, labelSize: f.labelSize }));
     setQrUrl('');
     setLookupPhone('');
+    setClientId(null);
+    setDetailsSaved(false);
   }
 
   async function handleDownload() {
@@ -439,6 +473,32 @@ export default function ShippingLabels() {
                 <Label className={labelClass}>Delivery Notes</Label>
                 <Input value={form.deliveryNotes} onChange={e => setForm(f => ({ ...f, deliveryNotes: e.target.value }))} placeholder="Leave at gate..." className={inputClass} />
               </div>
+
+              {/* Save to client record */}
+              {clientId !== null && (
+                <div className="flex items-center justify-between pt-1">
+                  {detailsSaved ? (
+                    <span className="flex items-center gap-1.5 text-xs text-emerald-500 font-semibold">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                      Details saved to client record
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Client linked — save details to their record</span>
+                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => saveDetailsMut.mutate(clientId)}
+                    disabled={saveDetailsMut.isPending}
+                    className="rounded-none border-border h-8 font-bold uppercase tracking-widest text-xs gap-1.5 shrink-0"
+                  >
+                    {saveDetailsMut.isPending ? 'Saving…' : 'Save Details'}
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 
