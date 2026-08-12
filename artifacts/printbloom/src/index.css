@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
@@ -98,7 +98,7 @@
 
   /* Muted dark surfaces */
   --muted:            30 10% 12%;   /* #1E1A14 */
-  --muted-foreground: 40 15% 52%;
+  --muted-foreground: 40 18% 68%;
 
   /* ACCENT — brighter gold for hovers */
   --accent:            43 70% 58%;  /* #D4B55E */
@@ -149,27 +149,27 @@
 /* ─── Admin light theme (default) ──────────────────────────────────────── */
 [data-admin-theme="light"] {
   --background:         0 0% 96%;        /* #F5F5F5 neutral canvas */
-  --foreground:         220 20% 13%;     /* near-black text */
+  --foreground:         222 32% 12%;     /* strong charcoal text */
   --border:             220 12% 88%;
   --input:              0 0% 100%;
   --ring:               43 60% 46%;
 
   --card:               0 0% 100%;       /* pure white cards */
-  --card-foreground:    220 20% 13%;
+  --card-foreground:    222 32% 12%;
   --card-border:        220 12% 90%;
 
   --popover:            0 0% 100%;
-  --popover-foreground: 220 20% 13%;
+  --popover-foreground: 222 32% 12%;
   --popover-border:     220 12% 88%;
 
-  --primary:            220 20% 13%;
+  --primary:            222 32% 12%;
   --primary-foreground: 0 0% 100%;
 
   --secondary:          43 62% 44%;      /* slightly richer gold on light bg */
   --secondary-foreground: 0 0% 100%;
 
   --muted:              220 12% 92%;
-  --muted-foreground:   220 10% 46%;
+  --muted-foreground:   220 16% 36%;
 
   --accent:             43 70% 52%;
   --accent-foreground:  220 20% 13%;
@@ -179,7 +179,7 @@
 
   /* Sidebar — clean white with subtle separator */
   --sidebar:                    0 0% 100%;
-  --sidebar-foreground:         220 15% 30%;
+  --sidebar-foreground:         220 24% 22%;
   --sidebar-border:             220 12% 90%;
   --sidebar-primary:            43 62% 40%;   /* deep gold */
   --sidebar-primary-foreground: 0 0% 100%;
@@ -201,6 +201,7 @@ body {
   color:            hsl(var(--foreground));
   font-family:      var(--app-font-sans);
   font-size:        15px;
+  font-weight:      400;
   line-height:      1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -213,6 +214,107 @@ h1, h2, h3, .font-serif {
   font-family: var(--app-font-serif);
   letter-spacing: -0.01em;
 }
+
+h1, h2, h3 { font-weight: 700; }
+
+/* ═══════════════════════════════════════════════════════
+   Readability system
+   Semantic contrast bridge for legacy hard-coded utilities.
+   ═══════════════════════════════════════════════════════ */
+
+/* Public site: stronger body copy without changing intentional hero whites. */
+[data-public-site] {
+  font-weight: 500;
+  text-rendering: optimizeLegibility;
+}
+[data-public-site] p,
+[data-public-site] li,
+[data-public-site] label,
+[data-public-site] input,
+[data-public-site] textarea,
+[data-public-site] select {
+  font-weight: 500;
+}
+[data-public-site] .text-muted-foreground { font-weight: 500; }
+[data-public-site] input::placeholder,
+[data-public-site] textarea::placeholder {
+  color: hsl(var(--muted-foreground) / 0.9);
+  opacity: 1;
+}
+
+/* Admin type hierarchy: operational UI must remain readable at a glance. */
+[data-admin-panel] {
+  font-weight: 500;
+  text-rendering: optimizeLegibility;
+}
+[data-admin-panel] h1,
+[data-admin-panel] h2,
+[data-admin-panel] h3 { font-weight: 700; }
+[data-admin-panel] p,
+[data-admin-panel] li,
+[data-admin-panel] td { font-weight: 500; }
+[data-admin-panel] label,
+[data-admin-panel] th,
+[data-admin-panel] button,
+[data-admin-panel] [role="button"] { font-weight: 600; }
+[data-admin-panel] th {
+  color: hsl(var(--muted-foreground));
+  letter-spacing: 0.045em;
+}
+[data-admin-panel] input,
+[data-admin-panel] textarea,
+[data-admin-panel] select {
+  color: hsl(var(--foreground));
+  font-weight: 500;
+}
+[data-admin-panel] input::placeholder,
+[data-admin-panel] textarea::placeholder {
+  color: hsl(var(--muted-foreground) / 0.88);
+  opacity: 1;
+}
+
+/* Light admin: remap legacy pale-gray text to accessible charcoal levels. */
+[data-admin-theme="light"] .text-gray-300,
+[data-admin-theme="light"] .text-slate-300 { color: hsl(220 12% 46%) !important; }
+[data-admin-theme="light"] .text-gray-400,
+[data-admin-theme="light"] .text-slate-400 { color: hsl(220 14% 39%) !important; }
+[data-admin-theme="light"] .text-gray-500,
+[data-admin-theme="light"] .text-slate-500 { color: hsl(220 17% 32%) !important; }
+[data-admin-theme="light"] .text-gray-600,
+[data-admin-theme="light"] .text-slate-600 { color: hsl(220 20% 25%) !important; }
+[data-admin-theme="light"] .text-gray-700,
+[data-admin-theme="light"] .text-slate-700 { color: hsl(222 24% 19%) !important; }
+[data-admin-theme="light"] .text-gray-800,
+[data-admin-theme="light"] .text-slate-800 { color: hsl(222 28% 15%) !important; }
+[data-admin-theme="light"] .text-gray-900,
+[data-admin-theme="light"] .text-slate-900,
+[data-admin-theme="light"] .text-slate-950 { color: hsl(var(--foreground)) !important; }
+
+/* Dark admin: make legacy light cards and gray text follow theme tokens too. */
+[data-admin-theme="dark"] .bg-white { background-color: hsl(var(--card)) !important; }
+[data-admin-theme="dark"] .bg-gray-50,
+[data-admin-theme="dark"] .bg-gray-100,
+[data-admin-theme="dark"] .bg-slate-50,
+[data-admin-theme="dark"] .bg-slate-100 { background-color: hsl(var(--muted)) !important; }
+[data-admin-theme="dark"] .border-gray-100,
+[data-admin-theme="dark"] .border-gray-200,
+[data-admin-theme="dark"] .border-slate-100,
+[data-admin-theme="dark"] .border-slate-200 { border-color: hsl(var(--border)) !important; }
+[data-admin-theme="dark"] .text-gray-900,
+[data-admin-theme="dark"] .text-gray-800,
+[data-admin-theme="dark"] .text-slate-950,
+[data-admin-theme="dark"] .text-slate-900,
+[data-admin-theme="dark"] .text-slate-800 { color: hsl(var(--foreground)) !important; }
+[data-admin-theme="dark"] .text-gray-700,
+[data-admin-theme="dark"] .text-gray-600,
+[data-admin-theme="dark"] .text-slate-700,
+[data-admin-theme="dark"] .text-slate-600 { color: hsl(var(--foreground) / 0.84) !important; }
+[data-admin-theme="dark"] .text-gray-500,
+[data-admin-theme="dark"] .text-gray-400,
+[data-admin-theme="dark"] .text-gray-300,
+[data-admin-theme="dark"] .text-slate-500,
+[data-admin-theme="dark"] .text-slate-400,
+[data-admin-theme="dark"] .text-slate-300 { color: hsl(var(--muted-foreground)) !important; }
 
 /* ─── Gold gradient text ────────────────────────────────────────────────── */
 .text-gradient {

@@ -249,7 +249,7 @@ export default function Home() {
               key={`sub-${slide}`}
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.65, delay: 0.3 }}
-              className="text-white/65 text-lg md:text-xl max-w-lg leading-relaxed mb-10"
+              className="text-white/85 font-medium text-lg md:text-xl max-w-lg leading-relaxed mb-10"
             >
               {currentSlide.sub}
             </motion.p>
@@ -334,7 +334,7 @@ export default function Home() {
             >
               <span className="text-[10px] text-[#C9A84C] font-bold tracking-[0.2em]">0{index + 1}</span>
               <h2 className="font-serif text-xl text-white mt-3 group-hover:text-[#C9A84C] transition-colors">{card.title}</h2>
-              <p className="text-xs text-white/45 leading-relaxed mt-2">{card.copy}</p>
+              <p className="text-xs font-medium text-white/75 leading-relaxed mt-2">{card.copy}</p>
               <ArrowRight className="w-4 h-4 text-[#C9A84C] mt-5 transition-transform group-hover:translate-x-1" />
             </Link>
           ))}
@@ -640,7 +640,7 @@ export default function Home() {
           <h2 className="font-serif text-5xl md:text-7xl font-bold text-[hsl(var(--foreground))] mb-6 leading-none">
             Ready to Frame<br /><span className="text-gradient italic">Your Story?</span>
           </h2>
-          <p className="text-[hsl(var(--foreground)/0.55)] text-lg mb-10">
+          <p className="text-[hsl(var(--foreground)/0.78)] font-medium text-lg mb-10">
             Visit our studio, browse the collection or submit a custom order — we'll handle the rest.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
