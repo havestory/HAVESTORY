@@ -135,6 +135,67 @@
 /* Hide default cursor sitewide — custom cursor takes over */
 * { cursor: none !important; }
 
+/* ─── Admin panel: always use system cursor ─────────────────────────────── */
+[data-admin-panel] *          { cursor: auto    !important; }
+[data-admin-panel] button,
+[data-admin-panel] a,
+[data-admin-panel] [role="button"],
+[data-admin-panel] label,
+[data-admin-panel] select     { cursor: pointer !important; }
+[data-admin-panel] input,
+[data-admin-panel] textarea   { cursor: text    !important; }
+[data-admin-panel] [disabled] { cursor: not-allowed !important; }
+
+/* ─── Admin light theme (default) ──────────────────────────────────────── */
+[data-admin-theme="light"] {
+  --background:         0 0% 96%;        /* #F5F5F5 neutral canvas */
+  --foreground:         220 20% 13%;     /* near-black text */
+  --border:             220 12% 88%;
+  --input:              0 0% 100%;
+  --ring:               43 60% 46%;
+
+  --card:               0 0% 100%;       /* pure white cards */
+  --card-foreground:    220 20% 13%;
+  --card-border:        220 12% 90%;
+
+  --popover:            0 0% 100%;
+  --popover-foreground: 220 20% 13%;
+  --popover-border:     220 12% 88%;
+
+  --primary:            220 20% 13%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary:          43 62% 44%;      /* slightly richer gold on light bg */
+  --secondary-foreground: 0 0% 100%;
+
+  --muted:              220 12% 92%;
+  --muted-foreground:   220 10% 46%;
+
+  --accent:             43 70% 52%;
+  --accent-foreground:  220 20% 13%;
+
+  --destructive:            0 68% 52%;
+  --destructive-foreground: 0 0% 100%;
+
+  /* Sidebar — clean white with subtle separator */
+  --sidebar:                    0 0% 100%;
+  --sidebar-foreground:         220 15% 30%;
+  --sidebar-border:             220 12% 90%;
+  --sidebar-primary:            43 62% 40%;   /* deep gold */
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent:             220 12% 94%;
+  --sidebar-accent-foreground:  220 20% 13%;
+  --sidebar-ring:               43 62% 46%;
+
+  --elevate-1: rgba(0,0,0,0.06);
+  --elevate-2: rgba(0,0,0,0.12);
+}
+
+/* ─── Admin dark theme (night mode) ────────────────────────────────────── */
+[data-admin-theme="dark"] {
+  /* inherits the root dark-gold variables — nothing extra needed */
+}
+
 body {
   background-color: hsl(var(--background));
   color:            hsl(var(--foreground));

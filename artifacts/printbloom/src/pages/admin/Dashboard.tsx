@@ -1,13 +1,16 @@
 import { useGetSiteStats, useListOrders, useListMessages, useGetSettings } from '@workspace/api-client-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Package, Clock, CheckCircle, MessageSquare, AlertTriangle, Users, Star, TrendingUp, ChevronRight } from 'lucide-react';
+import { Package, Clock, CheckCircle, MessageSquare, AlertTriangle, Users, Star, TrendingUp, ChevronRight, RefreshCw } from 'lucide-react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 
+const LIVE_INTERVAL = 30_000; // refresh every 30 s
+const liveQuery = { refetchInterval: LIVE_INTERVAL, refetchIntervalInBackground: false };
+
 export default function Dashboard() {
-  const { data: stats, isLoading: statsLoading } = useGetSiteStats();
-  const { data: recentOrders, isLoading: ordersLoading } = useListOrders({ status: 'pending' });
-  const { data: unreadMessages, isLoading: messagesLoading } = useListMessages({ read: false });
+  const { data: stats, isLoading: statsLoading, dataUpdatedAt } = useGetSiteStats({ query: liveQuery });
+  const { data: recentOrders, isLoading: ordersLoading } = useListOrders({ status: 'pending' }, { query: liveQuery });
+  const { data: unreadMessages, isLoading: messagesLoading } = useListMessages({ read: false }, { query: liveQuery });
   const { data: settings } = useGetSettings();
 
   const statCards = [
@@ -21,11 +24,21 @@ export default function Dashboard() {
     { title: 'Total Reviews', value: stats?.totalReviews || 0, icon: TrendingUp, link: '/admin/reviews', iconBg: 'bg-indigo-100', iconColor: 'text-indigo-700', borderClass: 'card-accent-l-indigo' },
   ];
 
+  const lastUpdated = dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString('en-LK', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : null;
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
-      <div>
-        <h1 className="text-3xl font-serif font-bold text-foreground">Workshop Dashboard</h1>
-        <p className="text-muted-foreground mt-2">Welcome back. Here is what's happening at {settings?.businessName || 'HAVESTORY'} today.</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-serif font-bold text-foreground">Workshop Dashboard</h1>
+          <p className="text-muted-foreground mt-2">Welcome back. Here is what's happening at {settings?.businessName || 'HAVESTORY'} today.</p>
+        </div>
+        {lastUpdated && (
+          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 uppercase tracking-widest shrink-0 mt-1">
+            <RefreshCw className="w-2.5 h-2.5 animate-[spin_3s_linear_infinite] opacity-50" />
+            {lastUpdated}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">

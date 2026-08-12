@@ -54,6 +54,12 @@ import ShippingVerify  from './pages/public/ShippingVerify';
 const queryClient = new QueryClient();
 const SPLASH_KEY  = 'hs_splash_v2';
 
+function CursorGate() {
+  const [location] = useLocation();
+  if (location.startsWith('/admin')) return null;
+  return <CustomCursor />;
+}
+
 function PublicRoutes() {
   return (
     <PublicLayout>
@@ -141,7 +147,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-          <CustomCursor />
+          {/* Custom cursor only on public site — admin uses system cursor */}
+          <CursorGate />
           {showSplash && <SplashScreen onDone={handleSplashDone} />}
           <Router />
         </WouterRouter>
