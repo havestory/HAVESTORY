@@ -27,7 +27,11 @@ export function setHomeServicesCache(data: any[]) {
 }
 
 export function broadcastAdminSave() {
-  try { localStorage.setItem(INVALIDATE_KEY, String(Date.now())); } catch {}
+  const timestamp = String(Date.now());
+  try { localStorage.setItem(INVALIDATE_KEY, timestamp); } catch {}
+  // Storage events do not fire in the tab that made the change. Dispatch a
+  // same-tab event as well so the public shell can refresh without a reload.
+  try { window.dispatchEvent(new CustomEvent("hs:admin-saved", { detail: { timestamp } })); } catch {}
 }
 
 export function getAdminSavedAt(): number {

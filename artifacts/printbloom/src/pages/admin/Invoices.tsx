@@ -1247,7 +1247,7 @@ export default function AdminInvoices() {
                     <div className="w-6 h-6 rounded-lg bg-blue-100 flex items-center justify-center"><Truck size={13} className="text-blue-600" /></div>
                     <span className="text-sm font-bold text-gray-800">Shipping Charges</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {SHIPPING_OPTIONS.map(opt => (
                       <button key={opt.key} onClick={() => setShipping(opt.key)}
                         className={`px-3 py-2.5 rounded-xl text-xs font-semibold text-left border-2 transition-all ${shipping === opt.key ? "border-amber-400 bg-amber-50 text-amber-700" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}>
@@ -1273,7 +1273,7 @@ export default function AdminInvoices() {
                       </div>
                       <div className="bg-blue-50/70 border border-blue-100 rounded-xl p-3 space-y-2">
                         <div className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Weight Rates (editable)</div>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           <div>
                             <label className="text-[10px] text-gray-500 block mb-1">First kg rate (Rs.)</label>
                             <div className="relative">
@@ -1345,25 +1345,25 @@ export default function AdminInvoices() {
                     />
                   </div>
                   <div className="mt-3 bg-gradient-to-r from-amber-50 to-stone-50 rounded-xl p-3 space-y-1.5 border border-amber-100">
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>Subtotal</span><span className="font-semibold">Rs. {subtotal.toLocaleString("en-IN")}</span>
+                    <div className="flex items-start justify-between gap-3 text-xs text-gray-500">
+                      <span className="min-w-0">Subtotal</span><span className="shrink-0 text-right font-semibold tabular-nums">Rs. {subtotal.toLocaleString("en-IN")}</span>
                     </div>
                     {shippingAmt > 0 && (
-                      <div className="flex justify-between text-xs text-gray-500">
-                        <span>Shipping</span><span>Rs. {shippingAmt.toLocaleString("en-IN")}</span>
+                      <div className="flex items-start justify-between gap-3 text-xs text-gray-500">
+                        <span className="min-w-0">Shipping</span><span className="shrink-0 text-right tabular-nums">Rs. {shippingAmt.toLocaleString("en-IN")}</span>
                       </div>
                     )}
                     {num(advance) > 0 && (
-                      <div className="flex justify-between text-xs text-green-600">
-                        <span>Advance paid</span><span>−Rs. {num(advance).toLocaleString("en-IN")}</span>
+                      <div className="flex items-start justify-between gap-3 text-xs text-green-600">
+                        <span className="min-w-0">Advance paid</span><span className="shrink-0 text-right tabular-nums">−Rs. {num(advance).toLocaleString("en-IN")}</span>
                       </div>
                     )}
-                    <div className="border-t border-amber-200 pt-1.5 flex justify-between text-sm font-bold">
-                      <span>Grand Total</span><span className="text-amber-600">Rs. {grandTotal.toLocaleString("en-IN")}</span>
+                    <div className="border-t border-amber-200 pt-1.5 flex items-start justify-between gap-3 text-sm font-bold">
+                      <span className="min-w-0">Grand Total</span><span className="shrink-0 text-right text-amber-600 tabular-nums">Rs. {grandTotal.toLocaleString("en-IN")}</span>
                     </div>
                     {num(advance) > 0 && (
-                      <div className="flex justify-between text-sm font-bold text-stone-700">
-                        <span>Balance Due</span><span>Rs. {(grandTotal - num(advance)).toLocaleString("en-IN")}</span>
+                      <div className="flex items-start justify-between gap-3 text-sm font-bold text-stone-700">
+                        <span className="min-w-0">Balance Due</span><span className="shrink-0 text-right tabular-nums">Rs. {(grandTotal - num(advance)).toLocaleString("en-IN")}</span>
                       </div>
                     )}
                   </div>

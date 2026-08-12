@@ -7,7 +7,7 @@ import { applyThemeVars } from '@/lib/theme-utils';
 
 export function PublicLayout({ children }: { children: ReactNode }) {
   const [location]   = useLocation();
-  const { data: settings } = useGetSettings();
+  const { data: settings, refetch: refetchSettings } = useGetSettings();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showWa,   setShowWa]   = useState(false);
@@ -24,6 +24,20 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => { setMenuOpen(false); }, [location]);
+
+  useEffect(() => {
+    const refreshSettings = () => { void refetchSettings(); };
+    const onAdminSave = () => refreshSettings();
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === 'hs_admin_saved_at') refreshSettings();
+    };
+    window.addEventListener('hs:admin-saved', onAdminSave);
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener('hs:admin-saved', onAdminSave);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, [refetchSettings]);
 
   useEffect(() => {
     if (!settings) return;

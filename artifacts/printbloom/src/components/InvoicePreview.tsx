@@ -93,11 +93,18 @@ function Divider() {
 
 function ItemsTable({ chunk, startIdx }: { chunk: LineItem[]; startIdx: number }) {
   return (
-    <table style={{ width: "100%", borderCollapse: "collapse" }}>
+    <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+      <colgroup>
+        <col style={{ width: "7%" }} />
+        <col style={{ width: "43%" }} />
+        <col style={{ width: "10%" }} />
+        <col style={{ width: "20%" }} />
+        <col style={{ width: "20%" }} />
+      </colgroup>
       <thead>
         <tr style={{ background: GRAD }}>
           {["#", "DESCRIPTION", "QTY", "UNIT PRICE", "AMOUNT"].map((h, i) => (
-            <th key={h} style={{ padding: "8px 12px", textAlign: i < 2 ? "left" : "right", color: "#fff", fontSize: 9.5, fontWeight: 700, letterSpacing: 1.2, whiteSpace: "nowrap" }}>{h}</th>
+            <th key={h} style={{ padding: "8px 8px", textAlign: i < 2 ? "left" : "right", color: "#fff", fontSize: 9.5, fontWeight: 700, letterSpacing: 1.2, whiteSpace: "normal", overflowWrap: "anywhere" }}>{h}</th>
           ))}
         </tr>
       </thead>
@@ -109,13 +116,13 @@ function ItemsTable({ chunk, startIdx }: { chunk: LineItem[]; startIdx: number }
           return (
             <tr key={it.id} style={{ borderBottom: "1px solid #f3e8ff", background: bg }}>
               <td style={{ padding: "8px 12px", fontSize: 12, color: "#888", width: 26, textAlign: "left" }}>{startIdx + i + 1}</td>
-              <td style={{ padding: "8px 12px", fontSize: 13, color: "#111", maxWidth: 260 }}>
-                <div style={{ fontWeight: 600 }}>{desc}</div>
+              <td style={{ padding: "8px 8px", fontSize: 13, color: "#111", minWidth: 0, overflowWrap: "anywhere", wordBreak: "break-word" }}>
+                <div style={{ fontWeight: 600, overflowWrap: "anywhere", wordBreak: "break-word" }}>{desc}</div>
                 {it.notes && <div style={{ fontSize: 10, color: "#888", marginTop: 1 }}>{it.notes}</div>}
               </td>
-              <td style={{ padding: "8px 12px", fontSize: 13, color: "#555", textAlign: "right", whiteSpace: "nowrap" }}>{it.qty}</td>
-              <td style={{ padding: "8px 12px", fontSize: 13, color: "#555", textAlign: "right", whiteSpace: "nowrap" }}>{rs(num(it.unitPrice))}</td>
-              <td style={{ padding: "8px 12px", fontSize: 13, fontWeight: 700, color: "#111", textAlign: "right", whiteSpace: "nowrap" }}>{rs(total)}</td>
+              <td style={{ padding: "8px 6px", fontSize: 13, color: "#555", textAlign: "right", whiteSpace: "normal", overflowWrap: "anywhere", fontVariantNumeric: "tabular-nums" }}>{it.qty}</td>
+              <td style={{ padding: "8px 6px", fontSize: 13, color: "#555", textAlign: "right", whiteSpace: "normal", overflowWrap: "anywhere", fontVariantNumeric: "tabular-nums" }}>{rs(num(it.unitPrice))}</td>
+              <td style={{ padding: "8px 6px", fontSize: 13, fontWeight: 700, color: "#111", textAlign: "right", whiteSpace: "normal", overflowWrap: "anywhere", fontVariantNumeric: "tabular-nums" }}>{rs(total)}</td>
             </tr>
           );
         })}
@@ -131,8 +138,8 @@ function SummaryBlock({ subtotal, shippingAmt, advance, grandTotal, shippingLabe
   const isPaid = (status || "").toLowerCase() === "paid";
   const balance = isPaid ? 0 : Math.max(0, grandTotal - num(advance));
   return (
-    <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginTop: 16 }}>
-      <div style={{ flex: 1 }}>
+    <div style={{ display: "flex", gap: 14, alignItems: "stretch", flexWrap: "wrap", marginTop: 16 }}>
+      <div style={{ flex: "1 1 300px", minWidth: 0 }}>
         {notes && (
           <div style={{ background: "#f9fafb", borderRadius: 8, border: "1px solid #f0f0f0", padding: "10px 14px" }}>
             <div style={{ fontSize: 9, fontWeight: 700, color: "#aaa", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>NOTES</div>
@@ -140,7 +147,7 @@ function SummaryBlock({ subtotal, shippingAmt, advance, grandTotal, shippingLabe
           </div>
         )}
       </div>
-      <div style={{ minWidth: 230, flexShrink: 0 }}>
+      <div style={{ flex: "0 1 230px", minWidth: 0, width: "min(100%, 280px)" }}>
         <div style={{ borderRadius: 10, border: "1px solid #f3e8ff", overflow: "hidden" }}>
           <div style={{ background: GRAD, padding: "6px 14px" }}>
             <span style={{ fontSize: 9.5, fontWeight: 700, color: "#fff", letterSpacing: 1.5 }}>SUMMARY</span>
@@ -430,7 +437,7 @@ export function InvoicePreview({
   );
 
   const BillToBlock = () => (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, margin: "12px 0" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))", gap: 12, margin: "12px 0" }}>
       <div style={{ background: "#fffbeb", borderRadius: 10, padding: "12px 14px", border: `1px solid #d6b98c` }}>
         <div style={{ fontSize: 8.5, fontWeight: 700, color: PINK, letterSpacing: 2, textTransform: "uppercase", marginBottom: 7 }}>BILL TO</div>
         <div style={{ fontWeight: 800, fontSize: 14.5, color: "#111" }}>{form.clientName || "—"}</div>
@@ -511,7 +518,7 @@ export function InvoicePreview({
                     <Lock size={8} /> Private · not printed
                   </span>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
                   {[
                     { label: "Total Cost",  val: hasCost ? `Rs. ${totalCost.toLocaleString("en-IN", { maximumFractionDigits: 2 })}` : "—", color: hasCost ? "text-red-500" : "text-gray-300" },
                     { label: "Revenue",     val: `Rs. ${totalRevenue.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`, color: "text-gray-700" },
@@ -606,19 +613,19 @@ export function InvoicePreview({
                             <span style={{ fontSize: 12, fontWeight: 700, color: "#fff", letterSpacing: 1 }}>BANK TRANSFER{banks.length > 1 ? ` — ACCOUNT ${bi + 1}` : ""}</span>
                           </div>
                           <div style={{ padding: "14px 16px", background: "#fff" }}>
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 28px" }}>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))", gap: "10px 20px" }}>
                               {([["Bank Name", bank.bankName], ["Account Holder", bank.accountHolder], ["Account Number", bank.accountNumber], ["Branch", bank.branch], ["Swift / BIC", bank.swiftBic]] as [string, string][])
                                 .filter(([, v]) => v)
                                 .map(([label, val]) => (
                                   <div key={label}>
                                     <div style={{ fontSize: 9, color: "#aaa", fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 3 }}>{label}</div>
-                                    <div style={{ fontSize: 14, fontWeight: 700, color: "#111" }}>{val}</div>
+                                    <div style={{ fontSize: 14, fontWeight: 700, color: "#111", overflowWrap: "anywhere", wordBreak: "break-word" }}>{val}</div>
                                   </div>
                                 ))}
                             </div>
                           </div>
                           <div style={{ background: "#fffbeb", padding: "8px 16px", borderTop: "1px solid #d6b98c" }}>
-                            <span style={{ fontSize: 11, color: PINK, fontWeight: 600 }}>Please include invoice number <strong>{invoiceNo}</strong> as the payment reference.</span>
+                            <span style={{ display: "block", fontSize: 11, color: PINK, fontWeight: 600, overflowWrap: "anywhere", wordBreak: "break-word" }}>Please include invoice number <strong>{invoiceNo}</strong> as the payment reference.</span>
                           </div>
                         </div>
                       ))}

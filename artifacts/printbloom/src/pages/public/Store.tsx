@@ -152,8 +152,10 @@ export default function Store() {
 
     const orderItems = cart.map(item => ({
       productId: item.product.id,
+      productName: item.product.name,
       quantity: item.quantity,
-      unitPrice: item.product.price
+      unitPrice: item.product.price,
+      notes: item.product.description || null,
     }));
 
     const couponNote = couponResult?.valid ? `\nCoupon: ${couponResult.code} (-Rs. ${couponDiscount.toLocaleString('en-IN')})` : '';
@@ -169,6 +171,9 @@ export default function Store() {
         customerEmail,
         customerPhone,
         customerAddress,
+        orderType: "standard",
+        designLinks: [],
+        attachments: [],
         shippingAddress: customerAddress,
         notes: notesText,
         description: notesText,
