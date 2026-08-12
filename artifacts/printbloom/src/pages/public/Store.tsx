@@ -427,7 +427,7 @@ export default function Store() {
                 >
                   Start custom inquiry <ArrowRight size={15} />
                 </Button>
-                <Link href="/custom-order" className="inline-flex h-12 items-center gap-2 rounded-full border border-white/20 px-6 text-xs font-bold uppercase tracking-[0.14em] text-white/80 transition-colors hover:border-secondary hover:text-secondary">
+                <Link href="/custom-project" className="inline-flex h-12 items-center gap-2 rounded-full border border-white/20 px-6 text-xs font-bold uppercase tracking-[0.14em] text-white/80 transition-colors hover:border-secondary hover:text-secondary">
                   Explore custom orders <ArrowUpRight size={14} />
                 </Link>
               </div>
