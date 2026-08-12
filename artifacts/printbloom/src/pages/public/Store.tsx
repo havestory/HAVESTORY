@@ -7,7 +7,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingCart, Plus, Minus, Trash2, Search, CheckCircle2, ArrowRight, Tag, X, Sparkles, ShieldCheck, Clock3, Ruler, Heart, Star, MessageCircle } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Trash2, Search, CheckCircle2, ArrowRight, Tag, X, Sparkles, ShieldCheck, Clock3, Ruler, Heart, Star, MessageCircle, Eye, SlidersHorizontal, ArrowUpRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'wouter';
 
@@ -28,6 +28,9 @@ export default function Store() {
   
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortMode, setSortMode] = useState<'featured' | 'price-low' | 'price-high'>('featured');
+  const [quickViewProduct, setQuickViewProduct] = useState<any | null>(null);
+  const [savedProducts, setSavedProducts] = useState<number[]>([]);
   const { toast } = useToast();
   
   // Local Cart State
@@ -51,10 +54,22 @@ export default function Store() {
   const categoryList = Array.isArray(categories) ? categories : [];
   const filteredProducts = productList.filter(p => {
     const matchesCategory = activeCategory === 'all' || p.categoryId?.toString() === activeCategory;
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    const name = String(p.name || '');
+    const description = String(p.description || '');
+    const query = searchQuery.trim().toLowerCase();
+    const matchesSearch = name.toLowerCase().includes(query) || description.toLowerCase().includes(query);
     return matchesCategory && matchesSearch;
   });
+
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    if (sortMode === 'price-low') return parseFloat(String(a.price || 0)) - parseFloat(String(b.price || 0));
+    if (sortMode === 'price-high') return parseFloat(String(b.price || 0)) - parseFloat(String(a.price || 0));
+    return 0;
+  });
+
+  const toggleSaved = (productId: number) => {
+    setSavedProducts(prev => prev.includes(productId) ? prev.filter(id => id !== productId) : [...prev, productId]);
+  };
 
   const addToCart = (product: any) => {
     setCart(prev => {
@@ -184,16 +199,17 @@ export default function Store() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Premium collection hero */}
-      <div className="relative overflow-hidden bg-primary noise">
-        <div className="absolute -right-24 -top-32 h-96 w-96 rounded-full bg-secondary/15 blur-3xl" />
+      <div className="editorial-hero relative overflow-hidden noise">
+        <div className="editorial-orb -right-24 -top-32" />
+        <div className="absolute bottom-10 left-1/2 h-48 w-48 -translate-x-1/2 rounded-full bg-secondary/10 blur-3xl" />
         <div className="relative z-10 mx-auto grid max-w-7xl gap-10 px-6 py-20 lg:grid-cols-[1fr_auto] lg:items-end lg:px-10 lg:py-24">
           <div>
-            <div className="mb-6 flex items-center gap-3"><span className="h-px w-10 bg-secondary" /><span className="section-label text-secondary">THE HAVESTORY EDIT</span></div>
-            <h1 className="max-w-3xl text-5xl font-serif font-bold leading-[0.95] text-white sm:text-6xl lg:text-8xl">Objects made<br /><span className="text-gradient italic">to hold meaning.</span></h1>
+            <div className="mb-6"><span className="editorial-kicker">The HAVESTORY Edit</span></div>
+            <h1 className="editorial-display max-w-3xl text-5xl leading-[0.92] text-white sm:text-6xl lg:text-8xl">Objects made<br /><span className="text-gradient italic">to hold meaning.</span></h1>
             <p className="mt-7 max-w-xl text-base leading-relaxed text-primary-foreground/70 sm:text-lg">Choose a frame, build a collection, and let our studio turn your favourite moments into something you will want to keep close.</p>
             <div className="mt-9 flex flex-wrap gap-3"><span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-white/75"><Sparkles size={13} className="text-secondary" /> Made to order</span><span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-white/75"><ShieldCheck size={13} className="text-secondary" /> Studio quality</span></div>
           </div>
-          <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 text-white/80 sm:grid-cols-4 lg:grid-cols-2">
+          <div className="store-toolbar grid grid-cols-2 gap-px overflow-hidden rounded-2xl text-white/80 sm:grid-cols-4 lg:grid-cols-2">
             {[['48h', 'express options', Clock3], ['1:1', 'design guidance', Ruler], ['5.0', 'client rating', Star], ['Island-wide', 'delivery', Heart]].map(([value, label, Icon]) => <div key={label as string} className="min-w-[125px] bg-black/20 p-4 backdrop-blur">{(() => { const StatIcon = Icon as typeof ShieldCheck; return <StatIcon size={15} className="mb-5 text-secondary" />; })()}<div className="text-lg font-bold text-white">{value as string}</div><div className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-white/45">{label as string}</div></div>)}
           </div>
         </div>
@@ -201,6 +217,7 @@ export default function Store() {
       <div className="border-b border-border bg-card/60"><div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-border px-6 sm:grid-cols-4 lg:px-10"><div className="flex items-center gap-3 px-3 py-4 text-xs font-semibold text-muted-foreground"><ShieldCheck size={16} className="text-secondary" /> Secure packaging</div><div className="flex items-center gap-3 px-3 py-4 text-xs font-semibold text-muted-foreground"><Ruler size={16} className="text-secondary" /> Custom sizing</div><div className="hidden items-center gap-3 px-3 py-4 text-xs font-semibold text-muted-foreground sm:flex"><MessageCircle size={16} className="text-secondary" /> Friendly guidance</div><div className="hidden items-center gap-3 px-3 py-4 text-xs font-semibold text-muted-foreground sm:flex"><Heart size={16} className="text-secondary" /> Made with care</div></div></div>
 
       <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-12 px-6 py-16 lg:flex-row lg:px-10">
+        <div className="editorial-rule absolute left-0 right-0" aria-hidden="true" />
         {/* Categories Sidebar */}
         <aside className="lg:w-64 shrink-0">
           <div className="sticky top-28">
@@ -247,7 +264,9 @@ export default function Store() {
         {/* Product Area */}
         <main className="flex-1">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
-            <div className="relative w-full sm:max-w-xs">
+            <div className="flex min-w-0 flex-1 flex-col gap-3 sm:max-w-md">
+              <div className="flex items-center justify-between gap-3"><div><span className="editorial-kicker">The collection</span><h2 className="mt-2 editorial-display text-3xl text-foreground sm:text-4xl">Find your frame.</h2></div><SlidersHorizontal size={18} className="text-secondary sm:hidden" /></div>
+              <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input 
                 placeholder="Search frames..." 
@@ -255,10 +274,18 @@ export default function Store() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 border-border rounded-[0.25rem] h-11 bg-card focus-visible:ring-primary focus-visible:border-primary"
               />
+              </div>
             </div>
             
             <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-              <p className="text-sm text-muted-foreground font-medium">Showing {filteredProducts?.length || 0} items</p>
+              <div className="flex items-center gap-3">
+                <span className="store-number">{String(sortedProducts.length).padStart(2, '0')} / {String(productList.length).padStart(2, '0')} objects</span>
+                <select value={sortMode} onChange={e => setSortMode(e.target.value as typeof sortMode)} className="h-10 rounded-full border border-border bg-card px-4 text-xs font-bold uppercase tracking-[0.12em] text-foreground outline-none transition-colors focus:border-secondary">
+                  <option value="featured">Featured</option>
+                  <option value="price-low">Price: Low</option>
+                  <option value="price-high">Price: High</option>
+                </select>
+              </div>
               
               <Sheet>
                 <SheetTrigger asChild>
@@ -366,8 +393,8 @@ export default function Store() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-              {filteredProducts?.map((product, i) => (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {sortedProducts.map((product, i) => (
                 <motion.div
                   key={product.id}
                   initial={{ opacity:0, y:32 }}
@@ -375,33 +402,43 @@ export default function Store() {
                   viewport={{ once:true }}
                   transition={{ duration:0.7, delay: (i % 6) * 0.1 }}
                 >
-                  <div className="card-3d group relative overflow-hidden bg-card border border-border flex flex-col h-full rounded-[0.25rem]">
-                    <div className="aspect-[4/3] relative overflow-hidden bg-muted">
-                      <img 
-                        src={product.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&q=80'} 
-                        alt={product.name} 
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                  <div className="store-product-card group flex h-full flex-col rounded-2xl">
+                    <div className="store-product-image aspect-[4/3]">
+                      <img
+                        src={product.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&q=85'}
+                        alt={product.name || 'HAVESTORY frame'}
+                        className="h-full w-full object-cover"
                       />
+                      <div className="absolute inset-x-4 top-4 z-10 flex items-center justify-between">
+                        <span className="store-number rounded-full bg-black/40 px-3 py-1.5 backdrop-blur-md">{String(i + 1).padStart(2, '0')} / EDIT</span>
+                        <div className="flex items-center gap-2">
+                          <button type="button" aria-label={`Preview ${product.name}`} onClick={() => setQuickViewProduct(product)} className="store-icon-button"><Eye size={15} /></button>
+                          <button type="button" aria-label={`Save ${product.name}`} onClick={() => toggleSaved(product.id)} className={`store-icon-button ${savedProducts.includes(product.id) ? 'is-active' : ''}`}><Heart size={15} fill={savedProducts.includes(product.id) ? 'currentColor' : 'none'} /></button>
+                        </div>
+                      </div>
                       {product.category && (
-                        <Badge className="absolute top-4 right-4 rounded-none bg-background/95 text-foreground backdrop-blur-md shadow-sm font-semibold uppercase tracking-wider text-[10px] border-none">
+                        <Badge className="absolute bottom-4 left-4 z-10 rounded-full border border-white/15 bg-black/55 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white backdrop-blur-md">
                           {product.category.name}
                         </Badge>
                       )}
-                      
-                      <button 
+                      <button
                         onClick={(e) => { e.preventDefault(); addToCart(product); }}
-                        className="absolute inset-x-0 bottom-0 z-20 flex w-full cursor-pointer items-center justify-between border-none bg-secondary/95 px-4 py-3 text-left text-sm font-bold text-secondary-foreground transition-transform duration-300 ease-out md:translate-y-full md:group-hover:translate-y-0"
+                        className="absolute inset-x-4 bottom-4 z-20 flex items-center justify-between rounded-full border border-secondary/50 bg-secondary px-5 py-3 text-left text-xs font-black uppercase tracking-[0.14em] text-secondary-foreground shadow-lg transition-all duration-300 ease-out md:translate-y-20 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100"
                       >
-                        <span>Add to Inquiry</span>
-                        <Plus className="w-4 h-4" />
+                        <span>Add to inquiry</span>
+                        <Plus className="h-4 w-4" />
                       </button>
                     </div>
-                    <div className="pt-4 pb-4 px-4 flex flex-col flex-1">
-                      <h3 className="font-serif text-xl font-bold mb-1 line-clamp-1">{product.name}</h3>
-                      <p className="text-xs text-muted-foreground mb-4 line-clamp-2 leading-relaxed">{product.description}</p>
-                      <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
-                        <p className="font-bold text-foreground">Rs. {product.price}</p>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mt-0.5">per {product.priceType}</p>
+                    <div className="flex flex-1 flex-col px-5 pb-5 pt-5">
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <span className="store-number">{product.category?.name || 'HANDCRAFTED EDIT'}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Ready to make</span>
+                      </div>
+                      <h3 className="editorial-display line-clamp-1 text-2xl font-bold text-foreground">{product.name}</h3>
+                      <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{product.description || 'A considered piece, finished by hand in our studio.'}</p>
+                      <div className="mt-auto flex items-end justify-between gap-3 border-t border-border/70 pt-5">
+                        <div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">From</p><p className="mt-1 text-lg font-black text-foreground">Rs. {product.price}</p></div>
+                        <button type="button" onClick={() => setQuickViewProduct(product)} className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-[0.14em] text-secondary transition-colors hover:text-foreground">Details <ArrowUpRight size={13} /></button>
                       </div>
                     </div>
                   </div>
@@ -420,6 +457,25 @@ export default function Store() {
           </div>
         </div>
       )}
+
+      {/* Quick view dialog */}
+      <Dialog open={Boolean(quickViewProduct)} onOpenChange={(open) => !open && setQuickViewProduct(null)}>
+        <DialogContent className="overflow-hidden rounded-2xl border-border bg-background p-0 sm:max-w-3xl">
+          {quickViewProduct && (
+            <div className="grid md:grid-cols-[0.95fr_1.05fr]">
+              <div className="store-product-image min-h-[280px] md:min-h-full"><img src={quickViewProduct.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=900&q=85'} alt={quickViewProduct.name || 'HAVESTORY frame'} className="h-full w-full object-cover" /></div>
+              <div className="flex flex-col justify-center p-7 sm:p-10">
+                <span className="editorial-kicker">A closer look</span>
+                <h2 className="editorial-display mt-4 text-4xl leading-none text-foreground">{quickViewProduct.name}</h2>
+                <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{quickViewProduct.description || 'A considered piece, finished by hand in our studio.'}</p>
+                <div className="my-7 flex items-end justify-between border-y border-border py-5"><div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Studio price</p><p className="mt-1 text-2xl font-black text-foreground">Rs. {quickViewProduct.price}</p></div><span className="store-number">PER {String(quickViewProduct.priceType || 'PIECE').toUpperCase()}</span></div>
+                <div className="flex flex-col gap-3 sm:flex-row"><Button onClick={() => { addToCart(quickViewProduct); setQuickViewProduct(null); }} className="h-12 flex-1 rounded-full bg-secondary font-black uppercase tracking-[0.14em] text-secondary-foreground hover:bg-secondary/90">Add to inquiry <ArrowRight size={15} /></Button><Button type="button" variant="outline" onClick={() => setQuickViewProduct(null)} className="h-12 rounded-full border-border px-6 text-xs font-bold uppercase tracking-[0.14em]">Close</Button></div>
+                <p className="mt-5 flex items-center gap-2 text-xs text-muted-foreground"><ShieldCheck size={14} className="text-secondary" /> We will confirm sizing, finish, and delivery before production.</p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Checkout Dialog */}
       <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
