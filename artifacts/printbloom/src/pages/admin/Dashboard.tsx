@@ -35,7 +35,11 @@ const RANGE_OPTIONS = [
 const STATUS_COLORS = ["#9a6b3f", "#d69e2e", "#2563eb", "#16a34a", "#dc2626", "#64748b"];
 
 async function loadDashboard(days: number): Promise<DashboardData> {
-  const response = await fetch(`/api/stats/dashboard?days=${days}`, { credentials: "include" });
+  const response = await fetch(`/api/stats/dashboard?days=${days}`, {
+    credentials: "include",
+    cache: "no-store",
+    signal: AbortSignal.timeout(20_000),
+  });
   const body = await response.json().catch(() => null);
   if (!response.ok) throw new Error(body?.error || "Dashboard analytics request failed");
   return body;
