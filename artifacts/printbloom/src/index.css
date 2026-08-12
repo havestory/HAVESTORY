@@ -295,7 +295,11 @@ h1, h2, h3 { font-weight: 700; }
 [data-admin-panel] input,
 [data-admin-panel] textarea,
 [data-admin-panel] select {
-  color: hsl(var(--foreground));
+  /* Keep typed values high-contrast even when legacy utility classes or browser
+     autofill styles are present inside older admin dialogs. */
+  color: hsl(var(--foreground)) !important;
+  -webkit-text-fill-color: hsl(var(--foreground));
+  caret-color: hsl(var(--foreground));
   font-weight: 500;
 }
 [data-admin-panel] input::placeholder,
