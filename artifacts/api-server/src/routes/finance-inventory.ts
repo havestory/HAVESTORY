@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { pool } from "@workspace/db";
 import { requireAdmin } from "../lib/auth-cookie";
+import { sendMonthlyFinanceReport } from "../lib/finance-report-scheduler";
 
 const router = Router();
 router.use(requireAdmin);
@@ -456,6 +457,38 @@ router.delete("/cost-values/:id", async (req, res) => {
   } catch (error) {
     req.log.error(error);
     return res.status(500).json({ error: "Unable to delete production cost value" });
+  }
+});
+
+/* ── Monthly report: manual trigger ─────────────────────────────── */
+router.post("/send-report", async (req, res) => {
+  try {
+    const month = /^\d{4}-(0[1-9]|1[0-2])$/.test(String(req.body?.month ?? ""))
+      ? String(req.body.month)
+      : undefined; // defaults to prior month inside sendMonthlyFinanceReport
+
+    const result = await sendMonthlyFinanceReport({
+      month,
+      force: true, // ignore enabled toggle for manual sends
+      log: (msg) => req.log.info(msg),
+    });
+
+    if (result.sent) {
+      return res.json({ success: true, message: "Report sent successfully" });
+    }
+    const readableReasons: Record<string, string> = {
+      smtp_not_configured: "Gmail credentials are not configured in Settings.",
+      no_recipient_configured: "No recipient email address has been saved.",
+      db_error: "Could not read finance data from the database.",
+    };
+    return res.status(422).json({
+      success: false,
+      reason: result.reason,
+      message: readableReasons[result.reason ?? ""] ?? result.reason ?? "Send failed",
+    });
+  } catch (error) {
+    req.log.error(error);
+    return res.status(500).json({ error: "Unable to send finance report" });
   }
 });
 

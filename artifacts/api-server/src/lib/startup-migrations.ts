@@ -87,7 +87,9 @@ export async function runStartupMigrations(log: (msg: string) => void = console.
         ADD COLUMN IF NOT EXISTS order_email_notifications_enabled INTEGER NOT NULL DEFAULT 1,
         ADD COLUMN IF NOT EXISTS order_email_recipients TEXT NOT NULL DEFAULT '',
         ADD COLUMN IF NOT EXISTS gmail_user TEXT,
-        ADD COLUMN IF NOT EXISTS gmail_app_password TEXT;
+        ADD COLUMN IF NOT EXISTS gmail_app_password TEXT,
+        ADD COLUMN IF NOT EXISTS finance_report_email_enabled INTEGER NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS finance_report_email_recipient TEXT;
     `);
     await client.query(`
       CREATE TABLE IF NOT EXISTS project_service_types (

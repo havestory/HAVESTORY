@@ -68,6 +68,7 @@ router.put("/", requireAdmin, async (req, res) => {
       "googlePayNumber","googlePayQrUrl","googlePayInstructions",
       "orderEmailRecipients",
       "gmailUser","gmailAppPassword",
+      "financeReportEmailRecipient",
     ];
     for (const f of fields) {
       if (req.body[f] !== undefined) updateData[f] = req.body[f];
@@ -75,6 +76,9 @@ router.put("/", requireAdmin, async (req, res) => {
     // Boolean-like integer fields (stored as 0/1)
     if (req.body.orderEmailNotificationsEnabled !== undefined) {
       updateData.orderEmailNotificationsEnabled = req.body.orderEmailNotificationsEnabled ? 1 : 0;
+    }
+    if (req.body.financeReportEmailEnabled !== undefined) {
+      updateData.financeReportEmailEnabled = req.body.financeReportEmailEnabled ? 1 : 0;
     }
     if (req.body.taglineEnabled !== undefined) {
       updateData.taglineEnabled = req.body.taglineEnabled ? 1 : 0;

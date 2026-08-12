@@ -90,6 +90,8 @@ export const settingsTable = pgTable("settings", {
   orderEmailRecipients: text("order_email_recipients").notNull().default(""),
   gmailUser: text("gmail_user"),
   gmailAppPassword: text("gmail_app_password"),
+  financeReportEmailEnabled: integer("finance_report_email_enabled").notNull().default(0),
+  financeReportEmailRecipient: text("finance_report_email_recipient"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 

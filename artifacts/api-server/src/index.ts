@@ -2,6 +2,7 @@ import app from "./app";
 import { logger } from "./lib/logger";
 import { pool } from "@workspace/db";
 import { runStartupMigrations } from "./lib/startup-migrations";
+import { startFinanceReportScheduler } from "./lib/finance-report-scheduler";
 
 const rawPort = process.env["PORT"];
 
@@ -44,4 +45,7 @@ app.listen(port, (err) => {
 
   /* Ensure all columns exist — idempotent, safe to run on every start */
   runStartupMigrations(msg => logger.info(msg));
+
+  /* Monthly finance report scheduler */
+  startFinanceReportScheduler(msg => logger.info(msg));
 });
