@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { Fragment, useState, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Search, RefreshCw, Plus, FolderKanban, X, Check, Trash2, Edit2, ChevronDown, ChevronUp, Tag, Loader2 } from "lucide-react";
 import { useListClients } from "@workspace/api-client-react";
@@ -48,9 +48,10 @@ const statusStyle: Record<string, string> = {
 };
 
 function StatusBadge({ status }: { status: string }) {
+  const normalizedStatus = String(status || "planning");
   return (
-    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${statusStyle[status] || "bg-gray-100 text-gray-600"}`}>
-      {status.replace("_", " ")}
+    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${statusStyle[normalizedStatus] || "bg-gray-100 text-gray-600"}`}>
+      {normalizedStatus.replace("_", " ")}
     </span>
   );
 }
@@ -67,6 +68,7 @@ const EMPTY_FORM = {
 export default function CRMProjects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState<DateFilterValue>("all");
@@ -102,9 +104,21 @@ export default function CRMProjects() {
 
   const fetchProjects = async () => {
     setLoading(true);
+    setLoadError("");
     try {
-      const res = await fetch("/api/crm-projects");
-      setProjects(await res.json());
+      const res = await fetch("/api/crm-projects", { credentials: "include", cache: "no-store" });
+      const payload = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(payload?.error || "Could not load CRM projects.");
+      const nextProjects = Array.isArray(payload)
+        ? payload
+        : Array.isArray(payload?.projects)
+          ? payload.projects
+          : null;
+      if (!nextProjects) throw new Error("The CRM projects response was not valid.");
+      setProjects(nextProjects as Project[]);
+    } catch (error) {
+      setProjects([]);
+      setLoadError(error instanceof Error ? error.message : "Could not load CRM projects.");
     } finally {
       setLoading(false);
     }
@@ -112,12 +126,22 @@ export default function CRMProjects() {
 
   const fetchServiceTypes = async () => {
     try {
-      const res = await fetch("/api/project-service-types");
-      if (res.ok) setServiceTypes(await res.json());
-    } catch {}
+      const res = await fetch("/api/project-service-types", { credentials: "include", cache: "no-store" });
+      const payload = await res.json().catch(() => null);
+      if (res.ok) {
+        const nextTypes = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.serviceTypes)
+            ? payload.serviceTypes
+            : [];
+        setServiceTypes(nextTypes as ServiceType[]);
+      }
+    } catch {
+      setServiceTypes([]);
+    }
   };
 
-  useEffect(() => { fetchProjects(); fetchServiceTypes(); }, []);
+  useEffect(() => { void fetchProjects(); void fetchServiceTypes(); }, []);
 
   // Deeplink: open the edit modal for ?edit=<id> (e.g. coming from /admin/clients).
   // Fires once after projects load and the matching project is in state.
@@ -317,7 +341,7 @@ export default function CRMProjects() {
     if (!dateMatchesFilter(p.createdAt, dateFilter)) return false;
     if (search) {
       const q = search.toLowerCase();
-      return p.title.toLowerCase().includes(q) || p.clientName.toLowerCase().includes(q) || p.projectId.toLowerCase().includes(q);
+      return String(p.title || "").toLowerCase().includes(q) || String(p.clientName || "").toLowerCase().includes(q) || String(p.projectId || "").toLowerCase().includes(q);
     }
     return true;
   });
@@ -401,6 +425,15 @@ export default function CRMProjects() {
         {loading ? (
           <div className="space-y-2 p-4">
             {[1, 2, 3].map(i => <div key={i} className="h-16 bg-gray-100 rounded-xl animate-pulse" />)}
+          </div>
+        ) : loadError ? (
+          <div className="py-20 px-6 text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-500">!</div>
+            <p className="text-base font-semibold text-gray-700">CRM projects could not be loaded</p>
+            <p className="mx-auto mt-1 max-w-md text-sm text-gray-400">{loadError}</p>
+            <button type="button" onClick={() => void fetchProjects()} className="mt-5 inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-700">
+              <RefreshCw size={14} /> Try again
+            </button>
           </div>
         ) : filtered.length === 0 ? (
           <div className="py-20 text-center text-gray-300">
@@ -495,7 +528,7 @@ export default function CRMProjects() {
                   const balance = (p.totalValue || 0) - (p.amountPaid || 0);
                   const isExpanded = expanded === p.id;
                   return (
-                    <>
+                    <Fragment key={p.id}>
                       <tr key={p.id} className="hover:bg-gray-50/50 transition-colors cursor-pointer" onClick={() => setExpanded(isExpanded ? null : p.id)}>
                         <td className="px-5 py-3.5">
                           <div className="flex items-center gap-1.5 flex-wrap">
@@ -545,7 +578,7 @@ export default function CRMProjects() {
                           </td>
                         </tr>
                       )}
-                    </>
+                    </Fragment>
                   );
                 })}
               </tbody>
