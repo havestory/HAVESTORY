@@ -138,8 +138,8 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       </div>
 
       {/* ── Main navbar ── */}
-      <header className={`fixed w-full z-40 transition-all duration-500 h-[68px] top-0 md:top-[36px] ${navBg}`}>
-        <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between gap-6">
+      <header className={`fixed w-full z-40 transition-all duration-500 h-[72px] top-0 md:top-[36px] ${navBg}`}>
+        <div className="max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center gap-5 xl:gap-8 2xl:gap-12">
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 shrink-0 group">
@@ -164,11 +164,11 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden lg:flex items-center gap-7">
+          <nav className="hidden xl:flex flex-1 min-w-0 items-center justify-center gap-5 xl:gap-7 2xl:gap-10">
             {navLinks.map(l => (
               <Link
                 key={l.href} href={l.href}
-                className={`text-[12px] font-bold uppercase tracking-[0.14em] transition-colors duration-200 pb-0.5 ${
+                className={`shrink-0 whitespace-nowrap text-[10px] xl:text-[11px] 2xl:text-[12px] font-bold uppercase tracking-[0.12em] xl:tracking-[0.14em] transition-colors duration-200 pb-0.5 ${
                   isActive(l.href)
                     ? 'text-[#C9A84C] border-b border-[#C9A84C]'
                     : 'text-[hsl(var(--foreground)/0.82)] hover:text-[#C9A84C]'
@@ -180,17 +180,17 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           </nav>
 
           {/* Right */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="ml-auto flex items-center gap-2 xl:gap-3 shrink-0">
             <Link href="/store" className="p-2 text-[hsl(var(--foreground)/0.8)] hover:text-[#C9A84C] transition-colors" title="Shop">
               <ShoppingBag className="w-5 h-5" />
             </Link>
             <Link
               href="/custom-project"
-              className="hidden lg:flex items-center gap-2 bg-[#C9A84C] text-[#0A0907] text-[10px] font-bold uppercase tracking-[0.18em] px-5 py-2.5 hover:bg-[#D4B55E] transition-colors btn-glow"
+              className="hidden xl:flex items-center gap-2 bg-[#C9A84C] text-[#0A0907] text-[10px] font-bold uppercase tracking-[0.16em] px-4 2xl:px-5 py-2.5 whitespace-nowrap hover:bg-[#D4B55E] transition-colors btn-glow"
             >
               Custom Order
             </Link>
-            <button className="lg:hidden p-2 text-[hsl(var(--foreground)/0.7)] hover:text-[#C9A84C] transition-colors" onClick={() => setMenuOpen(v => !v)}>
+            <button className="xl:hidden p-2 text-[hsl(var(--foreground)/0.7)] hover:text-[#C9A84C] transition-colors" onClick={() => setMenuOpen(v => !v)}>
               {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
@@ -204,14 +204,14 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             <motion.div
               key="overlay"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm xl:hidden"
               onClick={() => setMenuOpen(false)}
             />
             <motion.div
               key="drawer"
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 280 }}
-              className="fixed right-0 top-0 h-full w-80 z-50 bg-[#0A0907] border-l border-[#2A2418] flex flex-col lg:hidden"
+              className="fixed right-0 top-0 h-full w-80 z-50 bg-[#0A0907] border-l border-[#2A2418] flex flex-col xl:hidden"
               onClick={e => e.stopPropagation()}
             >
               <div className="flex items-center justify-between px-6 py-6 border-b border-[#1E1A14]">
