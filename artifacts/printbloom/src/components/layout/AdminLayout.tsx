@@ -18,7 +18,10 @@ import {
   Layers,
   Box,
   DollarSign,
-  BarChart2
+  BarChart2,
+  Tag,
+  Truck,
+  List
 } from 'lucide-react';
 import { useAdminLogout, useGetAdminMe } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
@@ -108,6 +111,13 @@ export function AdminLayout({ children }: { children: ReactNode }) {
               <div className="section-label text-sidebar-foreground/30 px-3 pt-2 pb-1 text-[9px]">FINANCE</div>
               <NavItem href="/admin/finance" label="Finance" icon={DollarSign} />
               <NavItem href="/admin/reports" label="Reports" icon={BarChart2} />
+            </div>
+
+            <div className="space-y-1">
+              <div className="section-label text-sidebar-foreground/30 px-3 pt-2 pb-1 text-[9px]">STUDIO TOOLS</div>
+              <NavItem href="/admin/coupons"         label="Coupons"         icon={Tag} />
+              <NavItem href="/admin/shipping-labels" label="Shipping Labels" icon={Truck} />
+              <NavItem href="/admin/price-lists"     label="Price Lists"     icon={List} />
             </div>
 
             <div className="space-y-1 pb-4">

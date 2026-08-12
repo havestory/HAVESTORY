@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { ordersTable, settingsTable, productsTable, clientsTable } from "@workspace/db/schema";
+import { ordersTable, settingsTable, productsTable, clientsTable, couponsTable } from "@workspace/db/schema";
 import { invoicesTable } from "@workspace/db/schema";
-import { eq, and, desc, isNull, inArray } from "drizzle-orm";
+import { eq, and, desc, isNull, inArray, sql } from "drizzle-orm";
 import { getAdminAuth, requireAdmin } from "../lib/auth-cookie";
 import multer from "multer";
 import { uploadToCloudinary } from "../lib/cloudinary";
@@ -164,7 +164,10 @@ router.post("/", async (req, res) => {
       customerName, customerPhone, customerEmail, customerAddress,
       orderType = "standard", items = [], designLinks = [], attachments = [],
       notes, shippingMethod, serviceTypeId,
-      dueDate, startDate, priority, discountAmount, advancePaid, tags,
+      dueDate, startDate, priority, advancePaid, tags,
+      // couponCode: validated server-side; discountAmount is only used for
+      // admin-created orders (when the caller is authenticated as admin).
+      couponCode,
       // Optional invoice handling. Defaults preserve the original behaviour
       // (auto-create a fresh invoice) so customer checkout keeps working
       // unchanged. The admin "New Order" modal now passes autoInvoice=false
@@ -173,8 +176,29 @@ router.post("/", async (req, res) => {
       linkInvoiceId,
     } = req.body;
 
-    // Resolve the invoice we are linking to (if any) BEFORE inserting the
-    // order so we can fail fast on bad input.
+    // ── Pre-computation: trusted item total from DB prices ───────────────────
+    // This runs outside the transaction so the heavy product lookup doesn't
+    // hold a transaction open, but the actual coupon *claim* is atomic inside.
+    const adminAuth = getAdminAuth(req);
+    const clientDiscountAmount = req.body.discountAmount;
+
+    const itemTotalForCoupon = await (async () => {
+      if (!couponCode) return 0;
+      const productIds = (Array.isArray(items) ? items : [])
+        .map((it: any) => Number(it.productId)).filter((id: number) => Number.isFinite(id) && id > 0);
+      if (productIds.length === 0) return 0;
+      const dbProducts = await db.select({ id: productsTable.id, price: productsTable.price })
+        .from(productsTable).where(inArray(productsTable.id, productIds));
+      const priceMap = new Map(dbProducts.map(p => [p.id, parseFloat(String(p.price)) || 0]));
+      return (Array.isArray(items) ? items : []).reduce((sum: number, it: any) => {
+        const qty = Math.max(1, Number(it.quantity ?? 1) || 1);
+        const price = priceMap.get(Number(it.productId)) ?? 0;
+        return sum + qty * price;
+      }, 0);
+    })();
+
+    // Resolve the invoice we are linking to (if any) BEFORE the transaction
+    // so we can fail fast on bad input without rolling back.
     let invoiceToLink: typeof invoicesTable.$inferSelect | null = null;
     if (linkInvoiceId !== undefined && linkInvoiceId !== null && linkInvoiceId !== "") {
       const linkId = Number(linkInvoiceId);
@@ -190,28 +214,85 @@ router.post("/", async (req, res) => {
 
     const orderId = await generateOrderId();
     const statusHistory = JSON.stringify([{ status: "submitted", timestamp: new Date().toISOString(), note: "Order request submitted" }]);
-    const [order] = await db.insert(ordersTable).values({
-      orderId,
-      customerName,
-      customerPhone,
-      customerEmail,
-      customerAddress: customerAddress || "",
-      orderType,
-      items: JSON.stringify(items),
-      designLinks: JSON.stringify(designLinks),
-      attachments: JSON.stringify(attachments),
-      status: "submitted",
-      adminNotes: notes,
-      statusHistory,
-      shippingMethod: shippingMethod || null,
-      serviceTypeId: serviceTypeId ? Number(serviceTypeId) : null,
-      dueDate: dueDate || null,
-      startDate: startDate || null,
-      priority: priority || null,
-      discountAmount: Number.isFinite(Number(discountAmount)) ? Math.max(0, Math.round(Number(discountAmount))) : 0,
-      advancePaid: Number.isFinite(Number(advancePaid)) ? Math.max(0, Math.round(Number(advancePaid))) : 0,
-      tags: JSON.stringify(Array.isArray(tags) ? tags : []),
-    }).returning();
+
+    // ── Atomic coupon claim + order insert in a single transaction ────────────
+    // The conditional UPDATE increments usedCount only when all eligibility
+    // conditions still hold at commit time, preventing overselling under
+    // concurrent requests.  If the claim fails the transaction is rolled back
+    // and the order is never created.
+    let discountAmount = 0;
+
+    let order: typeof ordersTable.$inferSelect;
+    try {
+      [order] = await db.transaction(async (tx) => {
+        if (couponCode) {
+          const code = String(couponCode).toUpperCase().trim().slice(0, 100);
+          // Single conditional UPDATE: claim the coupon slot atomically.
+          // Only proceeds when active, not expired, under max-use cap, and
+          // order total meets the minimum requirement.
+          const [claimed] = await tx
+            .update(couponsTable)
+            .set({ usedCount: sql`${couponsTable.usedCount} + 1` })
+            .where(sql`
+              ${couponsTable.code} = ${code}
+              AND ${couponsTable.isActive} = 1
+              AND (${couponsTable.expiresAt} IS NULL OR ${couponsTable.expiresAt} > NOW())
+              AND (${couponsTable.maxUses} IS NULL OR ${couponsTable.usedCount} < ${couponsTable.maxUses})
+              AND (${couponsTable.minOrder} IS NULL OR ${itemTotalForCoupon} >= ${couponsTable.minOrder})
+            `)
+            .returning();
+
+          if (!claimed) {
+            throw Object.assign(
+              new Error("Coupon is not valid, has expired, or the usage limit has been reached"),
+              { couponError: true, status: 400 }
+            );
+          }
+
+          // Derive discount from the claimed coupon row — never from client data
+          const couponType = String(claimed.type ?? "");
+          const couponValue = Number(claimed.value);
+          if (!["percentage", "fixed"].includes(couponType) || !Number.isFinite(couponValue) || couponValue < 0) {
+            throw new Error("Invalid coupon configuration");
+          }
+          const rawDiscount = couponType === "percentage"
+            ? Math.round(Math.min(100, couponValue) * itemTotalForCoupon / 100)
+            : Math.min(couponValue, itemTotalForCoupon);
+          discountAmount = Math.max(0, rawDiscount);
+        } else if (adminAuth && Number.isFinite(Number(clientDiscountAmount))) {
+          // Admin-created orders may supply a manual discount — still bounded
+          discountAmount = Math.max(0, Math.round(Number(clientDiscountAmount)));
+        }
+
+        return tx.insert(ordersTable).values({
+          orderId,
+          customerName,
+          customerPhone,
+          customerEmail,
+          customerAddress: customerAddress || "",
+          orderType,
+          items: JSON.stringify(items),
+          designLinks: JSON.stringify(designLinks),
+          attachments: JSON.stringify(attachments),
+          status: "submitted",
+          adminNotes: notes,
+          statusHistory,
+          shippingMethod: shippingMethod || null,
+          serviceTypeId: serviceTypeId ? Number(serviceTypeId) : null,
+          dueDate: dueDate || null,
+          startDate: startDate || null,
+          priority: priority || null,
+          discountAmount,
+          advancePaid: Number.isFinite(Number(advancePaid)) ? Math.max(0, Math.round(Number(advancePaid))) : 0,
+          tags: JSON.stringify(Array.isArray(tags) ? tags : []),
+        }).returning();
+      });
+    } catch (txErr: any) {
+      if (txErr?.couponError) {
+        return res.status(txErr.status ?? 400).json({ error: txErr.message });
+      }
+      throw txErr; // re-throw for the outer catch handler
+    }
 
     // Fire-and-forget admin email notification. Reads recipients + enabled
     // flag from settings; never blocks the response and swallows errors so

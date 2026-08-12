@@ -38,8 +38,15 @@ import Reviews         from './pages/admin/Reviews';
 import Messages        from './pages/admin/Messages';
 import Notices         from './pages/admin/Notices';
 import Settings        from './pages/admin/Settings';
-import Finance from './pages/admin/Finance';
-import Reports from './pages/admin/Reports';
+import Finance         from './pages/admin/Finance';
+import Reports         from './pages/admin/Reports';
+import Coupons         from './pages/admin/Coupons';
+import ShippingLabels  from './pages/admin/ShippingLabels';
+import PriceLists      from './pages/admin/PriceLists';
+
+// Public (unlisted)
+import PriceListView   from './pages/public/PriceListView';
+import ShippingVerify  from './pages/public/ShippingVerify';
 
 const queryClient = new QueryClient();
 const SPLASH_KEY  = 'hs_splash_v2';
@@ -60,7 +67,9 @@ function PublicRoutes() {
         <Route path="/contact"            component={Contact} />
         <Route path="/custom-project"     component={CustomProject} />
         <Route path="/privacy"            component={Privacy} />
-        <Route path="/terms"              component={Terms} />
+        <Route path="/terms"             component={Terms} />
+        <Route path="/price-list/:publicId" component={PriceListView} />
+        <Route path="/verify-shipping/:token" component={ShippingVerify} />
         <Route component={NotFound} />
       </Switch>
     </PublicLayout>
@@ -87,6 +96,9 @@ function AdminRoutes() {
           <Route path="/admin/settings"        component={Settings} />
           <Route path="/admin/finance"         component={Finance} />
           <Route path="/admin/reports"         component={Reports} />
+          <Route path="/admin/coupons"         component={Coupons} />
+          <Route path="/admin/shipping-labels" component={ShippingLabels} />
+          <Route path="/admin/price-lists"     component={PriceLists} />
           <Route component={NotFound} />
         </Switch>
       </AdminLayout>

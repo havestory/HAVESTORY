@@ -7,9 +7,19 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingCart, Plus, Minus, Trash2, Search, CheckCircle2, ArrowRight } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Trash2, Search, CheckCircle2, ArrowRight, Tag, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'wouter';
+
+interface CouponResult {
+  valid: boolean;
+  id?: number;
+  discount?: number;
+  type?: 'percentage' | 'fixed';
+  value?: number;
+  code?: string;
+  message?: string;
+}
 
 export default function Store() {
   const { data: categories } = useListCategories();
@@ -32,6 +42,11 @@ export default function Store() {
   const [customerAddress, setCustomerAddress] = useState('');
   const [orderDescription, setOrderDescription] = useState('');
 
+  // Coupon state
+  const [couponCode, setCouponCode] = useState('');
+  const [couponResult, setCouponResult] = useState<CouponResult | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+
   const filteredProducts = products?.filter(p => {
     const matchesCategory = activeCategory === 'all' || p.categoryId?.toString() === activeCategory;
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -49,6 +64,9 @@ export default function Store() {
       }
       return [...prev, { product, quantity: 1 }];
     });
+    // Cart changed — discard any applied coupon so it gets re-validated
+    setCouponResult(null);
+    setCouponCode('');
     toast({ title: 'Added to cart', description: `${product.name} added to your inquiry.` });
   };
 
@@ -62,13 +80,48 @@ export default function Store() {
       });
       return updated.filter(item => item.quantity > 0);
     });
+    // Cart changed — discard applied coupon to force re-validation
+    setCouponResult(null);
+    setCouponCode('');
   };
 
   const removeFromCart = (productId: number) => {
     setCart(prev => prev.filter(item => item.product.id !== productId));
+    setCouponResult(null);
+    setCouponCode('');
   };
 
   const cartTotal = cart.reduce((total, item) => total + (parseFloat(item.product.price) * item.quantity), 0);
+  const couponDiscount = couponResult?.valid && couponResult.discount ? couponResult.discount : 0;
+  const finalTotal = Math.max(0, cartTotal - couponDiscount);
+
+  const applyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    try {
+      const res = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: couponCode.trim(), orderTotal: cartTotal }),
+      });
+      const data: CouponResult = await res.json();
+      setCouponResult(data);
+      if (data.valid) {
+        toast({ title: 'Coupon applied!', description: `You save Rs. ${data.discount?.toLocaleString('en-IN')}` });
+      } else {
+        toast({ title: 'Invalid coupon', description: data.message, variant: 'destructive' });
+      }
+    } catch {
+      toast({ title: 'Could not validate coupon', variant: 'destructive' });
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setCouponResult(null);
+    setCouponCode('');
+  };
 
   const handleCheckoutSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,21 +139,27 @@ export default function Store() {
       unitPrice: item.product.price
     }));
 
-    const desc = orderDescription 
-      ? `Custom request: ${orderDescription}\n\nItems:\n${cart.map(c => `${c.quantity}x ${c.product.name}`).join('\n')}`
-      : `Items:\n${cart.map(c => `${c.quantity}x ${c.product.name}`).join('\n')}`;
+    const couponNote = couponResult?.valid ? `\nCoupon: ${couponResult.code} (-Rs. ${couponDiscount.toLocaleString('en-IN')})` : '';
+    const notesText = [
+      orderDescription ? `Custom request: ${orderDescription}` : '',
+      `Items:\n${cart.map(c => `${c.quantity}x ${c.product.name}`).join('\n')}`,
+      couponNote,
+    ].filter(Boolean).join('\n\n');
 
     createOrder.mutate({
       data: {
         customerName,
         customerEmail,
         customerPhone,
+        customerAddress,
         shippingAddress: customerAddress,
-        status: 'pending',
-        totalAmount: cartTotal.toString(),
-        description: desc,
+        notes: notesText,
+        description: notesText,
+        // couponCode is validated server-side; the backend derives the
+        // discount from trusted product prices and increments usedCount.
+        couponCode: couponResult?.valid && couponResult.code ? couponResult.code : undefined,
         items: orderItems as any 
-      }
+      } as any
     }, {
       onSuccess: () => {
         setCart([]);
@@ -111,6 +170,8 @@ export default function Store() {
         setCustomerEmail('');
         setCustomerAddress('');
         setOrderDescription('');
+        setCouponCode('');
+        setCouponResult(null);
       },
       onError: () => {
         toast({ title: 'Error', description: 'Failed to submit order. Please try again.', variant: 'destructive' });
@@ -413,9 +474,54 @@ export default function Store() {
               />
             </div>
 
-            <div className="bg-muted p-4 rounded-[0.25rem] border border-border flex justify-between items-center">
-              <span className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Estimated Total:</span>
-              <span className="font-serif text-2xl font-bold text-foreground">Rs. {cartTotal.toFixed(2)}</span>
+            {/* Coupon Code */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Coupon Code</label>
+              {couponResult?.valid ? (
+                <div className="flex items-center gap-3 bg-green-50 border border-green-200 p-3 rounded-[0.25rem]">
+                  <Tag className="w-4 h-4 text-green-600 shrink-0" />
+                  <span className="text-sm font-bold text-green-700 flex-1">{couponResult.code} — Rs. {couponResult.discount?.toLocaleString('en-IN')} off</span>
+                  <button type="button" onClick={removeCoupon} className="text-green-600 hover:text-green-800">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <Input
+                    value={couponCode}
+                    onChange={e => setCouponCode(e.target.value.toUpperCase())}
+                    placeholder="Enter coupon code"
+                    className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-secondary h-11 bg-muted/30 px-3 flex-1"
+                    onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), applyCoupon())}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={applyCoupon}
+                    disabled={!couponCode.trim() || couponLoading}
+                    className="rounded-[0.25rem] border-border h-11 font-bold uppercase tracking-widest text-xs px-4 shrink-0"
+                  >
+                    {couponLoading ? '...' : 'Apply'}
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-muted p-4 rounded-[0.25rem] border border-border space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Subtotal:</span>
+                <span className="text-base font-semibold text-foreground">Rs. {cartTotal.toFixed(2)}</span>
+              </div>
+              {couponDiscount > 0 && (
+                <div className="flex justify-between items-center text-green-600">
+                  <span className="font-bold text-xs uppercase tracking-widest">Coupon Discount:</span>
+                  <span className="text-base font-semibold">− Rs. {couponDiscount.toLocaleString('en-IN')}</span>
+                </div>
+              )}
+              <div className="flex justify-between items-center border-t border-border pt-2">
+                <span className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Estimated Total:</span>
+                <span className="font-serif text-2xl font-bold text-foreground">Rs. {finalTotal.toFixed(2)}</span>
+              </div>
             </div>
 
             <div className="flex gap-4 pt-2">
