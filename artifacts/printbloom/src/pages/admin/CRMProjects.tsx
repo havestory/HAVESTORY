@@ -377,6 +377,7 @@ export default function CRMProjects() {
             <Tag size={13} /> <span className="hidden sm:inline">Service Types</span><span className="sm:hidden">Types</span>
           </button>
           <button
+            type="button"
             onClick={openNew}
             className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-semibold shadow-sm hover:opacity-90 transition-opacity"
           >
