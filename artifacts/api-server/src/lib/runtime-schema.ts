@@ -1,6 +1,6 @@
 import { pool } from "@workspace/db";
 
-const SCHEMA_VERSION = "2026-08-12-core-v2";
+const SCHEMA_VERSION = "2026-08-12-core-v3";
 let runtimeSchemaReady: Promise<void> | null = null;
 
 async function versionExists(version: string): Promise<boolean> {
@@ -41,6 +41,11 @@ async function applyRuntimeSchema(): Promise<void> {
         id SERIAL PRIMARY KEY, name TEXT NOT NULL, description TEXT NOT NULL DEFAULT '',
         image_url TEXT, sort_order INTEGER NOT NULL DEFAULT 0, created_at TIMESTAMP NOT NULL DEFAULT NOW()
       );
+      ALTER TABLE categories
+        ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT '',
+        ADD COLUMN IF NOT EXISTS image_url TEXT,
+        ADD COLUMN IF NOT EXISTS sort_order INTEGER NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW();
       CREATE TABLE IF NOT EXISTS products (
         id SERIAL PRIMARY KEY, category_id INTEGER, name TEXT NOT NULL,
         description TEXT NOT NULL DEFAULT '', price TEXT NOT NULL DEFAULT '0',
@@ -70,6 +75,184 @@ async function applyRuntimeSchema(): Promise<void> {
         comment TEXT NOT NULL, photo_url TEXT, approved BOOLEAN NOT NULL DEFAULT FALSE,
         featured BOOLEAN NOT NULL DEFAULT FALSE, created_at TIMESTAMP NOT NULL DEFAULT NOW()
       );
+      ALTER TABLE reviews
+        ADD COLUMN IF NOT EXISTS photo_url TEXT,
+        ADD COLUMN IF NOT EXISTS approved BOOLEAN NOT NULL DEFAULT FALSE,
+        ADD COLUMN IF NOT EXISTS featured BOOLEAN NOT NULL DEFAULT FALSE,
+        ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW();
+
+      CREATE TABLE IF NOT EXISTS service_categories (
+        id SERIAL PRIMARY KEY, name TEXT NOT NULL, sort_order INTEGER NOT NULL DEFAULT 0,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      ALTER TABLE service_categories
+        ADD COLUMN IF NOT EXISTS sort_order INTEGER NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW();
+      CREATE TABLE IF NOT EXISTS services (
+        id SERIAL PRIMARY KEY, name TEXT NOT NULL, description TEXT NOT NULL DEFAULT '',
+        price TEXT, price_type TEXT NOT NULL DEFAULT 'custom_quote', package_details TEXT,
+        highlights TEXT NOT NULL DEFAULT '[]', image_url TEXT,
+        featured BOOLEAN NOT NULL DEFAULT FALSE, active BOOLEAN NOT NULL DEFAULT TRUE,
+        sort_order INTEGER NOT NULL DEFAULT 0, category_id INTEGER,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      ALTER TABLE services
+        ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT '',
+        ADD COLUMN IF NOT EXISTS price TEXT,
+        ADD COLUMN IF NOT EXISTS price_type TEXT NOT NULL DEFAULT 'custom_quote',
+        ADD COLUMN IF NOT EXISTS package_details TEXT,
+        ADD COLUMN IF NOT EXISTS highlights TEXT NOT NULL DEFAULT '[]',
+        ADD COLUMN IF NOT EXISTS image_url TEXT,
+        ADD COLUMN IF NOT EXISTS featured BOOLEAN NOT NULL DEFAULT FALSE,
+        ADD COLUMN IF NOT EXISTS active BOOLEAN NOT NULL DEFAULT TRUE,
+        ADD COLUMN IF NOT EXISTS sort_order INTEGER NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS category_id INTEGER,
+        ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW();
+      CREATE TABLE IF NOT EXISTS clients (
+        id SERIAL PRIMARY KEY, name TEXT NOT NULL, business_name TEXT, email TEXT,
+        phone TEXT, address TEXT, approved BOOLEAN NOT NULL DEFAULT TRUE, notes TEXT,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(), updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        deleted_at TIMESTAMP
+      );
+      ALTER TABLE clients
+        ADD COLUMN IF NOT EXISTS business_name TEXT,
+        ADD COLUMN IF NOT EXISTS email TEXT,
+        ADD COLUMN IF NOT EXISTS phone TEXT,
+        ADD COLUMN IF NOT EXISTS address TEXT,
+        ADD COLUMN IF NOT EXISTS approved BOOLEAN NOT NULL DEFAULT TRUE,
+        ADD COLUMN IF NOT EXISTS notes TEXT,
+        ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+
+      CREATE TABLE IF NOT EXISTS orders (
+        id SERIAL PRIMARY KEY, order_id TEXT NOT NULL UNIQUE, customer_name TEXT NOT NULL,
+        customer_phone TEXT NOT NULL, customer_email TEXT, customer_address TEXT NOT NULL DEFAULT '',
+        order_type TEXT NOT NULL DEFAULT 'standard', items TEXT NOT NULL DEFAULT '[]',
+        design_links TEXT NOT NULL DEFAULT '[]', attachments TEXT NOT NULL DEFAULT '[]',
+        status TEXT NOT NULL DEFAULT 'submitted', admin_notes TEXT, estimated_completion TEXT,
+        status_history TEXT NOT NULL DEFAULT '[]', delivery_method TEXT, courier_name TEXT,
+        courier_tracking_number TEXT, online_delivery_files TEXT NOT NULL DEFAULT '[]',
+        online_delivery_links TEXT NOT NULL DEFAULT '[]', order_description TEXT,
+        shipping_method TEXT, payment_proof_url TEXT, proof_file_url TEXT, proof_file_name TEXT,
+        service_type_id INTEGER, due_date TEXT, start_date TEXT, priority TEXT,
+        discount_amount INTEGER NOT NULL DEFAULT 0, advance_paid INTEGER NOT NULL DEFAULT 0,
+        tags TEXT NOT NULL DEFAULT '[]', created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW(), deleted_at TIMESTAMP
+      );
+      ALTER TABLE orders
+        ADD COLUMN IF NOT EXISTS order_id TEXT,
+        ADD COLUMN IF NOT EXISTS customer_name TEXT NOT NULL DEFAULT 'Customer',
+        ADD COLUMN IF NOT EXISTS customer_phone TEXT NOT NULL DEFAULT '',
+        ADD COLUMN IF NOT EXISTS customer_email TEXT,
+        ADD COLUMN IF NOT EXISTS customer_address TEXT NOT NULL DEFAULT '',
+        ADD COLUMN IF NOT EXISTS order_type TEXT NOT NULL DEFAULT 'standard',
+        ADD COLUMN IF NOT EXISTS items TEXT NOT NULL DEFAULT '[]',
+        ADD COLUMN IF NOT EXISTS design_links TEXT NOT NULL DEFAULT '[]',
+        ADD COLUMN IF NOT EXISTS attachments TEXT NOT NULL DEFAULT '[]',
+        ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'submitted',
+        ADD COLUMN IF NOT EXISTS admin_notes TEXT,
+        ADD COLUMN IF NOT EXISTS estimated_completion TEXT,
+        ADD COLUMN IF NOT EXISTS status_history TEXT NOT NULL DEFAULT '[]',
+        ADD COLUMN IF NOT EXISTS delivery_method TEXT,
+        ADD COLUMN IF NOT EXISTS courier_name TEXT,
+        ADD COLUMN IF NOT EXISTS courier_tracking_number TEXT,
+        ADD COLUMN IF NOT EXISTS online_delivery_files TEXT NOT NULL DEFAULT '[]',
+        ADD COLUMN IF NOT EXISTS online_delivery_links TEXT NOT NULL DEFAULT '[]',
+        ADD COLUMN IF NOT EXISTS order_description TEXT,
+        ADD COLUMN IF NOT EXISTS shipping_method TEXT,
+        ADD COLUMN IF NOT EXISTS payment_proof_url TEXT,
+        ADD COLUMN IF NOT EXISTS proof_file_url TEXT,
+        ADD COLUMN IF NOT EXISTS proof_file_name TEXT,
+        ADD COLUMN IF NOT EXISTS service_type_id INTEGER,
+        ADD COLUMN IF NOT EXISTS due_date TEXT,
+        ADD COLUMN IF NOT EXISTS start_date TEXT,
+        ADD COLUMN IF NOT EXISTS priority TEXT,
+        ADD COLUMN IF NOT EXISTS discount_amount INTEGER NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS advance_paid INTEGER NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS tags TEXT NOT NULL DEFAULT '[]',
+        ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+
+      CREATE TABLE IF NOT EXISTS invoices (
+        id SERIAL PRIMARY KEY, invoice_number TEXT NOT NULL UNIQUE, client_name TEXT NOT NULL,
+        client_id INTEGER, client_phone TEXT, client_email TEXT, order_id TEXT,
+        amount TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending', due_date TEXT,
+        notes TEXT, metadata TEXT, created_at TIMESTAMP NOT NULL DEFAULT NOW(), deleted_at TIMESTAMP
+      );
+      ALTER TABLE invoices
+        ADD COLUMN IF NOT EXISTS invoice_number TEXT,
+        ADD COLUMN IF NOT EXISTS client_name TEXT NOT NULL DEFAULT 'Customer',
+        ADD COLUMN IF NOT EXISTS client_id INTEGER,
+        ADD COLUMN IF NOT EXISTS client_phone TEXT,
+        ADD COLUMN IF NOT EXISTS client_email TEXT,
+        ADD COLUMN IF NOT EXISTS order_id TEXT,
+        ADD COLUMN IF NOT EXISTS amount TEXT NOT NULL DEFAULT '0',
+        ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'pending',
+        ADD COLUMN IF NOT EXISTS due_date TEXT,
+        ADD COLUMN IF NOT EXISTS notes TEXT,
+        ADD COLUMN IF NOT EXISTS metadata TEXT,
+        ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+
+      CREATE TABLE IF NOT EXISTS inventory (
+        id SERIAL PRIMARY KEY, name TEXT NOT NULL, description TEXT,
+        quantity INTEGER NOT NULL DEFAULT 0, unit TEXT NOT NULL DEFAULT 'units',
+        low_stock_threshold INTEGER NOT NULL DEFAULT 10, cost TEXT, supplier TEXT,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(), updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      ALTER TABLE inventory
+        ADD COLUMN IF NOT EXISTS description TEXT,
+        ADD COLUMN IF NOT EXISTS quantity INTEGER NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS unit TEXT NOT NULL DEFAULT 'units',
+        ADD COLUMN IF NOT EXISTS low_stock_threshold INTEGER NOT NULL DEFAULT 10,
+        ADD COLUMN IF NOT EXISTS cost TEXT,
+        ADD COLUMN IF NOT EXISTS supplier TEXT,
+        ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT NOW();
+
+      CREATE TABLE IF NOT EXISTS messages (
+        id SERIAL PRIMARY KEY, message_id TEXT NOT NULL UNIQUE, full_name TEXT NOT NULL,
+        phone TEXT NOT NULL DEFAULT '', email TEXT, subject TEXT NOT NULL DEFAULT '',
+        message TEXT NOT NULL DEFAULT '', is_read BOOLEAN NOT NULL DEFAULT FALSE,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      ALTER TABLE messages
+        ADD COLUMN IF NOT EXISTS message_id TEXT,
+        ADD COLUMN IF NOT EXISTS full_name TEXT NOT NULL DEFAULT 'Customer',
+        ADD COLUMN IF NOT EXISTS phone TEXT NOT NULL DEFAULT '',
+        ADD COLUMN IF NOT EXISTS email TEXT,
+        ADD COLUMN IF NOT EXISTS subject TEXT NOT NULL DEFAULT '',
+        ADD COLUMN IF NOT EXISTS message TEXT NOT NULL DEFAULT '',
+        ADD COLUMN IF NOT EXISTS is_read BOOLEAN NOT NULL DEFAULT FALSE,
+        ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW();
+
+      CREATE TABLE IF NOT EXISTS coupons (
+        id SERIAL PRIMARY KEY, code TEXT NOT NULL UNIQUE,
+        type TEXT NOT NULL DEFAULT 'percentage', value REAL NOT NULL,
+        min_order REAL, max_uses INTEGER, used_count INTEGER NOT NULL DEFAULT 0,
+        is_active INTEGER NOT NULL DEFAULT 1, expires_at TIMESTAMP,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE TABLE IF NOT EXISTS project_service_types (
+        id SERIAL PRIMARY KEY, name TEXT NOT NULL UNIQUE,
+        sort_order INTEGER NOT NULL DEFAULT 0, created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE TABLE IF NOT EXISTS admin_staff (
+        id SERIAL PRIMARY KEY, name TEXT NOT NULL, username TEXT NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL, permissions JSONB NOT NULL DEFAULT '[]'::jsonb,
+        active BOOLEAN NOT NULL DEFAULT TRUE, created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW(), last_login_at TIMESTAMP
+      );
+      CREATE TABLE IF NOT EXISTS admin_activity_log (
+        id BIGSERIAL PRIMARY KEY, actor_type TEXT NOT NULL, actor_id INTEGER,
+        actor_username TEXT NOT NULL, action TEXT NOT NULL, method TEXT NOT NULL,
+        path TEXT NOT NULL, status_code INTEGER, created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS admin_activity_created_idx ON admin_activity_log(created_at DESC);
+      CREATE INDEX IF NOT EXISTS admin_activity_actor_idx ON admin_activity_log(actor_id, created_at DESC);
+
       CREATE TABLE IF NOT EXISTS settings (id SERIAL PRIMARY KEY);
       ALTER TABLE settings
         ADD COLUMN IF NOT EXISTS business_name TEXT NOT NULL DEFAULT 'HAVESTORY',
@@ -163,11 +346,14 @@ async function applyRuntimeSchema(): Promise<void> {
         ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT NOW();
 
       DO $$ BEGIN
-        IF to_regclass('public.orders') IS NOT NULL THEN ALTER TABLE orders ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP; END IF;
-        IF to_regclass('public.invoices') IS NOT NULL THEN ALTER TABLE invoices ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP; END IF;
-        IF to_regclass('public.clients') IS NOT NULL THEN ALTER TABLE clients ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP; END IF;
         IF to_regclass('public.crm_projects') IS NOT NULL THEN ALTER TABLE crm_projects ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP; END IF;
       END $$;
+
+      CREATE INDEX IF NOT EXISTS idx_orders_created_at_active ON orders(created_at DESC) WHERE deleted_at IS NULL;
+      CREATE INDEX IF NOT EXISTS idx_orders_status_created ON orders(status, created_at DESC) WHERE deleted_at IS NULL;
+      CREATE INDEX IF NOT EXISTS idx_invoices_created_at_active ON invoices(created_at DESC) WHERE deleted_at IS NULL;
+      CREATE INDEX IF NOT EXISTS idx_invoices_status_created ON invoices(status, created_at DESC) WHERE deleted_at IS NULL;
+      CREATE INDEX IF NOT EXISTS idx_clients_created_at_active ON clients(created_at DESC) WHERE deleted_at IS NULL;
     `);
 
     await client.query("INSERT INTO app_schema_versions(version) VALUES ($1)", [SCHEMA_VERSION]);

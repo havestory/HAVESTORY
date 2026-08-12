@@ -180,16 +180,22 @@ export default function AdminInvoices() {
 
   const { mutate: createInvoice, isPending } = useCreateInvoice({
     mutation: {
+      onMutate: () => setClientCreateError(""),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["/api/invoices"] });
         setShowManual(false);
         setShowPreview(false);
         resetForm();
-      }
+      },
+      onError: (error: any) => {
+        const message = error?.data?.error || error?.message || "The invoice could not be created. Please retry.";
+        setClientCreateError(message);
+      },
     }
   });
   const { mutate: updateInvoice, isPending: isUpdating } = useUpdateInvoice({
     mutation: {
+      onMutate: () => setClientCreateError(""),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["/api/invoices"] });
         setEditingInvId(null);
@@ -198,7 +204,11 @@ export default function AdminInvoices() {
         setShowManual(false);
         setShowPreview(false);
         resetForm();
-      }
+      },
+      onError: (error: any) => {
+        const message = error?.data?.error || error?.message || "The invoice could not be updated. Please retry.";
+        setClientCreateError(message);
+      },
     }
   });
   const { mutate: deleteInvoice, mutateAsync: deleteInvoiceAsync } = useDeleteInvoice({
