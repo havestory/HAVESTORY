@@ -16,7 +16,9 @@ function publicId() {
   return randomBytes(12).toString("base64url");
 }
 
-async function ensureTable() {
+let tableReady: Promise<void> | null = null;
+
+async function initializeTable() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS price_lists (
       id SERIAL PRIMARY KEY,
@@ -34,6 +36,16 @@ async function ensureTable() {
   `);
   await pool.query("ALTER TABLE price_lists ADD COLUMN IF NOT EXISTS staff_visible INTEGER NOT NULL DEFAULT 1");
   await pool.query("CREATE INDEX IF NOT EXISTS price_lists_public_id_idx ON price_lists(public_id)");
+}
+
+function ensureTable(): Promise<void> {
+  if (!tableReady) {
+    tableReady = initializeTable().catch(error => {
+      tableReady = null;
+      throw error;
+    });
+  }
+  return tableReady;
 }
 
 function cleanSections(value: unknown): PriceListSection[] {

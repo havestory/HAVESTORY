@@ -1,4 +1,4 @@
-import { type ReactNode, useState, useCallback } from 'react';
+import { type ReactNode, useState, useCallback, lazy, Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
@@ -13,54 +13,79 @@ import { CustomCursor }   from './components/CustomCursor';
 
 // Public Pages
 import Home           from './pages/public/Home';
-import Store          from './pages/public/Store';
-import Services       from './pages/public/Services';
-import Portfolio      from './pages/public/Portfolio';
-import TrackOrder     from './pages/public/TrackOrder';
-import About          from './pages/public/About';
-import Contact        from './pages/public/Contact';
-import CustomProject  from './pages/public/CustomProject';
-import Privacy        from './pages/public/Privacy';
-import Terms          from './pages/public/Terms';
-import ClientVerification from './pages/ClientVerification';
-import StaffVerification  from './pages/StaffVerification';
-import ClientAgreement    from './pages/ClientAgreement';
+const Store = lazy(() => import('./pages/public/Store'));
+const Services = lazy(() => import('./pages/public/Services'));
+const Portfolio = lazy(() => import('./pages/public/Portfolio'));
+const TrackOrder = lazy(() => import('./pages/public/TrackOrder'));
+const About = lazy(() => import('./pages/public/About'));
+const Contact = lazy(() => import('./pages/public/Contact'));
+const CustomProject = lazy(() => import('./pages/public/CustomProject'));
+const Privacy = lazy(() => import('./pages/public/Privacy'));
+const Terms = lazy(() => import('./pages/public/Terms'));
+const ClientVerification = lazy(() => import('./pages/ClientVerification'));
+const StaffVerification = lazy(() => import('./pages/StaffVerification'));
+const ClientAgreement = lazy(() => import('./pages/ClientAgreement'));
 
 // Admin Pages
-import AdminLogin      from './pages/admin/Login';
-import Dashboard       from './pages/admin/Dashboard';
-import Orders          from './pages/admin/Orders';
-import CustomProjects  from './pages/admin/CustomProjects';
-import Clients         from './pages/admin/Clients';
-import CRMProjects     from './pages/admin/CRMProjects';
-import Invoices        from './pages/admin/Invoices';
-import Products        from './pages/admin/Products';
-import AdminServices   from './pages/admin/Services';
-import RawMaterials    from './pages/admin/RawMaterials';
-import Reviews         from './pages/admin/Reviews';
-import Messages        from './pages/admin/Messages';
-import Notices         from './pages/admin/Notices';
-import Settings        from './pages/admin/Settings';
-import WebsiteEditor   from './pages/admin/WebsiteEditor';
-import Finance         from './pages/admin/Finance';
-import Reports         from './pages/admin/Reports';
-import Coupons         from './pages/admin/Coupons';
-import ShippingLabels  from './pages/admin/ShippingLabels';
-import PriceLists      from './pages/admin/PriceLists';
-import Team            from './pages/admin/Team';
-import Attendance      from './pages/admin/Attendance';
-import StaffProfile    from './pages/admin/StaffProfile';
-import ProductionUsage from './pages/admin/ProductionUsage';
-import ClientVerificationReport from './pages/admin/ClientVerificationReport';
-import StaffVerificationReport  from './pages/admin/StaffVerificationReport';
-import ClientAgreementReport    from './pages/admin/ClientAgreementReport';
+const AdminLogin = lazy(() => import('./pages/admin/Login'));
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
+const Orders = lazy(() => import('./pages/admin/Orders'));
+const CustomProjects = lazy(() => import('./pages/admin/CustomProjects'));
+const Clients = lazy(() => import('./pages/admin/Clients'));
+const CRMProjects = lazy(() => import('./pages/admin/CRMProjects'));
+const Invoices = lazy(() => import('./pages/admin/Invoices'));
+const Products = lazy(() => import('./pages/admin/Products'));
+const AdminServices = lazy(() => import('./pages/admin/Services'));
+const RawMaterials = lazy(() => import('./pages/admin/RawMaterials'));
+const Reviews = lazy(() => import('./pages/admin/Reviews'));
+const Messages = lazy(() => import('./pages/admin/Messages'));
+const Notices = lazy(() => import('./pages/admin/Notices'));
+const Settings = lazy(() => import('./pages/admin/Settings'));
+const WebsiteEditor = lazy(() => import('./pages/admin/WebsiteEditor'));
+const Finance = lazy(() => import('./pages/admin/Finance'));
+const Reports = lazy(() => import('./pages/admin/Reports'));
+const Coupons = lazy(() => import('./pages/admin/Coupons'));
+const ShippingLabels = lazy(() => import('./pages/admin/ShippingLabels'));
+const PriceLists = lazy(() => import('./pages/admin/PriceLists'));
+const Team = lazy(() => import('./pages/admin/Team'));
+const Attendance = lazy(() => import('./pages/admin/Attendance'));
+const StaffProfile = lazy(() => import('./pages/admin/StaffProfile'));
+const ProductionUsage = lazy(() => import('./pages/admin/ProductionUsage'));
+const ClientVerificationReport = lazy(() => import('./pages/admin/ClientVerificationReport'));
+const StaffVerificationReport = lazy(() => import('./pages/admin/StaffVerificationReport'));
+const ClientAgreementReport = lazy(() => import('./pages/admin/ClientAgreementReport'));
 
 // Public (unlisted)
-import PriceListView   from './pages/public/PriceListView';
-import ShippingVerify  from './pages/public/ShippingVerify';
+const PriceListView = lazy(() => import('./pages/public/PriceListView'));
+const ShippingVerify = lazy(() => import('./pages/public/ShippingVerify'));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,
+      gcTime: 10 * 60_000,
+      retry: 1,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
+    },
+    mutations: { retry: false },
+  },
+});
 const SPLASH_KEY  = 'hs_splash_v2';
+
+function RouteLoader() {
+  return (
+    <div className="flex min-h-[45vh] items-center justify-center" role="status" aria-label="Loading section">
+      <div className="w-full max-w-xl space-y-4 px-6">
+        <div className="h-7 w-48 animate-pulse rounded bg-muted" />
+        <div className="grid grid-cols-3 gap-3">
+          {[0, 1, 2].map(i => <div key={i} className="h-24 animate-pulse rounded bg-muted" />)}
+        </div>
+        <div className="h-48 animate-pulse rounded bg-muted" />
+      </div>
+    </div>
+  );
+}
 
 function CursorGate() {
   const [location] = useLocation();
@@ -141,12 +166,14 @@ function Router() {
   const isLogin = location === '/admin/login';
   return (
     <ErrorBoundary resetKey={location}>
-      {isLogin
-        ? <Switch><Route path="/admin/login" component={AdminLogin} /><Route component={NotFound} /></Switch>
-        : isAdmin
-          ? <AdminRoutes />
-          : <PublicRoutes />
-      }
+      <Suspense fallback={<RouteLoader />}>
+        {isLogin
+          ? <Switch><Route path="/admin/login" component={AdminLogin} /><Route component={NotFound} /></Switch>
+          : isAdmin
+            ? <AdminRoutes />
+            : <PublicRoutes />
+        }
+      </Suspense>
     </ErrorBoundary>
   );
 }

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useGetSettings, useUpdateSettings, updateSettings as apiUpdateSettings } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { broadcastAdminSave } from "@/lib/home-cache";
+import { AdminErrorState, AdminPageSkeleton } from "@/components/admin/AdminPageState";
 import { Settings as SettingsIcon, Save, Globe, Phone, Users, Landmark, Truck, Plus, Trash2, ExternalLink, Upload, Loader2, Image as ImageIcon, X, Pencil, Check, CheckCircle2, Download, RotateCcw, AlertTriangle, HardDrive, QrCode, Link, CreditCard, Eye, EyeOff, ToggleLeft, ToggleRight, Archive, ArchiveRestore, Sparkles, Mail, Send } from "lucide-react";
 
 
@@ -309,7 +310,7 @@ function BankDetailsManager({ banks, onChange }: { banks: BankEntry[]; onChange:
 }
 
 export default function AdminSettings() {
-  const { data: settings } = useGetSettings();
+  const { data: settings, isLoading, isError, error, refetch } = useGetSettings();
   const queryClient = useQueryClient();
   const [form, setForm] = useState<any>({});
   const [loaded, setLoaded] = useState(false);
@@ -800,6 +801,11 @@ export default function AdminSettings() {
       ],
     },
   ];
+
+  if (isLoading && !settings) return <AdminPageSkeleton cards={2} rows={8} />;
+  if (isError && !settings) {
+    return <AdminErrorState message={error instanceof Error ? error.message : "Business settings could not be loaded."} onRetry={() => void refetch()} />;
+  }
 
   return (
     <div className="space-y-5">

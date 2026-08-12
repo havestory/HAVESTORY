@@ -8,10 +8,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { MoreHorizontal, Trash2, Eye, MessageCircle, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { AdminTableError, AdminTableLoading } from '@/components/admin/AdminPageState';
 
 export default function Orders() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const { data: orders, isLoading, refetch } = useListOrders(
+  const { data: orders, isLoading, isError, refetch } = useListOrders(
     statusFilter !== 'all' ? { status: statusFilter } : {}
   );
   
@@ -95,9 +96,9 @@ export default function Orders() {
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading orders...</TableCell>
-                </TableRow>
+                <AdminTableLoading columns={6} />
+              ) : isError ? (
+                <AdminTableError columns={6} onRetry={() => void refetch()} />
               ) : orders?.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-12">

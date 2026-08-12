@@ -9,7 +9,9 @@ export const STAFF_PERMISSIONS = [
 ] as const;
 export type StaffPermission = typeof STAFF_PERMISSIONS[number];
 
-export async function ensureTeamTables(): Promise<void> {
+let teamTablesReady: Promise<void> | null = null;
+
+async function initializeTeamTables(): Promise<void> {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS admin_staff (
       id SERIAL PRIMARY KEY,
@@ -88,6 +90,16 @@ export async function ensureTeamTables(): Promise<void> {
   `);
 }
 
+export function ensureTeamTables(): Promise<void> {
+  if (!teamTablesReady) {
+    teamTablesReady = initializeTeamTables().catch(error => {
+      teamTablesReady = null;
+      throw error;
+    });
+  }
+  return teamTablesReady;
+}
+
 export async function queueDeletionRequest(req: Request, targetType: "invoice"|"order"|"custom_order"|"crm_project", targetId: string|number, targetLabel: string, reason?: unknown) {
   const auth = getAdminAuth(req);
   if (!auth || auth.role !== "staff" || !auth.staffId) throw new Error("Staff account required");
@@ -127,7 +139,7 @@ const routePermission = (path: string, method: string): StaffPermission | "owner
   if (path.startsWith("/api/admin/team") || path.startsWith("/api/admin/activity")) return "owner";
   if (/^\/api\/admin\/(cleanup-files|run-migration|backfill|trash|restore|purge)/.test(path)) return "owner";
   if (path.startsWith("/api/finance-inventory")) return "finance";
-  if (path.startsWith("/api/stats")) return "reports";
+  if (path.startsWith("/api/stats")) return "dashboard";
   if (path.startsWith("/api/orders")) return "orders";
   if (path.startsWith("/api/invoices")) return "invoices";
   if (path.startsWith("/api/clients") || path.startsWith("/api/crm-projects")) return "customers";

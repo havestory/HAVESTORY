@@ -21,6 +21,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
+import { AdminTableError, AdminTableLoading } from '@/components/admin/AdminPageState';
 
 interface Coupon {
   id: number;
@@ -56,7 +57,7 @@ export default function Coupons() {
   const [editing, setEditing] = useState<Coupon | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
 
-  const { data: coupons = [], isLoading } = useQuery<Coupon[]>({
+  const { data: coupons = [], isLoading, isError, refetch } = useQuery<Coupon[]>({
     queryKey: ['coupons'],
     queryFn: () => apiFetch('/api/coupons'),
   });
@@ -174,7 +175,9 @@ export default function Coupons() {
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+                <AdminTableLoading columns={7} />
+              ) : isError ? (
+                <AdminTableError columns={7} onRetry={() => void refetch()} />
               ) : coupons.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-12">
