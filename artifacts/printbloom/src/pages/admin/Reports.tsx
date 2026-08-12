@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   FileText, Download, Printer, ShoppingCart,
-  Users, Box, CreditCard, ChevronDown
+  Users, Box, CreditCard, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -99,29 +99,34 @@ export default function Reports() {
   const [from, setFrom] = useState(defaultRange.from);
   const [to, setTo] = useState(defaultRange.to);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [ordersPage, setOrdersPage] = useState(1);
+  const [invoicesPage, setInvoicesPage] = useState(1);
+  const PAGE_LIMIT = 200;
 
   const { data: settings } = useGetSettings();
 
   // ── Orders report ──────────────────────────────────────────────────
   const { data: ordersData, isLoading: ordersLoading } = useQuery({
-    queryKey: ['report-orders', from, to, statusFilter],
+    queryKey: ['report-orders', from, to, statusFilter, ordersPage],
     queryFn: () => {
-      const params = new URLSearchParams({ from, to });
+      const params = new URLSearchParams({ from, to, page: String(ordersPage), limit: String(PAGE_LIMIT) });
       if (statusFilter !== 'all') params.set('status', statusFilter);
       return apiFetch<any>(`/api/reports/orders?${params}`);
     },
     enabled: tab === 'orders',
+    keepPreviousData: true,
   });
 
   // ── Invoices report ────────────────────────────────────────────────
   const { data: invoicesData, isLoading: invoicesLoading } = useQuery({
-    queryKey: ['report-invoices', from, to, statusFilter],
+    queryKey: ['report-invoices', from, to, statusFilter, invoicesPage],
     queryFn: () => {
-      const params = new URLSearchParams({ from, to });
+      const params = new URLSearchParams({ from, to, page: String(invoicesPage), limit: String(PAGE_LIMIT) });
       if (statusFilter !== 'all') params.set('status', statusFilter);
       return apiFetch<any>(`/api/reports/invoices?${params}`);
     },
     enabled: tab === 'invoices',
+    keepPreviousData: true,
   });
 
   // ── Clients report ─────────────────────────────────────────────────
@@ -182,25 +187,83 @@ export default function Reports() {
 
   const businessName = settings?.businessName ?? 'HAVESTORY';
 
+  // Reset pages when filters change
+  const handleFromChange = (v: string) => { setFrom(v); setOrdersPage(1); setInvoicesPage(1); };
+  const handleToChange   = (v: string) => { setTo(v);   setOrdersPage(1); setInvoicesPage(1); };
+  const handleStatusChange = (v: string) => { setStatusFilter(v); setOrdersPage(1); setInvoicesPage(1); };
+
+  // ── Pagination controls ────────────────────────────────────────────
+  const PaginationBar = ({
+    page, totalPages, totalCount, pageCount, onPrev, onNext,
+  }: {
+    page: number; totalPages: number; totalCount: number; pageCount: number;
+    onPrev: () => void; onNext: () => void;
+  }) => {
+    if (totalPages <= 1) return null;
+    const start = (page - 1) * PAGE_LIMIT + 1;
+    const end   = start + pageCount - 1;
+    return (
+      <div className="flex items-center justify-between px-4 py-3 border-t border-border text-xs text-muted-foreground">
+        <span>
+          Showing <span className="font-semibold text-foreground">{start}–{end}</span> of{' '}
+          <span className="font-semibold text-foreground">{totalCount.toLocaleString()}</span>
+        </span>
+        <div className="flex items-center gap-1">
+          <button
+            disabled={page <= 1}
+            onClick={onPrev}
+            className="h-7 w-7 flex items-center justify-center border border-border hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+          </button>
+          <span className="px-2 font-medium text-foreground">{page} / {totalPages}</span>
+          <button
+            disabled={page >= totalPages}
+            onClick={onNext}
+            className="h-7 w-7 flex items-center justify-center border border-border hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   // ── Summary stats for current tab ─────────────────────────────────
   const renderSummary = () => {
     if (tab === 'orders' && ordersData?.summary) {
       const s = ordersData.summary;
+      const p = ordersData.pagination;
       return (
-        <div className="flex gap-6 text-sm">
-          <span className="text-muted-foreground"><span className="font-semibold text-foreground">{s.count}</span> orders</span>
-          <span className="text-muted-foreground">Total: <span className="font-semibold text-foreground">LKR {fmtAmount(s.totalAmount)}</span></span>
+        <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
+          <span className="text-muted-foreground">
+            <span className="font-semibold text-foreground">{s.count.toLocaleString()}</span> orders total
+          </span>
+          <span className="text-muted-foreground">Revenue: <span className="font-semibold text-foreground">LKR {fmtAmount(s.totalAmount)}</span></span>
           <span className="text-muted-foreground">Advance: <span className="font-semibold text-foreground">LKR {fmtAmount(s.totalAdvance)}</span></span>
+          {p && p.totalPages > 1 && (
+            <span className="text-secondary text-[10px] font-semibold uppercase tracking-widest self-center">
+              Page {p.page}/{p.totalPages}
+            </span>
+          )}
         </div>
       );
     }
     if (tab === 'invoices' && invoicesData?.summary) {
       const s = invoicesData.summary;
+      const p = invoicesData.pagination;
       return (
-        <div className="flex gap-6 text-sm">
-          <span className="text-muted-foreground"><span className="font-semibold text-foreground">{s.count}</span> invoices</span>
+        <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
+          <span className="text-muted-foreground">
+            <span className="font-semibold text-foreground">{s.count.toLocaleString()}</span> invoices total
+          </span>
           <span className="text-muted-foreground">Total: <span className="font-semibold text-foreground">LKR {fmtAmount(s.totalAmount)}</span></span>
           <span className="text-muted-foreground">Paid: <span className="font-semibold text-emerald-600">LKR {fmtAmount(s.totalPaid)}</span> ({s.paidCount})</span>
+          {p && p.totalPages > 1 && (
+            <span className="text-secondary text-[10px] font-semibold uppercase tracking-widest self-center">
+              Page {p.page}/{p.totalPages}
+            </span>
+          )}
         </div>
       );
     }
@@ -276,16 +339,16 @@ export default function Reports() {
             <div className="flex flex-wrap gap-4 items-end">
               <div>
                 <Label className="text-xs uppercase tracking-widest font-semibold">From</Label>
-                <Input type="date" className="rounded-none mt-1 h-9 w-36" value={from} onChange={e => setFrom(e.target.value)} />
+                <Input type="date" className="rounded-none mt-1 h-9 w-36" value={from} onChange={e => handleFromChange(e.target.value)} />
               </div>
               <div>
                 <Label className="text-xs uppercase tracking-widest font-semibold">To</Label>
-                <Input type="date" className="rounded-none mt-1 h-9 w-36" value={to} onChange={e => setTo(e.target.value)} />
+                <Input type="date" className="rounded-none mt-1 h-9 w-36" value={to} onChange={e => handleToChange(e.target.value)} />
               </div>
               {(tab === 'orders' || tab === 'invoices') && (
                 <div>
                   <Label className="text-xs uppercase tracking-widest font-semibold">Status</Label>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <Select value={statusFilter} onValueChange={handleStatusChange}>
                     <SelectTrigger className="rounded-none mt-1 h-9 w-36">
                       <SelectValue placeholder="All" />
                     </SelectTrigger>
@@ -323,10 +386,30 @@ export default function Reports() {
         <Card className="rounded-none border border-border shadow-sm bg-card">
           <CardContent className="p-0">
             {tab === 'orders' && (
-              <OrdersTable rows={ordersData?.rows ?? []} isLoading={ordersLoading} />
+              <>
+                <OrdersTable rows={ordersData?.rows ?? []} isLoading={ordersLoading} />
+                <PaginationBar
+                  page={ordersPage}
+                  totalPages={ordersData?.pagination?.totalPages ?? 1}
+                  totalCount={ordersData?.pagination?.totalCount ?? 0}
+                  pageCount={(ordersData?.rows ?? []).length}
+                  onPrev={() => setOrdersPage(p => Math.max(1, p - 1))}
+                  onNext={() => setOrdersPage(p => p + 1)}
+                />
+              </>
             )}
             {tab === 'invoices' && (
-              <InvoicesTable rows={invoicesData?.rows ?? []} isLoading={invoicesLoading} />
+              <>
+                <InvoicesTable rows={invoicesData?.rows ?? []} isLoading={invoicesLoading} />
+                <PaginationBar
+                  page={invoicesPage}
+                  totalPages={invoicesData?.pagination?.totalPages ?? 1}
+                  totalCount={invoicesData?.pagination?.totalCount ?? 0}
+                  pageCount={(invoicesData?.rows ?? []).length}
+                  onPrev={() => setInvoicesPage(p => Math.max(1, p - 1))}
+                  onNext={() => setInvoicesPage(p => p + 1)}
+                />
+              </>
             )}
             {tab === 'clients' && (
               <ClientsTable rows={clientsData?.rows ?? []} isLoading={clientsLoading} />
