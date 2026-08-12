@@ -65,10 +65,10 @@ export function AdminLayout({ children }: { children: ReactNode }) {
         <div className={`flex items-center gap-3 px-3 py-2.5 rounded-sm transition-colors cursor-pointer
           ${isActive
             ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold'
-            : 'text-sidebar-foreground/55 hover:bg-sidebar-accent hover:text-sidebar-foreground'}`}
+            : 'text-sidebar-foreground font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'}`}
         >
           <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-sidebar-primary' : ''}`} />
-          <span className="text-sm">{label}</span>
+          <span className="text-[14px] font-semibold">{label}</span>
         </div>
       </Link>
     );
@@ -101,7 +101,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             </div>
             <div className="flex flex-col">
               <span className="text-sidebar-primary font-serif font-semibold text-base leading-tight">HAVESTORY</span>
-              <span className="text-sidebar-foreground/40 text-[10px] uppercase tracking-widest leading-tight">Admin Panel</span>
+              <span className="text-sidebar-foreground/70 font-semibold text-[10px] uppercase tracking-widest leading-tight">Admin Panel</span>
             </div>
           </Link>
           <button className="lg:hidden text-sidebar-foreground/60 hover:text-sidebar-foreground" onClick={() => setSidebarOpen(false)}>
@@ -117,7 +117,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             </div>
 
             <div className="space-y-1">
-              <p className="px-3 pt-1 pb-1 text-[9px] font-semibold uppercase tracking-widest text-sidebar-foreground/30">Orders</p>
+              <p className="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/70">Orders</p>
               <NavItem href="/admin/orders"          label="Orders"          icon={ShoppingCart} />
               <NavItem href="/admin/custom-projects" label="Custom Projects" icon={PenTool} />
               <NavItem href="/admin/clients"         label="Clients"         icon={Users} />
@@ -126,7 +126,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             </div>
 
             <div className="space-y-1">
-              <p className="px-3 pt-1 pb-1 text-[9px] font-semibold uppercase tracking-widest text-sidebar-foreground/30">Catalogue</p>
+              <p className="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/70">Catalogue</p>
               <NavItem href="/admin/products"      label="Products"  icon={Package} />
               <NavItem href="/admin/services"      label="Services"  icon={Layers} />
               <NavItem href="/admin/portfolio"     label="Portfolio" icon={ImageIcon} />
@@ -134,20 +134,20 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             </div>
 
             <div className="space-y-1">
-              <p className="px-3 pt-1 pb-1 text-[9px] font-semibold uppercase tracking-widest text-sidebar-foreground/30">Engagement</p>
+              <p className="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/70">Engagement</p>
               <NavItem href="/admin/reviews"  label="Reviews"  icon={Star} />
               <NavItem href="/admin/messages" label="Messages" icon={MessageSquare} />
               <NavItem href="/admin/notices"  label="Notices"  icon={Bell} />
             </div>
 
             <div className="space-y-1">
-              <p className="px-3 pt-1 pb-1 text-[9px] font-semibold uppercase tracking-widest text-sidebar-foreground/30">Finance</p>
+              <p className="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/70">Finance</p>
               <NavItem href="/admin/finance"  label="Finance" icon={DollarSign} />
               <NavItem href="/admin/reports"  label="Reports" icon={BarChart2} />
             </div>
 
             <div className="space-y-1">
-              <p className="px-3 pt-1 pb-1 text-[9px] font-semibold uppercase tracking-widest text-sidebar-foreground/30">Studio Tools</p>
+              <p className="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/70">Studio Tools</p>
               <NavItem href="/admin/coupons"         label="Coupons"         icon={Tag} />
               <NavItem href="/admin/shipping-labels" label="Shipping Labels" icon={Truck} />
               <NavItem href="/admin/price-lists"     label="Price Lists"     icon={List} />
@@ -156,20 +156,20 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
             {admin?.role === 'owner' && (
               <div className="space-y-1">
-                <p className="px-3 pt-1 pb-1 text-[9px] font-semibold uppercase tracking-widest text-sidebar-foreground/30">Team</p>
+                <p className="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/70">Team</p>
                 <NavItem href="/admin/team"       label="Team Access" icon={UserCog} />
                 <NavItem href="/admin/attendance" label="Attendance"  icon={CalendarCheck} />
               </div>
             )}
             {admin?.role === 'staff' && (
               <div className="space-y-1">
-                <p className="px-3 pt-1 pb-1 text-[9px] font-semibold uppercase tracking-widest text-sidebar-foreground/30">Team</p>
+                <p className="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/70">Team</p>
                 <NavItem href="/admin/attendance" label="Attendance" icon={CalendarCheck} />
               </div>
             )}
 
             <div className="space-y-1 pb-4">
-              <p className="px-3 pt-1 pb-1 text-[9px] font-semibold uppercase tracking-widest text-sidebar-foreground/30">System</p>
+              <p className="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/70">System</p>
               <NavItem href="/admin/website-editor" label="Website Editor" icon={PanelTop} />
               <NavItem href="/admin/settings" label="Settings" icon={Settings} />
             </div>
@@ -185,7 +185,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             </div>
             <div className="flex flex-col truncate">
               <span className="text-sm text-sidebar-foreground font-medium truncate">{admin?.username || 'Admin'}</span>
-              <span className="text-[9px] text-sidebar-foreground/35 uppercase tracking-widest">Workshop Manager</span>
+              <span className="text-[10px] font-semibold text-sidebar-foreground/70 uppercase tracking-widest">Workshop Manager</span>
             </div>
           </div>
 
@@ -193,7 +193,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
           <button
             onClick={toggleTheme}
             title={theme === 'light' ? 'Switch to Night Mode' : 'Switch to Day Mode'}
-            className="w-8 h-8 flex items-center justify-center rounded-sm text-sidebar-foreground/50 hover:text-sidebar-primary hover:bg-sidebar-accent transition-colors shrink-0"
+            className="w-8 h-8 flex items-center justify-center rounded-sm text-sidebar-foreground/75 hover:text-sidebar-primary hover:bg-sidebar-accent transition-colors shrink-0"
           >
             {theme === 'light'
               ? <Moon className="w-4 h-4" />
@@ -205,7 +205,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
           <button
             onClick={handleLogout}
             title="Log out"
-            className="w-8 h-8 flex items-center justify-center rounded-sm text-sidebar-foreground/50 hover:text-destructive hover:bg-sidebar-accent transition-colors shrink-0"
+            className="w-8 h-8 flex items-center justify-center rounded-sm text-sidebar-foreground/75 hover:text-destructive hover:bg-sidebar-accent transition-colors shrink-0"
           >
             <LogOut className="w-4 h-4" />
           </button>
@@ -223,7 +223,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
           {/* Night mode toggle on mobile topbar */}
           <button
             onClick={toggleTheme}
-            className="text-sidebar-foreground/50 hover:text-sidebar-primary transition-colors"
+            className="text-sidebar-foreground/75 hover:text-sidebar-primary transition-colors"
             title={theme === 'light' ? 'Night mode' : 'Day mode'}
           >
             {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}

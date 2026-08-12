@@ -57,7 +57,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
 
   if (settings?.siteClosedEnabled) {
     return (
-      <main className="min-h-[100dvh] bg-[#0A0907] text-white flex items-center justify-center px-6">
+      <main data-public-site="" className="min-h-[100dvh] bg-[#0A0907] text-white flex items-center justify-center px-6">
         <div className="max-w-xl text-center border border-[#C9A84C]/25 bg-[#C9A84C]/5 p-10 sm:p-14">
           <div className="w-12 h-px bg-[#C9A84C] mx-auto mb-8" />
           <p className="text-[#C9A84C] text-[10px] font-bold uppercase tracking-[0.24em] mb-4">Studio Notice</p>
@@ -97,10 +97,10 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     : 'bg-transparent border-b border-transparent';
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-[hsl(var(--background))] relative">
+    <div data-public-site="" className="min-h-[100dvh] flex flex-col bg-[hsl(var(--background))] relative">
 
       {/* ── Slim top bar ── */}
-      <div className="hidden md:flex bg-[#080705] text-[hsl(var(--foreground)/0.55)] py-2 px-8 justify-between items-center text-[11px] tracking-widest uppercase z-50 relative border-b border-[#1E1A14]">
+      <div className="hidden md:flex bg-[#080705] text-[hsl(var(--foreground)/0.75)] py-2 px-8 justify-between items-center text-[11px] font-semibold tracking-widest uppercase z-50 relative border-b border-[#1E1A14]">
         <div className="flex items-center gap-8">
           {settings?.phone && (
             <a href={`tel:${settings.phone}`} className="flex items-center gap-2 hover:text-[#C9A84C] transition-colors">
@@ -154,10 +154,10 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             {navLinks.map(l => (
               <Link
                 key={l.href} href={l.href}
-                className={`text-[10px] font-semibold uppercase tracking-[0.18em] transition-colors duration-200 pb-0.5 ${
+                className={`text-[12px] font-bold uppercase tracking-[0.14em] transition-colors duration-200 pb-0.5 ${
                   isActive(l.href)
                     ? 'text-[#C9A84C] border-b border-[#C9A84C]'
-                    : 'text-[hsl(var(--foreground)/0.6)] hover:text-[#C9A84C]'
+                    : 'text-[hsl(var(--foreground)/0.82)] hover:text-[#C9A84C]'
                 }`}
               >
                 {l.label}
@@ -167,7 +167,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
 
           {/* Right */}
           <div className="flex items-center gap-3 shrink-0">
-            <Link href="/store" className="p-2 text-[hsl(var(--foreground)/0.55)] hover:text-[#C9A84C] transition-colors" title="Shop">
+            <Link href="/store" className="p-2 text-[hsl(var(--foreground)/0.8)] hover:text-[#C9A84C] transition-colors" title="Shop">
               <ShoppingBag className="w-5 h-5" />
             </Link>
             <Link
@@ -257,7 +257,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             <div className="md:col-span-1">
               <div className="font-serif text-2xl font-bold text-[hsl(var(--foreground))] mb-1">{settings?.businessName || 'HAVESTORY'}</div>
               {settings?.tagline && <p className="text-xs tracking-widest uppercase text-[#C9A84C] mb-4">{settings.tagline}</p>}
-              <p className="text-xs leading-relaxed mb-6 text-[hsl(var(--foreground)/0.45)]">
+              <p className="text-xs leading-relaxed mb-6 text-[hsl(var(--foreground)/0.7)]">
                 Premium photo frames, colour lab prints &amp; custom studio work — crafted in Sri Lanka.
               </p>
               <div className="flex gap-3">
@@ -280,7 +280,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               <p className="section-label mb-5">Quick Links</p>
               <ul className="space-y-2.5">
                 {[{ href: '/', label: 'Home' }, { href: '/store', label: 'Frames & Prints' }, { href: '/services', label: 'Studio Services' }, { href: '/gallery', label: 'Gallery' }, { href: '/custom-project', label: 'Custom Project' }].map(l => (
-                  <li key={l.href}><Link href={l.href} className="text-sm text-[hsl(var(--foreground)/0.45)] hover:text-[#C9A84C] transition-colors">{l.label}</Link></li>
+                  <li key={l.href}><Link href={l.href} className="text-sm font-medium text-[hsl(var(--foreground)/0.72)] hover:text-[#C9A84C] transition-colors">{l.label}</Link></li>
                 ))}
               </ul>
             </div>
@@ -289,7 +289,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               <p className="section-label mb-5">Information</p>
               <ul className="space-y-2.5">
                 {[{ href: '/about', label: 'About Us' }, { href: '/contact', label: 'Contact' }, { href: '/track-order', label: 'Track Your Order' }, { href: '/privacy', label: 'Privacy Policy' }, { href: '/terms', label: 'Terms of Service' }].map(l => (
-                  <li key={l.href}><Link href={l.href} className="text-sm text-[hsl(var(--foreground)/0.45)] hover:text-[#C9A84C] transition-colors">{l.label}</Link></li>
+                  <li key={l.href}><Link href={l.href} className="text-sm font-medium text-[hsl(var(--foreground)/0.72)] hover:text-[#C9A84C] transition-colors">{l.label}</Link></li>
                 ))}
               </ul>
             </div>
@@ -303,7 +303,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                 {settings?.email && (
                   <li><a href={`mailto:${settings.email}`} className="flex items-center gap-2 hover:text-[#C9A84C] transition-colors"><Mail className="w-3.5 h-3.5 shrink-0 text-[#C9A84C]/50" />{settings.email}</a></li>
                 )}
-                {settings?.address && <li className="text-xs leading-relaxed text-[hsl(var(--foreground)/0.35)]">{settings.address}</li>}
+                {settings?.address && <li className="text-xs font-medium leading-relaxed text-[hsl(var(--foreground)/0.7)]">{settings.address}</li>}
               </ul>
               {settings?.whatsappNumber && (
                 <a
@@ -318,7 +318,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           </div>
 
           <div className="gold-rule mb-6" />
-          <p className="text-[10px] text-[hsl(var(--foreground)/0.3)] text-center tracking-widest uppercase">
+          <p className="text-[10px] font-semibold text-[hsl(var(--foreground)/0.65)] text-center tracking-widest uppercase">
             © {new Date().getFullYear()} {settings?.businessName || 'HAVESTORY'}. All rights reserved · Sri Lanka
           </p>
         </div>
