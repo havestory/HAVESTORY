@@ -1,8 +1,16 @@
 import app from "./app";
-import { runStartupMigrations } from "./lib/startup-migrations";
+import { ensureRuntimeSchema } from "./lib/runtime-schema";
 
-// Run schema migrations on every cold start so production columns stay in sync.
-// ALTER TABLE … IF NOT EXISTS is idempotent — safe to run on every cold start.
-runStartupMigrations();
-
-export default app;
+// Vercel used to start a large, unawaited migration on every cold start. That
+// competed with live requests for the small Neon connection pool and allowed
+// handlers to query half-migrated tables. A versioned, locked compatibility
+// pass now completes once before the first request reaches Express.
+export default async function handler(req: any, res: any) {
+  try {
+    await ensureRuntimeSchema();
+    return app(req, res);
+  } catch (error) {
+    console.error("[runtime-schema] Database preparation failed", error);
+    if (!res.headersSent) return res.status(503).json({ error: "Database is preparing. Please retry shortly." });
+  }
+}

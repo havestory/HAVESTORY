@@ -96,27 +96,29 @@ function CursorGate() {
 function PublicRoutes() {
   return (
     <PublicLayout>
-      <Switch>
-        <Route path="/"                   component={Home} />
-        <Route path="/store"              component={Store} />
-        <Route path="/frames-and-prints"  component={Store} />
-        <Route path="/services"           component={Services} />
-        <Route path="/studio-services"    component={Services} />
-        <Route path="/portfolio"          component={Portfolio} />
-        <Route path="/gallery"            component={Portfolio} />
-        <Route path="/track-order"        component={TrackOrder} />
-        <Route path="/about"              component={About} />
-        <Route path="/contact"            component={Contact} />
-        <Route path="/custom-project"     component={CustomProject} />
-        <Route path="/privacy"            component={Privacy} />
-        <Route path="/terms"             component={Terms} />
-        <Route path="/price-list/:publicId" component={PriceListView} />
-        <Route path="/verify-shipping/:token" component={ShippingVerify} />
-        <Route path="/client-verification/:token" component={ClientVerification} />
-        <Route path="/staff-verification/:token" component={StaffVerification} />
-        <Route path="/client-agreement/:token" component={ClientAgreement} />
-        <Route component={NotFound} />
-      </Switch>
+      <Suspense fallback={<RouteLoader />}>
+        <Switch>
+          <Route path="/"                   component={Home} />
+          <Route path="/store"              component={Store} />
+          <Route path="/frames-and-prints"  component={Store} />
+          <Route path="/services"           component={Services} />
+          <Route path="/studio-services"    component={Services} />
+          <Route path="/portfolio"          component={Portfolio} />
+          <Route path="/gallery"            component={Portfolio} />
+          <Route path="/track-order"        component={TrackOrder} />
+          <Route path="/about"              component={About} />
+          <Route path="/contact"            component={Contact} />
+          <Route path="/custom-project"     component={CustomProject} />
+          <Route path="/privacy"            component={Privacy} />
+          <Route path="/terms"             component={Terms} />
+          <Route path="/price-list/:publicId" component={PriceListView} />
+          <Route path="/verify-shipping/:token" component={ShippingVerify} />
+          <Route path="/client-verification/:token" component={ClientVerification} />
+          <Route path="/staff-verification/:token" component={StaffVerification} />
+          <Route path="/client-agreement/:token" component={ClientAgreement} />
+          <Route component={NotFound} />
+        </Switch>
+      </Suspense>
     </PublicLayout>
   );
 }
@@ -125,7 +127,8 @@ function AdminRoutes() {
   return (
     <AuthGuard>
       <AdminLayout>
-        <Switch>
+        <Suspense fallback={<RouteLoader />}>
+          <Switch>
           <Route path="/admin"                 component={Dashboard} />
           <Route path="/admin/orders"          component={Orders} />
           <Route path="/admin/custom-projects" component={CustomProjects} />
@@ -153,8 +156,9 @@ function AdminRoutes() {
           <Route path="/admin/client-verification/:clientId" component={ClientVerificationReport} />
           <Route path="/admin/staff-verification/:staffId" component={StaffVerificationReport} />
           <Route path="/admin/client-agreement/:agreementId" component={ClientAgreementReport} />
-          <Route component={NotFound} />
-        </Switch>
+            <Route component={NotFound} />
+          </Switch>
+        </Suspense>
       </AdminLayout>
     </AuthGuard>
   );
@@ -166,14 +170,12 @@ function Router() {
   const isLogin = location === '/admin/login';
   return (
     <ErrorBoundary resetKey={location}>
-      <Suspense fallback={<RouteLoader />}>
-        {isLogin
-          ? <Switch><Route path="/admin/login" component={AdminLogin} /><Route component={NotFound} /></Switch>
-          : isAdmin
-            ? <AdminRoutes />
-            : <PublicRoutes />
-        }
-      </Suspense>
+      {isLogin
+        ? <Suspense fallback={<RouteLoader />}><Switch><Route path="/admin/login" component={AdminLogin} /><Route component={NotFound} /></Switch></Suspense>
+        : isAdmin
+          ? <AdminRoutes />
+          : <PublicRoutes />
+      }
     </ErrorBoundary>
   );
 }
