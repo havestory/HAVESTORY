@@ -1,6 +1,6 @@
 import { pool } from "@workspace/db";
 
-const SCHEMA_VERSION = "2026-08-12-core-v3";
+const SCHEMA_VERSION = "2026-08-13-core-v4";
 let runtimeSchemaReady: Promise<void> | null = null;
 
 async function versionExists(version: string): Promise<boolean> {
@@ -171,6 +171,42 @@ async function applyRuntimeSchema(): Promise<void> {
         ADD COLUMN IF NOT EXISTS discount_amount INTEGER NOT NULL DEFAULT 0,
         ADD COLUMN IF NOT EXISTS advance_paid INTEGER NOT NULL DEFAULT 0,
         ADD COLUMN IF NOT EXISTS tags TEXT NOT NULL DEFAULT '[]',
+        ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+
+      CREATE TABLE IF NOT EXISTS project_service_types (
+        id SERIAL PRIMARY KEY, name TEXT NOT NULL,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      ALTER TABLE project_service_types
+        ADD COLUMN IF NOT EXISTS name TEXT NOT NULL DEFAULT '',
+        ADD COLUMN IF NOT EXISTS sort_order INTEGER NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW();
+
+      CREATE TABLE IF NOT EXISTS crm_projects (
+        id SERIAL PRIMARY KEY, project_id TEXT NOT NULL UNIQUE, title TEXT NOT NULL,
+        client_name TEXT NOT NULL, client_id INTEGER, service_type_id INTEGER,
+        status TEXT NOT NULL DEFAULT 'planning', description TEXT,
+        total_value INTEGER DEFAULT 0, amount_paid INTEGER DEFAULT 0,
+        start_date TEXT, due_date TEXT, notes TEXT,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW(), deleted_at TIMESTAMP
+      );
+      ALTER TABLE crm_projects
+        ADD COLUMN IF NOT EXISTS project_id TEXT,
+        ADD COLUMN IF NOT EXISTS title TEXT NOT NULL DEFAULT '',
+        ADD COLUMN IF NOT EXISTS client_name TEXT NOT NULL DEFAULT '',
+        ADD COLUMN IF NOT EXISTS client_id INTEGER,
+        ADD COLUMN IF NOT EXISTS service_type_id INTEGER,
+        ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'planning',
+        ADD COLUMN IF NOT EXISTS description TEXT,
+        ADD COLUMN IF NOT EXISTS total_value INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS amount_paid INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS start_date TEXT,
+        ADD COLUMN IF NOT EXISTS due_date TEXT,
+        ADD COLUMN IF NOT EXISTS notes TEXT,
         ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW(),
         ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
         ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
@@ -351,7 +387,10 @@ async function applyRuntimeSchema(): Promise<void> {
         ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT NOW();
 
       DO $$ BEGIN
-        IF to_regclass('public.crm_projects') IS NOT NULL THEN ALTER TABLE crm_projects ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP; END IF;
+        IF to_regclass('public.crm_projects') IS NOT NULL THEN
+          ALTER TABLE crm_projects ADD COLUMN IF NOT EXISTS service_type_id INTEGER;
+          ALTER TABLE crm_projects ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+        END IF;
       END $$;
 
       CREATE INDEX IF NOT EXISTS idx_orders_created_at_active ON orders(created_at DESC) WHERE deleted_at IS NULL;

@@ -687,6 +687,7 @@ CREATE TABLE IF NOT EXISTS "crm_projects" (
   "title" text NOT NULL,
   "client_name" text NOT NULL,
   "client_id" integer,
+  "service_type_id" integer,
   "status" text DEFAULT 'planning' NOT NULL,
   "description" text,
   "total_value" integer DEFAULT 0,
@@ -696,6 +697,7 @@ CREATE TABLE IF NOT EXISTS "crm_projects" (
   "notes" text,
   "created_at" timestamp DEFAULT now() NOT NULL,
   "updated_at" timestamp DEFAULT now() NOT NULL,
+  "deleted_at" timestamp,
   CONSTRAINT "crm_projects_project_id_unique" UNIQUE("project_id")
 );
   `.trim();
