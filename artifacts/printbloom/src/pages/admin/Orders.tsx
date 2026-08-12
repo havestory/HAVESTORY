@@ -95,7 +95,9 @@ export default function Orders() {
         discountAmount: 0,
         advancePaid: 0,
         tags: [],
-      },
+        // Pricing and invoice details can be added after the order is saved.
+        autoInvoice: false,
+      } as any,
     }, {
       onSuccess: () => {
         toast({ title: 'Order Created', description: 'The new order is now available in the order list.' });

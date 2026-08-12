@@ -21,6 +21,20 @@ interface CouponResult {
   message?: string;
 }
 
+// Production can be deployed before the catalog is populated. Keep a real,
+// orderable inquiry path available without inventing a database product row.
+// The API accepts nullable productId values for custom/admin-created orders.
+const CUSTOM_INQUIRY_PRODUCT = {
+  id: 'custom-inquiry',
+  name: 'Custom Frame Consultation',
+  description: 'Tell us about the moment, size, finish, and feeling you want to create.',
+  price: '0',
+  priceType: 'custom_quote',
+  imageUrl: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=900&q=85',
+  category: { name: 'Made to measure' },
+  isCustomInquiry: true,
+};
+
 export default function Store() {
   const { data: categories } = useListCategories();
   const { data: products, isLoading } = useListProducts();
@@ -108,7 +122,11 @@ export default function Store() {
     setCouponCode('');
   };
 
-  const cartTotal = cart.reduce((total, item) => total + (parseFloat(item.product.price) * item.quantity), 0);
+  const cartTotal = cart.reduce((total, item) => total + (parseFloat(String(item.product.price || 0)) * item.quantity), 0);
+  const hasQuotedItem = cart.some(item => item.product?.isCustomInquiry || item.product?.priceType === 'custom_quote');
+  const estimatedTotalLabel = hasQuotedItem
+    ? (cartTotal > 0 ? `Rs. ${cartTotal.toFixed(2)} + quote` : 'Quote on request')
+    : `Rs. ${cartTotal.toFixed(2)}`;
   const couponDiscount = couponResult?.valid && couponResult.discount ? couponResult.discount : 0;
   const finalTotal = Math.max(0, cartTotal - couponDiscount);
 
@@ -148,10 +166,12 @@ export default function Store() {
       return;
     }
 
-    if (cart.length === 0) return;
+    const inquiryCart = cart.length > 0
+      ? cart
+      : [{ product: CUSTOM_INQUIRY_PRODUCT, quantity: 1 }];
 
-    const orderItems = cart.map(item => ({
-      productId: item.product.id,
+    const orderItems = inquiryCart.map(item => ({
+      productId: typeof item.product.id === 'number' ? item.product.id : null,
       productName: item.product.name,
       quantity: item.quantity,
       unitPrice: item.product.price,
@@ -161,7 +181,7 @@ export default function Store() {
     const couponNote = couponResult?.valid ? `\nCoupon: ${couponResult.code} (-Rs. ${couponDiscount.toLocaleString('en-IN')})` : '';
     const notesText = [
       orderDescription ? `Custom request: ${orderDescription}` : '',
-      `Items:\n${cart.map(c => `${c.quantity}x ${c.product.name}`).join('\n')}`,
+      `Items:\n${inquiryCart.map(c => `${c.quantity}x ${c.product.name}`).join('\n')}`,
       couponNote,
     ].filter(Boolean).join('\n\n');
 
@@ -318,7 +338,15 @@ export default function Store() {
                           <ShoppingCart className="w-8 h-8 opacity-40" />
                         </div>
                         <p className="font-medium text-lg text-foreground">Your cart is empty.</p>
-                        <p className="text-sm">Add some beautiful frames to begin.</p>
+                        <p className="text-sm">Add a frame from the collection, or start with a custom consultation.</p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => { addToCart(CUSTOM_INQUIRY_PRODUCT); setIsCheckoutOpen(true); }}
+                          className="rounded-full border-secondary px-5 text-xs font-bold uppercase tracking-[0.14em] text-secondary"
+                        >
+                          Start custom inquiry
+                        </Button>
                       </div>
                     ) : (
                       <div className="space-y-4">
@@ -333,7 +361,7 @@ export default function Store() {
                             </div>
                             <div className="flex-1 flex flex-col">
                               <h4 className="font-serif font-bold text-base leading-tight mb-1">{item.product.name}</h4>
-                              <p className="text-sm text-secondary font-semibold mb-auto">Rs. {item.product.price}</p>
+                              <p className="text-sm text-secondary font-semibold mb-auto">{item.product.isCustomInquiry ? 'Studio quote' : `Rs. ${item.product.price}`}</p>
                               
                               <div className="flex items-center justify-between mt-3">
                                 <div className="flex items-center border border-border bg-background rounded-[0.25rem] overflow-hidden">
@@ -360,7 +388,7 @@ export default function Store() {
                     <div className="p-6 border-t border-border bg-card mt-auto shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
                       <div className="flex justify-between items-end mb-6">
                         <span className="text-muted-foreground font-medium text-sm">Estimated Total</span>
-                        <span className="font-serif text-3xl font-bold text-foreground">Rs. {cartTotal.toFixed(2)}</span>
+                        <span className="font-serif text-2xl font-bold text-foreground text-right">{estimatedTotalLabel}</span>
                       </div>
                       <Button 
                         onClick={() => setIsCheckoutOpen(true)}
@@ -384,6 +412,25 @@ export default function Store() {
                   <Skeleton className="h-4 w-1/2" />
                 </div>
               ))}
+            </div>
+          ) : productList.length === 0 ? (
+            <div className="overflow-hidden rounded-2xl border border-secondary/25 bg-primary px-6 py-16 text-center text-primary-foreground shadow-[0_18px_60px_rgba(0,0,0,0.12)] sm:px-12">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-secondary text-secondary-foreground"><Sparkles size={24} /></div>
+              <span className="editorial-kicker mt-7 block text-secondary">Made to measure</span>
+              <h3 className="editorial-display mt-4 text-4xl text-white sm:text-5xl">Start with your story.</h3>
+              <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-primary-foreground/70 sm:text-base">Our ready-to-order collection is being refreshed. You can still send a custom frame inquiry today and our studio will confirm the design, size, finish, and price with you.</p>
+              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <Button
+                  type="button"
+                  onClick={() => { addToCart(CUSTOM_INQUIRY_PRODUCT); setIsCheckoutOpen(true); }}
+                  className="h-12 rounded-full bg-secondary px-6 text-xs font-black uppercase tracking-[0.14em] text-secondary-foreground hover:bg-secondary/90"
+                >
+                  Start custom inquiry <ArrowRight size={15} />
+                </Button>
+                <Link href="/custom-order" className="inline-flex h-12 items-center gap-2 rounded-full border border-white/20 px-6 text-xs font-bold uppercase tracking-[0.14em] text-white/80 transition-colors hover:border-secondary hover:text-secondary">
+                  Explore custom orders <ArrowUpRight size={14} />
+                </Link>
+              </div>
             </div>
           ) : filteredProducts?.length === 0 ? (
             <div className="text-center py-32 border border-dashed border-border bg-muted/20 rounded-[0.25rem]">
@@ -457,7 +504,7 @@ export default function Store() {
       {cart.length > 0 && (
         <div className="fixed inset-x-4 bottom-5 z-40 mx-auto max-w-2xl animate-in slide-in-from-bottom-4 sm:inset-x-auto">
           <div className="flex items-center justify-between gap-4 rounded-2xl border border-secondary/30 bg-primary/95 px-4 py-3 text-primary-foreground shadow-[0_18px_60px_rgba(0,0,0,0.28)] backdrop-blur-xl sm:px-5">
-            <div className="flex min-w-0 items-center gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground"><ShoppingCart size={17} /></div><div className="min-w-0"><div className="truncate text-sm font-bold">{cart.reduce((a, b) => a + b.quantity, 0)} {cart.reduce((a, b) => a + b.quantity, 0) === 1 ? 'piece' : 'pieces'} selected</div><div className="text-[10px] uppercase tracking-[0.16em] text-primary-foreground/55">Estimated Rs. {cartTotal.toLocaleString('en-IN')}</div></div></div>
+            <div className="flex min-w-0 items-center gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground"><ShoppingCart size={17} /></div><div className="min-w-0"><div className="truncate text-sm font-bold">{cart.reduce((a, b) => a + b.quantity, 0)} {cart.reduce((a, b) => a + b.quantity, 0) === 1 ? 'piece' : 'pieces'} selected</div><div className="text-[10px] uppercase tracking-[0.16em] text-primary-foreground/55">Estimated {estimatedTotalLabel}</div></div></div>
             <Button onClick={() => setIsCheckoutOpen(true)} className="shrink-0 rounded-xl bg-secondary px-4 text-xs font-bold uppercase tracking-wider text-secondary-foreground hover:bg-secondary/90">Start order <ArrowRight size={14} /></Button>
           </div>
         </div>
@@ -586,7 +633,7 @@ export default function Store() {
             <div className="bg-muted p-4 rounded-[0.25rem] border border-border space-y-2">
               <div className="flex justify-between items-center">
                 <span className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Subtotal:</span>
-                <span className="text-base font-semibold text-foreground">Rs. {cartTotal.toFixed(2)}</span>
+                <span className="text-base font-semibold text-foreground">{estimatedTotalLabel}</span>
               </div>
               {couponDiscount > 0 && (
                 <div className="flex justify-between items-center text-green-600">
@@ -596,7 +643,7 @@ export default function Store() {
               )}
               <div className="flex justify-between items-center border-t border-border pt-2">
                 <span className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Estimated Total:</span>
-                <span className="font-serif text-2xl font-bold text-foreground">Rs. {finalTotal.toFixed(2)}</span>
+                <span className="font-serif text-2xl font-bold text-foreground text-right">{hasQuotedItem ? 'Quote on request' : `Rs. ${finalTotal.toFixed(2)}`}</span>
               </div>
             </div>
 
