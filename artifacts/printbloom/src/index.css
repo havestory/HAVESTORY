@@ -510,6 +510,14 @@ h1, h2, h3 { font-weight: 700; }
   .studio-edit-gallery-caption { font-size: 8px; }
 }
 
+/* ─── Public footer contrast bridge ─────────────────────────────────────── */
+.public-footer .section-label {
+  color: #E7C46B;
+}
+.public-footer .gold-rule {
+  background: linear-gradient(90deg, rgba(231,196,107,0.9), rgba(231,196,107,0.18));
+}
+
 /* ─── Heading underline (gold 40px line) ────────────────────────────────── */
 .heading-underline {
   position: relative;

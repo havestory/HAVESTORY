@@ -343,25 +343,25 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       </main>
 
       {/* ── Footer ── */}
-      <footer className="bg-[#070604] text-[hsl(var(--foreground)/0.6)] pt-16 pb-8 border-t border-[#1E1A14]">
+      <footer className="public-footer bg-[#070604] text-[#F7F2E7] pt-16 pb-8 border-t border-[#1E1A14]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12">
             <div className="md:col-span-1">
-              <div className="font-serif text-2xl font-bold text-[hsl(var(--foreground))] mb-1">{settings?.businessName || 'HAVESTORY'}</div>
+              <div className="font-serif text-2xl font-bold text-[#F7F2E7] mb-1">{settings?.businessName || 'HAVESTORY'}</div>
               {settings?.tagline && <p className="text-xs tracking-widest uppercase text-[#C9A84C] mb-4">{settings.tagline}</p>}
-              <p className="text-xs leading-relaxed mb-6 text-[hsl(var(--foreground)/0.7)]">
+              <p className="text-xs leading-relaxed mb-6 text-[#F7F2E7]/75">
                 Premium photo frames, colour lab prints &amp; custom studio work — crafted in Sri Lanka.
               </p>
               <div className="flex gap-3">
                 {settings?.instagramUrl && (
                   <a href={settings.instagramUrl} target="_blank" rel="noreferrer"
-                    className="w-8 h-8 border border-[#2A2418] flex items-center justify-center text-[hsl(var(--foreground)/0.4)] hover:text-[#C9A84C] hover:border-[#C9A84C]/40 transition-colors">
+                    className="w-8 h-8 border border-[#F7F2E7]/25 flex items-center justify-center text-[#F7F2E7]/65 hover:text-[#C9A84C] hover:border-[#C9A84C]/60 transition-colors">
                     <Instagram className="w-3.5 h-3.5" />
                   </a>
                 )}
                 {settings?.facebookUrl && (
                   <a href={settings.facebookUrl} target="_blank" rel="noreferrer"
-                    className="w-8 h-8 border border-[#2A2418] flex items-center justify-center text-[hsl(var(--foreground)/0.4)] hover:text-[#C9A84C] hover:border-[#C9A84C]/40 transition-colors">
+                    className="w-8 h-8 border border-[#F7F2E7]/25 flex items-center justify-center text-[#F7F2E7]/65 hover:text-[#C9A84C] hover:border-[#C9A84C]/60 transition-colors">
                     <Facebook className="w-3.5 h-3.5" />
                   </a>
                 )}
@@ -372,7 +372,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               <p className="section-label mb-5">Quick Links</p>
               <ul className="space-y-2.5">
                 {[{ href: '/', label: 'Home' }, { href: '/store', label: 'Frames & Prints' }, { href: '/services', label: 'Studio Services' }, { href: '/gallery', label: 'Gallery' }, { href: '/custom-project', label: 'Custom Project' }].map(l => (
-                  <li key={l.href}><Link href={l.href} className="text-sm font-medium text-[hsl(var(--foreground)/0.72)] hover:text-[#C9A84C] transition-colors">{l.label}</Link></li>
+                  <li key={l.href}><Link href={l.href} className="text-sm font-medium text-[#F7F2E7]/80 hover:text-[#E7C46B] transition-colors">{l.label}</Link></li>
                 ))}
               </ul>
             </div>
@@ -381,7 +381,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               <p className="section-label mb-5">Information</p>
               <ul className="space-y-2.5">
                 {[{ href: '/about', label: 'About Us' }, { href: '/contact', label: 'Contact' }, { href: '/track-order', label: 'Track Your Order' }, { href: '/privacy', label: 'Privacy Policy' }, { href: '/terms', label: 'Terms of Service' }].map(l => (
-                  <li key={l.href}><Link href={l.href} className="text-sm font-medium text-[hsl(var(--foreground)/0.72)] hover:text-[#C9A84C] transition-colors">{l.label}</Link></li>
+                  <li key={l.href}><Link href={l.href} className="text-sm font-medium text-[#F7F2E7]/80 hover:text-[#E7C46B] transition-colors">{l.label}</Link></li>
                 ))}
               </ul>
             </div>
@@ -390,12 +390,12 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               <p className="section-label mb-5">Contact</p>
               <ul className="space-y-3 text-sm">
                 {settings?.phone && (
-                  <li><a href={`tel:${settings.phone}`} className="flex items-center gap-2 hover:text-[#C9A84C] transition-colors"><Phone className="w-3.5 h-3.5 shrink-0 text-[#C9A84C]/50" />{settings.phone}</a></li>
+                  <li><a href={`tel:${settings.phone}`} className="flex items-center gap-2 text-[#F7F2E7]/80 hover:text-[#E7C46B] transition-colors"><Phone className="w-3.5 h-3.5 shrink-0 text-[#E7C46B]" />{settings.phone}</a></li>
                 )}
                 {settings?.email && (
-                  <li><a href={`mailto:${settings.email}`} className="flex items-center gap-2 hover:text-[#C9A84C] transition-colors"><Mail className="w-3.5 h-3.5 shrink-0 text-[#C9A84C]/50" />{settings.email}</a></li>
+                  <li><a href={`mailto:${settings.email}`} className="flex items-center gap-2 text-[#F7F2E7]/80 hover:text-[#E7C46B] transition-colors"><Mail className="w-3.5 h-3.5 shrink-0 text-[#E7C46B]" />{settings.email}</a></li>
                 )}
-                {settings?.address && <li className="text-xs font-medium leading-relaxed text-[hsl(var(--foreground)/0.7)]">{settings.address}</li>}
+                {settings?.address && <li className="text-xs font-medium leading-relaxed text-[#F7F2E7]/75">{settings.address}</li>}
               </ul>
               {settings?.whatsappNumber && (
                 <a
@@ -410,7 +410,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           </div>
 
           <div className="gold-rule mb-6" />
-          <p className="text-[10px] font-semibold text-[hsl(var(--foreground)/0.65)] text-center tracking-widest uppercase">
+          <p className="text-[10px] font-semibold text-[#F7F2E7]/70 text-center tracking-widest uppercase">
             © {new Date().getFullYear()} {settings?.businessName || 'HAVESTORY'}. All rights reserved · Sri Lanka
           </p>
         </div>
