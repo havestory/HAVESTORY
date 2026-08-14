@@ -1,9 +1,17 @@
 import { type ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useGetSettings } from '@workspace/api-client-react';
-import { Menu, X, Phone, Mail, Instagram, Facebook, ArrowRight, ShoppingBag, Sparkles } from 'lucide-react';
+import { Menu, X, Phone, Mail, Instagram, Facebook, ArrowRight, ShoppingBag, Sparkles, MessageCircle, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { applyThemeVars } from '@/lib/theme-utils';
+
+const WHATSAPP_FAQS = [
+  { question: 'What can HAVESTORY make for me?', answer: 'We create custom photo frames, archival prints, collages and studio pieces for homes, gifts, events and businesses.' },
+  { question: 'How do I place a custom order?', answer: 'Send us your photo, preferred size and any style ideas. Our team will guide you through the materials, layout and final quote.' },
+  { question: 'How long does an order take?', answer: 'Most standard orders are ready within 48 hours. Custom or larger pieces may need a little more time, and we will confirm the timeline before starting.' },
+  { question: 'Do you deliver across Sri Lanka?', answer: 'Yes. We offer secure island-wide delivery, with the delivery fee and estimated arrival shared with your quote.' },
+  { question: 'Can I ask for the price first?', answer: 'Absolutely. Send the size, quantity and a reference image if you have one. We will reply with a clear estimate before you commit.' },
+] as const;
 
 function SpecialEventOverlay({ enabled, type, message }: { enabled?: boolean; type?: string | null; message?: string | null }) {
   if (!enabled) return null;
@@ -48,6 +56,8 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
   const [showWa,   setShowWa]   = useState(false);
   const [showCta,  setShowCta]  = useState(false);
+  const [waFaqOpen, setWaFaqOpen] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   useEffect(() => {
     const onScroll = () => {
@@ -59,7 +69,23 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => { setMenuOpen(false); }, [location]);
+  useEffect(() => {
+    setMenuOpen(false);
+    setWaFaqOpen(false);
+  }, [location]);
+
+  useEffect(() => {
+    if (!waFaqOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setWaFaqOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [waFaqOpen]);
+
+  useEffect(() => {
+    if (!showWa) setWaFaqOpen(false);
+  }, [showWa]);
 
   useEffect(() => {
     const refreshSettings = () => { void refetchSettings(); };
@@ -125,6 +151,9 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       </main>
     );
   }
+
+  const whatsappDigits = settings?.whatsappNumber?.replace(/[^0-9]/g, '') || '';
+  const whatsappHref = whatsappDigits ? `https://wa.me/${whatsappDigits}` : '';
 
   const navLinks = [
     { href: '/',             label: 'Home' },
@@ -387,22 +416,81 @@ export function PublicLayout({ children }: { children: ReactNode }) {
         </div>
       </footer>
 
-      {/* ── WhatsApp FAB ── */}
-      {settings?.whatsappNumber && (
-        <motion.a
-          href={`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`}
-          target="_blank" rel="noreferrer"
-          aria-label="Chat on WhatsApp"
+      {/* ── WhatsApp FAB + FAQ ── */}
+      {whatsappHref && (
+        <motion.div
           initial={false}
-          animate={{ opacity: showWa ? 1 : 0, scale: showWa ? 1 : 0.7 }}
-          transition={{ duration: 0.25 }}
+          animate={{ opacity: showWa ? 1 : 0, y: showWa ? 0 : 12, scale: showWa ? 1 : 0.86 }}
+          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
           style={{ pointerEvents: showWa ? 'auto' : 'none' }}
-          className="fixed bottom-24 right-5 w-[52px] h-[52px] bg-[#25D366] text-white flex items-center justify-center shadow-xl z-40 animate-wa-pulse"
+          className="fixed bottom-24 right-4 z-50 flex flex-col items-end gap-3 sm:right-5"
         >
-          <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current">
-            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.334.101.154.453.721.969 1.18.665.59 1.221.77 1.378.857.156.087.248.072.338-.029.091-.101.393-.457.497-.614.104-.157.208-.13.346-.079l2.179 1.031c.144.072.239.116.275.18.036.065.036.375-.108.78z"/>
-          </svg>
-        </motion.a>
+          <AnimatePresence>
+            {waFaqOpen && (
+              <motion.div
+                key="whatsapp-faq"
+                initial={{ opacity: 0, y: 12, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 8, scale: 0.97 }}
+                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                role="dialog"
+                aria-label="Frequently asked questions"
+                className="w-[min(19rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-[#25D366]/25 bg-[hsl(var(--popover)/0.98)] text-[hsl(var(--popover-foreground))] shadow-[0_20px_60px_rgba(0,0,0,0.22)] backdrop-blur-xl"
+              >
+                <div className="flex items-start justify-between gap-4 border-b border-[hsl(var(--border))] bg-[#25D366]/[0.08] px-4 py-3.5">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#168c45]">HAVESTORY support</p>
+                    <h3 className="mt-1 font-serif text-xl font-bold leading-tight text-[hsl(var(--popover-foreground))]">How can we help?</h3>
+                  </div>
+                  <button type="button" onClick={() => setWaFaqOpen(false)} aria-label="Close WhatsApp FAQs" className="rounded-full p-1.5 text-[hsl(var(--muted-foreground))] transition-colors hover:bg-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]"><X className="h-4 w-4" /></button>
+                </div>
+                <div className="max-h-[min(54vh,20rem)] overflow-y-auto px-3 py-2">
+                  {WHATSAPP_FAQS.map((faq, index) => {
+                    const isOpen = openFaq === index;
+                    return (
+                      <div key={faq.question} className="border-b border-[hsl(var(--border)/0.72)] last:border-b-0">
+                        <button
+                          type="button"
+                          onClick={() => setOpenFaq(isOpen ? null : index)}
+                          aria-expanded={isOpen}
+                          className="flex w-full items-center justify-between gap-3 py-3 text-left text-[12px] font-bold leading-snug text-[hsl(var(--popover-foreground))] transition-colors hover:text-[#168c45]"
+                        >
+                          <span>{faq.question}</span>
+                          <ChevronDown className={`h-4 w-4 shrink-0 text-[#25D366] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                        </button>
+                        <AnimatePresence initial={false}>
+                          {isOpen && (
+                            <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden pb-3 pr-5 text-[11px] font-medium leading-relaxed text-[hsl(var(--muted-foreground))]">
+                              {faq.answer}
+                            </motion.p>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="border-t border-[hsl(var(--border))] p-3">
+                  <a href={whatsappHref} target="_blank" rel="noreferrer" className="flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#25D366] px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#073b1d] transition-colors hover:bg-[#58e788]">
+                    <MessageCircle className="h-4 w-4" /> Chat with the studio
+                  </a>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <button
+            type="button"
+            onClick={() => setWaFaqOpen(open => !open)}
+            aria-label={waFaqOpen ? 'Close WhatsApp FAQs' : 'Open WhatsApp FAQs'}
+            aria-expanded={waFaqOpen}
+            className="group flex h-14 w-14 items-center justify-center rounded-full border-4 border-white/85 bg-[#25D366] text-white shadow-[0_10px_30px_rgba(37,211,102,0.36)] transition-transform duration-200 hover:scale-105 active:scale-95 animate-wa-pulse sm:h-16 sm:w-16"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-7 w-7 fill-current sm:h-8 sm:w-8">
+              <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.334.101.154.453.721.969 1.18.665.59 1.221.77 1.378.857.156.087.248.072.338-.029.091-.101.393-.457.497-.614.104-.157.208-.13.346-.079l2.179 1.031c.144.072.239.116.275.18.036.065.036.375-.108.78z"/>
+            </svg>
+            <span className="sr-only">WhatsApp FAQs and chat</span>
+          </button>
+        </motion.div>
       )}
 
       {/* ── Sticky CTA ── */}
