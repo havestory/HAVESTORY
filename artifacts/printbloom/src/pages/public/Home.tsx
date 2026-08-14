@@ -64,8 +64,8 @@ function ScrollHeroSlide({ slide, index, total, progress }: { slide: HeroSlide; 
   return (
     <motion.div className="absolute inset-0" style={{ opacity, scale, y }} aria-hidden="true">
       <img src={slide.img} alt="" className="h-full w-full object-cover" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-black/10" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/25" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#071A2B]/90 via-[#071A2B]/48 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#071A2B]/82 via-transparent to-[#071A2B]/22" />
     </motion.div>
   );
 }
@@ -86,14 +86,14 @@ function HeroScrollSequence({ slides, settings }: { slides: HeroSlide[]; setting
   const highlight = activeSlide === 0 ? settings?.heroHighlightWord?.trim() : '';
 
   return (
-    <section ref={sectionRef} className="relative h-[1000svh] bg-[#070604]" aria-label="HAVESTORY story slideshow">
+    <section ref={sectionRef} className="relative h-[1000svh] bg-[#071A2B]" aria-label="HAVESTORY story slideshow">
       <div className="sticky top-0 h-[100svh] min-h-[600px] max-h-[960px] overflow-hidden">
         {slides.map((item, index) => <ScrollHeroSlide key={`${item.label}-${index}`} slide={item} index={index} total={slides.length} progress={scrollYProgress} />)}
 
         <div className="absolute inset-0 z-20 mx-auto flex max-w-7xl flex-col justify-center px-8 md:px-20 pointer-events-none">
           <AnimatePresence mode="wait">
             <motion.div key={`hero-copy-${activeSlide}`} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}>
-              <div className="mb-7 flex items-center gap-3"><span className="h-px w-14 bg-[#C9A84C]" /><span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#C9A84C]">{current.label}</span></div>
+              <div className="mb-7 flex items-center gap-3"><span className="h-px w-14 bg-[#E4B95F]" /><span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#E4B95F]">{current.label}</span></div>
               <div className="mb-7 overflow-hidden">
                 {headline.map((line, lineIndex) => {
                   const matchIndex = highlight ? line.toLocaleLowerCase().indexOf(highlight.toLocaleLowerCase()) : -1;
@@ -105,7 +105,7 @@ function HeroScrollSequence({ slides, settings }: { slides: HeroSlide[]; setting
               </div>
               <p className="max-w-lg text-base font-medium leading-relaxed text-white/80 md:text-xl">{current.sub}</p>
               <div className="mt-9 flex items-center gap-4">
-                <Link href={settings?.heroCtaLink || '/store'} className="pointer-events-auto inline-flex items-center gap-3 bg-[#C9A84C] px-7 py-3.5 text-xs font-bold uppercase tracking-[0.18em] text-[#0A0907] btn-glow hover:bg-[#D4B55E]">{settings?.heroCtaText || 'Find Your Frame'} <ArrowRight className="h-4 w-4" /></Link>
+                <Link href={settings?.heroCtaLink || '/store'} className="pointer-events-auto inline-flex items-center gap-3 bg-[#E4B95F] px-7 py-3.5 text-xs font-bold uppercase tracking-[0.18em] text-[#071A2B] btn-glow hover:bg-[#F0CA75]">{settings?.heroCtaText || 'Find Your Frame'} <ArrowRight className="h-4 w-4" /></Link>
                 <span className="hidden text-[10px] font-bold uppercase tracking-[0.2em] text-white/45 sm:inline">Scroll to explore</span>
               </div>
             </motion.div>
@@ -113,12 +113,12 @@ function HeroScrollSequence({ slides, settings }: { slides: HeroSlide[]; setting
         </div>
 
         <div className="absolute right-6 top-1/2 z-30 hidden -translate-y-1/2 flex-col items-end gap-3 md:flex">
-          {slides.map((item, index) => <div key={item.label} className="flex items-center gap-3"><span className={`text-[9px] font-bold uppercase tracking-[0.2em] transition-colors ${index === activeSlide ? 'text-[#C9A84C]' : 'text-white/35'}`}>{String(index + 1).padStart(2, '0')}</span><span className={`h-px transition-all duration-500 ${index === activeSlide ? 'w-10 bg-[#C9A84C]' : 'w-4 bg-white/25'}`} /></div>)}
+          {slides.map((item, index) => <div key={item.label} className="flex items-center gap-3"><span className={`text-[9px] font-bold uppercase tracking-[0.2em] transition-colors ${index === activeSlide ? 'text-[#E4B95F]' : 'text-white/35'}`}>{String(index + 1).padStart(2, '0')}</span><span className={`h-px transition-all duration-500 ${index === activeSlide ? 'w-10 bg-[#E4B95F]' : 'w-4 bg-white/25'}`} /></div>)}
         </div>
 
         <div className="absolute bottom-8 left-8 right-8 z-30 flex items-end justify-between md:left-20 md:right-20">
-          <div className="flex items-center gap-3 text-white/60"><span className="text-[10px] font-bold uppercase tracking-[0.25em]">Scroll story</span><div className="h-px w-24 overflow-hidden bg-white/20"><motion.div className="h-full origin-left bg-[#C9A84C]" style={{ scaleX: useTransform(progressPercent, [0, 100], [0, 1]) }} /></div></div>
-          <div className="font-serif text-sm text-white/55"><span className="text-[#C9A84C]">{String(activeSlide + 1).padStart(2, '0')}</span> / {String(slides.length).padStart(2, '0')}</div>
+          <div className="flex items-center gap-3 text-white/60"><span className="text-[10px] font-bold uppercase tracking-[0.25em]">Scroll story</span><div className="h-px w-24 overflow-hidden bg-white/20"><motion.div className="h-full origin-left bg-[#E4B95F]" style={{ scaleX: useTransform(progressPercent, [0, 100], [0, 1]) }} /></div></div>
+          <div className="font-serif text-sm text-white/55"><span className="text-[#E4B95F]">{String(activeSlide + 1).padStart(2, '0')}</span> / {String(slides.length).padStart(2, '0')}</div>
         </div>
       </div>
     </section>
@@ -199,10 +199,10 @@ export default function Home() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="bg-[#C9A84C]/10 border-b border-[#C9A84C]/20 text-sm text-[hsl(var(--foreground)/0.85)] px-6 py-3 flex items-center justify-between relative z-30"
+            className="bg-[#E4B95F]/10 border-b border-[#E4B95F]/20 text-sm text-[hsl(var(--foreground)/0.85)] px-6 py-3 flex items-center justify-between relative z-30"
           >
             <span>{n.message}</span>
-            <button onClick={() => setDismissedNotices(d => [...d, n.id])} className="ml-4 text-[hsl(var(--muted-foreground))] hover:text-[#C9A84C]"><X className="w-4 h-4" /></button>
+            <button onClick={() => setDismissedNotices(d => [...d, n.id])} className="ml-4 text-[hsl(var(--muted-foreground))] hover:text-[#E4B95F]"><X className="w-4 h-4" /></button>
           </motion.div>
         ))}
       </AnimatePresence>
@@ -211,10 +211,10 @@ export default function Home() {
       <HeroScrollSequence slides={heroSlides} settings={settings} />
 
       {/* ══════════════════════════════════════════ MARQUEE TICKER */}
-      <div className="bg-[#C9A84C] py-3 overflow-hidden select-none border-y border-[#D4B55E]/30">
+      <div className="bg-[#E4B95F] py-3 overflow-hidden select-none border-y border-[#F0CA75]/30">
         <div className="marquee-track animate-marquee">
           {[...marqueeItems, ...marqueeItems].map((item, i) => (
-            <span key={i} className="px-8 text-[#0A0907] text-[11px] font-bold uppercase tracking-widest whitespace-nowrap">
+            <span key={i} className="px-8 text-[#071A2B] text-[11px] font-bold uppercase tracking-widest whitespace-nowrap">
               {item}
             </span>
           ))}
@@ -222,18 +222,18 @@ export default function Home() {
       </div>
 
       {/* ══════════════════════════════════════════ EDITABLE FEATURE CARDS */}
-      <section className="border-b border-[#1E1A14] bg-[#070604]">
+      <section className="border-b border-[#1C3A51] bg-[#071A2B]">
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {featureCards.map((card, index) => (
             <Link
               key={`${card.title}-${index}`}
               href={card.href || '/store'}
-              className="group p-7 border-b sm:border-r border-[#1E1A14] last:border-r-0 hover:bg-[#C9A84C]/5 transition-colors"
+              className="group p-7 border-b sm:border-r border-[#1C3A51] last:border-r-0 hover:bg-[#E4B95F]/5 transition-colors"
             >
-              <span className="text-[10px] text-[#C9A84C] font-bold tracking-[0.2em]">0{index + 1}</span>
-              <h2 className="font-serif text-xl text-white mt-3 group-hover:text-[#C9A84C] transition-colors">{card.title}</h2>
+              <span className="text-[10px] text-[#E4B95F] font-bold tracking-[0.2em]">0{index + 1}</span>
+              <h2 className="font-serif text-xl text-white mt-3 group-hover:text-[#E4B95F] transition-colors">{card.title}</h2>
               <p className="text-xs font-medium text-white/75 leading-relaxed mt-2">{card.copy}</p>
-              <ArrowRight className="w-4 h-4 text-[#C9A84C] mt-5 transition-transform group-hover:translate-x-1" />
+              <ArrowRight className="w-4 h-4 text-[#E4B95F] mt-5 transition-transform group-hover:translate-x-1" />
             </Link>
           ))}
         </div>
@@ -263,13 +263,13 @@ export default function Home() {
               <div className="mt-8 grid max-w-lg grid-cols-1 gap-3 sm:mt-9 sm:grid-cols-3 sm:gap-2">
                 {[['01', 'Choose the moment'], ['02', 'Shape the feeling'], ['03', 'Make it yours']].map(([number, label]) => (
                   <div key={number} className="studio-edit-step border-t pt-3">
-                    <span className="font-mono text-[10px] font-bold tracking-[0.18em] text-[#A66A2C]">{number}</span>
+                    <span className="font-mono text-[10px] font-bold tracking-[0.18em] text-[#D96F52]">{number}</span>
                     <p className="studio-edit-step-label mt-2 text-xs font-bold">{label}</p>
                   </div>
                 ))}
               </div>
               <div className="mt-8 flex flex-col gap-3 sm:mt-9 sm:flex-row sm:flex-wrap sm:gap-4">
-                <Link href="/custom-project" className="btn-glow inline-flex min-h-12 items-center justify-center gap-3 rounded-full bg-[#A66A2C] px-6 py-3.5 text-center text-[11px] font-bold uppercase tracking-[0.14em] text-white hover:bg-[#8f5924] sm:px-7">
+                <Link href="/custom-project" className="btn-glow inline-flex min-h-12 items-center justify-center gap-3 rounded-full bg-[#D96F52] px-6 py-3.5 text-center text-[11px] font-bold uppercase tracking-[0.14em] text-white hover:bg-[#B65A41] sm:px-7">
                   Start a custom story <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link href="/about" className="studio-edit-secondary inline-flex min-h-12 items-center justify-center gap-2 rounded-full border px-6 py-3.5 text-center text-[11px] font-bold uppercase tracking-[0.14em] transition-colors sm:px-7">
@@ -296,23 +296,23 @@ export default function Home() {
                     <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800&q=85" alt="Gallery wall detail" className="h-full w-full object-cover transition-transform duration-700 hover:scale-105" />
                   </div>
                   <div className="studio-edit-note rounded-[22px] p-4 sm:p-5">
-                    <p className="font-serif text-2xl font-semibold text-[#A66A2C] sm:text-3xl">Made to keep.</p>
+                    <p className="font-serif text-2xl font-semibold text-[#D96F52] sm:text-3xl">Made to keep.</p>
                     <p className="studio-edit-note-meta mt-1 text-[9px] font-bold uppercase tracking-[0.17em] sm:text-[10px]">Frames · Prints · Stories</p>
                   </div>
                 </div>
               </div>
               <div className="studio-edit-gallery-caption absolute bottom-4 left-4 rounded-full px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.16em] sm:bottom-5 sm:left-5 sm:px-4 sm:py-2">A considered edit</div>
             </div>
-            <div className="absolute -bottom-3 -left-3 h-10 w-10 border-b-2 border-l-2 border-[#A66A2C] sm:-bottom-4 sm:-left-4 sm:h-12 sm:w-12" aria-hidden="true" />
-            <div className="absolute -right-3 -top-3 h-10 w-10 border-r-2 border-t-2 border-[#A66A2C] sm:-right-4 sm:-top-4 sm:h-12 sm:w-12" aria-hidden="true" />
+            <div className="absolute -bottom-3 -left-3 h-10 w-10 border-b-2 border-l-2 border-[#D96F52] sm:-bottom-4 sm:-left-4 sm:h-12 sm:w-12" aria-hidden="true" />
+            <div className="absolute -right-3 -top-3 h-10 w-10 border-r-2 border-t-2 border-[#D96F52] sm:-right-4 sm:-top-4 sm:h-12 sm:w-12" aria-hidden="true" />
           </motion.div>
         </div>
       </section>
 
       {/* ══════════════════════════════════════════ STATS */}
-      <section className="py-20 border-b border-[#1E1A14]">
+      <section className="py-20 border-b border-[#1C3A51]">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-[#1E1A14]">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-[#1C3A51]">
             {[
               { end: 1200, suffix: '+', label: 'Frames Made' },
               { end: 8,    suffix: '+', label: 'Years of Craft' },
@@ -351,7 +351,7 @@ export default function Home() {
                   Frames & Prints
                 </h2>
               </div>
-              <Link href="/store" className="hidden md:flex items-center gap-2 text-[#C9A84C] text-xs font-bold uppercase tracking-widest hover:text-[#D4B55E] transition-colors">
+              <Link href="/store" className="hidden md:flex items-center gap-2 text-[#E4B95F] text-xs font-bold uppercase tracking-widest hover:text-[#F0CA75] transition-colors">
                 View All <ArrowRight className="w-4 h-4" />
               </Link>
             </motion.div>
@@ -372,24 +372,24 @@ export default function Home() {
                       : <div className="w-full h-full flex items-center justify-center"><ImageIcon className="w-10 h-10 text-[hsl(var(--muted-foreground))/0.3]" /></div>
                     }
                     {/* Gold overlay on hover */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#C9A84C]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#E4B95F]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-400">
-                      <Link href="/store" className="block w-full text-center bg-[#C9A84C] text-[#0A0907] text-xs font-bold uppercase tracking-widest py-2.5">
+                      <Link href="/store" className="block w-full text-center bg-[#E4B95F] text-[#071A2B] text-xs font-bold uppercase tracking-widest py-2.5">
                         Quick Order
                       </Link>
                     </div>
                   </div>
                   <div className="p-5">
-                    <h3 className="font-serif text-lg font-semibold text-[hsl(var(--foreground))] mb-1 group-hover:text-[#C9A84C] transition-colors">{p.name}</h3>
+                    <h3 className="font-serif text-lg font-semibold text-[hsl(var(--foreground))] mb-1 group-hover:text-[#E4B95F] transition-colors">{p.name}</h3>
                     {p.description && <p className="text-xs text-[hsl(var(--muted-foreground))] line-clamp-2 mb-3">{p.description}</p>}
                     <div className="flex items-center justify-between">
                       {p.price && (
-                        <span className="font-serif text-xl font-semibold text-[#C9A84C]">
+                        <span className="font-serif text-xl font-semibold text-[#E4B95F]">
                           LKR {Number(p.price).toLocaleString()}
                         </span>
                       )}
                       {p.category && (
-                        <span className="text-[9px] uppercase tracking-widest text-[hsl(var(--muted-foreground))] border border-[#2A2418] px-2 py-1">
+                        <span className="text-[9px] uppercase tracking-widest text-[hsl(var(--muted-foreground))] border border-[#244257] px-2 py-1">
                           {p.category.name}
                         </span>
                       )}
@@ -400,7 +400,7 @@ export default function Home() {
             </div>
 
             <div className="text-center mt-10">
-              <Link href="/store" className="inline-flex items-center gap-2 border border-[#2A2418] text-[hsl(var(--foreground)/0.65)] text-xs font-bold uppercase tracking-widest px-8 py-3 hover:border-[#C9A84C] hover:text-[#C9A84C] transition-colors">
+              <Link href="/store" className="inline-flex items-center gap-2 border border-[#244257] text-[hsl(var(--foreground)/0.65)] text-xs font-bold uppercase tracking-widest px-8 py-3 hover:border-[#E4B95F] hover:text-[#E4B95F] transition-colors">
                 View All Frames & Prints <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -443,23 +443,23 @@ export default function Home() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.06 }}
-                    className="group bg-[hsl(var(--card))] border border-[#1E1A14] p-7 hover:border-[#C9A84C]/40 transition-all duration-400 relative overflow-hidden"
+                    className="group bg-[hsl(var(--card))] border border-[#1C3A51] p-7 hover:border-[#E4B95F]/40 transition-all duration-400 relative overflow-hidden"
                   >
-                    <div className="absolute -right-4 -top-4 w-24 h-24 bg-[#C9A84C]/5 rounded-full transition-all duration-500 group-hover:scale-150 group-hover:bg-[#C9A84C]/8" />
-                    <div className="w-11 h-11 bg-[#C9A84C]/10 border border-[#C9A84C]/20 flex items-center justify-center mb-5 group-hover:bg-[#C9A84C]/20 transition-colors">
-                      <Icon className="w-5 h-5 text-[#C9A84C]" />
+                    <div className="absolute -right-4 -top-4 w-24 h-24 bg-[#E4B95F]/5 rounded-full transition-all duration-500 group-hover:scale-150 group-hover:bg-[#E4B95F]/8" />
+                    <div className="w-11 h-11 bg-[#E4B95F]/10 border border-[#E4B95F]/20 flex items-center justify-center mb-5 group-hover:bg-[#E4B95F]/20 transition-colors">
+                      <Icon className="w-5 h-5 text-[#E4B95F]" />
                     </div>
-                    <h3 className="font-serif text-xl font-semibold text-[hsl(var(--foreground))] mb-2 group-hover:text-[#C9A84C] transition-colors">{svc.name}</h3>
+                    <h3 className="font-serif text-xl font-semibold text-[hsl(var(--foreground))] mb-2 group-hover:text-[#E4B95F] transition-colors">{svc.name}</h3>
                     {svc.description && <p className="text-xs text-[hsl(var(--muted-foreground))] leading-relaxed mb-4 line-clamp-3">{svc.description}</p>}
                     {svc.price && (
-                      <p className="font-serif text-lg text-[#C9A84C] font-semibold">from LKR {Number(svc.price).toLocaleString()}</p>
+                      <p className="font-serif text-lg text-[#E4B95F] font-semibold">from LKR {Number(svc.price).toLocaleString()}</p>
                     )}
                   </motion.div>
                 );
               })}
             </div>
             <div className="text-center mt-10">
-              <Link href="/services" className="inline-flex items-center gap-2 text-[#C9A84C] text-xs font-bold uppercase tracking-widest hover:text-[#D4B55E] transition-colors">
+              <Link href="/services" className="inline-flex items-center gap-2 text-[#E4B95F] text-xs font-bold uppercase tracking-widest hover:text-[#F0CA75] transition-colors">
                 All Studio Services <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -500,10 +500,10 @@ export default function Home() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.08 }}
-                    className="flex items-start gap-3 p-4 border border-[#1E1A14] hover:border-[#C9A84C]/30 transition-colors"
+                    className="flex items-start gap-3 p-4 border border-[#1C3A51] hover:border-[#E4B95F]/30 transition-colors"
                   >
-                    <div className="w-9 h-9 bg-[#C9A84C]/10 flex items-center justify-center shrink-0">
-                      <r.icon className="w-4 h-4 text-[#C9A84C]" />
+                    <div className="w-9 h-9 bg-[#E4B95F]/10 flex items-center justify-center shrink-0">
+                      <r.icon className="w-4 h-4 text-[#E4B95F]" />
                     </div>
                     <div>
                       <p className="font-serif font-semibold text-sm text-[hsl(var(--foreground))] mb-0.5">{r.title}</p>
@@ -526,14 +526,14 @@ export default function Home() {
                   { src: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80', cls: 'aspect-square' },
                   { src: 'https://images.unsplash.com/photo-1490750967868-88df5691892e?w=600&q=80', cls: 'aspect-square' },
                 ].map((img, i) => (
-                  <div key={i} className={`${img.cls} bg-[hsl(var(--muted))] overflow-hidden border border-[#2A2418]`}>
+                  <div key={i} className={`${img.cls} bg-[hsl(var(--muted))] overflow-hidden border border-[#244257]`}>
                     <img src={img.src} alt="" className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-500 hover:scale-105 transition-transform" />
                   </div>
                 ))}
               </div>
               {/* Gold corner accent */}
-              <div className="absolute -top-3 -left-3 w-10 h-10 border-t-2 border-l-2 border-[#C9A84C]" />
-              <div className="absolute -bottom-3 -right-3 w-10 h-10 border-b-2 border-r-2 border-[#C9A84C]" />
+              <div className="absolute -top-3 -left-3 w-10 h-10 border-t-2 border-l-2 border-[#E4B95F]" />
+              <div className="absolute -bottom-3 -right-3 w-10 h-10 border-b-2 border-r-2 border-[#E4B95F]" />
             </motion.div>
           </div>
         </div>
@@ -548,7 +548,7 @@ export default function Home() {
                 <p className="section-label mb-3">Our Work</p>
                 <h2 className="font-serif text-4xl md:text-5xl font-bold text-[hsl(var(--foreground))] heading-underline">Gallery</h2>
               </div>
-              <Link href="/gallery" className="hidden md:flex items-center gap-2 text-[#C9A84C] text-xs font-bold uppercase tracking-widest hover:text-[#D4B55E] transition-colors">
+              <Link href="/gallery" className="hidden md:flex items-center gap-2 text-[#E4B95F] text-xs font-bold uppercase tracking-widest hover:text-[#F0CA75] transition-colors">
                 Full Gallery <ArrowRight className="w-4 h-4" />
               </Link>
             </motion.div>
@@ -560,7 +560,7 @@ export default function Home() {
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.04 }}
-                  className="group break-inside-avoid bg-[hsl(var(--card))] border border-[#1E1A14] overflow-hidden hover:border-[#C9A84C]/40 transition-colors"
+                  className="group break-inside-avoid bg-[hsl(var(--card))] border border-[#1C3A51] overflow-hidden hover:border-[#E4B95F]/40 transition-colors"
                 >
                   {item.imageUrl
                     ? <img src={item.imageUrl} alt={item.title || ''} className="w-full object-cover transition-transform duration-600 group-hover:scale-105" />
@@ -602,17 +602,17 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="bg-[hsl(var(--card))] border border-[#1E1A14] p-7 relative hover:border-[#C9A84C]/30 transition-colors"
+                  className="bg-[hsl(var(--card))] border border-[#1C3A51] p-7 relative hover:border-[#E4B95F]/30 transition-colors"
                 >
-                  <Quote className="w-8 h-8 text-[#C9A84C]/25 absolute top-5 right-5" />
+                  <Quote className="w-8 h-8 text-[#E4B95F]/25 absolute top-5 right-5" />
                   <div className="flex gap-1 mb-4">
                     {Array.from({ length: r.rating || 5 }).map((_, j) => (
-                      <Star key={j} className="w-3.5 h-3.5 text-[#C9A84C] fill-[#C9A84C]" />
+                      <Star key={j} className="w-3.5 h-3.5 text-[#E4B95F] fill-[#E4B95F]" />
                     ))}
                   </div>
                   <p className="text-[hsl(var(--foreground)/0.7)] text-sm leading-relaxed mb-6 italic">&ldquo;{r.comment}&rdquo;</p>
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-[#C9A84C]/10 border border-[#C9A84C]/20 flex items-center justify-center font-serif font-bold text-sm text-[#C9A84C]">
+                    <div className="w-9 h-9 bg-[#E4B95F]/10 border border-[#E4B95F]/20 flex items-center justify-center font-serif font-bold text-sm text-[#E4B95F]">
                       {(r.customerName || '?')[0].toUpperCase()}
                     </div>
                     <div>
@@ -647,8 +647,8 @@ export default function Home() {
         </div>
         <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--muted)/0.96)] via-[hsl(var(--muted)/0.82)] to-[hsl(var(--muted)/0.96)]" />
         {/* Gold line top / bottom */}
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C] to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C] to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#E4B95F] to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#E4B95F] to-transparent" />
 
         <motion.div
           initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}

@@ -222,7 +222,7 @@ export default function Store() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="gallery-tides-store min-h-screen bg-background flex flex-col">
       {/* Premium collection hero */}
       <div className="editorial-hero relative overflow-hidden noise">
         <div className="editorial-orb -right-24 -top-32" />
@@ -483,6 +483,7 @@ export default function Store() {
                   whileInView={{ opacity:1, y:0 }}
                   viewport={{ once:true }}
                   transition={{ duration:0.7, delay: (i % 6) * 0.1 }}
+                  className={i % 4 === 1 ? 'xl:translate-y-8' : i % 4 === 3 ? 'xl:-translate-y-4' : ''}
                 >
                   <div className="store-product-card group flex h-full flex-col rounded-2xl">
                     <div className="store-product-image aspect-[4/3]">

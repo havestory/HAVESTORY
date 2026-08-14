@@ -7,9 +7,9 @@ type ThemeVars = {
 };
 
 export const THEME_VARS: Record<string, ThemeVars> = {
-  "light-premium": { from: "#173A5E", to: "#B87919", accent: "#8C5B08", primary: "220 55% 18%", secondary: "38 75% 38%" },
-  "light-editorial": { from: "#B88746", to: "#6D4C41", accent: "#A66A2C", primary: "26 32% 16%", secondary: "31 53% 44%" },
-  "havestory-gallery": { from: "#442a22", to: "#5d4037", accent: "#a67c60", primary: "15 34% 20%", secondary: "20 19% 44%" },
+  "light-premium": { from: "#071A2B", to: "#D96F52", accent: "#E4B95F", primary: "214 64% 10%", secondary: "43 68% 60%" },
+  "light-editorial": { from: "#071A2B", to: "#D96F52", accent: "#E4B95F", primary: "214 64% 10%", secondary: "43 68% 60%" },
+  "havestory-gallery": { from: "#071A2B", to: "#B9D8CC", accent: "#D96F52", primary: "214 64% 10%", secondary: "43 68% 60%" },
   "pink-purple": { from: "#ec4899", to: "#9333ea", accent: "#d946ef", primary: "330 85% 55%", secondary: "270 70% 60%" },
   // Website Editor historically stores this preset as `amber-purple`.
   // Keep both ids mapped so saved settings and live CSS always agree.
