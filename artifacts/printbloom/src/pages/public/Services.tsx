@@ -1,6 +1,7 @@
 import { useListServices } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { ComingSoon } from '@/components/public/ComingSoon';
 import { Check, Layers } from 'lucide-react';
 import { Link } from 'wouter';
 
@@ -34,7 +35,13 @@ export default function Services() {
             <Button onClick={() => void refetch()} className="mt-5 rounded-[0.25rem]">Try again</Button>
           </div>
         ) : serviceList.length === 0 ? (
-          <div className="py-16 text-center text-muted-foreground">No services are published yet.</div>
+          <ComingSoon
+            eyebrow="The studio is preparing its next edit"
+            title="Services are coming soon."
+            description="We are shaping a focused menu of print, framing and studio services. Tell us what you need and we will help you plan it personally."
+            href="/contact"
+            cta="Talk to the studio"
+          />
         ) : (
           <div className="grid md:grid-cols-2 gap-10">
             {serviceList.map(service => (

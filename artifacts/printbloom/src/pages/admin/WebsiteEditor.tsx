@@ -30,6 +30,16 @@ type TabId = typeof TABS[number]["id"];
 
 const THEME_PRESETS = [
   {
+    id: "light-editorial",
+    label: "Light Editorial",
+    desc: "Ivory, warm sand & bold studio charcoal",
+    from: "#B88746",
+    to: "#6D4C41",
+    accent: "#A66A2C",
+    primary: "26 32% 16%",
+    secondary: "31 53% 44%",
+  },
+  {
     id: "havestory-gallery",
     label: "Gallery Theme",
     desc: "Warm ivory, walnut & muted bronze",
@@ -488,7 +498,7 @@ export default function WebsiteEditor() {
   const faviconInputRef = useRef<HTMLInputElement>(null);
 
   /* ── THEME STATE ── */
-  const [themePreset, setThemePreset] = useState("amber-purple");
+  const [themePreset, setThemePreset] = useState("light-editorial");
 
   /* ── PORTFOLIO STATE ── */
   const [showPForm, setShowPForm] = useState(false);
@@ -602,7 +612,7 @@ export default function WebsiteEditor() {
     setSeoDescription(s.seoDescription || "");
     setSeoKeywords(s.seoKeywords || "");
     setSeoOgImage(s.seoOgImage || "");
-    setThemePreset(s.themePreset || "amber-purple");
+    setThemePreset(s.themePreset || "light-editorial");
     setFaviconUrl(s.faviconUrl || "");
   }, [settings]);
 

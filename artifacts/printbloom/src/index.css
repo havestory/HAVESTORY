@@ -129,6 +129,47 @@
   --gold-bright: #D4B55E;
 }
 
+/* ─── Light Editorial public theme ─────────────────────────────────────── */
+[data-public-site][data-public-theme="light-editorial"] {
+  --background: 40 33% 97%;
+  --foreground: 26 32% 16%;
+  --border: 34 20% 86%;
+  --input: 40 25% 99%;
+  --ring: 31 53% 44%;
+  --card: 40 30% 99%;
+  --card-foreground: 26 32% 16%;
+  --card-border: 34 20% 86%;
+  --popover: 40 30% 99%;
+  --popover-foreground: 26 32% 16%;
+  --popover-border: 34 20% 86%;
+  --primary: 26 32% 16%;
+  --primary-foreground: 40 33% 97%;
+  --secondary: 31 53% 44%;
+  --secondary-foreground: 40 33% 97%;
+  --muted: 36 27% 92%;
+  --muted-foreground: 27 14% 42%;
+  --accent: 34 58% 55%;
+  --accent-foreground: 26 32% 16%;
+  --destructive: 0 68% 48%;
+  --destructive-foreground: 40 33% 97%;
+  --app-font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --app-font-serif: 'Cormorant Garamond', Georgia, serif;
+  --radius: 0.28rem;
+  --gold: #A66A2C;
+  --gold-bright: #C0874A;
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+  font-weight: 500;
+}
+
+[data-public-site][data-public-theme="light-editorial"] h1,
+[data-public-site][data-public-theme="light-editorial"] h2,
+[data-public-site][data-public-theme="light-editorial"] h3,
+[data-public-site][data-public-theme="light-editorial"] button,
+[data-public-site][data-public-theme="light-editorial"] a {
+  font-weight: 700;
+}
+
 /* ─── Base ─────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -138,6 +179,10 @@
 [data-public-site] *::before,
 [data-public-site] *::after {
   cursor: none !important;
+}
+
+[data-public-site][data-public-theme="light-editorial"] .coming-soon-card {
+  box-shadow: 0 18px 55px rgba(84, 58, 33, 0.08);
 }
 
 /* ─── Admin panel: always use system cursor ─────────────────────────────── */

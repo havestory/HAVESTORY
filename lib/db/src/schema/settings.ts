@@ -46,7 +46,7 @@ export const settingsTable = pgTable("settings", {
   seoDescription: text("seo_description").notNull().default("HAVESTORY creates premium custom photo frames, glass-look frames and story collages in Sri Lanka."),
   seoKeywords: text("seo_keywords").notNull().default("photo frames sri lanka, custom frames, glass-look frames, collage frames, havestory"),
   seoOgImage: text("seo_og_image"),
-  themePreset: text("theme_preset").notNull().default("havestory-gallery"),
+  themePreset: text("theme_preset").notNull().default("light-editorial"),
   heroAvatarImage1: text("hero_avatar_image1"),
   heroAvatarImage2: text("hero_avatar_image2"),
   heroAvatarImage3: text("hero_avatar_image3"),

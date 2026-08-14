@@ -7,6 +7,7 @@ import {
   useGetNotices, useListPortfolio, useListReviews,
 } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
+import { ComingSoon } from '@/components/public/ComingSoon';
 import {
   X, ArrowRight, Shield, Truck, Star, Zap,
   Printer, PenTool, Layout, Package, Layers,
@@ -321,7 +322,7 @@ export default function Home() {
       </section>
 
       {/* ══════════════════════════════════════════ FEATURED PRODUCTS */}
-      {featuredProducts.length > 0 && (
+      {featuredProducts.length > 0 ? (
         <section className="py-24">
           <div className="max-w-7xl mx-auto px-6">
             <motion.div
@@ -389,11 +390,23 @@ export default function Home() {
             </div>
           </div>
         </section>
+      ) : (
+        <section className="border-y border-[hsl(var(--border))] py-24">
+          <div className="mx-auto max-w-7xl px-6">
+            <ComingSoon
+              eyebrow="The collection is being curated"
+              title="Frames & prints are coming soon."
+              description="Our first light-filled collection is being selected now. If you already have a story in mind, we can start a custom piece today."
+              href="/custom-project"
+              cta="Start a custom story"
+            />
+          </div>
+        </section>
       )}
 
       {/* ══════════════════════════════════════════ SERVICES */}
-      {displayServices.length > 0 && (
-        <section className="py-24 bg-[#070604] border-y border-[#1E1A14]">
+      {displayServices.length > 0 ? (
+        <section className="py-24 bg-[hsl(var(--muted))] border-y border-[hsl(var(--border))]">
           <div className="max-w-7xl mx-auto px-6">
             <motion.div
               initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
@@ -434,6 +447,19 @@ export default function Home() {
                 All Studio Services <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
+          </div>
+        </section>
+      ) : (
+        <section className="border-y border-[hsl(var(--border))] bg-[hsl(var(--muted))] py-24">
+          <div className="mx-auto max-w-7xl px-6">
+            <ComingSoon
+              eyebrow="The studio is preparing its next edit"
+              title="Services are coming soon."
+              description="We are shaping a focused menu of print, framing and studio services. Tell us what you need and we will help you plan it personally."
+              href="/contact"
+              cta="Talk to the studio"
+              compact
+            />
           </div>
         </section>
       )}
@@ -498,8 +524,8 @@ export default function Home() {
       </section>
 
       {/* ══════════════════════════════════════════ PORTFOLIO */}
-      {displayPortfolio.length > 0 && (
-        <section className="py-24 bg-[#070604] border-y border-[#1E1A14]">
+      {displayPortfolio.length > 0 ? (
+        <section className="py-24 bg-[hsl(var(--muted))] border-y border-[hsl(var(--border))]">
           <div className="max-w-7xl mx-auto px-6">
             <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="flex items-end justify-between mb-14">
               <div>
@@ -529,10 +555,23 @@ export default function Home() {
             </div>
           </div>
         </section>
+      ) : (
+        <section className="border-y border-[hsl(var(--border))] bg-[hsl(var(--muted))] py-24">
+          <div className="mx-auto max-w-7xl px-6">
+            <ComingSoon
+              eyebrow="The gallery is still developing"
+              title="Our work is coming soon."
+              description="We are preparing a considered gallery of frames, prints and client stories. Explore a custom project while the collection is being curated."
+              href="/custom-project"
+              cta="Create your project"
+              compact
+            />
+          </div>
+        </section>
       )}
 
       {/* ══════════════════════════════════════════ REVIEWS */}
-      {displayReviews.length > 0 && (
+      {displayReviews.length > 0 ? (
         <section className="py-24">
           <div className="max-w-7xl mx-auto px-6">
             <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-14">
@@ -569,15 +608,28 @@ export default function Home() {
             </div>
           </div>
         </section>
+      ) : (
+        <section className="py-24">
+          <div className="mx-auto max-w-7xl px-6">
+            <ComingSoon
+              eyebrow="Client notes are on the way"
+              title="Reviews are coming soon."
+              description="As more HAVESTORY stories are completed, this space will fill with honest notes from the people who trusted us with their moments."
+              href="/contact"
+              cta="Begin a conversation"
+              compact
+            />
+          </div>
+        </section>
       )}
 
       {/* ══════════════════════════════════════════ CTA BANNER */}
-      <section className="relative py-28 overflow-hidden border-y border-[#1E1A14]">
-        <div className="absolute inset-0 bg-[#070604]" />
-        <div className="absolute inset-0 opacity-10">
+      <section className="relative overflow-hidden border-y border-[hsl(var(--border))] bg-[hsl(var(--muted))] py-28">
+        <div className="absolute inset-0 bg-[hsl(var(--muted))]" />
+        <div className="absolute inset-0 opacity-[0.08]">
           <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=1600&q=60" className="w-full h-full object-cover" alt="" />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0A0907] via-[#0A0907]/80 to-[#0A0907]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--muted)/0.96)] via-[hsl(var(--muted)/0.82)] to-[hsl(var(--muted)/0.96)]" />
         {/* Gold line top / bottom */}
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C] to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C] to-transparent" />
@@ -595,10 +647,10 @@ export default function Home() {
             Visit our studio, browse the collection or submit a custom order — we'll handle the rest.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/store" className="inline-flex items-center gap-3 bg-[#C9A84C] text-[#0A0907] font-bold text-sm uppercase tracking-widest px-10 py-4 btn-glow hover:bg-[#D4B55E] transition-colors">
+            <Link href="/store" className="inline-flex items-center gap-3 bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] font-bold text-sm uppercase tracking-widest px-10 py-4 btn-glow hover:opacity-90 transition-colors">
               Browse Frames <ArrowRight className="w-4 h-4" />
             </Link>
-            <Link href="/contact" className="inline-flex items-center gap-3 border border-[#2A2418] text-[hsl(var(--foreground)/0.7)] text-sm uppercase tracking-widest px-10 py-4 hover:border-[#C9A84C] hover:text-[#C9A84C] transition-colors">
+            <Link href="/contact" className="inline-flex items-center gap-3 border border-[hsl(var(--border))] text-[hsl(var(--foreground)/0.7)] text-sm uppercase tracking-widest px-10 py-4 hover:border-[hsl(var(--secondary))] hover:text-[hsl(var(--secondary))] transition-colors">
               Contact Studio
             </Link>
           </div>

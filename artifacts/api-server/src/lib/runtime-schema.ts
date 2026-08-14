@@ -1,6 +1,6 @@
 import { pool } from "@workspace/db";
 
-const SCHEMA_VERSION = "2026-08-13-core-v4";
+const SCHEMA_VERSION = "2026-08-14-light-editorial-v1";
 let runtimeSchemaReady: Promise<void> | null = null;
 
 async function versionExists(version: string): Promise<boolean> {
@@ -333,7 +333,7 @@ async function applyRuntimeSchema(): Promise<void> {
         ADD COLUMN IF NOT EXISTS seo_description TEXT NOT NULL DEFAULT '',
         ADD COLUMN IF NOT EXISTS seo_keywords TEXT NOT NULL DEFAULT '',
         ADD COLUMN IF NOT EXISTS seo_og_image TEXT,
-        ADD COLUMN IF NOT EXISTS theme_preset TEXT NOT NULL DEFAULT 'havestory-gallery',
+        ADD COLUMN IF NOT EXISTS theme_preset TEXT NOT NULL DEFAULT 'light-editorial',
         ADD COLUMN IF NOT EXISTS hero_avatar_image1 TEXT,
         ADD COLUMN IF NOT EXISTS hero_avatar_image2 TEXT,
         ADD COLUMN IF NOT EXISTS hero_avatar_image3 TEXT,
@@ -400,6 +400,9 @@ async function applyRuntimeSchema(): Promise<void> {
       CREATE INDEX IF NOT EXISTS idx_clients_created_at_active ON clients(created_at DESC) WHERE deleted_at IS NULL;
     `);
 
+    // Upgrade only the previous built-in default once; future admin-selected themes remain untouched.
+    await client.query("UPDATE settings SET theme_preset = 'light-editorial' WHERE theme_preset = 'havestory-gallery'");
+    await client.query("INSERT INTO settings (id, theme_preset) VALUES (1, 'light-editorial') ON CONFLICT (id) DO NOTHING");
     await client.query("INSERT INTO app_schema_versions(version) VALUES ($1)", [SCHEMA_VERSION]);
     await client.query("COMMIT");
   } catch (error) {

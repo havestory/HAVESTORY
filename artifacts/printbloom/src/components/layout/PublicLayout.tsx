@@ -39,9 +39,11 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     };
   }, [refetchSettings]);
 
+  const publicThemePreset = settings?.themePreset || 'light-editorial';
+
   useEffect(() => {
     if (!settings) return;
-    applyThemeVars(settings.themePreset || 'havestory-gallery');
+    applyThemeVars(publicThemePreset);
     document.title = settings.seoTitle || `${settings.businessName || 'HAVESTORY'} — Premium Photo Frames`;
 
     const setMeta = (selector: string, attribute: 'name' | 'property', key: string, content?: string | null) => {
@@ -67,7 +69,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       }
       icon.href = settings.faviconUrl;
     }
-  }, [settings]);
+  }, [settings, publicThemePreset]);
 
   if (settings?.siteClosedEnabled) {
     return (
@@ -106,15 +108,19 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   };
 
   // Nav appearance: transparent top → solid on scroll
-  const navBg = scrolled
-    ? 'bg-[#0A0907]/95 backdrop-blur-md border-b border-[#2A2418] shadow-[0_2px_32px_rgba(0,0,0,0.6)]'
-    : 'bg-transparent border-b border-transparent';
+  const navBg = publicThemePreset === 'light-editorial'
+    ? (scrolled
+      ? 'bg-[hsl(var(--background)/0.96)] backdrop-blur-md border-b border-[hsl(var(--border))] shadow-[0_2px_24px_rgba(84,58,33,0.08)]'
+      : 'bg-[hsl(var(--background)/0.88)] backdrop-blur-sm border-b border-transparent')
+    : (scrolled
+      ? 'bg-[#0A0907]/95 backdrop-blur-md border-b border-[#2A2418] shadow-[0_2px_32px_rgba(0,0,0,0.6)]'
+      : 'bg-transparent border-b border-transparent');
 
   return (
-    <div data-public-site="" className="min-h-[100dvh] flex flex-col bg-[hsl(var(--background))] relative">
+    <div data-public-site="" data-public-theme={publicThemePreset} className="min-h-[100dvh] flex flex-col bg-[hsl(var(--background))] relative">
 
       {/* ── Slim top bar ── */}
-      <div className="hidden md:flex bg-[#080705] text-[hsl(var(--foreground)/0.75)] py-2 px-8 justify-between items-center text-[11px] font-semibold tracking-widest uppercase z-50 relative border-b border-[#1E1A14]">
+      <div className={`hidden md:flex ${publicThemePreset === 'light-editorial' ? 'bg-[hsl(var(--card))] border-[hsl(var(--border))]' : 'bg-[#080705] border-[#1E1A14]'} text-[hsl(var(--foreground)/0.75)] py-2 px-8 justify-between items-center text-[11px] font-semibold tracking-widest uppercase z-50 relative border-b`}>
         <div className="flex items-center gap-8">
           {settings?.phone && (
             <a href={`tel:${settings.phone}`} className="flex items-center gap-2 hover:text-[#C9A84C] transition-colors">
@@ -211,10 +217,10 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               key="drawer"
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 280 }}
-              className="fixed right-0 top-0 h-full w-80 z-50 bg-[#0A0907] border-l border-[#2A2418] flex flex-col xl:hidden"
+              className={`fixed right-0 top-0 h-full w-80 z-50 ${publicThemePreset === 'light-editorial' ? 'bg-[hsl(var(--background))] border-l border-[hsl(var(--border))]' : 'bg-[#0A0907] border-l border-[#2A2418]'} flex flex-col xl:hidden`}
               onClick={e => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between px-6 py-6 border-b border-[#1E1A14]">
+              <div className={`flex items-center justify-between px-6 py-6 border-b ${publicThemePreset === 'light-editorial' ? 'border-[hsl(var(--border))]' : 'border-[#1E1A14]'}`}>
                 <span className="font-serif font-bold text-xl text-[hsl(var(--foreground))]">{settings?.businessName || 'HAVESTORY'}</span>
                 <button onClick={() => setMenuOpen(false)} className="text-[hsl(var(--muted-foreground))] hover:text-[#C9A84C] transition-colors">
                   <X className="w-5 h-5" />

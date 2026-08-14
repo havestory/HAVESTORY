@@ -1,4 +1,5 @@
 export const THEME_VARS: Record<string, { from: string; to: string; accent: string; primary: string; secondary: string }> = {
+  "light-editorial": { from: "#B88746", to: "#6D4C41", accent: "#A66A2C", primary: "26 32% 16%", secondary: "31 53% 44%" },
   "havestory-gallery": { from: "#442a22", to: "#5d4037", accent: "#a67c60", primary: "15 34% 20%", secondary: "20 19% 44%" },
   "pink-purple":  { from: "#ec4899", to: "#9333ea", accent: "#d946ef", primary: "330 85% 55%", secondary: "270 70% 60%" },
   // Website Editor historically stores this preset as `amber-purple`.

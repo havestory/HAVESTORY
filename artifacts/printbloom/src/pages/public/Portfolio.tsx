@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useListPortfolio } from '@workspace/api-client-react';
 import { Card } from '@/components/ui/card';
+import { ComingSoon } from '@/components/public/ComingSoon';
 import { Image as ImageIcon } from 'lucide-react';
 
 export default function Portfolio() {
@@ -45,10 +46,13 @@ export default function Portfolio() {
             {[1,2,3,4,5,6].map(i => <div key={i} className="h-80 bg-muted animate-pulse"></div>)}
           </div>
         ) : filteredItems?.length === 0 ? (
-          <div className="text-center py-20">
-            <ImageIcon className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-            <p className="text-muted-foreground">No portfolio items found in this category.</p>
-          </div>
+          <ComingSoon
+            eyebrow="The gallery is still developing"
+            title="Our work is coming soon."
+            description="We are preparing a considered gallery of frames, prints and client stories. Explore a custom project while the collection is being curated."
+            href="/custom-project"
+            cta="Create your project"
+          />
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredItems?.map(item => (
