@@ -30,6 +30,16 @@ type TabId = typeof TABS[number]["id"];
 
 const THEME_PRESETS = [
   {
+    id: "light-premium",
+    label: "Light Premium",
+    desc: "Deep navy type, warm ivory surfaces & gold accents",
+    from: "#173A5E",
+    to: "#B87919",
+    accent: "#8C5B08",
+    primary: "220 55% 18%",
+    secondary: "38 75% 38%",
+  },
+  {
     id: "light-editorial",
     label: "Light Editorial",
     desc: "Ivory, warm sand & bold studio charcoal",
@@ -498,7 +508,10 @@ export default function WebsiteEditor() {
   const faviconInputRef = useRef<HTMLInputElement>(null);
 
   /* ── THEME STATE ── */
-  const [themePreset, setThemePreset] = useState("light-editorial");
+  const [themePreset, setThemePreset] = useState("light-premium");
+  const [specialEventEnabled, setSpecialEventEnabled] = useState(false);
+  const [specialEventType, setSpecialEventType] = useState("new-year");
+  const [specialEventMessage, setSpecialEventMessage] = useState("");
 
   /* ── PORTFOLIO STATE ── */
   const [showPForm, setShowPForm] = useState(false);
@@ -612,7 +625,10 @@ export default function WebsiteEditor() {
     setSeoDescription(s.seoDescription || "");
     setSeoKeywords(s.seoKeywords || "");
     setSeoOgImage(s.seoOgImage || "");
-    setThemePreset(s.themePreset || "light-editorial");
+    setThemePreset(s.themePreset || "light-premium");
+    setSpecialEventEnabled(Boolean(s.specialEventEnabled));
+    setSpecialEventType(s.specialEventType || "new-year");
+    setSpecialEventMessage(s.specialEventMessage || "");
     setFaviconUrl(s.faviconUrl || "");
   }, [settings]);
 
@@ -651,7 +667,7 @@ export default function WebsiteEditor() {
   });
 
   const { save: saveTheme, saving: savingTheme, saved: savedTheme } = useSave(async () => {
-    await updateSettings({ data: { themePreset } });
+    await updateSettings({ data: { themePreset, specialEventEnabled, specialEventType, specialEventMessage } });
     broadcastAdminSave();
     refetch();
   });
@@ -1461,6 +1477,62 @@ For questions about these terms, email us at ${(settings as any)?.email || "the 
                 </div>
               );
             })()}
+
+            <div className="mt-6 p-5 rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-white">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="w-10 h-10 rounded-2xl bg-amber-100 flex items-center justify-center shrink-0">
+                  <Sparkles size={18} className="text-amber-700" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900">Special Event Animations</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">Turn on a seasonal animation for special days and campaigns. It updates the public website after saving.</p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSpecialEventEnabled(value => !value)}
+                aria-pressed={specialEventEnabled}
+                className={`w-full flex items-center justify-between gap-4 rounded-xl border px-4 py-3 text-left transition-colors ${specialEventEnabled ? "border-amber-300 bg-white" : "border-gray-200 bg-white/70"}`}
+              >
+                <div>
+                  <div className="text-sm font-bold text-gray-900">Enable event animation</div>
+                  <div className="text-xs text-gray-500 mt-0.5">Keep this off when you do not want seasonal effects.</div>
+                </div>
+                <span className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${specialEventEnabled ? "bg-amber-600" : "bg-gray-300"}`}>
+                  <span className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${specialEventEnabled ? "translate-x-6" : "translate-x-1"}`} />
+                </span>
+              </button>
+
+              <div className={`grid gap-4 sm:grid-cols-2 mt-4 ${specialEventEnabled ? "" : "opacity-50"}`}>
+                <div>
+                  <label className="text-[10px] text-gray-500 font-bold tracking-widest block mb-2">EVENT STYLE</label>
+                  <select
+                    value={specialEventType}
+                    onChange={event => setSpecialEventType(event.target.value)}
+                    disabled={!specialEventEnabled}
+                    className={`${inp} bg-white disabled:cursor-not-allowed`}
+                  >
+                    <option value="new-year">New Year — Fireworks</option>
+                    <option value="valentine">Valentine's Day — Hearts</option>
+                    <option value="christmas">Christmas — Falling Snow</option>
+                    <option value="eid">Eid / Festive — Stars</option>
+                    <option value="custom">Custom Event — Confetti</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] text-gray-500 font-bold tracking-widest block mb-2">OPTIONAL MESSAGE</label>
+                  <input
+                    value={specialEventMessage}
+                    onChange={event => setSpecialEventMessage(event.target.value)}
+                    disabled={!specialEventEnabled}
+                    placeholder="Seasonal greeting or campaign message"
+                    className={`${inp} bg-white disabled:cursor-not-allowed`}
+                  />
+                </div>
+              </div>
+              <p className="text-[11px] text-gray-500 mt-3">The selected animation stays subtle and does not block buttons, forms, or scrolling. Disable it after the event to return to the clean site.</p>
+            </div>
 
             <div className="mt-4 px-4 py-3 bg-emerald-50 border border-emerald-100 rounded-xl text-xs text-emerald-800">
               <strong>Live preview:</strong> Theme changes apply instantly across the site as you click. Save to make it permanent.

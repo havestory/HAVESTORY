@@ -1,9 +1,45 @@
 import { type ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useGetSettings } from '@workspace/api-client-react';
-import { Menu, X, Phone, Mail, Instagram, Facebook, ArrowRight, ShoppingBag } from 'lucide-react';
+import { Menu, X, Phone, Mail, Instagram, Facebook, ArrowRight, ShoppingBag, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { applyThemeVars } from '@/lib/theme-utils';
+
+function SpecialEventOverlay({ enabled, type, message }: { enabled?: boolean; type?: string | null; message?: string | null }) {
+  if (!enabled) return null;
+  const eventType = type || 'custom';
+  const labels: Record<string, string> = {
+    'new-year': 'A bright new chapter begins',
+    valentine: 'Made with love, shared with heart',
+    christmas: 'Seasonal wishes from HAVESTORY',
+    eid: 'A season of light and togetherness',
+    custom: 'A special moment is here',
+  };
+  const label = message || labels[eventType] || labels.custom;
+  return (
+    <div className={`special-event-overlay special-event-${eventType}`} aria-hidden="true">
+      <div className="special-event-banner"><Sparkles size={14} /> <span>{label}</span></div>
+      <div className="special-event-particles">
+        {Array.from({ length: 18 }, (_, index) => (
+          <span
+            key={index}
+            className="special-event-particle"
+            style={{
+              left: `${(index * 37) % 101}%`,
+              animationDelay: `${(index % 9) * -0.8}s`,
+              animationDuration: `${6 + (index % 5)}s`,
+            }}
+          />
+        ))}
+      </div>
+      {eventType === 'new-year' && (
+        <div className="special-event-bursts">
+          {Array.from({ length: 4 }, (_, index) => <span key={index} style={{ animationDelay: `${index * -1.1}s` }} />)}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function PublicLayout({ children }: { children: ReactNode }) {
   const [location]   = useLocation();
@@ -39,7 +75,8 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     };
   }, [refetchSettings]);
 
-  const publicThemePreset = settings?.themePreset || 'light-editorial';
+  const publicThemePreset = settings?.themePreset || 'light-premium';
+  const isLightTheme = publicThemePreset === 'light-editorial' || publicThemePreset === 'light-premium';
 
   useEffect(() => {
     if (!settings) return;
@@ -108,7 +145,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   };
 
   // Nav appearance: transparent top → solid on scroll
-  const navBg = publicThemePreset === 'light-editorial'
+  const navBg = isLightTheme
     ? (scrolled
       ? 'bg-[hsl(var(--background)/0.96)] backdrop-blur-md border-b border-[hsl(var(--border))] shadow-[0_2px_24px_rgba(84,58,33,0.08)]'
       : 'bg-[hsl(var(--background)/0.88)] backdrop-blur-sm border-b border-transparent')
@@ -120,7 +157,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     <div data-public-site="" data-public-theme={publicThemePreset} className="min-h-[100dvh] flex flex-col bg-[hsl(var(--background))] relative">
 
       {/* ── Slim top bar ── */}
-      <div className={`hidden md:flex ${publicThemePreset === 'light-editorial' ? 'bg-[hsl(var(--card))] border-[hsl(var(--border))]' : 'bg-[#080705] border-[#1E1A14]'} text-[hsl(var(--foreground)/0.75)] py-2 px-8 justify-between items-center text-[11px] font-semibold tracking-widest uppercase z-50 relative border-b`}>
+      <div className={`hidden md:flex ${isLightTheme ? 'bg-[hsl(var(--card))] border-[hsl(var(--border))]' : 'bg-[#080705] border-[#1E1A14]'} text-[hsl(var(--foreground)/0.75)] py-2 px-8 justify-between items-center text-[11px] font-semibold tracking-widest uppercase z-50 relative border-b`}>
         <div className="flex items-center gap-8">
           {settings?.phone && (
             <a href={`tel:${settings.phone}`} className="flex items-center gap-2 hover:text-[#C9A84C] transition-colors">
@@ -203,6 +240,12 @@ export function PublicLayout({ children }: { children: ReactNode }) {
         </div>
       </header>
 
+      <SpecialEventOverlay
+        enabled={settings?.specialEventEnabled}
+        type={settings?.specialEventType}
+        message={settings?.specialEventMessage}
+      />
+
       {/* ── Mobile drawer ── */}
       <AnimatePresence>
         {menuOpen && (
@@ -217,10 +260,10 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               key="drawer"
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 280 }}
-              className={`fixed right-0 top-0 h-full w-80 z-50 ${publicThemePreset === 'light-editorial' ? 'bg-[hsl(var(--background))] border-l border-[hsl(var(--border))]' : 'bg-[#0A0907] border-l border-[#2A2418]'} flex flex-col xl:hidden`}
+              className={`fixed right-0 top-0 h-full w-80 z-50 ${isLightTheme ? 'bg-[hsl(var(--background))] border-l border-[hsl(var(--border))]' : 'bg-[#0A0907] border-l border-[#2A2418]'} flex flex-col xl:hidden`}
               onClick={e => e.stopPropagation()}
             >
-              <div className={`flex items-center justify-between px-6 py-6 border-b ${publicThemePreset === 'light-editorial' ? 'border-[hsl(var(--border))]' : 'border-[#1E1A14]'}`}>
+              <div className={`flex items-center justify-between px-6 py-6 border-b ${isLightTheme ? 'border-[hsl(var(--border))]' : 'border-[#1E1A14]'}`}>
                 <span className="font-serif font-bold text-xl text-[hsl(var(--foreground))]">{settings?.businessName || 'HAVESTORY'}</span>
                 <button onClick={() => setMenuOpen(false)} className="text-[hsl(var(--muted-foreground))] hover:text-[#C9A84C] transition-colors">
                   <X className="w-5 h-5" />

@@ -89,7 +89,7 @@ router.put("/", requireAdmin, async (req, res) => {
       "aboutVision","aboutFoundedYear","aboutTeamSize","aboutLocation",
       "privacyPolicy","termsOfService",
       "seoTitle","seoDescription","seoKeywords","seoOgImage",
-      "themePreset",
+      "themePreset","specialEventEnabled","specialEventType","specialEventMessage",
       "heroAvatarImage1","heroAvatarImage2","heroAvatarImage3","heroAvatarImage4",
       "designerCredit",
       "ownerName","logoUrl","tiktokUrl","bankDetails",
@@ -136,6 +136,9 @@ router.put("/", requireAdmin, async (req, res) => {
     }
     if (req.body.googlePayEnabled !== undefined) {
       updateData.googlePayEnabled = req.body.googlePayEnabled ? 1 : 0;
+    }
+    if (req.body.specialEventEnabled !== undefined) {
+      updateData.specialEventEnabled = req.body.specialEventEnabled ? 1 : 0;
     }
     const [updated] = await db.update(settingsTable).set(updateData)
       .where(eq(settingsTable.id, settings.id)).returning();
@@ -232,7 +235,7 @@ router.post("/restore", requireAdmin, async (req, res) => {
       "aboutVision","aboutFoundedYear","aboutTeamSize","aboutLocation",
       "privacyPolicy","termsOfService",
       "seoTitle","seoDescription","seoKeywords","seoOgImage",
-      "themePreset",
+      "themePreset","specialEventEnabled","specialEventType","specialEventMessage",
       "heroAvatarImage1","heroAvatarImage2","heroAvatarImage3","heroAvatarImage4",
       "designerCredit",
       "ownerName","logoUrl","tiktokUrl","bankDetails",

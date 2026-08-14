@@ -302,6 +302,9 @@ export interface SiteSettings {
   ownerName?: string | null;
   designerCredit?: string | null;
   themePreset?: string | null;
+  specialEventEnabled?: boolean;
+  specialEventType?: string | null;
+  specialEventMessage?: string | null;
   bankName?: string | null;
   bankAccountHolder?: string | null;
   bankAccountNumber?: string | null;
@@ -394,6 +397,9 @@ export interface UpdateSettingsBody {
   ownerName?: string | null;
   designerCredit?: string | null;
   themePreset?: string | null;
+  specialEventEnabled?: boolean;
+  specialEventType?: string | null;
+  specialEventMessage?: string | null;
   bankName?: string | null;
   bankAccountHolder?: string | null;
   bankAccountNumber?: string | null;
