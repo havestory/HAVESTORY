@@ -238,6 +238,60 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ══════════════════════════════════════════ THE STUDIO EDIT */}
+      <section className="relative overflow-hidden border-b border-[#1E1A14] bg-[#0b0907] py-24 md:py-32">
+        <div className="absolute inset-0 opacity-40" aria-hidden="true">
+          <div className="absolute -left-24 top-16 h-72 w-72 rounded-full bg-[#C9A84C]/8 blur-3xl" />
+          <div className="absolute -right-24 bottom-0 h-96 w-96 rounded-full bg-[#4a3020]/20 blur-3xl" />
+        </div>
+        <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-6 md:grid-cols-[0.9fr_1.1fr] md:px-10">
+          <motion.div initial={{ opacity: 0, x: -28 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
+            <p className="section-label mb-4">The Studio Edit</p>
+            <h2 className="max-w-xl font-serif text-4xl font-bold leading-[0.98] text-[hsl(var(--foreground))] md:text-6xl">
+              A quieter way to keep what <span className="text-gradient italic">matters.</span>
+            </h2>
+            <p className="mt-7 max-w-lg text-base leading-relaxed text-[hsl(var(--foreground)/0.72)] md:text-lg">
+              We believe the best frame does not compete with a memory. It gives it room to breathe — with honest materials, balanced proportions and a finish made for your space.
+            </p>
+            <div className="mt-9 grid max-w-lg grid-cols-1 gap-3 sm:grid-cols-3">
+              {[['01', 'Choose the moment'], ['02', 'Shape the feeling'], ['03', 'Make it yours']].map(([number, label]) => (
+                <div key={number} className="border-t border-[#C9A84C]/35 pt-3">
+                  <span className="font-mono text-[10px] tracking-[0.18em] text-[#C9A84C]">{number}</span>
+                  <p className="mt-2 text-xs font-semibold text-white/75">{label}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-9 flex flex-wrap gap-4">
+              <Link href="/custom-project" className="btn-glow inline-flex items-center gap-3 bg-[#C9A84C] px-7 py-3.5 text-xs font-bold uppercase tracking-[0.17em] text-[#0A0907] hover:bg-[#D4B55E]">
+                Start a custom story <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link href="/about" className="inline-flex items-center gap-2 border border-[#2A2418] px-7 py-3.5 text-xs font-bold uppercase tracking-[0.17em] text-white/65 transition-colors hover:border-[#C9A84C]/60 hover:text-[#C9A84C]">
+                Meet the studio
+              </Link>
+            </div>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, x: 28 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="relative mx-auto w-full max-w-2xl">
+            <div className="relative grid grid-cols-[1.15fr_0.85fr] gap-3 sm:gap-5">
+              <div className="aspect-[4/5] overflow-hidden border border-[#C9A84C]/25 bg-[#17130e] shadow-2xl">
+                <img src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=1000&q=85" alt="A considered interior with framed art" className="h-full w-full object-cover opacity-90 transition-transform duration-700 hover:scale-105" />
+              </div>
+              <div className="mt-12 space-y-3 sm:mt-20 sm:space-y-5">
+                <div className="aspect-square overflow-hidden border border-[#2A2418] bg-[#17130e]">
+                  <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800&q=85" alt="Gallery wall detail" className="h-full w-full object-cover opacity-85 transition-transform duration-700 hover:scale-105" />
+                </div>
+                <div className="border border-[#2A2418] bg-[#11100c] p-4 sm:p-5">
+                  <p className="font-serif text-2xl text-[#C9A84C]">Made to keep.</p>
+                  <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.17em] text-white/45">Frames · Prints · Stories</p>
+                </div>
+              </div>
+            </div>
+            <div className="absolute -bottom-4 -left-4 h-12 w-12 border-b-2 border-l-2 border-[#C9A84C]" aria-hidden="true" />
+            <div className="absolute -right-4 -top-4 h-12 w-12 border-r-2 border-t-2 border-[#C9A84C]" aria-hidden="true" />
+          </motion.div>
+        </div>
+      </section>
+
       {/* ══════════════════════════════════════════ STATS */}
       <section className="py-20 border-b border-[#1E1A14]">
         <div className="max-w-6xl mx-auto px-6">

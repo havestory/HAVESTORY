@@ -241,7 +241,37 @@ export default function Store() {
       </div>
       <div className="border-b border-border bg-card/60"><div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-border px-6 sm:grid-cols-4 lg:px-10"><div className="flex items-center gap-3 px-3 py-4 text-xs font-semibold text-muted-foreground"><ShieldCheck size={16} className="text-secondary" /> Secure packaging</div><div className="flex items-center gap-3 px-3 py-4 text-xs font-semibold text-muted-foreground"><Ruler size={16} className="text-secondary" /> Custom sizing</div><div className="hidden items-center gap-3 px-3 py-4 text-xs font-semibold text-muted-foreground sm:flex"><MessageCircle size={16} className="text-secondary" /> Friendly guidance</div><div className="hidden items-center gap-3 px-3 py-4 text-xs font-semibold text-muted-foreground sm:flex"><Heart size={16} className="text-secondary" /> Made with care</div></div></div>
 
-      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-12 px-6 py-16 lg:flex-row lg:px-10">
+      <section className="border-b border-border bg-background px-6 py-14 lg:px-10 lg:py-20">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+            <div>
+              <p className="section-label mb-3">Choose your starting point</p>
+              <h2 className="editorial-display max-w-2xl text-3xl text-foreground sm:text-5xl">Three ways to make a moment <span className="text-gradient italic">feel permanent.</span></h2>
+            </div>
+            <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">A considered collection for homes, gifts, studios and the stories that do not fit neatly into a catalogue.</p>
+          </div>
+          <div className="grid gap-3 md:grid-cols-3">
+            {[
+              { label: '01 / Ready to choose', title: 'Browse the collection', copy: 'Frames and prints with clear pricing and a simple inquiry checkout.', href: '#collection', image: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=900&q=82' },
+              { label: '02 / Made around you', title: 'Build a custom story', copy: 'Share your size, finish and idea. We will shape the right piece with you.', href: '/custom-project', image: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=900&q=82' },
+              { label: '03 / For your studio', title: 'Work with HAVESTORY', copy: 'Portraits, product imagery and print-ready studio services for brands and people.', href: '/services', image: 'https://images.unsplash.com/photo-1526779259212-939e64788e3c?w=900&q=82' },
+            ].map((route, index) => (
+              <Link key={route.label} href={route.href} className="group relative min-h-[18rem] overflow-hidden border border-border bg-card">
+                <img src={route.image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-55 grayscale transition duration-700 group-hover:scale-105 group-hover:grayscale-0" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-black/5" />
+                <div className="relative flex min-h-[18rem] flex-col justify-end p-6">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-secondary">{route.label}</span>
+                  <h3 className="mt-2 font-serif text-2xl font-semibold text-white">{route.title}</h3>
+                  <p className="mt-2 max-w-xs text-xs leading-relaxed text-white/70">{route.copy}</p>
+                  <span className="mt-5 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-secondary">Explore <ArrowUpRight size={14} /></span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div id="collection" className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-12 px-6 py-16 lg:flex-row lg:px-10">
         <div className="editorial-rule absolute left-0 right-0" aria-hidden="true" />
         {/* Categories Sidebar */}
         <aside className="lg:w-64 shrink-0">
