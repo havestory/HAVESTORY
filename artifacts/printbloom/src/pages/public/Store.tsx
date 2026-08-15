@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useListProducts, useListCategories, useCreateOrder } from '@workspace/api-client-react';
+import { useListProducts, useListCategories, useCreateOrder, useListPortfolio } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -38,6 +38,7 @@ const CUSTOM_INQUIRY_PRODUCT = {
 export default function Store() {
   const { data: categories } = useListCategories();
   const { data: products, isLoading } = useListProducts();
+  const { data: portfolio } = useListPortfolio();
   const createOrder = useCreateOrder();
   
   const [activeCategory, setActiveCategory] = useState<string>('all');
@@ -66,6 +67,7 @@ export default function Store() {
 
   const productList = Array.isArray(products) ? products : [];
   const categoryList = Array.isArray(categories) ? categories : [];
+  const recentWork = (Array.isArray(portfolio) ? portfolio : []).slice(0, 5);
   const filteredProducts = productList.filter(p => {
     const matchesCategory = activeCategory === 'all' || p.categoryId?.toString() === activeCategory;
     const name = String(p.name || '');
@@ -233,6 +235,32 @@ export default function Store() {
         <div className="hs-store-hero-image"><img src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1400&q=88" alt="A framed artwork in a bright interior" /><span>Made to measure · Finished by hand</span></div>
       </section>
       <div className="hs-store-trust"><span><ShieldCheck size={16} /> Secure packaging</span><span><Ruler size={16} /> Custom sizing</span><span><MessageCircle size={16} /> Studio guidance</span><span><Heart size={16} /> Made with care</span></div>
+
+      {recentWork.length > 0 && (
+        <section className="hs-store-work">
+          <div className="hs-store-work-copy">
+            <span>RECENT STUDIO WORK</span>
+            <h2>Made here.<br /><em>Living elsewhere.</em></h2>
+            <p>A small selection of finished frames, prints and client stories from our studio.</p>
+            <Link href="/gallery">View the complete gallery <ArrowRight size={15} /></Link>
+          </div>
+          <div className="hs-store-work-grid">
+            {recentWork.map((item, index) => (
+              <motion.div
+                key={item.id}
+                className={`hs-store-work-item hs-store-work-item-${index + 1}`}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: .2 }}
+                transition={{ duration: .55, delay: index * .07 }}
+              >
+                <img src={item.imageUrl || 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800&q=82'} alt={item.title || 'Recent HAVESTORY studio work'} />
+                <span>{item.title || `Studio story ${index + 1}`}</span>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <div id="collection" className="hs-store-collection">
         <div className="editorial-rule absolute left-0 right-0" aria-hidden="true" />
