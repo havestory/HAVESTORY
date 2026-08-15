@@ -52,7 +52,7 @@ function cleanSections(value: unknown): PriceListSection[] {
   if (!Array.isArray(value)) return [];
   return value.slice(0, 20).map((section: any, sectionIndex) => {
     const columns = (Array.isArray(section?.columns) ? section.columns : [])
-      .slice(0, 12)
+      .slice(0, 20)
       .map((column: unknown) => String(column ?? "").trim().slice(0, 80));
     return {
       id: String(section?.id || `section-${sectionIndex + 1}`).slice(0, 80),

@@ -52,19 +52,34 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+function editorId(prefix: string) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 function newSection(index: number): PriceListSection {
   return {
-    id: `section-${Date.now()}-${index}`,
+    id: editorId('section'),
     title: `Price Table ${index + 1}`,
     columns: ['Item', 'Size', 'Price'],
-    rows: [{ id: `row-${Date.now()}`, cells: ['', '', ''] }],
+    rows: [{ id: editorId('row'), cells: ['', '', ''] }],
   };
 }
 
-function SectionEditor({ section, onChange, onRemove }: {
+function cloneSection(section: PriceListSection, titleSuffix = ''): PriceListSection {
+  return {
+    ...section,
+    id: editorId('section'),
+    title: titleSuffix ? `${section.title} ${titleSuffix}` : section.title,
+    columns: [...section.columns],
+    rows: section.rows.map(row => ({ ...row, id: editorId('row'), cells: [...row.cells] })),
+  };
+}
+
+function SectionEditor({ section, onChange, onRemove, onDuplicate }: {
   section: PriceListSection;
   onChange: (s: PriceListSection) => void;
   onRemove: () => void;
+  onDuplicate: () => void;
 }) {
   function addColumn() {
     const col = `Column ${section.columns.length + 1}`;
@@ -72,6 +87,26 @@ function SectionEditor({ section, onChange, onRemove }: {
       ...section,
       columns: [...section.columns, col],
       rows: section.rows.map(r => ({ ...r, cells: [...r.cells, ''] })),
+    });
+  }
+
+  function duplicateColumn(ci: number) {
+    const source = section.columns[ci] || `Column ${ci + 1}`;
+    onChange({
+      ...section,
+      columns: [
+        ...section.columns.slice(0, ci + 1),
+        `${source} Copy`,
+        ...section.columns.slice(ci + 1),
+      ],
+      rows: section.rows.map(row => ({
+        ...row,
+        cells: [
+          ...row.cells.slice(0, ci + 1),
+          row.cells[ci] ?? '',
+          ...row.cells.slice(ci + 1),
+        ],
+      })),
     });
   }
 
@@ -93,12 +128,22 @@ function SectionEditor({ section, onChange, onRemove }: {
   function addRow() {
     onChange({
       ...section,
-      rows: [...section.rows, { id: `row-${Date.now()}`, cells: section.columns.map(() => '') }],
+      rows: [...section.rows, { id: editorId('row'), cells: section.columns.map(() => '') }],
     });
   }
 
   function removeRow(ri: number) {
     onChange({ ...section, rows: section.rows.filter((_, i) => i !== ri) });
+  }
+
+  function duplicateRow(ri: number) {
+    const source = section.rows[ri];
+    if (!source) return;
+    const copy = { ...source, id: editorId('row'), cells: [...source.cells] };
+    onChange({
+      ...section,
+      rows: [...section.rows.slice(0, ri + 1), copy, ...section.rows.slice(ri + 1)],
+    });
   }
 
   function updateCell(ri: number, ci: number, val: string) {
@@ -123,9 +168,17 @@ function SectionEditor({ section, onChange, onRemove }: {
           className="h-8 text-sm font-semibold rounded-none border-0 border-b-2 border-border focus-visible:ring-0 focus-visible:border-secondary bg-transparent px-0 flex-1"
           placeholder="Section title"
         />
-        <Button type="button" variant="ghost" size="icon" onClick={onRemove} className="h-7 w-7 text-muted-foreground hover:text-destructive rounded-none shrink-0">
-          <X className="w-4 h-4" />
-        </Button>
+        <span className="hidden sm:inline text-[9px] uppercase tracking-widest text-muted-foreground whitespace-nowrap">
+          {section.columns.length} columns · {section.rows.length} rows
+        </span>
+        <div className="flex items-center gap-1 shrink-0">
+          <Button type="button" variant="ghost" size="icon" onClick={onDuplicate} className="h-7 w-7 text-muted-foreground hover:text-foreground rounded-none" title="Duplicate section" aria-label="Duplicate section">
+            <Copy className="w-3.5 h-3.5" />
+          </Button>
+          <Button type="button" variant="ghost" size="icon" onClick={onRemove} className="h-7 w-7 text-muted-foreground hover:text-destructive rounded-none" title="Remove section" aria-label="Remove section">
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
       {/* Table */}
@@ -141,8 +194,11 @@ function SectionEditor({ section, onChange, onRemove }: {
                       onChange={e => updateColumn(ci, e.target.value)}
                       className={cellClass + ' font-semibold bg-muted/50'}
                     />
+                    <button type="button" onClick={() => duplicateColumn(ci)} className="text-muted-foreground hover:text-foreground shrink-0" title="Duplicate column" aria-label={`Duplicate ${col} column`}>
+                      <Copy className="w-3 h-3" />
+                    </button>
                     {section.columns.length > 1 && (
-                      <button type="button" onClick={() => removeColumn(ci)} className="text-muted-foreground hover:text-destructive shrink-0">
+                      <button type="button" onClick={() => removeColumn(ci)} className="text-muted-foreground hover:text-destructive shrink-0" title="Remove column" aria-label={`Remove ${col} column`}>
                         <X className="w-3 h-3" />
                       </button>
                     )}
@@ -165,10 +221,15 @@ function SectionEditor({ section, onChange, onRemove }: {
                     />
                   </td>
                 ))}
-                <td className="p-1 w-8">
-                  <button type="button" onClick={() => removeRow(ri)} className="text-muted-foreground hover:text-destructive">
-                    <X className="w-3 h-3" />
-                  </button>
+                <td className="p-1 w-14">
+                  <div className="flex items-center justify-end gap-1">
+                    <button type="button" onClick={() => duplicateRow(ri)} className="text-muted-foreground hover:text-foreground" title="Duplicate row" aria-label="Duplicate row">
+                      <Copy className="w-3 h-3" />
+                    </button>
+                    <button type="button" onClick={() => removeRow(ri)} className="text-muted-foreground hover:text-destructive" title="Remove row" aria-label="Remove row">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -268,7 +329,7 @@ export default function PriceLists() {
       active: pl.active,
       staffVisible: pl.staffVisible,
       expiresAt: pl.expiresAt ? pl.expiresAt.slice(0, 10) : '',
-      sections: pl.sections,
+      sections: pl.sections.map(section => cloneSection(section)),
     });
     setDialogOpen(true);
   }
@@ -463,6 +524,10 @@ export default function PriceLists() {
                     key={section.id}
                     section={section}
                     onChange={s => setForm(f => ({ ...f, sections: f.sections.map((sec, idx) => idx === i ? s : sec) }))}
+                    onDuplicate={() => setForm(f => {
+                      const copy = cloneSection(section, 'Copy');
+                      return { ...f, sections: [...f.sections.slice(0, i + 1), copy, ...f.sections.slice(i + 1)] };
+                    })}
                     onRemove={() => {
                       if (form.sections.length <= 1) return;
                       setForm(f => ({ ...f, sections: f.sections.filter((_, idx) => idx !== i) }));
