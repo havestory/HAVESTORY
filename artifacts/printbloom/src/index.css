@@ -2441,3 +2441,23 @@ h1, h2, h3 { font-weight: 700; }
   .hs-store-grid { gap: 22px 10px; }
   [data-public-site] .hs-store-product .store-product-image { aspect-ratio: 1/1.05; }
 }
+
+
+/* Store hero final balance pass: full-width trust rail and compact editorial proportions. */
+.hs-store-hero { min-height: 440px; }
+.hs-store-hero-copy { padding: 36px clamp(24px, 4vw, 60px); }
+.hs-store-hero-copy h1 { margin: 16px 0; font-size: clamp(44px, 5vw, 70px); line-height: .9; }
+.hs-store-hero-copy p { max-width: 510px; font-size: 14px; line-height: 1.55; }
+.hs-store-hero-copy>div { margin-top: 24px; gap: 18px; }
+.hs-store-hero-image { min-height: 440px; max-height: 440px; }
+.hs-store-trust { width: min(100%, 1520px); align-self: center; box-sizing: border-box; }
+.hs-store-trust span { min-width: 0; padding-inline: 16px; white-space: nowrap; }
+@media (max-width: 700px) {
+  .hs-store-hero-copy { padding: 34px 20px 30px; }
+  .hs-store-hero-copy h1 { margin: 12px 0 14px; font-size: 46px; }
+  .hs-store-hero-copy p { font-size: 14px; }
+  .hs-store-hero-copy>div { margin-top: 20px; }
+  .hs-store-hero-image { min-height: 240px; max-height: 240px; }
+  .hs-store-trust { width: 100%; }
+  .hs-store-trust span { min-height: 56px; padding-inline: 10px; white-space: normal; }
+}
