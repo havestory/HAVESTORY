@@ -1715,3 +1715,18 @@ h1, h2, h3 { font-weight: 700; }
 @media (prefers-reduced-motion: reduce) {
   .premium-feature-card, .premium-product-card, .premium-service-card, .premium-archive-tile img, .premium-studio-visual img, .premium-button { transition: none; }
 }
+
+
+/* Minimal hero controls: auto-rotation stays visible without numeric clutter. */
+.premium-hero-progress { width: min(16rem, 100%); height: 2px; overflow: hidden; margin-left: auto; background: rgba(245,240,232,.2); }
+.premium-hero-progress span { display: block; height: 100%; background: var(--premium-saffron); transition: width .45s ease; }
+@media (max-width: 900px) {
+  .premium-hero-progress { margin-left: 0; }
+}
+@media (max-width: 640px) {
+  .premium-hero-progress { width: 100%; }
+  .premium-hero-side { gap: .8rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .premium-hero-progress span { transition: none; }
+}

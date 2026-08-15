@@ -115,29 +115,18 @@ function HeroShowcase({ slides, settings }: { slides: HeroSlide[]; settings?: an
           </motion.div>
         </div>
 
-        <div className="premium-hero-side">
-          <div className="premium-hero-index-card">
-            <div className="premium-hero-index-top">
-              <span>Current edit</span>
-              <span>{String(active + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</span>
+          <div className="premium-hero-side" aria-label="Hero story controls">
+            <div className="premium-hero-progress" aria-hidden="true">
+              <span style={{ width: `${((active + 1) / slides.length) * 100}%` }} />
             </div>
-            <div className="premium-hero-index-rule"><span style={{ width: `${((active + 1) / slides.length) * 100}%` }} /></div>
-            <p>{current.label}</p>
-            <strong>Objects with a story deserve a considered place.</strong>
+            <div className="premium-hero-controls">
+              <button type="button" aria-label="Previous story" onClick={() => setActive(value => (value - 1 + slides.length) % slides.length)}><ChevronLeft size={17} /></button>
+              <button type="button" aria-label={paused ? 'Play story rotation' : 'Pause story rotation'} onClick={() => setPaused(value => !value)}>{paused ? <Play size={15} /> : <Pause size={15} />}</button>
+              <button type="button" aria-label="Next story" onClick={() => setActive(value => (value + 1) % slides.length)}><ChevronRight size={17} /></button>
+            </div>
           </div>
-          <div className="premium-hero-controls">
-            <button type="button" aria-label="Previous story" onClick={() => setActive(value => (value - 1 + slides.length) % slides.length)}><ChevronLeft size={17} /></button>
-            <button type="button" aria-label={paused ? 'Play story rotation' : 'Pause story rotation'} onClick={() => setPaused(value => !value)}>{paused ? <Play size={15} /> : <Pause size={15} />}</button>
-            <button type="button" aria-label="Next story" onClick={() => setActive(value => (value + 1) % slides.length)}><ChevronRight size={17} /></button>
-          </div>
-        </div>
       </div>
 
-      <div className="premium-hero-dots" aria-label="Choose a featured story">
-        {slides.map((slide, index) => (
-          <button key={`${slide.label}-${index}`} type="button" aria-label={`Show ${slide.label}`} aria-current={index === active} onClick={() => setActive(index)} className={index === active ? 'is-active' : ''}><span>{String(index + 1).padStart(2, '0')}</span></button>
-        ))}
-      </div>
     </section>
   );
 }
@@ -210,7 +199,7 @@ export default function Home() {
 
       <section className="premium-proof-rail" aria-label="HAVESTORY highlights">
         <div className="premium-container premium-proof-track">
-          {marqueeItems.map((item, index) => <span key={item}><b>{String(index + 1).padStart(2, '0')}</b>{item}</span>)}
+          {marqueeItems.map(item => <span key={item}>{item}</span>)}
         </div>
       </section>
 
