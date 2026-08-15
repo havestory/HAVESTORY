@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useListProducts, useListCategories, useCreateOrder, useListPortfolio } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -263,7 +262,6 @@ export default function Store() {
       )}
 
       <div id="collection" className="hs-store-collection">
-        <div className="editorial-rule absolute left-0 right-0" aria-hidden="true" />
         {/* Categories Sidebar */}
         <aside className="hs-store-filter">
           <div>
@@ -272,7 +270,7 @@ export default function Store() {
             <div className="hs-store-category-mobile no-scrollbar">
               <button 
                 onClick={() => setActiveCategory('all')}
-                className={`whitespace-nowrap px-4 py-1.5 rounded-[0.25rem] border text-xs font-semibold uppercase tracking-wider transition-colors ${activeCategory === 'all' ? 'bg-primary text-primary-foreground border-primary' : 'bg-transparent border-border hover:bg-muted text-foreground'}`}
+                className={`hs-store-filter-button ${activeCategory === 'all' ? 'is-active' : ''}`}
               >
                 All Products
               </button>
@@ -280,7 +278,7 @@ export default function Store() {
                 <button 
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id.toString())}
-                  className={`whitespace-nowrap px-4 py-1.5 rounded-[0.25rem] border text-xs font-semibold uppercase tracking-wider transition-colors ${activeCategory === cat.id.toString() ? 'bg-primary text-primary-foreground border-primary' : 'bg-transparent border-border hover:bg-muted text-foreground'}`}
+                  className={`hs-store-filter-button ${activeCategory === cat.id.toString() ? 'is-active' : ''}`}
                 >
                   {cat.name}
                 </button>
@@ -290,7 +288,7 @@ export default function Store() {
             <div className="hs-store-category-desktop">
               <button 
                 onClick={() => setActiveCategory('all')}
-                className={`text-left py-2 transition-colors text-sm font-semibold uppercase tracking-wide ${activeCategory === 'all' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`hs-store-filter-button ${activeCategory === 'all' ? 'is-active' : ''}`}
               >
                 All Products
               </button>
@@ -298,7 +296,7 @@ export default function Store() {
                 <button 
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id.toString())}
-                  className={`text-left py-2 transition-colors text-sm font-semibold uppercase tracking-wide ${activeCategory === cat.id.toString() ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                  className={`hs-store-filter-button ${activeCategory === cat.id.toString() ? 'is-active' : ''}`}
                 >
                   {cat.name}
                 </button>
@@ -310,23 +308,23 @@ export default function Store() {
         {/* Product Area */}
         <main className="hs-store-results">
           <div className="hs-store-toolbar">
-            <div className="flex min-w-0 flex-1 flex-col gap-3 sm:max-w-md">
+            <div className="hs-store-toolbar-heading">
               <div className="flex items-center justify-between gap-3"><div><span className="editorial-kicker">The collection</span><h2 className="mt-2 editorial-display text-3xl text-foreground sm:text-4xl">Find your frame.</h2></div><SlidersHorizontal size={18} className="text-secondary sm:hidden" /></div>
-              <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <div className="hs-store-search">
+              <Search aria-hidden="true" />
               <Input 
                 placeholder="Search frames..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="glass-gallery-search pl-10 border-border rounded-[0.25rem] h-11 bg-card focus-visible:ring-primary focus-visible:border-primary"
+                className="hs-store-search-input"
               />
               </div>
             </div>
             
-            <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-              <div className="flex items-center gap-3">
+            <div className="hs-store-controls">
+              <div className="hs-store-sort">
                 <span className="store-number">{String(sortedProducts.length).padStart(2, '0')} / {String(productList.length).padStart(2, '0')} objects</span>
-                <select value={sortMode} onChange={e => setSortMode(e.target.value as typeof sortMode)} className="h-10 rounded-full border border-border bg-card px-4 text-xs font-bold uppercase tracking-[0.12em] text-foreground outline-none transition-colors focus:border-secondary">
+                <select aria-label="Sort products" value={sortMode} onChange={e => setSortMode(e.target.value as typeof sortMode)}>
                   <option value="featured">Featured</option>
                   <option value="price-low">Price: Low</option>
                   <option value="price-high">Price: High</option>
@@ -335,7 +333,7 @@ export default function Store() {
               
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="default" className="rounded-[0.25rem] bg-secondary text-secondary-foreground hover:bg-secondary/90 gap-2 relative h-11 px-6 shadow-sm font-bold uppercase tracking-wider text-xs border-none">
+                  <Button variant="default" className="hs-store-cart-trigger">
                     <ShoppingCart className="w-4 h-4" />
                     <span>Inquiry Cart</span>
                     {cart.length > 0 && (
@@ -345,8 +343,8 @@ export default function Store() {
                     )}
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="w-full sm:max-w-md bg-background border-l-border flex flex-col p-0 rounded-l-[0.25rem]">
-                  <div className="p-6 border-b border-border bg-primary text-primary-foreground">
+                <SheetContent className="hs-store-cart-sheet">
+                  <div className="hs-store-cart-head">
                     <SheetHeader>
                       <SheetTitle className="font-serif text-2xl text-white">Your Inquiry Cart</SheetTitle>
                     </SheetHeader>
@@ -372,7 +370,7 @@ export default function Store() {
                     ) : (
                       <div className="space-y-4">
                         {cart.map(item => (
-                          <div key={item.product.id} className="flex gap-4 p-4 border border-border bg-card shadow-sm rounded-[0.25rem]">
+                          <div key={item.product.id} className="hs-store-cart-item">
                             <div className="w-20 h-20 bg-muted shrink-0 overflow-hidden rounded-[0.25rem]">
                               <img 
                                 src={item.product.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400&q=80'} 
@@ -406,7 +404,7 @@ export default function Store() {
                   </div>
 
                   {cart.length > 0 && (
-                    <div className="p-6 border-t border-border bg-card mt-auto shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+                    <div className="hs-store-cart-footer">
                       <div className="flex justify-between items-end mb-6">
                         <span className="text-muted-foreground font-medium text-sm">Estimated Total</span>
                         <span className="font-serif text-2xl font-bold text-foreground text-right">{estimatedTotalLabel}</span>
@@ -490,27 +488,22 @@ export default function Store() {
                           <button type="button" aria-label={`Save ${product.name}`} onClick={() => toggleSaved(product.id)} className={`store-icon-button ${savedProducts.includes(product.id) ? 'is-active' : ''}`}><Heart size={15} fill={savedProducts.includes(product.id) ? 'currentColor' : 'none'} /></button>
                         </div>
                       </div>
-                      {product.category && (
-                        <Badge className="absolute bottom-4 left-4 z-10 rounded-full border border-white/15 bg-black/55 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white backdrop-blur-md">
-                          {product.category.name}
-                        </Badge>
-                      )}
                       <button
                         onClick={(e) => { e.preventDefault(); addToCart(product); }}
-                        className="absolute inset-x-4 bottom-4 z-20 flex items-center justify-between rounded-full border border-secondary/50 bg-secondary px-5 py-3 text-left text-xs font-black uppercase tracking-[0.14em] text-secondary-foreground shadow-lg transition-all duration-300 ease-out md:translate-y-20 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100"
+                        className="hs-store-add"
                       >
                         <span>Add to inquiry</span>
                         <Plus className="h-4 w-4" />
                       </button>
                     </div>
-                    <div className="flex flex-1 flex-col px-5 pb-5 pt-5">
-                      <div className="mb-3 flex items-center justify-between gap-3">
+                    <div className="hs-store-product-body">
+                      <div className="hs-store-product-meta">
                         <span className="store-number">{product.category?.name || 'HANDCRAFTED EDIT'}</span>
                         <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Ready to make</span>
                       </div>
                       <h3 className="editorial-display line-clamp-1 text-2xl font-bold text-foreground">{product.name}</h3>
                       <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{product.description || 'A considered piece, finished by hand in our studio.'}</p>
-                      <div className="mt-auto flex items-end justify-between gap-3 border-t border-border/70 pt-5">
+                      <div className="hs-store-product-footer">
                         <div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">From</p><p className="mt-1 text-lg font-black text-foreground">Rs. {product.price}</p></div>
                         <button type="button" onClick={() => setQuickViewProduct(product)} className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-[0.14em] text-secondary transition-colors hover:text-foreground">Details <ArrowUpRight size={13} /></button>
                       </div>
@@ -524,8 +517,8 @@ export default function Store() {
       </div>
 
       {cart.length > 0 && (
-        <div className="fixed inset-x-4 bottom-5 z-40 mx-auto max-w-2xl animate-in slide-in-from-bottom-4 sm:inset-x-auto">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-secondary/30 bg-primary/95 px-4 py-3 text-primary-foreground shadow-[0_18px_60px_rgba(0,0,0,0.28)] backdrop-blur-xl sm:px-5">
+        <div className="hs-store-floating-cart animate-in slide-in-from-bottom-4">
+          <div>
             <div className="flex min-w-0 items-center gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground"><ShoppingCart size={17} /></div><div className="min-w-0"><div className="truncate text-sm font-bold">{cart.reduce((a, b) => a + b.quantity, 0)} {cart.reduce((a, b) => a + b.quantity, 0) === 1 ? 'piece' : 'pieces'} selected</div><div className="text-[10px] uppercase tracking-[0.16em] text-primary-foreground/55">Estimated {estimatedTotalLabel}</div></div></div>
             <Button onClick={() => setIsCheckoutOpen(true)} className="shrink-0 rounded-xl bg-secondary px-4 text-xs font-bold uppercase tracking-wider text-secondary-foreground hover:bg-secondary/90">Start order <ArrowRight size={14} /></Button>
           </div>
@@ -534,7 +527,7 @@ export default function Store() {
 
       {/* Quick view dialog */}
       <Dialog open={Boolean(quickViewProduct)} onOpenChange={(open) => !open && setQuickViewProduct(null)}>
-        <DialogContent className="overflow-hidden rounded-2xl border-border bg-background p-0 sm:max-w-3xl">
+        <DialogContent className="hs-store-quickview">
           {quickViewProduct && (
             <div className="grid md:grid-cols-[0.95fr_1.05fr]">
               <div className="store-product-image min-h-[280px] md:min-h-full"><img src={quickViewProduct.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=900&q=85'} alt={quickViewProduct.name || 'HAVESTORY frame'} className="h-full w-full object-cover" /></div>
@@ -553,7 +546,7 @@ export default function Store() {
 
       {/* Checkout Dialog */}
       <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
-        <DialogContent className="sm:max-w-[600px] rounded-[0.25rem] border-border p-0 overflow-hidden bg-background">
+        <DialogContent className="hs-store-checkout">
           <div className="p-6 bg-primary text-primary-foreground">
             <DialogHeader>
               <DialogTitle className="font-serif text-2xl font-bold text-white">Complete Your Inquiry</DialogTitle>
