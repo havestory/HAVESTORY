@@ -75,6 +75,11 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   }, [location]);
 
   useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [menuOpen]);
+
+  useEffect(() => {
     if (!waFaqOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setWaFaqOpen(false);
@@ -173,14 +178,9 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     return location.startsWith(href);
   };
 
-  // Nav appearance: transparent top → solid on scroll
-  const navBg = isLightTheme
-    ? (scrolled
-      ? 'bg-[hsl(var(--background)/0.96)] backdrop-blur-md border-b border-[hsl(var(--border))] shadow-[0_2px_24px_rgba(84,58,33,0.08)]'
-      : 'bg-[hsl(var(--background)/0.88)] backdrop-blur-sm border-b border-transparent')
-    : (scrolled
-      ? 'bg-[#0A0907]/95 backdrop-blur-md border-b border-[#2A2418] shadow-[0_2px_32px_rgba(0,0,0,0.6)]'
-      : 'bg-transparent border-b border-transparent');
+  // The visual state is handled by the single Glass Gallery shell layer.
+  // Keeping the state semantic prevents legacy Tailwind background utilities from winning in the cascade.
+  const navBg = scrolled ? 'public-nav-scrolled' : 'public-nav-idle';
 
   return (
     <div data-public-site="" data-public-theme={publicThemePreset} className="glass-gallery-shell min-h-[100dvh] flex flex-col bg-[hsl(var(--background))] relative overflow-x-clip">
@@ -210,7 +210,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       </div>
 
       {/* ── Main navbar ── */}
-      <header className={`glass-gallery-header fixed w-full z-40 transition-all duration-500 h-[72px] top-0 md:top-[36px] ${navBg}`}>
+      <header className={`glass-gallery-header public-shell-header fixed w-full z-40 transition-all duration-300 h-[76px] top-0 md:top-[36px] ${navBg}`}>
         <div className="glass-gallery-nav-surface max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center gap-5 xl:gap-8 2xl:gap-12">
 
           {/* Logo */}
@@ -262,7 +262,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             >
               Custom Order
             </Link>
-            <button className="glass-gallery-menu-button xl:hidden p-2 text-[hsl(var(--foreground)/0.7)] hover:text-[#C9A84C] transition-colors" onClick={() => setMenuOpen(v => !v)}>
+              <button aria-expanded={menuOpen} aria-controls="public-mobile-drawer" aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'} className="glass-gallery-menu-button xl:hidden p-2 text-[hsl(var(--foreground)/0.7)] hover:text-[#C9A84C] transition-colors" onClick={() => setMenuOpen(v => !v)}>
               {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
@@ -289,7 +289,8 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               key="drawer"
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 280 }}
-              className={`glass-gallery-drawer fixed right-0 top-0 h-full w-80 z-50 ${isLightTheme ? 'bg-[hsl(var(--background))] border-l border-[hsl(var(--border))]' : 'bg-[#0A0907] border-l border-[#2A2418]'} flex flex-col xl:hidden`}
+              id="public-mobile-drawer"
+              className={`glass-gallery-drawer fixed right-0 top-0 h-[100dvh] w-[min(22rem,calc(100vw-1rem))] max-w-full overscroll-contain z-50 ${isLightTheme ? 'bg-[hsl(var(--background))] border-l border-[hsl(var(--border))]' : 'bg-[#0A0907] border-l border-[#2A2418]'} flex flex-col xl:hidden`}
               onClick={e => e.stopPropagation()}
             >
               <div className={`flex items-center justify-between px-6 py-6 border-b ${isLightTheme ? 'border-[hsl(var(--border))]' : 'border-[#1E1A14]'}`}>
@@ -338,7 +339,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       </AnimatePresence>
 
       {/* ── Page content ── */}
-      <main className="glass-gallery-main flex-1 pt-[68px] md:pt-[calc(68px+36px)]">
+      <main className="glass-gallery-main flex-1 pt-[76px] md:pt-[112px]">
         {children}
       </main>
 
