@@ -1,85 +1,83 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useListPortfolio } from '@workspace/api-client-react';
-import { Card } from '@/components/ui/card';
 import { ComingSoon } from '@/components/public/ComingSoon';
-import { Image as ImageIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Image as ImageIcon, Maximize2, X } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export default function Portfolio() {
-  const [activeCategory, setActiveCategory] = useState<string>('all');
   const { data: items, isLoading } = useListPortfolio();
   const portfolioItems = Array.isArray(items) ? items : [];
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const selected = selectedIndex === null ? null : portfolioItems[selectedIndex];
 
-  const categories = Array.from(new Set(portfolioItems.map(i => i.category)));
-  const filteredItems = activeCategory === 'all' ? portfolioItems : portfolioItems.filter(i => i.category === activeCategory);
+  const move = (direction: number) => {
+    if (selectedIndex === null || portfolioItems.length < 2) return;
+    setSelectedIndex((selectedIndex + direction + portfolioItems.length) % portfolioItems.length);
+  };
+
+  useEffect(() => {
+    if (selectedIndex === null) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSelectedIndex(null);
+      if (event.key === 'ArrowLeft') move(-1);
+      if (event.key === 'ArrowRight') move(1);
+    };
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [selectedIndex, portfolioItems.length]);
 
   return (
-    <div className="glass-gallery-archive-page gallery-tides-page min-h-screen bg-background">
-      <div className="glass-gallery-archive-hero gallery-page-hero relative overflow-hidden bg-primary py-20 text-primary-foreground sm:py-24">
-        <div className="gallery-page-hero-mark" aria-hidden="true" />
-        <div className="relative mx-auto max-w-7xl px-6 lg:px-10">
-          <div className="max-w-3xl">
-            <p className="editorial-kicker mb-6">The HAVESTORY archive</p>
-            <h1 className="editorial-display text-5xl leading-[0.9] text-white sm:text-7xl lg:text-8xl">Images with a <span className="text-gradient italic">place.</span></h1>
-            <p className="mt-7 max-w-xl text-base leading-relaxed text-primary-foreground/72 sm:text-lg">
-              A living showcase of frames, prints and studio stories — each one composed to be lived with.
-            </p>
-          </div>
-          <div className="mt-10 flex items-end justify-between gap-5 border-t border-white/15 pt-5 text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">
-            <span>Selected work / 2026</span>
-            <span className="hidden sm:inline">Sri Lanka · Made to keep</span>
-          </div>
-        </div>
-      </div>
+    <div className="hs-gallery-page">
+      <header className="hs-gallery-hero">
+        <div><span>THE HAVESTORY ARCHIVE</span><h1>Stories in their<br /><em>finished form.</em></h1></div>
+        <p>A growing collection of frames, prints and studio work. Move across an image to reveal its story, or open it for a closer look.</p>
+      </header>
 
-      <div className="glass-gallery-archive-content mx-auto max-w-7xl px-6 py-14 lg:px-10 lg:py-20">
-        <div className="glass-gallery-archive-filters mb-12 flex flex-wrap gap-2">
-          <button 
-            onClick={() => setActiveCategory('all')}
-            className={`gallery-filter ${activeCategory === 'all' ? 'is-active' : ''}`}
-          >
-            All Work
-          </button>
-          {categories.map(cat => (
-            <button 
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`gallery-filter ${activeCategory === cat ? 'is-active' : ''}`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
+      <main className="hs-gallery-content">
+        <div className="hs-gallery-intro"><span>SELECTED WORK / {new Date().getFullYear()}</span><p>{portfolioItems.length ? `${portfolioItems.length} studio ${portfolioItems.length === 1 ? 'story' : 'stories'}` : 'The archive is being prepared'}</p></div>
         {isLoading ? (
-          <div className="glass-gallery-archive-skeleton grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1,2,3,4,5,6].map(i => <div key={i} className="h-80 bg-muted animate-pulse"></div>)}
-          </div>
-        ) : filteredItems?.length === 0 ? (
-          <ComingSoon
-            eyebrow="The gallery is still developing"
-            title="Our work is coming soon."
-            description="We are preparing a considered gallery of frames, prints and client stories. Explore a custom project while the collection is being curated."
-            href="/custom-project"
-            cta="Create your project"
-          />
+          <div className="hs-gallery-grid hs-gallery-skeleton">{[1,2,3,4,5,6].map(i => <div key={i} />)}</div>
+        ) : portfolioItems.length === 0 ? (
+          <ComingSoon eyebrow="The gallery is still developing" title="Our work is coming soon." description="We are preparing a considered gallery of frames, prints and client stories." href="/custom-project" cta="Create your project" />
         ) : (
-          <div className="glass-gallery-archive-mosaic gallery-mosaic grid sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-7">
-            {filteredItems?.map((item, index) => (
-              <Card key={item.id} className={`glass-frame glass-interactive glass-gallery-archive-card gallery-tile group overflow-hidden relative aspect-square cursor-pointer ${index % 5 === 1 ? 'lg:translate-y-10' : ''} ${index % 5 === 3 ? 'lg:-translate-y-5' : ''}`}>
-                {item.imageUrl ? (
-                  <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground/30"><ImageIcon className="h-10 w-10" /></div>
-                )}
-                <div className="gallery-tile-overlay absolute inset-0 flex flex-col justify-end p-6">
-                  <p className="text-secondary text-xs uppercase tracking-widest font-bold mb-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">{item.category}</p>
-                  <h3 className="text-white font-serif text-xl translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75">{item.title}</h3>
-                </div>
-              </Card>
+          <div className="hs-gallery-grid">
+            {portfolioItems.map((item, index) => (
+              <motion.button
+                type="button"
+                key={item.id}
+                className={`hs-gallery-card hs-gallery-card-${index % 6}`}
+                initial={{ opacity: 0, y: 26 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: .16 }}
+                transition={{ duration: .55, delay: (index % 6) * .055 }}
+                onClick={() => setSelectedIndex(index)}
+                aria-label={`Open ${item.title || 'gallery image'}`}
+              >
+                {item.imageUrl ? <img src={item.imageUrl} alt={item.title || 'HAVESTORY studio work'} /> : <span className="hs-gallery-placeholder"><ImageIcon /></span>}
+                <span className="hs-gallery-card-overlay"><small>{item.category || 'Studio work'}</small><strong>{item.title || `Story ${index + 1}`}</strong><i><Maximize2 /> View image</i></span>
+              </motion.button>
             ))}
           </div>
         )}
-      </div>
+      </main>
+
+      <AnimatePresence>
+        {selected && (
+          <motion.div className="hs-gallery-lightbox" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedIndex(null)} role="dialog" aria-modal="true" aria-label={selected.title || 'Gallery image preview'}>
+            <button type="button" className="hs-gallery-close" onClick={() => setSelectedIndex(null)} aria-label="Close image"><X /></button>
+            {portfolioItems.length > 1 && <button type="button" className="hs-gallery-prev" onClick={event => { event.stopPropagation(); move(-1); }} aria-label="Previous image"><ChevronLeft /></button>}
+            <motion.figure key={selected.id} initial={{ opacity: 0, scale: .96, y: 14 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: .35 }} onClick={event => event.stopPropagation()}>
+              <img src={selected.imageUrl || ''} alt={selected.title || 'HAVESTORY studio work'} />
+              <figcaption><span>{selected.category || 'Studio work'}</span><strong>{selected.title || `Story ${(selectedIndex || 0) + 1}`}</strong><small>{(selectedIndex || 0) + 1} / {portfolioItems.length}</small></figcaption>
+            </motion.figure>
+            {portfolioItems.length > 1 && <button type="button" className="hs-gallery-next" onClick={event => { event.stopPropagation(); move(1); }} aria-label="Next image"><ChevronRight /></button>}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

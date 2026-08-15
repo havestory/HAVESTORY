@@ -49,47 +49,45 @@ export default function TrackOrder() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <div className="bg-primary text-primary-foreground py-16">
-        <div className="max-w-3xl mx-auto px-6 text-center">
-          <h1 className="text-4xl lg:text-5xl font-serif mb-6">Track Your Order</h1>
-          <p className="text-lg text-primary-foreground/70 font-light mb-10">
+    <div className="hs-track-page">
+      <section className="hs-track-hero">
+        <div className="hs-track-hero-inner">
+          <span>ORDER JOURNEY</span>
+          <h1>Track your order.</h1>
+          <p>
             Enter your order ID below to see real-time updates on your project's progress.
           </p>
           
-          <form onSubmit={handleSearch} className="flex w-full max-w-md mx-auto relative group">
-            <Input 
-              value={orderId}
-              onChange={(e) => setOrderId(e.target.value)}
-              placeholder="e.g. ORD-12345" 
-              className="rounded-none h-14 pl-12 text-primary bg-white focus-visible:ring-0 border-none"
-            />
-            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Button type="submit" className="rounded-none h-14 px-8 bg-secondary text-secondary-foreground hover:bg-secondary/90 shrink-0">
+          <form onSubmit={handleSearch} className="hs-track-form">
+            <div className="hs-track-field">
+              <Search aria-hidden="true" />
+              <Input value={orderId} onChange={(e) => setOrderId(e.target.value)} placeholder="e.g. ORD-12345" aria-label="Order ID" className="hs-track-input" />
+            </div>
+            <Button type="submit" className="hs-track-submit">
               Track
             </Button>
           </form>
         </div>
-      </div>
+      </section>
 
-      <div className="flex-1 max-w-3xl mx-auto w-full px-6 py-16">
+      <div className="hs-track-results">
         {isLoading && (
-          <div className="text-center py-12">
+          <div className="hs-track-state">
             <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-muted-foreground">Locating your order...</p>
           </div>
         )}
 
         {isError && (
-          <div className="text-center py-12 bg-destructive/5 border border-destructive/20 text-destructive p-8">
+          <div className="hs-track-state hs-track-error">
             <p className="font-medium mb-2">Order Not Found</p>
             <p className="text-sm">We couldn't find an order matching "{searchId}". Please check your order ID and try again.</p>
           </div>
         )}
 
         {tracking && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
-            <Card className="rounded-none border-border shadow-sm">
+          <div className="hs-track-details animate-in fade-in slide-in-from-bottom-4">
+            <Card className="hs-track-card">
               <CardContent className="p-6 sm:p-8">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6 mb-6">
                   <div>
@@ -169,7 +167,7 @@ export default function TrackOrder() {
             {(tracking.onlineDeliveryLinks?.length > 0 || tracking.invoice) && (
               <div className="grid sm:grid-cols-2 gap-6">
                 {tracking.onlineDeliveryLinks?.length > 0 && (
-                  <Card className="rounded-none border-border shadow-sm">
+                  <Card className="hs-track-card">
                     <CardContent className="p-6">
                       <h3 className="font-serif text-lg mb-4">Digital Files</h3>
                       <div className="space-y-3">
@@ -185,7 +183,7 @@ export default function TrackOrder() {
                   </Card>
                 )}
                 {tracking.invoice && (
-                  <Card className="rounded-none border-border shadow-sm">
+                  <Card className="hs-track-card">
                     <CardContent className="p-6">
                       <h3 className="font-serif text-lg mb-4">Invoice Summary</h3>
                       <div className="space-y-2 mb-4">
