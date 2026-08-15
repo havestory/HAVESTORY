@@ -3,7 +3,7 @@ import { Link } from 'wouter';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import {
   ArrowRight, ChevronLeft, ChevronRight, Image as ImageIcon, Layers,
-  Layout, Mail, Package, PenTool, Play, Pause, Printer, Quote,
+  Layout, Mail, Package, PenTool, Printer, Quote,
   Shield, Star, Truck, X, Zap,
 } from 'lucide-react';
 import {
@@ -67,19 +67,18 @@ function SectionIntro({ eyebrow, title, copy, action }: { eyebrow: string; title
 
 function HeroShowcase({ slides, settings }: { slides: HeroSlide[]; settings?: any }) {
   const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
   const current = slides[active] || slides[0];
   const headline = current.headline.split('\n');
   const highlight = active === 0 ? settings?.heroHighlightWord?.trim() : '';
 
   useEffect(() => {
-    if (paused || slides.length < 2) return;
+    if (slides.length < 2) return;
     const timer = window.setInterval(() => setActive(value => (value + 1) % slides.length), 6500);
     return () => window.clearInterval(timer);
-  }, [paused, slides.length]);
+  }, [slides.length]);
 
   return (
-    <section className="premium-hero" aria-label="HAVESTORY featured stories" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+    <section className="premium-hero" aria-label="HAVESTORY featured stories">
       <div className="premium-hero-backdrop" aria-hidden="true">
         <AnimatePresence mode="wait">
           <motion.img
@@ -121,7 +120,6 @@ function HeroShowcase({ slides, settings }: { slides: HeroSlide[]; settings?: an
             </div>
             <div className="premium-hero-controls">
               <button type="button" aria-label="Previous story" onClick={() => setActive(value => (value - 1 + slides.length) % slides.length)}><ChevronLeft size={17} /></button>
-              <button type="button" aria-label={paused ? 'Play story rotation' : 'Pause story rotation'} onClick={() => setPaused(value => !value)}>{paused ? <Play size={15} /> : <Pause size={15} />}</button>
               <button type="button" aria-label="Next story" onClick={() => setActive(value => (value + 1) % slides.length)}><ChevronRight size={17} /></button>
             </div>
           </div>
