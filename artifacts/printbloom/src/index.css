@@ -1095,3 +1095,350 @@ h1, h2, h3 { font-weight: 700; }
 [data-public-site][data-public-theme="light-premium"] .editorial-hero .editorial-display { color: #F5F0E8; }
 
 [data-public-site][data-public-theme="light-premium"] .gallery-page-hero .editorial-display { color: #F5F0E8; }
+
+
+/* ═══════════════════════════════════════════════════════
+   HAVESTORY — Glass Gallery structural system
+   Layered translucent surfaces over an atmospheric gallery canvas.
+   ═══════════════════════════════════════════════════════ */
+.glass-gallery-shell {
+  --glass-ink: #071A2B;
+  --glass-porcelain: #F5F0E8;
+  --glass-sea: #B9D8CC;
+  --glass-clay: #D96F52;
+  --glass-saffron: #E4B95F;
+  --glass-border: rgba(7, 26, 43, 0.14);
+  --glass-surface: rgba(245, 240, 232, 0.68);
+  --glass-surface-strong: rgba(255, 255, 255, 0.78);
+  --glass-shadow: 0 24px 80px rgba(7, 26, 43, 0.14);
+  position: relative;
+  isolation: isolate;
+  background-color: hsl(var(--background)) !important;
+  background-image:
+    radial-gradient(circle at 5% 14%, rgba(185, 216, 204, 0.36), transparent 28rem),
+    radial-gradient(circle at 95% 33%, rgba(217, 111, 82, 0.09), transparent 24rem),
+    linear-gradient(135deg, rgba(255,255,255,0.22), transparent 42%);
+}
+.glass-gallery-shell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  opacity: 0.42;
+  background-image: linear-gradient(rgba(7, 26, 43, 0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(7, 26, 43, 0.018) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: linear-gradient(to bottom, black, transparent 78%);
+}
+.glass-gallery-shell::after {
+  content: '';
+  position: fixed;
+  right: 4vw;
+  bottom: 12vh;
+  z-index: -1;
+  width: 18rem;
+  height: 18rem;
+  border: 1px solid rgba(228, 185, 95, 0.18);
+  border-radius: 999px;
+  pointer-events: none;
+  box-shadow: 0 0 90px rgba(185, 216, 204, 0.13), inset 0 0 70px rgba(228, 185, 95, 0.06);
+}
+.glass-gallery-main { position: relative; isolation: isolate; }
+.glass-gallery-main::before {
+  content: '';
+  position: absolute;
+  top: 2rem;
+  left: 50%;
+  width: min(92vw, 78rem);
+  height: 1px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(217,111,82,0.22) 30%, rgba(228,185,95,0.52) 50%, rgba(185,216,204,0.22) 70%, transparent);
+}
+.glass-gallery-header { background: transparent !important; border-color: transparent !important; box-shadow: none !important; backdrop-filter: none !important; }
+.glass-gallery-topbar {
+  background: rgba(245, 240, 232, 0.52) !important;
+  border-color: rgba(7, 26, 43, 0.09) !important;
+  backdrop-filter: blur(18px) saturate(125%);
+  -webkit-backdrop-filter: blur(18px) saturate(125%);
+}
+.glass-gallery-nav-surface {
+  height: calc(100% - 0.75rem);
+  margin-top: 0.375rem;
+  border: 1px solid rgba(7, 26, 43, 0.13);
+  border-radius: 1.35rem;
+  background: rgba(245, 240, 232, 0.72);
+  box-shadow: 0 14px 48px rgba(7, 26, 43, 0.1), inset 0 1px 0 rgba(255,255,255,0.72);
+  backdrop-filter: blur(22px) saturate(135%);
+  -webkit-backdrop-filter: blur(22px) saturate(135%);
+}
+.glass-gallery-logo-name { color: var(--glass-ink) !important; }
+.glass-gallery-logo-tagline { color: rgba(7, 26, 43, 0.58) !important; }
+.glass-gallery-nav-link,
+.glass-gallery-shop-link,
+.glass-gallery-menu-button { color: rgba(7, 26, 43, 0.78) !important; }
+.glass-gallery-nav-link:hover,
+.glass-gallery-shop-link:hover,
+.glass-gallery-menu-button:hover { color: var(--glass-clay) !important; }
+.glass-gallery-order-button { background: var(--glass-saffron) !important; color: var(--glass-ink) !important; border-radius: 999px; box-shadow: 0 8px 24px rgba(228,185,95,0.22); }
+.glass-gallery-drawer {
+  background: rgba(245, 240, 232, 0.9) !important;
+  border-color: rgba(7, 26, 43, 0.14) !important;
+  backdrop-filter: blur(26px) saturate(135%);
+  -webkit-backdrop-filter: blur(26px) saturate(135%);
+}
+.glass-gallery-footer {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(7,26,43,0.98), rgba(12,44,56,0.96)) !important;
+  border-top-color: rgba(228,185,95,0.28) !important;
+}
+.glass-gallery-footer::before {
+  content: '';
+  position: absolute;
+  top: -7rem;
+  right: -4rem;
+  width: 22rem;
+  height: 22rem;
+  border: 1px solid rgba(185,216,204,0.18);
+  border-radius: 999px;
+  box-shadow: inset 0 0 80px rgba(228,185,95,0.06);
+  pointer-events: none;
+}
+.glass-panel {
+  border: 1px solid var(--glass-border);
+  border-radius: 1.5rem;
+  background: var(--glass-surface);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.68);
+  backdrop-filter: blur(20px) saturate(125%);
+  -webkit-backdrop-filter: blur(20px) saturate(125%);
+}
+.glass-panel-strong {
+  border: 1px solid rgba(7,26,43,0.12);
+  border-radius: 1.35rem;
+  background: var(--glass-surface-strong);
+  box-shadow: 0 18px 60px rgba(7,26,43,0.1), inset 0 1px 0 rgba(255,255,255,0.72);
+  backdrop-filter: blur(18px) saturate(125%);
+  -webkit-backdrop-filter: blur(18px) saturate(125%);
+}
+.glass-frame {
+  position: relative;
+  border: 1px solid rgba(7,26,43,0.13);
+  border-radius: 1.75rem;
+  box-shadow: 0 22px 70px rgba(7,26,43,0.13), inset 0 1px 0 rgba(255,255,255,0.7);
+}
+.glass-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0.55rem;
+  border: 1px solid rgba(255,255,255,0.34);
+  border-radius: 1.25rem;
+  pointer-events: none;
+}
+.glass-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid rgba(7,26,43,0.13);
+  border-radius: 999px;
+  background: rgba(245,240,232,0.62);
+  color: rgba(7,26,43,0.72);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.glass-interactive { transition: transform 240ms cubic-bezier(0.23,1,0.32,1), box-shadow 240ms ease, border-color 240ms ease, background-color 240ms ease; }
+.glass-interactive:hover { transform: translateY(-4px); border-color: rgba(217,111,82,0.45); box-shadow: 0 26px 80px rgba(7,26,43,0.16), inset 0 1px 0 rgba(255,255,255,0.72); }
+.glass-interactive:focus-visible,
+.glass-gallery-nav-link:focus-visible,
+.glass-gallery-order-button:focus-visible,
+.glass-gallery-shop-link:focus-visible,
+.glass-gallery-menu-button:focus-visible { outline: 2px solid var(--glass-clay); outline-offset: 4px; }
+
+[data-public-site]:not([data-public-theme="light-premium"]):not([data-public-theme="light-editorial"]) .glass-gallery-topbar { background: rgba(7,26,43,0.52) !important; border-color: rgba(245,240,232,0.12) !important; }
+[data-public-site]:not([data-public-theme="light-premium"]):not([data-public-theme="light-editorial"]) .glass-gallery-nav-surface { background: rgba(7,26,43,0.72); border-color: rgba(245,240,232,0.18); box-shadow: 0 18px 64px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.08); }
+[data-public-site]:not([data-public-theme="light-premium"]):not([data-public-theme="light-editorial"]) .glass-gallery-logo-name,
+[data-public-site]:not([data-public-theme="light-premium"]):not([data-public-theme="light-editorial"]) .glass-gallery-nav-link,
+[data-public-site]:not([data-public-theme="light-premium"]):not([data-public-theme="light-editorial"]) .glass-gallery-shop-link,
+[data-public-site]:not([data-public-theme="light-premium"]):not([data-public-theme="light-editorial"]) .glass-gallery-menu-button { color: rgba(245,240,232,0.86) !important; }
+[data-public-site]:not([data-public-theme="light-premium"]):not([data-public-theme="light-editorial"]) .glass-gallery-logo-tagline { color: rgba(245,240,232,0.56) !important; }
+
+@media (max-width: 767px) {
+  .glass-gallery-shell::after { right: -7rem; bottom: 18vh; width: 14rem; height: 14rem; }
+  .glass-gallery-main::before { top: 1.2rem; width: 88vw; }
+  .glass-gallery-nav-surface { height: calc(100% - 0.5rem); margin-top: 0.25rem; border-radius: 1.1rem; }
+  .glass-panel, .glass-panel-strong { border-radius: 1.15rem; }
+  .glass-frame { border-radius: 1.25rem; }
+  .glass-frame::after { inset: 0.4rem; border-radius: 0.9rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .glass-interactive { transition: none; }
+}
+
+
+/* Glass Gallery homepage compositions */
+.glass-gallery-home { position: relative; overflow: hidden; }
+.glass-gallery-home-hero { background: var(--glass-ink) !important; }
+.glass-gallery-home-hero .glass-gallery-hero-copy {
+  width: min(100%, 42rem);
+  padding: 1.5rem 1.65rem;
+  border: 1px solid rgba(245,240,232,0.18);
+  border-radius: 1.65rem;
+  background: linear-gradient(135deg, rgba(7,26,43,0.52), rgba(7,26,43,0.18));
+  box-shadow: 0 28px 90px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.16);
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+}
+.glass-gallery-home-hero .glass-gallery-hero-copy::after {
+  content: '';
+  position: absolute;
+  inset: 0.6rem;
+  border: 1px solid rgba(228,185,95,0.16);
+  border-radius: 1.2rem;
+  pointer-events: none;
+}
+.glass-gallery-ticker { position: relative; z-index: 2; box-shadow: 0 12px 34px rgba(7,26,43,0.16); }
+.glass-gallery-feature-band {
+  position: relative;
+  background: linear-gradient(135deg, #071A2B, #0B2A3B 60%, #123E46) !important;
+}
+.glass-gallery-feature-band::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 87% 20%, rgba(185,216,204,0.15), transparent 20rem), linear-gradient(90deg, transparent, rgba(228,185,95,0.04));
+}
+.glass-gallery-feature-band > div { position: relative; z-index: 1; }
+.glass-gallery-feature-card { min-height: 12rem; border-color: rgba(185,216,204,0.2) !important; }
+.glass-gallery-feature-card:hover { background: rgba(228,185,95,0.08) !important; }
+.glass-gallery-studio-stage {
+  background:
+    radial-gradient(circle at 12% 24%, rgba(185,216,204,0.27), transparent 24rem),
+    radial-gradient(circle at 88% 70%, rgba(217,111,82,0.12), transparent 26rem),
+    linear-gradient(140deg, rgba(245,240,232,0.92), rgba(232,230,219,0.56));
+}
+.glass-gallery-studio-stage .studio-edit-copy-panel {
+  border: 1px solid rgba(7,26,43,0.13);
+  background: rgba(245,240,232,0.62);
+  box-shadow: 0 26px 86px rgba(7,26,43,0.14), inset 0 1px 0 rgba(255,255,255,0.78);
+  backdrop-filter: blur(22px) saturate(125%);
+  -webkit-backdrop-filter: blur(22px) saturate(125%);
+}
+.glass-gallery-studio-stage .studio-edit-gallery-shell {
+  border: 1px solid rgba(7,26,43,0.16);
+  background: rgba(245,240,232,0.52);
+  box-shadow: 0 30px 90px rgba(7,26,43,0.16), inset 0 1px 0 rgba(255,255,255,0.72);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+.glass-gallery-stats-stage {
+  background: linear-gradient(180deg, rgba(245,240,232,0.68), rgba(185,216,204,0.16));
+}
+.glass-gallery-stats-stage .glass-gallery-stat { border-color: rgba(7,26,43,0.13) !important; }
+.glass-gallery-collection-section { position: relative; background: rgba(245,240,232,0.46); }
+.glass-gallery-collection-section::before,
+.glass-gallery-services-stage::before,
+.glass-gallery-archive-stage::before,
+.glass-gallery-reviews-stage::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 18% 10%, rgba(185,216,204,0.17), transparent 22rem); }
+.glass-gallery-collection-section > div,
+.glass-gallery-services-stage > div,
+.glass-gallery-archive-stage > div,
+.glass-gallery-reviews-stage > div { position: relative; z-index: 1; }
+.glass-gallery-home-product { border-radius: 1.5rem !important; }
+.glass-gallery-home-product .aspect-\[4\/3\] { border-radius: 1.2rem 1.2rem 0 0; }
+.glass-gallery-services-stage { position: relative; background: linear-gradient(135deg, rgba(185,216,204,0.24), rgba(245,240,232,0.62)) !important; }
+.glass-gallery-service-card { min-height: 15rem; border-color: rgba(7,26,43,0.12) !important; background: rgba(255,255,255,0.52) !important; }
+.glass-gallery-why-stage { position: relative; background: rgba(245,240,232,0.3); }
+.glass-gallery-frame-grid .glass-frame { border-color: rgba(7,26,43,0.16) !important; background: rgba(255,255,255,0.36) !important; }
+.glass-gallery-archive-stage { position: relative; background: linear-gradient(145deg, rgba(185,216,204,0.2), rgba(245,240,232,0.68)) !important; }
+.glass-gallery-archive-tile { border-radius: 1.1rem !important; background: rgba(255,255,255,0.54) !important; }
+.glass-gallery-reviews-stage { position: relative; background: rgba(245,240,232,0.48); }
+.glass-gallery-review-card { min-height: 15rem; background: rgba(255,255,255,0.62) !important; }
+.glass-gallery-cta-stage { background: linear-gradient(135deg, rgba(185,216,204,0.36), rgba(245,240,232,0.78)) !important; }
+.glass-gallery-cta-stage > .absolute:first-child { background: transparent !important; }
+.glass-gallery-cta-stage > .absolute:nth-child(3) { background: linear-gradient(90deg, rgba(245,240,232,0.92), rgba(245,240,232,0.65), rgba(245,240,232,0.92)) !important; }
+
+[data-public-site]:not([data-public-theme="light-premium"]):not([data-public-theme="light-editorial"]) .glass-gallery-collection-section,
+[data-public-site]:not([data-public-theme="light-premium"]):not([data-public-theme="light-editorial"]) .glass-gallery-why-stage,
+[data-public-site]:not([data-public-theme="light-premium"]):not([data-public-theme="light-editorial"]) .glass-gallery-reviews-stage { background: rgba(7,26,43,0.72); }
+[data-public-site]:not([data-public-theme="light-premium"]):not([data-public-theme="light-editorial"]) .glass-gallery-services-stage,
+[data-public-site]:not([data-public-theme="light-premium"]):not([data-public-theme="light-editorial"]) .glass-gallery-archive-stage,
+[data-public-site]:not([data-public-theme="light-premium"]):not([data-public-theme="light-editorial"]) .glass-gallery-cta-stage { background: linear-gradient(135deg, rgba(7,26,43,0.84), rgba(12,44,56,0.76)) !important; }
+[data-public-site]:not([data-public-theme="light-premium"]):not([data-public-theme="light-editorial"]) .glass-gallery-home-product,
+[data-public-site]:not([data-public-theme="light-premium"]):not([data-public-theme="light-editorial"]) .glass-gallery-service-card,
+[data-public-site]:not([data-public-theme="light-premium"]):not([data-public-theme="light-editorial"]) .glass-gallery-review-card { background: rgba(7,26,43,0.66) !important; border-color: rgba(185,216,204,0.2) !important; }
+
+@media (max-width: 640px) {
+  .glass-gallery-home-hero .glass-gallery-hero-copy { padding: 1.15rem 1rem; border-radius: 1.2rem; }
+  .glass-gallery-home-hero .glass-gallery-hero-copy::after { inset: 0.38rem; border-radius: 0.9rem; }
+  .glass-gallery-feature-card { min-height: auto; padding: 1.25rem !important; }
+  .glass-gallery-studio-stage .studio-edit-copy-panel { border-radius: 1.25rem; }
+  .glass-gallery-stat { padding: 1.5rem 0.6rem !important; }
+}
+
+
+/* Glass Gallery storefront and archive compositions */
+.glass-gallery-store { position: relative; overflow: hidden; }
+.glass-gallery-store-hero {
+  border-bottom: 1px solid rgba(228,185,95,0.3);
+  background: linear-gradient(135deg, rgba(7,26,43,0.98), rgba(12,44,56,0.94) 62%, rgba(22,65,68,0.92)) !important;
+}
+.glass-gallery-store-hero::after,
+.glass-gallery-archive-hero::after {
+  content: '';
+  position: absolute;
+  inset: 1rem;
+  border: 1px solid rgba(185,216,204,0.18);
+  border-radius: 1.65rem;
+  pointer-events: none;
+}
+.glass-gallery-store-hero .store-toolbar {
+  border: 1px solid rgba(185,216,204,0.2);
+  border-radius: 1.5rem;
+  background: rgba(7,26,43,0.34);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 18px 50px rgba(0,0,0,0.16);
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+}
+.glass-gallery-store-trust { background: rgba(245,240,232,0.62) !important; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.glass-gallery-store-route-section { position: relative; background: linear-gradient(140deg, rgba(245,240,232,0.82), rgba(185,216,204,0.18)) !important; }
+.glass-gallery-store-route-section::before { content: ''; position: absolute; left: 8%; right: 8%; top: 2.5rem; height: 1px; background: linear-gradient(90deg, transparent, rgba(217,111,82,0.35), rgba(228,185,95,0.5), transparent); }
+.glass-gallery-store-route-card { border-color: rgba(7,26,43,0.14) !important; border-radius: 1.35rem !important; box-shadow: 0 20px 60px rgba(7,26,43,0.12), inset 0 1px 0 rgba(255,255,255,0.34); }
+.glass-gallery-store-route-card::after { content: ''; position: absolute; inset: 0.55rem; border: 1px solid rgba(255,255,255,0.28); border-radius: 1rem; pointer-events: none; }
+.glass-gallery-store-collection { position: relative; }
+.glass-gallery-store-filter { border-radius: 1.35rem; }
+.glass-gallery-store-filter > .sticky { border: 1px solid rgba(7,26,43,0.11); border-radius: 1.25rem; padding: 1.25rem; background: rgba(245,240,232,0.46); box-shadow: inset 0 1px 0 rgba(255,255,255,0.68); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.glass-gallery-store-toolbar { border-bottom: 1px solid rgba(7,26,43,0.12); padding-bottom: 1.25rem; }
+.glass-gallery-search { background: rgba(255,255,255,0.6) !important; border-color: rgba(7,26,43,0.14) !important; }
+.glass-gallery-store-grid { align-items: start; }
+.glass-gallery-store-grid .store-product-card { border: 1px solid rgba(7,26,43,0.13); background: rgba(255,255,255,0.58) !important; box-shadow: 0 20px 64px rgba(7,26,43,0.11), inset 0 1px 0 rgba(255,255,255,0.75); }
+.glass-gallery-store-grid .store-product-card::after { content: ''; position: absolute; inset: 0.55rem; border: 1px solid rgba(255,255,255,0.32); border-radius: 1rem; pointer-events: none; }
+.glass-gallery-store-grid .store-product-image { border-radius: 1.05rem 1.05rem 0 0; overflow: hidden; }
+.glass-gallery-store-grid .store-product-card:hover { border-color: rgba(217,111,82,0.46); }
+
+.glass-gallery-archive-page { position: relative; overflow: hidden; }
+.glass-gallery-archive-hero { background: linear-gradient(135deg, rgba(7,26,43,0.98), rgba(12,44,56,0.95) 65%, rgba(22,65,68,0.92)) !important; }
+.glass-gallery-archive-content { position: relative; }
+.glass-gallery-archive-content::before { content: ''; position: absolute; top: 0; right: 5%; width: 16rem; height: 16rem; border: 1px solid rgba(217,111,82,0.18); border-radius: 999px; pointer-events: none; }
+.glass-gallery-archive-filters { position: relative; z-index: 1; padding: 0.7rem; border: 1px solid rgba(7,26,43,0.12); border-radius: 1.15rem; background: rgba(245,240,232,0.55); box-shadow: inset 0 1px 0 rgba(255,255,255,0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+.glass-gallery-archive-filters .gallery-filter { border-radius: 999px !important; }
+.glass-gallery-archive-mosaic { position: relative; z-index: 1; }
+.glass-gallery-archive-card { border-radius: 1.2rem !important; border-color: rgba(7,26,43,0.14) !important; box-shadow: 0 22px 70px rgba(7,26,43,0.13), inset 0 1px 0 rgba(255,255,255,0.56); }
+.glass-gallery-archive-card::after { z-index: 4; }
+.glass-gallery-archive-card .gallery-tile-overlay { z-index: 3; background: linear-gradient(180deg, transparent 38%, rgba(7,26,43,0.9)); }
+.glass-gallery-archive-skeleton > div { border-radius: 1.2rem; background: rgba(185,216,204,0.22); }
+
+[data-public-site]:not([data-public-theme="light-premium"]):not([data-public-theme="light-editorial"]) .glass-gallery-store-trust,
+[data-public-site]:not([data-public-theme="light-premium"]):not([data-public-theme="light-editorial"]) .glass-gallery-store-route-section,
+[data-public-site]:not([data-public-theme="light-premium"]):not([data-public-theme="light-editorial"]) .glass-gallery-store-filter > .sticky,
+[data-public-site]:not([data-public-theme="light-premium"]):not([data-public-theme="light-editorial"]) .glass-gallery-archive-filters { background: rgba(7,26,43,0.68) !important; border-color: rgba(185,216,204,0.2) !important; }
+[data-public-site]:not([data-public-theme="light-premium"]):not([data-public-theme="light-editorial"]) .glass-gallery-store-grid .store-product-card { background: rgba(7,26,43,0.7) !important; border-color: rgba(185,216,204,0.2); }
+
+@media (max-width: 767px) {
+  .glass-gallery-store-hero::after, .glass-gallery-archive-hero::after { inset: 0.6rem; border-radius: 1.15rem; }
+  .glass-gallery-store-hero .store-toolbar { border-radius: 1.15rem; }
+  .glass-gallery-store-filter > .sticky { padding: 0.85rem; }
+  .glass-gallery-store-toolbar { padding-bottom: 1rem; }
+  .glass-gallery-archive-filters { padding: 0.5rem; }
+}

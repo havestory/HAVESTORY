@@ -183,10 +183,10 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       : 'bg-transparent border-b border-transparent');
 
   return (
-    <div data-public-site="" data-public-theme={publicThemePreset} className="min-h-[100dvh] flex flex-col bg-[hsl(var(--background))] relative">
+    <div data-public-site="" data-public-theme={publicThemePreset} className="glass-gallery-shell min-h-[100dvh] flex flex-col bg-[hsl(var(--background))] relative overflow-x-clip">
 
       {/* ── Slim top bar ── */}
-      <div className={`hidden md:flex ${isLightTheme ? 'bg-[hsl(var(--card))] border-[hsl(var(--border))]' : 'bg-[#080705] border-[#1E1A14]'} text-[hsl(var(--foreground)/0.75)] py-2 px-8 justify-between items-center text-[11px] font-semibold tracking-widest uppercase z-50 relative border-b`}>
+      <div className={`glass-gallery-topbar hidden md:flex ${isLightTheme ? 'bg-[hsl(var(--card))] border-[hsl(var(--border))]' : 'bg-[#080705] border-[#1E1A14]'} text-[hsl(var(--foreground)/0.75)] py-2 px-8 justify-between items-center text-[11px] font-semibold tracking-widest uppercase z-50 relative border-b`}>
         <div className="flex items-center gap-8">
           {settings?.phone && (
             <a href={`tel:${settings.phone}`} className="flex items-center gap-2 hover:text-[#C9A84C] transition-colors">
@@ -210,8 +210,8 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       </div>
 
       {/* ── Main navbar ── */}
-      <header className={`fixed w-full z-40 transition-all duration-500 h-[72px] top-0 md:top-[36px] ${navBg}`}>
-        <div className="max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center gap-5 xl:gap-8 2xl:gap-12">
+      <header className={`glass-gallery-header fixed w-full z-40 transition-all duration-500 h-[72px] top-0 md:top-[36px] ${navBg}`}>
+        <div className="glass-gallery-nav-surface max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center gap-5 xl:gap-8 2xl:gap-12">
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 shrink-0 group">
@@ -224,11 +224,11 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               )
             }
             {settings?.showNameWithLogo !== false && <div className="hidden sm:block">
-              <div className="font-serif font-bold text-[17px] leading-none text-[hsl(var(--foreground))] tracking-tight group-hover:text-[#C9A84C] transition-colors">
+              <div className="glass-gallery-logo-name font-serif font-bold text-[17px] leading-none text-[hsl(var(--foreground))] tracking-tight group-hover:text-[#C9A84C] transition-colors">
                 {settings?.businessName || 'HAVESTORY'}
               </div>
               {settings?.taglineEnabled !== false && settings?.tagline && (
-                <div className="text-[9px] uppercase tracking-[0.22em] leading-none mt-0.5 text-[hsl(var(--muted-foreground))]">
+                <div className="glass-gallery-logo-tagline text-[9px] uppercase tracking-[0.22em] leading-none mt-0.5 text-[hsl(var(--muted-foreground))]">
                   {settings.tagline}
                 </div>
               )}
@@ -240,7 +240,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             {navLinks.map(l => (
               <Link
                 key={l.href} href={l.href}
-                className={`shrink-0 whitespace-nowrap text-[10px] xl:text-[11px] 2xl:text-[12px] font-bold uppercase tracking-[0.12em] xl:tracking-[0.14em] transition-colors duration-200 pb-0.5 ${
+                className={`glass-gallery-nav-link shrink-0 whitespace-nowrap text-[10px] xl:text-[11px] 2xl:text-[12px] font-bold uppercase tracking-[0.12em] xl:tracking-[0.14em] transition-colors duration-200 pb-0.5 ${
                   isActive(l.href)
                     ? 'text-[#C9A84C] border-b border-[#C9A84C]'
                     : 'text-[hsl(var(--foreground)/0.82)] hover:text-[#C9A84C]'
@@ -253,16 +253,16 @@ export function PublicLayout({ children }: { children: ReactNode }) {
 
           {/* Right */}
           <div className="ml-auto flex items-center gap-2 xl:gap-3 shrink-0">
-            <Link href="/store" className="p-2 text-[hsl(var(--foreground)/0.8)] hover:text-[#C9A84C] transition-colors" title="Shop">
+            <Link href="/store" className="glass-gallery-shop-link p-2 text-[hsl(var(--foreground)/0.8)] hover:text-[#C9A84C] transition-colors" title="Shop">
               <ShoppingBag className="w-5 h-5" />
             </Link>
             <Link
               href="/custom-project"
-              className="hidden xl:flex items-center gap-2 bg-[#C9A84C] text-[#0A0907] text-[10px] font-bold uppercase tracking-[0.16em] px-4 2xl:px-5 py-2.5 whitespace-nowrap hover:bg-[#D4B55E] transition-colors btn-glow"
+              className="glass-gallery-order-button hidden xl:flex items-center gap-2 bg-[#C9A84C] text-[#0A0907] text-[10px] font-bold uppercase tracking-[0.16em] px-4 2xl:px-5 py-2.5 whitespace-nowrap hover:bg-[#D4B55E] transition-colors btn-glow"
             >
               Custom Order
             </Link>
-            <button className="xl:hidden p-2 text-[hsl(var(--foreground)/0.7)] hover:text-[#C9A84C] transition-colors" onClick={() => setMenuOpen(v => !v)}>
+            <button className="glass-gallery-menu-button xl:hidden p-2 text-[hsl(var(--foreground)/0.7)] hover:text-[#C9A84C] transition-colors" onClick={() => setMenuOpen(v => !v)}>
               {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
@@ -289,7 +289,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               key="drawer"
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 280 }}
-              className={`fixed right-0 top-0 h-full w-80 z-50 ${isLightTheme ? 'bg-[hsl(var(--background))] border-l border-[hsl(var(--border))]' : 'bg-[#0A0907] border-l border-[#2A2418]'} flex flex-col xl:hidden`}
+              className={`glass-gallery-drawer fixed right-0 top-0 h-full w-80 z-50 ${isLightTheme ? 'bg-[hsl(var(--background))] border-l border-[hsl(var(--border))]' : 'bg-[#0A0907] border-l border-[#2A2418]'} flex flex-col xl:hidden`}
               onClick={e => e.stopPropagation()}
             >
               <div className={`flex items-center justify-between px-6 py-6 border-b ${isLightTheme ? 'border-[hsl(var(--border))]' : 'border-[#1E1A14]'}`}>
@@ -338,12 +338,12 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       </AnimatePresence>
 
       {/* ── Page content ── */}
-      <main className="flex-1 pt-[68px] md:pt-[calc(68px+36px)]">
+      <main className="glass-gallery-main flex-1 pt-[68px] md:pt-[calc(68px+36px)]">
         {children}
       </main>
 
       {/* ── Footer ── */}
-      <footer className="public-footer bg-[#070604] text-[#F7F2E7] pt-16 pb-8 border-t border-[#1E1A14]">
+      <footer className="glass-gallery-footer public-footer bg-[#070604] text-[#F7F2E7] pt-16 pb-8 border-t border-[#1E1A14]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12">
             <div className="md:col-span-1">

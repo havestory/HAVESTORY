@@ -222,9 +222,9 @@ export default function Store() {
   };
 
   return (
-    <div className="gallery-tides-store min-h-screen bg-background flex flex-col">
+    <div className="glass-gallery-store gallery-tides-store min-h-screen bg-background flex flex-col">
       {/* Premium collection hero */}
-      <div className="editorial-hero relative overflow-hidden noise">
+      <div className="glass-gallery-store-hero editorial-hero relative overflow-hidden noise">
         <div className="editorial-orb -right-24 -top-32" />
         <div className="absolute bottom-10 left-1/2 h-48 w-48 -translate-x-1/2 rounded-full bg-secondary/10 blur-3xl" />
         <div className="relative z-10 mx-auto grid max-w-7xl gap-10 px-6 py-20 lg:grid-cols-[1fr_auto] lg:items-end lg:px-10 lg:py-24">
@@ -239,9 +239,9 @@ export default function Store() {
           </div>
         </div>
       </div>
-      <div className="border-b border-border bg-card/60"><div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-border px-6 sm:grid-cols-4 lg:px-10"><div className="flex items-center gap-3 px-3 py-4 text-xs font-semibold text-muted-foreground"><ShieldCheck size={16} className="text-secondary" /> Secure packaging</div><div className="flex items-center gap-3 px-3 py-4 text-xs font-semibold text-muted-foreground"><Ruler size={16} className="text-secondary" /> Custom sizing</div><div className="hidden items-center gap-3 px-3 py-4 text-xs font-semibold text-muted-foreground sm:flex"><MessageCircle size={16} className="text-secondary" /> Friendly guidance</div><div className="hidden items-center gap-3 px-3 py-4 text-xs font-semibold text-muted-foreground sm:flex"><Heart size={16} className="text-secondary" /> Made with care</div></div></div>
+      <div className="glass-gallery-store-trust border-b border-border bg-card/60"><div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-border px-6 sm:grid-cols-4 lg:px-10"><div className="flex items-center gap-3 px-3 py-4 text-xs font-semibold text-muted-foreground"><ShieldCheck size={16} className="text-secondary" /> Secure packaging</div><div className="flex items-center gap-3 px-3 py-4 text-xs font-semibold text-muted-foreground"><Ruler size={16} className="text-secondary" /> Custom sizing</div><div className="hidden items-center gap-3 px-3 py-4 text-xs font-semibold text-muted-foreground sm:flex"><MessageCircle size={16} className="text-secondary" /> Friendly guidance</div><div className="hidden items-center gap-3 px-3 py-4 text-xs font-semibold text-muted-foreground sm:flex"><Heart size={16} className="text-secondary" /> Made with care</div></div></div>
 
-      <section className="border-b border-border bg-background px-6 py-14 lg:px-10 lg:py-20">
+      <section className="glass-gallery-store-route-section border-b border-border bg-background px-6 py-14 lg:px-10 lg:py-20">
         <div className="mx-auto max-w-7xl">
           <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div>
@@ -256,7 +256,7 @@ export default function Store() {
               { label: '02 / Made around you', title: 'Build a custom story', copy: 'Share your size, finish and idea. We will shape the right piece with you.', href: '/custom-project', image: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=900&q=82' },
               { label: '03 / For your studio', title: 'Work with HAVESTORY', copy: 'Portraits, product imagery and print-ready studio services for brands and people.', href: '/services', image: 'https://images.unsplash.com/photo-1526779259212-939e64788e3c?w=900&q=82' },
             ].map((route, index) => (
-              <Link key={route.label} href={route.href} className="group relative min-h-[18rem] overflow-hidden border border-border bg-card">
+              <Link key={route.label} href={route.href} className="glass-frame glass-interactive glass-gallery-store-route-card group relative min-h-[18rem] overflow-hidden border border-border bg-card">
                 <img src={route.image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-55 grayscale transition duration-700 group-hover:scale-105 group-hover:grayscale-0" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-black/5" />
                 <div className="relative flex min-h-[18rem] flex-col justify-end p-6">
@@ -271,10 +271,10 @@ export default function Store() {
         </div>
       </section>
 
-      <div id="collection" className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-12 px-6 py-16 lg:flex-row lg:px-10">
+      <div id="collection" className="glass-gallery-store-collection mx-auto flex w-full max-w-7xl flex-1 flex-col gap-12 px-6 py-16 lg:flex-row lg:px-10">
         <div className="editorial-rule absolute left-0 right-0" aria-hidden="true" />
         {/* Categories Sidebar */}
-        <aside className="lg:w-64 shrink-0">
+        <aside className="glass-gallery-store-filter lg:w-64 shrink-0">
           <div className="sticky top-28">
             <h3 className="section-label mb-6 text-muted-foreground">Categories</h3>
             
@@ -318,7 +318,7 @@ export default function Store() {
 
         {/* Product Area */}
         <main className="flex-1">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
+          <div className="glass-gallery-store-toolbar flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
             <div className="flex min-w-0 flex-1 flex-col gap-3 sm:max-w-md">
               <div className="flex items-center justify-between gap-3"><div><span className="editorial-kicker">The collection</span><h2 className="mt-2 editorial-display text-3xl text-foreground sm:text-4xl">Find your frame.</h2></div><SlidersHorizontal size={18} className="text-secondary sm:hidden" /></div>
               <div className="relative w-full">
@@ -327,7 +327,7 @@ export default function Store() {
                 placeholder="Search frames..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 border-border rounded-[0.25rem] h-11 bg-card focus-visible:ring-primary focus-visible:border-primary"
+                className="glass-gallery-search pl-10 border-border rounded-[0.25rem] h-11 bg-card focus-visible:ring-primary focus-visible:border-primary"
               />
               </div>
             </div>
@@ -475,7 +475,7 @@ export default function Store() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <div className="glass-gallery-store-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
               {sortedProducts.map((product, i) => (
                 <motion.div
                   key={product.id}
@@ -485,7 +485,7 @@ export default function Store() {
                   transition={{ duration:0.7, delay: (i % 6) * 0.1 }}
                   className={i % 4 === 1 ? 'xl:translate-y-8' : i % 4 === 3 ? 'xl:-translate-y-4' : ''}
                 >
-                  <div className="store-product-card group flex h-full flex-col rounded-2xl">
+                  <div className="glass-panel glass-interactive store-product-card group flex h-full flex-col rounded-2xl">
                     <div className="store-product-image aspect-[4/3]">
                       <img
                         src={product.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&q=85'}

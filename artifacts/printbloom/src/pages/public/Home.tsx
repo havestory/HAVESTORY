@@ -86,13 +86,13 @@ function HeroScrollSequence({ slides, settings }: { slides: HeroSlide[]; setting
   const highlight = activeSlide === 0 ? settings?.heroHighlightWord?.trim() : '';
 
   return (
-    <section ref={sectionRef} className="relative h-[1000svh] bg-[#071A2B]" aria-label="HAVESTORY story slideshow">
+    <section ref={sectionRef} className="glass-gallery-home-hero relative h-[1000svh] bg-[#071A2B]" aria-label="HAVESTORY story slideshow">
       <div className="sticky top-0 h-[100svh] min-h-[600px] max-h-[960px] overflow-hidden">
         {slides.map((item, index) => <ScrollHeroSlide key={`${item.label}-${index}`} slide={item} index={index} total={slides.length} progress={scrollYProgress} />)}
 
         <div className="absolute inset-0 z-20 mx-auto flex max-w-7xl flex-col justify-center px-8 md:px-20 pointer-events-none">
           <AnimatePresence mode="wait">
-            <motion.div key={`hero-copy-${activeSlide}`} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}>
+            <motion.div key={`hero-copy-${activeSlide}`} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }} className="glass-gallery-hero-copy">
               <div className="mb-7 flex items-center gap-3"><span className="h-px w-14 bg-[#E4B95F]" /><span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#E4B95F]">{current.label}</span></div>
               <div className="mb-7 overflow-hidden">
                 {headline.map((line, lineIndex) => {
@@ -189,7 +189,7 @@ export default function Home() {
 
 
   return (
-    <div className="bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
+    <div className="glass-gallery-home bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
 
       {/* ══════════════════════════════════════════ NOTICES */}
       <AnimatePresence>
@@ -211,7 +211,7 @@ export default function Home() {
       <HeroScrollSequence slides={heroSlides} settings={settings} />
 
       {/* ══════════════════════════════════════════ MARQUEE TICKER */}
-      <div className="bg-[#E4B95F] py-3 overflow-hidden select-none border-y border-[#F0CA75]/30">
+      <div className="glass-gallery-ticker bg-[#E4B95F] py-3 overflow-hidden select-none border-y border-[#F0CA75]/30">
         <div className="marquee-track animate-marquee">
           {[...marqueeItems, ...marqueeItems].map((item, i) => (
             <span key={i} className="px-8 text-[#071A2B] text-[11px] font-bold uppercase tracking-widest whitespace-nowrap">
@@ -222,13 +222,13 @@ export default function Home() {
       </div>
 
       {/* ══════════════════════════════════════════ EDITABLE FEATURE CARDS */}
-      <section className="border-b border-[#1C3A51] bg-[#071A2B]">
+      <section className="glass-gallery-feature-band border-b border-[#1C3A51] bg-[#071A2B]">
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {featureCards.map((card, index) => (
             <Link
               key={`${card.title}-${index}`}
               href={card.href || '/store'}
-              className="group p-7 border-b sm:border-r border-[#1C3A51] last:border-r-0 hover:bg-[#E4B95F]/5 transition-colors"
+              className="glass-gallery-feature-card group p-7 border-b sm:border-r border-[#1C3A51] last:border-r-0 hover:bg-[#E4B95F]/5 transition-colors"
             >
               <span className="text-[10px] text-[#E4B95F] font-bold tracking-[0.2em]">0{index + 1}</span>
               <h2 className="font-serif text-xl text-white mt-3 group-hover:text-[#E4B95F] transition-colors">{card.title}</h2>
@@ -240,7 +240,7 @@ export default function Home() {
       </section>
 
       {/* ══════════════════════════════════════════ THE STUDIO EDIT */}
-      <section className="studio-edit-section relative overflow-hidden border-b py-16 sm:py-20 md:py-28">
+      <section className="glass-gallery-studio-stage studio-edit-section relative overflow-hidden border-b py-16 sm:py-20 md:py-28">
         <div className="studio-edit-orb studio-edit-orb-left" aria-hidden="true" />
         <div className="studio-edit-orb studio-edit-orb-right" aria-hidden="true" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-4 sm:gap-12 sm:px-6 md:grid-cols-[0.92fr_1.08fr] md:gap-16 md:px-10">
@@ -310,7 +310,7 @@ export default function Home() {
       </section>
 
       {/* ══════════════════════════════════════════ STATS */}
-      <section className="py-20 border-b border-[#1C3A51]">
+      <section className="glass-gallery-stats-stage py-20 border-b border-[#1C3A51]">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-[#1C3A51]">
             {[
@@ -325,7 +325,7 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.08 }}
-                className="text-center py-8 px-4"
+                className="glass-gallery-stat text-center py-8 px-4"
               >
                 <div className="font-serif text-5xl md:text-6xl font-bold text-gradient leading-none mb-2">
                   <AnimatedCounter end={s.end} suffix={s.suffix} />
@@ -339,7 +339,7 @@ export default function Home() {
 
       {/* ══════════════════════════════════════════ FEATURED PRODUCTS */}
       {featuredProducts.length > 0 ? (
-        <section className="py-24">
+        <section className="glass-gallery-collection-section py-24">
           <div className="max-w-7xl mx-auto px-6">
             <motion.div
               initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
@@ -364,7 +364,7 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.07 }}
-                  className="group card-gold-hover bg-[hsl(var(--card))] overflow-hidden card-3d"
+                  className="glass-gallery-home-product glass-panel-strong glass-interactive group card-gold-hover bg-[hsl(var(--card))] overflow-hidden card-3d"
                 >
                   <div className="aspect-[4/3] bg-[hsl(var(--muted))] overflow-hidden relative">
                     {p.imageUrl
@@ -422,7 +422,7 @@ export default function Home() {
 
       {/* ══════════════════════════════════════════ SERVICES */}
       {displayServices.length > 0 ? (
-        <section className="py-24 bg-[hsl(var(--muted))] border-y border-[hsl(var(--border))]">
+        <section className="glass-gallery-services-stage py-24 bg-[hsl(var(--muted))] border-y border-[hsl(var(--border))]">
           <div className="max-w-7xl mx-auto px-6">
             <motion.div
               initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
@@ -443,7 +443,7 @@ export default function Home() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.06 }}
-                    className="group bg-[hsl(var(--card))] border border-[#1C3A51] p-7 hover:border-[#E4B95F]/40 transition-all duration-400 relative overflow-hidden"
+                    className="glass-panel glass-interactive glass-gallery-service-card group bg-[hsl(var(--card))] border border-[#1C3A51] p-7 hover:border-[#E4B95F]/40 transition-all duration-400 relative overflow-hidden"
                   >
                     <div className="absolute -right-4 -top-4 w-24 h-24 bg-[#E4B95F]/5 rounded-full transition-all duration-500 group-hover:scale-150 group-hover:bg-[#E4B95F]/8" />
                     <div className="w-11 h-11 bg-[#E4B95F]/10 border border-[#E4B95F]/20 flex items-center justify-center mb-5 group-hover:bg-[#E4B95F]/20 transition-colors">
@@ -481,7 +481,7 @@ export default function Home() {
       )}
 
       {/* ══════════════════════════════════════════ WHY HAVESTORY */}
-      <section className="py-24">
+      <section className="glass-gallery-why-stage py-24">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <motion.div initial={{ opacity: 0, x: -32 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }}>
@@ -500,7 +500,7 @@ export default function Home() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.08 }}
-                    className="flex items-start gap-3 p-4 border border-[#1C3A51] hover:border-[#E4B95F]/30 transition-colors"
+                    className="glass-panel glass-interactive flex items-start gap-3 p-4 border border-[#1C3A51] hover:border-[#E4B95F]/30 transition-colors"
                   >
                     <div className="w-9 h-9 bg-[#E4B95F]/10 flex items-center justify-center shrink-0">
                       <r.icon className="w-4 h-4 text-[#E4B95F]" />
@@ -520,13 +520,13 @@ export default function Home() {
               viewport={{ once: true }} transition={{ duration: 0.8 }}
               className="relative hidden md:block"
             >
-              <div className="grid grid-cols-2 gap-3">
+              <div className="glass-gallery-frame-grid grid grid-cols-2 gap-3">
                 {[
                   { src: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=600&q=80', cls: 'row-span-2 aspect-[3/4]' },
                   { src: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80', cls: 'aspect-square' },
                   { src: 'https://images.unsplash.com/photo-1490750967868-88df5691892e?w=600&q=80', cls: 'aspect-square' },
                 ].map((img, i) => (
-                  <div key={i} className={`${img.cls} bg-[hsl(var(--muted))] overflow-hidden border border-[#244257]`}>
+                  <div key={i} className={`glass-frame ${img.cls} bg-[hsl(var(--muted))] overflow-hidden border border-[#244257]`}>
                     <img src={img.src} alt="" className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-500 hover:scale-105 transition-transform" />
                   </div>
                 ))}
@@ -541,7 +541,7 @@ export default function Home() {
 
       {/* ══════════════════════════════════════════ PORTFOLIO */}
       {displayPortfolio.length > 0 ? (
-        <section className="py-24 bg-[hsl(var(--muted))] border-y border-[hsl(var(--border))]">
+        <section className="glass-gallery-archive-stage py-24 bg-[hsl(var(--muted))] border-y border-[hsl(var(--border))]">
           <div className="max-w-7xl mx-auto px-6">
             <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="flex items-end justify-between mb-14">
               <div>
@@ -560,7 +560,7 @@ export default function Home() {
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.04 }}
-                  className="group break-inside-avoid bg-[hsl(var(--card))] border border-[#1C3A51] overflow-hidden hover:border-[#E4B95F]/40 transition-colors"
+                  className="glass-frame glass-interactive glass-gallery-archive-tile group break-inside-avoid bg-[hsl(var(--card))] border border-[#1C3A51] overflow-hidden hover:border-[#E4B95F]/40 transition-colors"
                 >
                   {item.imageUrl
                     ? <img src={item.imageUrl} alt={item.title || ''} className="w-full object-cover transition-transform duration-600 group-hover:scale-105" />
@@ -588,7 +588,7 @@ export default function Home() {
 
       {/* ══════════════════════════════════════════ REVIEWS */}
       {displayReviews.length > 0 ? (
-        <section className="py-24">
+        <section className="glass-gallery-reviews-stage py-24">
           <div className="max-w-7xl mx-auto px-6">
             <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-14">
               <p className="section-label mb-3">Client Love</p>
@@ -602,7 +602,7 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="bg-[hsl(var(--card))] border border-[#1C3A51] p-7 relative hover:border-[#E4B95F]/30 transition-colors"
+                  className="glass-panel glass-interactive glass-gallery-review-card bg-[hsl(var(--card))] border border-[#1C3A51] p-7 relative hover:border-[#E4B95F]/30 transition-colors"
                 >
                   <Quote className="w-8 h-8 text-[#E4B95F]/25 absolute top-5 right-5" />
                   <div className="flex gap-1 mb-4">
@@ -640,7 +640,7 @@ export default function Home() {
       )}
 
       {/* ══════════════════════════════════════════ CTA BANNER */}
-      <section className="relative overflow-hidden border-y border-[hsl(var(--border))] bg-[hsl(var(--muted))] py-28">
+      <section className="glass-gallery-cta-stage relative overflow-hidden border-y border-[hsl(var(--border))] bg-[hsl(var(--muted))] py-28">
         <div className="absolute inset-0 bg-[hsl(var(--muted))]" />
         <div className="absolute inset-0 opacity-[0.08]">
           <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=1600&q=60" className="w-full h-full object-cover" alt="" />

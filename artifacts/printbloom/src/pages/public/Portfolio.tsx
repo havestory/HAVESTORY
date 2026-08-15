@@ -13,8 +13,8 @@ export default function Portfolio() {
   const filteredItems = activeCategory === 'all' ? portfolioItems : portfolioItems.filter(i => i.category === activeCategory);
 
   return (
-    <div className="gallery-tides-page min-h-screen bg-background">
-      <div className="gallery-page-hero relative overflow-hidden bg-primary py-20 text-primary-foreground sm:py-24">
+    <div className="glass-gallery-archive-page gallery-tides-page min-h-screen bg-background">
+      <div className="glass-gallery-archive-hero gallery-page-hero relative overflow-hidden bg-primary py-20 text-primary-foreground sm:py-24">
         <div className="gallery-page-hero-mark" aria-hidden="true" />
         <div className="relative mx-auto max-w-7xl px-6 lg:px-10">
           <div className="max-w-3xl">
@@ -31,8 +31,8 @@ export default function Portfolio() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-6 py-14 lg:px-10 lg:py-20">
-        <div className="mb-12 flex flex-wrap gap-2">
+      <div className="glass-gallery-archive-content mx-auto max-w-7xl px-6 py-14 lg:px-10 lg:py-20">
+        <div className="glass-gallery-archive-filters mb-12 flex flex-wrap gap-2">
           <button 
             onClick={() => setActiveCategory('all')}
             className={`gallery-filter ${activeCategory === 'all' ? 'is-active' : ''}`}
@@ -51,7 +51,7 @@ export default function Portfolio() {
         </div>
 
         {isLoading ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="glass-gallery-archive-skeleton grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1,2,3,4,5,6].map(i => <div key={i} className="h-80 bg-muted animate-pulse"></div>)}
           </div>
         ) : filteredItems?.length === 0 ? (
@@ -63,9 +63,9 @@ export default function Portfolio() {
             cta="Create your project"
           />
         ) : (
-          <div className="gallery-mosaic grid sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-7">
+          <div className="glass-gallery-archive-mosaic gallery-mosaic grid sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-7">
             {filteredItems?.map((item, index) => (
-              <Card key={item.id} className={`gallery-tile group overflow-hidden relative aspect-square cursor-pointer ${index % 5 === 1 ? 'lg:translate-y-10' : ''} ${index % 5 === 3 ? 'lg:-translate-y-5' : ''}`}>
+              <Card key={item.id} className={`glass-frame glass-interactive glass-gallery-archive-card gallery-tile group overflow-hidden relative aspect-square cursor-pointer ${index % 5 === 1 ? 'lg:translate-y-10' : ''} ${index % 5 === 3 ? 'lg:-translate-y-5' : ''}`}>
                 {item.imageUrl ? (
                   <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 ) : (
