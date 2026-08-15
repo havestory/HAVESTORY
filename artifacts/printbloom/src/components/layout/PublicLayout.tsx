@@ -185,86 +185,28 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   return (
     <div data-public-site="" data-public-theme={publicThemePreset} className="atelier-shell glass-gallery-shell min-h-[100dvh] flex flex-col bg-[hsl(var(--background))] relative overflow-x-clip">
 
-      {/* ── Slim top bar ── */}
-      <div className="atelier-topbar glass-gallery-topbar hidden lg:flex text-[hsl(var(--foreground)/0.72)] px-8 justify-between items-center text-[10px] font-bold tracking-[0.16em] uppercase z-50 relative border-b">
-        <div className="flex items-center gap-8">
-          {settings?.phone && (
-            <a href={`tel:${settings.phone}`} className="flex items-center gap-2 hover:text-[#C9A84C] transition-colors">
-              <Phone className="w-3 h-3" />{settings.phone}
-            </a>
-          )}
-          {settings?.email && (
-            <a href={`mailto:${settings.email}`} className="flex items-center gap-2 hover:text-[#C9A84C] transition-colors">
-              <Mail className="w-3 h-3" />{settings.email}
-            </a>
-          )}
+      <header className={`hs26-shell-header fixed inset-x-0 top-0 z-40 ${navBg}`}>
+        <div className="hs26-shell-meta">
+          <span>COLOUR LAB · FRAME STUDIO · SRI LANKA</span>
+          <div>{settings?.phone && <a href={`tel:${settings.phone}`}><Phone />{settings.phone}</a>}{settings?.email && <a href={`mailto:${settings.email}`}><Mail />{settings.email}</a>}</div>
         </div>
-        <div className="flex items-center gap-5">
-          {settings?.instagramUrl && (
-            <a href={settings.instagramUrl} target="_blank" rel="noreferrer" className="hover:text-[#C9A84C] transition-colors"><Instagram className="w-3.5 h-3.5" /></a>
-          )}
-          {settings?.facebookUrl && (
-            <a href={settings.facebookUrl} target="_blank" rel="noreferrer" className="hover:text-[#C9A84C] transition-colors"><Facebook className="w-3.5 h-3.5" /></a>
-          )}
-        </div>
-      </div>
-
-      {/* ── Main navbar ── */}
-      <header className={`atelier-header glass-gallery-header public-shell-header fixed w-full z-40 transition-all duration-300 h-[78px] top-0 lg:top-[32px] ${navBg}`}>
-        <div className="glass-gallery-nav-surface max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center gap-5 xl:gap-8 2xl:gap-12">
-
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 shrink-0 group">
+        <div className="hs26-shell-nav">
+          <Link href="/" className="hs26-shell-brand">
             {settings?.logoUrl
-              ? <img src={settings.logoUrl} alt={settings.businessName || 'HAVESTORY'} className="h-9 w-auto object-contain" />
-              : (
-                <div className="w-10 h-10 bg-[#C9A84C]/10 border border-[#C9A84C]/25 flex items-center justify-center transition-all group-hover:border-[#C9A84C]/60">
-                  <span className="font-serif font-bold text-sm text-[#C9A84C]">HS</span>
-                </div>
-              )
+              ? <img src={settings.logoUrl} alt={settings.businessName || 'HAVESTORY'} />
+              : <span className="hs26-shell-monogram">HS</span>
             }
-            {settings?.showNameWithLogo !== false && <div className="hidden sm:block">
-              <div className="glass-gallery-logo-name font-serif font-bold text-[17px] leading-none text-[hsl(var(--foreground))] tracking-tight group-hover:text-[#C9A84C] transition-colors">
-                {settings?.businessName || 'HAVESTORY'}
-              </div>
-              {settings?.taglineEnabled !== false && settings?.tagline && (
-                <div className="glass-gallery-logo-tagline text-[9px] uppercase tracking-[0.22em] leading-none mt-0.5 text-[hsl(var(--muted-foreground))]">
-                  {settings.tagline}
-                </div>
-              )}
-            </div>}
+            {settings?.showNameWithLogo !== false && <strong>{settings?.businessName || 'HAVESTORY'}</strong>}
           </Link>
-
-          {/* Desktop nav */}
-          <nav className="hidden xl:flex flex-1 min-w-0 items-center justify-center gap-5 xl:gap-7 2xl:gap-10">
+          <nav className="hs26-shell-links">
             {navLinks.map(l => (
-              <Link
-                key={l.href} href={l.href}
-                className={`atelier-nav-link glass-gallery-nav-link shrink-0 whitespace-nowrap text-[13px] 2xl:text-[14px] font-semibold tracking-[-0.01em] transition-colors duration-200 ${
-                  isActive(l.href)
-                    ? 'text-[#C9A84C] border-b border-[#C9A84C]'
-                    : 'text-[hsl(var(--foreground)/0.82)] hover:text-[#C9A84C]'
-                }`}
-              >
-                {l.label}
-              </Link>
+              <Link key={l.href} href={l.href} className={isActive(l.href) ? 'is-active' : ''}>{l.label}</Link>
             ))}
           </nav>
-
-          {/* Right */}
-          <div className="ml-auto flex items-center gap-2 xl:gap-3 shrink-0">
-            <Link href="/store" className="glass-gallery-shop-link p-2 text-[hsl(var(--foreground)/0.8)] hover:text-[#C9A84C] transition-colors" title="Shop">
-              <ShoppingBag className="w-5 h-5" />
-            </Link>
-            <Link
-              href="/custom-project"
-              className="atelier-order-button glass-gallery-order-button hidden xl:flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] px-5 2xl:px-6 py-3 whitespace-nowrap transition-colors"
-            >
-              Custom Order
-            </Link>
-              <button aria-expanded={menuOpen} aria-controls="public-mobile-drawer" aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'} className="glass-gallery-menu-button xl:hidden p-2 text-[hsl(var(--foreground)/0.7)] hover:text-[#C9A84C] transition-colors" onClick={() => setMenuOpen(v => !v)}>
-              {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
+          <div className="hs26-shell-actions">
+            <Link href="/store" aria-label="Open shop"><ShoppingBag /></Link>
+            <Link href="/custom-project" className="hs26-shell-order">Start a project <ArrowRight /></Link>
+            <button aria-expanded={menuOpen} aria-controls="public-mobile-drawer" aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'} onClick={() => setMenuOpen(v => !v)}>{menuOpen ? <X /> : <Menu />}</button>
           </div>
         </div>
       </header>
@@ -339,82 +281,19 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       </AnimatePresence>
 
       {/* ── Page content ── */}
-      <main className="atelier-main glass-gallery-main flex-1 pt-[78px] lg:pt-[110px]">
+      <main className="atelier-main glass-gallery-main flex-1 pt-[76px] xl:pt-[118px]">
         {children}
       </main>
 
-      {/* ── Footer ── */}
-      <footer className="atelier-footer glass-gallery-footer public-footer text-[#F8F4ED] pt-20 pb-8 border-t">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12">
-            <div className="md:col-span-1">
-              <div className="font-serif text-2xl font-bold text-[#F7F2E7] mb-1">{settings?.businessName || 'HAVESTORY'}</div>
-              {settings?.tagline && <p className="text-xs tracking-widest uppercase text-[#C9A84C] mb-4">{settings.tagline}</p>}
-              <p className="text-xs leading-relaxed mb-6 text-[#F7F2E7]/75">
-                Premium photo frames, colour lab prints &amp; custom studio work — crafted in Sri Lanka.
-              </p>
-              <div className="flex gap-3">
-                {settings?.instagramUrl && (
-                  <a href={settings.instagramUrl} target="_blank" rel="noreferrer"
-                    className="w-8 h-8 border border-[#F7F2E7]/25 flex items-center justify-center text-[#F7F2E7]/65 hover:text-[#C9A84C] hover:border-[#C9A84C]/60 transition-colors">
-                    <Instagram className="w-3.5 h-3.5" />
-                  </a>
-                )}
-                {settings?.facebookUrl && (
-                  <a href={settings.facebookUrl} target="_blank" rel="noreferrer"
-                    className="w-8 h-8 border border-[#F7F2E7]/25 flex items-center justify-center text-[#F7F2E7]/65 hover:text-[#C9A84C] hover:border-[#C9A84C]/60 transition-colors">
-                    <Facebook className="w-3.5 h-3.5" />
-                  </a>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <p className="section-label mb-5">Quick Links</p>
-              <ul className="space-y-2.5">
-                {[{ href: '/', label: 'Home' }, { href: '/store', label: 'Frames & Prints' }, { href: '/services', label: 'Studio Services' }, { href: '/gallery', label: 'Gallery' }, { href: '/custom-project', label: 'Custom Project' }].map(l => (
-                  <li key={l.href}><Link href={l.href} className="text-sm font-medium text-[#F7F2E7]/80 hover:text-[#E7C46B] transition-colors">{l.label}</Link></li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <p className="section-label mb-5">Information</p>
-              <ul className="space-y-2.5">
-                {[{ href: '/about', label: 'About Us' }, { href: '/contact', label: 'Contact' }, { href: '/track-order', label: 'Track Your Order' }, { href: '/privacy', label: 'Privacy Policy' }, { href: '/terms', label: 'Terms of Service' }].map(l => (
-                  <li key={l.href}><Link href={l.href} className="text-sm font-medium text-[#F7F2E7]/80 hover:text-[#E7C46B] transition-colors">{l.label}</Link></li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <p className="section-label mb-5">Contact</p>
-              <ul className="space-y-3 text-sm">
-                {settings?.phone && (
-                  <li><a href={`tel:${settings.phone}`} className="flex items-center gap-2 text-[#F7F2E7]/80 hover:text-[#E7C46B] transition-colors"><Phone className="w-3.5 h-3.5 shrink-0 text-[#E7C46B]" />{settings.phone}</a></li>
-                )}
-                {settings?.email && (
-                  <li><a href={`mailto:${settings.email}`} className="flex items-center gap-2 text-[#F7F2E7]/80 hover:text-[#E7C46B] transition-colors"><Mail className="w-3.5 h-3.5 shrink-0 text-[#E7C46B]" />{settings.email}</a></li>
-                )}
-                {settings?.address && <li className="text-xs font-medium leading-relaxed text-[#F7F2E7]/75">{settings.address}</li>}
-              </ul>
-              {settings?.whatsappNumber && (
-                <a
-                  href={`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`}
-                  target="_blank" rel="noreferrer"
-                  className="inline-flex items-center gap-2 mt-5 border border-[#25D366]/30 text-[#25D366] text-[10px] uppercase tracking-widest font-bold px-4 py-2 hover:bg-[#25D366] hover:text-black transition-colors"
-                >
-                  WhatsApp Us
-                </a>
-              )}
-            </div>
-          </div>
-
-          <div className="gold-rule mb-6" />
-          <p className="text-[10px] font-semibold text-[#F7F2E7]/70 text-center tracking-widest uppercase">
-            © {new Date().getFullYear()} {settings?.businessName || 'HAVESTORY'}. All rights reserved · Sri Lanka
-          </p>
+      <footer className="hs26-shell-footer">
+        <div className="hs26-footer-intro"><p>THE COLOUR & FRAME STUDIO</p><h2>{settings?.businessName || 'HAVESTORY'}</h2><span>{settings?.tagline || 'Photographs made tangible. Stories made to stay.'}</span></div>
+        <div className="hs26-footer-grid">
+          <div><p>Visit & contact</p>{settings?.address && <span>{settings.address}</span>}{settings?.phone && <a href={`tel:${settings.phone}`}>{settings.phone}</a>}{settings?.email && <a href={`mailto:${settings.email}`}>{settings.email}</a>}</div>
+          <div><p>Explore</p>{[{ href: '/store', label: 'Frames & Prints' }, { href: '/services', label: 'Studio Services' }, { href: '/gallery', label: 'Gallery' }, { href: '/custom-project', label: 'Custom Project' }].map(l => <Link key={l.href} href={l.href}>{l.label}</Link>)}</div>
+          <div><p>Information</p>{[{ href: '/about', label: 'About' }, { href: '/contact', label: 'Contact' }, { href: '/track-order', label: 'Track Order' }, { href: '/privacy', label: 'Privacy' }, { href: '/terms', label: 'Terms' }].map(l => <Link key={l.href} href={l.href}>{l.label}</Link>)}</div>
+          <div><p>Follow the studio</p><div className="hs26-footer-social">{settings?.instagramUrl && <a href={settings.instagramUrl} target="_blank" rel="noreferrer"><Instagram /> Instagram</a>}{settings?.facebookUrl && <a href={settings.facebookUrl} target="_blank" rel="noreferrer"><Facebook /> Facebook</a>}</div>{settings?.whatsappNumber && <a className="hs26-footer-chat" href={`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer">Chat on WhatsApp <ArrowRight /></a>}</div>
         </div>
+        <div className="hs26-footer-base"><span>© {new Date().getFullYear()} {settings?.businessName || 'HAVESTORY'}</span><span>Crafted in Sri Lanka</span></div>
       </footer>
 
       {/* ── WhatsApp FAB + FAQ ── */}
