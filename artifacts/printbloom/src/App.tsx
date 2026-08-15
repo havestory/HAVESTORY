@@ -9,7 +9,6 @@ import { PublicLayout }   from './components/layout/PublicLayout';
 import { AdminLayout }    from './components/layout/AdminLayout';
 import { AuthGuard }      from './components/layout/AuthGuard';
 import { SplashScreen }   from './components/SplashScreen';
-import { CustomCursor }   from './components/CustomCursor';
 
 // Public Pages
 import Home           from './pages/public/Home';
@@ -128,12 +127,6 @@ function AdminRouteFallback({ error, resetError }: ErrorFallbackProps) {
   );
 }
 
-function CursorGate() {
-  const [location] = useLocation();
-  if (location.startsWith('/admin')) return null;
-  return <CustomCursor />;
-}
-
 function PublicRoutes() {
   return (
     <PublicLayout>
@@ -237,8 +230,6 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-          {/* Custom cursor only on public site — admin uses system cursor */}
-          <CursorGate />
           {showSplash && <SplashScreen onDone={handleSplashDone} />}
           <Router />
         </WouterRouter>

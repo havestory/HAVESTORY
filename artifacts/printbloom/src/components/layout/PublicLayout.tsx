@@ -106,8 +106,8 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     };
   }, [refetchSettings]);
 
-  const publicThemePreset = settings?.themePreset || 'light-premium';
-  const isLightTheme = publicThemePreset === 'light-editorial' || publicThemePreset === 'light-premium';
+  const publicThemePreset = settings?.themePreset || 'atelier-light';
+  const isLightTheme = true;
 
   useEffect(() => {
     if (!settings) return;
@@ -183,10 +183,10 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   const navBg = scrolled ? 'public-nav-scrolled' : 'public-nav-idle';
 
   return (
-    <div data-public-site="" data-public-theme={publicThemePreset} className="glass-gallery-shell min-h-[100dvh] flex flex-col bg-[hsl(var(--background))] relative overflow-x-clip">
+    <div data-public-site="" data-public-theme={publicThemePreset} className="atelier-shell glass-gallery-shell min-h-[100dvh] flex flex-col bg-[hsl(var(--background))] relative overflow-x-clip">
 
       {/* ── Slim top bar ── */}
-      <div className={`glass-gallery-topbar hidden md:flex ${isLightTheme ? 'bg-[hsl(var(--card))] border-[hsl(var(--border))]' : 'bg-[#080705] border-[#1E1A14]'} text-[hsl(var(--foreground)/0.75)] py-2 px-8 justify-between items-center text-[11px] font-semibold tracking-widest uppercase z-50 relative border-b`}>
+      <div className="atelier-topbar glass-gallery-topbar hidden lg:flex text-[hsl(var(--foreground)/0.72)] px-8 justify-between items-center text-[10px] font-bold tracking-[0.16em] uppercase z-50 relative border-b">
         <div className="flex items-center gap-8">
           {settings?.phone && (
             <a href={`tel:${settings.phone}`} className="flex items-center gap-2 hover:text-[#C9A84C] transition-colors">
@@ -210,7 +210,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       </div>
 
       {/* ── Main navbar ── */}
-      <header className={`glass-gallery-header public-shell-header fixed w-full z-40 transition-all duration-300 h-[76px] top-0 md:top-[36px] ${navBg}`}>
+      <header className={`atelier-header glass-gallery-header public-shell-header fixed w-full z-40 transition-all duration-300 h-[78px] top-0 lg:top-[32px] ${navBg}`}>
         <div className="glass-gallery-nav-surface max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center gap-5 xl:gap-8 2xl:gap-12">
 
           {/* Logo */}
@@ -240,7 +240,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             {navLinks.map(l => (
               <Link
                 key={l.href} href={l.href}
-                className={`glass-gallery-nav-link shrink-0 whitespace-nowrap text-[10px] xl:text-[11px] 2xl:text-[12px] font-bold uppercase tracking-[0.12em] xl:tracking-[0.14em] transition-colors duration-200 pb-0.5 ${
+                className={`atelier-nav-link glass-gallery-nav-link shrink-0 whitespace-nowrap text-[13px] 2xl:text-[14px] font-semibold tracking-[-0.01em] transition-colors duration-200 ${
                   isActive(l.href)
                     ? 'text-[#C9A84C] border-b border-[#C9A84C]'
                     : 'text-[hsl(var(--foreground)/0.82)] hover:text-[#C9A84C]'
@@ -258,7 +258,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             </Link>
             <Link
               href="/custom-project"
-              className="glass-gallery-order-button hidden xl:flex items-center gap-2 bg-[#C9A84C] text-[#0A0907] text-[10px] font-bold uppercase tracking-[0.16em] px-4 2xl:px-5 py-2.5 whitespace-nowrap hover:bg-[#D4B55E] transition-colors btn-glow"
+              className="atelier-order-button glass-gallery-order-button hidden xl:flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] px-5 2xl:px-6 py-3 whitespace-nowrap transition-colors"
             >
               Custom Order
             </Link>
@@ -290,7 +290,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 280 }}
               id="public-mobile-drawer"
-              className={`glass-gallery-drawer fixed right-0 top-0 h-[100dvh] w-[min(22rem,calc(100vw-1rem))] max-w-full overscroll-contain z-50 ${isLightTheme ? 'bg-[hsl(var(--background))] border-l border-[hsl(var(--border))]' : 'bg-[#0A0907] border-l border-[#2A2418]'} flex flex-col xl:hidden`}
+              className="atelier-drawer glass-gallery-drawer fixed right-0 top-0 h-[100dvh] w-[min(23rem,calc(100vw-1rem))] max-w-full overscroll-contain z-50 border-l border-[hsl(var(--border))] flex flex-col xl:hidden"
               onClick={e => e.stopPropagation()}
             >
               <div className={`flex items-center justify-between px-6 py-6 border-b ${isLightTheme ? 'border-[hsl(var(--border))]' : 'border-[#1E1A14]'}`}>
@@ -309,7 +309,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                   >
                     <Link
                       href={l.href}
-                      className={`block py-4 font-serif text-2xl font-semibold border-b border-[#1E1A14] transition-colors ${
+                      className={`atelier-mobile-link block py-4 font-serif text-2xl font-semibold border-b transition-colors ${
                         isActive(l.href) ? 'text-[#C9A84C]' : 'text-[hsl(var(--foreground)/0.75)] hover:text-[hsl(var(--foreground))]'
                       }`}
                     >
@@ -318,7 +318,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                   </motion.div>
                 ))}
                 <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: navLinks.length * 0.05 }}>
-                  <Link href="/custom-project" className="block py-4 font-serif text-2xl font-semibold border-b border-[#1E1A14] text-[hsl(var(--foreground)/0.75)] hover:text-[hsl(var(--foreground))] transition-colors">
+                  <Link href="/custom-project" className="atelier-mobile-link block py-4 font-serif text-2xl font-semibold border-b text-[hsl(var(--foreground)/0.75)] hover:text-[hsl(var(--foreground))] transition-colors">
                     Custom Project
                   </Link>
                 </motion.div>
@@ -339,12 +339,12 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       </AnimatePresence>
 
       {/* ── Page content ── */}
-      <main className="glass-gallery-main flex-1 pt-[76px] md:pt-[112px]">
+      <main className="atelier-main glass-gallery-main flex-1 pt-[78px] lg:pt-[110px]">
         {children}
       </main>
 
       {/* ── Footer ── */}
-      <footer className="glass-gallery-footer public-footer bg-[#070604] text-[#F7F2E7] pt-16 pb-8 border-t border-[#1E1A14]">
+      <footer className="atelier-footer glass-gallery-footer public-footer text-[#F8F4ED] pt-20 pb-8 border-t">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12">
             <div className="md:col-span-1">
@@ -502,8 +502,8 @@ export function PublicLayout({ children }: { children: ReactNode }) {
         style={{ pointerEvents: showCta ? 'auto' : 'none' }}
         className="fixed bottom-5 left-1/2 -translate-x-1/2 md:left-auto md:right-5 md:translate-x-0 z-50"
       >
-        <Link href="/store" className="flex items-center gap-2 bg-[#C9A84C] text-[#0A0907] px-6 py-3 text-sm font-bold uppercase tracking-widest shadow-[0_8px_32px_rgba(201,168,76,0.35)] cta-pulse whitespace-nowrap">
-          🖼 Order a Frame <ArrowRight className="w-4 h-4" />
+        <Link href="/store" className="atelier-sticky-cta flex items-center gap-2 px-6 py-3 text-[11px] font-bold uppercase tracking-[0.12em] whitespace-nowrap">
+          Order a Frame <ArrowRight className="w-4 h-4" />
         </Link>
       </motion.div>
     </div>
