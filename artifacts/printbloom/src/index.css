@@ -2736,3 +2736,161 @@ h1, h2, h3 { font-weight: 700; }
 @media(hover:none){
   [data-public-site] .hs-store-add { opacity:1; transform:none; }
 }
+
+
+/* Procurement Order Generator — print-ready document system */
+.procurement-document {
+  --procurement-ink: #1c1917;
+  --procurement-muted: #78716c;
+  --procurement-rule: #d6d3d1;
+  --procurement-accent: #8b5e34;
+  position: relative;
+  overflow: hidden;
+  color: var(--procurement-ink);
+  letter-spacing: 0.005em;
+  -webkit-font-smoothing: antialiased;
+}
+
+.procurement-document,
+.procurement-document input,
+.procurement-document button {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.procurement-document input {
+  color: var(--procurement-ink) !important;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+}
+
+.procurement-document input::placeholder {
+  color: #a8a29e !important;
+  opacity: 1;
+}
+
+.procurement-document__header {
+  min-width: 0;
+}
+
+.procurement-brand-mark {
+  letter-spacing: -0.025em;
+}
+
+.procurement-supplier-card {
+  break-inside: avoid;
+}
+
+.procurement-document table {
+  table-layout: auto;
+}
+
+.procurement-document th,
+.procurement-document td {
+  vertical-align: middle;
+}
+
+.procurement-document th:first-child,
+.procurement-document td:first-child {
+  padding-left: 0;
+}
+
+.procurement-document th:last-child,
+.procurement-document td:last-child {
+  padding-right: 0;
+}
+
+.procurement-document .tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.procurement-write-line {
+  height: 22px;
+  margin-top: 4px;
+  border-bottom: 1px solid #a8a29e;
+}
+
+.procurement-ruled-area {
+  display: grid;
+  gap: 10px;
+  padding-top: 5px;
+}
+
+.procurement-ruled-area span {
+  display: block;
+  height: 16px;
+  border-bottom: 1px solid #d6d3d1;
+}
+
+.procurement-document.is-capturing .no-print-capture {
+  display: none !important;
+}
+
+.procurement-document.is-capturing input {
+  appearance: none;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+.procurement-document.is-capturing .procurement-handwriting-panel {
+  display: block !important;
+}
+
+.procurement-document--a5 {
+  font-size: 0.92em;
+}
+
+.procurement-document--a5 .procurement-document__header {
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+.procurement-document--a5 .procurement-document__header h1 {
+  font-size: 15px;
+  letter-spacing: 0.12em;
+}
+
+.procurement-document--a5 .procurement-supplier-card {
+  padding: 13px;
+  margin-bottom: 20px;
+}
+
+.procurement-document--a5 .procurement-handwriting-panel {
+  margin-top: 22px;
+  padding: 11px;
+}
+
+.procurement-document--a5 .procurement-write-line {
+  height: 17px;
+}
+
+.procurement-document--a5 .procurement-ruled-area {
+  gap: 7px;
+}
+
+.procurement-document--a5 .procurement-ruled-area span {
+  height: 12px;
+}
+
+@media (max-width: 767px) {
+  .procurement-document__header {
+    gap: 18px;
+  }
+
+  .procurement-document__header h1 {
+    font-size: 16px;
+  }
+}
+
+@media print {
+  .procurement-document {
+    box-shadow: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .procurement-document * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

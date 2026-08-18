@@ -159,8 +159,10 @@ export default function Procurement() {
     try {
       toast({ title: "Generating Image", description: "Please wait while we prepare your order request..." });
       
+      printRef.current.classList.add('is-capturing');
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
       const canvas = await html2canvas(printRef.current, {
-        scale: 2, // Higher quality
+        scale: 2,
         useCORS: true,
         backgroundColor: '#ffffff'
       });
@@ -174,11 +176,13 @@ export default function Procurement() {
     } catch (error) {
       console.error('Download error:', error);
       toast({ variant: "destructive", title: "Error", description: "Failed to generate image." });
+    } finally {
+      printRef.current?.classList.remove('is-capturing');
     }
   };
 
   const labelClass = "text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block";
-  const inputClass = "rounded-none border-border h-9 text-sm focus-visible:ring-secondary";
+  const inputClass = "rounded-none border-border h-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-secondary";
 
   return (
     <div className="p-6 lg:p-10 space-y-8 max-w-7xl mx-auto">
@@ -298,40 +302,47 @@ export default function Procurement() {
               style={{ 
                 width: format === 'A4' ? '794px' : '559px', 
                 minHeight: format === 'A4' ? '1123px' : '794px',
-                padding: '40px',
+                padding: format === 'A4' ? '40px' : '28px',
                 backgroundColor: 'white',
-                color: 'black',
+                color: '#1c1917',
                 boxShadow: '0 0 40px rgba(0,0,0,0.1)',
                 display: 'flex',
-                flexDirection: 'column'
+                flexDirection: 'column',
+                boxSizing: 'border-box',
+                fontFamily: 'Arial, Helvetica, sans-serif'
               }}
-              className="font-sans text-black"
+              className={`procurement-document procurement-document--${format.toLowerCase()} text-black`}
             >
               {/* Document Header */}
-              <div className="flex justify-between items-start mb-10">
-                <div className="max-w-[60%]">
-                  <h2 className="text-2xl font-serif font-bold text-primary mb-2 tracking-tight">{business.name}</h2>
-                  <div className="text-[11px] text-gray-600 leading-relaxed">
-                    <p>{business.address}</p>
-                    <p>{business.contact}</p>
+              <div className="procurement-document__header grid grid-cols-[1fr_auto] items-start gap-8 mb-10">
+                <div className="min-w-0">
+                  <h2 className="procurement-brand-mark text-2xl font-bold text-primary mb-2 tracking-tight">{business.name || 'Your Business'}</h2>
+                  <div className="text-[11px] text-gray-600 leading-relaxed break-words">
+                    <p>{business.address || 'Business address'}</p>
+                    <p>{business.contact || 'Business contact'}</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <h1 className="text-xl font-bold uppercase tracking-[0.2em] text-gray-900 mb-4">Order Request</h1>
-                  <div className="text-[11px] space-y-1">
-                    <p><span className="font-bold text-gray-500 uppercase mr-2">No:</span> {orderInfo.orderNo}</p>
-                    <p><span className="font-bold text-gray-500 uppercase mr-2">Date:</span> {orderInfo.date}</p>
+                <div className="text-right whitespace-nowrap">
+                  <h1 className="text-xl font-bold uppercase tracking-[0.16em] text-gray-900 mb-4">Order Request</h1>
+                  <div className="text-[11px] space-y-1 leading-relaxed">
+                    <p><span className="font-bold text-gray-500 uppercase mr-2">No:</span>{orderInfo.orderNo || '—'}</p>
+                    <p><span className="font-bold text-gray-500 uppercase mr-2">Date:</span>{orderInfo.date || '—'}</p>
                   </div>
                 </div>
               </div>
 
               {/* Supplier Info */}
-              <div className="bg-gray-50 p-5 mb-8 border-l-4 border-primary">
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Supplier</h3>
-                <div className="text-sm">
-                  <p className="font-bold text-gray-900">{supplier.name || '(Shop Name)'}</p>
-                  <p className="text-gray-600 mt-1">{supplier.address || '(Address)'}</p>
-                  <p className="text-gray-600">{supplier.contact || '(Contact)'}</p>
+              <div className="procurement-supplier-card bg-gray-50 p-5 mb-8 border-l-4 border-primary">
+                <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Supplier / Shop</h3>
+                <div className="grid grid-cols-[1.1fr_1fr] gap-6 text-sm">
+                  <div className="min-w-0">
+                    <p className="font-bold text-gray-900 break-words">{supplier.name || '(Shop Name)'}</p>
+                    <p className="text-gray-600 mt-1 break-words">{supplier.address || '(Address)'}</p>
+                  </div>
+                  <div className="min-w-0 text-right">
+                    <p className="text-gray-600 break-words">{supplier.contact || '(Contact)'}</p>
+                    <p className="text-[10px] uppercase tracking-widest font-bold text-gray-400 mt-2">Please complete the handwriting fields below</p>
+                  </div>
                 </div>
               </div>
 
@@ -343,19 +354,19 @@ export default function Procurement() {
                       <th className="text-left py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-12">#</th>
                       {columns.map(col => (
                         <th key={col.id} className={`${col.isNumeric ? 'text-right' : 'text-left'} py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 px-2 group/col relative`}>
-                          <div className="flex items-center gap-1 justify-between">
+                          <div className={`flex items-center gap-1 ${col.isNumeric ? 'justify-end' : 'justify-start'}`}>
                             <Input 
                               value={col.label} 
                               onChange={e => updateColumnLabel(col.id, e.target.value)}
-                              className="h-6 border-none focus-visible:ring-0 bg-transparent px-0 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-full"
+                              className={`h-6 border-none focus-visible:ring-0 bg-transparent px-0 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-full ${col.isNumeric ? 'text-right' : 'text-left'}`}
                             />
                             <div className="flex items-center gap-1 opacity-0 group-hover/col:opacity-100 no-print-capture transition-opacity">
-                              <button onClick={() => duplicateColumn(col.id)} className="text-gray-300 hover:text-primary">
-                                <Copy className="w-2.5 h-2.5" />
-                              </button>
-                              <button onClick={() => removeColumn(col.id)} className="text-gray-300 hover:text-red-400">
-                                <Trash2 className="w-2.5 h-2.5" />
-                              </button>
+                            <button type="button" aria-label={`Duplicate ${col.label || 'column'}`} onClick={() => duplicateColumn(col.id)} className="text-gray-300 hover:text-primary">
+                              <Copy className="w-2.5 h-2.5" />
+                            </button>
+                            <button type="button" aria-label={`Remove ${col.label || 'column'}`} onClick={() => removeColumn(col.id)} className="text-gray-300 hover:text-red-400">
+                              <Trash2 className="w-2.5 h-2.5" />
+                            </button>
                             </div>
                           </div>
                         </th>
@@ -370,20 +381,21 @@ export default function Procurement() {
                         {columns.map(col => (
                           <td key={col.id} className="py-1 px-2">
                             <Input 
-                              type={col.isNumeric ? 'text' : 'text'}
-                              value={item.values[col.id]} 
+                              type="text"
+                              inputMode={col.isNumeric ? 'decimal' : 'text'}
+                              value={item.values[col.id]}
                               onChange={e => updateItem(item.id, col.id, e.target.value)}
                               placeholder={!col.isNumeric ? "Type..." : "0"}
-                              className={`h-8 border-none focus-visible:ring-0 bg-transparent px-0 text-sm ${col.isNumeric ? 'text-right font-bold text-gray-900' : 'font-medium text-gray-700'} placeholder:text-gray-200`}
+                              className={`h-8 border-none focus-visible:ring-0 bg-transparent px-0 text-sm text-gray-900 ${col.isNumeric ? 'text-right font-bold tabular-nums' : 'text-left font-medium'} placeholder:text-gray-300`}
                             />
                           </td>
                         ))}
                         <td className="w-16 no-print-capture">
                           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => duplicateRow(item.id)} className="text-gray-400 hover:text-primary">
+                            <button type="button" aria-label="Duplicate row" onClick={() => duplicateRow(item.id)} className="text-gray-400 hover:text-primary">
                               <Copy className="w-3.5 h-3.5" />
                             </button>
-                            <button onClick={() => removeItem(item.id)} className="text-red-400 hover:text-red-600">
+                            <button type="button" aria-label="Remove row" onClick={() => removeItem(item.id)} className="text-red-400 hover:text-red-600">
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
@@ -414,7 +426,7 @@ export default function Procurement() {
               </div>
 
               {/* Totals & Footer */}
-              <div className="mt-10 border-t-2 border-gray-900 pt-6">
+              <div className="procurement-document__footer mt-10 border-t-2 border-gray-900 pt-6">
                 <div className="flex justify-between items-center mb-8">
                   <div className="max-w-[60%]">
                     {orderInfo.note && (
@@ -432,16 +444,33 @@ export default function Procurement() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-20 mt-16">
-                  <div className="border-t border-gray-200 pt-2 text-center">
+                <div className="procurement-handwriting-panel mt-10 border border-dashed border-gray-300 p-4">
+                  <div className="flex items-center justify-between gap-4 mb-3">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-600">Supplier Confirmation</h4>
+                    <span className="text-[9px] uppercase tracking-widest text-gray-400">For shop use</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-4 text-[10px] text-gray-500">
+                    <div><span className="font-bold uppercase tracking-widest">Received by</span><div className="procurement-write-line" /></div>
+                    <div><span className="font-bold uppercase tracking-widest">Delivery date</span><div className="procurement-write-line" /></div>
+                    <div><span className="font-bold uppercase tracking-widest">Shop contact</span><div className="procurement-write-line" /></div>
+                    <div><span className="font-bold uppercase tracking-widest">Supplier ref.</span><div className="procurement-write-line" /></div>
+                  </div>
+                  <div className="mt-4 text-[10px] text-gray-500">
+                    <span className="font-bold uppercase tracking-widest">Shop notes / handwriting</span>
+                    <div className="procurement-ruled-area"><span /><span /><span /></div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-12 mt-12">
+                  <div className="border-t border-gray-300 pt-2 text-center">
                     <p className="text-[9px] uppercase tracking-widest font-bold text-gray-400">Requested By</p>
                   </div>
-                  <div className="border-t border-gray-200 pt-2 text-center">
+                  <div className="border-t border-gray-300 pt-2 text-center">
                     <p className="text-[9px] uppercase tracking-widest font-bold text-gray-400">Authorized Signature</p>
                   </div>
                 </div>
                 
-                <div className="mt-12 text-center">
+                <div className="mt-10 text-center">
                   <p className="text-[8px] uppercase tracking-[0.3em] text-gray-300 font-bold">Powered by HAVESTORY Studio OS</p>
                 </div>
               </div>
