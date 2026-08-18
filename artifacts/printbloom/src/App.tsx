@@ -74,6 +74,7 @@ const Team = lazyWithRecovery(() => import('./pages/admin/Team'));
 const Attendance = lazyWithRecovery(() => import('./pages/admin/Attendance'));
 const StaffProfile = lazyWithRecovery(() => import('./pages/admin/StaffProfile'));
 const ProductionUsage = lazyWithRecovery(() => import('./pages/admin/ProductionUsage'));
+const Procurement = lazyWithRecovery(() => import('./pages/admin/Procurement'));
 const ClientVerificationReport = lazyWithRecovery(() => import('./pages/admin/ClientVerificationReport'));
 const StaffVerificationReport = lazyWithRecovery(() => import('./pages/admin/StaffVerificationReport'));
 const ClientAgreementReport = lazyWithRecovery(() => import('./pages/admin/ClientAgreementReport'));
@@ -189,6 +190,7 @@ function AdminRoutes() {
           <Route path="/admin/team/:id/profile"  component={StaffProfile} />
           <Route path="/admin/attendance"        component={Attendance} />
           <Route path="/admin/production-usage"  component={ProductionUsage} />
+          <Route path="/admin/procurement"       component={Procurement} />
           <Route path="/admin/client-verification/:clientId" component={ClientVerificationReport} />
           <Route path="/admin/staff-verification/:staffId" component={StaffVerificationReport} />
           <Route path="/admin/client-agreement/:agreementId" component={ClientAgreementReport} />

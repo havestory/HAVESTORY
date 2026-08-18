@@ -59,7 +59,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
     ['/admin/custom-projects', 'Custom Projects'], ['/admin/crm-projects', 'CRM Projects'],
     ['/admin/shipping-labels', 'Shipping Labels'], ['/admin/production-usage', 'Production Usage'],
     ['/admin/website-editor', 'Website Editor'], ['/admin/raw-materials', 'Inventory'],
-    ['/admin/price-lists', 'Price Lists'], ['/admin/attendance', 'Attendance'],
+    ['/admin/price-lists', 'Price Lists'], ['/admin/procurement', 'Procurement'], ['/admin/attendance', 'Attendance'],
     ['/admin/invoices', 'Invoices'], ['/admin/products', 'Products'], ['/admin/services', 'Services'],
     ['/admin/portfolio', 'Portfolio'], ['/admin/reviews', 'Reviews'], ['/admin/messages', 'Messages'],
     ['/admin/notices', 'Notices'], ['/admin/finance', 'Finance'], ['/admin/reports', 'Reports'],
@@ -174,6 +174,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
               <NavItem href="/admin/coupons"         label="Coupons"         icon={Tag} permission="owner" />
               <NavItem href="/admin/shipping-labels" label="Shipping Labels" icon={Truck} permission="shipping" />
               <NavItem href="/admin/price-lists"     label="Price Lists"     icon={List} permission="price_lists_view" />
+              <NavItem href="/admin/procurement"     label="Procurement"     icon={PlusCircle} permission="production" />
               <NavItem href="/admin/production-usage" label="Production Usage" icon={Factory} permission="production" />
             </div>
 
