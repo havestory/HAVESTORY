@@ -12,20 +12,40 @@ const PREFLIGHT_CSS = [
 ].join("");
 
 /**
+ * Color CSS properties that html2canvas reads and that Tailwind v4 can
+ * emit as oklch() tokens. We copy computed values for all of these as
+ * explicit inline !important styles so html2canvas's own CSS parser only
+ * ever sees rgb()/rgba() values — even when the source stylesheet is a
+ * linked <link> file (production builds) that we cannot rewrite in place.
+ */
+const COLOR_PROPS = [
+  "color",
+  "background-color",
+  "border-top-color",
+  "border-right-color",
+  "border-bottom-color",
+  "border-left-color",
+  "outline-color",
+  "text-decoration-color",
+  "caret-color",
+] as const;
+
+/**
  * Convert any CSS color string (including oklch/oklab) to an sRGB rgb() string
  * by rendering a single pixel onto an off-screen canvas. The canvas API always
  * resolves to sRGB, so this works for every modern color space.
  *
- * Returns "transparent" if conversion fails (invalid color, security error, etc.)
+ * Returns the original string unchanged if no oklch/oklab is present, or
+ * "transparent" as a safe fallback on any error.
  */
 function resolveColorToRgb(color: string): string {
-  if (!color) return color;
+  if (!color || !/okl(?:ch|ab)/i.test(color)) return color;
   try {
     const canvas = document.createElement("canvas");
     canvas.width = 1;
     canvas.height = 1;
     const ctx = canvas.getContext("2d");
-    if (!ctx) return color;
+    if (!ctx) return "transparent";
     ctx.clearRect(0, 0, 1, 1);
     ctx.fillStyle = color;
     ctx.fillRect(0, 0, 1, 1);
@@ -39,26 +59,61 @@ function resolveColorToRgb(color: string): string {
 }
 
 /**
- * Walk all <style> elements in a document and replace every oklch()/oklab()
- * token with its sRGB rgb() equivalent so that html2canvas's own CSS parser
- * never encounters a color function it cannot handle.
+ * APPROACH 1 — Stylesheet sanitisation (works in Vite dev mode where CSS is
+ * injected as <style> elements).
  *
- * We use a regex rather than a full CSS parse so we can do the conversion even
- * on minified/concatenated Tailwind output. The pattern is safe because:
- *  – oklch/oklab do not nest parentheses in the wild,
- *  – [^)]+ is greedy and stops at the first ")" so it handles all arg variants.
+ * Walk all <style> elements in the cloned document and replace every oklch()/
+ * oklab() token with its sRGB rgb() equivalent so that html2canvas's own CSS
+ * parser never encounters a color function it cannot handle.
  */
 function sanitizeOklchInStylesheets(doc: Document): void {
   const OKLCH_RE = /okl(?:ch|ab)\([^)]+\)/gi;
 
   doc.querySelectorAll("style").forEach((styleEl) => {
     const text = styleEl.textContent ?? "";
-    if (!OKLCH_RE.test(text)) return; // reset lastIndex and skip if clean
+    if (!OKLCH_RE.test(text)) return;
     OKLCH_RE.lastIndex = 0;
-
     styleEl.textContent = text.replace(OKLCH_RE, (match) =>
-      resolveColorToRgb(match)
+      resolveColorToRgb(match),
     );
+  });
+}
+
+/**
+ * APPROACH 2 — Inline style override (belt-and-suspenders; also covers Vite
+ * production builds where CSS ships as a linked <link> file that cannot be
+ * rewritten in place).
+ *
+ * For every element in the cloned document, read the computed color-related
+ * properties from the corresponding live original element, convert any oklch/
+ * oklab values to rgb(), and stamp them as inline !important styles. After
+ * this, html2canvas reads the inline styles (which win the cascade) and only
+ * ever sees rgb()/rgba() values.
+ *
+ * @param liveRoot  The original live element passed to html2canvas.
+ * @param clonedEl  The root of html2canvas's internal cloned element.
+ */
+function inlineComputedColors(
+  liveRoot: HTMLElement,
+  clonedEl: HTMLElement,
+): void {
+  const liveNodes = [liveRoot, ...Array.from(liveRoot.querySelectorAll<HTMLElement>("*"))];
+  const cloneNodes = [clonedEl, ...Array.from(clonedEl.querySelectorAll<HTMLElement>("*"))];
+
+  liveNodes.forEach((src, i) => {
+    const dst = cloneNodes[i];
+    if (!dst || !(dst instanceof HTMLElement)) return;
+    try {
+      const computed = window.getComputedStyle(src);
+      for (const prop of COLOR_PROPS) {
+        const raw = computed.getPropertyValue(prop);
+        if (!raw || raw === "none") continue;
+        const safe = resolveColorToRgb(raw);
+        if (safe) dst.style.setProperty(prop, safe, "important");
+      }
+    } catch {
+      /* skip SVG / pseudo elements */
+    }
   });
 }
 
@@ -82,24 +137,30 @@ export interface CaptureOptions {
 /**
  * Captures a DOM element to an HTMLCanvasElement.
  *
- * Root-cause fix for html2canvas + Tailwind v4:
- *  Tailwind v4 emits oklch()/oklab() color tokens in its generated stylesheet.
- *  html2canvas ships its own CSS parser which does NOT understand oklch/oklab
- *  and throws a parse error when it encounters them, aborting the capture.
+ * Root-cause fix for html2canvas + Tailwind v4 oklch crash
+ * ─────────────────────────────────────────────────────────
+ * Tailwind v4 emits oklch()/oklab() color tokens in its generated stylesheet.
+ * html2canvas ships its own CSS parser which does NOT understand oklch/oklab
+ * and throws during rendering, causing "Failed to generate image."
  *
- *  We fix this at the source: inside the onclone callback we walk every <style>
- *  element in the cloned document and replace each oklch()/oklab() token with
- *  its sRGB rgb() equivalent (resolved via a single-pixel canvas draw). After
- *  this replacement html2canvas's parser only sees rgb()/rgba() values and
- *  succeeds. Inline overrides (layers 1–3 below) remain as belt-and-suspenders
- *  for any edge-case color values that might slip through from other sources.
+ * Two complementary fixes run inside onclone:
  *
- * Additional fixes baked in:
- *  – Input/textarea .value properties are copied from the live original to both
- *    the intermediate clone and html2canvas's internal clone (cloneNode only
- *    copies HTML attributes, not React-controlled .value JS properties).
- *  – Clone is placed at left:-9999px to avoid scroll-offset artefacts.
- *  – document.fonts.ready + 100 ms delay ensures custom fonts are loaded.
+ * 1. sanitizeOklchInStylesheets — rewrites every <style> element in the cloned
+ *    document, replacing oklch()/oklab() tokens with canvas-resolved rgb()
+ *    values. Effective in Vite dev mode (CSS in <style> tags).
+ *
+ * 2. inlineComputedColors — reads getComputedStyle() from the live original
+ *    elements, converts any oklch result to rgb() via canvas, and stamps the
+ *    result as inline !important styles on the cloned elements. Effective in
+ *    production builds (CSS in linked <link> files that can't be rewritten)
+ *    and as a belt-and-suspenders layer in dev mode.
+ *
+ * Additional fixes:
+ *  – React-controlled input .value properties are copied into both the
+ *    intermediate clone and html2canvas's internal clone (cloneNode only
+ *    copies HTML attributes, not the JS .value property React manages).
+ *  – Clone placed at left:-9999px to avoid scroll-offset artefacts.
+ *  – document.fonts.ready + 150 ms delay ensures custom fonts are loaded.
  */
 export async function captureElement(
   el: HTMLElement,
@@ -149,9 +210,7 @@ export async function captureElement(
     "box-sizing:border-box",
   ].join(";");
 
-  // ── Copy React-controlled input values to the intermediate clone ──────────
-  // cloneNode(true) copies HTML attributes but NOT the .value JS property
-  // that React sets on controlled <input>/<textarea> elements.
+  // ── Copy React-controlled input values into the intermediate clone ─────────
   const liveInputs = Array.from(
     el.querySelectorAll<HTMLInputElement>("input, textarea, select"),
   );
@@ -178,12 +237,17 @@ export async function captureElement(
       allowTaint: true,
       logging: false,
       onclone: (_doc: Document, clonedEl: HTMLElement) => {
-        // ── PRIMARY FIX: strip oklch/oklab from all cloned stylesheets ────
-        // This is the definitive fix. html2canvas's own CSS parser throws on
-        // oklch()/oklab() tokens. We convert every occurrence in every <style>
-        // element of the cloned document to sRGB rgb() via a canvas pixel read
-        // before html2canvas has a chance to parse them.
+        // ── Fix 1: rewrite oklch tokens in all <style> elements ───────────
+        // Effective for Vite dev mode where CSS is injected as <style> tags.
         sanitizeOklchInStylesheets(_doc);
+
+        // ── Fix 2: stamp computed colors as inline !important styles ──────
+        // Reads live computed styles (getComputedStyle on the original DOM),
+        // converts any oklch/oklab values to rgb(), and applies them as inline
+        // styles on the cloned elements. This wins the CSS cascade so html2canvas
+        // always sees rgb(). Covers production linked-CSS builds that Fix 1
+        // cannot rewrite.
+        inlineComputedColors(el, clonedEl);
 
         // ── Clone geometry ────────────────────────────────────────────────
         clonedEl.style.overflow = overflow;
@@ -206,8 +270,6 @@ export async function captureElement(
           });
 
         // ── Copy input values into html2canvas's internal clone ───────────
-        // html2canvas creates its own internal clone from our `clone`. The
-        // intermediate copy above handled our clone; repeat here for safety.
         const clonedInputsInner = Array.from(
           clonedEl.querySelectorAll<HTMLInputElement>(
             "input, textarea, select",

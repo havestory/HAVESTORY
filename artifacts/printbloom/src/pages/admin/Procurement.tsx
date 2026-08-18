@@ -432,13 +432,30 @@ export default function Procurement() {
                           className={`group/col relative ${col.id === 'desc' ? 'min-w-[148px]' : ''}`}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: col.isNumeric ? 'flex-end' : 'flex-start' }}>
-                            <Input
+                            {/* Plain <input> — avoids shadcn default text-color/shadow/border CSS vars
+                                which can render invisible on the dark navy header background */}
+                            <input
                               aria-label={`${col.label || (col.id === 'desc' ? 'Item Description' : 'Column')} header`}
                               value={col.label}
                               placeholder={col.id === 'desc' ? 'Item Description' : 'New Column'}
                               onChange={e => updateColumnLabel(col.id, e.target.value)}
-                              className={`h-6 min-w-0 border-none focus-visible:ring-0 bg-transparent px-0 text-[9px] font-bold uppercase tracking-widest w-full ${col.isNumeric ? 'text-right' : 'text-left'}`}
-                              style={{ color: '#C9A84C', letterSpacing: '0.12em' }}
+                              style={{
+                                color: '#C9A84C',
+                                backgroundColor: 'transparent',
+                                border: 'none',
+                                outline: 'none',
+                                boxShadow: 'none',
+                                padding: 0,
+                                margin: 0,
+                                width: '100%',
+                                minWidth: 0,
+                                fontSize: '9px',
+                                fontWeight: 700,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.14em',
+                                textAlign: col.isNumeric ? 'right' : 'left',
+                                fontFamily: 'inherit',
+                              }}
                             />
                             <div className="flex shrink-0 items-center gap-1 opacity-0 group-hover/col:opacity-100 no-print-capture transition-opacity">
                               <button type="button" aria-label={`Duplicate ${col.label || 'column'}`} onClick={() => duplicateColumn(col.id)} style={{ color: '#C9A84C', opacity: 0.6 }}>
