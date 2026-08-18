@@ -62,7 +62,7 @@ export default function Procurement() {
   ]);
 
   const [items, setItems] = useState<OrderItem[]>([
-    { id: crypto.randomUUID(), values: { desc: '', qty: '1', price: '0', total: '0.00' } }
+    { id: crypto.randomUUID(), values: { desc: '', qty: '', price: '', total: '' } }
   ]);
 
   const addColumn = () => {
@@ -107,7 +107,7 @@ export default function Procurement() {
 
   const addItem = () => {
     const newValues: Record<string, string> = {};
-    columns.forEach(c => newValues[c.id] = c.isNumeric ? '0' : '');
+    columns.forEach(c => newValues[c.id] = '');
     setItems([...items, { id: crypto.randomUUID(), values: newValues }]);
   };
 
@@ -135,11 +135,16 @@ export default function Procurement() {
       if (item.id === id) {
         const updatedValues = { ...item.values, [colId]: value };
         
-        // Auto-calc total if qty and price exist
+        // Only calculate the total when both source fields are filled.
+        // Leaving either field empty keeps the total empty for handwriting.
         if (colId === 'qty' || colId === 'price') {
-          const q = parseFloat(updatedValues['qty']) || 0;
-          const p = parseFloat(updatedValues['price']) || 0;
-          updatedValues['total'] = (q * p).toFixed(2);
+          const qty = updatedValues['qty']?.trim() ?? '';
+          const price = updatedValues['price']?.trim() ?? '';
+          if (qty !== '' && price !== '' && Number.isFinite(Number(qty)) && Number.isFinite(Number(price))) {
+            updatedValues['total'] = (Number(qty) * Number(price)).toFixed(2);
+          } else {
+            updatedValues['total'] = '';
+          }
         }
         
         return { ...item, values: updatedValues };
@@ -183,6 +188,14 @@ export default function Procurement() {
 
   const labelClass = "text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block";
   const inputClass = "rounded-none border-border h-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-secondary";
+  const isFilled = (value?: string) => Boolean(value?.trim());
+  const renderWritingLines = (count: number, className = '') => (
+    <div className={`procurement-ruled-area ${className}`} aria-hidden="true">
+      {Array.from({ length: count }, (_, index) => <span key={index} />)}
+    </div>
+  );
+  const supplierHasDetails = Object.values(supplier).some(isFilled);
+  const businessHasDetails = Object.values(business).some(isFilled);
 
   return (
     <div className="p-6 lg:p-10 space-y-8 max-w-7xl mx-auto">
@@ -314,13 +327,26 @@ export default function Procurement() {
               className={`procurement-document procurement-document--${format.toLowerCase()} text-black`}
             >
               {/* Document Header */}
-              <div className="procurement-document__header grid grid-cols-[1fr_auto] items-start gap-8 mb-10">
+              <div className="procurement-document__header grid grid-cols-[minmax(0,1fr)_auto] items-start gap-8 mb-10">
                 <div className="min-w-0">
-                  <h2 className="procurement-brand-mark text-2xl font-bold text-primary mb-2 tracking-tight">{business.name || 'Your Business'}</h2>
-                  <div className="text-[11px] text-gray-600 leading-relaxed break-words">
-                    <p>{business.address || 'Business address'}</p>
-                    <p>{business.contact || 'Business contact'}</p>
-                  </div>
+                  {businessHasDetails ? (
+                    <>
+                      {isFilled(business.name) ? (
+                        <h2 className="procurement-brand-mark text-2xl font-bold text-primary mb-2 tracking-tight break-words">{business.name}</h2>
+                      ) : (
+                        <div className="procurement-field-line procurement-field-line--brand mb-2" />
+                      )}
+                      <div className="text-[11px] text-gray-600 leading-relaxed break-words space-y-1">
+                        {isFilled(business.address) ? <p>{business.address}</p> : <div className="procurement-field-line" />}
+                        {isFilled(business.contact) ? <p>{business.contact}</p> : <div className="procurement-field-line" />}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Business / Shop details</p>
+                      {renderWritingLines(5, 'procurement-ruled-area--header')}
+                    </>
+                  )}
                 </div>
                 <div className="text-right whitespace-nowrap">
                   <h1 className="text-xl font-bold uppercase tracking-[0.16em] text-gray-900 mb-4">Order Request</h1>
@@ -331,19 +357,37 @@ export default function Procurement() {
                 </div>
               </div>
 
-              {/* Supplier Info */}
+              {/* Supplier / Shop header */}
               <div className="procurement-supplier-card bg-gray-50 p-5 mb-8 border-l-4 border-primary">
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Supplier / Shop</h3>
-                <div className="grid grid-cols-[1.1fr_1fr] gap-6 text-sm">
-                  <div className="min-w-0">
-                    <p className="font-bold text-gray-900 break-words">{supplier.name || '(Shop Name)'}</p>
-                    <p className="text-gray-600 mt-1 break-words">{supplier.address || '(Address)'}</p>
+                <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-3">Shop Name / Address / Contact</h3>
+                {supplierHasDetails ? (
+                  <div className="grid grid-cols-[1.1fr_1fr] gap-6 text-sm">
+                    <div className="min-w-0 space-y-2">
+                      {isFilled(supplier.name) ? (
+                        <p className="font-bold text-gray-900 break-words">{supplier.name}</p>
+                      ) : (
+                        <div className="procurement-field-line" />
+                      )}
+                      {isFilled(supplier.address) ? (
+                        <p className="text-gray-600 break-words">{supplier.address}</p>
+                      ) : (
+                        <div className="procurement-field-line" />
+                      )}
+                    </div>
+                    <div className="min-w-0 text-right">
+                      {isFilled(supplier.contact) ? (
+                        <p className="text-gray-600 break-words">{supplier.contact}</p>
+                      ) : (
+                        <div className="procurement-field-line" />
+                      )}
+                    </div>
                   </div>
-                  <div className="min-w-0 text-right">
-                    <p className="text-gray-600 break-words">{supplier.contact || '(Contact)'}</p>
-                    <p className="text-[10px] uppercase tracking-widest font-bold text-gray-400 mt-2">Please complete the handwriting fields below</p>
-                  </div>
-                </div>
+                ) : (
+                  <>
+                    <p className="text-[9px] uppercase tracking-widest text-gray-400 mb-1">Write supplier details by hand</p>
+                    {renderWritingLines(5, 'procurement-ruled-area--supplier')}
+                  </>
+                )}
               </div>
 
               {/* Items Table */}
@@ -353,20 +397,26 @@ export default function Procurement() {
                     <tr className="border-b-2 border-gray-900">
                       <th className="text-left py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-12">#</th>
                       {columns.map(col => (
-                        <th key={col.id} className={`${col.isNumeric ? 'text-right' : 'text-left'} py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 px-2 group/col relative`}>
-                          <div className={`flex items-center gap-1 ${col.isNumeric ? 'justify-end' : 'justify-start'}`}>
-                            <Input 
-                              value={col.label} 
+                        <th
+                          key={col.id}
+                          style={col.id === 'desc' ? { width: '42%' } : undefined}
+                          className={`${col.isNumeric ? 'text-right' : 'text-left'} py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 px-2 group/col relative ${col.id === 'desc' ? 'min-w-[148px]' : ''}`}
+                        >
+                          <div className={`flex items-center gap-1 min-w-0 ${col.isNumeric ? 'justify-end' : 'justify-start'}`}>
+                            <Input
+                              aria-label={`${col.label || (col.id === 'desc' ? 'Item Description' : 'Column')} header`}
+                              value={col.label}
+                              placeholder={col.id === 'desc' ? 'Item Description' : 'New Column'}
                               onChange={e => updateColumnLabel(col.id, e.target.value)}
-                              className={`h-6 border-none focus-visible:ring-0 bg-transparent px-0 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-full ${col.isNumeric ? 'text-right' : 'text-left'}`}
+                              className={`h-6 min-w-0 border-none focus-visible:ring-0 bg-transparent px-0 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-full ${col.isNumeric ? 'text-right' : 'text-left'}`}
                             />
-                            <div className="flex items-center gap-1 opacity-0 group-hover/col:opacity-100 no-print-capture transition-opacity">
-                            <button type="button" aria-label={`Duplicate ${col.label || 'column'}`} onClick={() => duplicateColumn(col.id)} className="text-gray-300 hover:text-primary">
-                              <Copy className="w-2.5 h-2.5" />
-                            </button>
-                            <button type="button" aria-label={`Remove ${col.label || 'column'}`} onClick={() => removeColumn(col.id)} className="text-gray-300 hover:text-red-400">
-                              <Trash2 className="w-2.5 h-2.5" />
-                            </button>
+                            <div className="flex shrink-0 items-center gap-1 opacity-0 group-hover/col:opacity-100 no-print-capture transition-opacity">
+                              <button type="button" aria-label={`Duplicate ${col.label || 'column'}`} onClick={() => duplicateColumn(col.id)} className="text-gray-300 hover:text-primary">
+                                <Copy className="w-2.5 h-2.5" />
+                              </button>
+                              <button type="button" aria-label={`Remove ${col.label || 'column'}`} onClick={() => removeColumn(col.id)} className="text-gray-300 hover:text-red-400">
+                                <Trash2 className="w-2.5 h-2.5" />
+                              </button>
                             </div>
                           </div>
                         </th>
@@ -378,18 +428,25 @@ export default function Procurement() {
                     {items.map((item, index) => (
                       <tr key={item.id} className="border-b border-gray-100 group">
                         <td className="py-3 text-xs text-gray-500">{index + 1}</td>
-                        {columns.map(col => (
-                          <td key={col.id} className="py-1 px-2">
-                            <Input 
-                              type="text"
-                              inputMode={col.isNumeric ? 'decimal' : 'text'}
-                              value={item.values[col.id]}
-                              onChange={e => updateItem(item.id, col.id, e.target.value)}
-                              placeholder={!col.isNumeric ? "Type..." : "0"}
-                              className={`h-8 border-none focus-visible:ring-0 bg-transparent px-0 text-sm text-gray-900 ${col.isNumeric ? 'text-right font-bold tabular-nums' : 'text-left font-medium'} placeholder:text-gray-300`}
-                            />
-                          </td>
-                        ))}
+                        {columns.map(col => {
+                          const value = item.values[col.id] ?? '';
+                          return (
+                            <td key={col.id} className={`py-1 px-2 ${col.id === 'desc' ? 'min-w-[148px]' : ''}`}>
+                              <div className={`procurement-cell-field ${col.isNumeric ? 'procurement-cell-field--numeric' : ''}`}>
+                                <Input
+                                  type="text"
+                                  inputMode={col.isNumeric ? 'decimal' : 'text'}
+                                  value={value}
+                                  onChange={e => updateItem(item.id, col.id, e.target.value)}
+                                  placeholder=""
+                                  aria-label={`${col.label || (col.id === 'desc' ? 'Item Description' : 'Item field')} row ${index + 1}`}
+                                  className={`h-8 border-none focus-visible:ring-0 bg-transparent px-0 text-sm text-gray-900 ${col.isNumeric ? 'text-right font-bold tabular-nums' : 'text-left font-medium'}`}
+                                />
+                                {!isFilled(value) && <div className="procurement-field-line" aria-hidden="true" />}
+                              </div>
+                            </td>
+                          );
+                        })}
                         <td className="w-16 no-print-capture">
                           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button type="button" aria-label="Duplicate row" onClick={() => duplicateRow(item.id)} className="text-gray-400 hover:text-primary">
@@ -444,33 +501,13 @@ export default function Procurement() {
                   </div>
                 </div>
 
-                <div className="procurement-handwriting-panel mt-10 border border-dashed border-gray-300 p-4">
-                  <div className="flex items-center justify-between gap-4 mb-3">
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-600">Supplier Confirmation</h4>
-                    <span className="text-[9px] uppercase tracking-widest text-gray-400">For shop use</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-4 text-[10px] text-gray-500">
-                    <div><span className="font-bold uppercase tracking-widest">Received by</span><div className="procurement-write-line" /></div>
-                    <div><span className="font-bold uppercase tracking-widest">Delivery date</span><div className="procurement-write-line" /></div>
-                    <div><span className="font-bold uppercase tracking-widest">Shop contact</span><div className="procurement-write-line" /></div>
-                    <div><span className="font-bold uppercase tracking-widest">Supplier ref.</span><div className="procurement-write-line" /></div>
-                  </div>
-                  <div className="mt-4 text-[10px] text-gray-500">
-                    <span className="font-bold uppercase tracking-widest">Shop notes / handwriting</span>
-                    <div className="procurement-ruled-area"><span /><span /><span /></div>
-                  </div>
+                <div className="procurement-handwriting-panel mt-8 border border-dashed border-gray-300 p-4">
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-600">Shop Notes</h4>
+                  <p className="text-[9px] text-gray-400 mt-1">Additional notes for handwriting</p>
+                  {renderWritingLines(4, 'procurement-ruled-area--notes')}
                 </div>
 
-                <div className="grid grid-cols-2 gap-12 mt-12">
-                  <div className="border-t border-gray-300 pt-2 text-center">
-                    <p className="text-[9px] uppercase tracking-widest font-bold text-gray-400">Requested By</p>
-                  </div>
-                  <div className="border-t border-gray-300 pt-2 text-center">
-                    <p className="text-[9px] uppercase tracking-widest font-bold text-gray-400">Authorized Signature</p>
-                  </div>
-                </div>
-                
-                <div className="mt-10 text-center">
+                <div className="mt-8 text-center">
                   <p className="text-[8px] uppercase tracking-[0.3em] text-gray-300 font-bold">Powered by HAVESTORY Studio OS</p>
                 </div>
               </div>

@@ -2781,7 +2781,7 @@ h1, h2, h3 { font-weight: 700; }
 }
 
 .procurement-document table {
-  table-layout: auto;
+  table-layout: fixed;
 }
 
 .procurement-document th,
@@ -2803,10 +2803,38 @@ h1, h2, h3 { font-weight: 700; }
   font-variant-numeric: tabular-nums;
 }
 
-.procurement-write-line {
-  height: 22px;
-  margin-top: 4px;
+.procurement-cell-field {
+  min-width: 0;
+}
+
+.procurement-cell-field input {
+  width: 100%;
+}
+
+.procurement-field-line {
+  width: 100%;
+  height: 17px;
+  margin-top: 1px;
   border-bottom: 1px solid #a8a29e;
+}
+
+.procurement-field-line--brand {
+  width: min(220px, 100%);
+  height: 29px;
+  margin-top: 0;
+}
+
+.procurement-ruled-area--header,
+.procurement-ruled-area--supplier,
+.procurement-ruled-area--notes {
+  gap: 7px;
+}
+
+.procurement-ruled-area--header span,
+.procurement-ruled-area--supplier span,
+.procurement-ruled-area--notes span {
+  height: 14px;
+  border-bottom-color: #c4bfb9;
 }
 
 .procurement-ruled-area {
@@ -2860,16 +2888,20 @@ h1, h2, h3 { font-weight: 700; }
   padding: 11px;
 }
 
-.procurement-document--a5 .procurement-write-line {
-  height: 17px;
+.procurement-document--a5 .procurement-field-line {
+  height: 13px;
+}
+
+.procurement-document--a5 .procurement-field-line--brand {
+  height: 22px;
 }
 
 .procurement-document--a5 .procurement-ruled-area {
-  gap: 7px;
+  gap: 5px;
 }
 
 .procurement-document--a5 .procurement-ruled-area span {
-  height: 12px;
+  height: 10px;
 }
 
 @media (max-width: 767px) {
