@@ -11,6 +11,57 @@ const PREFLIGHT_CSS = [
   "*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}",
 ].join("");
 
+/**
+ * Convert any CSS color string (including oklch/oklab) to an sRGB rgb() string
+ * by rendering a single pixel onto an off-screen canvas. The canvas API always
+ * resolves to sRGB, so this works for every modern color space.
+ *
+ * Returns "transparent" if conversion fails (invalid color, security error, etc.)
+ */
+function resolveColorToRgb(color: string): string {
+  if (!color) return color;
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1;
+    canvas.height = 1;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return color;
+    ctx.clearRect(0, 0, 1, 1);
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, 1, 1);
+    const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+    return a === 255
+      ? `rgb(${r},${g},${b})`
+      : `rgba(${r},${g},${b},${(a / 255).toFixed(3)})`;
+  } catch {
+    return "transparent";
+  }
+}
+
+/**
+ * Walk all <style> elements in a document and replace every oklch()/oklab()
+ * token with its sRGB rgb() equivalent so that html2canvas's own CSS parser
+ * never encounters a color function it cannot handle.
+ *
+ * We use a regex rather than a full CSS parse so we can do the conversion even
+ * on minified/concatenated Tailwind output. The pattern is safe because:
+ *  – oklch/oklab do not nest parentheses in the wild,
+ *  – [^)]+ is greedy and stops at the first ")" so it handles all arg variants.
+ */
+function sanitizeOklchInStylesheets(doc: Document): void {
+  const OKLCH_RE = /okl(?:ch|ab)\([^)]+\)/gi;
+
+  doc.querySelectorAll("style").forEach((styleEl) => {
+    const text = styleEl.textContent ?? "";
+    if (!OKLCH_RE.test(text)) return; // reset lastIndex and skip if clean
+    OKLCH_RE.lastIndex = 0;
+
+    styleEl.textContent = text.replace(OKLCH_RE, (match) =>
+      resolveColorToRgb(match)
+    );
+  });
+}
+
 export interface CaptureOptions {
   /** Capture width in CSS pixels */
   width: number;
@@ -29,32 +80,26 @@ export interface CaptureOptions {
 }
 
 /**
- * Captures a DOM element to an HTMLCanvasElement, neutralising the
- * Tailwind CSS preflight  img { display: block }  rule that shifts text
- * baselines during html2canvas rendering.
+ * Captures a DOM element to an HTMLCanvasElement.
  *
- * Fix strategy (three layers so one always wins):
+ * Root-cause fix for html2canvas + Tailwind v4:
+ *  Tailwind v4 emits oklch()/oklab() color tokens in its generated stylesheet.
+ *  html2canvas ships its own CSS parser which does NOT understand oklch/oklab
+ *  and throws a parse error when it encounters them, aborting the capture.
  *
- *  1. Inject a <style> tag into the LIVE document <head> BEFORE the
- *     html2canvas call. html2canvas copies all stylesheets into the
- *     cloned document, so the fix travels with it. The tag is removed
- *     in a finally block — it never leaks.
+ *  We fix this at the source: inside the onclone callback we walk every <style>
+ *  element in the cloned document and replace each oklch()/oklab() token with
+ *  its sRGB rgb() equivalent (resolved via a single-pixel canvas draw). After
+ *  this replacement html2canvas's parser only sees rgb()/rgba() values and
+ *  succeeds. Inline overrides (layers 1–3 below) remain as belt-and-suspenders
+ *  for any edge-case color values that might slip through from other sources.
  *
- *  2. Inside onclone, inject the same <style> into the clone's <head>
- *     directly, so even if stylesheet propagation is skipped it is there.
- *
- *  3. Inside onclone, walk every img/svg/canvas/video with querySelectorAll
- *     and set inline styles directly — inline + !important beats everything.
- *
- * Other best-practices baked in:
- *  - Clone is appended at left:-9999px (not left:0) to avoid scroll offsets.
- *  - document.fonts.ready + 100 ms delay so custom fonts (Google Fonts/Inter)
- *    are fully loaded before the capture, preventing text-alignment drift.
- *  - Input/textarea .value properties are copied from the live original to the
- *    html2canvas clone (cloneNode does not transfer JS property values).
- *  - All getPropertyValue / setProperty calls use kebab-case names so that
- *    browser-resolved RGB values are correctly read and applied, preventing
- *    html2canvas from encountering raw oklch()/oklab() tokens in stylesheets.
+ * Additional fixes baked in:
+ *  – Input/textarea .value properties are copied from the live original to both
+ *    the intermediate clone and html2canvas's internal clone (cloneNode only
+ *    copies HTML attributes, not React-controlled .value JS properties).
+ *  – Clone is placed at left:-9999px to avoid scroll-offset artefacts.
+ *  – document.fonts.ready + 100 ms delay ensures custom fonts are loaded.
  */
 export async function captureElement(
   el: HTMLElement,
@@ -70,19 +115,21 @@ export async function captureElement(
 
   const overflow = overflowVisible ? "visible" : "hidden";
 
-  // ── Layer 1: inject override into the live document ───────────────────────
+  // ── Layer 1: inject preflight into live document head ─────────────────────
   const preflightStyle = document.createElement("style");
   preflightStyle.textContent = PREFLIGHT_CSS;
   document.head.appendChild(preflightStyle);
 
   // ── Font readiness ────────────────────────────────────────────────────────
   await document.fonts.ready;
-  await new Promise<void>(resolve => setTimeout(resolve, 100));
+  await new Promise<void>((resolve) => setTimeout(resolve, 150));
 
   // ── Off-screen fixed wrapper ──────────────────────────────────────────────
   const wrap = document.createElement("div");
   wrap.style.cssText = [
-    "position:fixed", "top:0", "left:-9999px",
+    "position:fixed",
+    "top:0",
+    "left:-9999px",
     `width:${width}px`,
     `height:${height}px`,
     `overflow:${overflow}`,
@@ -102,17 +149,18 @@ export async function captureElement(
     "box-sizing:border-box",
   ].join(";");
 
-  // ── Copy React-controlled input values to the clone ───────────────────────
+  // ── Copy React-controlled input values to the intermediate clone ──────────
   // cloneNode(true) copies HTML attributes but NOT the .value JS property
-  // that React sets on controlled inputs. Without this, all typed text in
-  // <input> / <textarea> fields appears blank in the captured image.
-  const liveInputs = Array.from(el.querySelectorAll<HTMLInputElement>("input, textarea, select"));
-  const cloneInputs = Array.from(clone.querySelectorAll<HTMLInputElement>("input, textarea, select"));
+  // that React sets on controlled <input>/<textarea> elements.
+  const liveInputs = Array.from(
+    el.querySelectorAll<HTMLInputElement>("input, textarea, select"),
+  );
+  const cloneInputs = Array.from(
+    clone.querySelectorAll<HTMLInputElement>("input, textarea, select"),
+  );
   liveInputs.forEach((liveInput, i) => {
     const cloneInput = cloneInputs[i];
-    if (cloneInput) {
-      cloneInput.value = liveInput.value;
-    }
+    if (cloneInput) cloneInput.value = liveInput.value;
   });
 
   wrap.appendChild(clone);
@@ -130,84 +178,45 @@ export async function captureElement(
       allowTaint: true,
       logging: false,
       onclone: (_doc: Document, clonedEl: HTMLElement) => {
+        // ── PRIMARY FIX: strip oklch/oklab from all cloned stylesheets ────
+        // This is the definitive fix. html2canvas's own CSS parser throws on
+        // oklch()/oklab() tokens. We convert every occurrence in every <style>
+        // element of the cloned document to sRGB rgb() via a canvas pixel read
+        // before html2canvas has a chance to parse them.
+        sanitizeOklchInStylesheets(_doc);
+
+        // ── Clone geometry ────────────────────────────────────────────────
         clonedEl.style.overflow = overflow;
         clonedEl.style.height = `${height}px`;
         clonedEl.style.width = `${width}px`;
         clonedEl.style.boxSizing = "border-box";
 
-        // ── Layer 3: imperative inline-style fix ──────────────────────────
-        clonedEl.querySelectorAll<HTMLElement>("img, svg, canvas, video").forEach(imgEl => {
-          imgEl.style.display = "inline-block";
-          imgEl.style.verticalAlign = "middle";
-          imgEl.style.maxWidth = "none";
-        });
-
-        // ── Copy input values into html2canvas's internal clone ───────────
-        // html2canvas creates its own internal clone from our `clone`. We
-        // already copied values from `el` → `clone` above, but html2canvas
-        // clones again so we repeat the copy here to be safe.
-        const clonedInputsInner = Array.from(clonedEl.querySelectorAll<HTMLInputElement>("input, textarea, select"));
-        liveInputs.forEach((liveInput, i) => {
-          const clonedInput = clonedInputsInner[i];
-          if (clonedInput) {
-            clonedInput.value = liveInput.value;
-          }
-        });
-
-        // ── Resolve oklch/oklab colors inline before html2canvas parses them
-        // Tailwind v4 emits oklch()/oklab() paint values. html2canvas throws
-        // when its CSS parser encounters these unknown color functions.
-        // We read browser-resolved RGB values from the live original nodes and
-        // apply them as inline !important styles on the cloned nodes so that
-        // html2canvas never needs to parse the raw color functions.
-        //
-        // IMPORTANT: getPropertyValue and setProperty both require kebab-case
-        // property names (e.g. "background-color", not "backgroundColor").
-        // Using camelCase silently returns "" and the fix has no effect.
-        const originalNodes = [el, ...Array.from(el.querySelectorAll<HTMLElement>("*"))];
-        const clonedNodes = [clonedEl, ...Array.from(clonedEl.querySelectorAll<HTMLElement>("*"))];
-        clonedNodes.forEach((node, index) => {
-          const source = originalNodes[index];
-          if (!source) return;
-          try {
-            const computed = window.getComputedStyle(source);
-            // Solid-color properties — always safe to inline as rgb()
-            [
-              "color",
-              "background-color",
-              "border-top-color",
-              "border-right-color",
-              "border-bottom-color",
-              "border-left-color",
-              "outline-color",
-              "text-decoration-color",
-              "column-rule-color",
-              "caret-color",
-              "fill",
-              "stroke",
-            ].forEach(property => {
-              const value = computed.getPropertyValue(property);
-              if (value) node.style.setProperty(property, value, "important");
-            });
-            // Gradient / shadow properties — only inline if they are plain RGB;
-            // drop them entirely if they contain oklch/oklab to avoid parse errors.
-            ["background-image", "box-shadow", "text-shadow"].forEach(property => {
-              const value = computed.getPropertyValue(property);
-              if (value && !/oklch|oklab/i.test(value)) {
-                node.style.setProperty(property, value, "important");
-              } else if (/oklch|oklab/i.test(value)) {
-                node.style.setProperty(property, "none", "important");
-              }
-            });
-          } catch {
-            // A single inaccessible style must not abort the full document export.
-          }
-        });
-
         // ── Layer 2: stylesheet inside the clone ──────────────────────────
         const st = _doc.createElement("style");
         st.textContent = PREFLIGHT_CSS;
         _doc.head.appendChild(st);
+
+        // ── Layer 3: fix img/svg display mode ─────────────────────────────
+        clonedEl
+          .querySelectorAll<HTMLElement>("img, svg, canvas, video")
+          .forEach((imgEl) => {
+            imgEl.style.display = "inline-block";
+            imgEl.style.verticalAlign = "middle";
+            imgEl.style.maxWidth = "none";
+          });
+
+        // ── Copy input values into html2canvas's internal clone ───────────
+        // html2canvas creates its own internal clone from our `clone`. The
+        // intermediate copy above handled our clone; repeat here for safety.
+        const clonedInputsInner = Array.from(
+          clonedEl.querySelectorAll<HTMLInputElement>(
+            "input, textarea, select",
+          ),
+        );
+        liveInputs.forEach((liveInput, i) => {
+          const clonedInput = clonedInputsInner[i];
+          if (clonedInput) clonedInput.value = liveInput.value;
+        });
       },
     });
 
