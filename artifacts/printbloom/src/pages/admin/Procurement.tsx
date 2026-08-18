@@ -257,6 +257,10 @@ export default function Procurement() {
   const labelClass = "text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block";
   const inputClass = "rounded-none border-border h-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-secondary";
   const isFilled = (value?: string) => Boolean(value?.trim());
+  const supplierAddressLineCount = isFilled(supplier.address)
+    ? supplier.address.split(/\r?\n/).length
+    : 0;
+  const remainingAddressLines = Math.max(0, 2 - Math.min(2, supplierAddressLineCount));
   const renderWritingLines = (count: number, className = '') => (
     <div className={`procurement-ruled-area ${className}`} aria-hidden="true">
       {Array.from({ length: count }, (_, index) => <span key={index} />)}
@@ -457,7 +461,9 @@ export default function Procurement() {
                   ) : (
                     <div className="procurement-field-line" aria-label="Address handwriting line" />
                   )}
-                  <div className="procurement-field-line" aria-label="Additional address handwriting line" />
+                  {Array.from({ length: remainingAddressLines }, (_, index) => (
+                    <div key={`address-guide-${index}`} className="procurement-field-line" aria-label="Additional address handwriting line" />
+                  ))}
                   {isFilled(supplier.contact) ? (
                     <p className="procurement-supplier-line" style={{ color: '#475569' }}>{supplier.contact}</p>
                   ) : (
