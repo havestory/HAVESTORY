@@ -341,65 +341,78 @@ export default function Procurement() {
               style={{ 
                 width: format === 'A4' ? '794px' : '559px', 
                 minHeight: format === 'A4' ? '1123px' : '794px',
-                padding: format === 'A4' ? '40px' : '28px',
+                padding: '0',
                 backgroundColor: 'white',
-                color: '#1c1917',
-                boxShadow: '0 0 40px rgba(0,0,0,0.1)',
+                color: '#0F1B2D',
+                boxShadow: '0 4px 32px rgba(0,0,0,0.13)',
                 display: 'flex',
                 flexDirection: 'column',
                 boxSizing: 'border-box',
-                fontFamily: 'Arial, Helvetica, sans-serif'
+                fontFamily: 'Arial, Helvetica, sans-serif',
+                border: '1px solid #E2E8F0',
               }}
               className={`procurement-document procurement-document--${format.toLowerCase()} text-black`}
             >
+              {/* Gold top accent bar */}
+              <div style={{ height: '4px', backgroundColor: '#C9A84C', width: '100%', flexShrink: 0 }} />
+
+              {/* Inner padded area */}
+              <div style={{ padding: format === 'A4' ? '40px 44px 36px' : '28px 30px 24px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+
               {/* Document Header */}
-              <div className="procurement-document__header grid grid-cols-[minmax(0,1fr)_auto] items-start gap-8 mb-10">
+              <div className="procurement-document__header grid grid-cols-[minmax(0,1fr)_auto] items-start gap-8 mb-8">
                 <div className="min-w-0">
                   {businessHasDetails ? (
                     <>
                       {isFilled(business.name) ? (
-                        <h2 className="procurement-brand-mark text-2xl font-bold text-primary mb-2 tracking-tight break-words">{business.name}</h2>
+                        <h2 className="procurement-brand-mark mb-1 break-words" style={{ fontSize: '22px', fontWeight: 900, letterSpacing: '-0.03em', color: '#0F1B2D' }}>{business.name}</h2>
                       ) : (
                         <div className="procurement-field-line procurement-field-line--brand mb-2" />
                       )}
-                      <div className="text-[11px] text-gray-600 leading-relaxed break-words space-y-1">
+                      <div className="break-words" style={{ fontSize: '10.5px', color: '#64748B', lineHeight: 1.65 }}>
                         {isFilled(business.address) ? <p>{business.address}</p> : <div className="procurement-field-line" />}
                         {isFilled(business.contact) ? <p>{business.contact}</p> : <div className="procurement-field-line" />}
                       </div>
                     </>
                   ) : (
                     <>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Business / Shop details</p>
+                      <p style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#94A3B8', marginBottom: '6px' }}>Business / Shop details</p>
                       {renderWritingLines(5, 'procurement-ruled-area--header')}
                     </>
                   )}
                 </div>
-                <div className="text-right whitespace-nowrap">
-                  <h1 className="text-xl font-bold uppercase tracking-[0.16em] text-gray-900 mb-4">Order Request</h1>
-                  <div className="text-[11px] space-y-1 leading-relaxed">
-                    <p><span className="font-bold text-gray-500 uppercase mr-2">No:</span>{orderInfo.orderNo || '—'}</p>
-                    <p><span className="font-bold text-gray-500 uppercase mr-2">Date:</span>{orderInfo.date || '—'}</p>
+                <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                  {/* ORDER REQUEST badge */}
+                  <div style={{ display: 'inline-block', backgroundColor: '#0F1B2D', padding: '6px 14px', marginBottom: '14px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#C9A84C' }}>Order Request</span>
+                  </div>
+                  <div style={{ fontSize: '10.5px', lineHeight: 1.8, color: '#64748B' }}>
+                    <p><span style={{ fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: '6px', fontSize: '9px' }}>No:</span><span style={{ color: '#0F1B2D', fontWeight: 600 }}>{orderInfo.orderNo || '—'}</span></p>
+                    <p><span style={{ fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: '6px', fontSize: '9px' }}>Date:</span><span style={{ color: '#0F1B2D', fontWeight: 600 }}>{orderInfo.date || '—'}</span></p>
                   </div>
                 </div>
               </div>
 
+              {/* Divider */}
+              <div style={{ height: '1px', backgroundColor: '#E2E8F0', marginBottom: '20px' }} />
+
               {/* Supplier / Shop header */}
-              <div className="procurement-supplier-card bg-gray-50 p-5 mb-8 border-l-4 border-primary">
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-3">Shop Name / Address / Contact</h3>
-                <div className="procurement-supplier-fields text-sm">
+              <div className="procurement-supplier-card" style={{ backgroundColor: '#F8FAFC', padding: '14px 18px', marginBottom: '24px', borderLeft: '3px solid #C9A84C' }}>
+                <p style={{ fontSize: '8.5px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#94A3B8', marginBottom: '10px' }}>Shop Name / Address / Contact</p>
+                <div className="procurement-supplier-fields" style={{ fontSize: '12px' }}>
                   {isFilled(supplier.name) ? (
-                    <p className="procurement-supplier-line procurement-supplier-line--name font-bold text-gray-900">{supplier.name}</p>
+                    <p className="procurement-supplier-line" style={{ fontWeight: 700, color: '#0F1B2D' }}>{supplier.name}</p>
                   ) : (
                     <div className="procurement-field-line" aria-label="Shop name handwriting line" />
                   )}
                   {isFilled(supplier.address) ? (
-                    <p className="procurement-supplier-line text-gray-600">{supplier.address}</p>
+                    <p className="procurement-supplier-line" style={{ color: '#475569' }}>{supplier.address}</p>
                   ) : (
                     <div className="procurement-field-line" aria-label="Address handwriting line" />
                   )}
                   <div className="procurement-field-line" aria-label="Additional address handwriting line" />
                   {isFilled(supplier.contact) ? (
-                    <p className="procurement-supplier-line text-gray-600">{supplier.contact}</p>
+                    <p className="procurement-supplier-line" style={{ color: '#475569' }}>{supplier.contact}</p>
                   ) : (
                     <div className="procurement-field-line" aria-label="Contact handwriting line" />
                   )}
@@ -410,44 +423,45 @@ export default function Procurement() {
               <div className="flex-1">
                 <table className="w-full border-collapse">
                   <thead>
-                    <tr className="border-b-2 border-gray-900">
-                      <th className="text-left py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-12">#</th>
+                    <tr style={{ backgroundColor: '#0F1B2D' }}>
+                      <th className="text-left w-12" style={{ padding: '10px 8px 10px 0', fontSize: '9px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A84C' }}>#</th>
                       {columns.map(col => (
                         <th
                           key={col.id}
-                          style={col.id === 'desc' ? { width: '42%' } : undefined}
-                          className={`${col.isNumeric ? 'text-right' : 'text-left'} py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 px-2 group/col relative ${col.id === 'desc' ? 'min-w-[148px]' : ''}`}
+                          style={{ width: col.id === 'desc' ? '42%' : undefined, padding: '10px 8px', fontSize: '9px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A84C', textAlign: col.isNumeric ? 'right' : 'left' }}
+                          className={`group/col relative ${col.id === 'desc' ? 'min-w-[148px]' : ''}`}
                         >
-                          <div className={`flex items-center gap-1 min-w-0 ${col.isNumeric ? 'justify-end' : 'justify-start'}`}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: col.isNumeric ? 'flex-end' : 'flex-start' }}>
                             <Input
                               aria-label={`${col.label || (col.id === 'desc' ? 'Item Description' : 'Column')} header`}
                               value={col.label}
                               placeholder={col.id === 'desc' ? 'Item Description' : 'New Column'}
                               onChange={e => updateColumnLabel(col.id, e.target.value)}
-                              className={`h-6 min-w-0 border-none focus-visible:ring-0 bg-transparent px-0 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-full ${col.isNumeric ? 'text-right' : 'text-left'}`}
+                              className={`h-6 min-w-0 border-none focus-visible:ring-0 bg-transparent px-0 text-[9px] font-bold uppercase tracking-widest w-full ${col.isNumeric ? 'text-right' : 'text-left'}`}
+                              style={{ color: '#C9A84C', letterSpacing: '0.12em' }}
                             />
                             <div className="flex shrink-0 items-center gap-1 opacity-0 group-hover/col:opacity-100 no-print-capture transition-opacity">
-                              <button type="button" aria-label={`Duplicate ${col.label || 'column'}`} onClick={() => duplicateColumn(col.id)} className="text-gray-300 hover:text-primary">
+                              <button type="button" aria-label={`Duplicate ${col.label || 'column'}`} onClick={() => duplicateColumn(col.id)} style={{ color: '#C9A84C', opacity: 0.6 }}>
                                 <Copy className="w-2.5 h-2.5" />
                               </button>
-                              <button type="button" aria-label={`Remove ${col.label || 'column'}`} onClick={() => removeColumn(col.id)} className="text-gray-300 hover:text-red-400">
+                              <button type="button" aria-label={`Remove ${col.label || 'column'}`} onClick={() => removeColumn(col.id)} style={{ color: '#ef4444' }}>
                                 <Trash2 className="w-2.5 h-2.5" />
                               </button>
                             </div>
                           </div>
                         </th>
                       ))}
-                      <th className="w-8 no-print-capture"></th>
+                      <th className="w-8 no-print-capture" style={{ backgroundColor: '#0F1B2D' }}></th>
                     </tr>
                   </thead>
                   <tbody>
                     {items.map((item, index) => (
-                      <tr key={item.id} className="border-b border-gray-100 group">
-                        <td className="py-3 text-xs text-gray-500">{index + 1}</td>
+                      <tr key={item.id} className="group" style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
+                        <td style={{ padding: '8px 8px 8px 0', fontSize: '11px', color: '#94A3B8', fontWeight: 600 }}>{index + 1}</td>
                         {columns.map(col => {
                           const value = item.values[col.id] ?? '';
                           return (
-                            <td key={col.id} className={`py-1 px-2 ${col.id === 'desc' ? 'min-w-[148px]' : ''}`}>
+                            <td key={col.id} style={{ padding: '4px 8px' }} className={col.id === 'desc' ? 'min-w-[148px]' : ''}>
                               <div className={`procurement-cell-field ${col.isNumeric ? 'procurement-cell-field--numeric' : ''}`}>
                                 <Input
                                   type="text"
@@ -456,7 +470,8 @@ export default function Procurement() {
                                   onChange={e => updateItem(item.id, col.id, e.target.value)}
                                   placeholder=""
                                   aria-label={`${col.label || (col.id === 'desc' ? 'Item Description' : 'Item field')} row ${index + 1}`}
-                                  className={`h-7 border-none focus-visible:ring-0 bg-transparent px-0 text-[11px] font-bold text-gray-900 ${col.isNumeric ? 'text-right tabular-nums' : 'text-left'}`}
+                                  className={`h-7 border-none focus-visible:ring-0 bg-transparent px-0 text-[11px] font-bold ${col.isNumeric ? 'text-right tabular-nums' : 'text-left'}`}
+                                  style={{ color: '#0F1B2D' }}
                                 />
                                 {!isFilled(value) && <div className="procurement-field-line" aria-hidden="true" />}
                               </div>
@@ -499,38 +514,44 @@ export default function Procurement() {
               </div>
 
               {/* Totals & Footer */}
-              <div className="procurement-document__footer mt-10 border-t-2 border-gray-900 pt-6">
-                <div className="flex justify-between items-center mb-8">
-                  <div className="max-w-[60%]">
+              <div className="procurement-document__footer" style={{ marginTop: '28px', borderTop: '2px solid #0F1B2D', paddingTop: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+                  <div style={{ maxWidth: '55%' }}>
                     {orderInfo.note && (
                       <>
-                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Notes</h4>
-                        <p className="text-xs text-gray-600 leading-relaxed italic">"{orderInfo.note}"</p>
+                        <p style={{ fontSize: '8.5px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#94A3B8', marginBottom: '4px' }}>Notes</p>
+                        <p style={{ fontSize: '11px', color: '#475569', lineHeight: 1.5, fontStyle: 'italic' }}>"{orderInfo.note}"</p>
                       </>
                     )}
                   </div>
-                  <div className="w-48 space-y-2">
-                    <div className="flex justify-between text-xs text-gray-500 uppercase tracking-widest font-bold">
-                      <span>Grand Total</span>
-                      {grandTotal > 0 ? (
-                        <span className="text-gray-900 text-lg font-serif">Rs. {grandTotal.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</span>
-                      ) : (
-                        <div className="procurement-grand-total-line" aria-label="Grand total handwriting line" />
-                      )}
-                    </div>
+                  {/* Grand Total box */}
+                  <div style={{ minWidth: '180px', border: '1.5px solid #0F1B2D', padding: '12px 16px' }}>
+                    <p style={{ fontSize: '8px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#94A3B8', marginBottom: '6px' }}>Grand Total</p>
+                    {grandTotal > 0 ? (
+                      <p style={{ fontSize: '20px', fontWeight: 800, color: '#0F1B2D', letterSpacing: '-0.02em', lineHeight: 1 }}>
+                        Rs. {grandTotal.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+                      </p>
+                    ) : (
+                      <div className="procurement-grand-total-line" aria-label="Grand total handwriting line" style={{ marginTop: '8px' }} />
+                    )}
                   </div>
                 </div>
 
-                <div className="procurement-handwriting-panel mt-8 border border-dashed border-gray-300 p-4">
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-600">Shop Notes</h4>
-                  <p className="text-[9px] text-gray-400 mt-1">Additional notes for handwriting</p>
+                <div className="procurement-handwriting-panel" style={{ marginTop: '20px', border: '1px dashed #CBD5E1', padding: '14px 16px', backgroundColor: '#FAFBFC' }}>
+                  <p style={{ fontSize: '8.5px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#64748B', marginBottom: '4px' }}>Shop Notes</p>
+                  <p style={{ fontSize: '9px', color: '#94A3B8', marginBottom: '8px' }}>Additional notes for handwriting</p>
                   {renderWritingLines(4, 'procurement-ruled-area--notes')}
                 </div>
 
-                <div className="mt-8 text-center">
-                  <p className="text-[8px] uppercase tracking-[0.3em] text-gray-300 font-bold">Powered by HAVESTORY Studio OS</p>
+                {/* Footer bar */}
+                <div style={{ marginTop: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                  <div style={{ height: '1px', flex: 1, backgroundColor: '#E2E8F0' }} />
+                  <p style={{ fontSize: '7.5px', fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: '#CBD5E1' }}>Powered by HAVESTORY Studio OS</p>
+                  <div style={{ height: '1px', flex: 1, backgroundColor: '#E2E8F0' }} />
                 </div>
               </div>
+
+              </div>{/* end inner padded area */}
             </div>
           </div>
           
