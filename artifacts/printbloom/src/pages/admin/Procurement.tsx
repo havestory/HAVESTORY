@@ -386,24 +386,23 @@ export default function Procurement() {
               {/* Supplier / Shop header */}
               <div className="procurement-supplier-card bg-gray-50 p-5 mb-8 border-l-4 border-primary">
                 <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-3">Shop Name / Address / Contact</h3>
-                <div className="grid grid-cols-[1.1fr_1fr] gap-6 text-sm">
-                  <div className="min-w-0 space-y-2">
-                    {isFilled(supplier.name) ? (
-                      <p className="font-bold text-gray-900 break-words">{supplier.name}</p>
-                    ) : (
-                      renderWritingLines(1, 'procurement-field-lines--name')
-                    )}
-                    {isFilled(supplier.address) ? (
-                      <p className="text-gray-600 break-words whitespace-pre-wrap">{supplier.address}</p>
-                    ) : (
-                      renderWritingLines(2, 'procurement-field-lines--address')
-                    )}
-                  </div>
-                  <div className="min-w-0 text-right">
-                    {isFilled(supplier.contact) && (
-                      <p className="text-gray-600 break-words">{supplier.contact}</p>
-                    )}
-                  </div>
+                <div className="procurement-supplier-fields text-sm">
+                  {isFilled(supplier.name) ? (
+                    <p className="procurement-supplier-line procurement-supplier-line--name font-bold text-gray-900">{supplier.name}</p>
+                  ) : (
+                    <div className="procurement-field-line" aria-label="Shop name handwriting line" />
+                  )}
+                  {isFilled(supplier.address) ? (
+                    <p className="procurement-supplier-line text-gray-600">{supplier.address}</p>
+                  ) : (
+                    <div className="procurement-field-line" aria-label="Address handwriting line" />
+                  )}
+                  <div className="procurement-field-line" aria-label="Additional address handwriting line" />
+                  {isFilled(supplier.contact) ? (
+                    <p className="procurement-supplier-line text-gray-600">{supplier.contact}</p>
+                  ) : (
+                    <div className="procurement-field-line" aria-label="Contact handwriting line" />
+                  )}
                 </div>
               </div>
 

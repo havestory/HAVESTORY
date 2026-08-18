@@ -2780,6 +2780,27 @@ h1, h2, h3 { font-weight: 700; }
 
 .procurement-supplier-card {
   break-inside: avoid;
+  overflow: hidden;
+}
+
+.procurement-supplier-fields {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8pt;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.procurement-supplier-line {
+  display: block;
+  width: 100%;
+  min-height: 17px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
+  line-height: 1.25;
 }
 
 .procurement-document table {
@@ -2926,6 +2947,14 @@ h1, h2, h3 { font-weight: 700; }
 
 .procurement-document--a5 .procurement-field-line {
   height: 13px;
+}
+
+.procurement-document--a5 .procurement-supplier-fields {
+  gap: 8pt;
+}
+
+.procurement-document--a5 .procurement-supplier-line {
+  min-height: 13px;
 }
 
 .procurement-document--a5 .procurement-field-lines--name,
