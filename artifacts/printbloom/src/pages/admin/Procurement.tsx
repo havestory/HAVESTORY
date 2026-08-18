@@ -603,7 +603,7 @@ export default function Procurement() {
                     {items.map((item, index) => (
                       <tr key={item.id} className="group">
                         {/* Row number */}
-                        <td style={{ padding: '3px 4px', fontSize: '7px', color: '#94A3B8', fontWeight: 600, border: '1px solid #E2E8F0', textAlign: 'center', verticalAlign: 'top' }}>
+                        <td style={{ padding: '3px 4px', fontSize: `${typography.valueSize}px`, lineHeight: 1.5, color: '#94A3B8', fontWeight: 600, border: '1px solid #E2E8F0', textAlign: 'center', verticalAlign: 'top' }}>
                           {index + 1}
                         </td>
                         {columns.map(col => {
@@ -627,9 +627,9 @@ export default function Procurement() {
                                     e.target.style.height = e.target.scrollHeight + 'px';
                                   }}
                                   maxLength={75000}
-                                  rows={2}
+                                  rows={1}
                                   aria-label={`Description row ${index + 1}`}
-                                  style={{ color: '#0F1B2D', WebkitTextFillColor: '#0F1B2D', backgroundColor: 'transparent', border: 'none', outline: 'none', resize: 'none', width: '100%', fontSize: `${typography.valueSize}px`, fontFamily: 'inherit', lineHeight: 1.5, padding: 0, overflow: 'hidden', display: 'block' }}
+                                  style={{ color: '#0F1B2D', WebkitTextFillColor: '#0F1B2D', backgroundColor: 'transparent', border: 'none', outline: 'none', resize: 'none', width: '100%', fontSize: `${typography.valueSize}px`, fontFamily: 'inherit', lineHeight: 1.5, minHeight: `${Math.ceil(typography.valueSize * 1.5)}px`, padding: 0, overflow: 'hidden', display: 'block' }}
                                 />
                               ) : (
                                 /* Plain <input> with WebkitTextFillColor to prevent browser/Tailwind
