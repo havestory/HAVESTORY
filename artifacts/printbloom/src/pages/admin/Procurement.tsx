@@ -419,23 +419,28 @@ export default function Procurement() {
                 </div>
               </div>
 
-              {/* Items Table */}
+              {/* Items Table — bordered spreadsheet grid */}
               <div className="flex-1">
-                <table className="w-full border-collapse">
+                <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                  <colgroup>
+                    {/* # column */}
+                    <col style={{ width: '26px' }} />
+                    {columns.map(col => (
+                      <col key={col.id} style={{ width: col.id === 'desc' ? '42%' : undefined }} />
+                    ))}
+                    {/* actions column (hidden in capture) */}
+                    <col className="no-print-capture" style={{ width: '40px' }} />
+                  </colgroup>
                   <thead>
                     <tr style={{ backgroundColor: '#0F1B2D' }}>
-                      <th className="text-left w-12" style={{ padding: '10px 8px 10px 0', fontSize: '9px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A84C' }}>#</th>
+                      <th style={{ padding: '6px 4px', fontSize: '7px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#C9A84C', border: '1px solid #1E3050', textAlign: 'center' }}>#</th>
                       {columns.map(col => (
                         <th
                           key={col.id}
-                          style={{ width: col.id === 'desc' ? '42%' : undefined, padding: '10px 8px', fontSize: '9px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A84C', textAlign: col.isNumeric ? 'right' : 'left' }}
-                          className={`group/col relative ${col.id === 'desc' ? 'min-w-[148px]' : ''}`}
+                          style={{ padding: '6px 6px', fontSize: '7px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#C9A84C', textAlign: col.isNumeric ? 'right' : 'left', border: '1px solid #1E3050' }}
+                          className="group/col relative"
                         >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: col.isNumeric ? 'flex-end' : 'flex-start', flex: 1 }}>
-                            {/* contentEditable div — guaranteed visible gold text on any background.
-                                <input> elements receive -webkit-text-fill-color from browser/Tailwind
-                                CSS which can override the 'color' property silently on dark backgrounds.
-                                A plain contentEditable div has no such quirk. */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '3px', justifyContent: col.isNumeric ? 'flex-end' : 'flex-start' }}>
                             <div
                               role="textbox"
                               aria-label={`${col.label || 'Column'} header`}
@@ -443,69 +448,78 @@ export default function Procurement() {
                               suppressContentEditableWarning
                               onBlur={e => updateColumnLabel(col.id, e.currentTarget.textContent?.trim() ?? '')}
                               onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); (e.target as HTMLElement).blur(); } }}
-                              style={{
-                                color: '#C9A84C',
-                                fontSize: '9px',
-                                fontWeight: 700,
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.14em',
-                                textAlign: col.isNumeric ? 'right' : 'left',
-                                outline: 'none',
-                                cursor: 'text',
-                                minWidth: '20px',
-                                flex: 1,
-                                userSelect: 'text',
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                              }}
+                              style={{ color: '#C9A84C', fontSize: '7px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', textAlign: col.isNumeric ? 'right' : 'left', outline: 'none', cursor: 'text', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden' }}
                             >
                               {col.label}
                             </div>
                             <div className="flex shrink-0 items-center gap-1 opacity-0 group-hover/col:opacity-100 no-print-capture transition-opacity">
-                              <button type="button" aria-label={`Duplicate ${col.label || 'column'}`} onClick={() => duplicateColumn(col.id)} style={{ color: '#C9A84C', opacity: 0.6 }}>
-                                <Copy className="w-2.5 h-2.5" />
+                              <button type="button" aria-label={`Duplicate ${col.label || 'column'}`} onClick={() => duplicateColumn(col.id)} style={{ color: '#C9A84C', opacity: 0.7 }}>
+                                <Copy className="w-2 h-2" />
                               </button>
                               <button type="button" aria-label={`Remove ${col.label || 'column'}`} onClick={() => removeColumn(col.id)} style={{ color: '#ef4444' }}>
-                                <Trash2 className="w-2.5 h-2.5" />
+                                <Trash2 className="w-2 h-2" />
                               </button>
                             </div>
                           </div>
                         </th>
                       ))}
-                      <th className="w-8 no-print-capture" style={{ backgroundColor: '#0F1B2D' }}></th>
+                      <th className="no-print-capture" style={{ backgroundColor: '#0F1B2D', border: '1px solid #1E3050' }} />
                     </tr>
                   </thead>
                   <tbody>
                     {items.map((item, index) => (
-                      <tr key={item.id} className="group" style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
-                        <td style={{ padding: '8px 8px 8px 0', fontSize: '11px', color: '#94A3B8', fontWeight: 600 }}>{index + 1}</td>
+                      <tr key={item.id} className="group">
+                        {/* Row number */}
+                        <td style={{ padding: '3px 4px', fontSize: '7px', color: '#94A3B8', fontWeight: 600, border: '1px solid #E2E8F0', textAlign: 'center', verticalAlign: 'top' }}>
+                          {index + 1}
+                        </td>
                         {columns.map(col => {
                           const value = item.values[col.id] ?? '';
+                          const isDesc = col.id === 'desc';
                           return (
-                            <td key={col.id} style={{ padding: '4px 8px' }} className={col.id === 'desc' ? 'min-w-[148px]' : ''}>
-                              <div className={`procurement-cell-field ${col.isNumeric ? 'procurement-cell-field--numeric' : ''}`}>
-                                <Input
+                            <td key={col.id} style={{ padding: '2px 5px', border: '1px solid #E2E8F0', verticalAlign: 'top' }}>
+                              {isDesc ? (
+                                /* Textarea for description — supports up to 75 000 characters,
+                                   grows vertically with content */
+                                <textarea
+                                  value={value}
+                                  onChange={e => {
+                                    updateItem(item.id, col.id, e.target.value);
+                                    // auto-resize: reset then expand to scrollHeight
+                                    e.target.style.height = 'auto';
+                                    e.target.style.height = e.target.scrollHeight + 'px';
+                                  }}
+                                  onFocus={e => {
+                                    e.target.style.height = 'auto';
+                                    e.target.style.height = e.target.scrollHeight + 'px';
+                                  }}
+                                  maxLength={75000}
+                                  rows={2}
+                                  aria-label={`Description row ${index + 1}`}
+                                  style={{ color: '#0F1B2D', WebkitTextFillColor: '#0F1B2D', backgroundColor: 'transparent', border: 'none', outline: 'none', resize: 'none', width: '100%', fontSize: '7px', fontFamily: 'inherit', lineHeight: 1.5, padding: 0, overflow: 'hidden', display: 'block' }}
+                                />
+                              ) : (
+                                /* Plain <input> with WebkitTextFillColor to prevent browser/Tailwind
+                                   -webkit-text-fill-color from making text invisible */
+                                <input
                                   type="text"
                                   inputMode={col.isNumeric ? 'decimal' : 'text'}
                                   value={value}
                                   onChange={e => updateItem(item.id, col.id, e.target.value)}
-                                  placeholder=""
-                                  aria-label={`${col.label || (col.id === 'desc' ? 'Item Description' : 'Item field')} row ${index + 1}`}
-                                  className={`h-7 border-none focus-visible:ring-0 bg-transparent px-0 text-[11px] font-bold ${col.isNumeric ? 'text-right tabular-nums' : 'text-left'}`}
-                                  style={{ color: '#0F1B2D' }}
+                                  aria-label={`${col.label || 'Field'} row ${index + 1}`}
+                                  style={{ color: '#0F1B2D', WebkitTextFillColor: '#0F1B2D', backgroundColor: 'transparent', border: 'none', outline: 'none', boxShadow: 'none', width: '100%', fontSize: '7px', fontFamily: 'inherit', padding: 0, textAlign: col.isNumeric ? 'right' : 'left', display: 'block' }}
                                 />
-                                {!isFilled(value) && <div className="procurement-field-line" aria-hidden="true" />}
-                              </div>
+                              )}
                             </td>
                           );
                         })}
-                        <td className="w-16 no-print-capture">
-                          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <td className="no-print-capture" style={{ border: '1px solid #E2E8F0', verticalAlign: 'middle', textAlign: 'center' }}>
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity justify-center">
                             <button type="button" aria-label="Duplicate row" onClick={() => duplicateRow(item.id)} className="text-gray-400 hover:text-primary">
-                              <Copy className="w-3.5 h-3.5" />
+                              <Copy className="w-3 h-3" />
                             </button>
                             <button type="button" aria-label="Remove row" onClick={() => removeItem(item.id)} className="text-red-400 hover:text-red-600">
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-3 h-3" />
                             </button>
                           </div>
                         </td>
