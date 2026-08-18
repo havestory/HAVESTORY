@@ -19,7 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useGetSettings } from '@workspace/api-client-react';
-import html2canvas from 'html2canvas';
+import { captureElement } from '@/lib/html2canvas-capture';
 
 interface OrderItem {
   id: string;
@@ -173,30 +173,37 @@ export default function Procurement() {
   }, 0);
 
   const downloadJPG = async () => {
-    if (!printRef.current) return;
-    
+    const documentElement = printRef.current;
+    if (!documentElement) return;
+
     try {
       toast({ title: "Generating Image", description: "Please wait while we prepare your order request..." });
-      
-      printRef.current.classList.add('is-capturing');
+
+      documentElement.classList.add('is-capturing');
       await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
-      const canvas = await html2canvas(printRef.current, {
+
+      const width = format === 'A4' ? 794 : 559;
+      const baseHeight = format === 'A4' ? 1123 : 794;
+      const height = Math.max(baseHeight, documentElement.scrollHeight);
+      const canvas = await captureElement(documentElement, {
+        width,
+        height,
         scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        overflowVisible: true,
       });
-      
+
       const link = document.createElement('a');
       link.download = `${orderInfo.orderNo}_${supplier.name || 'Order'}.jpg`;
       link.href = canvas.toDataURL('image/jpeg', 0.9);
       link.click();
-      
+
       toast({ title: "Success", description: "Order request downloaded as JPG." });
     } catch (error) {
-      console.error('Download error:', error);
-      toast({ variant: "destructive", title: "Error", description: "Failed to generate image." });
+      console.error('JPG generation failed:', error);
+      toast({ title: "Error", description: "Failed to generate image. Please try again.", variant: "destructive" });
     } finally {
-      printRef.current?.classList.remove('is-capturing');
+      documentElement.classList.remove('is-capturing');
     }
   };
 
@@ -387,10 +394,8 @@ export default function Procurement() {
                     )}
                   </div>
                   <div className="min-w-0 text-right">
-                    {isFilled(supplier.contact) ? (
+                    {isFilled(supplier.contact) && (
                       <p className="text-gray-600 break-words">{supplier.contact}</p>
-                    ) : (
-                      renderWritingLines(1, 'procurement-field-lines--contact')
                     )}
                   </div>
                 </div>
