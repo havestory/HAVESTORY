@@ -2774,6 +2774,8 @@ h1, h2, h3 { font-weight: 700; }
 
 .procurement-brand-mark {
   letter-spacing: -0.025em;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .procurement-supplier-card {
@@ -2809,6 +2811,14 @@ h1, h2, h3 { font-weight: 700; }
 
 .procurement-cell-field input {
   width: 100%;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  line-height: 1.25;
+}
+
+.procurement-supplier-card p {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .procurement-field-line {
@@ -2822,6 +2832,24 @@ h1, h2, h3 { font-weight: 700; }
   width: min(220px, 100%);
   height: 29px;
   margin-top: 0;
+}
+
+.procurement-field-lines--name,
+.procurement-field-lines--address,
+.procurement-field-lines--contact {
+  gap: 6px;
+}
+
+.procurement-field-lines--name span,
+.procurement-field-lines--address span,
+.procurement-field-lines--contact span {
+  height: 17px;
+}
+
+.procurement-grand-total-line {
+  width: 108px;
+  height: 22px;
+  border-bottom: 1px solid #a8a29e;
 }
 
 .procurement-ruled-area--header,
@@ -2890,6 +2918,23 @@ h1, h2, h3 { font-weight: 700; }
 
 .procurement-document--a5 .procurement-field-line {
   height: 13px;
+}
+
+.procurement-document--a5 .procurement-field-lines--name,
+.procurement-document--a5 .procurement-field-lines--address,
+.procurement-document--a5 .procurement-field-lines--contact {
+  gap: 4px;
+}
+
+.procurement-document--a5 .procurement-field-lines--name span,
+.procurement-document--a5 .procurement-field-lines--address span,
+.procurement-document--a5 .procurement-field-lines--contact span {
+  height: 12px;
+}
+
+.procurement-document--a5 .procurement-grand-total-line {
+  width: 78px;
+  height: 18px;
 }
 
 .procurement-document--a5 .procurement-field-line--brand {

@@ -208,7 +208,6 @@ export default function Procurement() {
       {Array.from({ length: count }, (_, index) => <span key={index} />)}
     </div>
   );
-  const supplierHasDetails = Object.values(supplier).some(isFilled);
   const businessHasDetails = Object.values(business).some(isFilled);
 
   return (
@@ -374,34 +373,27 @@ export default function Procurement() {
               {/* Supplier / Shop header */}
               <div className="procurement-supplier-card bg-gray-50 p-5 mb-8 border-l-4 border-primary">
                 <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-3">Shop Name / Address / Contact</h3>
-                {supplierHasDetails ? (
-                  <div className="grid grid-cols-[1.1fr_1fr] gap-6 text-sm">
-                    <div className="min-w-0 space-y-2">
-                      {isFilled(supplier.name) ? (
-                        <p className="font-bold text-gray-900 break-words">{supplier.name}</p>
-                      ) : (
-                        <div className="procurement-field-line" />
-                      )}
-                      {isFilled(supplier.address) ? (
-                        <p className="text-gray-600 break-words">{supplier.address}</p>
-                      ) : (
-                        <div className="procurement-field-line" />
-                      )}
-                    </div>
-                    <div className="min-w-0 text-right">
-                      {isFilled(supplier.contact) ? (
-                        <p className="text-gray-600 break-words">{supplier.contact}</p>
-                      ) : (
-                        <div className="procurement-field-line" />
-                      )}
-                    </div>
+                <div className="grid grid-cols-[1.1fr_1fr] gap-6 text-sm">
+                  <div className="min-w-0 space-y-2">
+                    {isFilled(supplier.name) ? (
+                      <p className="font-bold text-gray-900 break-words">{supplier.name}</p>
+                    ) : (
+                      renderWritingLines(1, 'procurement-field-lines--name')
+                    )}
+                    {isFilled(supplier.address) ? (
+                      <p className="text-gray-600 break-words whitespace-pre-wrap">{supplier.address}</p>
+                    ) : (
+                      renderWritingLines(2, 'procurement-field-lines--address')
+                    )}
                   </div>
-                ) : (
-                  <>
-                    <p className="text-[9px] uppercase tracking-widest text-gray-400 mb-1">Write supplier details by hand</p>
-                    {renderWritingLines(5, 'procurement-ruled-area--supplier')}
-                  </>
-                )}
+                  <div className="min-w-0 text-right">
+                    {isFilled(supplier.contact) ? (
+                      <p className="text-gray-600 break-words">{supplier.contact}</p>
+                    ) : (
+                      renderWritingLines(1, 'procurement-field-lines--contact')
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Items Table */}
@@ -454,7 +446,7 @@ export default function Procurement() {
                                   onChange={e => updateItem(item.id, col.id, e.target.value)}
                                   placeholder=""
                                   aria-label={`${col.label || (col.id === 'desc' ? 'Item Description' : 'Item field')} row ${index + 1}`}
-                                  className={`h-8 border-none focus-visible:ring-0 bg-transparent px-0 text-sm text-gray-900 ${col.isNumeric ? 'text-right font-bold tabular-nums' : 'text-left font-medium'}`}
+                                  className={`h-7 border-none focus-visible:ring-0 bg-transparent px-0 text-[11px] font-bold text-gray-900 ${col.isNumeric ? 'text-right tabular-nums' : 'text-left'}`}
                                 />
                                 {!isFilled(value) && <div className="procurement-field-line" aria-hidden="true" />}
                               </div>
@@ -510,7 +502,11 @@ export default function Procurement() {
                   <div className="w-48 space-y-2">
                     <div className="flex justify-between text-xs text-gray-500 uppercase tracking-widest font-bold">
                       <span>Grand Total</span>
-                      <span className="text-gray-900 text-lg font-serif">Rs. {grandTotal.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</span>
+                      {grandTotal > 0 ? (
+                        <span className="text-gray-900 text-lg font-serif">Rs. {grandTotal.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</span>
+                      ) : (
+                        <div className="procurement-grand-total-line" aria-label="Grand total handwriting line" />
+                      )}
                     </div>
                   </div>
                 </div>
