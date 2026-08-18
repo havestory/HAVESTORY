@@ -2936,6 +2936,35 @@ h1, h2, h3 { font-weight: 700; }
   height: 17px !important;
 }
 
+/* Capture plain text instead of browser form controls so multi-digit amounts
+   are exported completely and never clipped by input rendering. */
+.procurement-capture-value {
+  display: none;
+  min-width: 0;
+  color: var(--procurement-ink);
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 700;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.procurement-capture-value--numeric {
+  white-space: nowrap;
+  overflow: visible;
+  text-align: right;
+  overflow-wrap: normal;
+}
+
+.procurement-document.is-capturing .procurement-document table tbody input,
+.procurement-document.is-capturing .procurement-document table tbody textarea {
+  display: none !important;
+}
+
+.procurement-document.is-capturing .procurement-capture-value {
+  display: block !important;
+}
+
 .procurement-document.is-capturing .procurement-handwriting-panel {
   display: block !important;
 }

@@ -273,6 +273,16 @@ export default function Procurement() {
       });
 
       documentElement.classList.add('is-capturing');
+      
+      // Ensure all input and textarea values are mirrored to HTML attributes
+      // so html2canvas correctly serializes and renders them without truncation.
+      documentElement.querySelectorAll<HTMLInputElement>('input').forEach(input => {
+        input.setAttribute('value', input.value);
+      });
+      documentElement.querySelectorAll<HTMLTextAreaElement>('textarea').forEach(textarea => {
+        textarea.textContent = textarea.value;
+      });
+
       // Two frames: first lets layout recalculate after collapsing no-print
       // elements, second lets any CSS transitions settle.
       await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
@@ -662,34 +672,52 @@ export default function Procurement() {
                               {isDesc ? (
                                 /* Textarea for description — supports up to 75 000 characters,
                                    grows vertically with content */
-                                <textarea
-                                  value={value}
-                                  onChange={e => {
-                                    updateItem(item.id, col.id, e.target.value);
-                                    // auto-resize: reset then expand to scrollHeight
-                                    e.target.style.height = 'auto';
-                                    e.target.style.height = e.target.scrollHeight + 'px';
-                                  }}
-                                  onFocus={e => {
-                                    e.target.style.height = 'auto';
-                                    e.target.style.height = e.target.scrollHeight + 'px';
-                                  }}
-                                  maxLength={75000}
-                                  rows={1}
-                                  aria-label={`Description row ${index + 1}`}
-                                  style={{ color: '#0F1B2D', WebkitTextFillColor: '#0F1B2D', backgroundColor: 'transparent', border: 'none', outline: 'none', resize: 'none', width: '100%', fontSize: `${typography.valueSize}px`, fontFamily: 'inherit', lineHeight: 1.5, minHeight: `${Math.ceil(typography.valueSize * 1.5)}px`, padding: 0, overflow: 'hidden', display: 'block' }}
-                                />
+                                <>
+                                  <textarea
+                                    value={value}
+                                    onChange={e => {
+                                      updateItem(item.id, col.id, e.target.value);
+                                      // auto-resize: reset then expand to scrollHeight
+                                      e.target.style.height = 'auto';
+                                      e.target.style.height = e.target.scrollHeight + 'px';
+                                    }}
+                                    onFocus={e => {
+                                      e.target.style.height = 'auto';
+                                      e.target.style.height = e.target.scrollHeight + 'px';
+                                    }}
+                                    maxLength={75000}
+                                    rows={1}
+                                    aria-label={`Description row ${index + 1}`}
+                                    style={{ color: '#0F1B2D', WebkitTextFillColor: '#0F1B2D', backgroundColor: 'transparent', border: 'none', outline: 'none', resize: 'none', width: '100%', fontSize: `${typography.valueSize}px`, fontFamily: 'inherit', lineHeight: 1.5, minHeight: `${Math.ceil(typography.valueSize * 1.5)}px`, padding: 0, overflow: 'hidden', display: 'block' }}
+                                  />
+                                  <span
+                                    className="procurement-capture-value procurement-capture-value--description"
+                                    aria-hidden="true"
+                                    style={{ fontSize: `${typography.valueSize}px`, lineHeight: 1.5 }}
+                                  >
+                                    {value}
+                                  </span>
+                                </>
                               ) : (
                                 /* Plain <input> with WebkitTextFillColor to prevent browser/Tailwind
                                    -webkit-text-fill-color from making text invisible */
-                                <input
-                                  type="text"
-                                  inputMode={col.isNumeric ? 'decimal' : 'text'}
-                                  value={value}
-                                  onChange={e => updateItem(item.id, col.id, e.target.value)}
-                                  aria-label={`${col.label || 'Field'} row ${index + 1}`}
-                                  style={{ color: '#0F1B2D', WebkitTextFillColor: '#0F1B2D', backgroundColor: 'transparent', border: 'none', outline: 'none', boxShadow: 'none', width: '100%', fontSize: `${typography.valueSize}px`, fontFamily: 'inherit', padding: 0, textAlign: col.isNumeric ? 'right' : 'left', display: 'block' }}
-                                />
+                                <>
+                                  <input
+                                    type="text"
+                                    inputMode={col.isNumeric ? 'decimal' : 'text'}
+                                    value={value}
+                                    onChange={e => updateItem(item.id, col.id, e.target.value)}
+                                    aria-label={`${col.label || 'Field'} row ${index + 1}`}
+                                    style={{ color: '#0F1B2D', WebkitTextFillColor: '#0F1B2D', backgroundColor: 'transparent', border: 'none', outline: 'none', boxShadow: 'none', width: '100%', fontSize: `${typography.valueSize}px`, fontFamily: 'inherit', padding: 0, textAlign: col.isNumeric ? 'right' : 'left', display: 'block' }}
+                                  />
+                                  <span
+                                    className={`procurement-capture-value${col.isNumeric ? ' procurement-capture-value--numeric' : ''}`}
+                                    aria-hidden="true"
+                                    style={{ fontSize: `${typography.valueSize}px`, lineHeight: 1.5, textAlign: col.isNumeric ? 'right' : 'left' }}
+                                  >
+                                    {value}
+                                  </span>
+                                </>
                               )}
                             </td>
                           );
