@@ -177,11 +177,50 @@ export default function Procurement() {
     const documentElement = printRef.current;
     if (!documentElement) return;
 
+    // Collect every .no-print-capture element so we can zero them out before
+    // capture. CSS display:none is unreliable on <col> elements and leaves a
+    // ghost gap in table-layout:fixed tables, causing alignment shifts in the
+    // downloaded image. We manually collapse width/padding and restore after.
+    const noPrint = Array.from(
+      documentElement.querySelectorAll<HTMLElement>('.no-print-capture')
+    );
+    type SavedStyle = { el: HTMLElement; display: string; width: string; padding: string; overflow: string; minWidth: string };
+    const saved: SavedStyle[] = noPrint.map(el => ({
+      el,
+      display: el.style.display,
+      width: el.style.width,
+      padding: el.style.padding,
+      overflow: el.style.overflow,
+      minWidth: el.style.minWidth,
+    }));
+
+    const restoreNoPrint = () => {
+      saved.forEach(({ el, display, width, padding, overflow, minWidth }) => {
+        el.style.display = display;
+        el.style.width = width;
+        el.style.padding = padding;
+        el.style.overflow = overflow;
+        el.style.minWidth = minWidth;
+      });
+    };
+
     try {
       toast({ title: "Generating Image", description: "Please wait while we prepare your order request..." });
 
+      // Collapse all UI-only elements before is-capturing so their space
+      // is gone before scrollHeight is measured and the clone is made.
+      noPrint.forEach(el => {
+        el.style.display = 'none';
+        el.style.width = '0';
+        el.style.minWidth = '0';
+        el.style.padding = '0';
+        el.style.overflow = 'hidden';
+      });
+
       documentElement.classList.add('is-capturing');
-      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+      // Two frames: first lets layout recalculate after collapsing no-print
+      // elements, second lets any CSS transitions settle.
+      await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
 
       const width = format === 'A4' ? 794 : 559;
       const baseHeight = format === 'A4' ? 1123 : 794;
@@ -210,6 +249,7 @@ export default function Procurement() {
       toast({ title: "Error", description: "Failed to generate image. Please try again.", variant: "destructive" });
     } finally {
       documentElement.classList.remove('is-capturing');
+      restoreNoPrint();
     }
   };
 
@@ -428,16 +468,17 @@ export default function Procurement() {
                     {columns.map(col => (
                       <col key={col.id} style={{ width: col.id === 'desc' ? '42%' : undefined }} />
                     ))}
-                    {/* actions column (hidden in capture) */}
-                    <col className="no-print-capture" style={{ width: '40px' }} />
+                    {/* actions column — NO width set so display:none fully collapses it */}
+                    <col className="no-print-capture" />
                   </colgroup>
                   <thead>
-                    <tr style={{ backgroundColor: '#0F1B2D' }}>
-                      <th style={{ padding: '6px 4px', fontSize: '7px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#C9A84C', border: '1px solid #1E3050', textAlign: 'center' }}>#</th>
+                    {/* Clean light header — no dark background */}
+                    <tr style={{ backgroundColor: '#F8FAFC' }}>
+                      <th style={{ padding: '6px 4px', fontSize: '7px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#475569', border: '1px solid #CBD5E1', textAlign: 'center' }}>#</th>
                       {columns.map(col => (
                         <th
                           key={col.id}
-                          style={{ padding: '6px 6px', fontSize: '7px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#C9A84C', textAlign: col.isNumeric ? 'right' : 'left', border: '1px solid #1E3050' }}
+                          style={{ padding: '6px 6px', fontSize: '7px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#475569', textAlign: col.isNumeric ? 'right' : 'left', border: '1px solid #CBD5E1' }}
                           className="group/col relative"
                         >
                           <div style={{ display: 'flex', alignItems: 'center', gap: '3px', justifyContent: col.isNumeric ? 'flex-end' : 'flex-start' }}>
@@ -448,12 +489,12 @@ export default function Procurement() {
                               suppressContentEditableWarning
                               onBlur={e => updateColumnLabel(col.id, e.currentTarget.textContent?.trim() ?? '')}
                               onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); (e.target as HTMLElement).blur(); } }}
-                              style={{ color: '#C9A84C', fontSize: '7px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', textAlign: col.isNumeric ? 'right' : 'left', outline: 'none', cursor: 'text', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden' }}
+                              style={{ color: '#0F1B2D', fontSize: '7px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', textAlign: col.isNumeric ? 'right' : 'left', outline: 'none', cursor: 'text', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden' }}
                             >
                               {col.label}
                             </div>
                             <div className="flex shrink-0 items-center gap-1 opacity-0 group-hover/col:opacity-100 no-print-capture transition-opacity">
-                              <button type="button" aria-label={`Duplicate ${col.label || 'column'}`} onClick={() => duplicateColumn(col.id)} style={{ color: '#C9A84C', opacity: 0.7 }}>
+                              <button type="button" aria-label={`Duplicate ${col.label || 'column'}`} onClick={() => duplicateColumn(col.id)} style={{ color: '#0F1B2D', opacity: 0.4 }}>
                                 <Copy className="w-2 h-2" />
                               </button>
                               <button type="button" aria-label={`Remove ${col.label || 'column'}`} onClick={() => removeColumn(col.id)} style={{ color: '#ef4444' }}>
@@ -463,7 +504,7 @@ export default function Procurement() {
                           </div>
                         </th>
                       ))}
-                      <th className="no-print-capture" style={{ backgroundColor: '#0F1B2D', border: '1px solid #1E3050' }} />
+                      <th className="no-print-capture" style={{ width: '40px', border: '1px solid #CBD5E1' }} />
                     </tr>
                   </thead>
                   <tbody>
