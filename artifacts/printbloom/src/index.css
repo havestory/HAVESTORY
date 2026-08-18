@@ -2839,6 +2839,12 @@ h1, h2, h3 { font-weight: 700; }
   line-height: 1.25;
 }
 
+.procurement-cell-field input.procurement-item-description {
+  font-size: 13px !important;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+
 .procurement-supplier-card p {
   overflow-wrap: anywhere;
   word-break: break-word;
@@ -2957,6 +2963,10 @@ h1, h2, h3 { font-weight: 700; }
 
 .procurement-document--a5 .procurement-supplier-line {
   min-height: 13px;
+}
+
+.procurement-document--a5 .procurement-cell-field input.procurement-item-description {
+  font-size: 12px !important;
 }
 
 .procurement-document--a5 .procurement-field-lines--name,
