@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   Plus, 
   Trash2, 
@@ -18,6 +18,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
+import { useGetSettings } from '@workspace/api-client-react';
 import html2canvas from 'html2canvas';
 
 interface OrderItem {
@@ -33,6 +34,7 @@ interface Column {
 
 export default function Procurement() {
   const { toast } = useToast();
+  const { data: settings } = useGetSettings();
   const printRef = useRef<HTMLDivElement>(null);
   const [format, setFormat] = useState<'A4' | 'A5'>('A4');
   
@@ -47,6 +49,18 @@ export default function Procurement() {
     address: 'No. 123, Studio Lane, Colombo, Sri Lanka',
     contact: '+94 77 123 4567 / info@havestory.lk'
   });
+
+  useEffect(() => {
+    if (settings) {
+      const s = settings as any;
+      const contactParts = [s.phone, s.email].filter(Boolean);
+      setBusiness({
+        name: s.businessName || 'HAVESTORY',
+        address: s.address || 'No. 123, Studio Lane, Colombo, Sri Lanka',
+        contact: contactParts.length > 0 ? contactParts.join(' / ') : '+94 77 123 4567 / info@havestory.lk'
+      });
+    }
+  }, [settings]);
 
   const [orderInfo, setOrderInfo] = useState({
     orderNo: `PO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
