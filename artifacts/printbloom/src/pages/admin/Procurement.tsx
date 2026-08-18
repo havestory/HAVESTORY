@@ -33,11 +33,36 @@ interface Column {
   isNumeric: boolean;
 }
 
+interface ProcurementTypography {
+  headerSize: number;
+  valueSize: number;
+}
+
+const PROCUREMENT_TYPOGRAPHY_KEY = 'havestory.procurement.typography';
+const DEFAULT_PROCUREMENT_TYPOGRAPHY: ProcurementTypography = {
+  headerSize: 8,
+  valueSize: 10,
+};
+
 export default function Procurement() {
   const { toast } = useToast();
   const { data: settings } = useGetSettings();
   const printRef = useRef<HTMLDivElement>(null);
   const [format, setFormat] = useState<'A4' | 'A5'>('A4');
+  const [typography, setTypography] = useState<ProcurementTypography>(() => {
+    if (typeof window === 'undefined') return DEFAULT_PROCUREMENT_TYPOGRAPHY;
+    try {
+      const saved = window.localStorage.getItem(PROCUREMENT_TYPOGRAPHY_KEY);
+      if (!saved) return DEFAULT_PROCUREMENT_TYPOGRAPHY;
+      const parsed = JSON.parse(saved) as Partial<ProcurementTypography>;
+      return {
+        headerSize: Number.isFinite(parsed.headerSize) ? Number(parsed.headerSize) : DEFAULT_PROCUREMENT_TYPOGRAPHY.headerSize,
+        valueSize: Number.isFinite(parsed.valueSize) ? Number(parsed.valueSize) : DEFAULT_PROCUREMENT_TYPOGRAPHY.valueSize,
+      };
+    } catch {
+      return DEFAULT_PROCUREMENT_TYPOGRAPHY;
+    }
+  });
   
   const [supplier, setSupplier] = useState({
     name: '',
@@ -143,6 +168,15 @@ export default function Procurement() {
         values: { ...itemToClone.values }
       });
       setItems(newItems);
+    }
+  };
+
+  const saveTypography = () => {
+    try {
+      window.localStorage.setItem(PROCUREMENT_TYPOGRAPHY_KEY, JSON.stringify(typography));
+      toast({ title: 'Font sizes saved', description: 'Your Procurement table font sizes will be used in future previews and JPG exports.' });
+    } catch {
+      toast({ title: 'Could not save font sizes', description: 'The current sizes will still apply to this document.', variant: 'destructive' });
     }
   };
 
@@ -376,6 +410,51 @@ export default function Procurement() {
               </div>
             </CardContent>
           </Card>
+
+          <Card className="rounded-none border-border shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
+                <Calculator className="w-4 h-4 text-secondary" /> Table Typography
+              </CardTitle>
+              <CardDescription className="text-xs leading-relaxed">
+                Adjust the Item Description, Qty, Price, and Total headings and the text entered below them. Save to keep these sizes for future orders and JPG exports.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className={labelClass}>Headings (px)</Label>
+                  <Input
+                    type="number"
+                    min={6}
+                    max={20}
+                    step={1}
+                    value={typography.headerSize}
+                    onChange={e => setTypography(current => ({ ...current, headerSize: Math.min(20, Math.max(6, Number(e.target.value) || 6)) }))}
+                    className={inputClass}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className={labelClass}>Typed entries (px)</Label>
+                  <Input
+                    type="number"
+                    min={7}
+                    max={24}
+                    step={1}
+                    value={typography.valueSize}
+                    onChange={e => setTypography(current => ({ ...current, valueSize: Math.min(24, Math.max(7, Number(e.target.value) || 7)) }))}
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between gap-3 border-t border-border pt-4">
+                <p className="text-[10px] text-muted-foreground leading-relaxed">Recommended: 8px headings and 10px entries.</p>
+                <Button type="button" onClick={saveTypography} className="rounded-none h-9 px-4 text-[10px] font-bold uppercase tracking-widest">
+                  Save Font Sizes
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Preview Side */}
@@ -491,7 +570,7 @@ export default function Procurement() {
                       {columns.map(col => (
                         <th
                           key={col.id}
-                          style={{ padding: '6px 6px', fontSize: '7px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#475569', textAlign: col.isNumeric ? 'right' : 'left', border: '1px solid #CBD5E1' }}
+                          style={{ padding: '6px 6px', fontSize: `${typography.headerSize}px`, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#475569', textAlign: col.isNumeric ? 'right' : 'left', border: '1px solid #CBD5E1' }}
                           className="group/col relative"
                         >
                           <div style={{ display: 'flex', alignItems: 'center', gap: '3px', justifyContent: col.isNumeric ? 'flex-end' : 'flex-start' }}>
@@ -502,7 +581,7 @@ export default function Procurement() {
                               suppressContentEditableWarning
                               onBlur={e => updateColumnLabel(col.id, e.currentTarget.textContent?.trim() ?? '')}
                               onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); (e.target as HTMLElement).blur(); } }}
-                              style={{ color: '#0F1B2D', fontSize: '7px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', textAlign: col.isNumeric ? 'right' : 'left', outline: 'none', cursor: 'text', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden' }}
+                              style={{ color: '#0F1B2D', fontSize: `${typography.headerSize}px`, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', textAlign: col.isNumeric ? 'right' : 'left', outline: 'none', cursor: 'text', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden' }}
                             >
                               {col.label}
                             </div>
@@ -550,7 +629,7 @@ export default function Procurement() {
                                   maxLength={75000}
                                   rows={2}
                                   aria-label={`Description row ${index + 1}`}
-                                  style={{ color: '#0F1B2D', WebkitTextFillColor: '#0F1B2D', backgroundColor: 'transparent', border: 'none', outline: 'none', resize: 'none', width: '100%', fontSize: '7px', fontFamily: 'inherit', lineHeight: 1.5, padding: 0, overflow: 'hidden', display: 'block' }}
+                                  style={{ color: '#0F1B2D', WebkitTextFillColor: '#0F1B2D', backgroundColor: 'transparent', border: 'none', outline: 'none', resize: 'none', width: '100%', fontSize: `${typography.valueSize}px`, fontFamily: 'inherit', lineHeight: 1.5, padding: 0, overflow: 'hidden', display: 'block' }}
                                 />
                               ) : (
                                 /* Plain <input> with WebkitTextFillColor to prevent browser/Tailwind
@@ -561,7 +640,7 @@ export default function Procurement() {
                                   value={value}
                                   onChange={e => updateItem(item.id, col.id, e.target.value)}
                                   aria-label={`${col.label || 'Field'} row ${index + 1}`}
-                                  style={{ color: '#0F1B2D', WebkitTextFillColor: '#0F1B2D', backgroundColor: 'transparent', border: 'none', outline: 'none', boxShadow: 'none', width: '100%', fontSize: '7px', fontFamily: 'inherit', padding: 0, textAlign: col.isNumeric ? 'right' : 'left', display: 'block' }}
+                                  style={{ color: '#0F1B2D', WebkitTextFillColor: '#0F1B2D', backgroundColor: 'transparent', border: 'none', outline: 'none', boxShadow: 'none', width: '100%', fontSize: `${typography.valueSize}px`, fontFamily: 'inherit', padding: 0, textAlign: col.isNumeric ? 'right' : 'left', display: 'block' }}
                                 />
                               )}
                             </td>
