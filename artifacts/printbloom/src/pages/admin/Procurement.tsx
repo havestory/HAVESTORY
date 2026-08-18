@@ -36,12 +36,14 @@ interface Column {
 interface ProcurementTypography {
   headerSize: number;
   valueSize: number;
+  footerSize: number;
 }
 
 const PROCUREMENT_TYPOGRAPHY_KEY = 'havestory.procurement.typography';
 const DEFAULT_PROCUREMENT_TYPOGRAPHY: ProcurementTypography = {
   headerSize: 8,
   valueSize: 10,
+  footerSize: 9,
 };
 
 export default function Procurement() {
@@ -58,6 +60,7 @@ export default function Procurement() {
       return {
         headerSize: Number.isFinite(parsed.headerSize) ? Number(parsed.headerSize) : DEFAULT_PROCUREMENT_TYPOGRAPHY.headerSize,
         valueSize: Number.isFinite(parsed.valueSize) ? Number(parsed.valueSize) : DEFAULT_PROCUREMENT_TYPOGRAPHY.valueSize,
+        footerSize: Number.isFinite(parsed.footerSize) ? Number(parsed.footerSize) : DEFAULT_PROCUREMENT_TYPOGRAPHY.footerSize,
       };
     } catch {
       return DEFAULT_PROCUREMENT_TYPOGRAPHY;
@@ -417,11 +420,11 @@ export default function Procurement() {
                 <Calculator className="w-4 h-4 text-secondary" /> Table Typography
               </CardTitle>
               <CardDescription className="text-xs leading-relaxed">
-                Adjust the Item Description, Qty, Price, and Total headings and the text entered below them. Save to keep these sizes for future orders and JPG exports.
+                Adjust the table headings, typed entries, and footer text. Save to keep these sizes for future orders and JPG exports.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label className={labelClass}>Headings (px)</Label>
                   <Input
@@ -446,9 +449,21 @@ export default function Procurement() {
                     className={inputClass}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label className={labelClass}>Footer text (px)</Label>
+                  <Input
+                    type="number"
+                    min={7}
+                    max={18}
+                    step={1}
+                    value={typography.footerSize}
+                    onChange={e => setTypography(current => ({ ...current, footerSize: Math.min(18, Math.max(7, Number(e.target.value) || 7)) }))}
+                    className={inputClass}
+                  />
+                </div>
               </div>
               <div className="flex items-center justify-between gap-3 border-t border-border pt-4">
-                <p className="text-[10px] text-muted-foreground leading-relaxed">Recommended: 8px headings and 10px entries.</p>
+                <p className="text-[10px] text-muted-foreground leading-relaxed">Recommended: 8px headings, 10px entries, and 9px footer text.</p>
                 <Button type="button" onClick={saveTypography} className="rounded-none h-9 px-4 text-[10px] font-bold uppercase tracking-widest">
                   Save Font Sizes
                 </Button>
@@ -687,14 +702,14 @@ export default function Procurement() {
                   <div style={{ maxWidth: '55%' }}>
                     {orderInfo.note && (
                       <>
-                        <p style={{ fontSize: '8.5px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#94A3B8', marginBottom: '4px' }}>Notes</p>
-                        <p style={{ fontSize: '11px', color: '#475569', lineHeight: 1.5, fontStyle: 'italic' }}>"{orderInfo.note}"</p>
+                        <p style={{ fontSize: `${typography.footerSize}px`, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#94A3B8', marginBottom: '4px' }}>Notes</p>
+                        <p style={{ fontSize: `${typography.footerSize}px`, color: '#475569', lineHeight: 1.5, fontStyle: 'italic' }}>"{orderInfo.note}"</p>
                       </>
                     )}
                   </div>
                   {/* Grand Total box */}
                   <div className="procurement-grand-total-box" style={{ minWidth: '180px', border: '1.5px solid #0F1B2D', padding: '12px 16px' }}>
-                    <p style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#000000', marginBottom: '8px' }}>Grand Total</p>
+                    <p style={{ fontSize: `${typography.footerSize}px`, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#000000', marginBottom: '8px' }}>Grand Total</p>
                     {grandTotal > 0 ? (
                       <p style={{ fontSize: '22px', fontWeight: 900, color: '#000000', letterSpacing: '-0.02em', lineHeight: 1 }}>
                         Rs. {grandTotal.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
@@ -706,15 +721,15 @@ export default function Procurement() {
                 </div>
 
                 <div className="procurement-handwriting-panel" style={{ marginTop: '20px', border: '1px dashed #CBD5E1', padding: '14px 16px', backgroundColor: '#FAFBFC' }}>
-                  <p style={{ fontSize: '8.5px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#64748B', marginBottom: '4px' }}>Shop Notes</p>
-                  <p style={{ fontSize: '9px', color: '#94A3B8', marginBottom: '8px' }}>Additional notes for handwriting</p>
+                  <p style={{ fontSize: `${typography.footerSize}px`, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#64748B', marginBottom: '4px' }}>Shop Notes</p>
+                  <p style={{ fontSize: `${typography.footerSize}px`, color: '#94A3B8', marginBottom: '8px' }}>Additional notes for handwriting</p>
                   {renderWritingLines(4, 'procurement-ruled-area--notes')}
                 </div>
 
                 {/* Footer bar */}
                 <div style={{ marginTop: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
                   <div style={{ height: '1px', flex: 1, backgroundColor: '#E2E8F0' }} />
-                  <p style={{ fontSize: '7.5px', fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: '#CBD5E1' }}>Powered by HAVESTORY Studio OS</p>
+                  <p style={{ fontSize: `${Math.max(7, typography.footerSize - 1)}px`, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: '#CBD5E1' }}>Powered by HAVESTORY Studio OS</p>
                   <div style={{ height: '1px', flex: 1, backgroundColor: '#E2E8F0' }} />
                 </div>
               </div>
