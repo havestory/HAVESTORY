@@ -124,6 +124,36 @@ export async function captureElement(
           imgEl.style.maxWidth = "none";
         });
 
+        // Tailwind v4 can emit oklch/oklab paint values. html2canvas versions
+        // that do not understand those functions throw while parsing the clone.
+        // Copy browser-resolved RGB paint values inline so the clone remains
+        // visually identical without asking html2canvas to parse the source
+        // color function.
+        const originalNodes = [el, ...Array.from(el.querySelectorAll<HTMLElement>("*"))];
+        const clonedNodes = [clonedEl, ...Array.from(clonedEl.querySelectorAll<HTMLElement>("*"))];
+        clonedNodes.forEach((node, index) => {
+          const source = originalNodes[index];
+          if (!source) return;
+          try {
+            const computed = window.getComputedStyle(source);
+            [
+              "color", "backgroundColor", "borderTopColor", "borderRightColor",
+              "borderBottomColor", "borderLeftColor", "outlineColor",
+              "textDecorationColor", "columnRuleColor", "caretColor", "fill", "stroke",
+            ].forEach(property => {
+              const value = computed.getPropertyValue(property);
+              if (value) node.style.setProperty(property, value, "important");
+            });
+            ["backgroundImage", "boxShadow", "textShadow"].forEach(property => {
+              const value = computed.getPropertyValue(property);
+              if (value && !/oklch|oklab/i.test(value)) node.style.setProperty(property, value, "important");
+              else if (/oklch|oklab/i.test(value)) node.style.setProperty(property, "none", "important");
+            });
+          } catch {
+            // A single inaccessible style must not abort the full document export.
+          }
+        });
+
         // ── Layer 2: stylesheet inside the clone ──────────────────────────
         const st = _doc.createElement("style");
         st.textContent = PREFLIGHT_CSS;

@@ -194,10 +194,15 @@ export default function Procurement() {
         overflowVisible: true,
       });
 
+      const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.92));
+      if (!blob) throw new Error('The browser could not encode the generated canvas as a JPG.');
+
+      const objectUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.download = `${orderInfo.orderNo}_${supplier.name || 'Order'}.jpg`;
-      link.href = canvas.toDataURL('image/jpeg', 0.9);
+      link.href = objectUrl;
       link.click();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
 
       toast({ title: "Success", description: "Order request downloaded as JPG." });
     } catch (error) {

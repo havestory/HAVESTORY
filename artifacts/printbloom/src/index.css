@@ -2886,6 +2886,14 @@ h1, h2, h3 { font-weight: 700; }
   border: 0 !important;
   outline: 0 !important;
   box-shadow: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.procurement-document.is-capturing .procurement-cell-field input {
+  height: 17px !important;
 }
 
 .procurement-document.is-capturing .procurement-handwriting-panel {
