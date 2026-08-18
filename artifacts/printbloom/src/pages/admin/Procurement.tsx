@@ -44,22 +44,23 @@ export default function Procurement() {
     contact: ''
   });
 
+  // Keep this blank until the Settings query resolves so no hardcoded business
+  // address or contact details flash before the saved values arrive.
   const [business, setBusiness] = useState({
-    name: 'HAVESTORY',
-    address: 'No. 123, Studio Lane, Colombo, Sri Lanka',
-    contact: '+94 77 123 4567 / info@havestory.lk'
+    name: '',
+    address: '',
+    contact: ''
   });
 
   useEffect(() => {
-    if (settings) {
-      const s = settings as any;
-      const contactParts = [s.phone, s.email].filter(Boolean);
-      setBusiness({
-        name: s.businessName || 'HAVESTORY',
-        address: s.address || 'No. 123, Studio Lane, Colombo, Sri Lanka',
-        contact: contactParts.length > 0 ? contactParts.join(' / ') : '+94 77 123 4567 / info@havestory.lk'
-      });
-    }
+    if (!settings) return;
+    const s = settings as any;
+    const contactParts = [s.phone, s.email].filter((value: unknown): value is string => Boolean(value));
+    setBusiness({
+      name: typeof s.businessName === 'string' ? s.businessName : '',
+      address: typeof s.address === 'string' ? s.address : '',
+      contact: contactParts.join(' / ')
+    });
   }, [settings]);
 
   const [orderInfo, setOrderInfo] = useState({
