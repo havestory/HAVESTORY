@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
@@ -311,7 +312,13 @@ export default function Procurement() {
               </div>
               <div className="space-y-2">
                 <Label className={labelClass}>Address</Label>
-                <Input value={supplier.address} onChange={e => setSupplier({...supplier, address: e.target.value})} placeholder="123, Main St, Pettah" className={inputClass} />
+                <Textarea
+                  value={supplier.address}
+                  onChange={e => setSupplier({...supplier, address: e.target.value})}
+                  placeholder="123, Main St, Pettah"
+                  rows={2}
+                  className={`${inputClass} h-auto min-h-[72px] resize-y py-2 leading-relaxed`}
+                />
               </div>
               <div className="space-y-2">
                 <Label className={labelClass}>Contact Info</Label>
@@ -421,10 +428,10 @@ export default function Procurement() {
                     </>
                   )}
                 </div>
-                <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                <div className="procurement-order-meta" style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                   {/* ORDER REQUEST badge */}
-                  <div style={{ display: 'inline-block', backgroundColor: '#0F1B2D', padding: '6px 14px', marginBottom: '14px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#C9A84C' }}>Order Request</span>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '28px', backgroundColor: '#0F1B2D', padding: '6px 14px', marginBottom: '14px', lineHeight: 1 }}>
+                    <span style={{ fontSize: '11px', lineHeight: 1, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#C9A84C' }}>Order Request</span>
                   </div>
                   <div style={{ fontSize: '10.5px', lineHeight: 1.8, color: '#64748B' }}>
                     <p><span style={{ fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: '6px', fontSize: '9px' }}>No:</span><span style={{ color: '#0F1B2D', fontWeight: 600 }}>{orderInfo.orderNo || '—'}</span></p>
@@ -601,14 +608,14 @@ export default function Procurement() {
                     )}
                   </div>
                   {/* Grand Total box */}
-                  <div style={{ minWidth: '180px', border: '1.5px solid #0F1B2D', padding: '12px 16px' }}>
-                    <p style={{ fontSize: '8px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#94A3B8', marginBottom: '6px' }}>Grand Total</p>
+                  <div className="procurement-grand-total-box" style={{ minWidth: '180px', border: '1.5px solid #0F1B2D', padding: '12px 16px' }}>
+                    <p style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#000000', marginBottom: '8px' }}>Grand Total</p>
                     {grandTotal > 0 ? (
-                      <p style={{ fontSize: '20px', fontWeight: 800, color: '#0F1B2D', letterSpacing: '-0.02em', lineHeight: 1 }}>
+                      <p style={{ fontSize: '22px', fontWeight: 900, color: '#000000', letterSpacing: '-0.02em', lineHeight: 1 }}>
                         Rs. {grandTotal.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
                       </p>
                     ) : (
-                      <div className="procurement-grand-total-line" aria-label="Grand total handwriting line" style={{ marginTop: '8px' }} />
+                      <div className="procurement-grand-total-line" aria-label="Grand total handwriting line" style={{ marginTop: '10px' }} />
                     )}
                   </div>
                 </div>

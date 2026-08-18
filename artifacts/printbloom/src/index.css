@@ -2774,6 +2774,13 @@ h1, h2, h3 { font-weight: 700; }
   min-width: 0;
 }
 
+.procurement-order-meta {
+  align-self: start;
+  justify-self: end;
+  min-width: 190px;
+  transform: translateY(0);
+}
+
 .procurement-brand-mark {
   letter-spacing: -0.025em;
   overflow-wrap: anywhere;
@@ -2876,9 +2883,13 @@ h1, h2, h3 { font-weight: 700; }
 }
 
 .procurement-grand-total-line {
-  width: 108px;
-  height: 22px;
-  border-bottom: 2px solid #CBD5E1;
+  width: 168px;
+  height: 24px;
+  border-bottom: 2px solid #000000;
+}
+
+.procurement-grand-total-box {
+  color: #000000;
 }
 
 .procurement-ruled-area--header,
@@ -2963,6 +2974,7 @@ h1, h2, h3 { font-weight: 700; }
 
 .procurement-document--a5 .procurement-supplier-line {
   min-height: 13px;
+  white-space: pre-wrap;
 }
 
 .procurement-document--a5 .procurement-cell-field input.procurement-item-description {
@@ -2982,8 +2994,8 @@ h1, h2, h3 { font-weight: 700; }
 }
 
 .procurement-document--a5 .procurement-grand-total-line {
-  width: 78px;
-  height: 18px;
+  width: 132px;
+  height: 20px;
 }
 
 .procurement-document--a5 .procurement-field-line--brand {
