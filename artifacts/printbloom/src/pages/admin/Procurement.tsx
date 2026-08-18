@@ -431,32 +431,36 @@ export default function Procurement() {
                           style={{ width: col.id === 'desc' ? '42%' : undefined, padding: '10px 8px', fontSize: '9px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A84C', textAlign: col.isNumeric ? 'right' : 'left' }}
                           className={`group/col relative ${col.id === 'desc' ? 'min-w-[148px]' : ''}`}
                         >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: col.isNumeric ? 'flex-end' : 'flex-start' }}>
-                            {/* Plain <input> — avoids shadcn default text-color/shadow/border CSS vars
-                                which can render invisible on the dark navy header background */}
-                            <input
-                              aria-label={`${col.label || (col.id === 'desc' ? 'Item Description' : 'Column')} header`}
-                              value={col.label}
-                              placeholder={col.id === 'desc' ? 'Item Description' : 'New Column'}
-                              onChange={e => updateColumnLabel(col.id, e.target.value)}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: col.isNumeric ? 'flex-end' : 'flex-start', flex: 1 }}>
+                            {/* contentEditable div — guaranteed visible gold text on any background.
+                                <input> elements receive -webkit-text-fill-color from browser/Tailwind
+                                CSS which can override the 'color' property silently on dark backgrounds.
+                                A plain contentEditable div has no such quirk. */}
+                            <div
+                              role="textbox"
+                              aria-label={`${col.label || 'Column'} header`}
+                              contentEditable
+                              suppressContentEditableWarning
+                              onBlur={e => updateColumnLabel(col.id, e.currentTarget.textContent?.trim() ?? '')}
+                              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); (e.target as HTMLElement).blur(); } }}
                               style={{
                                 color: '#C9A84C',
-                                backgroundColor: 'transparent',
-                                border: 'none',
-                                outline: 'none',
-                                boxShadow: 'none',
-                                padding: 0,
-                                margin: 0,
-                                width: '100%',
-                                minWidth: 0,
                                 fontSize: '9px',
                                 fontWeight: 700,
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.14em',
                                 textAlign: col.isNumeric ? 'right' : 'left',
-                                fontFamily: 'inherit',
+                                outline: 'none',
+                                cursor: 'text',
+                                minWidth: '20px',
+                                flex: 1,
+                                userSelect: 'text',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
                               }}
-                            />
+                            >
+                              {col.label}
+                            </div>
                             <div className="flex shrink-0 items-center gap-1 opacity-0 group-hover/col:opacity-100 no-print-capture transition-opacity">
                               <button type="button" aria-label={`Duplicate ${col.label || 'column'}`} onClick={() => duplicateColumn(col.id)} style={{ color: '#C9A84C', opacity: 0.6 }}>
                                 <Copy className="w-2.5 h-2.5" />
