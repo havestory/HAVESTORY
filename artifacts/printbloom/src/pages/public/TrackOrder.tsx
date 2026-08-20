@@ -1,27 +1,78 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTrackOrder } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Search, Package, Truck, CheckCircle, Clock } from 'lucide-react';
+import { AlertCircle, CheckCircle, CheckCircle2, Clock, CreditCard, FileCheck, Package, Search, Truck, UploadCloud } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function TrackOrder() {
   const [orderId, setOrderId] = useState('');
   const [searchId, setSearchId] = useState('');
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [paymentActionLoading, setPaymentActionLoading] = useState(false);
+  const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
   
-  // Use enabled: false initially, trigger refetch manually or use queryKey based on searchId
-  const { data: tracking, isLoading, isError, error } = useTrackOrder(searchId, {
+  // Allow the order link from checkout/admin to open this page already populated.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const linkedOrder = params.get('id') || params.get('order');
+    if (linkedOrder?.trim()) setSearchId(linkedOrder.trim());
+  }, []);
+
+  const { data: tracking, isLoading, isError, error, refetch } = useTrackOrder(searchId, {
     query: {
       enabled: !!searchId,
       retry: false
     } as any
   });
 
+  useEffect(() => {
+    if (searchId) setOrderId(searchId);
+  }, [searchId]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (orderId.trim()) {
+      setPaymentMessage(null);
       setSearchId(orderId.trim());
+    }
+  };
+
+  const uploadPaymentProof = async () => {
+    if (!tracking || !proofFile) return;
+    setPaymentActionLoading(true);
+    setPaymentMessage(null);
+    try {
+      const body = new FormData();
+      body.append('file', proofFile);
+      const response = await fetch(`/api/orders/track/${encodeURIComponent(tracking.orderId)}/payment-proof`, { method: 'POST', body });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Could not upload payment proof');
+      setProofFile(null);
+      setPaymentMessage('Payment proof uploaded. The studio will review it shortly.');
+      await refetch();
+    } catch (error) {
+      setPaymentMessage(error instanceof Error ? error.message : 'Could not upload payment proof');
+    } finally {
+      setPaymentActionLoading(false);
+    }
+  };
+
+  const confirmPayment = async () => {
+    if (!tracking) return;
+    setPaymentActionLoading(true);
+    setPaymentMessage(null);
+    try {
+      const response = await fetch(`/api/orders/track/${encodeURIComponent(tracking.orderId)}/payment-confirm`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Could not confirm payment');
+      setPaymentMessage('Payment confirmation sent. Your order will move forward after studio approval.');
+      await refetch();
+    } catch (error) {
+      setPaymentMessage(error instanceof Error ? error.message : 'Could not confirm payment');
+    } finally {
+      setPaymentActionLoading(false);
     }
   };
 
@@ -164,6 +215,50 @@ export default function TrackOrder() {
                 </div>
               </CardContent>
             </Card>
+
+            {(() => {
+              const payment = tracking as any;
+              const method = String(payment.paymentMethod || 'bank_transfer');
+              const requiresPayment = method !== 'cod';
+              const proofStatus = String(payment.paymentProofStatus || 'pending');
+              const paymentStatus = String(payment.paymentStatus || 'pending');
+              return requiresPayment ? (
+                <Card className="hs-track-card mb-6">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between gap-4 mb-4">
+                      <div>
+                        <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-1">Payment confirmation</p>
+                        <h3 className="font-serif text-xl">{method === 'full_payment' ? 'Full payment' : 'Bank transfer / deposit'}</h3>
+                      </div>
+                      <CreditCard className="h-5 w-5 text-primary shrink-0" />
+                    </div>
+                    <div className="grid gap-2 text-sm mb-5">
+                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Amount recorded</span><strong>Rs. {Number(payment.paymentAmount || 0).toLocaleString('en-LK')}</strong></div>
+                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Payment status</span><strong className="capitalize">{paymentStatus.replaceAll('_', ' ')}</strong></div>
+                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Proof status</span><strong className="capitalize">{proofStatus.replaceAll('_', ' ')}</strong></div>
+                    </div>
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 mb-5">
+                      <div className="flex gap-2"><AlertCircle className="h-4 w-4 mt-0.5 shrink-0" /><p>After payment, upload a JPG, PNG, or PDF proof and press confirm payment. Uploaded proof is retained for 14 days and then permanently deleted.</p></div>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <label className="flex min-h-12 cursor-pointer items-center gap-2 rounded-xl border border-border px-4 py-3 text-sm font-semibold hover:bg-muted/40">
+                        <UploadCloud className="h-4 w-4 text-primary" />
+                        <span className="min-w-0 flex-1 truncate">{proofFile?.name || 'Choose payment proof'}</span>
+                        <input type="file" accept="image/jpeg,image/png,application/pdf" className="sr-only" onChange={(event) => setProofFile(event.target.files?.[0] || null)} />
+                      </label>
+                      <Button type="button" onClick={uploadPaymentProof} disabled={!proofFile || paymentActionLoading} className="h-12 rounded-xl">
+                        <FileCheck className="h-4 w-4 mr-2" /> Upload proof
+                      </Button>
+                    </div>
+                    <Button type="button" variant="outline" onClick={confirmPayment} disabled={paymentActionLoading || paymentStatus === 'customer_confirmed' || paymentStatus === 'approved'} className="mt-3 w-full h-12 rounded-xl">
+                      <CheckCircle2 className="h-4 w-4 mr-2" /> {paymentStatus === 'customer_confirmed' || paymentStatus === 'approved' ? 'Payment confirmation sent' : 'I have paid — confirm payment'}
+                    </Button>
+                    {paymentMessage && <p className="mt-3 text-sm text-muted-foreground">{paymentMessage}</p>}
+                    {payment.expiresAt && <p className="mt-3 text-xs text-muted-foreground">Proof expiry: {format(new Date(payment.expiresAt), 'MMMM d, yyyy')}</p>}
+                  </CardContent>
+                </Card>
+              ) : null;
+            })()}
 
             {(tracking.onlineDeliveryLinks?.length > 0 || tracking.invoice) && (
               <div className="grid sm:grid-cols-2 gap-6">

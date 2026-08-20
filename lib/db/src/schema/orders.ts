@@ -27,6 +27,15 @@ export const ordersTable = pgTable("orders", {
   paymentProofUrl: text("payment_proof_url"),
   proofFileUrl: text("proof_file_url"),
   proofFileName: text("proof_file_name"),
+  paymentMethod: text("payment_method").notNull().default("bank_transfer"),
+  paymentStatus: text("payment_status").notNull().default("pending"),
+  paymentAmount: integer("payment_amount").notNull().default(0),
+  paymentProofStatus: text("payment_proof_status").notNull().default("not_uploaded"),
+  paymentProofUploadedAt: timestamp("payment_proof_uploaded_at"),
+  paymentProofExpiresAt: timestamp("payment_proof_expires_at"),
+  paymentApprovedAt: timestamp("payment_approved_at"),
+  paymentRejectionReason: text("payment_rejection_reason"),
+  customerPaymentConfirmedAt: timestamp("customer_payment_confirmed_at"),
   serviceTypeId: integer("service_type_id"),
   // Optional fields used by the admin New Custom Project form. Nullable so
   // existing orders are unaffected. dueDate/startDate are stored as ISO date

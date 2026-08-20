@@ -165,6 +165,7 @@ router.post("/", async (req, res) => {
       orderType = "standard", items = [], designLinks = [], attachments = [],
       notes, shippingMethod, serviceTypeId,
       dueDate, startDate, priority, advancePaid, tags,
+      paymentMethod = "bank_transfer", paymentAmount = 0,
       // couponCode: validated server-side; discountAmount is only used for
       // admin-created orders (when the caller is authenticated as admin).
       couponCode,
@@ -309,6 +310,10 @@ router.post("/", async (req, res) => {
           discountAmount,
           advancePaid: Number.isFinite(Number(advancePaid)) ? Math.max(0, Math.round(Number(advancePaid))) : 0,
           tags: JSON.stringify(Array.isArray(tags) ? tags : []),
+          paymentMethod: ["bank_transfer", "full_payment", "cod"].includes(String(paymentMethod)) ? String(paymentMethod) : "bank_transfer",
+          paymentAmount: Number.isFinite(Number(paymentAmount)) ? Math.max(0, Math.round(Number(paymentAmount))) : 0,
+          paymentStatus: String(paymentMethod) === "cod" ? "cod_pending" : "pending",
+          paymentProofStatus: "not_uploaded",
         }).returning();
       });
     } catch (txErr: any) {
@@ -679,6 +684,15 @@ router.get("/track/:orderId", async (req, res) => {
       paymentProofUrl: order.paymentProofUrl,
       proofFileUrl: order.proofFileUrl,
       proofFileName: order.proofFileName,
+      paymentMethod: order.paymentMethod,
+      paymentStatus: order.paymentStatus,
+      paymentAmount: order.paymentAmount,
+      paymentProofStatus: order.paymentProofStatus,
+      paymentProofUploadedAt: order.paymentProofUploadedAt?.toISOString?.() ?? order.paymentProofUploadedAt,
+      paymentProofExpiresAt: order.paymentProofExpiresAt?.toISOString?.() ?? order.paymentProofExpiresAt,
+      paymentApprovedAt: order.paymentApprovedAt?.toISOString?.() ?? order.paymentApprovedAt,
+      paymentRejectionReason: order.paymentRejectionReason,
+      customerPaymentConfirmedAt: (order as any).customerPaymentConfirmedAt?.toISOString?.() ?? (order as any).customerPaymentConfirmedAt,
       attachments: parseArr(order.attachments),
       invoice: invoice ? {
         invoiceNumber: invoice.invoiceNumber,
@@ -734,14 +748,46 @@ router.post("/track/:orderId/payment-proof", upload.single("file"), async (req, 
     if (!order) return res.status(404).json({ error: "Order not found" });
 
     const { url: fileUrl } = await uploadToCloudinary(req.file.buffer, "havestory/payment-proofs", req.file.originalname);
+    const uploadedAt = new Date();
+    const expiresAt = new Date(uploadedAt.getTime() + 14 * 24 * 60 * 60 * 1000);
     await db.update(ordersTable)
-      .set({ paymentProofUrl: fileUrl, updatedAt: new Date() })
+      .set({
+        paymentProofUrl: fileUrl,
+        paymentProofStatus: "uploaded",
+        paymentProofUploadedAt: uploadedAt,
+        paymentProofExpiresAt: expiresAt,
+        paymentRejectionReason: null,
+        updatedAt: new Date(),
+      })
       .where(eq(ordersTable.orderId, orderId));
 
-    res.json({ url: fileUrl });
+    res.json({ url: fileUrl, status: "uploaded", expiresAt: expiresAt.toISOString() });
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to upload payment proof" });
+  }
+});
+
+// Customer confirms that the transfer/payment has been made. Admin approval
+// remains required before the order moves into production.
+router.post("/track/:orderId/payment-confirm", async (req, res) => {
+  try {
+    const orderId = String(req.params.orderId);
+    const [order] = await db.select().from(ordersTable).where(eq(ordersTable.orderId, orderId));
+    if (!order) return res.status(404).json({ error: "Order not found" });
+    if (order.paymentMethod === "cod") {
+      return res.status(400).json({ error: "COD orders do not require payment confirmation" });
+    }
+    const [updated] = await db.update(ordersTable).set({
+      paymentStatus: "customer_confirmed",
+      customerPaymentConfirmedAt: new Date(),
+      paymentProofStatus: order.paymentProofUrl ? "uploaded" : order.paymentProofStatus,
+      updatedAt: new Date(),
+    } as any).where(eq(ordersTable.orderId, orderId)).returning();
+    res.json({ ok: true, order: serializeOrder(updated) });
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to confirm payment" });
   }
 });
 
@@ -806,6 +852,33 @@ router.delete("/:id/online-files", async (req, res) => {
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to remove file" });
+  }
+});
+
+// Admin approves or rejects a customer payment proof. Approval is separate from
+// upload so no order is processed until the business reviews the transfer.
+router.post("/:id/payment-review", requireAdmin, async (req, res) => {
+  try {
+    const id = String(req.params.id);
+    const action = String(req.body?.action || "");
+    if (!["approve", "reject"].includes(action)) return res.status(400).json({ error: "Action must be approve or reject" });
+    const idNum = parseInt(id);
+    const [order] = isNaN(idNum)
+      ? await db.select().from(ordersTable).where(eq(ordersTable.orderId, id))
+      : await db.select().from(ordersTable).where(eq(ordersTable.id, idNum));
+    if (!order) return res.status(404).json({ error: "Order not found" });
+    const updateData: any = {
+      paymentProofStatus: action === "approve" ? "approved" : "rejected",
+      paymentStatus: action === "approve" ? "paid" : "payment_action_required",
+      paymentApprovedAt: action === "approve" ? new Date() : null,
+      paymentRejectionReason: action === "reject" ? String(req.body?.reason || "Payment proof needs review") : null,
+      updatedAt: new Date(),
+    };
+    const [updated] = await db.update(ordersTable).set(updateData).where(eq(ordersTable.id, order.id)).returning();
+    res.json(serializeOrder(updated));
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to review payment proof" });
   }
 });
 

@@ -183,6 +183,7 @@ export default function Orders() {
   const [manageOpen, setManageOpen] = useState(false);
   const [manageForm, setManageForm] = useState<ManageForm>(EMPTY_MANAGE_FORM);
   const [sections, setSections] = useState({ status: true, customer: true, project: true, files: true, payment: true, delivery: true });
+  const [paymentReviewLoading, setPaymentReviewLoading] = useState<'approve' | 'reject' | null>(null);
 
   const { data: orders, isLoading, isError, refetch } = useListOrders(statusFilter !== 'all' ? { status: statusFilter } : {});
   const { data: clients = [], isLoading: clientsLoading } = useListClients();
@@ -413,6 +414,38 @@ export default function Orders() {
     }
   };
 
+  const reviewPayment = async (action: 'approve' | 'reject') => {
+    if (!manageOrder) return;
+    const reason = action === 'reject' ? window.prompt('Reason for rejecting this payment proof:', 'Please upload a clearer payment slip.') : '';
+    if (action === 'reject' && reason === null) return;
+    setPaymentReviewLoading(action);
+    try {
+      const response = await fetch(`/api/orders/${manageOrder.id}/payment-review`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, reason: reason || undefined }),
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(payload?.error || 'Payment review failed');
+      setManageOrder((current) => current ? { ...current, ...payload } : payload);
+      if (action === 'approve') {
+        updateOrder.mutate({ id: String(manageOrder.id), data: { status: 'processing' } as any }, {
+          onSuccess: () => {
+            setManageOrder((current) => current ? { ...current, status: 'processing' } : current);
+            void refetch();
+          },
+        });
+      } else {
+        void refetch();
+      }
+      toast({ title: action === 'approve' ? 'Payment approved' : 'Payment proof rejected', description: action === 'approve' ? 'The order is now marked for processing.' : 'The customer can upload a new proof.' });
+    } catch (error) {
+      toast({ title: 'Payment review failed', description: error instanceof Error ? error.message : 'Could not update payment review.', variant: 'destructive' });
+    } finally {
+      setPaymentReviewLoading(null);
+    }
+  };
+
   const isCreating = createOrder.isPending || createInvoice.isPending || createClient.isPending;
 
   return (
@@ -544,7 +577,17 @@ export default function Orders() {
 
             <SectionCard title="Design / Reference Files" icon={FolderOpen} open={sections.files} onToggle={() => setSections((value) => ({ ...value, files: !value.files }))}><div className="space-y-4"><div><div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">Customer-uploaded files</div><div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-400"><FolderOpen className="mx-auto mb-2 h-6 w-6 text-slate-300" />{Array.isArray(manageOrder.attachments) && manageOrder.attachments.length > 0 ? `${manageOrder.attachments.length} file(s) attached` : 'No files uploaded by customer yet'}</div></div><div><div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">Admin proof / design file</div><label htmlFor="order-proof-upload" className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-violet-200 bg-violet-50/40 px-4 py-5 text-sm font-semibold text-violet-600 transition hover:bg-violet-50"><UploadCloud className="h-5 w-5" /> {manageOrder.proofFileName || 'Upload Proof / Design File'}</label><input id="order-proof-upload" type="file" className="sr-only" onChange={(event) => void uploadProofFile(event.target.files?.[0])} /></div></div></SectionCard>
 
-            <SectionCard title="Payment Proof" icon={CreditCard} open={sections.payment} onToggle={() => setSections((value) => ({ ...value, payment: !value.payment }))}><div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-400">{manageOrder.paymentProofUrl ? <a href={manageOrder.paymentProofUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 font-semibold text-violet-600 hover:underline"><ExternalLink className="h-4 w-4" /> View payment proof</a> : <><CreditCard className="mx-auto mb-2 h-6 w-6 text-slate-300" />No payment proof yet. Waiting for customer to upload.</>}</div></SectionCard>
+            <SectionCard title="Payment Proof & Approval" icon={CreditCard} open={sections.payment} onToggle={() => setSections((value) => ({ ...value, payment: !value.payment }))}>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  <div className="rounded-2xl bg-slate-50 p-3"><div className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Method</div><div className="mt-1 text-sm font-bold text-slate-700">{String(manageOrder.paymentMethod || '—').replace('_', ' ')}</div></div>
+                  <div className="rounded-2xl bg-slate-50 p-3"><div className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Payment</div><div className="mt-1 text-sm font-bold text-slate-700">{String(manageOrder.paymentStatus || 'pending').replace('_', ' ')}</div></div>
+                  <div className="rounded-2xl bg-slate-50 p-3"><div className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Proof</div><div className="mt-1 text-sm font-bold text-slate-700">{String(manageOrder.paymentProofStatus || 'not uploaded').replace('_', ' ')}</div></div>
+                  <div className="rounded-2xl bg-slate-50 p-3"><div className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Amount</div><div className="mt-1 text-sm font-bold text-slate-700">{money(manageOrder.paymentAmount || orderTotalForRow(manageOrder))}</div></div>
+                </div>
+                {manageOrder.paymentProofUrl ? <div className="flex flex-col gap-3 rounded-2xl border border-violet-100 bg-violet-50/50 p-4 sm:flex-row sm:items-center sm:justify-between"><div><a href={manageOrder.paymentProofUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 font-semibold text-violet-700 hover:underline"><ExternalLink className="h-4 w-4" /> View customer payment proof</a>{manageOrder.paymentProofExpiresAt && <div className="mt-1 text-xs text-violet-500">Proof retention ends {safeDate(manageOrder.paymentProofExpiresAt)}.</div>}</div><div className="flex gap-2"><Button type="button" onClick={() => void reviewPayment('reject')} disabled={paymentReviewLoading !== null} variant="outline" className="h-9 rounded-full border-rose-200 px-4 text-xs font-bold text-rose-600">{paymentReviewLoading === 'reject' ? 'Rejecting…' : 'Reject'}</Button><Button type="button" onClick={() => void reviewPayment('approve')} disabled={paymentReviewLoading !== null} className="h-9 rounded-full bg-emerald-600 px-4 text-xs font-bold text-white hover:bg-emerald-700">{paymentReviewLoading === 'approve' ? 'Approving…' : 'Approve & Process'}</Button></div></div> : <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-400"><CreditCard className="mx-auto mb-2 h-6 w-6 text-slate-300" />No customer payment proof yet. The customer must upload a slip from the tracking link.</div>}
+              </div>
+            </SectionCard>
 
             <SectionCard title="Delivery & Timeline" icon={BadgeDollarSign} open={sections.delivery} onToggle={() => setSections((value) => ({ ...value, delivery: !value.delivery }))}><div className="grid grid-cols-1 gap-4 sm:grid-cols-2"><div className="space-y-1.5"><Label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Delivery method</Label><select value={manageForm.deliveryMethod} onChange={(event) => setManageForm((form) => ({ ...form, deliveryMethod: event.target.value }))} className="h-11 w-full rounded-full border border-slate-200 bg-white px-4 text-sm text-slate-700"><option value="">Not selected</option><option value="pickup">Pickup</option><option value="courier">Courier</option><option value="sl_post">Sri Lanka Post</option></select></div><div className="space-y-1.5"><Label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Due date</Label><Input type="date" value={manageForm.dueDate} onChange={(event) => setManageForm((form) => ({ ...form, dueDate: event.target.value }))} className="h-11 rounded-full border-slate-200" /></div><div className="space-y-1.5"><Label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Courier name</Label><Input value={manageForm.courierName} onChange={(event) => setManageForm((form) => ({ ...form, courierName: event.target.value }))} className="h-11 rounded-full border-slate-200" /></div><div className="space-y-1.5"><Label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Tracking number</Label><Input value={manageForm.courierTrackingNumber} onChange={(event) => setManageForm((form) => ({ ...form, courierTrackingNumber: event.target.value }))} className="h-11 rounded-full border-slate-200" /></div></div></SectionCard>
           </div>}
