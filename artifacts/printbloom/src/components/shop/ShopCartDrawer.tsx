@@ -11,10 +11,8 @@ export function ShopCartDrawer({ trigger }: { trigger: ReactNode }) {
   const [, navigate] = useLocation();
 
   const beginCheckout = () => {
-    try { sessionStorage.setItem("hs-open-checkout", "1"); } catch { /* optional */ }
-    window.dispatchEvent(new CustomEvent("hs:checkout-request"));
     setOpen(false);
-    navigate("/store");
+    navigate("/checkout");
   };
 
   return (

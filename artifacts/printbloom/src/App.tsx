@@ -38,6 +38,7 @@ function lazyWithRecovery<T extends { default: ComponentType<any> }>(loader: () 
 }
 
 const Store = lazyWithRecovery(() => import('./pages/public/Store'));
+const Checkout = lazyWithRecovery(() => import('./pages/public/Checkout'));
 const ProductDetail = lazyWithRecovery(() => import('./pages/public/ProductDetail'));
 const Services = lazyWithRecovery(() => import('./pages/public/Services'));
 const Portfolio = lazyWithRecovery(() => import('./pages/public/Portfolio'));
@@ -133,6 +134,7 @@ function PublicRoutes() {
         <Switch>
           <Route path="/"                   component={Home} />
           <Route path="/store"              component={Store} />
+          <Route path="/checkout"            component={Checkout} />
           <Route path="/store/:id"          component={ProductDetail} />
           <Route path="/frames-and-prints"  component={Store} />
           <Route path="/services"           component={Services} />

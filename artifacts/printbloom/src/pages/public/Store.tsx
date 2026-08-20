@@ -1,25 +1,15 @@
-import { useEffect, useState } from 'react';
-import { useListProducts, useListCategories, useCreateOrder, useListPortfolio, useGetSettings } from '@workspace/api-client-react';
+import { useState } from 'react';
+import { useListProducts, useListCategories, useListPortfolio, useGetSettings } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingCart, Search, CheckCircle2, ArrowRight, Tag, X, Sparkles, ShieldCheck, Ruler, Heart, MessageCircle, Eye, SlidersHorizontal, ArrowUpRight } from 'lucide-react';
+import { ShoppingCart, Search, ArrowRight, Sparkles, ShieldCheck, Ruler, Heart, MessageCircle, Eye, SlidersHorizontal, ArrowUpRight } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { useShopCart } from '@/lib/shop-cart';
 import { ShopCartDrawer } from '@/components/shop/ShopCartDrawer';
-
-interface CouponResult {
-  valid: boolean;
-  id?: number;
-  discount?: number;
-  type?: 'percentage' | 'fixed';
-  value?: number;
-  code?: string;
-  message?: string;
-}
 
 // Production can be deployed before the catalog is populated. Keep a real,
 // orderable inquiry path available without inventing a database product row.
@@ -40,7 +30,6 @@ export default function Store() {
   const { data: products, isLoading } = useListProducts();
   const { data: portfolio } = useListPortfolio();
   const { data: settings } = useGetSettings();
-  const createOrder = useCreateOrder();
   
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,24 +37,10 @@ export default function Store() {
   const [quickViewProduct, setQuickViewProduct] = useState<any | null>(null);
   const [savedProducts, setSavedProducts] = useState<number[]>([]);
   const { toast } = useToast();
+  const [, navigate] = useLocation();
   
-  const { items: cart, count: cartCount, subtotal: cartTotal, addItem, clear: clearCart } = useShopCart();
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
-  const [successOrderId, setSuccessOrderId] = useState('');
-
-  // Form State for Checkout
-  const [customerName, setCustomerName] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [customerEmail, setCustomerEmail] = useState('');
-  const [customerAddress, setCustomerAddress] = useState('');
-  const [orderDescription, setOrderDescription] = useState('');
-  const [shippingMethod, setShippingMethod] = useState<'courier' | 'sl_post' | 'pickup'>('courier');
-
-  // Coupon state
-  const [couponCode, setCouponCode] = useState('');
-  const [couponResult, setCouponResult] = useState<CouponResult | null>(null);
-  const [couponLoading, setCouponLoading] = useState(false);
+  const { items: cart, count: cartCount, subtotal: cartTotal, addItem } = useShopCart();
+  const estimatedTotalLabel = cartTotal > 0 ? `Rs. ${cartTotal.toFixed(2)}` : 'Quote on request';
 
   const productList = Array.isArray(products) ? products : [];
   const categoryList = Array.isArray(categories) ? categories : [];
@@ -91,137 +66,9 @@ export default function Store() {
 
   const addToCart = (product: any) => {
     addItem({ product, quantity: 1, selections: [], unitPrice: parseFloat(String(product.price || 0)) || 0, imageUrl: product.imageUrl });
-    // Cart changed — discard any applied coupon so it gets re-validated
-    setCouponResult(null);
-    setCouponCode('');
     toast({ title: 'Added to cart', description: `${product.name} is ready for checkout.` });
   };
 
-  const hasQuotedItem = cart.some(item => item.product?.isCustomInquiry || item.product?.priceType === 'custom_quote');
-  const estimatedTotalLabel = hasQuotedItem
-    ? (cartTotal > 0 ? `Rs. ${cartTotal.toFixed(2)} + quote` : 'Quote on request')
-    : `Rs. ${cartTotal.toFixed(2)}`;
-  const couponDiscount = couponResult?.valid && couponResult.discount ? couponResult.discount : 0;
-  const courierCharge = Number((settings as any)?.courierCharge || 450);
-  const slPostCharge = Number((settings as any)?.slPostCharge || 250);
-  const shippingCost = shippingMethod === 'courier' ? courierCharge : shippingMethod === 'sl_post' ? slPostCharge : 0;
-  const finalTotal = Math.max(0, cartTotal - couponDiscount + shippingCost);
-
-  useEffect(() => {
-    let requested = window.location.hash === '#checkout';
-    try { requested = requested || sessionStorage.getItem('hs-open-checkout') === '1'; } catch { /* optional */ }
-    if (requested && cart.length > 0) {
-      setIsCheckoutOpen(true);
-      try { sessionStorage.removeItem('hs-open-checkout'); } catch { /* optional */ }
-      window.history.replaceState(null, '', window.location.pathname);
-    }
-  }, [cart.length]);
-
-  useEffect(() => {
-    const openCheckout = () => {
-      if (cart.length > 0) setIsCheckoutOpen(true);
-      try { sessionStorage.removeItem('hs-open-checkout'); } catch { /* optional */ }
-    };
-    window.addEventListener('hs:checkout-request', openCheckout);
-    return () => window.removeEventListener('hs:checkout-request', openCheckout);
-  }, [cart.length]);
-
-  const applyCoupon = async () => {
-    if (!couponCode.trim()) return;
-    setCouponLoading(true);
-    try {
-      const res = await fetch('/api/coupons/validate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: couponCode.trim(), orderTotal: cartTotal }),
-      });
-      const data: CouponResult = await res.json();
-      setCouponResult(data);
-      if (data.valid) {
-        toast({ title: 'Coupon applied!', description: `You save Rs. ${data.discount?.toLocaleString('en-IN')}` });
-      } else {
-        toast({ title: 'Invalid coupon', description: data.message, variant: 'destructive' });
-      }
-    } catch {
-      toast({ title: 'Could not validate coupon', variant: 'destructive' });
-    } finally {
-      setCouponLoading(false);
-    }
-  };
-
-  const removeCoupon = () => {
-    setCouponResult(null);
-    setCouponCode('');
-  };
-
-  const handleCheckoutSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!customerName || !customerPhone || !customerAddress) {
-      toast({ title: 'Error', description: 'Please fill in all required fields.', variant: 'destructive' });
-      return;
-    }
-
-    const inquiryCart = cart.length > 0
-      ? cart
-      : [{ key: 'custom-inquiry', product: CUSTOM_INQUIRY_PRODUCT, quantity: 1, selections: [], unitPrice: 0, imageUrl: CUSTOM_INQUIRY_PRODUCT.imageUrl }];
-
-    const orderItems = inquiryCart.map(item => ({
-      productId: typeof item.product.id === 'number' ? item.product.id : null,
-      productName: item.product.name,
-      quantity: item.quantity,
-      unitPrice: item.unitPrice,
-      selectedOptions: item.selections.map(selection => ({ groupId: selection.groupId, choiceId: selection.choiceId })),
-      notes: [
-        item.selections?.length ? item.selections.map(selection => `${selection.groupTitle}: ${selection.choiceName}`).join(', ') : '',
-        item.product.description || '',
-      ].filter(Boolean).join(' — ') || null,
-    }));
-
-    const couponNote = couponResult?.valid ? `\nCoupon: ${couponResult.code} (-Rs. ${couponDiscount.toLocaleString('en-IN')})` : '';
-    const notesText = [
-      orderDescription ? `Custom request: ${orderDescription}` : '',
-      `Items:\n${inquiryCart.map(c => `${c.quantity}x ${c.product.name}${c.selections?.length ? ` (${c.selections.map(selection => `${selection.groupTitle}: ${selection.choiceName}`).join(', ')})` : ''}`).join('\n')}`,
-      couponNote,
-    ].filter(Boolean).join('\n\n');
-
-    createOrder.mutate({
-      data: {
-        customerName,
-        customerEmail,
-        customerPhone,
-        customerAddress,
-        orderType: "standard",
-        designLinks: [],
-        attachments: [],
-        shippingAddress: customerAddress,
-        shippingMethod,
-        notes: notesText,
-        description: notesText,
-        // couponCode is validated server-side; the backend derives the
-        // discount from trusted product prices and increments usedCount.
-        couponCode: couponResult?.valid && couponResult.code ? couponResult.code : undefined,
-        items: orderItems as any 
-      } as any
-    }, {
-      onSuccess: (order: any) => {
-        clearCart();
-        setIsCheckoutOpen(false);
-        setSuccessOrderId(order?.orderId || '');
-        setIsSuccessOpen(true);
-        setCustomerName('');
-        setCustomerPhone('');
-        setCustomerEmail('');
-        setCustomerAddress('');
-        setOrderDescription('');
-        setCouponCode('');
-        setCouponResult(null);
-      },
-      onError: () => {
-        toast({ title: 'Error', description: 'Failed to submit order. Please try again.', variant: 'destructive' });
-      }
-    });
-  };
 
   return (
     <div className="hs-store min-h-screen flex flex-col">
@@ -355,7 +202,7 @@ export default function Store() {
               <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <Button
                   type="button"
-                  onClick={() => { addToCart(CUSTOM_INQUIRY_PRODUCT); setIsCheckoutOpen(true); }}
+                  onClick={() => { addToCart(CUSTOM_INQUIRY_PRODUCT); navigate('/checkout'); }}
                   className="h-12 rounded-full bg-secondary px-6 text-xs font-black uppercase tracking-[0.14em] text-secondary-foreground hover:bg-secondary/90"
                 >
                   Start custom inquiry <ArrowRight size={15} />
@@ -431,7 +278,7 @@ export default function Store() {
         <div className="hs-store-floating-cart animate-in slide-in-from-bottom-4">
           <div>
             <div className="flex min-w-0 items-center gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground"><ShoppingCart size={17} /></div><div className="min-w-0"><div className="truncate text-sm font-bold">{cartCount} {cartCount === 1 ? 'piece' : 'pieces'} in your cart</div><div className="text-[10px] uppercase tracking-[0.16em] text-primary-foreground/55">Subtotal {estimatedTotalLabel}</div></div></div>
-            <Button onClick={() => setIsCheckoutOpen(true)} className="shrink-0 rounded-xl bg-secondary px-4 text-xs font-bold uppercase tracking-wider text-secondary-foreground hover:bg-secondary/90">Checkout <ArrowRight size={14} /></Button>
+            <Button onClick={() => navigate('/checkout')} className="shrink-0 rounded-xl bg-secondary px-4 text-xs font-bold uppercase tracking-wider text-secondary-foreground hover:bg-secondary/90">Checkout <ArrowRight size={14} /></Button>
           </div>
         </div>
       )}
@@ -455,167 +302,6 @@ export default function Store() {
         </DialogContent>
       </Dialog>
 
-      {/* Checkout Dialog */}
-      <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
-        <DialogContent className="hs-store-checkout">
-          <div className="p-6 bg-primary text-primary-foreground">
-            <DialogHeader>
-              <DialogTitle className="font-serif text-2xl font-bold text-white">Checkout</DialogTitle>
-              <DialogDescription className="text-primary-foreground/80 mt-2">
-                Review your delivery details and place your HAVESTORY order. You will receive a unique tracking number after submission.
-              </DialogDescription>
-            </DialogHeader>
-          </div>
-          
-          <form onSubmit={handleCheckoutSubmit} className="p-6 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Full Name *</label>
-                <Input 
-                  required 
-                  value={customerName} 
-                  onChange={(e) => setCustomerName(e.target.value)} 
-                  placeholder="John Doe"
-                  className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-secondary h-11 bg-muted/30 px-3"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Phone Number *</label>
-                <Input 
-                  required 
-                  value={customerPhone} 
-                  onChange={(e) => setCustomerPhone(e.target.value)} 
-                  placeholder="077 123 4567"
-                  className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-secondary h-11 bg-muted/30 px-3"
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Email Address</label>
-              <Input 
-                type="email" 
-                value={customerEmail} 
-                onChange={(e) => setCustomerEmail(e.target.value)} 
-                placeholder="john@example.com"
-                className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-secondary h-11 bg-muted/30 px-3"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Shipping Address *</label>
-              <Input 
-                required 
-                value={customerAddress} 
-                onChange={(e) => setCustomerAddress(e.target.value)} 
-                placeholder="123 Main St, Colombo"
-                className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-secondary h-11 bg-muted/30 px-3"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Order Notes / Custom Requests</label>
-              <textarea 
-                value={orderDescription} 
-                onChange={(e) => setOrderDescription(e.target.value)}
-                className="flex w-full rounded-none border-b-2 border-t-0 border-x-0 border-border bg-muted/30 px-3 py-3 text-sm focus-visible:outline-none focus-visible:ring-0 focus-visible:border-secondary min-h-[100px] resize-y"
-                placeholder="Any special instructions for framing?"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Delivery method *</label>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                {[
-                  { value: 'courier', label: 'Courier', price: courierCharge },
-                  { value: 'sl_post', label: 'SL Post', price: slPostCharge },
-                  { value: 'pickup', label: 'Studio pickup', price: 0 },
-                ].map(method => <button key={method.value} type="button" onClick={() => setShippingMethod(method.value as typeof shippingMethod)} className={`rounded-xl border px-3 py-3 text-left transition ${shippingMethod === method.value ? 'border-secondary bg-secondary/10 text-foreground' : 'border-border bg-background text-muted-foreground'}`}><strong className="block text-xs">{method.label}</strong><span className="mt-1 block text-[10px]">{method.price ? `Rs. ${method.price.toLocaleString('en-LK')}` : 'Free'}</span></button>)}
-              </div>
-            </div>
-
-            {/* Coupon Code */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Coupon Code</label>
-              {couponResult?.valid ? (
-                <div className="flex items-center gap-3 bg-green-50 border border-green-200 p-3 rounded-[0.25rem]">
-                  <Tag className="w-4 h-4 text-green-600 shrink-0" />
-                  <span className="text-sm font-bold text-green-700 flex-1">{couponResult.code} — Rs. {couponResult.discount?.toLocaleString('en-IN')} off</span>
-                  <button type="button" onClick={removeCoupon} className="text-green-600 hover:text-green-800">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <div className="flex gap-2">
-                  <Input
-                    value={couponCode}
-                    onChange={e => setCouponCode(e.target.value.toUpperCase())}
-                    placeholder="Enter coupon code"
-                    className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-secondary h-11 bg-muted/30 px-3 flex-1"
-                    onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), applyCoupon())}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={applyCoupon}
-                    disabled={!couponCode.trim() || couponLoading}
-                    className="rounded-[0.25rem] border-border h-11 font-bold uppercase tracking-widest text-xs px-4 shrink-0"
-                  >
-                    {couponLoading ? '...' : 'Apply'}
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            <div className="bg-muted p-4 rounded-[0.25rem] border border-border space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Subtotal:</span>
-                <span className="text-base font-semibold text-foreground">{estimatedTotalLabel}</span>
-              </div>
-              {couponDiscount > 0 && (
-                <div className="flex justify-between items-center text-green-600">
-                  <span className="font-bold text-xs uppercase tracking-widest">Coupon Discount:</span>
-                  <span className="text-base font-semibold">− Rs. {couponDiscount.toLocaleString('en-IN')}</span>
-                </div>
-              )}
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Delivery:</span>
-                <span className="text-base font-semibold text-foreground">{shippingCost ? `Rs. ${shippingCost.toLocaleString('en-LK')}` : 'Free'}</span>
-              </div>
-              <div className="flex justify-between items-center border-t border-border pt-2">
-                <span className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Estimated Total:</span>
-                <span className="font-serif text-2xl font-bold text-foreground text-right">{hasQuotedItem ? 'Quote on request' : `Rs. ${finalTotal.toFixed(2)}`}</span>
-              </div>
-            </div>
-
-            <div className="flex gap-4 pt-2">
-              <Button type="button" variant="outline" onClick={() => setIsCheckoutOpen(false)} className="flex-1 rounded-[0.25rem] border-border h-12 font-bold uppercase tracking-widest text-xs">
-                Cancel
-              </Button>
-              <Button type="submit" disabled={createOrder.isPending} className="flex-1 rounded-[0.25rem] bg-secondary text-secondary-foreground hover:bg-secondary/90 h-12 font-bold uppercase tracking-widest text-xs shadow-sm">
-                {createOrder.isPending ? 'Placing order...' : 'Place order'}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Success Dialog */}
-      <Dialog open={isSuccessOpen} onOpenChange={setIsSuccessOpen}>
-        <DialogContent className="sm:max-w-[400px] rounded-[0.25rem] border-border text-center p-10 bg-background">
-          <div className="w-16 h-16 bg-secondary/20 text-secondary rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 className="w-8 h-8" />
-          </div>
-          <h2 className="font-serif text-3xl font-bold mb-4">Order received!</h2>
-          <p className="text-muted-foreground mb-8 text-sm leading-relaxed">
-            Your order has been created successfully. Check your email for the order number and use Track Order to follow its progress.
-          </p>
-          {successOrderId && <div className="mb-6 rounded-xl border border-secondary/30 bg-secondary/10 p-4"><span className="block text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">Your tracking number</span><strong className="mt-1 block text-lg text-foreground">{successOrderId}</strong><Link href={`/track-order?id=${encodeURIComponent(successOrderId)}`} className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-secondary">Track this order <ArrowRight size={13} /></Link></div>}
-          <Button onClick={() => setIsSuccessOpen(false)} className="w-full rounded-[0.25rem] bg-primary text-primary-foreground h-12 font-bold uppercase tracking-widest text-xs">
-            Continue Browsing
-          </Button>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

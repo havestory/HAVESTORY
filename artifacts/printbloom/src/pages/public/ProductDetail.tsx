@@ -53,7 +53,7 @@ export default function ProductDetail() {
     if (!product) return;
     addItem({ product, quantity: Math.max(minQuantity, quantity), selections, unitPrice, imageUrl: displayImage });
     toast({ title: "Added to cart", description: `${product.name} is ready for checkout.` });
-    if (buyNow) navigate("/store#checkout");
+    if (buyNow) navigate("/checkout");
   };
 
   if (isLoading) {

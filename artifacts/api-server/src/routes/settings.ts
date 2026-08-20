@@ -175,6 +175,14 @@ router.put("/", requireAdmin, async (req, res) => {
       "gmailUser",
       "gmailAppPassword",
       "financeReportEmailRecipient",
+      "checkoutBankTransferEnabled",
+      "checkoutDepositAmount",
+      "checkoutDepositMessage",
+      "checkoutFullPaymentEnabled",
+      "checkoutFullPaymentOffer",
+      "checkoutFullPaymentDiscount",
+      "checkoutCodEnabled",
+      "checkoutCodMessage",
     ];
     for (const f of fields) {
       if (req.body[f] !== undefined) updateData[f] = req.body[f];
@@ -214,6 +222,15 @@ router.put("/", requireAdmin, async (req, res) => {
     }
     if (req.body.specialEventEnabled !== undefined) {
       updateData.specialEventEnabled = req.body.specialEventEnabled ? 1 : 0;
+    }
+    if (req.body.checkoutBankTransferEnabled !== undefined) {
+      updateData.checkoutBankTransferEnabled = req.body.checkoutBankTransferEnabled ? 1 : 0;
+    }
+    if (req.body.checkoutFullPaymentEnabled !== undefined) {
+      updateData.checkoutFullPaymentEnabled = req.body.checkoutFullPaymentEnabled ? 1 : 0;
+    }
+    if (req.body.checkoutCodEnabled !== undefined) {
+      updateData.checkoutCodEnabled = req.body.checkoutCodEnabled ? 1 : 0;
     }
     const [updated] = await db
       .update(settingsTable)
@@ -434,6 +451,14 @@ router.post("/restore", requireAdmin, async (req, res) => {
       "gmailAppPassword",
       "financeReportEmailEnabled",
       "financeReportEmailRecipient",
+      "checkoutBankTransferEnabled",
+      "checkoutDepositAmount",
+      "checkoutDepositMessage",
+      "checkoutFullPaymentEnabled",
+      "checkoutFullPaymentOffer",
+      "checkoutFullPaymentDiscount",
+      "checkoutCodEnabled",
+      "checkoutCodMessage",
     ];
     for (const f of fields) {
       if (incoming[f] !== undefined) updateData[f] = incoming[f];

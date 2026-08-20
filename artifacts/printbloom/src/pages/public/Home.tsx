@@ -305,11 +305,11 @@ export default function Home() {
           link="Shop everything"
         />
         {productList.length ? (
-          <div className="hsc-product-grid">
+          <div className={`hsc-product-grid ${productList.length === 1 ? "hsc-product-grid-single" : ""}`}>
             {productList.map((product, index) => (
               <motion.article
                 key={product.id}
-                className="hsc-product-card"
+                className={`hsc-product-card ${productList.length === 1 ? "hsc-product-card-featured" : ""}`}
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -336,8 +336,8 @@ export default function Home() {
                         ? `Rs. ${Number(product.price).toLocaleString()}`
                         : "Quote on request"}
                     </strong>
-                    <Link href="/store">
-                      View <ArrowRight />
+                    <Link href={`/store/${product.id}`}>
+                      View edition <ArrowRight />
                     </Link>
                   </footer>
                 </div>
