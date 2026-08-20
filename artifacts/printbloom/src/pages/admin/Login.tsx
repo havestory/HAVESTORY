@@ -3,12 +3,12 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLocation } from 'wouter';
-import { useAdminLogin } from '@workspace/api-client-react';
+import { useAdminLogin, useGetSettings } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ArrowRight, LockKeyhole, ShieldCheck, Sparkles } from 'lucide-react';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -26,6 +26,9 @@ export default function AdminLogin() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const loginMutation = useAdminLogin();
+  const { data: settings } = useGetSettings();
+  const businessName = settings?.businessName || 'HAVESTORY';
+  const brandMark = businessName.slice(0, 2).toUpperCase();
 
   // step: 'credentials' | 'pin'
   const [step, setStep] = useState<'credentials' | 'pin'>('credentials');
@@ -90,67 +93,79 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen flex bg-background animate-in fade-in">
-      {/* Left Branding Side */}
-      <div className="hidden lg:flex flex-col flex-1 bg-primary relative overflow-hidden noise justify-center items-center p-12 text-primary-foreground">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-secondary/20 via-transparent to-transparent opacity-60" />
-        
-        <div className="relative z-10 max-w-lg w-full flex flex-col items-center text-center">
-          <h1 className="text-6xl font-serif font-bold tracking-tight mb-4 text-white">HAVESTORY</h1>
-          <p className="text-xl font-serif text-primary-foreground/80 mb-12 italic">Crafting tangible memories.</p>
+    <div className="hs-login-page animate-in fade-in">
+      <aside className="hs-login-story" aria-label={`${businessName} studio introduction`}>
+        <div className="hs-login-orb hs-login-orb-one" />
+        <div className="hs-login-orb hs-login-orb-two" />
+        <div className="hs-login-story-inner">
+          <button type="button" className="hs-login-brand" onClick={() => setLocation('/')} aria-label="Return to website">
+            {settings?.logoUrl ? (
+              <img src={settings.logoUrl} alt="" />
+            ) : (
+              <span>{brandMark}</span>
+            )}
+            <strong>{businessName}</strong>
+          </button>
 
-          <div className="relative w-64 h-80 mb-12">
-            <div className="absolute inset-0 bg-white/10 border border-white/20 transform rotate-[-6deg] animate-float transition-transform"></div>
-            <div className="absolute inset-0 bg-secondary/20 border border-secondary/40 transform rotate-[3deg] animate-float-delay transition-transform"></div>
-            <div className="absolute inset-0 bg-black/40 border border-white/10 backdrop-blur-sm flex items-center justify-center animate-float-delay-2 p-6 text-center">
-              <span className="font-serif text-2xl text-white/90 leading-relaxed italic">
-                "Where design meets execution."
-              </span>
-            </div>
+          <div className="hs-login-story-copy">
+            <span><Sparkles /> Studio control centre</span>
+            <h1>Every detail,<br />beautifully organised.</h1>
+            <p>{settings?.tagline || 'Manage orders, clients, frames and studio stories from one focused workspace.'}</p>
           </div>
 
-          <p className="text-sm tracking-widest uppercase text-primary-foreground/50 font-semibold section-label mt-auto">
-            Managing your story gallery since 2019
-          </p>
+          <div className="hs-login-preview" aria-hidden="true">
+            <div><small>01</small><strong>Orders</strong><span>Follow every project</span></div>
+            <div><small>02</small><strong>Studio</strong><span>Keep production clear</span></div>
+            <div><small>03</small><strong>Gallery</strong><span>Publish finished work</span></div>
+          </div>
         </div>
-      </div>
+      </aside>
 
-      {/* Right Form Side */}
-      <div className="flex-1 flex flex-col justify-center items-center p-6 lg:p-12 relative">
-        <div className="w-full max-w-sm space-y-8 animate-fade-up">
-          <div className="space-y-2">
-            <h2 className="text-3xl font-serif font-semibold text-foreground">Welcome Back</h2>
-            <p className="text-sm text-muted-foreground">
-              {step === 'credentials' ? 'Sign in to access your workshop dashboard.' : 'Verify your identity to continue.'}
+      <main className="hs-login-main">
+        <button type="button" className="hs-login-mobile-brand" onClick={() => setLocation('/')}>
+          <span>{brandMark}</span>
+          <strong>{businessName}</strong>
+        </button>
+
+        <div className="hs-login-card animate-fade-up">
+          <div className="hs-login-security"><ShieldCheck /> Secure admin access</div>
+          <div className="hs-login-heading">
+            <h2>{step === 'credentials' ? 'Welcome back.' : 'One more step.'}</h2>
+            <p>
+              {step === 'credentials' ? `Sign in to open your ${businessName} workspace.` : 'Enter your security PIN to complete sign in.'}
             </p>
           </div>
 
+          <div className="hs-login-progress" aria-label={`Sign-in step ${step === 'credentials' ? '1' : '2'} of 2`}>
+            <span className="is-active">1</span><i /><span className={step === 'pin' ? 'is-active' : ''}>2</span>
+          </div>
+
           {step === 'pin' && (
-            <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
+            <div className="hs-login-step-back">
               <button
                 type="button"
                 onClick={() => { setStep('credentials'); pinForm.reset(); }}
-                className="flex items-center gap-1 hover:text-foreground transition-colors uppercase tracking-widest font-semibold"
               >
-                <ArrowLeft className="w-3 h-3" /> Back
+                <ArrowLeft /> Back to credentials
               </button>
-              <span className="ml-auto section-label">Step 2 — Security PIN</span>
+              <span>Step 2 of 2</span>
             </div>
           )}
 
           {step === 'credentials' && (
             <Form {...credForm}>
-              <form onSubmit={credForm.handleSubmit(onCredSubmit)} className="space-y-8">
+              <form onSubmit={credForm.handleSubmit(onCredSubmit)} className="hs-login-form">
                 <FormField
                   control={credForm.control}
                   name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="section-label">Username</FormLabel>
+                      <FormLabel>Username</FormLabel>
                       <FormControl>
                         <Input
                           autoComplete="username"
-                          className="rounded-none border-0 border-b-2 border-border focus-visible:ring-0 focus-visible:border-secondary bg-transparent px-0 text-base"
+                          className="hs-login-input"
+                          placeholder="Enter your username"
                           {...field}
                         />
                       </FormControl>
@@ -163,12 +178,13 @@ export default function AdminLogin() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="section-label">Password</FormLabel>
+                      <FormLabel>Password</FormLabel>
                       <FormControl>
                         <Input
                           type="password"
                           autoComplete="current-password"
-                          className="rounded-none border-0 border-b-2 border-border focus-visible:ring-0 focus-visible:border-secondary bg-transparent px-0 text-base"
+                          className="hs-login-input"
+                          placeholder="Enter your password"
                           {...field}
                         />
                       </FormControl>
@@ -178,10 +194,10 @@ export default function AdminLogin() {
                 />
                 <Button
                   type="submit"
-                  className="w-full rounded-none h-12 text-xs tracking-widest uppercase font-semibold bg-primary text-primary-foreground btn-glow"
+                  className="hs-login-submit"
                   disabled={loginMutation.isPending}
                 >
-                  {loginMutation.isPending ? 'Authenticating...' : 'Sign In →'}
+                  {loginMutation.isPending ? 'Authenticating...' : <><LockKeyhole /> Sign in securely <ArrowRight /></>}
                 </Button>
               </form>
             </Form>
@@ -189,20 +205,21 @@ export default function AdminLogin() {
 
           {step === 'pin' && (
             <Form {...pinForm}>
-              <form onSubmit={pinForm.handleSubmit(onPinSubmit)} className="space-y-8">
+              <form onSubmit={pinForm.handleSubmit(onPinSubmit)} className="hs-login-form">
                 <FormField
                   control={pinForm.control}
                   name="pin"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="section-label">Security PIN</FormLabel>
+                      <FormLabel>Security PIN</FormLabel>
                       <FormControl>
                         <Input
                           type="password"
                           inputMode="numeric"
                           autoComplete="one-time-code"
                           maxLength={10}
-                          className="rounded-none border-0 border-b-2 border-border focus-visible:ring-0 focus-visible:border-secondary bg-transparent px-0 text-center text-2xl tracking-[0.5em] font-mono"
+                          className="hs-login-input hs-login-pin"
+                          placeholder="••••"
                           {...field}
                         />
                       </FormControl>
@@ -212,16 +229,19 @@ export default function AdminLogin() {
                 />
                 <Button
                   type="submit"
-                  className="w-full rounded-none h-12 text-xs tracking-widest uppercase font-semibold bg-primary text-primary-foreground btn-glow"
+                  className="hs-login-submit"
                   disabled={pinLoading}
                 >
-                  {pinLoading ? 'Verifying...' : 'Unlock Dashboard'}
+                  {pinLoading ? 'Verifying...' : <><ShieldCheck /> Unlock dashboard <ArrowRight /></>}
                 </Button>
               </form>
             </Form>
           )}
+          <button type="button" className="hs-login-return" onClick={() => setLocation('/')}>
+            <ArrowLeft /> Return to website
+          </button>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
