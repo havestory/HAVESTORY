@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { ArrowRight, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useShopCart } from "@/lib/shop-cart";
 import { formatMoney } from "@/lib/product-options";
@@ -58,7 +58,7 @@ export function ShopCartDrawer({ trigger }: { trigger: ReactNode }) {
             <div><span>Subtotal</span><strong>{formatMoney(subtotal)}</strong></div>
             <p>Delivery and coupon discounts are calculated at checkout.</p>
             <button type="button" onClick={beginCheckout}>Continue to checkout <ArrowRight /></button>
-            <Link href="/store" onClick={() => setOpen(false)}>Continue shopping</Link>
+            <Link href="/store" onClick={() => setOpen(false)} className="hs-cart-back-to-store"><ArrowLeft /> Back to store</Link>
           </div>
         )}
       </SheetContent>

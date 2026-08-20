@@ -8,7 +8,6 @@ import { ShoppingCart, Search, ArrowRight, Sparkles, ArrowUpRight } from 'lucide
 import { motion } from 'framer-motion';
 import { Link, useLocation } from 'wouter';
 import { useShopCart } from '@/lib/shop-cart';
-import { ShopCartDrawer } from '@/components/shop/ShopCartDrawer';
 
 // Production can be deployed before the catalog is populated. Keep a real,
 // orderable inquiry path available without inventing a database product row.
@@ -91,7 +90,6 @@ export default function Store() {
                 <option value="price-high">Price: High</option>
               </select>
             </div>
-            <ShopCartDrawer trigger={<Button variant="default" className="hs-store-cart-trigger"><ShoppingCart className="w-4 h-4" /><span>Shopping Cart</span>{cartCount > 0 && <span className="hs-store-cart-count">{cartCount}</span>}</Button>} />
           </div>
         </div>
       </section>
