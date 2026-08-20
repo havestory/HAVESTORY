@@ -2,14 +2,14 @@ import { useEffect, useState } from 'react';
 import { useListProducts, useListCategories, useCreateOrder, useListPortfolio, useGetSettings } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingCart, Plus, Minus, Trash2, Search, CheckCircle2, ArrowRight, Tag, X, Sparkles, ShieldCheck, Ruler, Heart, MessageCircle, Eye, SlidersHorizontal, ArrowUpRight } from 'lucide-react';
+import { ShoppingCart, Search, CheckCircle2, ArrowRight, Tag, X, Sparkles, ShieldCheck, Ruler, Heart, MessageCircle, Eye, SlidersHorizontal, ArrowUpRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'wouter';
 import { useShopCart } from '@/lib/shop-cart';
+import { ShopCartDrawer } from '@/components/shop/ShopCartDrawer';
 
 interface CouponResult {
   valid: boolean;
@@ -49,7 +49,7 @@ export default function Store() {
   const [savedProducts, setSavedProducts] = useState<number[]>([]);
   const { toast } = useToast();
   
-  const { items: cart, count: cartCount, subtotal: cartTotal, addItem, updateQuantity, removeItem, clear: clearCart } = useShopCart();
+  const { items: cart, count: cartCount, subtotal: cartTotal, addItem, clear: clearCart } = useShopCart();
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const [successOrderId, setSuccessOrderId] = useState('');
@@ -97,19 +97,6 @@ export default function Store() {
     toast({ title: 'Added to cart', description: `${product.name} is ready for checkout.` });
   };
 
-  const changeQuantity = (key: string, delta: number) => {
-    updateQuantity(key, delta);
-    // Cart changed — discard applied coupon to force re-validation
-    setCouponResult(null);
-    setCouponCode('');
-  };
-
-  const removeFromCart = (key: string) => {
-    removeItem(key);
-    setCouponResult(null);
-    setCouponCode('');
-  };
-
   const hasQuotedItem = cart.some(item => item.product?.isCustomInquiry || item.product?.priceType === 'custom_quote');
   const estimatedTotalLabel = hasQuotedItem
     ? (cartTotal > 0 ? `Rs. ${cartTotal.toFixed(2)} + quote` : 'Quote on request')
@@ -121,10 +108,22 @@ export default function Store() {
   const finalTotal = Math.max(0, cartTotal - couponDiscount + shippingCost);
 
   useEffect(() => {
-    if (window.location.hash === '#checkout' && cart.length > 0) {
+    let requested = window.location.hash === '#checkout';
+    try { requested = requested || sessionStorage.getItem('hs-open-checkout') === '1'; } catch { /* optional */ }
+    if (requested && cart.length > 0) {
       setIsCheckoutOpen(true);
+      try { sessionStorage.removeItem('hs-open-checkout'); } catch { /* optional */ }
       window.history.replaceState(null, '', window.location.pathname);
     }
+  }, [cart.length]);
+
+  useEffect(() => {
+    const openCheckout = () => {
+      if (cart.length > 0) setIsCheckoutOpen(true);
+      try { sessionStorage.removeItem('hs-open-checkout'); } catch { /* optional */ }
+    };
+    window.addEventListener('hs:checkout-request', openCheckout);
+    return () => window.removeEventListener('hs:checkout-request', openCheckout);
   }, [cart.length]);
 
   const applyCoupon = async () => {
@@ -333,95 +332,7 @@ export default function Store() {
                 </select>
               </div>
               
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="default" className="hs-store-cart-trigger">
-                    <ShoppingCart className="w-4 h-4" />
-                    <span>Shopping Cart</span>
-                    {cart.length > 0 && (
-                      <span className="absolute -top-2 -right-2 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-[10px] font-bold shadow-sm border-2 border-background">
-                        {cartCount}
-                      </span>
-                    )}
-                  </Button>
-                </SheetTrigger>
-                <SheetContent className="hs-store-cart-sheet">
-                  <div className="hs-store-cart-head">
-                    <SheetHeader>
-                      <SheetTitle className="font-serif text-2xl text-white">Your Shopping Cart</SheetTitle>
-                    </SheetHeader>
-                  </div>
-                  
-                  <div className="flex-1 overflow-y-auto p-6">
-                    {cart.length === 0 ? (
-                      <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-4">
-                        <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center">
-                          <ShoppingCart className="w-8 h-8 opacity-40" />
-                        </div>
-                        <p className="font-medium text-lg text-foreground">Your cart is empty.</p>
-                        <p className="text-sm">Choose a frame or print, select its options, and add it here.</p>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => { addToCart(CUSTOM_INQUIRY_PRODUCT); setIsCheckoutOpen(true); }}
-                          className="rounded-full border-secondary px-5 text-xs font-bold uppercase tracking-[0.14em] text-secondary"
-                        >
-                          Start custom inquiry
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {cart.map(item => (
-                          <div key={item.key} className="hs-store-cart-item">
-                            <div className="w-20 h-20 bg-muted shrink-0 overflow-hidden rounded-[0.25rem]">
-                              <img 
-                                src={item.imageUrl || item.product.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400&q=80'}
-                                alt={item.product.name} 
-                                className="w-full h-full object-cover" 
-                              />
-                            </div>
-                            <div className="flex-1 flex flex-col">
-                              <h4 className="font-serif font-bold text-base leading-tight mb-1">{item.product.name}</h4>
-                              <p className="text-sm text-secondary font-semibold">{item.product.isCustomInquiry ? 'Studio quote' : `Rs. ${item.unitPrice.toLocaleString('en-LK')}`}</p>
-                              {item.selections?.length > 0 && <p className="mb-auto mt-1 text-[10px] leading-relaxed text-muted-foreground">{item.selections.map(selection => `${selection.groupTitle}: ${selection.choiceName}`).join(' · ')}</p>}
-                              
-                              <div className="flex items-center justify-between mt-3">
-                                <div className="flex items-center border border-border bg-background rounded-[0.25rem] overflow-hidden">
-                                  <button onClick={() => changeQuantity(item.key, -1)} className="w-7 h-7 flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
-                                    <Minus className="w-3 h-3" />
-                                  </button>
-                                  <span className="w-8 text-center text-xs font-semibold">{item.quantity}</span>
-                                  <button onClick={() => changeQuantity(item.key, 1)} className="w-7 h-7 flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
-                                    <Plus className="w-3 h-3" />
-                                  </button>
-                                </div>
-                                <button onClick={() => removeFromCart(item.key)} className="w-7 h-7 flex items-center justify-center text-destructive/70 hover:text-destructive hover:bg-destructive/10 rounded-full transition-colors">
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {cart.length > 0 && (
-                    <div className="hs-store-cart-footer">
-                      <div className="flex justify-between items-end mb-6">
-                        <span className="text-muted-foreground font-medium text-sm">Estimated Total</span>
-                        <span className="font-serif text-2xl font-bold text-foreground text-right">{estimatedTotalLabel}</span>
-                      </div>
-                      <Button 
-                        onClick={() => setIsCheckoutOpen(true)}
-                        className="w-full rounded-[0.25rem] h-14 bg-primary text-primary-foreground hover:bg-primary/90 font-bold uppercase tracking-widest text-sm shadow-sm"
-                      >
-                        Proceed to checkout
-                      </Button>
-                    </div>
-                  )}
-                </SheetContent>
-              </Sheet>
+              <ShopCartDrawer trigger={<Button variant="default" className="hs-store-cart-trigger"><ShoppingCart className="w-4 h-4" /><span>Shopping Cart</span>{cartCount > 0 && <span className="hs-store-cart-count">{cartCount}</span>}</Button>} />
             </div>
           </div>
 
