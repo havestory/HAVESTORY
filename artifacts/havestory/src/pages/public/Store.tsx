@@ -225,7 +225,7 @@ export default function Store() {
               </Button>
             </div>
           ) : (
-            <div className="hs-store-grid">
+            <div className={`hs-store-grid ${sortedProducts.length === 1 ? 'is-single' : ''}`}>
               {sortedProducts.map((product, i) => (
                 <motion.div
                   key={product.id}
