@@ -55,7 +55,6 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showWa,   setShowWa]   = useState(false);
-  const [showCta,  setShowCta]  = useState(false);
   const [waFaqOpen, setWaFaqOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
@@ -63,7 +62,6 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     const onScroll = () => {
       setScrolled(window.scrollY > 40);
       setShowWa(window.scrollY > 200);
-      setShowCta(window.scrollY > 600);
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -286,7 +284,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       </main>
 
       <footer className="hsx-footer">
-        <div className="hsx-footer-top"><div><span>THE COLOUR & FRAME STUDIO</span><h2>{settings?.businessName || 'HAVESTORY'}</h2></div><p>{settings?.tagline || 'Photographs made tangible. Stories made to stay.'}</p><Link href="/custom-project">Start a project <ArrowRight /></Link></div>
+        <div className="hsx-footer-top"><div><span>THE COLOUR & FRAME STUDIO</span><h2>{settings?.businessName || 'HAVESTORY'}</h2></div><p>{settings?.tagline || 'Photographs made tangible. Stories made to stay.'}</p></div>
         <div className="hsx-footer-grid">
           <div><p>Studio</p>{settings?.address && <span>{settings.address}</span>}{settings?.phone && <a href={`tel:${settings.phone}`}>{settings.phone}</a>}{settings?.email && <a href={`mailto:${settings.email}`}>{settings.email}</a>}</div>
           <div><p>Shop & create</p>{[{ href: '/store', label: 'Frames & Prints' }, { href: '/services', label: 'Studio Services' }, { href: '/gallery', label: 'Gallery' }, { href: '/custom-project', label: 'Custom Project' }].map(l => <Link key={l.href} href={l.href}>{l.label}</Link>)}</div>
@@ -375,11 +373,10 @@ export function PublicLayout({ children }: { children: ReactNode }) {
 
       {/* ── Sticky CTA ── */}
       <motion.div
-        initial={false}
-        animate={{ opacity: showCta ? 1 : 0, y: showCta ? 0 : 16 }}
-        transition={{ duration: 0.3 }}
-        style={{ pointerEvents: showCta ? 'auto' : 'none' }}
-        className="fixed bottom-5 left-1/2 -translate-x-1/2 md:left-auto md:right-5 md:translate-x-0 z-50"
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.35 }}
+        className="hsx-floating-order fixed bottom-5 left-1/2 -translate-x-1/2 z-50"
       >
         <Link href="/store" className="atelier-sticky-cta flex items-center gap-2 px-6 py-3 text-[11px] font-bold uppercase tracking-[0.12em] whitespace-nowrap">
           Order a Frame <ArrowRight className="w-4 h-4" />
