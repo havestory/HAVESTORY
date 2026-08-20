@@ -9,6 +9,7 @@ import { PublicLayout }   from './components/layout/PublicLayout';
 import { AdminLayout }    from './components/layout/AdminLayout';
 import { AuthGuard }      from './components/layout/AuthGuard';
 import { SplashScreen }   from './components/SplashScreen';
+import { ShopCartProvider } from './lib/shop-cart';
 
 // Public Pages
 import Home           from './pages/public/Home';
@@ -37,6 +38,7 @@ function lazyWithRecovery<T extends { default: ComponentType<any> }>(loader: () 
 }
 
 const Store = lazyWithRecovery(() => import('./pages/public/Store'));
+const ProductDetail = lazyWithRecovery(() => import('./pages/public/ProductDetail'));
 const Services = lazyWithRecovery(() => import('./pages/public/Services'));
 const Portfolio = lazyWithRecovery(() => import('./pages/public/Portfolio'));
 const TrackOrder = lazyWithRecovery(() => import('./pages/public/TrackOrder'));
@@ -135,6 +137,7 @@ function PublicRoutes() {
         <Switch>
           <Route path="/"                   component={Home} />
           <Route path="/store"              component={Store} />
+          <Route path="/store/:id"          component={ProductDetail} />
           <Route path="/frames-and-prints"  component={Store} />
           <Route path="/services"           component={Services} />
           <Route path="/studio-services"    component={Services} />
@@ -233,7 +236,7 @@ function App() {
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
           {showSplash && <SplashScreen onDone={handleSplashDone} />}
-          <Router />
+          <ShopCartProvider><Router /></ShopCartProvider>
         </WouterRouter>
         <Toaster />
       </TooltipProvider>

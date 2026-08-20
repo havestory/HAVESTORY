@@ -315,7 +315,7 @@ export default function Home() {
                 viewport={{ once: true }}
                 transition={{ delay: (index % 3) * 0.05 }}
               >
-                <Link href="/store" className="hsc-product-image">
+                <Link href={`/store/${product.id}`} className="hsc-product-image">
                   {product.imageUrl ? (
                     <img src={product.imageUrl} alt={product.name} />
                   ) : (

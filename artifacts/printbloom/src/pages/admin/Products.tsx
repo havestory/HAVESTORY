@@ -23,7 +23,7 @@ const DEFAULT_PRINT_CATEGORIES = [
 /* ────────── Types ────────── */
 type FixedPrice = { qty: number; price: string };
 type RangePrice = { from: number; to: number; pricePerUnit: string };
-type Choice = { id: string; name: string; price: string; chargeType: "flat" | "per_unit"; sizePrices?: { sizeId: string; price: string }[] };
+type Choice = { id: string; name: string; price: string; chargeType: "flat" | "per_unit"; imageUrl?: string; sizePrices?: { sizeId: string; price: string }[] };
 type OptionGroup = { id: string; title: string; choices: Choice[] };
 type SizeTier = { from: number; to: number; pricePerUnit: string };
 type ProductSize = { id: string; name: string; packSize: number; unitLabel: string; minQty: number; tiers: SizeTier[] };
@@ -493,7 +493,7 @@ function SizeTierBuilder({ sizes, onChange }: { sizes: ProductSize[]; onChange: 
   );
 }
 
-function ChoiceRow({ choice, onChange, onRemove, sizes }: { choice: Choice; onChange: (c: Choice) => void; onRemove: () => void; sizes?: ProductSize[] }) {
+function ChoiceRow({ choice, onChange, onRemove, sizes, productImages = [] }: { choice: Choice; onChange: (c: Choice) => void; onRemove: () => void; sizes?: ProductSize[]; productImages?: string[] }) {
   const [showSizePrices, setShowSizePrices] = useState(false);
   const hasSizes = sizes && sizes.length > 0;
 
@@ -538,6 +538,17 @@ function ChoiceRow({ choice, onChange, onRemove, sizes }: { choice: Choice; onCh
         <button type="button" onClick={onRemove} className="p-1.5 text-gray-300 hover:text-red-400 transition-colors"><X size={14} /></button>
       </div>
 
+      <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-2">
+        {choice.imageUrl ? <img src={choice.imageUrl} alt="" className="h-10 w-10 rounded-md object-cover" /> : <div className="grid h-10 w-10 place-items-center rounded-md bg-gray-100 text-gray-300"><Image size={15} /></div>}
+        <div className="min-w-0 flex-1">
+          <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-400">Image shown when customer selects this choice</label>
+          <select value={choice.imageUrl || ""} onChange={e => onChange({ ...choice, imageUrl: e.target.value || undefined })} className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700 outline-none focus:ring-2 focus:ring-amber-200">
+            <option value="">Keep current product image</option>
+            {productImages.map((image, index) => <option key={image} value={image}>Product image {index + 1}{index === 0 ? " (cover)" : ""}</option>)}
+          </select>
+        </div>
+      </div>
+
       {/* Size-dependent pricing */}
       {hasSizes && showSizePrices && (
         <div className="ml-2 pl-3 border-l-2 border-blue-200 space-y-1.5">
@@ -569,6 +580,7 @@ function OptionGroupCard({
   onChange, onRemove, onMoveUp, onMoveDown,
   dragHandleProps,
   sizes,
+  productImages,
 }: {
   group: OptionGroup; index: number; total: number;
   onChange: (g: OptionGroup) => void;
@@ -577,6 +589,7 @@ function OptionGroupCard({
   onMoveDown: () => void;
   dragHandleProps: any;
   sizes?: ProductSize[];
+  productImages?: string[];
 }) {
   const [collapsed, setCollapsed] = useState(false);
 
@@ -616,6 +629,7 @@ function OptionGroupCard({
               onChange={nc => onChange({ ...group, choices: group.choices.map((x, xi) => xi === ci ? nc : x) })}
               onRemove={() => onChange({ ...group, choices: group.choices.filter((_, xi) => xi !== ci) })}
               sizes={sizes}
+              productImages={productImages}
             />
           ))}
           <button
@@ -1676,6 +1690,7 @@ export default function AdminProducts() {
                         onMoveDown={() => moveGroup(i, i + 1)}
                         dragHandleProps={{}}
                         sizes={config.productType === "multi_size_tier" ? config.sizes : undefined}
+                        productImages={form.galleryImages || []}
                       />
                     ))}
                   </div>
