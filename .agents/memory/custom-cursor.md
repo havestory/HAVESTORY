@@ -6,7 +6,7 @@ description: Gold dot + ring follower cursor — implementation details and gotc
 # Custom Cursor Implementation
 
 ## Files
-- Component: `artifacts/printbloom/src/components/CustomCursor.tsx`
+- Component: `artifacts/havestory/src/components/CustomCursor.tsx`
 - CSS classes: `.cursor-dot`, `.cursor-ring`, `.cursor-ring.hovering`, `.cursor-dot.hovering` in `index.css`
 - Mounted in `App.tsx` (outside Router, inside WouterRouter)
 

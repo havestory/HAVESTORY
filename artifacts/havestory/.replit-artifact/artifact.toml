@@ -3,7 +3,7 @@ previewPath = "/"
 title = "HAVESTORY"
 description = "HAVESTORY is a premium Sri Lankan printing & graphic design business platform. It has a full customer-facing website (home, store, services, portfolio, order tracking, about, contact) and a comprehensive admin panel for managing products, orders, clients, invoices, inventory, CRM projects, notices, settings and more."
 version = "1.0.0"
-id = "artifacts/printbloom"
+id = "artifacts/havestory"
 router = "path"
 
 [[services]]
@@ -12,12 +12,12 @@ paths = [ "/" ]
 localPort = 20092
 
 [services.development]
-run = "pnpm --filter @workspace/printbloom run dev"
+run = "pnpm --filter @workspace/havestory run dev"
 
 [services.production]
-build = [ "pnpm", "--filter", "@workspace/printbloom", "run", "build" ]
+build = [ "pnpm", "--filter", "@workspace/havestory", "run", "build" ]
 serve = "static"
-publicDir = "artifacts/printbloom/dist/public"
+publicDir = "artifacts/havestory/dist/public"
 
 [[services.production.rewrites]]
 from = "/*"

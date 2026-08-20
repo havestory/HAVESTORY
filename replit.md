@@ -5,7 +5,7 @@ Premium photo frame & story gallery business platform for Sri Lanka — full cus
 ## Run & Operate
 
 - `pnpm --filter @workspace/api-server run dev` — run the API server (port 8080)
-- `pnpm --filter @workspace/printbloom run dev` — run the frontend (port 20092)
+- `pnpm --filter @workspace/havestory run dev` — run the frontend (port 20092)
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - `pnpm run typecheck` — full typecheck across all packages
@@ -27,8 +27,8 @@ Premium photo frame & story gallery business platform for Sri Lanka — full cus
 - `lib/api-spec/openapi.yaml` — API contract source of truth
 - `lib/db/src/schema/` — Drizzle DB schema for all tables
 - `artifacts/api-server/src/routes/` — all Express route handlers
-- `artifacts/printbloom/src/pages/` — React pages (public + admin)
-- `artifacts/printbloom/src/components/layout/` — PublicLayout, AdminLayout, AuthGuard
+- `artifacts/havestory/src/pages/` — React pages (public + admin)
+- `artifacts/havestory/src/components/layout/` — PublicLayout, AdminLayout, AuthGuard
 - `lib/api-client-react/src/generated/` — Orval-generated React Query hooks
 
 ## Public Pages
@@ -91,5 +91,5 @@ Premium photo frame & story gallery business platform for Sri Lanka — full cus
 
 - After any OpenAPI spec change, run codegen and the sed fix runs automatically via the package.json script
 - `ADMIN_PASSWORD` and `ADMIN_PIN` warnings in server logs are expected until secrets are set — login still works (wide open) without them in dev
-- The artifact slug is `printbloom` (URL path `/`), business name displayed is HAVESTORY (from DB settings)
+- The artifact slug is `havestory` (URL path `/`), business name displayed is HAVESTORY (from DB settings)
 - Orval generates `zod.int()` (v4 API) — the codegen script patches the import automatically

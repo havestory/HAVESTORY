@@ -2,7 +2,7 @@
 
 The screenshot and local runtime confirm the home page uses the Glass Gallery palette, but the Studio favourites area currently has an unbalanced visual rhythm. The product card treatment uses a large fixed image, a white content block, and a footer that can read like a detached dark price strip. When only one featured product is available, the three-column grid leaves most of the section empty and makes the product feel visually stranded. The section header and card should be rebalanced for a single featured item, with the price/action row treated as a cohesive inline footer and a stronger editorial frame around the featured product.
 
-The existing source is `artifacts/printbloom/src/pages/public/Home.tsx` and the home styles are in `artifacts/printbloom/src/index.css` under `.hsc-products-section`, `.hsc-product-grid`, and `.hsc-product-card`.
+The existing source is `artifacts/havestory/src/pages/public/Home.tsx` and the home styles are in `artifacts/havestory/src/index.css` under `.hsc-products-section`, `.hsc-product-grid`, and `.hsc-product-card`.
 
 ## Runtime verification
 
