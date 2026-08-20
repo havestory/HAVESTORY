@@ -3461,6 +3461,29 @@ h1, h2, h3 { font-weight: 700; }
   color: var(--hsc-ink) !important;
 }
 
+/* Keep the empty-store callout readable inside the otherwise light store toolbar. */
+[data-public-site] .hs-store-empty {
+  border-color: rgba(241, 186, 56, .24) !important;
+  background: linear-gradient(145deg, #101f34, #0a1729) !important;
+  color: #fffaf3 !important;
+}
+[data-public-site] .hs-store-empty .editorial-display {
+  color: #fffaf3 !important;
+}
+[data-public-site] .hs-store-empty .editorial-kicker {
+  color: #e5ae4b !important;
+}
+[data-public-site] .hs-store-empty p {
+  color: rgba(255, 250, 243, .78) !important;
+}
+[data-public-site] .hs-store-empty a {
+  color: rgba(255, 250, 243, .9) !important;
+}
+[data-public-site] .hs-store-empty a:hover {
+  border-color: #e5ae4b !important;
+  color: #f4cb68 !important;
+}
+
 /* Shared secondary-page rhythm prevents stacked floating cards. */
 [data-public-site] .hsx-service-note {
   width: min(calc(100% - 80px), 1180px);
