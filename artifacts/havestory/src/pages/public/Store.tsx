@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { useListProducts, useListCategories, useListPortfolio, useGetSettings } from '@workspace/api-client-react';
+import { useListProducts } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingCart, Search, ArrowRight, Sparkles, ShieldCheck, Ruler, Heart, MessageCircle, SlidersHorizontal, ArrowUpRight } from 'lucide-react';
+import { ShoppingCart, Search, ArrowRight, Sparkles, ArrowUpRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link, useLocation } from 'wouter';
 import { useShopCart } from '@/lib/shop-cart';
@@ -25,12 +25,8 @@ const CUSTOM_INQUIRY_PRODUCT = {
 };
 
 export default function Store() {
-  const { data: categories } = useListCategories();
   const { data: products, isLoading } = useListProducts();
-  const { data: portfolio } = useListPortfolio();
-  const { data: settings } = useGetSettings();
-  
-  const [activeCategory, setActiveCategory] = useState<string>('all');
+
   const [searchQuery, setSearchQuery] = useState('');
   const [sortMode, setSortMode] = useState<'featured' | 'price-low' | 'price-high'>('featured');
   const { toast } = useToast();
@@ -40,15 +36,11 @@ export default function Store() {
   const estimatedTotalLabel = cartTotal > 0 ? `Rs. ${cartTotal.toFixed(2)}` : 'Quote on request';
 
   const productList = Array.isArray(products) ? products : [];
-  const categoryList = Array.isArray(categories) ? categories : [];
-  const recentWork = (Array.isArray(portfolio) ? portfolio : []).slice(0, 5);
   const filteredProducts = productList.filter(p => {
-    const matchesCategory = activeCategory === 'all' || p.categoryId?.toString() === activeCategory;
     const name = String(p.name || '');
     const description = String(p.description || '');
     const query = searchQuery.trim().toLowerCase();
-    const matchesSearch = name.toLowerCase().includes(query) || description.toLowerCase().includes(query);
-    return matchesCategory && matchesSearch;
+    return name.toLowerCase().includes(query) || description.toLowerCase().includes(query);
   });
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
@@ -65,92 +57,11 @@ export default function Store() {
 
   return (
     <div className="hs-store min-h-screen flex flex-col">
-      <section className="hs-store-hero">
-        <div className="hs-store-hero-copy">
-          <span>THE HAVESTORY COLLECTION / 2026</span>
-          <h1>Frames & prints,<br /><em>made personal.</em></h1>
-          <p>Browse ready-to-order pieces or start a custom frame with guidance from our studio. Clear choices, considered materials and no complicated calculator.</p>
-          <div><a href="#collection">Shop the collection <ArrowRight size={16} /></a><Link href="/custom-project">Need a custom size?</Link></div>
-        </div>
-        <div className="hs-store-hero-image"><img src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1400&q=88" alt="A framed artwork in a bright interior" /><span>Made to measure · Finished by hand</span></div>
-      </section>
-      <div className="hs-store-trust"><span><ShieldCheck size={16} /> Secure packaging</span><span><Ruler size={16} /> Custom sizing</span><span><MessageCircle size={16} /> Studio guidance</span><span><Heart size={16} /> Made with care</span></div>
-
-      {recentWork.length > 0 && (
-        <section className="hs-store-work">
-          <div className="hs-store-work-copy">
-            <span>RECENT STUDIO WORK</span>
-            <h2>Made here.<br /><em>Living elsewhere.</em></h2>
-            <p>A small selection of finished frames, prints and client stories from our studio.</p>
-            <Link href="/gallery">View the complete gallery <ArrowRight size={15} /></Link>
-          </div>
-          <div className="hs-store-work-grid">
-            {recentWork.map((item, index) => (
-              <motion.div
-                key={item.id}
-                className={`hs-store-work-item hs-store-work-item-${index + 1}`}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: .2 }}
-                transition={{ duration: .55, delay: index * .07 }}
-              >
-                <img src={item.imageUrl || 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800&q=82'} alt={item.title || 'Recent HAVESTORY studio work'} />
-                <span>{item.title || `Studio story ${index + 1}`}</span>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <div id="collection" className="hs-store-collection">
-        {/* Categories Sidebar */}
-        <aside className="hs-store-filter">
-          <div>
-            <h3>Browse by category</h3>
-            
-            <div className="hs-store-category-mobile no-scrollbar">
-              <button 
-                onClick={() => setActiveCategory('all')}
-                className={`hs-store-filter-button ${activeCategory === 'all' ? 'is-active' : ''}`}
-              >
-                All Products
-              </button>
-              {categoryList.map(cat => (
-                <button 
-                  key={cat.id}
-                  onClick={() => setActiveCategory(cat.id.toString())}
-                  className={`hs-store-filter-button ${activeCategory === cat.id.toString() ? 'is-active' : ''}`}
-                >
-                  {cat.name}
-                </button>
-              ))}
-            </div>
-
-            <div className="hs-store-category-desktop">
-              <button 
-                onClick={() => setActiveCategory('all')}
-                className={`hs-store-filter-button ${activeCategory === 'all' ? 'is-active' : ''}`}
-              >
-                All Products
-              </button>
-              {categoryList.map(cat => (
-                <button 
-                  key={cat.id}
-                  onClick={() => setActiveCategory(cat.id.toString())}
-                  className={`hs-store-filter-button ${activeCategory === cat.id.toString() ? 'is-active' : ''}`}
-                >
-                  {cat.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        </aside>
-
-        {/* Product Area */}
+      <div id="collection" className="hs-store-collection hs-store-collection-compact">
         <main className="hs-store-results">
           <div className="hs-store-toolbar">
             <div className="hs-store-toolbar-heading">
-              <div className="flex items-center justify-between gap-3"><div><span className="editorial-kicker">The collection</span><h2 className="mt-2 editorial-display text-3xl text-foreground sm:text-4xl">Find your frame.</h2></div><SlidersHorizontal size={18} className="text-secondary sm:hidden" /></div>
+              <div className="hs-store-toolbar-title"><span className="editorial-kicker">The collection</span><h2 className="mt-2 editorial-display text-3xl text-foreground sm:text-4xl">Find your frame.</h2></div>
               <div className="hs-store-search">
               <Search aria-hidden="true" />
               <Input 
@@ -164,7 +75,6 @@ export default function Store() {
             
             <div className="hs-store-controls">
               <div className="hs-store-sort">
-                <span className="store-number">{String(sortedProducts.length).padStart(2, '0')} / {String(productList.length).padStart(2, '0')} objects</span>
                 <select aria-label="Sort products" value={sortMode} onChange={e => setSortMode(e.target.value as typeof sortMode)}>
                   <option value="featured">Featured</option>
                   <option value="price-low">Price: Low</option>
@@ -212,7 +122,7 @@ export default function Store() {
               <Button 
                 variant="outline" 
                 className="mt-6 border-primary text-primary hover:bg-primary/5 rounded-[0.25rem] font-semibold text-xs uppercase tracking-widest"
-                onClick={() => { setActiveCategory('all'); setSearchQuery(''); }}
+                onClick={() => setSearchQuery('')}
               >
                 Clear Filters
               </Button>
