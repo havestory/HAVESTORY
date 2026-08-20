@@ -217,7 +217,6 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           </nav>
           <div className="hsx-shell-actions">
             <ShopCartDrawer trigger={<button type="button" className="hsx-header-cart" aria-label={`Open shopping cart with ${cartCount} items`}><ShoppingBag />{cartCount > 0 && <span>{cartCount}</span>}</button>} />
-            <Link href="/custom-project" className="hsx-shell-order">Start a project <ArrowRight /></Link>
             <button aria-expanded={menuOpen} aria-controls="public-mobile-drawer" aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'} onClick={() => setMenuOpen(v => !v)}>{menuOpen ? <X /> : <Menu />}</button>
           </div>
         </div>
