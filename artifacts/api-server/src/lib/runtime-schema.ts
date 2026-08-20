@@ -1,6 +1,6 @@
 import { pool } from "@workspace/db";
 
-const SCHEMA_VERSION = "2026-08-20-checkout-payment-columns-v1";
+const SCHEMA_VERSION = "2026-08-20-delivery-options-columns-v2";
 let runtimeSchemaReady: Promise<void> | null = null;
 
 async function versionExists(version: string): Promise<boolean> {
