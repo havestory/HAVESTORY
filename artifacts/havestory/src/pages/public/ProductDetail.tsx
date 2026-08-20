@@ -126,9 +126,9 @@ export default function ProductDetail() {
           <div className="hs-product-purchase-label">Quantity</div>
           <div className="hs-product-purchase-row">
             <div className="hs-product-quantity" aria-label="Quantity"><button type="button" onClick={() => setQuantity(value => Math.max(minQuantity, value - quantityStep))} aria-label="Decrease quantity"><Minus /></button><span>{Math.max(minQuantity, quantity)}</span><button type="button" onClick={() => setQuantity(value => Math.max(minQuantity, value) + quantityStep)} aria-label="Increase quantity"><Plus /></button></div>
-            <Button type="button" onClick={() => putInCart(false)} className="hs-product-add"><ShoppingBag /> Add to cart</Button>
+            <Button type="button" variant="ghost" onClick={() => putInCart(false)} className="hs-product-add"><ShoppingBag /> Add to cart</Button>
           </div>
-          <Button type="button" onClick={() => putInCart(true)} className="hs-product-buy-now">Buy now <ArrowRight /></Button>
+          <Button type="button" variant="ghost" onClick={() => putInCart(true)} className="hs-product-buy-now">Buy now <ArrowRight /></Button>
 
           {config.offerEnabled && config.offerMessage && <div className="hs-product-offer"><span>Special offer</span><p>{config.offerMessage}</p>{config.offerMinAmount ? <small>Valid from {formatMoney(config.offerMinAmount)}</small> : null}</div>}
           <div className="hs-product-assurance"><p><ShieldCheck /> Secure packaging</p><p><Truck /> Island-wide delivery</p>{config.productionTime && <p><Check /> Ready in {config.productionTime}</p>}</div>

@@ -2,10 +2,9 @@ import { useState } from 'react';
 import { useListProducts, useListCategories, useListPortfolio, useGetSettings } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingCart, Search, ArrowRight, Sparkles, ShieldCheck, Ruler, Heart, MessageCircle, Eye, SlidersHorizontal, ArrowUpRight } from 'lucide-react';
+import { ShoppingCart, Search, ArrowRight, Sparkles, ShieldCheck, Ruler, Heart, MessageCircle, SlidersHorizontal, ArrowUpRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link, useLocation } from 'wouter';
 import { useShopCart } from '@/lib/shop-cart';
@@ -34,8 +33,6 @@ export default function Store() {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortMode, setSortMode] = useState<'featured' | 'price-low' | 'price-high'>('featured');
-  const [quickViewProduct, setQuickViewProduct] = useState<any | null>(null);
-  const [savedProducts, setSavedProducts] = useState<number[]>([]);
   const { toast } = useToast();
   const [, navigate] = useLocation();
   
@@ -59,10 +56,6 @@ export default function Store() {
     if (sortMode === 'price-high') return parseFloat(String(b.price || 0)) - parseFloat(String(a.price || 0));
     return 0;
   });
-
-  const toggleSaved = (productId: number) => {
-    setSavedProducts(prev => prev.includes(productId) ? prev.filter(id => id !== productId) : [...prev, productId]);
-  };
 
   const addToCart = (product: any) => {
     addItem({ product, quantity: 1, selections: [], unitPrice: parseFloat(String(product.price || 0)) || 0, imageUrl: product.imageUrl });
@@ -235,38 +228,31 @@ export default function Store() {
                   transition={{ duration:0.7, delay: (i % 6) * 0.1 }}
                   className="hs-store-product-wrap"
                 >
-                  <div className="hs-store-product store-product-card group flex h-full flex-col">
+                  <Link
+                    href={`/store/${product.id}`}
+                    aria-label={`View ${product.name}`}
+                    className="hs-store-product store-product-card group flex h-full flex-col"
+                  >
                     <div className="store-product-image aspect-[4/3]">
                       <img
                         src={product.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&q=85'}
                         alt={product.name || 'HAVESTORY frame'}
                         className="h-full w-full object-cover"
                       />
-                      <div className="absolute inset-x-4 top-4 z-10 flex items-center justify-between">
-                        <span className="store-number rounded-full bg-black/40 px-3 py-1.5 backdrop-blur-md">{String(i + 1).padStart(2, '0')} / EDIT</span>
-                        <div className="flex items-center gap-2">
-                          <button type="button" aria-label={`Preview ${product.name}`} onClick={() => setQuickViewProduct(product)} className="store-icon-button"><Eye size={15} /></button>
-                          <button type="button" aria-label={`Save ${product.name}`} onClick={() => toggleSaved(product.id)} className={`store-icon-button ${savedProducts.includes(product.id) ? 'is-active' : ''}`}><Heart size={15} fill={savedProducts.includes(product.id) ? 'currentColor' : 'none'} /></button>
-                        </div>
-                      </div>
-                      <Link href={`/store/${product.id}`} className="hs-store-add">
-                        <span>View &amp; choose options</span>
-                        <ArrowRight className="h-4 w-4" />
-                      </Link>
                     </div>
                     <div className="hs-store-product-body">
                       <div className="hs-store-product-meta">
                         <span className="store-number">{product.category?.name || 'HANDCRAFTED EDIT'}</span>
                         <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Ready to make</span>
                       </div>
-                      <Link href={`/store/${product.id}`}><h3 className="editorial-display line-clamp-1 text-2xl font-bold text-foreground">{product.name}</h3></Link>
+                      <h3 className="editorial-display line-clamp-1 text-2xl font-bold text-foreground">{product.name}</h3>
                       <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{product.description || 'A considered piece, finished by hand in our studio.'}</p>
                       <div className="hs-store-product-footer">
                         <div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">From</p><p className="mt-1 text-lg font-black text-foreground">Rs. {product.price}</p></div>
-                        <Link href={`/store/${product.id}`} className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-[0.14em] text-secondary transition-colors hover:text-foreground">View details <ArrowUpRight size={13} /></Link>
+                        <span className="hs-store-view-details">View details <ArrowUpRight size={13} /></span>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 </motion.div>
               ))}
             </div>
@@ -283,24 +269,6 @@ export default function Store() {
         </div>
       )}
 
-      {/* Quick view dialog */}
-      <Dialog open={Boolean(quickViewProduct)} onOpenChange={(open) => !open && setQuickViewProduct(null)}>
-        <DialogContent className="hs-store-quickview">
-          {quickViewProduct && (
-            <div className="grid md:grid-cols-[0.95fr_1.05fr]">
-              <div className="store-product-image min-h-[280px] md:min-h-full"><img src={quickViewProduct.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=900&q=85'} alt={quickViewProduct.name || 'HAVESTORY frame'} className="h-full w-full object-cover" /></div>
-              <div className="flex flex-col justify-center p-7 sm:p-10">
-                <span className="editorial-kicker">A closer look</span>
-                <h2 className="editorial-display mt-4 text-4xl leading-none text-foreground">{quickViewProduct.name}</h2>
-                <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{quickViewProduct.description || 'A considered piece, finished by hand in our studio.'}</p>
-                <div className="my-7 flex items-end justify-between border-y border-border py-5"><div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Studio price</p><p className="mt-1 text-2xl font-black text-foreground">Rs. {quickViewProduct.price}</p></div><span className="store-number">PER {String(quickViewProduct.priceType || 'PIECE').toUpperCase()}</span></div>
-                <div className="flex flex-col gap-3 sm:flex-row"><Link href={`/store/${quickViewProduct.id}`} onClick={() => setQuickViewProduct(null)} className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-secondary px-5 text-xs font-black uppercase tracking-[0.14em] text-secondary-foreground">View product &amp; options <ArrowRight size={15} /></Link><Button type="button" variant="outline" onClick={() => setQuickViewProduct(null)} className="h-12 rounded-full border-border px-6 text-xs font-bold uppercase tracking-[0.14em]">Close</Button></div>
-                <p className="mt-5 flex items-center gap-2 text-xs text-muted-foreground"><ShieldCheck size={14} className="text-secondary" /> Select the size, frame and finish before adding this item to your cart.</p>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
 
     </div>
   );
