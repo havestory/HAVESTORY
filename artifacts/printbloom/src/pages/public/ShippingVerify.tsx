@@ -84,7 +84,7 @@ export default function ShippingVerify() {
   const colorsClass = statusColor(data.status);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-12">
+    <div className="hsc-verify-page min-h-screen bg-background flex flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm space-y-6">
         {/* Header */}
         <div className="text-center">

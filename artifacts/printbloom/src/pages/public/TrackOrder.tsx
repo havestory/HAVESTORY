@@ -59,10 +59,11 @@ export default function TrackOrder() {
           </p>
           
           <form onSubmit={handleSearch} className="hs-track-form">
-            <div className="hs-track-field">
+            <label className="hs-track-field" htmlFor="public-order-id">
               <Search aria-hidden="true" />
-              <Input value={orderId} onChange={(e) => setOrderId(e.target.value)} placeholder="e.g. ORD-12345" aria-label="Order ID" className="hs-track-input" />
-            </div>
+              <span className="sr-only">Order ID or tracking number</span>
+              <Input id="public-order-id" value={orderId} onChange={(e) => setOrderId(e.target.value)} placeholder="Order ID or tracking number" aria-label="Order ID or tracking number" className="hs-track-input" />
+            </label>
             <Button type="submit" className="hs-track-submit">
               Track
             </Button>
@@ -172,7 +173,7 @@ export default function TrackOrder() {
                       <h3 className="font-serif text-lg mb-4">Digital Files</h3>
                       <div className="space-y-3">
                         {tracking.onlineDeliveryLinks.map((link, i) => (
-                          <Button key={i} variant="outline" asChild className="w-full justify-start rounded-none">
+                          <Button key={i} variant="outline" asChild className="hs-track-file-link w-full justify-start">
                             <a href={link} target="_blank" rel="noreferrer">
                               File Link {i + 1}
                             </a>
