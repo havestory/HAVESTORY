@@ -384,17 +384,6 @@ export function PublicLayout({ children }: { children: ReactNode }) {
         </motion.div>
       )}
 
-      {/* ── Sticky CTA ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, delay: 0.35 }}
-        className="hsx-floating-order fixed bottom-5 left-1/2 -translate-x-1/2 z-50"
-      >
-        <Link href="/store" className="atelier-sticky-cta flex items-center gap-2 px-6 py-3 text-[11px] font-bold uppercase tracking-[0.12em] whitespace-nowrap">
-          Order a Frame <ArrowRight className="w-4 h-4" />
-        </Link>
-      </motion.div>
     </div>
   );
 }
