@@ -1426,6 +1426,18 @@ components:
           type: string
         quantity:
           type: integer
+        unitPrice:
+          type: number
+        selectedOptions:
+          type: array
+          items:
+            type: object
+            properties:
+              groupId:
+                type: string
+              choiceId:
+                type: string
+            required: [groupId, choiceId]
         notes:
           type: string
           nullable: true
@@ -1558,6 +1570,19 @@ components:
           nullable: true
           items:
             type: string
+        shippingMethod:
+          type: string
+          nullable: true
+        paymentMethod:
+          type: string
+          nullable: true
+          enum: [bank_transfer, full_payment, cod]
+        paymentAmount:
+          type: integer
+          nullable: true
+        couponCode:
+          type: string
+          nullable: true
       required:
         [
           customerName,

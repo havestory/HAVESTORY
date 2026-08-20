@@ -474,6 +474,11 @@ export const ListOrdersResponseItem = zod.object({
   "productId": zod.int().nullish(),
   "productName": zod.string(),
   "quantity": zod.int(),
+  "unitPrice": zod.number().optional(),
+  "selectedOptions": zod.array(zod.object({
+  "groupId": zod.string(),
+  "choiceId": zod.string()
+})).optional(),
   "notes": zod.string().nullish()
 })),
   "designLinks": zod.array(zod.string()),
@@ -506,6 +511,11 @@ export const CreateOrderBody = zod.object({
   "productId": zod.int().nullish(),
   "productName": zod.string(),
   "quantity": zod.int(),
+  "unitPrice": zod.number().optional(),
+  "selectedOptions": zod.array(zod.object({
+  "groupId": zod.string(),
+  "choiceId": zod.string()
+})).optional(),
   "notes": zod.string().nullish()
 })),
   "designLinks": zod.array(zod.string()),
@@ -516,7 +526,11 @@ export const CreateOrderBody = zod.object({
   "priority": zod.string().nullish(),
   "discountAmount": zod.int().nullish(),
   "advancePaid": zod.int().nullish(),
-  "tags": zod.array(zod.string()).nullish()
+  "tags": zod.array(zod.string()).nullish(),
+  "shippingMethod": zod.string().nullish(),
+  "paymentMethod": zod.enum(['bank_transfer', 'full_payment', 'cod']).nullish(),
+  "paymentAmount": zod.int().nullish(),
+  "couponCode": zod.string().nullish()
 })
 
 export const CreateOrderResponse = zod.object({
@@ -531,6 +545,11 @@ export const CreateOrderResponse = zod.object({
   "productId": zod.int().nullish(),
   "productName": zod.string(),
   "quantity": zod.int(),
+  "unitPrice": zod.number().optional(),
+  "selectedOptions": zod.array(zod.object({
+  "groupId": zod.string(),
+  "choiceId": zod.string()
+})).optional(),
   "notes": zod.string().nullish()
 })),
   "designLinks": zod.array(zod.string()),
@@ -568,6 +587,11 @@ export const GetOrderResponse = zod.object({
   "productId": zod.int().nullish(),
   "productName": zod.string(),
   "quantity": zod.int(),
+  "unitPrice": zod.number().optional(),
+  "selectedOptions": zod.array(zod.object({
+  "groupId": zod.string(),
+  "choiceId": zod.string()
+})).optional(),
   "notes": zod.string().nullish()
 })),
   "designLinks": zod.array(zod.string()),
@@ -611,6 +635,11 @@ export const UpdateOrderResponse = zod.object({
   "productId": zod.int().nullish(),
   "productName": zod.string(),
   "quantity": zod.int(),
+  "unitPrice": zod.number().optional(),
+  "selectedOptions": zod.array(zod.object({
+  "groupId": zod.string(),
+  "choiceId": zod.string()
+})).optional(),
   "notes": zod.string().nullish()
 })),
   "designLinks": zod.array(zod.string()),

@@ -117,10 +117,17 @@ export interface CreatePortfolioItemBody {
   completedAt?: string | null;
 }
 
+export type OrderItemSelectedOptionsItem = {
+  groupId: string;
+  choiceId: string;
+};
+
 export interface OrderItem {
   productId?: number | null;
   productName: string;
   quantity: number;
+  unitPrice?: number;
+  selectedOptions?: OrderItemSelectedOptionsItem[];
   notes?: string | null;
 }
 
@@ -148,6 +155,15 @@ export interface Order {
   updatedAt: string;
 }
 
+export type CreateOrderBodyPaymentMethod = typeof CreateOrderBodyPaymentMethod[keyof typeof CreateOrderBodyPaymentMethod] | null;
+
+
+export const CreateOrderBodyPaymentMethod = {
+  bank_transfer: 'bank_transfer',
+  full_payment: 'full_payment',
+  cod: 'cod',
+} as const;
+
 export interface CreateOrderBody {
   customerName: string;
   customerPhone: string;
@@ -164,6 +180,10 @@ export interface CreateOrderBody {
   discountAmount?: number | null;
   advancePaid?: number | null;
   tags?: string[] | null;
+  shippingMethod?: string | null;
+  paymentMethod?: CreateOrderBodyPaymentMethod;
+  paymentAmount?: number | null;
+  couponCode?: string | null;
 }
 
 export interface UpdateOrderBody {

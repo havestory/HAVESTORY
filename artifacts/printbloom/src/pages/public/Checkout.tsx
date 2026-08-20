@@ -196,7 +196,7 @@ export default function Checkout() {
         paymentMethod,
         paymentAmount: paymentMethod === "bank_transfer" ? depositAmount : paymentMethod === "full_payment" ? total : 0,
         couponCode: coupon?.valid ? coupon.code : undefined,
-      } as any,
+      },
     }, {
       onSuccess: (order: any) => {
         const orderId = String(order?.orderId || order?.id || "");

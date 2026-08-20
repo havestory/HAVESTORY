@@ -5,10 +5,13 @@
  * HAVESTORY API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { OrderItemSelectedOptionsItem } from './orderItemSelectedOptionsItem';
 
 export interface OrderItem {
   productId?: number | null;
   productName: string;
   quantity: number;
+  unitPrice?: number;
+  selectedOptions?: OrderItemSelectedOptionsItem[];
   notes?: string | null;
 }

@@ -5,6 +5,7 @@
  * HAVESTORY API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { CreateOrderBodyPaymentMethod } from './createOrderBodyPaymentMethod';
 import type { OrderItem } from './orderItem';
 
 export interface CreateOrderBody {
@@ -23,4 +24,8 @@ export interface CreateOrderBody {
   discountAmount?: number | null;
   advancePaid?: number | null;
   tags?: string[] | null;
+  shippingMethod?: string | null;
+  paymentMethod?: CreateOrderBodyPaymentMethod;
+  paymentAmount?: number | null;
+  couponCode?: string | null;
 }

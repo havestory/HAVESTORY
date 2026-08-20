@@ -1,6 +1,6 @@
 import { pool } from "@workspace/db";
 
-const SCHEMA_VERSION = "2026-08-14-light-premium-events-v1";
+const SCHEMA_VERSION = "2026-08-20-checkout-payment-columns-v1";
 let runtimeSchemaReady: Promise<void> | null = null;
 
 async function versionExists(version: string): Promise<boolean> {
@@ -143,6 +143,10 @@ async function applyRuntimeSchema(): Promise<void> {
         courier_tracking_number TEXT, online_delivery_files TEXT NOT NULL DEFAULT '[]',
         online_delivery_links TEXT NOT NULL DEFAULT '[]', order_description TEXT,
         shipping_method TEXT, payment_proof_url TEXT, proof_file_url TEXT, proof_file_name TEXT,
+        payment_method TEXT NOT NULL DEFAULT 'bank_transfer', payment_status TEXT NOT NULL DEFAULT 'pending',
+        payment_amount INTEGER NOT NULL DEFAULT 0, payment_proof_status TEXT NOT NULL DEFAULT 'not_uploaded',
+        payment_proof_uploaded_at TIMESTAMP, payment_proof_expires_at TIMESTAMP,
+        payment_approved_at TIMESTAMP, payment_rejection_reason TEXT, customer_payment_confirmed_at TIMESTAMP,
         service_type_id INTEGER, due_date TEXT, start_date TEXT, priority TEXT,
         discount_amount INTEGER NOT NULL DEFAULT 0, advance_paid INTEGER NOT NULL DEFAULT 0,
         tags TEXT NOT NULL DEFAULT '[]', created_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -172,6 +176,15 @@ async function applyRuntimeSchema(): Promise<void> {
         ADD COLUMN IF NOT EXISTS payment_proof_url TEXT,
         ADD COLUMN IF NOT EXISTS proof_file_url TEXT,
         ADD COLUMN IF NOT EXISTS proof_file_name TEXT,
+        ADD COLUMN IF NOT EXISTS payment_method TEXT NOT NULL DEFAULT 'bank_transfer',
+        ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'pending',
+        ADD COLUMN IF NOT EXISTS payment_amount INTEGER NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS payment_proof_status TEXT NOT NULL DEFAULT 'not_uploaded',
+        ADD COLUMN IF NOT EXISTS payment_proof_uploaded_at TIMESTAMP,
+        ADD COLUMN IF NOT EXISTS payment_proof_expires_at TIMESTAMP,
+        ADD COLUMN IF NOT EXISTS payment_approved_at TIMESTAMP,
+        ADD COLUMN IF NOT EXISTS payment_rejection_reason TEXT,
+        ADD COLUMN IF NOT EXISTS customer_payment_confirmed_at TIMESTAMP,
         ADD COLUMN IF NOT EXISTS service_type_id INTEGER,
         ADD COLUMN IF NOT EXISTS due_date TEXT,
         ADD COLUMN IF NOT EXISTS start_date TEXT,
@@ -390,6 +403,14 @@ async function applyRuntimeSchema(): Promise<void> {
         ADD COLUMN IF NOT EXISTS google_pay_number TEXT,
         ADD COLUMN IF NOT EXISTS google_pay_qr_url TEXT,
         ADD COLUMN IF NOT EXISTS google_pay_instructions TEXT,
+        ADD COLUMN IF NOT EXISTS checkout_bank_transfer_enabled INTEGER NOT NULL DEFAULT 1,
+        ADD COLUMN IF NOT EXISTS checkout_deposit_amount INTEGER NOT NULL DEFAULT 500,
+        ADD COLUMN IF NOT EXISTS checkout_deposit_message TEXT NOT NULL DEFAULT 'A Rs. 500 deposit is required to confirm this order. Upload your payment proof after paying.',
+        ADD COLUMN IF NOT EXISTS checkout_full_payment_enabled INTEGER NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS checkout_full_payment_offer TEXT NOT NULL DEFAULT 'Pay the full amount upfront and receive a special offer.',
+        ADD COLUMN IF NOT EXISTS checkout_full_payment_discount INTEGER NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS checkout_cod_enabled INTEGER NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS checkout_cod_message TEXT NOT NULL DEFAULT 'Cash on delivery is currently unavailable.',
         ADD COLUMN IF NOT EXISTS order_email_notifications_enabled INTEGER NOT NULL DEFAULT 1,
         ADD COLUMN IF NOT EXISTS order_email_recipients TEXT NOT NULL DEFAULT '',
         ADD COLUMN IF NOT EXISTS gmail_user TEXT,
