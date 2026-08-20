@@ -162,6 +162,7 @@ router.get("/:id", async (req, res) => {
 
     if (!result) return res.status(404).json({ error: "Product not found" });
     const p = result.products;
+    if (!p.active && !getAdminAuth(req)) return res.status(404).json({ error: "Product not found" });
     res.json({ ...p, invoiceName: (p as any).invoiceName ?? null, galleryImages: parseGallery(p.galleryImages), category: result.categories });
   } catch (err) {
     req.log.error(err);

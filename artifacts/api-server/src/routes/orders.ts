@@ -182,20 +182,44 @@ router.post("/", async (req, res) => {
     const adminAuth = getAdminAuth(req);
     const clientDiscountAmount = req.body.discountAmount;
 
-    const itemTotalForCoupon = await (async () => {
-      if (!couponCode) return 0;
-      const productIds = (Array.isArray(items) ? items : [])
+    const requestedItems = Array.isArray(items) ? items : [];
+    let trustedItems = requestedItems;
+    if (!adminAuth && requestedItems.length > 0) {
+      const productIds = requestedItems
         .map((it: any) => Number(it.productId)).filter((id: number) => Number.isFinite(id) && id > 0);
-      if (productIds.length === 0) return 0;
-      const dbProducts = await db.select({ id: productsTable.id, price: productsTable.price })
-        .from(productsTable).where(inArray(productsTable.id, productIds));
-      const priceMap = new Map(dbProducts.map(p => [p.id, parseFloat(String(p.price)) || 0]));
-      return (Array.isArray(items) ? items : []).reduce((sum: number, it: any) => {
-        const qty = Math.max(1, Number(it.quantity ?? 1) || 1);
-        const price = priceMap.get(Number(it.productId)) ?? 0;
-        return sum + qty * price;
-      }, 0);
-    })();
+      const dbProducts = productIds.length > 0
+        ? await db.select({ id: productsTable.id, name: productsTable.name, price: productsTable.price, active: productsTable.active, customConfig: productsTable.customConfig })
+          .from(productsTable).where(inArray(productsTable.id, productIds))
+        : [];
+      const productMap = new Map(dbProducts.map(product => [product.id, product]));
+
+      trustedItems = requestedItems.map((item: any) => {
+        const product = productMap.get(Number(item.productId));
+        if (!product || !product.active) return { ...item, productId: null, unitPrice: 0 };
+        let optionTotal = 0;
+        try {
+          const config = JSON.parse(product.customConfig || "{}");
+          const selected = Array.isArray(item.selectedOptions) ? item.selectedOptions : [];
+          for (const selection of selected) {
+            const group = (Array.isArray(config.optionGroups) ? config.optionGroups : []).find((entry: any) => entry.id === selection.groupId);
+            const choice = (Array.isArray(group?.choices) ? group.choices : []).find((entry: any) => entry.id === selection.choiceId);
+            const optionPrice = Number.parseFloat(String(choice?.price ?? 0));
+            if (Number.isFinite(optionPrice) && optionPrice > 0) optionTotal += optionPrice;
+          }
+        } catch { /* malformed legacy config falls back to the product base price */ }
+        return {
+          ...item,
+          productName: product.name,
+          unitPrice: (Number.parseFloat(String(product.price)) || 0) + optionTotal,
+        };
+      });
+    }
+
+    const itemTotalForCoupon = trustedItems.reduce((sum: number, item: any) => {
+      const qty = Math.max(1, Number(item.quantity ?? 1) || 1);
+      const price = Number.parseFloat(String(item.unitPrice ?? item.price ?? 0)) || 0;
+      return sum + qty * price;
+    }, 0);
 
     // Resolve the invoice we are linking to (if any) BEFORE the transaction
     // so we can fail fast on bad input without rolling back.
@@ -271,7 +295,7 @@ router.post("/", async (req, res) => {
           customerEmail,
           customerAddress: customerAddress || "",
           orderType,
-          items: JSON.stringify(items),
+          items: JSON.stringify(trustedItems),
           designLinks: JSON.stringify(designLinks),
           attachments: JSON.stringify(attachments),
           status: "submitted",
@@ -310,7 +334,7 @@ router.post("/", async (req, res) => {
         const recipients = String(settingsRow?.orderEmailRecipients ?? "")
           .split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
         if (!enabled || recipients.length === 0) return;
-        let itemsAny = (Array.isArray(items) ? items : []) as any[];
+        let itemsAny = trustedItems as any[];
         const shippingMethodVal = shippingMethod === "courier" ? "courier"
                                 : shippingMethod === "sl_post" ? "sl_post"
                                 : null;
@@ -364,7 +388,7 @@ router.post("/", async (req, res) => {
           const shipCost = shippingMethod === "courier" ? courierCh
                          : shippingMethod === "sl_post" ? slPostCh : 0;
           const disc = Number.isFinite(Number(discountAmount)) ? Math.max(0, Math.round(Number(discountAmount))) : 0;
-          let itemsAny = (Array.isArray(items) ? items : []) as any[];
+          let itemsAny = trustedItems as any[];
           let itemTotal = itemsAny.reduce((s: number, it: any) => {
             const qty = Number(it.quantity ?? it.qty ?? 1) || 1;
             const unit = parseFloat(String(it.price ?? it.unitPrice ?? 0)) || 0;
@@ -488,7 +512,7 @@ router.post("/", async (req, res) => {
       // Build line items — use product invoiceName if set, and include any
       // extra options / size info appearing after the base product name.
       const productIdSet = [...new Set(
-        (items as any[])
+        (trustedItems as any[])
           .map((it: any) => Number(it.productId))
           .filter(n => Number.isFinite(n) && n > 0)
       )];
@@ -507,7 +531,7 @@ router.post("/", async (req, res) => {
         }
       }
 
-      const lineItems = (items as any[]).map((it: any) => {
+      const lineItems = (trustedItems as any[]).map((it: any) => {
         const rawName: string = it.name ?? it.productName ?? "Item";
         const pid = Number(it.productId);
         let description: string;
@@ -593,7 +617,7 @@ router.post("/", async (req, res) => {
       // Log at ERROR level so the failure is visible in Vercel function logs.
       // The order has already been saved, so we deliberately do not 500 here.
       req.log.error(
-        { err: invErr, orderId, customerName, itemCount: (items as any[]).length },
+        { err: invErr, orderId, customerName, itemCount: (trustedItems as any[]).length },
         "Auto-invoice creation failed",
       );
     }

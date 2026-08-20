@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useListProducts, useListCategories, useCreateOrder, useListPortfolio } from '@workspace/api-client-react';
+import { useEffect, useState } from 'react';
+import { useListProducts, useListCategories, useCreateOrder, useListPortfolio, useGetSettings } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ShoppingCart, Plus, Minus, Trash2, Search, CheckCircle2, ArrowRight, Tag, X, Sparkles, ShieldCheck, Ruler, Heart, MessageCircle, Eye, SlidersHorizontal, ArrowUpRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'wouter';
+import { useShopCart } from '@/lib/shop-cart';
 
 interface CouponResult {
   valid: boolean;
@@ -38,6 +39,7 @@ export default function Store() {
   const { data: categories } = useListCategories();
   const { data: products, isLoading } = useListProducts();
   const { data: portfolio } = useListPortfolio();
+  const { data: settings } = useGetSettings();
   const createOrder = useCreateOrder();
   
   const [activeCategory, setActiveCategory] = useState<string>('all');
@@ -47,10 +49,10 @@ export default function Store() {
   const [savedProducts, setSavedProducts] = useState<number[]>([]);
   const { toast } = useToast();
   
-  // Local Cart State
-  const [cart, setCart] = useState<Array<{product: any, quantity: number}>>([]);
+  const { items: cart, count: cartCount, subtotal: cartTotal, addItem, updateQuantity, removeItem, clear: clearCart } = useShopCart();
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [successOrderId, setSuccessOrderId] = useState('');
 
   // Form State for Checkout
   const [customerName, setCustomerName] = useState('');
@@ -58,6 +60,7 @@ export default function Store() {
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
   const [orderDescription, setOrderDescription] = useState('');
+  const [shippingMethod, setShippingMethod] = useState<'courier' | 'sl_post' | 'pickup'>('courier');
 
   // Coupon state
   const [couponCode, setCouponCode] = useState('');
@@ -87,49 +90,42 @@ export default function Store() {
   };
 
   const addToCart = (product: any) => {
-    setCart(prev => {
-      const existing = prev.find(item => item.product.id === product.id);
-      if (existing) {
-        return prev.map(item => 
-          item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      }
-      return [...prev, { product, quantity: 1 }];
-    });
+    addItem({ product, quantity: 1, selections: [], unitPrice: parseFloat(String(product.price || 0)) || 0, imageUrl: product.imageUrl });
     // Cart changed — discard any applied coupon so it gets re-validated
     setCouponResult(null);
     setCouponCode('');
-    toast({ title: 'Added to cart', description: `${product.name} added to your inquiry.` });
+    toast({ title: 'Added to cart', description: `${product.name} is ready for checkout.` });
   };
 
-  const updateQuantity = (productId: number, delta: number) => {
-    setCart(prev => {
-      const updated = prev.map(item => {
-        if (item.product.id === productId) {
-          return { ...item, quantity: item.quantity + delta };
-        }
-        return item;
-      });
-      return updated.filter(item => item.quantity > 0);
-    });
+  const changeQuantity = (key: string, delta: number) => {
+    updateQuantity(key, delta);
     // Cart changed — discard applied coupon to force re-validation
     setCouponResult(null);
     setCouponCode('');
   };
 
-  const removeFromCart = (productId: number) => {
-    setCart(prev => prev.filter(item => item.product.id !== productId));
+  const removeFromCart = (key: string) => {
+    removeItem(key);
     setCouponResult(null);
     setCouponCode('');
   };
 
-  const cartTotal = cart.reduce((total, item) => total + (parseFloat(String(item.product.price || 0)) * item.quantity), 0);
   const hasQuotedItem = cart.some(item => item.product?.isCustomInquiry || item.product?.priceType === 'custom_quote');
   const estimatedTotalLabel = hasQuotedItem
     ? (cartTotal > 0 ? `Rs. ${cartTotal.toFixed(2)} + quote` : 'Quote on request')
     : `Rs. ${cartTotal.toFixed(2)}`;
   const couponDiscount = couponResult?.valid && couponResult.discount ? couponResult.discount : 0;
-  const finalTotal = Math.max(0, cartTotal - couponDiscount);
+  const courierCharge = Number((settings as any)?.courierCharge || 450);
+  const slPostCharge = Number((settings as any)?.slPostCharge || 250);
+  const shippingCost = shippingMethod === 'courier' ? courierCharge : shippingMethod === 'sl_post' ? slPostCharge : 0;
+  const finalTotal = Math.max(0, cartTotal - couponDiscount + shippingCost);
+
+  useEffect(() => {
+    if (window.location.hash === '#checkout' && cart.length > 0) {
+      setIsCheckoutOpen(true);
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, [cart.length]);
 
   const applyCoupon = async () => {
     if (!couponCode.trim()) return;
@@ -169,20 +165,24 @@ export default function Store() {
 
     const inquiryCart = cart.length > 0
       ? cart
-      : [{ product: CUSTOM_INQUIRY_PRODUCT, quantity: 1 }];
+      : [{ key: 'custom-inquiry', product: CUSTOM_INQUIRY_PRODUCT, quantity: 1, selections: [], unitPrice: 0, imageUrl: CUSTOM_INQUIRY_PRODUCT.imageUrl }];
 
     const orderItems = inquiryCart.map(item => ({
       productId: typeof item.product.id === 'number' ? item.product.id : null,
       productName: item.product.name,
       quantity: item.quantity,
-      unitPrice: item.product.price,
-      notes: item.product.description || null,
+      unitPrice: item.unitPrice,
+      selectedOptions: item.selections.map(selection => ({ groupId: selection.groupId, choiceId: selection.choiceId })),
+      notes: [
+        item.selections?.length ? item.selections.map(selection => `${selection.groupTitle}: ${selection.choiceName}`).join(', ') : '',
+        item.product.description || '',
+      ].filter(Boolean).join(' — ') || null,
     }));
 
     const couponNote = couponResult?.valid ? `\nCoupon: ${couponResult.code} (-Rs. ${couponDiscount.toLocaleString('en-IN')})` : '';
     const notesText = [
       orderDescription ? `Custom request: ${orderDescription}` : '',
-      `Items:\n${inquiryCart.map(c => `${c.quantity}x ${c.product.name}`).join('\n')}`,
+      `Items:\n${inquiryCart.map(c => `${c.quantity}x ${c.product.name}${c.selections?.length ? ` (${c.selections.map(selection => `${selection.groupTitle}: ${selection.choiceName}`).join(', ')})` : ''}`).join('\n')}`,
       couponNote,
     ].filter(Boolean).join('\n\n');
 
@@ -196,6 +196,7 @@ export default function Store() {
         designLinks: [],
         attachments: [],
         shippingAddress: customerAddress,
+        shippingMethod,
         notes: notesText,
         description: notesText,
         // couponCode is validated server-side; the backend derives the
@@ -204,9 +205,10 @@ export default function Store() {
         items: orderItems as any 
       } as any
     }, {
-      onSuccess: () => {
-        setCart([]);
+      onSuccess: (order: any) => {
+        clearCart();
         setIsCheckoutOpen(false);
+        setSuccessOrderId(order?.orderId || '');
         setIsSuccessOpen(true);
         setCustomerName('');
         setCustomerPhone('');
@@ -335,10 +337,10 @@ export default function Store() {
                 <SheetTrigger asChild>
                   <Button variant="default" className="hs-store-cart-trigger">
                     <ShoppingCart className="w-4 h-4" />
-                    <span>Inquiry Cart</span>
+                    <span>Shopping Cart</span>
                     {cart.length > 0 && (
                       <span className="absolute -top-2 -right-2 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-[10px] font-bold shadow-sm border-2 border-background">
-                        {cart.reduce((a, b) => a + b.quantity, 0)}
+                        {cartCount}
                       </span>
                     )}
                   </Button>
@@ -346,7 +348,7 @@ export default function Store() {
                 <SheetContent className="hs-store-cart-sheet">
                   <div className="hs-store-cart-head">
                     <SheetHeader>
-                      <SheetTitle className="font-serif text-2xl text-white">Your Inquiry Cart</SheetTitle>
+                      <SheetTitle className="font-serif text-2xl text-white">Your Shopping Cart</SheetTitle>
                     </SheetHeader>
                   </div>
                   
@@ -357,7 +359,7 @@ export default function Store() {
                           <ShoppingCart className="w-8 h-8 opacity-40" />
                         </div>
                         <p className="font-medium text-lg text-foreground">Your cart is empty.</p>
-                        <p className="text-sm">Add a frame from the collection, or start with a custom consultation.</p>
+                        <p className="text-sm">Choose a frame or print, select its options, and add it here.</p>
                         <Button
                           type="button"
                           variant="outline"
@@ -370,29 +372,30 @@ export default function Store() {
                     ) : (
                       <div className="space-y-4">
                         {cart.map(item => (
-                          <div key={item.product.id} className="hs-store-cart-item">
+                          <div key={item.key} className="hs-store-cart-item">
                             <div className="w-20 h-20 bg-muted shrink-0 overflow-hidden rounded-[0.25rem]">
                               <img 
-                                src={item.product.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400&q=80'} 
+                                src={item.imageUrl || item.product.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400&q=80'}
                                 alt={item.product.name} 
                                 className="w-full h-full object-cover" 
                               />
                             </div>
                             <div className="flex-1 flex flex-col">
                               <h4 className="font-serif font-bold text-base leading-tight mb-1">{item.product.name}</h4>
-                              <p className="text-sm text-secondary font-semibold mb-auto">{item.product.isCustomInquiry ? 'Studio quote' : `Rs. ${item.product.price}`}</p>
+                              <p className="text-sm text-secondary font-semibold">{item.product.isCustomInquiry ? 'Studio quote' : `Rs. ${item.unitPrice.toLocaleString('en-LK')}`}</p>
+                              {item.selections?.length > 0 && <p className="mb-auto mt-1 text-[10px] leading-relaxed text-muted-foreground">{item.selections.map(selection => `${selection.groupTitle}: ${selection.choiceName}`).join(' · ')}</p>}
                               
                               <div className="flex items-center justify-between mt-3">
                                 <div className="flex items-center border border-border bg-background rounded-[0.25rem] overflow-hidden">
-                                  <button onClick={() => updateQuantity(item.product.id, -1)} className="w-7 h-7 flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
+                                  <button onClick={() => changeQuantity(item.key, -1)} className="w-7 h-7 flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
                                     <Minus className="w-3 h-3" />
                                   </button>
                                   <span className="w-8 text-center text-xs font-semibold">{item.quantity}</span>
-                                  <button onClick={() => updateQuantity(item.product.id, 1)} className="w-7 h-7 flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
+                                  <button onClick={() => changeQuantity(item.key, 1)} className="w-7 h-7 flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
                                     <Plus className="w-3 h-3" />
                                   </button>
                                 </div>
-                                <button onClick={() => removeFromCart(item.product.id)} className="w-7 h-7 flex items-center justify-center text-destructive/70 hover:text-destructive hover:bg-destructive/10 rounded-full transition-colors">
+                                <button onClick={() => removeFromCart(item.key)} className="w-7 h-7 flex items-center justify-center text-destructive/70 hover:text-destructive hover:bg-destructive/10 rounded-full transition-colors">
                                   <Trash2 className="w-4 h-4" />
                                 </button>
                               </div>
@@ -413,7 +416,7 @@ export default function Store() {
                         onClick={() => setIsCheckoutOpen(true)}
                         className="w-full rounded-[0.25rem] h-14 bg-primary text-primary-foreground hover:bg-primary/90 font-bold uppercase tracking-widest text-sm shadow-sm"
                       >
-                        Proceed to Inquiry
+                        Proceed to checkout
                       </Button>
                     </div>
                   )}
@@ -488,24 +491,21 @@ export default function Store() {
                           <button type="button" aria-label={`Save ${product.name}`} onClick={() => toggleSaved(product.id)} className={`store-icon-button ${savedProducts.includes(product.id) ? 'is-active' : ''}`}><Heart size={15} fill={savedProducts.includes(product.id) ? 'currentColor' : 'none'} /></button>
                         </div>
                       </div>
-                      <button
-                        onClick={(e) => { e.preventDefault(); addToCart(product); }}
-                        className="hs-store-add"
-                      >
-                        <span>Add to inquiry</span>
-                        <Plus className="h-4 w-4" />
-                      </button>
+                      <Link href={`/store/${product.id}`} className="hs-store-add">
+                        <span>View &amp; choose options</span>
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
                     </div>
                     <div className="hs-store-product-body">
                       <div className="hs-store-product-meta">
                         <span className="store-number">{product.category?.name || 'HANDCRAFTED EDIT'}</span>
                         <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Ready to make</span>
                       </div>
-                      <h3 className="editorial-display line-clamp-1 text-2xl font-bold text-foreground">{product.name}</h3>
+                      <Link href={`/store/${product.id}`}><h3 className="editorial-display line-clamp-1 text-2xl font-bold text-foreground">{product.name}</h3></Link>
                       <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{product.description || 'A considered piece, finished by hand in our studio.'}</p>
                       <div className="hs-store-product-footer">
                         <div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">From</p><p className="mt-1 text-lg font-black text-foreground">Rs. {product.price}</p></div>
-                        <button type="button" onClick={() => setQuickViewProduct(product)} className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-[0.14em] text-secondary transition-colors hover:text-foreground">Details <ArrowUpRight size={13} /></button>
+                        <Link href={`/store/${product.id}`} className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-[0.14em] text-secondary transition-colors hover:text-foreground">View details <ArrowUpRight size={13} /></Link>
                       </div>
                     </div>
                   </div>
@@ -519,8 +519,8 @@ export default function Store() {
       {cart.length > 0 && (
         <div className="hs-store-floating-cart animate-in slide-in-from-bottom-4">
           <div>
-            <div className="flex min-w-0 items-center gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground"><ShoppingCart size={17} /></div><div className="min-w-0"><div className="truncate text-sm font-bold">{cart.reduce((a, b) => a + b.quantity, 0)} {cart.reduce((a, b) => a + b.quantity, 0) === 1 ? 'piece' : 'pieces'} selected</div><div className="text-[10px] uppercase tracking-[0.16em] text-primary-foreground/55">Estimated {estimatedTotalLabel}</div></div></div>
-            <Button onClick={() => setIsCheckoutOpen(true)} className="shrink-0 rounded-xl bg-secondary px-4 text-xs font-bold uppercase tracking-wider text-secondary-foreground hover:bg-secondary/90">Start order <ArrowRight size={14} /></Button>
+            <div className="flex min-w-0 items-center gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground"><ShoppingCart size={17} /></div><div className="min-w-0"><div className="truncate text-sm font-bold">{cartCount} {cartCount === 1 ? 'piece' : 'pieces'} in your cart</div><div className="text-[10px] uppercase tracking-[0.16em] text-primary-foreground/55">Subtotal {estimatedTotalLabel}</div></div></div>
+            <Button onClick={() => setIsCheckoutOpen(true)} className="shrink-0 rounded-xl bg-secondary px-4 text-xs font-bold uppercase tracking-wider text-secondary-foreground hover:bg-secondary/90">Checkout <ArrowRight size={14} /></Button>
           </div>
         </div>
       )}
@@ -536,8 +536,8 @@ export default function Store() {
                 <h2 className="editorial-display mt-4 text-4xl leading-none text-foreground">{quickViewProduct.name}</h2>
                 <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{quickViewProduct.description || 'A considered piece, finished by hand in our studio.'}</p>
                 <div className="my-7 flex items-end justify-between border-y border-border py-5"><div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Studio price</p><p className="mt-1 text-2xl font-black text-foreground">Rs. {quickViewProduct.price}</p></div><span className="store-number">PER {String(quickViewProduct.priceType || 'PIECE').toUpperCase()}</span></div>
-                <div className="flex flex-col gap-3 sm:flex-row"><Button onClick={() => { addToCart(quickViewProduct); setQuickViewProduct(null); }} className="h-12 flex-1 rounded-full bg-secondary font-black uppercase tracking-[0.14em] text-secondary-foreground hover:bg-secondary/90">Add to inquiry <ArrowRight size={15} /></Button><Button type="button" variant="outline" onClick={() => setQuickViewProduct(null)} className="h-12 rounded-full border-border px-6 text-xs font-bold uppercase tracking-[0.14em]">Close</Button></div>
-                <p className="mt-5 flex items-center gap-2 text-xs text-muted-foreground"><ShieldCheck size={14} className="text-secondary" /> We will confirm sizing, finish, and delivery before production.</p>
+                <div className="flex flex-col gap-3 sm:flex-row"><Link href={`/store/${quickViewProduct.id}`} onClick={() => setQuickViewProduct(null)} className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-secondary px-5 text-xs font-black uppercase tracking-[0.14em] text-secondary-foreground">View product &amp; options <ArrowRight size={15} /></Link><Button type="button" variant="outline" onClick={() => setQuickViewProduct(null)} className="h-12 rounded-full border-border px-6 text-xs font-bold uppercase tracking-[0.14em]">Close</Button></div>
+                <p className="mt-5 flex items-center gap-2 text-xs text-muted-foreground"><ShieldCheck size={14} className="text-secondary" /> Select the size, frame and finish before adding this item to your cart.</p>
               </div>
             </div>
           )}
@@ -549,9 +549,9 @@ export default function Store() {
         <DialogContent className="hs-store-checkout">
           <div className="p-6 bg-primary text-primary-foreground">
             <DialogHeader>
-              <DialogTitle className="font-serif text-2xl font-bold text-white">Complete Your Inquiry</DialogTitle>
+              <DialogTitle className="font-serif text-2xl font-bold text-white">Checkout</DialogTitle>
               <DialogDescription className="text-primary-foreground/80 mt-2">
-                Provide your details. We will contact you shortly to confirm the order and discuss any custom requirements.
+                Review your delivery details and place your HAVESTORY order. You will receive a unique tracking number after submission.
               </DialogDescription>
             </DialogHeader>
           </div>
@@ -612,6 +612,17 @@ export default function Store() {
               />
             </div>
 
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Delivery method *</label>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                {[
+                  { value: 'courier', label: 'Courier', price: courierCharge },
+                  { value: 'sl_post', label: 'SL Post', price: slPostCharge },
+                  { value: 'pickup', label: 'Studio pickup', price: 0 },
+                ].map(method => <button key={method.value} type="button" onClick={() => setShippingMethod(method.value as typeof shippingMethod)} className={`rounded-xl border px-3 py-3 text-left transition ${shippingMethod === method.value ? 'border-secondary bg-secondary/10 text-foreground' : 'border-border bg-background text-muted-foreground'}`}><strong className="block text-xs">{method.label}</strong><span className="mt-1 block text-[10px]">{method.price ? `Rs. ${method.price.toLocaleString('en-LK')}` : 'Free'}</span></button>)}
+              </div>
+            </div>
+
             {/* Coupon Code */}
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Coupon Code</label>
@@ -656,6 +667,10 @@ export default function Store() {
                   <span className="text-base font-semibold">− Rs. {couponDiscount.toLocaleString('en-IN')}</span>
                 </div>
               )}
+              <div className="flex justify-between items-center">
+                <span className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Delivery:</span>
+                <span className="text-base font-semibold text-foreground">{shippingCost ? `Rs. ${shippingCost.toLocaleString('en-LK')}` : 'Free'}</span>
+              </div>
               <div className="flex justify-between items-center border-t border-border pt-2">
                 <span className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Estimated Total:</span>
                 <span className="font-serif text-2xl font-bold text-foreground text-right">{hasQuotedItem ? 'Quote on request' : `Rs. ${finalTotal.toFixed(2)}`}</span>
@@ -667,7 +682,7 @@ export default function Store() {
                 Cancel
               </Button>
               <Button type="submit" disabled={createOrder.isPending} className="flex-1 rounded-[0.25rem] bg-secondary text-secondary-foreground hover:bg-secondary/90 h-12 font-bold uppercase tracking-widest text-xs shadow-sm">
-                {createOrder.isPending ? 'Submitting...' : 'Submit Inquiry'}
+                {createOrder.isPending ? 'Placing order...' : 'Place order'}
               </Button>
             </div>
           </form>
@@ -680,10 +695,11 @@ export default function Store() {
           <div className="w-16 h-16 bg-secondary/20 text-secondary rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="w-8 h-8" />
           </div>
-          <h2 className="font-serif text-3xl font-bold mb-4">Inquiry Received!</h2>
+          <h2 className="font-serif text-3xl font-bold mb-4">Order received!</h2>
           <p className="text-muted-foreground mb-8 text-sm leading-relaxed">
-            Thank you for your interest. Our team will review your order and contact you shortly.
+            Your order has been created successfully. Check your email for the order number and use Track Order to follow its progress.
           </p>
+          {successOrderId && <div className="mb-6 rounded-xl border border-secondary/30 bg-secondary/10 p-4"><span className="block text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">Your tracking number</span><strong className="mt-1 block text-lg text-foreground">{successOrderId}</strong><Link href={`/track-order?id=${encodeURIComponent(successOrderId)}`} className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-secondary">Track this order <ArrowRight size={13} /></Link></div>}
           <Button onClick={() => setIsSuccessOpen(false)} className="w-full rounded-[0.25rem] bg-primary text-primary-foreground h-12 font-bold uppercase tracking-widest text-xs">
             Continue Browsing
           </Button>
