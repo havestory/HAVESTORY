@@ -125,7 +125,7 @@ export default function CustomProject() {
 
             <motion.div variants={fadeUp} className="mb-10">
               <p className="section-label mb-2">Project Details</p>
-              <h2 className="font-serif text-3xl font-bold text-foreground .heading-underline">Tell us about your project</h2>
+              <h2 className="font-serif text-3xl font-bold text-foreground">Tell us about your project</h2>
               <p className="text-muted-foreground mt-3">Fields marked <span className="text-destructive">*</span> are required.</p>
             </motion.div>
 

@@ -70,7 +70,7 @@ export default function PriceListView() {
   const isExpired = pl.expiresAt && new Date(pl.expiresAt) < new Date();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="hsc-price-list min-h-screen bg-background">
       {/* Print styles */}
       <style>{`
         @media print {

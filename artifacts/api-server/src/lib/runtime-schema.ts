@@ -5,7 +5,10 @@ let runtimeSchemaReady: Promise<void> | null = null;
 
 async function versionExists(version: string): Promise<boolean> {
   try {
-    const result = await pool.query("SELECT 1 FROM app_schema_versions WHERE version = $1", [version]);
+    const result = await pool.query(
+      "SELECT 1 FROM app_schema_versions WHERE version = $1",
+      [version],
+    );
     return result.rowCount === 1;
   } catch (error: any) {
     // 42P01 = app_schema_versions has not been created yet.
@@ -21,14 +24,19 @@ async function applyRuntimeSchema(): Promise<void> {
   try {
     await client.query("BEGIN");
     // Serialise the one-time repair across simultaneous Vercel cold starts.
-    await client.query("SELECT pg_advisory_xact_lock(hashtext('havestory-runtime-schema'))");
+    await client.query(
+      "SELECT pg_advisory_xact_lock(hashtext('havestory-runtime-schema'))",
+    );
     await client.query(`
       CREATE TABLE IF NOT EXISTS app_schema_versions (
         version TEXT PRIMARY KEY,
         applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `);
-    const existing = await client.query("SELECT 1 FROM app_schema_versions WHERE version = $1", [SCHEMA_VERSION]);
+    const existing = await client.query(
+      "SELECT 1 FROM app_schema_versions WHERE version = $1",
+      [SCHEMA_VERSION],
+    );
     if (existing.rowCount === 1) {
       await client.query("COMMIT");
       return;
@@ -366,6 +374,7 @@ async function applyRuntimeSchema(): Promise<void> {
         ADD COLUMN IF NOT EXISTS hero_slide_image8 TEXT,
         ADD COLUMN IF NOT EXISTS hero_slide_image9 TEXT,
         ADD COLUMN IF NOT EXISTS hero_slide_image10 TEXT,
+        ADD COLUMN IF NOT EXISTS hero_slide_enabled TEXT NOT NULL DEFAULT '[true,true,true,true,true,true,true,true,true,true]',
         ADD COLUMN IF NOT EXISTS home_feature_cards TEXT NOT NULL DEFAULT '[]',
         ADD COLUMN IF NOT EXISTS payment_qr_url TEXT,
         ADD COLUMN IF NOT EXISTS payment_button_url TEXT,
@@ -404,9 +413,15 @@ async function applyRuntimeSchema(): Promise<void> {
     `);
 
     // Promote the former built-in themes once; future admin-selected themes remain untouched.
-    await client.query("UPDATE settings SET theme_preset = 'light-premium' WHERE theme_preset IN ('havestory-gallery', 'light-editorial')");
-    await client.query("INSERT INTO settings (id, theme_preset, special_event_type) VALUES (1, 'light-premium', 'none') ON CONFLICT (id) DO NOTHING");
-    await client.query("INSERT INTO app_schema_versions(version) VALUES ($1)", [SCHEMA_VERSION]);
+    await client.query(
+      "UPDATE settings SET theme_preset = 'light-premium' WHERE theme_preset IN ('havestory-gallery', 'light-editorial')",
+    );
+    await client.query(
+      "INSERT INTO settings (id, theme_preset, special_event_type) VALUES (1, 'light-premium', 'none') ON CONFLICT (id) DO NOTHING",
+    );
+    await client.query("INSERT INTO app_schema_versions(version) VALUES ($1)", [
+      SCHEMA_VERSION,
+    ]);
     await client.query("COMMIT");
   } catch (error) {
     await client.query("ROLLBACK").catch(() => undefined);
@@ -418,7 +433,7 @@ async function applyRuntimeSchema(): Promise<void> {
 
 export function ensureRuntimeSchema(): Promise<void> {
   if (!runtimeSchemaReady) {
-    runtimeSchemaReady = applyRuntimeSchema().catch(error => {
+    runtimeSchemaReady = applyRuntimeSchema().catch((error) => {
       runtimeSchemaReady = null;
       throw error;
     });

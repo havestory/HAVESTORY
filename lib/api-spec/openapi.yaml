@@ -1226,7 +1226,18 @@ components:
         category:
           $ref: "#/components/schemas/Category"
           nullable: true
-      required: [id, name, description, price, priceType, featured, active, sortOrder, createdAt]
+      required:
+        [
+          id,
+          name,
+          description,
+          price,
+          priceType,
+          featured,
+          active,
+          sortOrder,
+          createdAt,
+        ]
 
     CreateProductBody:
       type: object
@@ -1288,7 +1299,18 @@ components:
           type: integer
         createdAt:
           type: string
-      required: [id, name, description, priceType, highlights, featured, active, sortOrder, createdAt]
+      required:
+        [
+          id,
+          name,
+          description,
+          priceType,
+          highlights,
+          featured,
+          active,
+          sortOrder,
+          createdAt,
+        ]
 
     CreateServiceBody:
       type: object
@@ -1352,7 +1374,17 @@ components:
           nullable: true
         createdAt:
           type: string
-      required: [id, title, category, description, galleryImages, tags, featured, createdAt]
+      required:
+        [
+          id,
+          title,
+          category,
+          description,
+          galleryImages,
+          tags,
+          featured,
+          createdAt,
+        ]
 
     CreatePortfolioItemBody:
       type: object
@@ -1458,7 +1490,24 @@ components:
           type: string
         updatedAt:
           type: string
-      required: [id, orderId, customerName, customerPhone, customerAddress, orderType, items, designLinks, attachments, status, discountAmount, advancePaid, tags, createdAt, updatedAt]
+      required:
+        [
+          id,
+          orderId,
+          customerName,
+          customerPhone,
+          customerAddress,
+          orderType,
+          items,
+          designLinks,
+          attachments,
+          status,
+          discountAmount,
+          advancePaid,
+          tags,
+          createdAt,
+          updatedAt,
+        ]
 
     CreateOrderBody:
       type: object
@@ -1509,7 +1558,16 @@ components:
           nullable: true
           items:
             type: string
-      required: [customerName, customerPhone, customerAddress, orderType, items, designLinks, attachments]
+      required:
+        [
+          customerName,
+          customerPhone,
+          customerAddress,
+          orderType,
+          items,
+          designLinks,
+          attachments,
+        ]
 
     UpdateOrderBody:
       type: object
@@ -1601,7 +1659,18 @@ components:
             status:
               type: string
           required: [invoiceNumber, amount, status]
-      required: [orderId, customerName, status, createdAt, updatedAt, statusHistory, attachments, onlineDeliveryFiles, onlineDeliveryLinks]
+      required:
+        [
+          orderId,
+          customerName,
+          status,
+          createdAt,
+          updatedAt,
+          statusHistory,
+          attachments,
+          onlineDeliveryFiles,
+          onlineDeliveryLinks,
+        ]
 
     Review:
       type: object
@@ -1620,7 +1689,8 @@ components:
           type: boolean
         createdAt:
           type: string
-      required: [id, customerName, rating, comment, approved, featured, createdAt]
+      required:
+        [id, customerName, rating, comment, approved, featured, createdAt]
 
     CreateReviewBody:
       type: object
@@ -1664,7 +1734,8 @@ components:
           type: boolean
         createdAt:
           type: string
-      required: [id, messageId, fullName, phone, subject, message, isRead, createdAt]
+      required:
+        [id, messageId, fullName, phone, subject, message, isRead, createdAt]
 
     CreateMessageBody:
       type: object
@@ -1811,6 +1882,14 @@ components:
         themePreset:
           type: string
           nullable: true
+        specialEventEnabled:
+          type: boolean
+        specialEventType:
+          type: string
+          nullable: true
+        specialEventMessage:
+          type: string
+          nullable: true
         bankName:
           type: string
           nullable: true
@@ -1901,6 +1980,24 @@ components:
           type: string
           nullable: true
         heroSlideImage5:
+          type: string
+          nullable: true
+        heroSlideImage6:
+          type: string
+          nullable: true
+        heroSlideImage7:
+          type: string
+          nullable: true
+        heroSlideImage8:
+          type: string
+          nullable: true
+        heroSlideImage9:
+          type: string
+          nullable: true
+        heroSlideImage10:
+          type: string
+          nullable: true
+        heroSlideEnabled:
           type: string
           nullable: true
         aboutVision:
@@ -1990,7 +2087,22 @@ components:
           nullable: true
         updatedAt:
           type: string
-      required: [id, businessName, tagline, heroTitle, heroSubtitle, whatsappNumber, whatsappMessage, aboutStory, aboutMission, ordersCompletedCount, happyClientsPercent, starRating, updatedAt]
+      required:
+        [
+          id,
+          businessName,
+          tagline,
+          heroTitle,
+          heroSubtitle,
+          whatsappNumber,
+          whatsappMessage,
+          aboutStory,
+          aboutMission,
+          ordersCompletedCount,
+          happyClientsPercent,
+          starRating,
+          updatedAt,
+        ]
 
     UpdateSettingsBody:
       type: object
@@ -2058,6 +2170,14 @@ components:
           type: string
           nullable: true
         themePreset:
+          type: string
+          nullable: true
+        specialEventEnabled:
+          type: boolean
+        specialEventType:
+          type: string
+          nullable: true
+        specialEventMessage:
           type: string
           nullable: true
         bankName:
@@ -2150,6 +2270,24 @@ components:
           type: string
           nullable: true
         heroSlideImage5:
+          type: string
+          nullable: true
+        heroSlideImage6:
+          type: string
+          nullable: true
+        heroSlideImage7:
+          type: string
+          nullable: true
+        heroSlideImage8:
+          type: string
+          nullable: true
+        heroSlideImage9:
+          type: string
+          nullable: true
+        heroSlideImage10:
+          type: string
+          nullable: true
+        heroSlideEnabled:
           type: string
           nullable: true
         aboutVision:
@@ -2264,7 +2402,20 @@ components:
           type: integer
         lowStockItems:
           type: integer
-      required: [happyClients, productTypes, ordersDelivered, starRating, totalOrders, pendingOrders, completedOrders, totalReviews, totalMessages, unreadMessages, lowStockItems]
+      required:
+        [
+          happyClients,
+          productTypes,
+          ordersDelivered,
+          starRating,
+          totalOrders,
+          pendingOrders,
+          completedOrders,
+          totalReviews,
+          totalMessages,
+          unreadMessages,
+          lowStockItems,
+        ]
 
     Invoice:
       type: object
@@ -2387,7 +2538,8 @@ components:
           type: string
         updatedAt:
           type: string
-      required: [id, name, quantity, unit, lowStockThreshold, createdAt, updatedAt]
+      required:
+        [id, name, quantity, unit, lowStockThreshold, createdAt, updatedAt]
 
     CreateInventoryItemBody:
       type: object

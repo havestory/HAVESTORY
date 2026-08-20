@@ -8,7 +8,7 @@ export default function Terms() {
   const email = settings?.email || 'hello@havestory.lk';
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="hsc-legal-page min-h-screen bg-background">
       {/* Header */}
       <div className="bg-primary text-primary-foreground py-20 relative overflow-hidden noise">
         <div className="max-w-3xl mx-auto px-6 relative z-10">

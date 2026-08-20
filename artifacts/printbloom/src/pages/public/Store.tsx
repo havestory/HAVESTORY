@@ -433,7 +433,7 @@ export default function Store() {
               ))}
             </div>
           ) : productList.length === 0 ? (
-            <div className="overflow-hidden rounded-2xl border border-secondary/25 bg-primary px-6 py-16 text-center text-primary-foreground shadow-[0_18px_60px_rgba(0,0,0,0.12)] sm:px-12">
+            <div className="hs-store-empty overflow-hidden rounded-2xl border border-secondary/25 bg-primary px-6 py-16 text-center text-primary-foreground shadow-[0_18px_60px_rgba(0,0,0,0.12)] sm:px-12">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-secondary text-secondary-foreground"><Sparkles size={24} /></div>
               <span className="editorial-kicker mt-7 block text-secondary">Made to measure</span>
               <h3 className="editorial-display mt-4 text-4xl text-white sm:text-5xl">Start with your story.</h3>
