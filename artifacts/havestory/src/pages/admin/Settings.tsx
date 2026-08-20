@@ -436,6 +436,16 @@ export default function AdminSettings() {
       logoUrl: (settings as any).logoUrl || "",
       courierCharge: (settings as any).courierCharge ?? "450",
       slPostCharge: (settings as any).slPostCharge ?? "250",
+      checkoutCourierEnabled: (settings as any).checkoutCourierEnabled !== 0,
+      checkoutCourierLabel: (settings as any).checkoutCourierLabel || "Studio courier",
+      checkoutCourierDescription: (settings as any).checkoutCourierDescription || "Carefully packed and delivered to your door.",
+      checkoutSlPostEnabled: (settings as any).checkoutSlPostEnabled !== 0,
+      checkoutSlPostLabel: (settings as any).checkoutSlPostLabel || "Sri Lanka Post",
+      checkoutSlPostDescription: (settings as any).checkoutSlPostDescription || "A considered island-wide delivery route.",
+      checkoutPickupEnabled: (settings as any).checkoutPickupEnabled === 1,
+      checkoutPickupLabel: (settings as any).checkoutPickupLabel || "Studio pickup",
+      checkoutPickupDescription: (settings as any).checkoutPickupDescription || "Collect your order from the HAVESTORY studio.",
+      checkoutPickupAddress: (settings as any).checkoutPickupAddress || "Contact us for pickup details.",
       invoiceStandardRate: (settings as any).invoiceStandardRate ?? "350",
       invoiceExpressRate: (settings as any).invoiceExpressRate ?? "530",
       invoiceWeightFirstKg: (settings as any).invoiceWeightFirstKg ?? "450",
@@ -552,6 +562,16 @@ export default function AdminSettings() {
         checkoutFullPaymentDiscount: Math.max(0, Number(form.checkoutFullPaymentDiscount) || 0),
         checkoutCodEnabled: form.checkoutCodEnabled ? 1 : 0,
         checkoutCodMessage: form.checkoutCodMessage || null,
+        checkoutCourierEnabled: form.checkoutCourierEnabled ? 1 : 0,
+        checkoutCourierLabel: form.checkoutCourierLabel || null,
+        checkoutCourierDescription: form.checkoutCourierDescription || null,
+        checkoutSlPostEnabled: form.checkoutSlPostEnabled ? 1 : 0,
+        checkoutSlPostLabel: form.checkoutSlPostLabel || null,
+        checkoutSlPostDescription: form.checkoutSlPostDescription || null,
+        checkoutPickupEnabled: form.checkoutPickupEnabled ? 1 : 0,
+        checkoutPickupLabel: form.checkoutPickupLabel || null,
+        checkoutPickupDescription: form.checkoutPickupDescription || null,
+        checkoutPickupAddress: form.checkoutPickupAddress || null,
       } as any);
       queryClient.invalidateQueries({ queryKey: ["/api/settings"] });
       broadcastAdminSave();
@@ -1440,6 +1460,97 @@ export default function AdminSettings() {
             <button type="button" onClick={saveCheckoutSettings} disabled={paymentSaving} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-50 border border-violet-200 text-violet-700 text-sm font-semibold hover:bg-violet-100 transition-colors disabled:opacity-60">
               {paymentSaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
               {paymentSaving ? "Saving…" : "Save Checkout Rules"}
+            </button>
+            {paymentSaved && <div className="flex items-center gap-1.5 text-xs text-emerald-600 font-medium"><CheckCircle2 size={12} /> Saved — checkout updated</div>}
+          </div>
+        </div>
+
+        {/* Checkout Delivery Options */}
+        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+          <div className="flex items-center gap-2 mb-1">
+            <Truck size={18} className="text-amber-500" />
+            <h2 className="font-bold text-gray-900">Store Checkout Delivery Options</h2>
+          </div>
+          <p className="text-xs text-gray-400 mb-5">
+            Choose which delivery methods customers can select at checkout and set the customer-facing copy and charge.
+          </p>
+
+          <div className="space-y-4">
+            {[
+              {
+                key: "checkoutCourierEnabled",
+                labelKey: "checkoutCourierLabel",
+                descKey: "checkoutCourierDescription",
+                chargeKey: "courierCharge",
+                title: "Studio Courier",
+                fallbackLabel: "Studio courier",
+                fallbackDesc: "Carefully packed and delivered to your door.",
+              },
+              {
+                key: "checkoutSlPostEnabled",
+                labelKey: "checkoutSlPostLabel",
+                descKey: "checkoutSlPostDescription",
+                chargeKey: "slPostCharge",
+                title: "Sri Lanka Post",
+                fallbackLabel: "Sri Lanka Post",
+                fallbackDesc: "A considered island-wide delivery route.",
+              },
+            ].map((option: any) => (
+              <div key={option.key} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <div className="text-sm font-semibold text-slate-800">{option.title}</div>
+                    <div className="text-xs text-slate-500 mt-0.5">Show this delivery method during checkout.</div>
+                  </div>
+                  <button type="button" onClick={() => setForm((f: any) => ({ ...f, [option.key]: !f[option.key] }))} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${form[option.key] ? "bg-amber-500" : "bg-slate-300"}`}>
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${form[option.key] ? "translate-x-6" : "translate-x-1"}`} />
+                  </button>
+                </div>
+                {form[option.key] && (
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-[180px_1fr] gap-3">
+                    <div>
+                      <label className="text-[10px] text-slate-500 font-semibold block mb-1">Charge (LKR)</label>
+                      <input type="number" min="0" value={form[option.chargeKey] || ""} onChange={e => setForm((f: any) => ({ ...f, [option.chargeKey]: e.target.value }))} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" />
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-[10px] text-slate-500 font-semibold block mb-1">Customer-facing name</label>
+                        <input value={form[option.labelKey] || option.fallbackLabel} onChange={e => setForm((f: any) => ({ ...f, [option.labelKey]: e.target.value }))} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-slate-500 font-semibold block mb-1">Description</label>
+                        <input value={form[option.descKey] || option.fallbackDesc} onChange={e => setForm((f: any) => ({ ...f, [option.descKey]: e.target.value }))} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+
+            <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <div className="text-sm font-semibold text-slate-800">Studio Pickup</div>
+                  <div className="text-xs text-slate-500 mt-0.5">Offer collection from your studio without a delivery charge.</div>
+                </div>
+                <button type="button" onClick={() => setForm((f: any) => ({ ...f, checkoutPickupEnabled: !f.checkoutPickupEnabled }))} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${form.checkoutPickupEnabled ? "bg-amber-500" : "bg-slate-300"}`}>
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${form.checkoutPickupEnabled ? "translate-x-6" : "translate-x-1"}`} />
+                </button>
+              </div>
+              {form.checkoutPickupEnabled && (
+                <div className="mt-4 grid grid-cols-1 gap-3">
+                  <input value={form.checkoutPickupLabel || "Studio pickup"} onChange={e => setForm((f: any) => ({ ...f, checkoutPickupLabel: e.target.value }))} placeholder="Customer-facing name" className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" />
+                  <input value={form.checkoutPickupDescription || "Collect your order from the HAVESTORY studio."} onChange={e => setForm((f: any) => ({ ...f, checkoutPickupDescription: e.target.value }))} placeholder="Short description" className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" />
+                  <input value={form.checkoutPickupAddress || "Contact us for pickup details."} onChange={e => setForm((f: any) => ({ ...f, checkoutPickupAddress: e.target.value }))} placeholder="Pickup address or instructions" className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" />
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-5 flex items-center gap-3 pt-4 border-t border-gray-100">
+            <button type="button" onClick={saveCheckoutSettings} disabled={paymentSaving} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm font-semibold hover:bg-amber-100 transition-colors disabled:opacity-60">
+              {paymentSaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
+              {paymentSaving ? "Saving…" : "Save Delivery Options"}
             </button>
             {paymentSaved && <div className="flex items-center gap-1.5 text-xs text-emerald-600 font-medium"><CheckCircle2 size={12} /> Saved — checkout updated</div>}
           </div>

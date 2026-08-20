@@ -144,6 +144,13 @@ router.put("/", requireAdmin, async (req, res) => {
       "bankDetails",
       "courierCharge",
       "slPostCharge",
+      "checkoutCourierLabel",
+      "checkoutCourierDescription",
+      "checkoutSlPostLabel",
+      "checkoutSlPostDescription",
+      "checkoutPickupLabel",
+      "checkoutPickupDescription",
+      "checkoutPickupAddress",
       "invoiceStandardRate",
       "invoiceExpressRate",
       "invoiceWeightFirstKg",
@@ -183,6 +190,9 @@ router.put("/", requireAdmin, async (req, res) => {
       "checkoutFullPaymentDiscount",
       "checkoutCodEnabled",
       "checkoutCodMessage",
+      "checkoutCourierEnabled",
+      "checkoutSlPostEnabled",
+      "checkoutPickupEnabled",
     ];
     for (const f of fields) {
       if (req.body[f] !== undefined) updateData[f] = req.body[f];
@@ -231,6 +241,15 @@ router.put("/", requireAdmin, async (req, res) => {
     }
     if (req.body.checkoutCodEnabled !== undefined) {
       updateData.checkoutCodEnabled = req.body.checkoutCodEnabled ? 1 : 0;
+    }
+    if (req.body.checkoutCourierEnabled !== undefined) {
+      updateData.checkoutCourierEnabled = req.body.checkoutCourierEnabled ? 1 : 0;
+    }
+    if (req.body.checkoutSlPostEnabled !== undefined) {
+      updateData.checkoutSlPostEnabled = req.body.checkoutSlPostEnabled ? 1 : 0;
+    }
+    if (req.body.checkoutPickupEnabled !== undefined) {
+      updateData.checkoutPickupEnabled = req.body.checkoutPickupEnabled ? 1 : 0;
     }
     const [updated] = await db
       .update(settingsTable)
@@ -412,6 +431,13 @@ router.post("/restore", requireAdmin, async (req, res) => {
       "bankDetails",
       "courierCharge",
       "slPostCharge",
+      "checkoutCourierLabel",
+      "checkoutCourierDescription",
+      "checkoutSlPostLabel",
+      "checkoutSlPostDescription",
+      "checkoutPickupLabel",
+      "checkoutPickupDescription",
+      "checkoutPickupAddress",
       "invoiceStandardRate",
       "invoiceExpressRate",
       "invoiceWeightFirstKg",
@@ -459,6 +485,9 @@ router.post("/restore", requireAdmin, async (req, res) => {
       "checkoutFullPaymentDiscount",
       "checkoutCodEnabled",
       "checkoutCodMessage",
+      "checkoutCourierEnabled",
+      "checkoutSlPostEnabled",
+      "checkoutPickupEnabled",
     ];
     for (const f of fields) {
       if (incoming[f] !== undefined) updateData[f] = incoming[f];

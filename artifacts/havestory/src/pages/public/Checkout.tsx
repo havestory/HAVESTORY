@@ -21,6 +21,16 @@ type CouponResult = {
 const FALLBACK_SETTINGS = {
   courierCharge: 450,
   slPostCharge: 250,
+  checkoutCourierEnabled: 1,
+  checkoutCourierLabel: "Studio courier",
+  checkoutCourierDescription: "Carefully packed and delivered to your door.",
+  checkoutSlPostEnabled: 1,
+  checkoutSlPostLabel: "Sri Lanka Post",
+  checkoutSlPostDescription: "A considered island-wide delivery route.",
+  checkoutPickupEnabled: 0,
+  checkoutPickupLabel: "Studio pickup",
+  checkoutPickupDescription: "Collect your order from the HAVESTORY studio.",
+  checkoutPickupAddress: "Contact us for pickup details.",
   checkoutBankTransferEnabled: 1,
   checkoutDepositAmount: 500,
   checkoutDepositMessage: "A Rs. 500 deposit is required to confirm this order. Upload your payment proof after paying.",
@@ -75,9 +85,43 @@ export default function Checkout() {
   const codEnabled = settingEnabled(settings.checkoutCodEnabled, false);
   const depositAmount = Number(settings.checkoutDepositAmount) || 500;
   const fullPaymentDiscount = Math.max(0, Number(settings.checkoutFullPaymentDiscount) || 0);
-  const courierCharge = Number(settings.courierCharge) || 450;
-  const slPostCharge = Number(settings.slPostCharge) || 250;
-  const shippingCost = shippingMethod === "courier" ? courierCharge : shippingMethod === "sl_post" ? slPostCharge : 0;
+  const courierCharge = Math.max(0, Number(settings.courierCharge) || 450);
+  const slPostCharge = Math.max(0, Number(settings.slPostCharge) || 250);
+  const deliveryOptions = useMemo(() => [
+    settingEnabled(settings.checkoutCourierEnabled, true) ? {
+      value: "courier" as const,
+      title: String(settings.checkoutCourierLabel || "Studio courier"),
+      price: courierCharge,
+      detail: String(settings.checkoutCourierDescription || "Carefully packed and delivered to your door."),
+    } : null,
+    settingEnabled(settings.checkoutSlPostEnabled, true) ? {
+      value: "sl_post" as const,
+      title: String(settings.checkoutSlPostLabel || "Sri Lanka Post"),
+      price: slPostCharge,
+      detail: String(settings.checkoutSlPostDescription || "A considered island-wide delivery route."),
+    } : null,
+    settingEnabled(settings.checkoutPickupEnabled, false) ? {
+      value: "pickup" as const,
+      title: String(settings.checkoutPickupLabel || "Studio pickup"),
+      price: 0,
+      detail: String(settings.checkoutPickupDescription || "Collect your order from the HAVESTORY studio."),
+    } : null,
+  ].filter(Boolean) as { value: ShippingMethod; title: string; price: number; detail: string }[], [
+    courierCharge,
+    settings.checkoutCourierDescription,
+    settings.checkoutCourierEnabled,
+    settings.checkoutCourierLabel,
+    settings.checkoutPickupDescription,
+    settings.checkoutPickupEnabled,
+    settings.checkoutPickupLabel,
+    settings.checkoutSlPostDescription,
+    settings.checkoutSlPostEnabled,
+    settings.checkoutSlPostLabel,
+    slPostCharge,
+  ]);
+  const selectedDelivery = deliveryOptions.find(option => option.value === shippingMethod);
+  const shippingCost = selectedDelivery?.price || 0;
+  const shippingAddressRequired = shippingMethod !== "pickup";
   const couponDiscount = coupon?.valid ? Number(coupon.discount) || 0 : 0;
   const fullPaymentOffer = paymentMethod === "full_payment" ? Math.min(fullPaymentDiscount, subtotal) : 0;
   const total = Math.max(0, subtotal + shippingCost - couponDiscount - fullPaymentOffer);
@@ -123,6 +167,12 @@ export default function Checkout() {
     }
   }, [paymentMethod, paymentOptions]);
 
+  useEffect(() => {
+    if (deliveryOptions.length > 0 && !deliveryOptions.some(option => option.value === shippingMethod)) {
+      setShippingMethod(deliveryOptions[0].value);
+    }
+  }, [deliveryOptions, shippingMethod]);
+
   const applyCoupon = async () => {
     const code = couponCode.trim().toUpperCase();
     if (!code) return;
@@ -163,8 +213,8 @@ export default function Checkout() {
       toast({ title: "Your cart is empty", description: "Add a piece from the collection before checking out.", variant: "destructive" });
       return;
     }
-    if (!customerName.trim() || !customerPhone.trim() || !customerAddress.trim()) {
-      toast({ title: "A few details are missing", description: "Please add your name, phone number and delivery address.", variant: "destructive" });
+    if (!customerName.trim() || !customerPhone.trim() || (shippingAddressRequired && !customerAddress.trim())) {
+      toast({ title: "A few details are missing", description: shippingAddressRequired ? "Please add your name, phone number and delivery address." : "Please add your name and phone number.", variant: "destructive" });
       return;
     }
     if (paymentOptions.length === 0) {
@@ -179,6 +229,7 @@ export default function Checkout() {
       paymentMethod === "bank_transfer" ? `Payment plan: ${money(depositAmount)} deposit via bank transfer` : "",
       paymentMethod === "full_payment" ? `Payment plan: full payment${fullPaymentOffer > 0 ? ` with ${money(fullPaymentOffer)} offer` : ""}` : "",
       paymentMethod === "cod" ? "Payment plan: cash on delivery" : "",
+      selectedDelivery ? `Delivery: ${selectedDelivery.title}${selectedDelivery.price ? ` (${money(selectedDelivery.price)})` : " (free pickup)"}` : "",
     ].filter(Boolean).join("\n\n");
 
     createOrder.mutate({
@@ -186,7 +237,7 @@ export default function Checkout() {
         customerName: customerName.trim(),
         customerPhone: customerPhone.trim(),
         customerEmail: customerEmail.trim() || null,
-        customerAddress: customerAddress.trim(),
+        customerAddress: customerAddress.trim() || (shippingMethod === "pickup" ? String(settings.checkoutPickupAddress || "Studio pickup") : ""),
         orderType: "standard",
         items: orderItems,
         designLinks: [],
@@ -281,20 +332,16 @@ export default function Checkout() {
                 <label className="block"><span className="checkout-label">Full name *</span><Input required value={customerName} onChange={event => setCustomerName(event.target.value)} placeholder="Your name" className="checkout-input" /></label>
                 <label className="block"><span className="checkout-label">Phone number *</span><Input required value={customerPhone} onChange={event => setCustomerPhone(event.target.value)} placeholder="077 123 4567" className="checkout-input" /></label>
                 <label className="block sm:col-span-2"><span className="checkout-label">Email address <small>(for your receipt)</small></span><Input type="email" value={customerEmail} onChange={event => setCustomerEmail(event.target.value)} placeholder="hello@example.com" className="checkout-input" /></label>
-                <label className="block sm:col-span-2"><span className="checkout-label">Delivery address *</span><textarea required value={customerAddress} onChange={event => setCustomerAddress(event.target.value)} placeholder="House number, street, city" className="checkout-textarea" /></label>
+                <label className="block sm:col-span-2"><span className="checkout-label">Delivery address {shippingAddressRequired ? "*" : <small>(optional for pickup)</small>}</span><textarea required={shippingAddressRequired} value={customerAddress} onChange={event => setCustomerAddress(event.target.value)} placeholder={shippingAddressRequired ? "House number, street, city" : String(settings.checkoutPickupAddress || "Optional — studio pickup")} className="checkout-textarea" /></label>
                 <label className="block sm:col-span-2"><span className="checkout-label">A note for the studio <small>(optional)</small></span><textarea value={orderNotes} onChange={event => setOrderNotes(event.target.value)} placeholder="Any special instructions, colour notes or timing requests?" className="checkout-textarea min-h-[92px]" /></label>
               </div>
             </section>
 
             <section className="glass-panel p-6 sm:p-8">
               <div className="flex items-start justify-between gap-4"><div><span className="glass-chip px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em]">02 / Delivery</span><h2 className="editorial-display mt-4 text-3xl text-[var(--glass-ink)]">Choose the handoff.</h2></div><Truck className="mt-1 shrink-0 text-[var(--glass-clay)]" size={22} /></div>
-              <div className="mt-7 grid gap-3 sm:grid-cols-3">
-                {([
-                  ["courier", "Studio courier", courierCharge, "Carefully packed to your door"],
-                  ["sl_post", "Sri Lanka Post", slPostCharge, "A considered island-wide route"],
-                  ["pickup", "Studio pickup", 0, "Collect from HAVESTORY"],
-                ] as [ShippingMethod, string, number, string][]).map(([value, title, price, detail]) => <button key={value} type="button" onClick={() => setShippingMethod(value)} className={`checkout-choice text-left ${shippingMethod === value ? "is-selected" : ""}`}><span className="flex items-center justify-between gap-3"><strong>{title}</strong>{shippingMethod === value && <Check size={16} />}</span><span className="mt-3 block text-sm font-black">{price ? money(price) : "Free"}</span><small className="mt-1 block leading-relaxed">{detail}</small></button>)}
-              </div>
+              {deliveryOptions.length > 0 ? <div className={`mt-7 grid gap-3 ${deliveryOptions.length === 1 ? "sm:grid-cols-1" : deliveryOptions.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3"}`}>
+                {deliveryOptions.map(({ value, title, price, detail }) => <button key={value} type="button" onClick={() => setShippingMethod(value)} className={`checkout-choice text-left ${shippingMethod === value ? "is-selected" : ""}`}><span className="flex items-center justify-between gap-3"><strong>{title}</strong>{shippingMethod === value && <Check size={16} />}</span><span className="mt-3 block text-sm font-black">{price ? money(price) : "Free"}</span><small className="mt-1 block leading-relaxed">{detail}</small>{value === "pickup" && shippingMethod === value && <small className="mt-3 block border-t border-[rgba(7,26,43,0.12)] pt-3 leading-relaxed">{String(settings.checkoutPickupAddress || "Contact us for pickup details.")}</small>}</button>)}
+              </div> : <div className="mt-7 rounded-2xl border border-red-200 bg-red-50/60 p-4 text-sm text-red-800">No delivery method is currently enabled. Please contact HAVESTORY before placing an order.</div>}
             </section>
 
             <section className="glass-panel p-6 sm:p-8">

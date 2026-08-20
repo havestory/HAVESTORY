@@ -222,6 +222,30 @@ router.post("/", async (req, res) => {
       return sum + qty * price;
     }, 0);
 
+    const [checkoutSettings] = await db.select().from(settingsTable).limit(1);
+    const deliveryConfig = {
+      courier: {
+        enabled: Number(checkoutSettings?.checkoutCourierEnabled ?? 1) !== 0,
+        label: String(checkoutSettings?.checkoutCourierLabel || "Studio courier"),
+        charge: Math.max(0, Number.parseFloat(String(checkoutSettings?.courierCharge ?? "450")) || 450),
+      },
+      sl_post: {
+        enabled: Number(checkoutSettings?.checkoutSlPostEnabled ?? 1) !== 0,
+        label: String(checkoutSettings?.checkoutSlPostLabel || "Sri Lanka Post"),
+        charge: Math.max(0, Number.parseFloat(String(checkoutSettings?.slPostCharge ?? "250")) || 250),
+      },
+      pickup: {
+        enabled: Number(checkoutSettings?.checkoutPickupEnabled ?? 0) !== 0,
+        label: String(checkoutSettings?.checkoutPickupLabel || "Studio pickup"),
+        charge: 0,
+      },
+    } as const;
+    const deliveryKey = String(shippingMethod || "") as keyof typeof deliveryConfig;
+    const selectedDeliveryConfig = deliveryConfig[deliveryKey];
+    if (!adminAuth && (!selectedDeliveryConfig || !selectedDeliveryConfig.enabled)) {
+      return res.status(400).json({ error: "The selected delivery method is currently unavailable. Please refresh checkout and choose another option." });
+    }
+
     // Resolve the invoice we are linking to (if any) BEFORE the transaction
     // so we can fail fast on bad input without rolling back.
     let invoiceToLink: typeof invoicesTable.$inferSelect | null = null;
@@ -340,9 +364,7 @@ router.post("/", async (req, res) => {
           .split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
         if (!enabled || recipients.length === 0) return;
         let itemsAny = trustedItems as any[];
-        const shippingMethodVal = shippingMethod === "courier" ? "courier"
-                                : shippingMethod === "sl_post" ? "sl_post"
-                                : null;
+        const shippingMethodVal = selectedDeliveryConfig?.label || null;
         let itemTotal = itemsAny.reduce((s, it) => {
           const qty = Number(it.quantity ?? it.qty ?? 1) || 1;
           const unit = parseFloat(String(it.price ?? it.unitPrice ?? 0)) || 0;
@@ -388,10 +410,7 @@ router.post("/", async (req, res) => {
       void (async () => {
         try {
           const [settingsRow] = await db.select().from(settingsTable);
-          const courierCh = parseFloat(settingsRow?.courierCharge ?? "450") || 450;
-          const slPostCh = parseFloat(settingsRow?.slPostCharge ?? "250") || 250;
-          const shipCost = shippingMethod === "courier" ? courierCh
-                         : shippingMethod === "sl_post" ? slPostCh : 0;
+          const shipCost = selectedDeliveryConfig?.charge || 0;
           const disc = Number.isFinite(Number(discountAmount)) ? Math.max(0, Math.round(Number(discountAmount))) : 0;
           let itemsAny = trustedItems as any[];
           let itemTotal = itemsAny.reduce((s: number, it: any) => {
@@ -499,20 +518,8 @@ router.post("/", async (req, res) => {
         // Auto-generate invoice for every new order. We swallow errors so the
     // order itself still succeeds, but we log at ERROR level so silent
     // invoice failures show up in production logs (Vercel function logs).
-    let courierCharge = 450;
-    let slPostCharge  = 250;
     try {
-      const [settings] = await db.select().from(settingsTable);
-      courierCharge = parseFloat(settings?.courierCharge ?? "450") || 450;
-      slPostCharge  = parseFloat(settings?.slPostCharge  ?? "250") || 250;
-    } catch (settingsErr) {
-      req.log.warn({ err: settingsErr }, "Auto-invoice: could not read settings, using defaults");
-    }
-
-    try {
-      const shippingAmount = shippingMethod === "courier" ? courierCharge
-                           : shippingMethod === "sl_post"  ? slPostCharge
-                           : 0;
+      const shippingAmount = selectedDeliveryConfig?.charge || 0;
 
       // Build line items — use product invoiceName if set, and include any
       // extra options / size info appearing after the base product name.
@@ -571,9 +578,7 @@ router.post("/", async (req, res) => {
       const totalAmount = Math.max(0, itemAmount + shippingAmount - discAmt);
 
       // Human-readable shipping method label for the invoice
-      const shippingLabel = shippingMethod === "courier" ? "Courier Service"
-                          : shippingMethod === "sl_post"  ? "Sri Lanka Post"
-                          : "";
+      const shippingLabel = selectedDeliveryConfig?.label || "";
 
       // Build structured metadata so InvoicePreview renders correctly.
       // projectTitle is kept for backward compatibility with legacy invoices
