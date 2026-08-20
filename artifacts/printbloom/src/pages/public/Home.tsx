@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
-  Check,
   Image as ImageIcon,
   PackageCheck,
   Palette,
@@ -66,6 +65,7 @@ export default function Home() {
   const { data: portfolio } = useListPortfolio();
   const { data: reviews } = useListReviews();
   const [dismissedNotices, setDismissedNotices] = useState<number[]>([]);
+  const [activeHeroSlide, setActiveHeroSlide] = useState(0);
 
   const activeNotices = (Array.isArray(notices) ? notices : []).filter(
     (item) => item.enabled && !dismissedNotices.includes(item.id),
@@ -78,11 +78,50 @@ export default function Home() {
   const reviewList = (Array.isArray(reviews) ? reviews : [])
     .filter((item) => item.approved)
     .slice(0, 3);
+  let slideEnabled = Array(10).fill(true) as boolean[];
+  try {
+    const savedEnabled = (settings as any)?.heroSlideEnabled;
+    const parsed =
+      typeof savedEnabled === "string"
+        ? JSON.parse(savedEnabled)
+        : savedEnabled;
+    if (Array.isArray(parsed)) {
+      slideEnabled = Array.from(
+        { length: 10 },
+        (_, index) => parsed[index] !== false,
+      );
+    }
+  } catch {
+    // Existing sites publish all configured images by default.
+  }
+  const configuredHeroSlideSlots = Array.from(
+    { length: 10 },
+    (_, index) =>
+      (settings as any)?.[`heroSlideImage${index + 1}`] as string | undefined,
+  );
+  const configuredHeroSlides = configuredHeroSlideSlots.filter(
+    (image, index): image is string => Boolean(image && slideEnabled[index]),
+  );
+  const hasConfiguredHeroSlides = configuredHeroSlideSlots.some(Boolean);
+  const heroSlides = hasConfiguredHeroSlides
+    ? configuredHeroSlides
+    : [settings?.heroBgImage || DEFAULT_IMAGES[0]];
+  const heroSlidesKey = heroSlides.join("|");
+  const safeActiveHeroSlide = heroSlides.length
+    ? activeHeroSlide % heroSlides.length
+    : 0;
+  const activeHeroImage = heroSlides[safeActiveHeroSlide];
   const heroImages = [
-    settings?.heroBgImage,
-    settings?.heroSlideImage2,
-    settings?.heroSlideImage3,
-  ].map((item, index) => item || DEFAULT_IMAGES[index]);
+    heroSlides[0] || DEFAULT_IMAGES[0],
+    heroSlides[1] || DEFAULT_IMAGES[1],
+    heroSlides[2] || DEFAULT_IMAGES[2],
+  ];
+  const benefits = [
+    { label: "Colour checked", Icon: Palette },
+    { label: "Made to measure", Icon: Ruler },
+    { label: "Securely packed", Icon: PackageCheck },
+    { label: "Island-wide delivery", Icon: Truck },
+  ];
   const categories = [
     {
       title: "Custom Frames",
@@ -106,6 +145,18 @@ export default function Home() {
       tone: "ink",
     },
   ];
+
+  useEffect(() => {
+    setActiveHeroSlide(0);
+  }, [heroSlidesKey]);
+
+  useEffect(() => {
+    if (heroSlides.length < 2) return;
+    const timer = window.setInterval(() => {
+      setActiveHeroSlide((current) => (current + 1) % heroSlides.length);
+    }, 4500);
+    return () => window.clearInterval(timer);
+  }, [heroSlides.length, heroSlidesKey]);
 
   return (
     <div className="hsc-home">
@@ -161,14 +212,6 @@ export default function Home() {
               Create something custom
             </Link>
           </div>
-          <div className="hsc-trust-line">
-            <span>
-              <Check /> Clear studio guidance
-            </span>
-            <span>
-              <Check /> Secure island-wide delivery
-            </span>
-          </div>
         </motion.div>
         <motion.div
           className="hsc-hero-media"
@@ -176,37 +219,51 @@ export default function Home() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.7 }}
         >
-          <img
-            src={heroImages[0]}
-            alt="HAVESTORY framed photographs in a modern interior"
-          />
-          <div className="hsc-hero-float">
-            <span>Made for your space</span>
-            <strong>
-              Custom framing,
-              <br />
-              without the guesswork.
-            </strong>
-            <Link href="/custom-project">
-              Start a project <ArrowRight />
-            </Link>
-          </div>
+          <AnimatePresence initial={false} mode="popLayout">
+            {activeHeroImage && (
+              <motion.img
+                key={`${safeActiveHeroSlide}-${activeHeroImage}`}
+                src={activeHeroImage}
+                alt={`HAVESTORY featured studio work ${safeActiveHeroSlide + 1}`}
+                initial={{ opacity: 0, x: 70, scale: 1.04 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -55, scale: 1.015 }}
+                transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+              />
+            )}
+          </AnimatePresence>
           <span className="hsc-hero-tag">Crafted in Sri Lanka</span>
+          {heroSlides.length > 1 && (
+            <div className="hsc-hero-dots" aria-label="Choose featured image">
+              {heroSlides.map((_, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  aria-label={`Show image ${index + 1}`}
+                  aria-current={index === safeActiveHeroSlide}
+                  onClick={() => setActiveHeroSlide(index)}
+                />
+              ))}
+            </div>
+          )}
         </motion.div>
       </section>
-      <div className="hsc-benefits">
-        <span>
-          <Palette /> Colour checked
-        </span>
-        <span>
-          <Ruler /> Made to measure
-        </span>
-        <span>
-          <PackageCheck /> Securely packed
-        </span>
-        <span>
-          <Truck /> Island-wide delivery
-        </span>
+      <div className="hsc-benefits" aria-label="HAVESTORY service benefits">
+        <div className="hsc-benefits-track">
+          {[0, 1].map((group) => (
+            <div
+              key={group}
+              className="hsc-benefits-group"
+              aria-hidden={group === 1}
+            >
+              {benefits.map(({ label, Icon }) => (
+                <span key={`${group}-${label}`}>
+                  <Icon /> {label}
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
       <section className="hsc-section">
         <SectionHead

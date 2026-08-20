@@ -336,6 +336,12 @@ export interface SiteSettings {
   heroSlideImage3?: string | null;
   heroSlideImage4?: string | null;
   heroSlideImage5?: string | null;
+  heroSlideImage6?: string | null;
+  heroSlideImage7?: string | null;
+  heroSlideImage8?: string | null;
+  heroSlideImage9?: string | null;
+  heroSlideImage10?: string | null;
+  heroSlideEnabled?: string | null;
   aboutVision?: string | null;
   aboutFoundedYear?: string | null;
   aboutTeamSize?: string | null;
@@ -431,6 +437,12 @@ export interface UpdateSettingsBody {
   heroSlideImage3?: string | null;
   heroSlideImage4?: string | null;
   heroSlideImage5?: string | null;
+  heroSlideImage6?: string | null;
+  heroSlideImage7?: string | null;
+  heroSlideImage8?: string | null;
+  heroSlideImage9?: string | null;
+  heroSlideImage10?: string | null;
+  heroSlideEnabled?: string | null;
   aboutVision?: string | null;
   aboutFoundedYear?: string | null;
   aboutTeamSize?: string | null;

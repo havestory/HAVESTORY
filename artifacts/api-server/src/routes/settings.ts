@@ -8,7 +8,10 @@ import { getAdminAuth, requireAdmin } from "../lib/auth-cookie";
 import { parseIdParam } from "../lib/parse-id";
 import { sendTestEmail } from "../lib/mailer";
 
-const siteUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+const siteUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+});
 
 const router = Router();
 
@@ -16,16 +19,20 @@ let settingsCompatibilityReady: Promise<void> | null = null;
 
 function ensureSettingsCompatibility(): Promise<void> {
   if (!settingsCompatibilityReady) {
-    settingsCompatibilityReady = pool.query(`
+    settingsCompatibilityReady = pool
+      .query(
+        `
       ALTER TABLE settings ADD COLUMN IF NOT EXISTS home_feature_cards TEXT NOT NULL DEFAULT '[]';
       ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image6 TEXT;
       ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image7 TEXT;
       ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image8 TEXT;
       ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image9 TEXT;
       ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image10 TEXT;
-    `)
+      ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_enabled TEXT NOT NULL DEFAULT '[true,true,true,true,true,true,true,true,true,true]';
+    `,
+      )
       .then(() => undefined)
-      .catch(error => {
+      .catch((error) => {
         settingsCompatibilityReady = null;
         throw error;
       });
@@ -80,30 +87,93 @@ router.put("/", requireAdmin, async (req, res) => {
     const settings = await getOrCreateSettings();
     const updateData: any = { updatedAt: new Date() };
     const fields = [
-      "businessName","tagline","heroTitle","heroSubtitle","whatsappNumber","whatsappMessage",
-      "aboutStory","aboutMission","aboutImage","ordersCompletedCount","happyClientsPercent",
-      "starRating","facebookUrl","instagramUrl","address","email","phone","website",
-      "bankName","bankAccountHolder","bankAccountNumber","bankBranch","bankSwiftBic",
-      "paymentDueDays","overdueDays","termsConditions","courierServices",
-      "heroBgImage","heroCtaText","heroCtaLink","heroBadgeText","heroHighlightWord",
-      "aboutVision","aboutFoundedYear","aboutTeamSize","aboutLocation",
-      "privacyPolicy","termsOfService",
-      "seoTitle","seoDescription","seoKeywords","seoOgImage",
-      "themePreset","specialEventEnabled","specialEventType","specialEventMessage",
-      "heroAvatarImage1","heroAvatarImage2","heroAvatarImage3","heroAvatarImage4",
+      "businessName",
+      "tagline",
+      "heroTitle",
+      "heroSubtitle",
+      "whatsappNumber",
+      "whatsappMessage",
+      "aboutStory",
+      "aboutMission",
+      "aboutImage",
+      "ordersCompletedCount",
+      "happyClientsPercent",
+      "starRating",
+      "facebookUrl",
+      "instagramUrl",
+      "address",
+      "email",
+      "phone",
+      "website",
+      "bankName",
+      "bankAccountHolder",
+      "bankAccountNumber",
+      "bankBranch",
+      "bankSwiftBic",
+      "paymentDueDays",
+      "overdueDays",
+      "termsConditions",
+      "courierServices",
+      "heroBgImage",
+      "heroCtaText",
+      "heroCtaLink",
+      "heroBadgeText",
+      "heroHighlightWord",
+      "aboutVision",
+      "aboutFoundedYear",
+      "aboutTeamSize",
+      "aboutLocation",
+      "privacyPolicy",
+      "termsOfService",
+      "seoTitle",
+      "seoDescription",
+      "seoKeywords",
+      "seoOgImage",
+      "themePreset",
+      "specialEventEnabled",
+      "specialEventType",
+      "specialEventMessage",
+      "heroAvatarImage1",
+      "heroAvatarImage2",
+      "heroAvatarImage3",
+      "heroAvatarImage4",
       "designerCredit",
-      "ownerName","logoUrl","tiktokUrl","bankDetails",
-      "courierCharge","slPostCharge",
-      "invoiceStandardRate","invoiceExpressRate","invoiceWeightFirstKg","invoiceWeightAddKg",
+      "ownerName",
+      "logoUrl",
+      "tiktokUrl",
+      "bankDetails",
+      "courierCharge",
+      "slPostCharge",
+      "invoiceStandardRate",
+      "invoiceExpressRate",
+      "invoiceWeightFirstKg",
+      "invoiceWeightAddKg",
       "faviconUrl",
       "whatsappOrderTemplate",
-      "heroSlideImage1","heroSlideImage2","heroSlideImage3","heroSlideImage4","heroSlideImage5","heroSlideImage6","heroSlideImage7","heroSlideImage8","heroSlideImage9","heroSlideImage10","homeFeatureCards",
-      "paymentQrUrl","paymentButtonUrl","paymentButtonLabel",
+      "heroSlideImage1",
+      "heroSlideImage2",
+      "heroSlideImage3",
+      "heroSlideImage4",
+      "heroSlideImage5",
+      "heroSlideImage6",
+      "heroSlideImage7",
+      "heroSlideImage8",
+      "heroSlideImage9",
+      "heroSlideImage10",
+      "heroSlideEnabled",
+      "homeFeatureCards",
+      "paymentQrUrl",
+      "paymentButtonUrl",
+      "paymentButtonLabel",
       "siteClosedMessage",
-      "ipayToken","ipaySecret",
-      "googlePayNumber","googlePayQrUrl","googlePayInstructions",
+      "ipayToken",
+      "ipaySecret",
+      "googlePayNumber",
+      "googlePayQrUrl",
+      "googlePayInstructions",
       "orderEmailRecipients",
-      "gmailUser","gmailAppPassword",
+      "gmailUser",
+      "gmailAppPassword",
       "financeReportEmailRecipient",
     ];
     for (const f of fields) {
@@ -111,10 +181,15 @@ router.put("/", requireAdmin, async (req, res) => {
     }
     // Boolean-like integer fields (stored as 0/1)
     if (req.body.orderEmailNotificationsEnabled !== undefined) {
-      updateData.orderEmailNotificationsEnabled = req.body.orderEmailNotificationsEnabled ? 1 : 0;
+      updateData.orderEmailNotificationsEnabled = req.body
+        .orderEmailNotificationsEnabled
+        ? 1
+        : 0;
     }
     if (req.body.financeReportEmailEnabled !== undefined) {
-      updateData.financeReportEmailEnabled = req.body.financeReportEmailEnabled ? 1 : 0;
+      updateData.financeReportEmailEnabled = req.body.financeReportEmailEnabled
+        ? 1
+        : 0;
     }
     if (req.body.taglineEnabled !== undefined) {
       updateData.taglineEnabled = req.body.taglineEnabled ? 1 : 0;
@@ -140,8 +215,11 @@ router.put("/", requireAdmin, async (req, res) => {
     if (req.body.specialEventEnabled !== undefined) {
       updateData.specialEventEnabled = req.body.specialEventEnabled ? 1 : 0;
     }
-    const [updated] = await db.update(settingsTable).set(updateData)
-      .where(eq(settingsTable.id, settings.id)).returning();
+    const [updated] = await db
+      .update(settingsTable)
+      .set(updateData)
+      .where(eq(settingsTable.id, settings.id))
+      .returning();
     res.json(updated);
   } catch (err) {
     req.log.error(err);
@@ -155,17 +233,32 @@ router.put("/", requireAdmin, async (req, res) => {
 router.post("/test-email", requireAdmin, async (req, res) => {
   try {
     const settings = await getOrCreateSettings();
-    const raw = (req.body?.recipients as string | undefined) ?? settings.orderEmailRecipients ?? "";
-    const recipients = String(raw).split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
+    const raw =
+      (req.body?.recipients as string | undefined) ??
+      settings.orderEmailRecipients ??
+      "";
+    const recipients = String(raw)
+      .split(/[\s,;]+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
     if (recipients.length === 0) {
-      return res.status(400).json({ ok: false, error: "No recipient email configured. Add one in Settings first." });
+      return res
+        .status(400)
+        .json({
+          ok: false,
+          error: "No recipient email configured. Add one in Settings first.",
+        });
     }
     // Allow the admin to test a value typed into the form *before* it has
     // been saved to the DB (so they can verify a fresh App Password
     // without an explicit save round-trip). Falls back to the saved
     // values, then to env vars in mailer.ts.
-    const overrideUser = typeof req.body?.gmailUser === "string" ? req.body.gmailUser : null;
-    const overridePass = typeof req.body?.gmailAppPassword === "string" ? req.body.gmailAppPassword : null;
+    const overrideUser =
+      typeof req.body?.gmailUser === "string" ? req.body.gmailUser : null;
+    const overridePass =
+      typeof req.body?.gmailAppPassword === "string"
+        ? req.body.gmailAppPassword
+        : null;
     const result = await sendTestEmail({
       recipients,
       businessName: settings.businessName || "HAVESTORY",
@@ -178,25 +271,42 @@ router.post("/test-email", requireAdmin, async (req, res) => {
     });
     if (result.ok) return res.json({ ok: true, recipients });
     if (result.reason === "smtp_not_configured") {
-      return res.status(503).json({ ok: false, error: "Mailer is not configured. Enter your Gmail address and App Password in Settings." });
+      return res
+        .status(503)
+        .json({
+          ok: false,
+          error:
+            "Mailer is not configured. Enter your Gmail address and App Password in Settings.",
+        });
     }
-    return res.status(502).json({ ok: false, error: result.reason || "Failed to send email" });
+    return res
+      .status(502)
+      .json({ ok: false, error: result.reason || "Failed to send email" });
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ ok: false, error: "Failed to send test email" });
   }
 });
 
-router.post("/upload-image", requireAdmin, siteUpload.single("file"), async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
-    const { url: fileUrl } = await uploadToCloudinary(req.file.buffer, "havestory/site-images", req.file.originalname);
-    res.json({ url: fileUrl, originalName: req.file.originalname });
-  } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Failed to upload image" });
-  }
-});
+router.post(
+  "/upload-image",
+  requireAdmin,
+  siteUpload.single("file"),
+  async (req, res) => {
+    try {
+      if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+      const { url: fileUrl } = await uploadToCloudinary(
+        req.file.buffer,
+        "havestory/site-images",
+        req.file.originalname,
+      );
+      res.json({ url: fileUrl, originalName: req.file.originalname });
+    } catch (err) {
+      req.log.error(err);
+      res.status(500).json({ error: "Failed to upload image" });
+    }
+  },
+);
 
 router.get("/backup", requireAdmin, async (req, res) => {
   try {
@@ -221,40 +331,118 @@ router.post("/restore", requireAdmin, async (req, res) => {
   try {
     const { settings: incoming, version } = req.body;
     if (!incoming || typeof incoming !== "object") {
-      return res.status(400).json({ error: "Invalid backup file — missing settings object" });
+      return res
+        .status(400)
+        .json({ error: "Invalid backup file — missing settings object" });
     }
     const current = await getOrCreateSettings();
     const updateData: any = { updatedAt: new Date() };
     const fields = [
-      "businessName","tagline","heroTitle","heroSubtitle","whatsappNumber","whatsappMessage",
-      "aboutStory","aboutMission","aboutImage","ordersCompletedCount","happyClientsPercent",
-      "starRating","facebookUrl","instagramUrl","address","email","phone","website",
-      "bankName","bankAccountHolder","bankAccountNumber","bankBranch","bankSwiftBic",
-      "paymentDueDays","overdueDays","termsConditions","courierServices",
-      "heroBgImage","heroCtaText","heroCtaLink","heroBadgeText","heroHighlightWord",
-      "aboutVision","aboutFoundedYear","aboutTeamSize","aboutLocation",
-      "privacyPolicy","termsOfService",
-      "seoTitle","seoDescription","seoKeywords","seoOgImage",
-      "themePreset","specialEventEnabled","specialEventType","specialEventMessage",
-      "heroAvatarImage1","heroAvatarImage2","heroAvatarImage3","heroAvatarImage4",
+      "businessName",
+      "tagline",
+      "heroTitle",
+      "heroSubtitle",
+      "whatsappNumber",
+      "whatsappMessage",
+      "aboutStory",
+      "aboutMission",
+      "aboutImage",
+      "ordersCompletedCount",
+      "happyClientsPercent",
+      "starRating",
+      "facebookUrl",
+      "instagramUrl",
+      "address",
+      "email",
+      "phone",
+      "website",
+      "bankName",
+      "bankAccountHolder",
+      "bankAccountNumber",
+      "bankBranch",
+      "bankSwiftBic",
+      "paymentDueDays",
+      "overdueDays",
+      "termsConditions",
+      "courierServices",
+      "heroBgImage",
+      "heroCtaText",
+      "heroCtaLink",
+      "heroBadgeText",
+      "heroHighlightWord",
+      "aboutVision",
+      "aboutFoundedYear",
+      "aboutTeamSize",
+      "aboutLocation",
+      "privacyPolicy",
+      "termsOfService",
+      "seoTitle",
+      "seoDescription",
+      "seoKeywords",
+      "seoOgImage",
+      "themePreset",
+      "specialEventEnabled",
+      "specialEventType",
+      "specialEventMessage",
+      "heroAvatarImage1",
+      "heroAvatarImage2",
+      "heroAvatarImage3",
+      "heroAvatarImage4",
       "designerCredit",
-      "ownerName","logoUrl","tiktokUrl","bankDetails",
-      "courierCharge","slPostCharge",
-      "invoiceStandardRate","invoiceExpressRate","invoiceWeightFirstKg","invoiceWeightAddKg",
-      "faviconUrl","taglineEnabled","showNameWithLogo",
-      "heroSlideImage1","heroSlideImage2","heroSlideImage3","heroSlideImage4","heroSlideImage5","heroSlideImage6","heroSlideImage7","heroSlideImage8","heroSlideImage9","heroSlideImage10","homeFeatureCards",
-      "paymentQrUrl","paymentButtonUrl","paymentButtonLabel",
-      "siteClosedEnabled","siteClosedMessage",
-      "ipayToken","ipaySecret","ipayEnabled","ipaySandbox",
-      "payButtonVisible","googlePayEnabled","googlePayNumber","googlePayQrUrl","googlePayInstructions",
-      "orderEmailNotificationsEnabled","orderEmailRecipients","gmailUser","gmailAppPassword",
-      "financeReportEmailEnabled","financeReportEmailRecipient",
+      "ownerName",
+      "logoUrl",
+      "tiktokUrl",
+      "bankDetails",
+      "courierCharge",
+      "slPostCharge",
+      "invoiceStandardRate",
+      "invoiceExpressRate",
+      "invoiceWeightFirstKg",
+      "invoiceWeightAddKg",
+      "faviconUrl",
+      "taglineEnabled",
+      "showNameWithLogo",
+      "heroSlideImage1",
+      "heroSlideImage2",
+      "heroSlideImage3",
+      "heroSlideImage4",
+      "heroSlideImage5",
+      "heroSlideImage6",
+      "heroSlideImage7",
+      "heroSlideImage8",
+      "heroSlideImage9",
+      "heroSlideImage10",
+      "heroSlideEnabled",
+      "homeFeatureCards",
+      "paymentQrUrl",
+      "paymentButtonUrl",
+      "paymentButtonLabel",
+      "siteClosedEnabled",
+      "siteClosedMessage",
+      "ipayToken",
+      "ipaySecret",
+      "ipayEnabled",
+      "ipaySandbox",
+      "payButtonVisible",
+      "googlePayEnabled",
+      "googlePayNumber",
+      "googlePayQrUrl",
+      "googlePayInstructions",
+      "orderEmailNotificationsEnabled",
+      "orderEmailRecipients",
+      "gmailUser",
+      "gmailAppPassword",
+      "financeReportEmailEnabled",
+      "financeReportEmailRecipient",
     ];
     for (const f of fields) {
       if (incoming[f] !== undefined) updateData[f] = incoming[f];
     }
-    const [updated] = await db.update(settingsTable).set(updateData)
-      .where(eq(settingsTable.id, current.id)).returning();
+    const [updated] = await db
+      .update(settingsTable)
+      .set(updateData)
+      .where(eq(settingsTable.id, current.id))
+      .returning();
     res.json({ success: true, settings: updated });
   } catch (err) {
     req.log.error(err);
@@ -269,7 +457,11 @@ export const noticeRouter = Router();
 noticeRouter.get("/", async (req, res) => {
   try {
     const notice = await getOrCreateNotice();
-    res.json({ enabled: notice.enabled === 1, message: notice.message, type: notice.type });
+    res.json({
+      enabled: notice.enabled === 1,
+      message: notice.message,
+      type: notice.type,
+    });
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to fetch notice" });
@@ -280,13 +472,21 @@ noticeRouter.put("/", requireAdmin, async (req, res) => {
   try {
     const notice = await getOrCreateNotice();
     const { enabled, message, type } = req.body;
-    const [updated] = await db.update(noticeTable).set({
-      enabled: enabled ? 1 : 0,
-      message: message ?? notice.message,
-      type: type ?? notice.type,
-      updatedAt: new Date(),
-    }).where(eq(noticeTable.id, notice.id)).returning();
-    res.json({ enabled: updated.enabled === 1, message: updated.message, type: updated.type });
+    const [updated] = await db
+      .update(noticeTable)
+      .set({
+        enabled: enabled ? 1 : 0,
+        message: message ?? notice.message,
+        type: type ?? notice.type,
+        updatedAt: new Date(),
+      })
+      .where(eq(noticeTable.id, notice.id))
+      .returning();
+    res.json({
+      enabled: updated.enabled === 1,
+      message: updated.message,
+      type: updated.type,
+    });
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to update notice" });
@@ -298,8 +498,11 @@ export const noticesRouter = Router();
 
 noticesRouter.get("/", async (req, res) => {
   try {
-    const rows = await db.select().from(noticesTable).orderBy(asc(noticesTable.sortOrder), asc(noticesTable.createdAt));
-    res.json(rows.map(r => ({ ...r, enabled: r.enabled === 1 })));
+    const rows = await db
+      .select()
+      .from(noticesTable)
+      .orderBy(asc(noticesTable.sortOrder), asc(noticesTable.createdAt));
+    res.json(rows.map((r) => ({ ...r, enabled: r.enabled === 1 })));
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to fetch notices" });
@@ -308,12 +511,28 @@ noticesRouter.get("/", async (req, res) => {
 
 noticesRouter.post("/", requireAdmin, async (req, res) => {
   try {
-    const { message, style = "info", placement = "banner", enabled = true, sortOrder = 0, topic, imageUrl } = req.body;
+    const {
+      message,
+      style = "info",
+      placement = "banner",
+      enabled = true,
+      sortOrder = 0,
+      topic,
+      imageUrl,
+    } = req.body;
     if (!message) return res.status(400).json({ error: "message is required" });
-    const [created] = await db.insert(noticesTable).values({
-      message, style, placement, enabled: enabled ? 1 : 0, sortOrder,
-      topic: topic || null, imageUrl: imageUrl || null,
-    }).returning();
+    const [created] = await db
+      .insert(noticesTable)
+      .values({
+        message,
+        style,
+        placement,
+        enabled: enabled ? 1 : 0,
+        sortOrder,
+        topic: topic || null,
+        imageUrl: imageUrl || null,
+      })
+      .returning();
     res.status(201).json({ ...created, enabled: created.enabled === 1 });
   } catch (err) {
     req.log.error(err);
@@ -325,7 +544,8 @@ noticesRouter.put("/:id", requireAdmin, async (req, res) => {
   try {
     const id = parseIdParam(req, res);
     if (id === null) return;
-    const { message, style, placement, enabled, sortOrder, topic, imageUrl } = req.body;
+    const { message, style, placement, enabled, sortOrder, topic, imageUrl } =
+      req.body;
     const updateData: any = { updatedAt: new Date() };
     if (message !== undefined) updateData.message = message;
     if (style !== undefined) updateData.style = style;
@@ -334,7 +554,11 @@ noticesRouter.put("/:id", requireAdmin, async (req, res) => {
     if (sortOrder !== undefined) updateData.sortOrder = sortOrder;
     if (topic !== undefined) updateData.topic = topic || null;
     if (imageUrl !== undefined) updateData.imageUrl = imageUrl || null;
-    const [updated] = await db.update(noticesTable).set(updateData).where(eq(noticesTable.id, id)).returning();
+    const [updated] = await db
+      .update(noticesTable)
+      .set(updateData)
+      .where(eq(noticesTable.id, id))
+      .returning();
     if (!updated) return res.status(404).json({ error: "Notice not found" });
     res.json({ ...updated, enabled: updated.enabled === 1 });
   } catch (err) {

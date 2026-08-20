@@ -1,7 +1,12 @@
 import { Router, type Request, type Response } from "express";
 import crypto from "crypto";
 import { db, pool } from "@workspace/db";
-import { ordersTable, invoicesTable, clientsTable, crmProjectsTable } from "@workspace/db/schema";
+import {
+  ordersTable,
+  invoicesTable,
+  clientsTable,
+  crmProjectsTable,
+} from "@workspace/db/schema";
 import { eq, lt, isNull, isNotNull, sql, and, type SQL } from "drizzle-orm";
 import { runInvoiceClientBackfill } from "@workspace/invoice-client-link";
 import { deleteCloudinaryUrls } from "../lib/cloudinary";
@@ -15,25 +20,37 @@ import {
   requireOwner,
   requirePermission,
 } from "../lib/auth-cookie";
-import { ensureTeamTables, hashStaffPassword, verifyStaffPassword, STAFF_PERMISSIONS } from "../lib/team-access";
+import {
+  ensureTeamTables,
+  hashStaffPassword,
+  verifyStaffPassword,
+  STAFF_PERMISSIONS,
+} from "../lib/team-access";
 
 const router = Router();
 
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "Admin.HAVESTORY";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
-const ADMIN_PIN      = process.env.ADMIN_PIN      || "";
+const ADMIN_PIN = process.env.ADMIN_PIN || "";
 
 if (!ADMIN_PASSWORD) {
-  console.error("⚠️  SECURITY WARNING: ADMIN_PASSWORD env var is not set — admin login is wide open!");
+  console.error(
+    "⚠️  SECURITY WARNING: ADMIN_PASSWORD env var is not set — admin login is wide open!",
+  );
 }
 if (!ADMIN_PIN) {
-  console.error("⚠️  SECURITY WARNING: ADMIN_PIN env var is not set — PIN step is wide open!");
+  console.error(
+    "⚠️  SECURITY WARNING: ADMIN_PIN env var is not set — PIN step is wide open!",
+  );
 }
 
 const MAX_PIN_ATTEMPTS = 5;
 
 // ── In-memory IP-based rate limiter for Step 1 (username + password) ─────────
-interface RateEntry { count: number; resetAt: number }
+interface RateEntry {
+  count: number;
+  resetAt: number;
+}
 const loginRateMap = new Map<string, RateEntry>();
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const LOGIN_MAX_ATTEMPTS = 10;
@@ -48,7 +65,10 @@ function getClientIp(req: Request): string {
   return req.socket?.remoteAddress ?? "unknown";
 }
 
-function checkLoginRate(ip: string): { allowed: boolean; retryAfterSec: number } {
+function checkLoginRate(ip: string): {
+  allowed: boolean;
+  retryAfterSec: number;
+} {
   const now = Date.now();
   const entry = loginRateMap.get(ip);
   if (!entry || now > entry.resetAt) {
@@ -56,7 +76,10 @@ function checkLoginRate(ip: string): { allowed: boolean; retryAfterSec: number }
     return { allowed: true, retryAfterSec: 0 };
   }
   if (entry.count >= LOGIN_MAX_ATTEMPTS) {
-    return { allowed: false, retryAfterSec: Math.ceil((entry.resetAt - now) / 1000) };
+    return {
+      allowed: false,
+      retryAfterSec: Math.ceil((entry.resetAt - now) / 1000),
+    };
   }
   entry.count++;
   return { allowed: true, retryAfterSec: 0 };
@@ -67,7 +90,10 @@ function safeEqual(a: string, b: string): boolean {
   const bufA = Buffer.from(a);
   const bufB = Buffer.from(b);
   if (bufA.length !== bufB.length) {
-    crypto.timingSafeEqual(Buffer.alloc(bufA.length), Buffer.alloc(bufA.length));
+    crypto.timingSafeEqual(
+      Buffer.alloc(bufA.length),
+      Buffer.alloc(bufA.length),
+    );
     return false;
   }
   return crypto.timingSafeEqual(bufA, bufB);
@@ -79,14 +105,26 @@ router.post("/login", async (req: Request, res: Response) => {
   const rate = checkLoginRate(ip);
   if (!rate.allowed) {
     res.setHeader("Retry-After", String(rate.retryAfterSec));
-    return res.status(429).json({ error: `Too many login attempts. Try again in ${Math.ceil(rate.retryAfterSec / 60)} minute(s).` });
+    return res
+      .status(429)
+      .json({
+        error: `Too many login attempts. Try again in ${Math.ceil(rate.retryAfterSec / 60)} minute(s).`,
+      });
   }
   const { username, password } = req.body;
-  if (typeof username !== "string" || typeof password !== "string" || !password) {
+  if (
+    typeof username !== "string" ||
+    typeof password !== "string" ||
+    !password
+  ) {
     return res.status(401).json({ error: "Invalid username or password" });
   }
 
-  const ownerValid = !!ADMIN_PASSWORD && !!ADMIN_PIN && safeEqual(username, ADMIN_USERNAME) && safeEqual(password, ADMIN_PASSWORD);
+  const ownerValid =
+    !!ADMIN_PASSWORD &&
+    !!ADMIN_PIN &&
+    safeEqual(username, ADMIN_USERNAME) &&
+    safeEqual(password, ADMIN_PASSWORD);
   if (ownerValid) {
     setPendingCookie(res, username);
     return res.json({ success: true, requiresPin: true, role: "owner" });
@@ -96,13 +134,24 @@ router.post("/login", async (req: Request, res: Response) => {
     await ensureTeamTables();
     const { rows } = await pool.query(
       "SELECT id,name,username,password_hash,permissions,active FROM admin_staff WHERE LOWER(username)=LOWER($1) LIMIT 1",
-      [username.trim()]
+      [username.trim()],
     );
     const staff = rows[0];
     if (staff?.active && verifyStaffPassword(password, staff.password_hash)) {
-      const permissions = Array.isArray(staff.permissions) ? staff.permissions.map(String) : [];
-      setAdminCookie(res, staff.username, "staff", permissions, Number(staff.id));
-      await pool.query("UPDATE admin_staff SET last_login_at=NOW() WHERE id=$1", [staff.id]);
+      const permissions = Array.isArray(staff.permissions)
+        ? staff.permissions.map(String)
+        : [];
+      setAdminCookie(
+        res,
+        staff.username,
+        "staff",
+        permissions,
+        Number(staff.id),
+      );
+      await pool.query(
+        "UPDATE admin_staff SET last_login_at=NOW() WHERE id=$1",
+        [staff.id],
+      );
       return res.json({ success: true, requiresPin: false, role: "staff" });
     }
   } catch (error) {
@@ -125,7 +174,9 @@ router.post("/verify-pin", (req: Request, res: Response) => {
   if (attempts >= MAX_PIN_ATTEMPTS) {
     clearAuthCookies(res);
     pinAttemptMap.delete(attemptKey);
-    return res.status(429).json({ error: "Too many PIN attempts. Please start over." });
+    return res
+      .status(429)
+      .json({ error: "Too many PIN attempts. Please start over." });
   }
 
   // Reject when the PIN env var is empty so callers cannot satisfy the check
@@ -153,7 +204,9 @@ router.post("/verify-pin", (req: Request, res: Response) => {
   if (remaining <= 0) {
     clearAuthCookies(res);
     pinAttemptMap.delete(attemptKey);
-    return res.status(429).json({ error: "Too many PIN attempts. Please start over." });
+    return res
+      .status(429)
+      .json({ error: "Too many PIN attempts. Please start over." });
   }
 
   return res.status(401).json({
@@ -162,130 +215,255 @@ router.post("/verify-pin", (req: Request, res: Response) => {
 });
 
 /* ── Safe production material usage (no cost/profit exposure) ─────────── */
-router.get("/production-usage/materials", requirePermission("production"), async (_req: Request, res: Response) => {
-  await ensureTeamTables();
-  const { rows } = await pool.query("SELECT id,name,quantity,unit,low_stock_threshold FROM inventory ORDER BY name");
-  res.json(rows);
-});
+router.get(
+  "/production-usage/materials",
+  requirePermission("production"),
+  async (_req: Request, res: Response) => {
+    await ensureTeamTables();
+    const { rows } = await pool.query(
+      "SELECT id,name,quantity,unit,low_stock_threshold FROM inventory ORDER BY name",
+    );
+    res.json(rows);
+  },
+);
 
-router.get("/production-usage", requirePermission("production"), async (req: Request, res: Response) => {
-  await ensureTeamTables();
-  const auth = getAdminAuth(req)!;
-  const requestedMonth = String(req.query.month || "");
-  const month = /^\d{4}-(0[1-9]|1[0-2])$/.test(requestedMonth) ? requestedMonth : colomboDate().slice(0,7);
-  const params:any[]=[month];
-  let staffFilter="";
-  if(auth.role==="staff"){params.push(auth.staffId);staffFilter=" AND u.staff_id=$2";}
-  const {rows}=await pool.query(`SELECT u.id,u.staff_id,u.inventory_item_id,u.reference,u.used_quantity,u.waste_quantity,u.note,u.usage_date,u.created_at,
+router.get(
+  "/production-usage",
+  requirePermission("production"),
+  async (req: Request, res: Response) => {
+    await ensureTeamTables();
+    const auth = getAdminAuth(req)!;
+    const requestedMonth = String(req.query.month || "");
+    const month = /^\d{4}-(0[1-9]|1[0-2])$/.test(requestedMonth)
+      ? requestedMonth
+      : colomboDate().slice(0, 7);
+    const params: any[] = [month];
+    let staffFilter = "";
+    if (auth.role === "staff") {
+      params.push(auth.staffId);
+      staffFilter = " AND u.staff_id=$2";
+    }
+    const { rows } = await pool.query(
+      `SELECT u.id,u.staff_id,u.inventory_item_id,u.reference,u.used_quantity,u.waste_quantity,u.note,u.usage_date,u.created_at,
       i.name AS material_name,i.unit,s.name AS staff_name
     FROM staff_production_usage u JOIN inventory i ON i.id=u.inventory_item_id
     LEFT JOIN admin_staff s ON s.id=u.staff_id
     WHERE u.usage_date >= to_date($1 || '-01','YYYY-MM-DD')
       AND u.usage_date < to_date($1 || '-01','YYYY-MM-DD') + INTERVAL '1 month'${staffFilter}
-    ORDER BY u.usage_date DESC,u.created_at DESC`,params);
-  res.json({month,role:auth.role,records:rows});
-});
+    ORDER BY u.usage_date DESC,u.created_at DESC`,
+      params,
+    );
+    res.json({ month, role: auth.role, records: rows });
+  },
+);
 
-router.post("/production-usage", requirePermission("production"), async (req: Request, res: Response) => {
-  await ensureTeamTables();
-  const auth=getAdminAuth(req)!;
-  const inventoryItemId=Number(req.body?.inventoryItemId);
-  const used=Math.max(0,Math.floor(Number(req.body?.usedQuantity)||0));
-  const waste=Math.max(0,Math.floor(Number(req.body?.wasteQuantity)||0));
-  const total=used+waste;
-  if(!Number.isInteger(inventoryItemId)||inventoryItemId<=0||total<=0)return res.status(400).json({error:"Material and used/waste quantity are required"});
-  const client=await pool.connect();
-  try{
-    await client.query("BEGIN");
-    const stock=await client.query("UPDATE inventory SET quantity=quantity-$1,updated_at=NOW() WHERE id=$2 AND quantity >= $1 RETURNING id,name,quantity,unit",[total,inventoryItemId]);
-    if(!stock.rows[0]){await client.query("ROLLBACK");return res.status(409).json({error:"Not enough material stock"});}
-    const {rows}=await client.query(`INSERT INTO staff_production_usage(staff_id,inventory_item_id,reference,used_quantity,waste_quantity,note,usage_date)
-      VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *`,[
-      auth.role==="staff"?auth.staffId:null,inventoryItemId,String(req.body?.reference||"").trim().slice(0,120)||null,used,waste,
-      String(req.body?.note||"").trim().slice(0,300)||null,colomboDate()
-    ]);
-    await client.query("COMMIT");
-    res.status(201).json({...rows[0],remaining_stock:stock.rows[0].quantity});
-  }catch(error){await client.query("ROLLBACK").catch(()=>{});req.log.error(error);res.status(500).json({error:"Could not record production usage"});}
-  finally{client.release();}
-});
+router.post(
+  "/production-usage",
+  requirePermission("production"),
+  async (req: Request, res: Response) => {
+    await ensureTeamTables();
+    const auth = getAdminAuth(req)!;
+    const inventoryItemId = Number(req.body?.inventoryItemId);
+    const used = Math.max(0, Math.floor(Number(req.body?.usedQuantity) || 0));
+    const waste = Math.max(0, Math.floor(Number(req.body?.wasteQuantity) || 0));
+    const total = used + waste;
+    if (
+      !Number.isInteger(inventoryItemId) ||
+      inventoryItemId <= 0 ||
+      total <= 0
+    )
+      return res
+        .status(400)
+        .json({ error: "Material and used/waste quantity are required" });
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const stock = await client.query(
+        "UPDATE inventory SET quantity=quantity-$1,updated_at=NOW() WHERE id=$2 AND quantity >= $1 RETURNING id,name,quantity,unit",
+        [total, inventoryItemId],
+      );
+      if (!stock.rows[0]) {
+        await client.query("ROLLBACK");
+        return res.status(409).json({ error: "Not enough material stock" });
+      }
+      const { rows } = await client.query(
+        `INSERT INTO staff_production_usage(staff_id,inventory_item_id,reference,used_quantity,waste_quantity,note,usage_date)
+      VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+        [
+          auth.role === "staff" ? auth.staffId : null,
+          inventoryItemId,
+          String(req.body?.reference || "")
+            .trim()
+            .slice(0, 120) || null,
+          used,
+          waste,
+          String(req.body?.note || "")
+            .trim()
+            .slice(0, 300) || null,
+          colomboDate(),
+        ],
+      );
+      await client.query("COMMIT");
+      res
+        .status(201)
+        .json({ ...rows[0], remaining_stock: stock.rows[0].quantity });
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => {});
+      req.log.error(error);
+      res.status(500).json({ error: "Could not record production usage" });
+    } finally {
+      client.release();
+    }
+  },
+);
 
 /* ── Staff attendance ────────────────────────────────────────────────── */
-const colomboDate = () => new Intl.DateTimeFormat("en-CA", {
-  timeZone: "Asia/Colombo", year: "numeric", month: "2-digit", day: "2-digit",
-}).format(new Date());
+const colomboDate = () =>
+  new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Colombo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
 
 router.get("/attendance", requireAdmin, async (req: Request, res: Response) => {
   await ensureTeamTables();
   const auth = getAdminAuth(req)!;
   const requestedMonth = String(req.query.month || "");
-  const month = /^\d{4}-(0[1-9]|1[0-2])$/.test(requestedMonth) ? requestedMonth : colomboDate().slice(0, 7);
+  const month = /^\d{4}-(0[1-9]|1[0-2])$/.test(requestedMonth)
+    ? requestedMonth
+    : colomboDate().slice(0, 7);
   const params: any[] = [month];
   let staffFilter = "";
-  if (auth.role === "staff") { params.push(auth.staffId); staffFilter = " AND a.staff_id=$2"; }
-  const { rows } = await pool.query(`SELECT a.*,s.name AS staff_name,s.username,
+  if (auth.role === "staff") {
+    params.push(auth.staffId);
+    staffFilter = " AND a.staff_id=$2";
+  }
+  const { rows } = await pool.query(
+    `SELECT a.*,s.name AS staff_name,s.username,
       CASE WHEN a.check_out_at IS NOT NULL THEN GREATEST(0,FLOOR(EXTRACT(EPOCH FROM (a.check_out_at-a.check_in_at))/60))::int ELSE NULL END AS duration_minutes
     FROM staff_attendance a JOIN admin_staff s ON s.id=a.staff_id
     WHERE a.attendance_date >= to_date($1 || '-01','YYYY-MM-DD')
       AND a.attendance_date < to_date($1 || '-01','YYYY-MM-DD') + INTERVAL '1 month'${staffFilter}
-    ORDER BY a.attendance_date DESC,a.check_in_at DESC`, params);
+    ORDER BY a.attendance_date DESC,a.check_in_at DESC`,
+    params,
+  );
   res.json({ month, role: auth.role, today: colomboDate(), records: rows });
 });
 
-router.get("/attendance-pending", requireOwner, async (_req: Request, res: Response) => {
-  await ensureTeamTables();
-  const { rows } = await pool.query(`SELECT a.id,a.attendance_date,a.check_in_at,s.name AS staff_name,s.username
+router.get(
+  "/attendance-pending",
+  requireOwner,
+  async (_req: Request, res: Response) => {
+    await ensureTeamTables();
+    const { rows } =
+      await pool.query(`SELECT a.id,a.attendance_date,a.check_in_at,s.name AS staff_name,s.username
     FROM staff_attendance a JOIN admin_staff s ON s.id=a.staff_id
     WHERE a.status='pending' ORDER BY a.check_in_at DESC LIMIT 50`);
-  res.json(rows);
-});
+    res.json(rows);
+  },
+);
 
-router.post("/attendance/check-in", requireAdmin, async (req: Request, res: Response) => {
-  await ensureTeamTables();
-  const auth = getAdminAuth(req)!;
-  if (auth.role !== "staff" || !auth.staffId) return res.status(403).json({ error: "Only staff accounts can request attendance" });
-  const date = colomboDate();
-  const existing = await pool.query("SELECT id,status FROM staff_attendance WHERE staff_id=$1 AND attendance_date=$2", [auth.staffId, date]);
-  if (existing.rows[0] && existing.rows[0].status !== "rejected") return res.status(409).json({ error: "Today's attendance request already exists" });
-  const { rows } = existing.rows[0]
-    ? await pool.query(`UPDATE staff_attendance SET check_in_at=NOW(),check_out_at=NULL,status='pending',owner_note=NULL,early_checkout=FALSE,checkout_note=NULL,decided_at=NULL,updated_at=NOW()
-        WHERE id=$1 RETURNING *`, [existing.rows[0].id])
-    : await pool.query(`INSERT INTO staff_attendance(staff_id,attendance_date) VALUES($1,$2) RETURNING *`, [auth.staffId, date]);
-  res.status(201).json(rows[0]);
-});
+router.post(
+  "/attendance/check-in",
+  requireAdmin,
+  async (req: Request, res: Response) => {
+    await ensureTeamTables();
+    const auth = getAdminAuth(req)!;
+    if (auth.role !== "staff" || !auth.staffId)
+      return res
+        .status(403)
+        .json({ error: "Only staff accounts can request attendance" });
+    const date = colomboDate();
+    const existing = await pool.query(
+      "SELECT id,status FROM staff_attendance WHERE staff_id=$1 AND attendance_date=$2",
+      [auth.staffId, date],
+    );
+    if (existing.rows[0] && existing.rows[0].status !== "rejected")
+      return res
+        .status(409)
+        .json({ error: "Today's attendance request already exists" });
+    const { rows } = existing.rows[0]
+      ? await pool.query(
+          `UPDATE staff_attendance SET check_in_at=NOW(),check_out_at=NULL,status='pending',owner_note=NULL,early_checkout=FALSE,checkout_note=NULL,decided_at=NULL,updated_at=NOW()
+        WHERE id=$1 RETURNING *`,
+          [existing.rows[0].id],
+        )
+      : await pool.query(
+          `INSERT INTO staff_attendance(staff_id,attendance_date) VALUES($1,$2) RETURNING *`,
+          [auth.staffId, date],
+        );
+    res.status(201).json(rows[0]);
+  },
+);
 
-router.post("/attendance/:id/check-out", requireAdmin, async (req: Request, res: Response) => {
-  await ensureTeamTables();
-  const auth = getAdminAuth(req)!;
-  if (auth.role !== "staff" || !auth.staffId) return res.status(403).json({ error: "Only staff can check out" });
-  const id = Number(req.params.id);
-  const earlyCheckout = req.body?.earlyCheckout === true;
-  const checkoutNote = String(req.body?.note || "").trim().slice(0, 300);
-  if (earlyCheckout && !checkoutNote) return res.status(400).json({ error: "Please add a reason before checking out early" });
-  const { rows } = await pool.query(`UPDATE staff_attendance
+router.post(
+  "/attendance/:id/check-out",
+  requireAdmin,
+  async (req: Request, res: Response) => {
+    await ensureTeamTables();
+    const auth = getAdminAuth(req)!;
+    if (auth.role !== "staff" || !auth.staffId)
+      return res.status(403).json({ error: "Only staff can check out" });
+    const id = Number(req.params.id);
+    const earlyCheckout = req.body?.earlyCheckout === true;
+    const checkoutNote = String(req.body?.note || "")
+      .trim()
+      .slice(0, 300);
+    if (earlyCheckout && !checkoutNote)
+      return res
+        .status(400)
+        .json({ error: "Please add a reason before checking out early" });
+    const { rows } = await pool.query(
+      `UPDATE staff_attendance
     SET check_out_at=NOW(),early_checkout=$4,checkout_note=$5,updated_at=NOW()
     WHERE id=$1 AND staff_id=$2 AND attendance_date=$3 AND check_out_at IS NULL AND status IN ('pending','approved') RETURNING *`,
-    [id, auth.staffId, colomboDate(), earlyCheckout, checkoutNote || null]);
-  if (!rows[0]) return res.status(404).json({ error: "Active attendance record not found" });
-  res.json(rows[0]);
-});
+      [id, auth.staffId, colomboDate(), earlyCheckout, checkoutNote || null],
+    );
+    if (!rows[0])
+      return res
+        .status(404)
+        .json({ error: "Active attendance record not found" });
+    res.json(rows[0]);
+  },
+);
 
-router.post("/attendance/:id/decision", requireOwner, async (req: Request, res: Response) => {
-  await ensureTeamTables();
-  const id = Number(req.params.id);
-  const status = req.body?.status === "approved" ? "approved" : req.body?.status === "rejected" ? "rejected" : "";
-  if (!Number.isInteger(id) || !status) return res.status(400).json({ error: "Valid attendance decision required" });
-  const note = String(req.body?.note || "").trim().slice(0, 300) || null;
-  const { rows } = await pool.query(`UPDATE staff_attendance SET status=$1,owner_note=$2,decided_at=NOW(),updated_at=NOW()
-    WHERE id=$3 RETURNING *`, [status, note, id]);
-  if (!rows[0]) return res.status(404).json({ error: "Attendance request not found" });
-  res.json(rows[0]);
-});
+router.post(
+  "/attendance/:id/decision",
+  requireOwner,
+  async (req: Request, res: Response) => {
+    await ensureTeamTables();
+    const id = Number(req.params.id);
+    const status =
+      req.body?.status === "approved"
+        ? "approved"
+        : req.body?.status === "rejected"
+          ? "rejected"
+          : "";
+    if (!Number.isInteger(id) || !status)
+      return res
+        .status(400)
+        .json({ error: "Valid attendance decision required" });
+    const note =
+      String(req.body?.note || "")
+        .trim()
+        .slice(0, 300) || null;
+    const { rows } = await pool.query(
+      `UPDATE staff_attendance SET status=$1,owner_note=$2,decided_at=NOW(),updated_at=NOW()
+    WHERE id=$3 RETURNING *`,
+      [status, note, id],
+    );
+    if (!rows[0])
+      return res.status(404).json({ error: "Attendance request not found" });
+    res.json(rows[0]);
+  },
+);
 
 /* ── Team access management (owner only) ─────────────────────────────── */
 router.get("/team", requireOwner, async (_req: Request, res: Response) => {
   await ensureTeamTables();
-  const { rows } = await pool.query(`SELECT id,name,username,permissions,active,created_at,updated_at,last_login_at
+  const { rows } =
+    await pool.query(`SELECT id,name,username,permissions,active,created_at,updated_at,last_login_at
     FROM admin_staff ORDER BY active DESC, name ASC`);
   res.json(rows);
 });
@@ -295,15 +473,41 @@ router.post("/team", requireOwner, async (req: Request, res: Response) => {
   const name = String(req.body?.name || "").trim();
   const username = String(req.body?.username || "").trim();
   const password = String(req.body?.password || "");
-  const permissions = (Array.isArray(req.body?.permissions) ? req.body.permissions : []).map(String).filter((p: string) => (STAFF_PERMISSIONS as readonly string[]).includes(p));
-  if (!name || username.length < 3 || password.length < 10) return res.status(400).json({ error: "Name, username (3+ characters) and password (10+ characters) are required" });
+  const permissions = (
+    Array.isArray(req.body?.permissions) ? req.body.permissions : []
+  )
+    .map(String)
+    .filter((p: string) =>
+      (STAFF_PERMISSIONS as readonly string[]).includes(p),
+    );
+  if (!name || username.length < 3 || password.length < 10)
+    return res
+      .status(400)
+      .json({
+        error:
+          "Name, username (3+ characters) and password (10+ characters) are required",
+      });
   try {
-    const { rows } = await pool.query(`INSERT INTO admin_staff(name,username,password_hash,permissions)
+    const { rows } = await pool.query(
+      `INSERT INTO admin_staff(name,username,password_hash,permissions)
       VALUES($1,$2,$3,$4::jsonb) RETURNING id,name,username,permissions,active,created_at,last_login_at`,
-      [name, username, hashStaffPassword(password), JSON.stringify(permissions)]);
+      [
+        name,
+        username,
+        hashStaffPassword(password),
+        JSON.stringify(permissions),
+      ],
+    );
     res.status(201).json(rows[0]);
   } catch (error: any) {
-    res.status(error?.code === "23505" ? 409 : 500).json({ error: error?.code === "23505" ? "That username is already used" : "Could not create staff account" });
+    res
+      .status(error?.code === "23505" ? 409 : 500)
+      .json({
+        error:
+          error?.code === "23505"
+            ? "That username is already used"
+            : "Could not create staff account",
+      });
   }
 });
 
@@ -312,122 +516,177 @@ router.patch("/team/:id", requireOwner, async (req: Request, res: Response) => {
   const id = Number(req.params.id);
   const name = String(req.body?.name || "").trim();
   const username = String(req.body?.username || "").trim();
-  const permissions = (Array.isArray(req.body?.permissions) ? req.body.permissions : []).map(String).filter((p: string) => (STAFF_PERMISSIONS as readonly string[]).includes(p));
-  if (!Number.isInteger(id) || !name || username.length < 3) return res.status(400).json({ error: "Valid staff details are required" });
+  const permissions = (
+    Array.isArray(req.body?.permissions) ? req.body.permissions : []
+  )
+    .map(String)
+    .filter((p: string) =>
+      (STAFF_PERMISSIONS as readonly string[]).includes(p),
+    );
+  if (!Number.isInteger(id) || !name || username.length < 3)
+    return res.status(400).json({ error: "Valid staff details are required" });
   try {
-    const { rows } = await pool.query(`UPDATE admin_staff SET name=$1,username=$2,permissions=$3::jsonb,active=$4,updated_at=NOW()
+    const { rows } = await pool.query(
+      `UPDATE admin_staff SET name=$1,username=$2,permissions=$3::jsonb,active=$4,updated_at=NOW()
       WHERE id=$5 RETURNING id,name,username,permissions,active,created_at,updated_at,last_login_at`,
-      [name, username, JSON.stringify(permissions), req.body?.active !== false, id]);
-    if (!rows[0]) return res.status(404).json({ error: "Staff account not found" });
+      [
+        name,
+        username,
+        JSON.stringify(permissions),
+        req.body?.active !== false,
+        id,
+      ],
+    );
+    if (!rows[0])
+      return res.status(404).json({ error: "Staff account not found" });
     res.json(rows[0]);
   } catch (error: any) {
-    res.status(error?.code === "23505" ? 409 : 500).json({ error: error?.code === "23505" ? "That username is already used" : "Could not update staff account" });
+    res
+      .status(error?.code === "23505" ? 409 : 500)
+      .json({
+        error:
+          error?.code === "23505"
+            ? "That username is already used"
+            : "Could not update staff account",
+      });
   }
 });
 
-router.delete("/team/:id", requireOwner, async (req: Request, res: Response) => {
-  await ensureTeamTables();
-  const id = Number(req.params.id);
-  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: "Invalid staff ID" });
-  const result = await pool.query("DELETE FROM admin_staff WHERE id=$1 RETURNING id", [id]);
-  if (!result.rowCount) return res.status(404).json({ error: "Staff account not found" });
-  res.json({ success: true });
-});
+router.delete(
+  "/team/:id",
+  requireOwner,
+  async (req: Request, res: Response) => {
+    await ensureTeamTables();
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0)
+      return res.status(400).json({ error: "Invalid staff ID" });
+    const result = await pool.query(
+      "DELETE FROM admin_staff WHERE id=$1 RETURNING id",
+      [id],
+    );
+    if (!result.rowCount)
+      return res.status(404).json({ error: "Staff account not found" });
+    res.json({ success: true });
+  },
+);
 
-router.post("/team/:id/reset-password", requireOwner, async (req: Request, res: Response) => {
-  await ensureTeamTables();
-  const id = Number(req.params.id);
-  const password = String(req.body?.password || "");
-  if (!Number.isInteger(id) || password.length < 10) return res.status(400).json({ error: "New password must contain at least 10 characters" });
-  const result = await pool.query("UPDATE admin_staff SET password_hash=$1,updated_at=NOW() WHERE id=$2", [hashStaffPassword(password), id]);
-  if (!result.rowCount) return res.status(404).json({ error: "Staff account not found" });
-  res.json({ success: true });
-});
+router.post(
+  "/team/:id/reset-password",
+  requireOwner,
+  async (req: Request, res: Response) => {
+    await ensureTeamTables();
+    const id = Number(req.params.id);
+    const password = String(req.body?.password || "");
+    if (!Number.isInteger(id) || password.length < 10)
+      return res
+        .status(400)
+        .json({ error: "New password must contain at least 10 characters" });
+    const result = await pool.query(
+      "UPDATE admin_staff SET password_hash=$1,updated_at=NOW() WHERE id=$2",
+      [hashStaffPassword(password), id],
+    );
+    if (!result.rowCount)
+      return res.status(404).json({ error: "Staff account not found" });
+    res.json({ success: true });
+  },
+);
 
 router.get("/activity", requireOwner, async (req: Request, res: Response) => {
   await ensureTeamTables();
   const limit = Math.min(300, Math.max(20, Number(req.query.limit) || 100));
-  const { rows } = await pool.query(`SELECT id,actor_id,actor_username,action,method,path,status_code,created_at
-    FROM admin_activity_log ORDER BY created_at DESC LIMIT $1`, [limit]);
+  const { rows } = await pool.query(
+    `SELECT id,actor_id,actor_username,action,method,path,status_code,created_at
+    FROM admin_activity_log ORDER BY created_at DESC LIMIT $1`,
+    [limit],
+  );
   res.json(rows);
 });
 
 /* ── Storage Cleanup ─────────────────────────────────────────────────────── */
-router.post("/cleanup-files", requireOwner, async (req: Request, res: Response) => {
-  if (!getAdminAuth(req)) {
-    return res.status(401).json({ error: "Not authenticated" });
-  }
-  try {
-    const cutoff = new Date();
-    cutoff.setMonth(cutoff.getMonth() - 3);
-
-    const oldOrders = await db
-      .select()
-      .from(ordersTable)
-      .where(lt(ordersTable.createdAt, cutoff));
-
-    let ordersProcessed = 0;
-    let filesDeleted = 0;
-
-    for (const order of oldOrders) {
-      const urls: string[] = [];
-
-      if (order.paymentProofUrl) urls.push(order.paymentProofUrl);
-      if (order.proofFileUrl) urls.push(order.proofFileUrl);
-
-      try {
-        const attachments = JSON.parse(order.attachments || "[]");
-        for (const a of attachments) {
-          if (typeof a === "string") urls.push(a);
-          else if (a?.url) urls.push(a.url);
-        }
-      } catch {}
-
-      try {
-        const onlineFiles = JSON.parse(order.onlineDeliveryFiles || "[]");
-        for (const f of onlineFiles) {
-          if (typeof f === "string") urls.push(f);
-          else if (f?.url) urls.push(f.url);
-        }
-      } catch {}
-
-      const cloudinaryUrls = urls.filter(u => u && u.includes("cloudinary.com"));
-      if (cloudinaryUrls.length === 0) continue;
-
-      const deleted = await deleteCloudinaryUrls(cloudinaryUrls);
-      filesDeleted += deleted;
-
-      // Scope the update to the current order. The previous implementation
-      // re-applied this UPDATE to every old order on every loop iteration
-      // because it used `lt(createdAt, cutoff)`.
-      await db
-        .update(ordersTable)
-        .set({
-          attachments: "[]",
-          onlineDeliveryFiles: "[]",
-          paymentProofUrl: null,
-          proofFileUrl: null,
-          proofFileName: null,
-          updatedAt: new Date(),
-        })
-        .where(eq(ordersTable.id, order.id));
-
-      ordersProcessed++;
+router.post(
+  "/cleanup-files",
+  requireOwner,
+  async (req: Request, res: Response) => {
+    if (!getAdminAuth(req)) {
+      return res.status(401).json({ error: "Not authenticated" });
     }
+    try {
+      const cutoff = new Date();
+      cutoff.setMonth(cutoff.getMonth() - 3);
 
-    return res.json({
-      success: true,
-      ordersProcessed,
-      filesDeleted,
-      message: ordersProcessed === 0
-        ? "No orders older than 3 months with files were found."
-        : `Cleaned ${ordersProcessed} order(s) and removed ${filesDeleted} file(s) from cloud storage.`,
-    });
-  } catch (err: any) {
-    req.log.error(err);
-    return res.status(500).json({ error: "Cleanup failed", details: err?.message });
-  }
-});
+      const oldOrders = await db
+        .select()
+        .from(ordersTable)
+        .where(lt(ordersTable.createdAt, cutoff));
+
+      let ordersProcessed = 0;
+      let filesDeleted = 0;
+
+      for (const order of oldOrders) {
+        const urls: string[] = [];
+
+        if (order.paymentProofUrl) urls.push(order.paymentProofUrl);
+        if (order.proofFileUrl) urls.push(order.proofFileUrl);
+
+        try {
+          const attachments = JSON.parse(order.attachments || "[]");
+          for (const a of attachments) {
+            if (typeof a === "string") urls.push(a);
+            else if (a?.url) urls.push(a.url);
+          }
+        } catch {}
+
+        try {
+          const onlineFiles = JSON.parse(order.onlineDeliveryFiles || "[]");
+          for (const f of onlineFiles) {
+            if (typeof f === "string") urls.push(f);
+            else if (f?.url) urls.push(f.url);
+          }
+        } catch {}
+
+        const cloudinaryUrls = urls.filter(
+          (u) => u && u.includes("cloudinary.com"),
+        );
+        if (cloudinaryUrls.length === 0) continue;
+
+        const deleted = await deleteCloudinaryUrls(cloudinaryUrls);
+        filesDeleted += deleted;
+
+        // Scope the update to the current order. The previous implementation
+        // re-applied this UPDATE to every old order on every loop iteration
+        // because it used `lt(createdAt, cutoff)`.
+        await db
+          .update(ordersTable)
+          .set({
+            attachments: "[]",
+            onlineDeliveryFiles: "[]",
+            paymentProofUrl: null,
+            proofFileUrl: null,
+            proofFileName: null,
+            updatedAt: new Date(),
+          })
+          .where(eq(ordersTable.id, order.id));
+
+        ordersProcessed++;
+      }
+
+      return res.json({
+        success: true,
+        ordersProcessed,
+        filesDeleted,
+        message:
+          ordersProcessed === 0
+            ? "No orders older than 3 months with files were found."
+            : `Cleaned ${ordersProcessed} order(s) and removed ${filesDeleted} file(s) from cloud storage.`,
+      });
+    } catch (err: any) {
+      req.log.error(err);
+      return res
+        .status(500)
+        .json({ error: "Cleanup failed", details: err?.message });
+    }
+  },
+);
 
 /* ── Logout ───────────────────────────────────────────────────────────────── */
 router.post("/logout", (req: Request, res: Response) => {
@@ -439,18 +698,27 @@ router.post("/logout", (req: Request, res: Response) => {
 router.get("/me", (req: Request, res: Response) => {
   const admin = getAdminAuth(req);
   if (admin) {
-    res.json({ authenticated: true, username: admin.username, role: admin.role, permissions: admin.permissions, staffId: admin.staffId });
+    res.json({
+      authenticated: true,
+      username: admin.username,
+      role: admin.role,
+      permissions: admin.permissions,
+      staffId: admin.staffId,
+    });
   } else {
     res.status(401).json({ error: "Not authenticated", authenticated: false });
   }
 });
 
 /* ── One-time DB migration (creates all tables if missing) ───────────────── */
-router.post("/run-migration", requireOwner, async (req: Request, res: Response) => {
-  if (!getAdminAuth(req)) {
-    return res.status(401).json({ error: "Not authenticated" });
-  }
-  const MIGRATION_SQL = `
+router.post(
+  "/run-migration",
+  requireOwner,
+  async (req: Request, res: Response) => {
+    if (!getAdminAuth(req)) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    const MIGRATION_SQL = `
 CREATE TABLE IF NOT EXISTS "categories" (
   "id" serial PRIMARY KEY NOT NULL,
   "name" text NOT NULL,
@@ -702,7 +970,7 @@ CREATE TABLE IF NOT EXISTS "crm_projects" (
 );
   `.trim();
 
-  const ALTER_SQL = `
+    const ALTER_SQL = `
 DO $$ BEGIN
   ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image1 text;
 EXCEPTION WHEN others THEN NULL; END $$;
@@ -718,36 +986,64 @@ EXCEPTION WHEN others THEN NULL; END $$;
 DO $$ BEGIN
   ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image5 text;
 EXCEPTION WHEN others THEN NULL; END $$;
+DO $$ BEGIN
+  ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image6 text;
+EXCEPTION WHEN others THEN NULL; END $$;
+DO $$ BEGIN
+  ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image7 text;
+EXCEPTION WHEN others THEN NULL; END $$;
+DO $$ BEGIN
+  ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image8 text;
+EXCEPTION WHEN others THEN NULL; END $$;
+DO $$ BEGIN
+  ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image9 text;
+EXCEPTION WHEN others THEN NULL; END $$;
+DO $$ BEGIN
+  ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image10 text;
+EXCEPTION WHEN others THEN NULL; END $$;
+DO $$ BEGIN
+  ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_enabled text NOT NULL DEFAULT '[true,true,true,true,true,true,true,true,true,true]';
+EXCEPTION WHEN others THEN NULL; END $$;
   `.trim();
 
-  try {
-    const client = await pool.connect();
-    await client.query(MIGRATION_SQL);
-    await client.query(ALTER_SQL);
-    client.release();
-    return res.json({ success: true, message: "All tables created and columns updated successfully" });
-  } catch (err: any) {
-    return res.status(500).json({ error: "Migration failed", details: err?.message });
-  }
-});
+    try {
+      const client = await pool.connect();
+      await client.query(MIGRATION_SQL);
+      await client.query(ALTER_SQL);
+      client.release();
+      return res.json({
+        success: true,
+        message: "All tables created and columns updated successfully",
+      });
+    } catch (err: any) {
+      return res
+        .status(500)
+        .json({ error: "Migration failed", details: err?.message });
+    }
+  },
+);
 
 /* ── Re-link old invoices to clients ─────────────────────────────────────── */
-router.post("/backfill-invoice-client-id", requireOwner, async (req: Request, res: Response) => {
-  if (!getAdminAuth(req)) {
-    return res.status(401).json({ error: "Not authenticated" });
-  }
-  try {
-    const { summary } = await runInvoiceClientBackfill(db);
-    return res.json({ success: true, ...summary });
-  } catch (err: any) {
-    req.log.error({ err }, "backfill-invoice-client-id failed");
-    return res.status(500).json({
-      success: false,
-      error: "Backfill failed",
-      details: err?.message ?? String(err),
-    });
-  }
-});
+router.post(
+  "/backfill-invoice-client-id",
+  requireOwner,
+  async (req: Request, res: Response) => {
+    if (!getAdminAuth(req)) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const { summary } = await runInvoiceClientBackfill(db);
+      return res.json({ success: true, ...summary });
+    } catch (err: any) {
+      req.log.error({ err }, "backfill-invoice-client-id failed");
+      return res.status(500).json({
+        success: false,
+        error: "Backfill failed",
+        details: err?.message ?? String(err),
+      });
+    }
+  },
+);
 
 /* ── Soft-delete helpers ──────────────────────────────────────────────────── */
 
@@ -756,7 +1052,11 @@ router.post("/backfill-invoice-client-id", requireOwner, async (req: Request, re
 // `extraFilter` is AND-ed into every trash / restore / count predicate so
 // only the targeted subset is affected.
 type SectionConfig = {
-  table: typeof ordersTable | typeof invoicesTable | typeof clientsTable | typeof crmProjectsTable;
+  table:
+    | typeof ordersTable
+    | typeof invoicesTable
+    | typeof clientsTable
+    | typeof crmProjectsTable;
   extraFilter?: SQL;
 };
 
@@ -768,7 +1068,10 @@ const SECTION_MAP: Record<string, SectionConfig> = {
   // Subset of `orders` — only rows where orderType = 'custom'. Used by the
   // "Clear Custom Projects" action in Settings → Data Management so admins
   // can wipe just the custom-project orders without touching standard ones.
-  "custom-orders": { table: ordersTable, extraFilter: eq(ordersTable.orderType, "custom") },
+  "custom-orders": {
+    table: ordersTable,
+    extraFilter: eq(ordersTable.orderType, "custom"),
+  },
 };
 
 type SectionKey = keyof typeof SECTION_MAP;
@@ -782,129 +1085,177 @@ function withExtra(base: SQL, extra?: SQL): SQL {
 }
 
 /* ── Trash (soft-delete) all items in a section ──────────────────────────── */
-router.post("/trash/:section", requireOwner, async (req: Request, res: Response) => {
-  if (!getAdminAuth(req)) {
-    return res.status(401).json({ error: "Not authenticated" });
-  }
-  const section = String(req.params.section);
-  if (!isSectionKey(section)) {
-    return res.status(400).json({ error: `Invalid section: ${section}` });
-  }
-  try {
-    const { table, extraFilter } = SECTION_MAP[section];
-    const now = new Date();
-    const result = await db
-      .update(table)
-      .set({ deletedAt: now } as any)
-      .where(withExtra(isNull(table.deletedAt), extraFilter));
-    const count = (result as any).rowCount ?? 0;
-    return res.json({ success: true, trashedCount: count, message: `${count} ${section} moved to trash.` });
-  } catch (err: any) {
-    req.log.error(err);
-    return res.status(500).json({ error: `Failed to trash ${section}`, details: err?.message });
-  }
-});
+router.post(
+  "/trash/:section",
+  requireOwner,
+  async (req: Request, res: Response) => {
+    if (!getAdminAuth(req)) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    const section = String(req.params.section);
+    if (!isSectionKey(section)) {
+      return res.status(400).json({ error: `Invalid section: ${section}` });
+    }
+    try {
+      const { table, extraFilter } = SECTION_MAP[section];
+      const now = new Date();
+      const result = await db
+        .update(table)
+        .set({ deletedAt: now } as any)
+        .where(withExtra(isNull(table.deletedAt), extraFilter));
+      const count = (result as any).rowCount ?? 0;
+      return res.json({
+        success: true,
+        trashedCount: count,
+        message: `${count} ${section} moved to trash.`,
+      });
+    } catch (err: any) {
+      req.log.error(err);
+      return res
+        .status(500)
+        .json({ error: `Failed to trash ${section}`, details: err?.message });
+    }
+  },
+);
 
 /* ── List trashed items for a section ────────────────────────────────────── */
-router.get("/trash/:section", requireOwner, async (req: Request, res: Response) => {
-  if (!getAdminAuth(req)) {
-    return res.status(401).json({ error: "Not authenticated" });
-  }
-  const section = String(req.params.section);
-  if (!isSectionKey(section)) {
-    return res.status(400).json({ error: `Invalid section: ${section}` });
-  }
-  try {
-    const { table, extraFilter } = SECTION_MAP[section];
-    const items = await db.select().from(table).where(withExtra(isNotNull(table.deletedAt), extraFilter));
-    return res.json(items);
-  } catch (err: any) {
-    req.log.error(err);
-    return res.status(500).json({ error: `Failed to fetch trashed ${section}`, details: err?.message });
-  }
-});
-
-/* ── Trash counts for all sections ───────────────────────────────────────── */
-router.get("/trash-counts", requireOwner, async (req: Request, res: Response) => {
-  if (!getAdminAuth(req)) {
-    return res.status(401).json({ error: "Not authenticated" });
-  }
-  try {
-    const counts: Record<string, number> = {};
-    for (const [key, { table, extraFilter }] of Object.entries(SECTION_MAP)) {
-      const [row] = await db
-        .select({ count: sql<number>`count(*)::int` })
+router.get(
+  "/trash/:section",
+  requireOwner,
+  async (req: Request, res: Response) => {
+    if (!getAdminAuth(req)) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    const section = String(req.params.section);
+    if (!isSectionKey(section)) {
+      return res.status(400).json({ error: `Invalid section: ${section}` });
+    }
+    try {
+      const { table, extraFilter } = SECTION_MAP[section];
+      const items = await db
+        .select()
         .from(table)
         .where(withExtra(isNotNull(table.deletedAt), extraFilter));
-      counts[key] = row?.count ?? 0;
+      return res.json(items);
+    } catch (err: any) {
+      req.log.error(err);
+      return res
+        .status(500)
+        .json({
+          error: `Failed to fetch trashed ${section}`,
+          details: err?.message,
+        });
     }
-    return res.json(counts);
-  } catch (err: any) {
-    req.log.error(err);
-    return res.status(500).json({ error: "Failed to fetch trash counts", details: err?.message });
-  }
-});
+  },
+);
+
+/* ── Trash counts for all sections ───────────────────────────────────────── */
+router.get(
+  "/trash-counts",
+  requireOwner,
+  async (req: Request, res: Response) => {
+    if (!getAdminAuth(req)) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const counts: Record<string, number> = {};
+      for (const [key, { table, extraFilter }] of Object.entries(SECTION_MAP)) {
+        const [row] = await db
+          .select({ count: sql<number>`count(*)::int` })
+          .from(table)
+          .where(withExtra(isNotNull(table.deletedAt), extraFilter));
+        counts[key] = row?.count ?? 0;
+      }
+      return res.json(counts);
+    } catch (err: any) {
+      req.log.error(err);
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch trash counts", details: err?.message });
+    }
+  },
+);
 
 /* ── Restore specific items or all items from trash ──────────────────────── */
-router.post("/restore/:section", requireOwner, async (req: Request, res: Response) => {
-  if (!getAdminAuth(req)) {
-    return res.status(401).json({ error: "Not authenticated" });
-  }
-  const section = String(req.params.section);
-  if (!isSectionKey(section)) {
-    return res.status(400).json({ error: `Invalid section: ${section}` });
-  }
-  try {
-    const { table, extraFilter } = SECTION_MAP[section];
-    const { ids } = req.body as { ids?: number[] };
-    let result: any;
-    if (ids && Array.isArray(ids) && ids.length > 0) {
-      const idSet = ids.filter(Number.isFinite);
-      let restored = 0;
-      for (const id of idSet) {
+router.post(
+  "/restore/:section",
+  requireOwner,
+  async (req: Request, res: Response) => {
+    if (!getAdminAuth(req)) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    const section = String(req.params.section);
+    if (!isSectionKey(section)) {
+      return res.status(400).json({ error: `Invalid section: ${section}` });
+    }
+    try {
+      const { table, extraFilter } = SECTION_MAP[section];
+      const { ids } = req.body as { ids?: number[] };
+      let result: any;
+      if (ids && Array.isArray(ids) && ids.length > 0) {
+        const idSet = ids.filter(Number.isFinite);
+        let restored = 0;
+        for (const id of idSet) {
+          const r = await db
+            .update(table)
+            .set({ deletedAt: null } as any)
+            .where(withExtra(eq(table.id, id), extraFilter));
+          restored += (r as any).rowCount ?? 0;
+        }
+        result = { restoredCount: restored };
+      } else {
         const r = await db
           .update(table)
           .set({ deletedAt: null } as any)
-          .where(withExtra(eq(table.id, id), extraFilter));
-        restored += (r as any).rowCount ?? 0;
+          .where(withExtra(isNotNull(table.deletedAt), extraFilter));
+        result = { restoredCount: (r as any).rowCount ?? 0 };
       }
-      result = { restoredCount: restored };
-    } else {
-      const r = await db
-        .update(table)
-        .set({ deletedAt: null } as any)
-        .where(withExtra(isNotNull(table.deletedAt), extraFilter));
-      result = { restoredCount: (r as any).rowCount ?? 0 };
+      return res.json({
+        success: true,
+        ...result,
+        message: `${result.restoredCount} ${section} restored from trash.`,
+      });
+    } catch (err: any) {
+      req.log.error(err);
+      return res
+        .status(500)
+        .json({ error: `Failed to restore ${section}`, details: err?.message });
     }
-    return res.json({ success: true, ...result, message: `${result.restoredCount} ${section} restored from trash.` });
-  } catch (err: any) {
-    req.log.error(err);
-    return res.status(500).json({ error: `Failed to restore ${section}`, details: err?.message });
-  }
-});
+  },
+);
 
 /* ── Permanently delete items that have been in trash for over 30 days ──── */
-router.post("/purge/:section", requireOwner, async (req: Request, res: Response) => {
-  if (!getAdminAuth(req)) {
-    return res.status(401).json({ error: "Not authenticated" });
-  }
-  const section = String(req.params.section);
-  if (!isSectionKey(section)) {
-    return res.status(400).json({ error: `Invalid section: ${section}` });
-  }
-  try {
-    const { table, extraFilter } = SECTION_MAP[section];
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - 30);
-    const result = await db
-      .delete(table)
-      .where(withExtra(lt(table.deletedAt, cutoff), extraFilter));
-    const count = (result as any).rowCount ?? 0;
-    return res.json({ success: true, purgedCount: count, message: `${count} ${section} permanently deleted.` });
-  } catch (err: any) {
-    req.log.error(err);
-    return res.status(500).json({ error: `Failed to purge ${section}`, details: err?.message });
-  }
-});
+router.post(
+  "/purge/:section",
+  requireOwner,
+  async (req: Request, res: Response) => {
+    if (!getAdminAuth(req)) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    const section = String(req.params.section);
+    if (!isSectionKey(section)) {
+      return res.status(400).json({ error: `Invalid section: ${section}` });
+    }
+    try {
+      const { table, extraFilter } = SECTION_MAP[section];
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 30);
+      const result = await db
+        .delete(table)
+        .where(withExtra(lt(table.deletedAt, cutoff), extraFilter));
+      const count = (result as any).rowCount ?? 0;
+      return res.json({
+        success: true,
+        purgedCount: count,
+        message: `${count} ${section} permanently deleted.`,
+      });
+    } catch (err: any) {
+      req.log.error(err);
+      return res
+        .status(500)
+        .json({ error: `Failed to purge ${section}`, details: err?.message });
+    }
+  },
+);
 
 export default router;

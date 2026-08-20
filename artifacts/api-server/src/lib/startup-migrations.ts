@@ -5,7 +5,9 @@ import { pool } from "@workspace/db";
  * in an older production database. Safe to run on every server start.
  * Uses ALTER TABLE … ADD COLUMN IF NOT EXISTS so duplicate runs are harmless.
  */
-export async function runStartupMigrations(log: (msg: string) => void = console.log): Promise<void> {
+export async function runStartupMigrations(
+  log: (msg: string) => void = console.log,
+): Promise<void> {
   const client = await pool.connect();
   try {
     // Isolated from the rest of startup DDL so an unrelated legacy index
@@ -116,6 +118,13 @@ export async function runStartupMigrations(log: (msg: string) => void = console.
         ADD COLUMN IF NOT EXISTS hero_slide_image3 TEXT,
         ADD COLUMN IF NOT EXISTS hero_slide_image4 TEXT,
         ADD COLUMN IF NOT EXISTS hero_slide_image5 TEXT,
+        ADD COLUMN IF NOT EXISTS hero_slide_image6 TEXT,
+        ADD COLUMN IF NOT EXISTS hero_slide_image7 TEXT,
+        ADD COLUMN IF NOT EXISTS hero_slide_image8 TEXT,
+        ADD COLUMN IF NOT EXISTS hero_slide_image9 TEXT,
+        ADD COLUMN IF NOT EXISTS hero_slide_image10 TEXT,
+        ADD COLUMN IF NOT EXISTS hero_slide_enabled TEXT NOT NULL DEFAULT '[true,true,true,true,true,true,true,true,true,true]',
+        ADD COLUMN IF NOT EXISTS home_feature_cards TEXT NOT NULL DEFAULT '[]',
         ADD COLUMN IF NOT EXISTS payment_qr_url TEXT,
         ADD COLUMN IF NOT EXISTS payment_button_url TEXT,
         ADD COLUMN IF NOT EXISTS payment_button_label TEXT,
@@ -240,7 +249,7 @@ export async function runStartupMigrations(log: (msg: string) => void = console.
          FROM invoices
         WHERE metadata IS NOT NULL
           AND metadata <> ''
-          AND (client_phone IS NULL OR client_email IS NULL)`
+          AND (client_phone IS NULL OR client_email IS NULL)`,
     );
     let backfilled = 0;
     for (const row of rows as Array<{ id: number; metadata: string }>) {
@@ -260,12 +269,14 @@ export async function runStartupMigrations(log: (msg: string) => void = console.
                 client_email = COALESCE(client_email, $3)
           WHERE id = $1
             AND (client_phone IS NULL OR client_email IS NULL)`,
-        [row.id, phone || null, email || null]
+        [row.id, phone || null, email || null],
       );
       if (result.rowCount && result.rowCount > 0) backfilled += 1;
     }
     if (backfilled > 0) {
-      log(`[migrations] Backfilled client_phone/client_email on ${backfilled} legacy invoice row(s)`);
+      log(
+        `[migrations] Backfilled client_phone/client_email on ${backfilled} legacy invoice row(s)`,
+      );
     }
   } catch (e) {
     console.warn("[migrations] Invoice contact backfill warning:", e);
@@ -288,7 +299,7 @@ export async function runStartupMigrations(log: (msg: string) => void = console.
         WHERE deleted_at IS NULL
           AND status IN ('issued', 'pending', 'draft')
           AND metadata IS NOT NULL
-          AND metadata <> ''`
+          AND metadata <> ''`,
     );
     let reconciled = 0;
     for (const row of rows as Array<{
@@ -307,18 +318,20 @@ export async function runStartupMigrations(log: (msg: string) => void = console.
       const total = Number(row.amount ?? 0);
       if (!Number.isFinite(adv) || adv <= 0) continue;
       const target =
-        Number.isFinite(total) && total > 0 && adv >= total ? "paid" : "partial";
+        Number.isFinite(total) && total > 0 && adv >= total
+          ? "paid"
+          : "partial";
       if (target === row.status) continue;
       const result = await reconcileClient.query(
         `UPDATE invoices SET status = $2 WHERE id = $1 AND status = $3`,
-        [row.id, target, row.status]
+        [row.id, target, row.status],
       );
       if (result.rowCount && result.rowCount > 0) reconciled += 1;
     }
     if (reconciled > 0) {
       log(
         `[migrations] Reconciled status on ${reconciled} legacy invoice row(s) ` +
-          `(advance > 0 → partial/paid)`
+          `(advance > 0 → partial/paid)`,
       );
     }
   } catch (e) {
@@ -337,12 +350,14 @@ export async function runStartupMigrations(log: (msg: string) => void = console.
     for (const table of tables) {
       const result = await purgeClient.query(
         `DELETE FROM ${table} WHERE deleted_at IS NOT NULL AND deleted_at < $1`,
-        [cutoff]
+        [cutoff],
       );
       totalPurged += result.rowCount ?? 0;
     }
     if (totalPurged > 0) {
-      log(`[migrations] Auto-purged ${totalPurged} expired trash item(s) (older than 30 days)`);
+      log(
+        `[migrations] Auto-purged ${totalPurged} expired trash item(s) (older than 30 days)`,
+      );
     }
   } catch (e) {
     console.warn("[migrations] Trash auto-purge warning:", e);

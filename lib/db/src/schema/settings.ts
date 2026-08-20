@@ -1,17 +1,42 @@
-import { pgTable, serial, text, integer, real, timestamp } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  serial,
+  text,
+  integer,
+  real,
+  timestamp,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
 export const settingsTable = pgTable("settings", {
   id: serial("id").primaryKey(),
   businessName: text("business_name").notNull().default("HAVESTORY"),
-  tagline: text("tagline").notNull().default("Premium Photo Frames & Story Galleries"),
-  heroTitle: text("hero_title").notNull().default("Frame the Moments That Stay"),
-  heroSubtitle: text("hero_subtitle").notNull().default("Thoughtfully made photo frames that turn everyday moments into a gallery of your own."),
+  tagline: text("tagline")
+    .notNull()
+    .default("Premium Photo Frames & Story Galleries"),
+  heroTitle: text("hero_title")
+    .notNull()
+    .default("Frame the Moments That Stay"),
+  heroSubtitle: text("hero_subtitle")
+    .notNull()
+    .default(
+      "Thoughtfully made photo frames that turn everyday moments into a gallery of your own.",
+    ),
   whatsappNumber: text("whatsapp_number").notNull().default("94700000000"),
-  whatsappMessage: text("whatsapp_message").notNull().default("Hi! I'd like to place an order with HAVESTORY."),
-  aboutStory: text("about_story").notNull().default("HAVESTORY creates premium custom frames for portraits, celebrations and the stories that make a home."),
-  aboutMission: text("about_mission").notNull().default("Our mission is to preserve meaningful moments through careful craft, honest materials and timeless design."),
+  whatsappMessage: text("whatsapp_message")
+    .notNull()
+    .default("Hi! I'd like to place an order with HAVESTORY."),
+  aboutStory: text("about_story")
+    .notNull()
+    .default(
+      "HAVESTORY creates premium custom frames for portraits, celebrations and the stories that make a home.",
+    ),
+  aboutMission: text("about_mission")
+    .notNull()
+    .default(
+      "Our mission is to preserve meaningful moments through careful craft, honest materials and timeless design.",
+    ),
   aboutImage: text("about_image"),
   ordersCompletedCount: integer("orders_completed_count").notNull().default(10),
   happyClientsPercent: integer("happy_clients_percent").notNull().default(99),
@@ -34,7 +59,9 @@ export const settingsTable = pgTable("settings", {
   heroBgImage: text("hero_bg_image"),
   heroCtaText: text("hero_cta_text").notNull().default("Find Your Frame"),
   heroCtaLink: text("hero_cta_link").notNull().default("/custom-project"),
-  heroBadgeText: text("hero_badge_text").notNull().default("Premium Photo Frames · Made in Sri Lanka"),
+  heroBadgeText: text("hero_badge_text")
+    .notNull()
+    .default("Premium Photo Frames · Made in Sri Lanka"),
   heroHighlightWord: text("hero_highlight_word").notNull().default("Matters"),
   aboutVision: text("about_vision"),
   aboutFoundedYear: text("about_founded_year").notNull().default("2020"),
@@ -42,9 +69,19 @@ export const settingsTable = pgTable("settings", {
   aboutLocation: text("about_location").notNull().default("Sri Lanka"),
   privacyPolicy: text("privacy_policy"),
   termsOfService: text("terms_of_service"),
-  seoTitle: text("seo_title").notNull().default("HAVESTORY — Premium Custom Photo Frames Sri Lanka"),
-  seoDescription: text("seo_description").notNull().default("HAVESTORY creates premium custom photo frames, glass-look frames and story collages in Sri Lanka."),
-  seoKeywords: text("seo_keywords").notNull().default("photo frames sri lanka, custom frames, glass-look frames, collage frames, havestory"),
+  seoTitle: text("seo_title")
+    .notNull()
+    .default("HAVESTORY — Premium Custom Photo Frames Sri Lanka"),
+  seoDescription: text("seo_description")
+    .notNull()
+    .default(
+      "HAVESTORY creates premium custom photo frames, glass-look frames and story collages in Sri Lanka.",
+    ),
+  seoKeywords: text("seo_keywords")
+    .notNull()
+    .default(
+      "photo frames sri lanka, custom frames, glass-look frames, collage frames, havestory",
+    ),
   seoOgImage: text("seo_og_image"),
   themePreset: text("theme_preset").notNull().default("light-premium"),
   specialEventEnabled: integer("special_event_enabled").notNull().default(0),
@@ -63,12 +100,18 @@ export const settingsTable = pgTable("settings", {
   slPostCharge: text("sl_post_charge").notNull().default("250"),
   invoiceStandardRate: text("invoice_standard_rate").notNull().default("350"),
   invoiceExpressRate: text("invoice_express_rate").notNull().default("530"),
-  invoiceWeightFirstKg: text("invoice_weight_first_kg").notNull().default("450"),
+  invoiceWeightFirstKg: text("invoice_weight_first_kg")
+    .notNull()
+    .default("450"),
   invoiceWeightAddKg: text("invoice_weight_add_kg").notNull().default("200"),
   taglineEnabled: integer("tagline_enabled").notNull().default(1),
   showNameWithLogo: integer("show_name_with_logo").notNull().default(1),
   faviconUrl: text("favicon_url"),
-  whatsappOrderTemplate: text("whatsapp_order_template").notNull().default("Hi {customerName}! 🖼️\n\nThank you for choosing *HAVESTORY*! Your order has been received and is being processed.\n\nOrder Number: *{orderNumber}*\n\nTrack your order status here:\n{trackingLink}\n\nIf you have any questions, feel free to contact us anytime.\n\nWarm regards,\n*HAVESTORY* 🖼️"),
+  whatsappOrderTemplate: text("whatsapp_order_template")
+    .notNull()
+    .default(
+      "Hi {customerName}! 🖼️\n\nThank you for choosing *HAVESTORY*! Your order has been received and is being processed.\n\nOrder Number: *{orderNumber}*\n\nTrack your order status here:\n{trackingLink}\n\nIf you have any questions, feel free to contact us anytime.\n\nWarm regards,\n*HAVESTORY* 🖼️",
+    ),
   heroSlideImage1: text("hero_slide_image1"),
   heroSlideImage2: text("hero_slide_image2"),
   heroSlideImage3: text("hero_slide_image3"),
@@ -79,12 +122,17 @@ export const settingsTable = pgTable("settings", {
   heroSlideImage8: text("hero_slide_image8"),
   heroSlideImage9: text("hero_slide_image9"),
   heroSlideImage10: text("hero_slide_image10"),
+  heroSlideEnabled: text("hero_slide_enabled")
+    .notNull()
+    .default("[true,true,true,true,true,true,true,true,true,true]"),
   homeFeatureCards: text("home_feature_cards").notNull().default("[]"),
   paymentQrUrl: text("payment_qr_url"),
   paymentButtonUrl: text("payment_button_url"),
   paymentButtonLabel: text("payment_button_label"),
   siteClosedEnabled: integer("site_closed_enabled").notNull().default(0),
-  siteClosedMessage: text("site_closed_message").notNull().default("We are currently closed for maintenance. We will be back soon!"),
+  siteClosedMessage: text("site_closed_message")
+    .notNull()
+    .default("We are currently closed for maintenance. We will be back soon!"),
   ipayEnabled: integer("ipay_enabled").notNull().default(0),
   ipaySandbox: integer("ipay_sandbox").notNull().default(1),
   ipayToken: text("ipay_token"),
@@ -94,16 +142,23 @@ export const settingsTable = pgTable("settings", {
   googlePayNumber: text("google_pay_number"),
   googlePayQrUrl: text("google_pay_qr_url"),
   googlePayInstructions: text("google_pay_instructions"),
-  orderEmailNotificationsEnabled: integer("order_email_notifications_enabled").notNull().default(1),
+  orderEmailNotificationsEnabled: integer("order_email_notifications_enabled")
+    .notNull()
+    .default(1),
   orderEmailRecipients: text("order_email_recipients").notNull().default(""),
   gmailUser: text("gmail_user"),
   gmailAppPassword: text("gmail_app_password"),
-  financeReportEmailEnabled: integer("finance_report_email_enabled").notNull().default(0),
+  financeReportEmailEnabled: integer("finance_report_email_enabled")
+    .notNull()
+    .default(0),
   financeReportEmailRecipient: text("finance_report_email_recipient"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const insertSettingsSchema = createInsertSchema(settingsTable).omit({ id: true, updatedAt: true });
+export const insertSettingsSchema = createInsertSchema(settingsTable).omit({
+  id: true,
+  updatedAt: true,
+});
 export type InsertSettings = z.infer<typeof insertSettingsSchema>;
 export type Settings = typeof settingsTable.$inferSelect;
 

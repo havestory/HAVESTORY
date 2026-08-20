@@ -33,6 +33,9 @@ export interface UpdateSettingsBody {
   ownerName?: string | null;
   designerCredit?: string | null;
   themePreset?: string | null;
+  specialEventEnabled?: boolean;
+  specialEventType?: string | null;
+  specialEventMessage?: string | null;
   bankName?: string | null;
   bankAccountHolder?: string | null;
   bankAccountNumber?: string | null;
@@ -64,6 +67,12 @@ export interface UpdateSettingsBody {
   heroSlideImage3?: string | null;
   heroSlideImage4?: string | null;
   heroSlideImage5?: string | null;
+  heroSlideImage6?: string | null;
+  heroSlideImage7?: string | null;
+  heroSlideImage8?: string | null;
+  heroSlideImage9?: string | null;
+  heroSlideImage10?: string | null;
+  heroSlideEnabled?: string | null;
   aboutVision?: string | null;
   aboutFoundedYear?: string | null;
   aboutTeamSize?: string | null;
