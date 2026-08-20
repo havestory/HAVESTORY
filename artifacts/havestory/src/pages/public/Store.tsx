@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useListProducts } from '@workspace/api-client-react';
+import { useListProducts, useListCategories } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -26,7 +26,9 @@ const CUSTOM_INQUIRY_PRODUCT = {
 
 export default function Store() {
   const { data: products, isLoading } = useListProducts();
+  const { data: categories } = useListCategories();
 
+  const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortMode, setSortMode] = useState<'featured' | 'price-low' | 'price-high'>('featured');
   const { toast } = useToast();
@@ -36,11 +38,14 @@ export default function Store() {
   const estimatedTotalLabel = cartTotal > 0 ? `Rs. ${cartTotal.toFixed(2)}` : 'Quote on request';
 
   const productList = Array.isArray(products) ? products : [];
+  const categoryList = Array.isArray(categories) ? categories : [];
   const filteredProducts = productList.filter(p => {
+    const matchesCategory = activeCategory === 'all' || p.categoryId?.toString() === activeCategory;
     const name = String(p.name || '');
     const description = String(p.description || '');
     const query = searchQuery.trim().toLowerCase();
-    return name.toLowerCase().includes(query) || description.toLowerCase().includes(query);
+    const matchesSearch = name.toLowerCase().includes(query) || description.toLowerCase().includes(query);
+    return matchesCategory && matchesSearch;
   });
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
@@ -57,34 +62,76 @@ export default function Store() {
 
   return (
     <div className="hs-store min-h-screen flex flex-col">
-      <div id="collection" className="hs-store-collection hs-store-collection-compact">
-        <main className="hs-store-results">
-          <div className="hs-store-toolbar">
-            <div className="hs-store-toolbar-heading">
-              <div className="hs-store-toolbar-title"><span className="editorial-kicker">The collection</span><h2 className="mt-2 editorial-display text-3xl text-foreground sm:text-4xl">Find your frame.</h2></div>
-              <div className="hs-store-search">
-              <Search aria-hidden="true" />
-              <Input 
-                placeholder="Search frames..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="hs-store-search-input"
-              />
-              </div>
-            </div>
-            
-            <div className="hs-store-controls">
-              <div className="hs-store-sort">
-                <select aria-label="Sort products" value={sortMode} onChange={e => setSortMode(e.target.value as typeof sortMode)}>
-                  <option value="featured">Featured</option>
-                  <option value="price-low">Price: Low</option>
-                  <option value="price-high">Price: High</option>
-                </select>
-              </div>
-              
-              <ShopCartDrawer trigger={<Button variant="default" className="hs-store-cart-trigger"><ShoppingCart className="w-4 h-4" /><span>Shopping Cart</span>{cartCount > 0 && <span className="hs-store-cart-count">{cartCount}</span>}</Button>} />
-            </div>
+      <section className="hs-store-search-stage" aria-labelledby="store-heading">
+        <motion.div
+          className="hs-store-search-heading"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <span className="editorial-kicker">The collection / 2026</span>
+          <h1 id="store-heading">Find your <em>frame.</em></h1>
+          <p>Search the collection, then choose the finish that feels right.</p>
+        </motion.div>
+        <div className="hs-store-search-line">
+          <div className="hs-store-search">
+            <Search aria-hidden="true" />
+            <Input
+              placeholder="Search frames..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="hs-store-search-input"
+            />
           </div>
+          <div className="hs-store-controls">
+            <div className="hs-store-sort">
+              <select aria-label="Sort products" value={sortMode} onChange={e => setSortMode(e.target.value as typeof sortMode)}>
+                <option value="featured">Featured</option>
+                <option value="price-low">Price: Low</option>
+                <option value="price-high">Price: High</option>
+              </select>
+            </div>
+            <ShopCartDrawer trigger={<Button variant="default" className="hs-store-cart-trigger"><ShoppingCart className="w-4 h-4" /><span>Shopping Cart</span>{cartCount > 0 && <span className="hs-store-cart-count">{cartCount}</span>}</Button>} />
+          </div>
+        </div>
+      </section>
+
+      <div id="collection" className="hs-store-collection hs-store-collection-with-sidebar">
+        <aside className="hs-store-category-panel" aria-label="Browse products by category">
+          <div className="hs-store-category-intro">
+            <span>Browse by category</span>
+            <h2>Choose your<br /><em>finish.</em></h2>
+            <p>Start with a collection, then let the details make it yours.</p>
+          </div>
+          <div className="hs-store-category-list">
+            <button
+              type="button"
+              onClick={() => setActiveCategory('all')}
+              aria-pressed={activeCategory === 'all'}
+              className={activeCategory === 'all' ? 'is-active' : ''}
+            >
+              <span>All products</span><small>{productList.length.toString().padStart(2, '0')}</small>
+            </button>
+            {categoryList.map((category) => {
+              const count = productList.filter((product) => product.categoryId?.toString() === category.id.toString()).length;
+              return (
+                <button
+                  type="button"
+                  key={category.id}
+                  onClick={() => setActiveCategory(category.id.toString())}
+                  aria-pressed={activeCategory === category.id.toString()}
+                  className={activeCategory === category.id.toString() ? 'is-active' : ''}
+                >
+                  <span>{category.name}</span><small>{count.toString().padStart(2, '0')}</small>
+                </button>
+              );
+            })}
+          </div>
+          {activeCategory !== 'all' && (
+            <button type="button" className="hs-store-clear-category" onClick={() => setActiveCategory('all')}>Show all products <ArrowRight size={13} /></button>
+          )}
+        </aside>
+        <main className="hs-store-results">
 
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
@@ -122,7 +169,7 @@ export default function Store() {
               <Button 
                 variant="outline" 
                 className="mt-6 border-primary text-primary hover:bg-primary/5 rounded-[0.25rem] font-semibold text-xs uppercase tracking-widest"
-                onClick={() => setSearchQuery('')}
+                onClick={() => { setActiveCategory('all'); setSearchQuery(''); }}
               >
                 Clear Filters
               </Button>
