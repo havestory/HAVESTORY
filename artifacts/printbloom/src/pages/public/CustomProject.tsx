@@ -73,8 +73,8 @@ export default function CustomProject() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-6">
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center max-w-md">
+      <div className="hsx-custom-success">
+        <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}>
           <div className="w-20 h-20 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="w-10 h-10 text-secondary" />
           </div>
@@ -96,11 +96,10 @@ export default function CustomProject() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="hsx-page hsx-custom-page">
       {/* Hero */}
-      <section className="bg-primary text-primary-foreground py-24 relative overflow-hidden noise">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(30_42%_46%/0.15),transparent_60%)]" />
-        <div className="max-w-4xl mx-auto px-6 relative z-10">
+      <section className="hsx-custom-hero">
+        <div>
           <div className="flex items-center gap-2 text-primary-foreground/50 text-xs tracking-widest uppercase mb-6">
             <Link href="/" className="hover:text-secondary transition-colors">Home</Link>
             <ChevronRight className="w-3 h-3" />
@@ -120,8 +119,8 @@ export default function CustomProject() {
       </section>
 
       {/* Form */}
-      <section className="py-20">
-        <div className="max-w-3xl mx-auto px-6">
+      <section className="hsx-custom-form-section">
+        <div>
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={{ visible: { transition: { staggerChildren: 0.07 } } }}>
 
             <motion.div variants={fadeUp} className="mb-10">
@@ -132,7 +131,7 @@ export default function CustomProject() {
 
             <form onSubmit={handleSubmit} className="space-y-0">
               {/* Contact info */}
-              <motion.div variants={fadeUp} className="bg-card border border-border p-6 mb-6">
+              <motion.div variants={fadeUp} className="hsx-form-card">
                 <h3 className="font-serif text-xl font-semibold mb-5 flex items-center gap-2">
                   <span className="w-6 h-6 rounded-full bg-secondary/10 text-secondary text-xs flex items-center justify-center font-bold font-sans">1</span>
                   Contact Information
@@ -158,7 +157,7 @@ export default function CustomProject() {
               </motion.div>
 
               {/* Project details */}
-              <motion.div variants={fadeUp} className="bg-card border border-border p-6 mb-6">
+              <motion.div variants={fadeUp} className="hsx-form-card">
                 <h3 className="font-serif text-xl font-semibold mb-5 flex items-center gap-2">
                   <span className="w-6 h-6 rounded-full bg-secondary/10 text-secondary text-xs flex items-center justify-center font-bold font-sans">2</span>
                   Project Specifications
@@ -206,7 +205,7 @@ export default function CustomProject() {
               </motion.div>
 
               {/* Delivery + file */}
-              <motion.div variants={fadeUp} className="bg-card border border-border p-6 mb-8">
+              <motion.div variants={fadeUp} className="hsx-form-card">
                 <h3 className="font-serif text-xl font-semibold mb-5 flex items-center gap-2">
                   <span className="w-6 h-6 rounded-full bg-secondary/10 text-secondary text-xs flex items-center justify-center font-bold font-sans">3</span>
                   Reference & Delivery
@@ -238,7 +237,7 @@ export default function CustomProject() {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-14 bg-primary text-primary-foreground hover:bg-primary/90 btn-glow uppercase tracking-widest text-sm font-semibold"
+                  className="hsx-custom-submit"
                 >
                   {loading ? 'Submitting your request...' : 'Submit Custom Project Request'}
                   {!loading && <PenTool className="w-4 h-4 ml-3" />}

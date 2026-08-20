@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { MapPin, Phone, Mail, Clock, Send, MessageCircle } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Send, MessageCircle, ArrowRight } from 'lucide-react';
+import { Link } from 'wouter';
 
 const contactSchema = z.object({
   fullName: z.string().min(2, 'Name is required'),
@@ -46,22 +47,17 @@ export default function Contact() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="hsx-page hsx-contact-page">
       {/* Header */}
-      <div className="bg-primary text-primary-foreground py-24 lg:py-32 noise relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
-          <span className="section-label text-secondary block mb-4">GET IN TOUCH</span>
-          <h1 className="text-5xl lg:text-6xl font-serif font-bold text-white mb-6">Contact the Studio</h1>
-          <p className="text-lg text-primary-foreground/70 font-light max-w-xl mx-auto">
-            Whether it's a bespoke gallery wall or a single custom frame, our artisans are ready to help.
-          </p>
-        </div>
-      </div>
+      <header className="hsx-page-hero hsx-contact-hero">
+        <div><span>Contact the studio</span><h1>Bring us the photo.<br />We’ll help with the rest.</h1></div>
+        <div><p>From one meaningful frame to a complete gallery wall, tell us what you are planning and we will reply with a clear next step.</p><Link href="/store" className="hsx-text-link">Browse the shop <ArrowRight /></Link></div>
+      </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-20 w-full flex-1 grid lg:grid-cols-5 gap-16">
+      <div className="hsx-contact-layout">
         
         {/* Contact Info (Left) */}
-        <div className="lg:col-span-2 space-y-10">
+        <aside className="hsx-contact-info">
           <div>
             <h3 className="font-serif text-3xl font-bold mb-6">Visit Us</h3>
             <div className="space-y-6">
@@ -125,10 +121,10 @@ export default function Contact() {
               </a>
             </div>
           )}
-        </div>
+        </aside>
 
         {/* Form (Right) */}
-        <div className="lg:col-span-3 bg-card border border-border p-10 rounded-[0.25rem] shadow-sm">
+        <div className="hsx-contact-form">
           <div className="mb-8">
             <h2 className="text-2xl font-serif font-bold mb-2">Send an Inquiry</h2>
             <p className="text-muted-foreground text-sm">Fill out the form below and our team will get back to you within 24 hours.</p>

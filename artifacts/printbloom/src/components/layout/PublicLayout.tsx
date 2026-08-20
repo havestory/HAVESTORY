@@ -185,27 +185,27 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   return (
     <div data-public-site="" data-public-theme={publicThemePreset} className="atelier-shell glass-gallery-shell min-h-[100dvh] flex flex-col bg-[hsl(var(--background))] relative overflow-x-clip">
 
-      <header className={`hs26-shell-header fixed inset-x-0 top-0 z-40 ${navBg}`}>
-        <div className="hs26-shell-meta">
-          <span>COLOUR LAB · FRAME STUDIO · SRI LANKA</span>
-          <div>{settings?.phone && <a href={`tel:${settings.phone}`}><Phone />{settings.phone}</a>}{settings?.email && <a href={`mailto:${settings.email}`}><Mail />{settings.email}</a>}</div>
+      <header className={`hsx-shell-header fixed inset-x-0 top-0 z-40 ${navBg}`}>
+        <div className="hsx-announcement">
+          <span>COLOUR LAB · FRAME STUDIO · MADE IN SRI LANKA</span>
+          <span>Custom orders open <ArrowRight /></span>
         </div>
-        <div className="hs26-shell-nav">
-          <Link href="/" className="hs26-shell-brand">
+        <div className="hsx-shell-nav">
+          <Link href="/" className="hsx-shell-brand">
             {settings?.logoUrl
               ? <img src={settings.logoUrl} alt={settings.businessName || 'HAVESTORY'} />
-              : <span className="hs26-shell-monogram">HS</span>
+              : <span className="hsx-shell-monogram">HS</span>
             }
             {settings?.showNameWithLogo !== false && <strong>{settings?.businessName || 'HAVESTORY'}</strong>}
           </Link>
-          <nav className="hs26-shell-links">
+          <nav className="hsx-shell-links">
             {navLinks.map(l => (
               <Link key={l.href} href={l.href} className={isActive(l.href) ? 'is-active' : ''}>{l.label}</Link>
             ))}
           </nav>
-          <div className="hs26-shell-actions">
+          <div className="hsx-shell-actions">
             <Link href="/store" aria-label="Open shop"><ShoppingBag /></Link>
-            <Link href="/custom-project" className="hs26-shell-order">Start a project <ArrowRight /></Link>
+            <Link href="/custom-project" className="hsx-shell-order">Start a project <ArrowRight /></Link>
             <button aria-expanded={menuOpen} aria-controls="public-mobile-drawer" aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'} onClick={() => setMenuOpen(v => !v)}>{menuOpen ? <X /> : <Menu />}</button>
           </div>
         </div>
@@ -281,19 +281,19 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       </AnimatePresence>
 
       {/* ── Page content ── */}
-      <main className="atelier-main glass-gallery-main flex-1 pt-[76px] xl:pt-[118px]">
+      <main className="hsx-main flex-1">
         {children}
       </main>
 
-      <footer className="hs26-shell-footer">
-        <div className="hs26-footer-intro"><p>THE COLOUR & FRAME STUDIO</p><h2>{settings?.businessName || 'HAVESTORY'}</h2><span>{settings?.tagline || 'Photographs made tangible. Stories made to stay.'}</span></div>
-        <div className="hs26-footer-grid">
-          <div><p>Visit & contact</p>{settings?.address && <span>{settings.address}</span>}{settings?.phone && <a href={`tel:${settings.phone}`}>{settings.phone}</a>}{settings?.email && <a href={`mailto:${settings.email}`}>{settings.email}</a>}</div>
-          <div><p>Explore</p>{[{ href: '/store', label: 'Frames & Prints' }, { href: '/services', label: 'Studio Services' }, { href: '/gallery', label: 'Gallery' }, { href: '/custom-project', label: 'Custom Project' }].map(l => <Link key={l.href} href={l.href}>{l.label}</Link>)}</div>
-          <div><p>Information</p>{[{ href: '/about', label: 'About' }, { href: '/contact', label: 'Contact' }, { href: '/track-order', label: 'Track Order' }, { href: '/privacy', label: 'Privacy' }, { href: '/terms', label: 'Terms' }].map(l => <Link key={l.href} href={l.href}>{l.label}</Link>)}</div>
-          <div><p>Follow the studio</p><div className="hs26-footer-social">{settings?.instagramUrl && <a href={settings.instagramUrl} target="_blank" rel="noreferrer"><Instagram /> Instagram</a>}{settings?.facebookUrl && <a href={settings.facebookUrl} target="_blank" rel="noreferrer"><Facebook /> Facebook</a>}</div>{settings?.whatsappNumber && <a className="hs26-footer-chat" href={`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer">Chat on WhatsApp <ArrowRight /></a>}</div>
+      <footer className="hsx-footer">
+        <div className="hsx-footer-top"><div><span>THE COLOUR & FRAME STUDIO</span><h2>{settings?.businessName || 'HAVESTORY'}</h2></div><p>{settings?.tagline || 'Photographs made tangible. Stories made to stay.'}</p><Link href="/custom-project">Start a project <ArrowRight /></Link></div>
+        <div className="hsx-footer-grid">
+          <div><p>Studio</p>{settings?.address && <span>{settings.address}</span>}{settings?.phone && <a href={`tel:${settings.phone}`}>{settings.phone}</a>}{settings?.email && <a href={`mailto:${settings.email}`}>{settings.email}</a>}</div>
+          <div><p>Shop & create</p>{[{ href: '/store', label: 'Frames & Prints' }, { href: '/services', label: 'Studio Services' }, { href: '/gallery', label: 'Gallery' }, { href: '/custom-project', label: 'Custom Project' }].map(l => <Link key={l.href} href={l.href}>{l.label}</Link>)}</div>
+          <div><p>Help</p>{[{ href: '/track-order', label: 'Track Order' }, { href: '/contact', label: 'Contact' }, { href: '/about', label: 'Our Studio' }, { href: '/privacy', label: 'Privacy' }, { href: '/terms', label: 'Terms' }].map(l => <Link key={l.href} href={l.href}>{l.label}</Link>)}</div>
+          <div><p>Stay connected</p>{settings?.instagramUrl && <a href={settings.instagramUrl} target="_blank" rel="noreferrer"><Instagram /> Instagram</a>}{settings?.facebookUrl && <a href={settings.facebookUrl} target="_blank" rel="noreferrer"><Facebook /> Facebook</a>}{settings?.whatsappNumber && <a href={`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer"><MessageCircle /> WhatsApp</a>}</div>
         </div>
-        <div className="hs26-footer-base"><span>© {new Date().getFullYear()} {settings?.businessName || 'HAVESTORY'}</span><span>Crafted in Sri Lanka</span></div>
+        <div className="hsx-footer-base"><span>© {new Date().getFullYear()} {settings?.businessName || 'HAVESTORY'}</span><span>Made with care in Sri Lanka</span></div>
       </footer>
 
       {/* ── WhatsApp FAB + FAQ ── */}
