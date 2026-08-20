@@ -4977,3 +4977,445 @@ h1, h2, h3 { font-weight: 700; }
   [data-public-site] .hs-product-detail-clean .hs-product-main-image { aspect-ratio: 4 / 3; border-radius: 12px; }
   [data-public-site] .hs-product-detail-clean .hs-product-main-image img { padding: 16px; }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HAVESTORY FINAL CUSTOMER-FACING CORRECTION — light gallery + purple/gold
+   This is intentionally the last cascade layer so older navy/plum passes cannot
+   reintroduce dark surfaces or destabilise the Store toolbar/grid.
+   ═══════════════════════════════════════════════════════════════════════════ */
+[data-public-site] {
+  --hsc-plum: #4c2370;
+  --hsc-plum-deep: #2b123f;
+  --hsc-gold: #c49a4a;
+  --hsc-gold-soft: #f4e7c1;
+  --hsc-ink: #24162f;
+  --hsc-copy: #655a6b;
+  --hsc-paper: #fbfaf8;
+  --hsc-soft: #f3eff6;
+  --hsc-line: #e2dce7;
+  background: var(--hsc-paper) !important;
+  color: var(--hsc-ink) !important;
+}
+
+/* Keep the public shell and all ordinary Home sections light and readable. */
+[data-public-site] .hsx-main,
+[data-public-site] .hsc-home,
+[data-public-site] .hsc-section,
+[data-public-site] .hsc-products-section,
+[data-public-site] .hsc-work,
+[data-public-site] .hsc-services,
+[data-public-site] .hsc-reviews {
+  background: var(--hsc-paper) !important;
+  color: var(--hsc-ink) !important;
+}
+[data-public-site] .hsc-section-head h2,
+[data-public-site] .hsc-section-head p,
+[data-public-site] .hsc-category h3,
+[data-public-site] .hsc-category p,
+[data-public-site] .hsc-product-card h3,
+[data-public-site] .hsc-product-card p,
+[data-public-site] .hsc-services h3,
+[data-public-site] .hsc-reviews blockquote > p,
+[data-public-site] .hsc-final h2,
+[data-public-site] .hsc-final p {
+  color: var(--hsc-ink) !important;
+}
+[data-public-site] .hsc-section-head p,
+[data-public-site] .hsc-product-card > div > p,
+[data-public-site] .hsc-services p {
+  color: var(--hsc-copy) !important;
+}
+
+/* Replace the old dark process block with a soft editorial panel. */
+[data-public-site] .hsc-how {
+  width: min(calc(100% - 40px), 1460px);
+  margin: 20px auto;
+  overflow: hidden;
+  border: 1px solid var(--hsc-line);
+  border-radius: 28px;
+  background: linear-gradient(135deg, #f4eef8 0%, #fffdf8 58%, #f8f1df 100%) !important;
+  color: var(--hsc-ink) !important;
+  box-shadow: 0 18px 55px rgba(43, 23, 64, .07);
+}
+[data-public-site] .hsc-how-intro {
+  border-right: 1px solid rgba(76, 35, 112, .12);
+}
+[data-public-site] .hsc-how-intro > span,
+[data-public-site] .hsc-how li > span {
+  color: var(--hsc-plum) !important;
+}
+[data-public-site] .hsc-how h2,
+[data-public-site] .hsc-how li h3 {
+  color: var(--hsc-ink) !important;
+}
+[data-public-site] .hsc-how-intro p,
+[data-public-site] .hsc-how li p {
+  color: var(--hsc-copy) !important;
+}
+[data-public-site] .hsc-how ol {
+  background: rgba(255, 255, 255, .56) !important;
+}
+[data-public-site] .hsc-how li {
+  border-color: rgba(76, 35, 112, .14) !important;
+}
+[data-public-site] .hsc-how .hsc-btn-gold {
+  background: var(--hsc-gold) !important;
+  color: #2b1b08 !important;
+}
+
+/* Make the Home final call-to-action light instead of a second dark footer. */
+[data-public-site] .hsc-final {
+  width: min(calc(100% - 40px), 1460px);
+  margin: 20px auto 70px;
+  border: 1px solid var(--hsc-line);
+  background: linear-gradient(135deg, #f3edf7 0%, #fffdf8 60%, #f8f0dc 100%) !important;
+  color: var(--hsc-ink) !important;
+  box-shadow: 0 18px 55px rgba(43, 23, 64, .07);
+}
+[data-public-site] .hsc-final > div > span { color: var(--hsc-plum) !important; }
+[data-public-site] .hsc-final h2 { color: var(--hsc-ink) !important; }
+[data-public-site] .hsc-final p { color: var(--hsc-copy) !important; }
+[data-public-site] .hsc-final .hsc-btn-dark-outline {
+  border-color: rgba(76, 35, 112, .22) !important;
+  color: var(--hsc-plum) !important;
+}
+[data-public-site] .hsc-final .hsc-btn-dark-outline:hover {
+  border-color: var(--hsc-gold) !important;
+  background: var(--hsc-gold-soft) !important;
+}
+
+/* Keep category tiles light while retaining purple and gold as accents. */
+[data-public-site] .hsc-category-plum > a > div,
+[data-public-site] .hsc-category-ink > a > div,
+[data-public-site] .hsc-category-gold > a > div {
+  background: linear-gradient(135deg, #f3edf7, #fffdf8) !important;
+  color: var(--hsc-ink) !important;
+}
+[data-public-site] .hsc-category-plum > a > div { border-top: 3px solid var(--hsc-plum); }
+[data-public-site] .hsc-category-gold > a > div { border-top: 3px solid var(--hsc-gold); }
+[data-public-site] .hsc-category-ink > a > div { border-top: 3px solid #8b6ea8; }
+[data-public-site] .hsc-category-plum h3,
+[data-public-site] .hsc-category-gold h3,
+[data-public-site] .hsc-category-ink h3,
+[data-public-site] .hsc-category-plum p,
+[data-public-site] .hsc-category-gold p,
+[data-public-site] .hsc-category-ink p { color: var(--hsc-ink) !important; }
+
+/* Footer: deep purple field with a clear gold hierarchy, never navy. */
+[data-public-site] .hsx-footer {
+  width: min(calc(100% - 40px), 1460px);
+  margin: 0 auto 20px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, var(--hsc-plum-deep) 0%, #3a1b57 58%, var(--hsc-plum) 100%) !important;
+  color: #fffaf4 !important;
+  box-shadow: 0 22px 70px rgba(43, 18, 63, .22);
+}
+[data-public-site] .hsx-footer-top,
+[data-public-site] .hsx-footer-base { border-color: rgba(244, 231, 193, .22) !important; }
+[data-public-site] .hsx-footer-top > div > span,
+[data-public-site] .hsx-footer-grid p { color: var(--hsc-gold-soft) !important; }
+[data-public-site] .hsx-footer-top h2 { color: #fffaf4 !important; }
+[data-public-site] .hsx-footer-top > p,
+[data-public-site] .hsx-footer-grid a,
+[data-public-site] .hsx-footer-grid span { color: rgba(255, 250, 244, .78) !important; }
+[data-public-site] .hsx-footer-grid a:hover { color: var(--hsc-gold-soft) !important; }
+[data-public-site] .hsx-footer-base { color: rgba(255, 250, 244, .58) !important; }
+
+/* Header cart and cart drawer use light surfaces; purple/gold are reserved for
+   icons, borders, badges, and primary actions for immediate readability. */
+[data-public-site] .hsx-shell-actions > button.hsx-header-cart,
+[data-public-site] .hsx-header-cart {
+  background: rgba(255, 253, 248, .96) !important;
+  border-color: rgba(76, 35, 112, .18) !important;
+  color: var(--hsc-plum-deep) !important;
+  box-shadow: 0 8px 22px rgba(43, 23, 64, .08);
+}
+[data-public-site] .hsx-header-cart:hover {
+  border-color: var(--hsc-gold) !important;
+  color: var(--hsc-plum) !important;
+  background: var(--hsc-gold-soft) !important;
+}
+[data-public-site] .hsx-header-cart > span,
+[data-public-site] .hs-store-cart-count {
+  border-color: #fffdf8 !important;
+  background: var(--hsc-gold) !important;
+  color: #2b1b08 !important;
+}
+[data-public-site] .hs-cart-drawer {
+  background: #fbfaf8 !important;
+  color: var(--hsc-ink) !important;
+  box-shadow: -20px 0 70px rgba(43, 23, 64, .16);
+}
+[data-public-site] .hs-cart-drawer-head {
+  background: linear-gradient(135deg, #f3edf7, #fffdf8) !important;
+  color: var(--hsc-ink) !important;
+  border-bottom: 1px solid var(--hsc-line);
+}
+[data-public-site] .hs-cart-drawer-head > span,
+[data-public-site] .hs-cart-empty a,
+[data-public-site] .hs-cart-item-copy > div:first-child span,
+[data-public-site] .hs-cart-item-base > strong { color: var(--hsc-plum) !important; }
+[data-public-site] .hs-cart-drawer-head h2,
+[data-public-site] .hs-cart-empty h3,
+[data-public-site] .hs-cart-item-copy h3,
+[data-public-site] .hs-cart-drawer-footer > div strong { color: var(--hsc-ink) !important; }
+[data-public-site] .hs-cart-drawer-head p,
+[data-public-site] .hs-cart-empty p,
+[data-public-site] .hs-cart-item-copy > p,
+[data-public-site] .hs-cart-drawer-footer > p { color: var(--hsc-copy) !important; }
+[data-public-site] .hs-cart-drawer > button {
+  border-color: rgba(76, 35, 112, .18) !important;
+  background: rgba(255, 255, 255, .75) !important;
+  color: var(--hsc-plum) !important;
+}
+[data-public-site] .hs-cart-empty > div,
+[data-public-site] .hs-cart-item,
+[data-public-site] .hs-cart-drawer-footer {
+  border-color: var(--hsc-line) !important;
+  background: #fff !important;
+}
+[data-public-site] .hs-cart-empty > div { color: var(--hsc-plum) !important; }
+[data-public-site] .hs-cart-item-image { background: linear-gradient(145deg, #f1ebf6, #faf3e4) !important; }
+[data-public-site] .hs-cart-item-image img { object-fit: contain !important; padding: 8px; }
+[data-public-site] .hs-cart-quantity { border-color: var(--hsc-line) !important; }
+[data-public-site] .hs-cart-quantity button:hover { background: var(--hsc-gold-soft) !important; color: var(--hsc-plum) !important; }
+[data-public-site] .hs-cart-drawer-footer > button {
+  background: var(--hsc-plum) !important;
+  color: #fff !important;
+}
+[data-public-site] .hs-cart-drawer-footer > button:hover { background: var(--hsc-plum-deep) !important; }
+[data-public-site] .hs-cart-drawer-footer > a { color: var(--hsc-plum) !important; }
+
+/* Store: one compact, centered product system at every desktop width. */
+[data-public-site] .hs-store-collection {
+  width: min(100%, 1380px) !important;
+  grid-template-columns: 220px minmax(0, 1fr) !important;
+  gap: clamp(24px, 3vw, 38px) !important;
+}
+[data-public-site] .hs-store-results { min-width: 0 !important; }
+[data-public-site] .hs-store-toolbar {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: end !important;
+  gap: 18px !important;
+  min-width: 0 !important;
+  padding: 20px !important;
+  border: 1px solid var(--hsc-line) !important;
+  border-radius: 20px !important;
+  background: rgba(255, 255, 255, .9) !important;
+  box-shadow: 0 16px 42px rgba(43, 23, 64, .07) !important;
+}
+[data-public-site] .hs-store-toolbar-heading {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(230px, 390px) !important;
+  align-items: end !important;
+  gap: 18px !important;
+  min-width: 0 !important;
+}
+[data-public-site] .hs-store-toolbar-heading > div:first-child { min-width: 0 !important; }
+[data-public-site] .hs-store-toolbar h2 {
+  margin-top: 8px !important;
+  color: var(--hsc-ink) !important;
+  font-size: clamp(32px, 3.5vw, 48px) !important;
+  line-height: .96 !important;
+}
+[data-public-site] .hs-store-search {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: 46px !important;
+  margin: 0 !important;
+  align-self: end !important;
+}
+[data-public-site] .hs-store-search-input {
+  width: 100% !important;
+  height: 46px !important;
+  border: 1px solid var(--hsc-line) !important;
+  border-radius: 13px !important;
+  background: var(--hsc-soft) !important;
+  color: var(--hsc-ink) !important;
+}
+[data-public-site] .hs-store-search-input::placeholder { color: #8f8497 !important; }
+[data-public-site] .hs-store-search > svg { color: var(--hsc-plum) !important; }
+[data-public-site] .hs-store-controls {
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  align-self: end !important;
+}
+[data-public-site] .hs-store-sort { min-width: 0 !important; display: flex !important; align-items: center !important; gap: 9px !important; }
+[data-public-site] .hs-store-sort select {
+  height: 41px !important;
+  max-width: 132px !important;
+  border: 1px solid var(--hsc-line) !important;
+  border-radius: 11px !important;
+  background: #fff !important;
+  color: var(--hsc-ink) !important;
+}
+[data-public-site] .hs-store-cart-trigger {
+  min-height: 41px !important;
+  border-radius: 11px !important;
+  background: var(--hsc-plum) !important;
+  color: #fff !important;
+}
+[data-public-site] .hs-store-cart-trigger:hover { background: var(--hsc-plum-deep) !important; }
+
+[data-public-site] .hs-store-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 320px)) !important;
+  justify-content: center !important;
+  align-items: start !important;
+  gap: 24px 18px !important;
+  width: 100% !important;
+}
+[data-public-site] .hs-store-grid.is-single { grid-template-columns: minmax(250px, 320px) !important; }
+[data-public-site] .hs-store-product-wrap { min-width: 0 !important; width: 100% !important; }
+[data-public-site] .hs-store-product {
+  width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid var(--hsc-line) !important;
+  border-radius: 18px !important;
+  background: #fff !important;
+  box-shadow: 0 12px 34px rgba(43, 23, 64, .075) !important;
+}
+[data-public-site] .hs-store-product:hover {
+  border-color: rgba(196, 154, 74, .7) !important;
+  box-shadow: 0 20px 50px rgba(43, 23, 64, .13) !important;
+}
+[data-public-site] .hs-store-product .store-product-image {
+  aspect-ratio: 4 / 3 !important;
+  min-height: 0 !important;
+  background: linear-gradient(145deg, #f1ebf6, #faf3e4) !important;
+}
+[data-public-site] .hs-store-product .store-product-image > img {
+  width: 100% !important;
+  height: 100% !important;
+  padding: clamp(10px, 1.7vw, 18px) !important;
+  object-fit: contain !important;
+}
+[data-public-site] .hs-store-product-body { padding: 16px !important; }
+[data-public-site] .hs-store-product h3 { color: var(--hsc-ink) !important; font-size: 18px !important; }
+[data-public-site] .hs-store-product-meta .store-number { color: var(--hsc-plum) !important; }
+[data-public-site] .hs-store-product-footer { border-color: var(--hsc-line) !important; }
+[data-public-site] .hs-store-product-footer button { color: var(--hsc-plum) !important; }
+[data-public-site] .store-icon-button { color: var(--hsc-ink) !important; }
+[data-public-site] .store-icon-button:hover { color: var(--hsc-plum) !important; border-color: var(--hsc-gold) !important; }
+[data-public-site] .store-icon-button.is-active { color: var(--hsc-plum) !important; background: var(--hsc-gold-soft) !important; }
+
+/* Product Detail: contained media with a capped frame, never a giant artwork. */
+[data-public-site] .hs-product-detail-clean {
+  width: min(1180px, calc(100% - 48px)) !important;
+  color: var(--hsc-ink) !important;
+}
+[data-public-site] .hs-product-detail-clean .hs-product-detail-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(340px, .92fr) !important;
+  gap: clamp(34px, 5vw, 68px) !important;
+  align-items: start !important;
+}
+[data-public-site] .hs-product-gallery-frame {
+  width: min(100%, 610px) !important;
+  margin: 0 auto !important;
+  padding: 14px !important;
+  border: 1px solid rgba(76, 35, 112, .14) !important;
+  border-radius: 22px !important;
+  background: rgba(255, 255, 255, .88) !important;
+  box-shadow: 0 18px 52px rgba(43, 23, 64, .09) !important;
+}
+[data-public-site] .hs-product-detail-clean .hs-product-main-image {
+  width: 100% !important;
+  min-height: 280px !important;
+  max-height: 560px !important;
+  aspect-ratio: 4 / 3 !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: hidden !important;
+  border-radius: 15px !important;
+  background: linear-gradient(145deg, #f1ebf6, #faf3e4) !important;
+}
+[data-public-site] .hs-product-detail-clean .hs-product-main-image img {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  padding: clamp(16px, 3.2vw, 40px) !important;
+  object-fit: contain !important;
+}
+[data-public-site] .hs-product-detail-clean .hs-product-buybox h1 { color: var(--hsc-plum-deep) !important; }
+[data-public-site] .hs-product-detail-clean .hs-product-kicker,
+[data-public-site] .hs-product-detail-clean .hs-product-breadcrumb a,
+[data-public-site] .hs-product-detail-clean .hs-product-options legend span { color: var(--hsc-plum) !important; }
+[data-public-site] .hs-product-price-block strong { color: #8b6426 !important; }
+[data-public-site] .hs-product-detail-clean .hs-product-add { background: var(--hsc-plum) !important; }
+[data-public-site] .hs-product-detail-clean .hs-product-buy-now { background: var(--hsc-ink) !important; }
+
+@media (max-width: 1080px) {
+  [data-public-site] .hs-store-toolbar { grid-template-columns: 1fr !important; align-items: stretch !important; }
+  [data-public-site] .hs-store-toolbar-heading { grid-template-columns: minmax(0, 1fr) minmax(230px, 360px) !important; }
+  [data-public-site] .hs-store-controls { justify-content: space-between !important; }
+  [data-public-site] .hs-store-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 310px)) !important; }
+  [data-public-site] .hs-store-grid.is-single { grid-template-columns: minmax(240px, 310px) !important; }
+}
+@media (max-width: 800px) {
+  [data-public-site] .hs-store-collection { grid-template-columns: 1fr !important; }
+  [data-public-site] .hs-store-toolbar { padding: 16px !important; gap: 15px !important; }
+  [data-public-site] .hs-store-toolbar-heading { grid-template-columns: 1fr !important; gap: 13px !important; }
+  [data-public-site] .hs-store-search,
+  [data-public-site] .hs-store-search-input { height: 46px !important; }
+  [data-public-site] .hs-store-controls { width: 100% !important; justify-content: space-between !important; }
+  [data-public-site] .hs-store-grid,
+  [data-public-site] .hs-store-grid.is-single { grid-template-columns: minmax(0, 320px) !important; justify-content: center !important; }
+  [data-public-site] .hs-product-detail-clean { width: min(calc(100% - 32px), 720px) !important; }
+  [data-public-site] .hs-product-detail-clean .hs-product-detail-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+  [data-public-site] .hs-product-gallery-frame { width: min(100%, 560px) !important; }
+  [data-public-site] .hs-product-detail-clean .hs-product-main-image { max-height: 480px !important; }
+}
+@media (max-width: 520px) {
+  [data-public-site] .hs-store-grid,
+  [data-public-site] .hs-store-grid.is-single { grid-template-columns: minmax(0, 1fr) !important; }
+  [data-public-site] .hs-store-controls { flex-wrap: wrap !important; }
+  [data-public-site] .hs-store-sort { flex: 1 1 150px !important; }
+  [data-public-site] .hs-store-cart-trigger { flex: 0 0 auto !important; }
+  [data-public-site] .hs-store-product .store-product-image { aspect-ratio: 4 / 3 !important; }
+  [data-public-site] .hs-product-detail-clean { width: calc(100% - 24px) !important; }
+  [data-public-site] .hs-product-detail-clean .hs-product-main-image { min-height: 220px !important; max-height: 380px !important; aspect-ratio: 4 / 3 !important; }
+  [data-public-site] .hs-product-detail-clean .hs-product-main-image img { padding: 16px !important; }
+  [data-public-site] .hsx-footer { width: calc(100% - 20px) !important; padding: 42px 20px 22px !important; }
+}
+
+
+/* Narrow desktop/tablet correction: the category rail leaves too little width for
+   a title and search field inside the same row, so stack them before they collide. */
+@media (max-width: 1080px) {
+  [data-public-site] .hs-store-toolbar-heading {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 13px !important;
+  }
+  [data-public-site] .hs-store-toolbar-heading > div:first-child,
+  [data-public-site] .hs-store-toolbar-heading > div:first-child > div {
+    min-width: 0 !important;
+  }
+  [data-public-site] .hs-store-toolbar-heading h2 {
+    max-width: 100% !important;
+    overflow-wrap: anywhere !important;
+  }
+  [data-public-site] .hs-store-search { width: 100% !important; }
+}
+
+
+/* The results rail is narrower than the viewport because of the category column;
+   stack the toolbar before the inner title/search pair becomes cramped. */
+@media (max-width: 1280px) {
+  [data-public-site] .hs-store-toolbar {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  [data-public-site] .hs-store-toolbar-heading {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  [data-public-site] .hs-store-toolbar-heading h2 {
+    max-width: 100% !important;
+  }
+}
