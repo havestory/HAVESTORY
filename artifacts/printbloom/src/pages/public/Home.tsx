@@ -195,7 +195,7 @@ export default function Home() {
           </span>
           <h1>
             {settings?.heroTitle ||
-              "Turn your best moments into something beautiful."}
+              "Frame the Moments That Stay"}
           </h1>
           <p>
             {settings?.heroSubtitle ||

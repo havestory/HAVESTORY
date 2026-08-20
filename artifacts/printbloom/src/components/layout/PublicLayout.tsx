@@ -4,6 +4,8 @@ import { useGetSettings } from '@workspace/api-client-react';
 import { Menu, X, Phone, Mail, Instagram, Facebook, ArrowRight, ShoppingBag, Sparkles, MessageCircle, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { applyThemeVars } from '@/lib/theme-utils';
+import { useShopCart } from '@/lib/shop-cart';
+import { ShopCartDrawer } from '@/components/shop/ShopCartDrawer';
 
 const WHATSAPP_FAQS = [
   { question: 'What can HAVESTORY make for me?', answer: 'We create custom photo frames, archival prints, collages and studio pieces for homes, gifts, events and businesses.' },
@@ -51,7 +53,8 @@ function SpecialEventOverlay({ enabled, type, message }: { enabled?: boolean; ty
 
 export function PublicLayout({ children }: { children: ReactNode }) {
   const [location]   = useLocation();
-  const { data: settings, refetch: refetchSettings } = useGetSettings();
+  const { data: settings, isLoading: settingsLoading, refetch: refetchSettings } = useGetSettings();
+  const { count: cartCount } = useShopCart();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showWa,   setShowWa]   = useState(false);
@@ -137,6 +140,17 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     }
   }, [settings, publicThemePreset]);
 
+  if (settingsLoading && !settings) {
+    return (
+      <main className="hs-data-loader" role="status" aria-live="polite" aria-label="Preparing HAVESTORY">
+        <div className="hs-data-loader-mark"><span>HS</span></div>
+        <strong>HAVESTORY</strong>
+        <p>Preparing the studio collection</p>
+        <div className="hs-data-loader-line"><i /></div>
+      </main>
+    );
+  }
+
   if (settings?.siteClosedEnabled) {
     return (
       <main data-public-site="" className="min-h-[100dvh] bg-[#0A0907] text-white flex items-center justify-center px-6">
@@ -202,7 +216,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="hsx-shell-actions">
-            <Link href="/store" aria-label="Open shop"><ShoppingBag /></Link>
+            <ShopCartDrawer trigger={<button type="button" className="hsx-header-cart" aria-label={`Open shopping cart with ${cartCount} items`}><ShoppingBag />{cartCount > 0 && <span>{cartCount}</span>}</button>} />
             <Link href="/custom-project" className="hsx-shell-order">Start a project <ArrowRight /></Link>
             <button aria-expanded={menuOpen} aria-controls="public-mobile-drawer" aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'} onClick={() => setMenuOpen(v => !v)}>{menuOpen ? <X /> : <Menu />}</button>
           </div>

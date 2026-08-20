@@ -97,17 +97,13 @@ const queryClient = new QueryClient({
     mutations: { retry: false },
   },
 });
-const SPLASH_KEY  = 'hs_splash_v2';
-
 function RouteLoader() {
   return (
-    <div className="flex min-h-[45vh] items-center justify-center" role="status" aria-label="Loading section">
-      <div className="w-full max-w-xl space-y-4 px-6">
-        <div className="h-7 w-48 animate-pulse rounded bg-muted" />
-        <div className="grid grid-cols-3 gap-3">
-          {[0, 1, 2].map(i => <div key={i} className="h-24 animate-pulse rounded bg-muted" />)}
-        </div>
-        <div className="h-48 animate-pulse rounded bg-muted" />
+    <div className="hs-route-loader" role="status" aria-label="Loading section">
+      <div>
+        <span>HS</span>
+        <strong>Preparing this collection</strong>
+        <div><i /></div>
       </div>
     </div>
   );
@@ -223,11 +219,8 @@ function Router() {
 }
 
 function App() {
-  const [showSplash, setShowSplash] = useState(() => {
-    try { return !sessionStorage.getItem(SPLASH_KEY); } catch { return false; }
-  });
+  const [showSplash, setShowSplash] = useState(() => !window.location.pathname.startsWith('/admin'));
   const handleSplashDone = useCallback(() => {
-    try { sessionStorage.setItem(SPLASH_KEY, '1'); } catch {}
     setShowSplash(false);
   }, []);
 
