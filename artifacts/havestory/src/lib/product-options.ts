@@ -13,8 +13,19 @@ export type ProductOptionGroup = {
   choices: ProductChoice[];
 };
 
+export type ProductSize = {
+  id: string;
+  name: string;
+  packSize?: number;
+  unitLabel?: string;
+  minQty?: number;
+  imageUrl?: string;
+  tiers?: { from: number; to: number; pricePerUnit: string }[];
+};
+
 export type ProductConfig = {
   optionGroups?: ProductOptionGroup[];
+  sizes?: ProductSize[];
   productionTime?: string;
   sizeLabel?: string;
   minQuantity?: number;

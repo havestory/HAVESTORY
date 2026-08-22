@@ -26,7 +26,7 @@ type RangePrice = { from: number; to: number; pricePerUnit: string };
 type Choice = { id: string; name: string; price: string; chargeType: "flat" | "per_unit"; imageUrl?: string; sizePrices?: { sizeId: string; price: string }[] };
 type OptionGroup = { id: string; title: string; choices: Choice[] };
 type SizeTier = { from: number; to: number; pricePerUnit: string };
-type ProductSize = { id: string; name: string; packSize: number; unitLabel: string; minQty: number; tiers: SizeTier[] };
+type ProductSize = { id: string; name: string; packSize: number; unitLabel: string; minQty: number; tiers: SizeTier[]; imageUrl?: string };
 
 /* ── Multi Prints types ── */
 type MPPricingMode = "unit" | "qty-range";
@@ -36,7 +36,10 @@ type MPLamination = { id: string; name: "none" | "one-side-gloss" | "one-side-ma
 type MPRoundCornerCut = { enabled: boolean; pricingMode: MPPricingMode; unitPrice: string; tiers: MPTier[] };
 type MPBoardType = { id: string; name: string; gsm: number; description: string; isActive: boolean; basePricingMode: MPPricingMode; baseUnitPrice: string; baseTiers: MPTier[]; printSides: MPPrintSide[]; laminations: MPLamination[]; roundCornerCut?: MPRoundCornerCut };
 
+type ProductFormat = "ready_made" | "frame_print" | "print_service" | "finishing";
+
 type CustomConfig = {
+  productFormat: ProductFormat;
   productType: "standard" | "custom_print" | "multi_size_tier" | "multi_prints";
   pricingModel: "fixed_quantities" | "range_per_unit";
   fixedPrices: FixedPrice[];
@@ -60,6 +63,7 @@ type CustomConfig = {
 };
 
 const DEFAULT_CONFIG: CustomConfig = {
+  productFormat: "ready_made",
   productType: "standard",
   pricingModel: "fixed_quantities",
   fixedPrices: [{ qty: 100, price: "" }, { qty: 250, price: "" }, { qty: 500, price: "" }],
@@ -305,8 +309,19 @@ function rs(v: any) { return `Rs. ${Number(v || 0).toLocaleString("en-IN")}`; }
 
 function parseConfig(raw: string | null | undefined): CustomConfig {
   if (!raw) return { ...DEFAULT_CONFIG };
-  try { return { ...DEFAULT_CONFIG, ...JSON.parse(raw) }; }
-  catch { return { ...DEFAULT_CONFIG }; }
+  try {
+    const saved = JSON.parse(raw);
+    const legacyFormat: ProductFormat = saved.productType === "multi_size_tier"
+      ? "frame_print"
+      : saved.productType === "custom_print"
+      ? "print_service"
+      : saved.productType === "multi_prints"
+      ? "finishing"
+      : "ready_made";
+    return { ...DEFAULT_CONFIG, ...saved, productFormat: saved.productFormat || legacyFormat };
+  } catch {
+    return { ...DEFAULT_CONFIG };
+  }
 }
 
 /* ────────── Sub-components ────────── */
@@ -379,7 +394,7 @@ function RangePriceTable({ rows, onChange }: { rows: RangePrice[]; onChange: (r:
 }
 
 /* ── Multi-Size Tier Builder ── */
-function SizeTierBuilder({ sizes, onChange }: { sizes: ProductSize[]; onChange: (s: ProductSize[]) => void }) {
+function SizeTierBuilder({ sizes, onChange, productImages = [] }: { sizes: ProductSize[]; onChange: (s: ProductSize[]) => void; productImages?: string[] }) {
   const addSize = () => onChange([...sizes, { id: uid(), name: "", packSize: 1, unitLabel: "Pack", minQty: 1, tiers: [{ from: 1, to: 100, pricePerUnit: "" }] }]);
   const removeSize = (idx: number) => onChange(sizes.filter((_, i) => i !== idx));
   const updateSize = (idx: number, patch: Partial<ProductSize>) => onChange(sizes.map((s, i) => i === idx ? { ...s, ...patch } : s));
@@ -457,6 +472,30 @@ function SizeTierBuilder({ sizes, onChange }: { sizes: ProductSize[]; onChange: 
                 />
                 <p className="text-[10px] text-gray-400 mt-1">Min order qty</p>
               </div>
+            </div>
+
+            <div className="rounded-xl border border-violet-100 bg-violet-50/45 p-3">
+              <div className="flex items-start gap-3">
+                {size.imageUrl ? <img src={size.imageUrl} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover ring-2 ring-white shadow-sm" /> : <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-gray-300 ring-1 ring-gray-200"><Image size={16} /></div>}
+                <div className="min-w-0 flex-1">
+                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-violet-500">Photo shown for this size</label>
+                  <select value={size.imageUrl || ""} onChange={e => updateSize(sIdx, { imageUrl: e.target.value || undefined })} className="w-full rounded-lg border border-violet-100 bg-white px-2.5 py-2 text-xs text-gray-700 outline-none focus:ring-2 focus:ring-violet-200">
+                    <option value="">Use the main product image</option>
+                    {productImages.map((image, index) => <option key={image} value={image}>Product photo {index + 1}{index === 0 ? " (cover)" : ""}</option>)}
+                  </select>
+                  <p className="mt-1 text-[10px] leading-relaxed text-gray-400">This photo appears when a customer selects {size.name || "this size"}.</p>
+                </div>
+              </div>
+              {productImages.length > 0 && (
+                <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">
+                  {productImages.map((image, index) => (
+                    <button type="button" key={image} onClick={() => updateSize(sIdx, { imageUrl: size.imageUrl === image ? undefined : image })} className={`group relative aspect-square overflow-hidden rounded-lg border-2 bg-white transition ${size.imageUrl === image ? "border-violet-500 ring-2 ring-violet-100" : "border-white hover:border-violet-200"}`} title={`Use product photo ${index + 1}`}>
+                      <img src={image} alt={`Product photo ${index + 1}`} className="h-full w-full object-cover" />
+                      <span className="absolute bottom-0 left-0 right-0 bg-black/55 px-1 py-0.5 text-center text-[9px] font-bold text-white">{index + 1}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Tiers */}
@@ -548,15 +587,28 @@ function ChoiceRow({ choice, onChange, onRemove, sizes, productImages = [] }: { 
         <button type="button" onClick={onRemove} className="p-1.5 text-gray-300 hover:text-red-400 transition-colors"><X size={14} /></button>
       </div>
 
-      <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-2">
-        {choice.imageUrl ? <img src={choice.imageUrl} alt="" className="h-10 w-10 rounded-md object-cover" /> : <div className="grid h-10 w-10 place-items-center rounded-md bg-gray-100 text-gray-300"><Image size={15} /></div>}
-        <div className="min-w-0 flex-1">
-          <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-400">Image shown when customer selects this choice</label>
-          <select value={choice.imageUrl || ""} onChange={e => onChange({ ...choice, imageUrl: e.target.value || undefined })} className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700 outline-none focus:ring-2 focus:ring-amber-200">
-            <option value="">Keep current product image</option>
-            {productImages.map((image, index) => <option key={image} value={image}>Product image {index + 1}{index === 0 ? " (cover)" : ""}</option>)}
-          </select>
+      <div className="rounded-xl border border-violet-100 bg-violet-50/45 p-3">
+        <div className="flex items-start gap-3">
+          {choice.imageUrl ? <img src={choice.imageUrl} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover ring-2 ring-white shadow-sm" /> : <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-gray-300 ring-1 ring-gray-200"><Image size={16} /></div>}
+          <div className="min-w-0 flex-1">
+            <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-violet-500">Photo shown for this price / choice</label>
+            <select value={choice.imageUrl || ""} onChange={e => onChange({ ...choice, imageUrl: e.target.value || undefined })} className="w-full rounded-lg border border-violet-100 bg-white px-2.5 py-2 text-xs text-gray-700 outline-none focus:ring-2 focus:ring-violet-200">
+              <option value="">Use the main product image</option>
+              {productImages.map((image, index) => <option key={image} value={image}>Product photo {index + 1}{index === 0 ? " (cover)" : ""}</option>)}
+            </select>
+            <p className="mt-1 text-[10px] leading-relaxed text-gray-400">When a customer selects this choice, this photo becomes the product preview and is saved with the cart item.</p>
+          </div>
         </div>
+        {productImages.length > 0 && (
+          <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">
+            {productImages.map((image, index) => (
+              <button type="button" key={image} onClick={() => onChange({ ...choice, imageUrl: choice.imageUrl === image ? undefined : image })} className={`group relative aspect-square overflow-hidden rounded-lg border-2 bg-white transition ${choice.imageUrl === image ? "border-violet-500 ring-2 ring-violet-100" : "border-white hover:border-violet-200"}`} title={`Use product photo ${index + 1}`}>
+                <img src={image} alt={`Product photo ${index + 1}`} className="h-full w-full object-cover" />
+                <span className="absolute bottom-0 left-0 right-0 bg-black/55 px-1 py-0.5 text-center text-[9px] font-bold text-white">{index + 1}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Size-dependent pricing */}
@@ -627,9 +679,9 @@ function OptionGroupCard({
       {!collapsed && (
         <div className="p-4 space-y-2">
           <div className="flex gap-2 text-xs font-semibold text-gray-400 uppercase tracking-wide px-1">
-            <span className="flex-1">Choice Name</span>
+            <span className="flex-1">Choice / item name</span>
             <span className="w-28 text-center">Price</span>
-            <span className="w-24 text-center">Charge Type</span>
+            <span className="w-24 text-center">Price basis</span>
             <span className="w-6" />
           </div>
           {group.choices.map((c, ci) => (
@@ -837,6 +889,14 @@ export default function AdminProducts() {
       const gallery = prev.galleryImages.filter((u: string) => u !== url);
       return { ...prev, galleryImages: gallery, imageUrl: gallery[0] || "" };
     });
+    setConfig(current => ({
+      ...current,
+      sizes: current.sizes.map(size => size.imageUrl === url ? { ...size, imageUrl: undefined } : size),
+      optionGroups: current.optionGroups.map(group => ({
+        ...group,
+        choices: group.choices.map(choice => choice.imageUrl === url ? { ...choice, imageUrl: undefined } : choice),
+      })),
+    }));
   };
 
   const setCover = (url: string) => {
@@ -1428,37 +1488,48 @@ export default function AdminProducts() {
 
               {/* ── SECTION 2: Pricing ── */}
               <section className="space-y-4">
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                  <Layers size={12} /> Pricing & Product Type
-                </h3>
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                    <Layers size={12} /> Pricing & Business Format
+                  </h3>
 
-                {/* Product Type Toggle */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {[
-                    { value: "standard", label: "Standard Product", sub: "Fixed price, ready-made items" },
-                    { value: "custom_print", label: "Custom Print", sub: "Variable pricing with options" },
-                    { value: "multi_size_tier", label: "Multi-Size Tier", sub: "Multiple sizes with tiered pricing" },
-                    { value: "multi_prints", label: "Colour Lab Options", sub: "Paper types, print sides and protective finishes" },
-                  ].map(opt => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setC({ productType: opt.value as any })}
-                      className={`p-4 rounded-2xl border-2 text-left transition-all ${
-                        config.productType === opt.value
-                          ? "border-amber-400 bg-amber-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${config.productType === opt.value ? "border-amber-500 bg-amber-500" : "border-gray-300"}`}>
-                          {config.productType === opt.value && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                        </div>
-                        <span className="text-sm font-bold text-gray-800">{opt.label}</span>
-                      </div>
-                      <p className="text-xs text-gray-400 pl-5">{opt.sub}</p>
-                    </button>
-                  ))}
+                {/* Business-friendly product format */}
+                <div className="rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50/80 via-white to-amber-50/70 p-4 sm:p-5">
+                  <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-violet-500">Product setup</p>
+                      <h4 className="mt-1 text-base font-bold text-gray-900">What are you adding?</h4>
+                    </div>
+                    <p className="text-[11px] text-gray-500">Choose the closest format — you can still add custom options below.</p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {[
+                      { value: "ready_made" as const, type: "standard", label: "Ready-made product", sub: "Frames, albums, gifts, wall décor", example: "One base price + stock" },
+                      { value: "frame_print" as const, type: "multi_size_tier", label: "Photo frame or print", sub: "Sizes, packs, and quantity tiers", example: "A4 / A3 / custom sizes" },
+                      { value: "print_service" as const, type: "custom_print", label: "Printing service", sub: "Business cards, flyers, photos, books", example: "Quantity-based pricing" },
+                      { value: "finishing" as const, type: "multi_prints", label: "Paper & finishing", sub: "Paper, sides, lamination, cutting", example: "Material combinations" },
+                    ].map(opt => {
+                      const isSelected = config.productFormat === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => setC({ productFormat: opt.value, productType: opt.type as CustomConfig["productType"] })}
+                          className={`rounded-2xl border-2 p-4 text-left transition-all ${isSelected ? "border-violet-400 bg-white shadow-md shadow-violet-100" : "border-white/80 bg-white/65 hover:border-violet-200 hover:bg-white"}`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <span className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border-2 ${isSelected ? "border-violet-500 bg-violet-500" : "border-gray-300"}`}>
+                              {isSelected && <span className="h-2 w-2 rounded-full bg-white" />}
+                            </span>
+                            <span className="min-w-0">
+                              <span className="block text-sm font-bold text-gray-900">{opt.label}</span>
+                              <span className="mt-1 block text-xs leading-relaxed text-gray-500">{opt.sub}</span>
+                              <span className="mt-2 inline-flex rounded-full bg-gray-100 px-2 py-1 text-[10px] font-semibold text-gray-500">{opt.example}</span>
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* ── STANDARD: Simple Price ── */}
@@ -1536,7 +1607,7 @@ export default function AdminProducts() {
                 {config.productType === "custom_print" && (
                   <div className="border border-gray-200 rounded-2xl overflow-hidden">
                     <div className="px-5 py-3 bg-gray-50 border-b border-gray-200">
-                      <span className="text-sm font-semibold text-gray-700">Base Pricing Setup</span>
+                        <span className="text-sm font-semibold text-gray-700">Printing service pricing</span>
                     </div>
 
                     <div className="p-5 space-y-5">
@@ -1612,12 +1683,12 @@ export default function AdminProducts() {
                     <div className="p-4 bg-blue-50/60 border border-blue-100 rounded-2xl">
                       <div className="flex items-center gap-1.5 mb-2">
                         <Ruler size={12} className="text-blue-500" />
-                        <span className="text-xs font-bold text-blue-700 uppercase tracking-wide">Sizes & Tier Pricing</span>
+                        <span className="text-xs font-bold text-blue-700 uppercase tracking-wide">Frame / print sizes & quantity pricing</span>
                       </div>
                       <p className="text-[11px] text-gray-500 mb-3">
-                        Add different sizes of this product. Each size has a pack size (customer buys in multiples) and price tiers that automatically adjust based on quantity.
+                        Add the sizes you sell for this frame or print. Set pack multiples, minimum quantities, and price tiers that adjust automatically as the customer changes quantity.
                       </p>
-                      <SizeTierBuilder sizes={config.sizes || []} onChange={s => setC({ sizes: s })} />
+                      <SizeTierBuilder sizes={config.sizes || []} onChange={s => setC({ sizes: s })} productImages={form.galleryImages || []} />
                     </div>
                   </div>
                 )}
@@ -1630,24 +1701,24 @@ export default function AdminProducts() {
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-1.5">
                           <Layers size={13} className="text-indigo-500" />
-                          <span className="text-xs font-bold text-indigo-700 uppercase tracking-wide">Board Types</span>
+                          <span className="text-xs font-bold text-indigo-700 uppercase tracking-wide">Paper & finishing combinations</span>
                         </div>
                         <button
                           type="button"
                           onClick={() => setC({ multiPrintsBoardTypes: [...(config.multiPrintsBoardTypes || []), emptyMPBoard()] })}
                           className="flex items-center gap-1 px-3 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700"
                         >
-                          <Plus size={12} /> Add Board Type
+                          <Plus size={12} /> Add material
                         </button>
                       </div>
                       <p className="text-[11px] text-gray-500 mb-3">
-                        Add each board type (e.g. 300gsm Art Board, 260gsm Photo Board). Each board has its own print sides, laminations and base price. Use <strong>Save &amp; stay</strong> to keep adding boards.
+                        Add the papers or boards you offer (for example photo paper, art board, or mounted board). Each material can have its own print sides, lamination, corner cutting, and base price.
                       </p>
                       {(!config.multiPrintsBoardTypes || config.multiPrintsBoardTypes.length === 0) && (
                         <div className="text-center py-8 text-indigo-300 border-2 border-dashed border-indigo-200 rounded-xl">
                           <Layers size={28} className="mx-auto mb-2 opacity-40" />
-                          <p className="text-sm font-medium">No board types yet</p>
-                          <p className="text-[11px] mt-0.5">Click "+ Add Board Type" to start</p>
+                          <p className="text-sm font-medium">No materials added yet</p>
+                          <p className="text-[11px] mt-0.5">Add paper, board, or finishing materials to start</p>
                         </div>
                       )}
                       {(config.multiPrintsBoardTypes || []).map((board, i) => (
@@ -1671,10 +1742,10 @@ export default function AdminProducts() {
               {/* ── SECTION 3: Selection Options / Add-ons (All Product Types) ── */}
               <section className="space-y-4">
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                  <Layers size={12} /> Selection Options / Add-ons
+                    <Layers size={12} /> Customer Choices, Prices & Photos
                 </h3>
                 <p className="text-[11px] text-gray-400 -mt-2">
-                  Add dropdown options like Print Sides, Lamination, Board Type, etc. These appear as selection dropdowns on the product page.
+                  Add the choices customers can select — such as frame size, paper, finish, print side, or service type. Each choice can have its own price and linked product photo.
                   {config.productType === "multi_size_tier" && config.sizes?.length > 0 && (
                     <span className="text-blue-500 font-medium"> You can set different prices per size using the ruler icon on each choice.</span>
                   )}
@@ -1710,7 +1781,7 @@ export default function AdminProducts() {
                   onClick={() => setC({ optionGroups: [...config.optionGroups, { id: uid(), title: "", choices: [] }] })}
                   className="w-full py-3 border-2 border-dashed border-amber-200 text-amber-500 text-sm font-semibold rounded-2xl hover:bg-amber-50 transition-colors flex items-center justify-center gap-2"
                 >
-                  <Plus size={16} /> Add New Option Group
+                  <Plus size={16} /> Add choice group
                 </button>
               </section>
 
