@@ -829,7 +829,12 @@ export default function AdminProducts() {
   const guideInputRef = useRef<HTMLInputElement>(null);
     const { data: admin } = useGetAdminMe({ query: { staleTime: 5 * 60_000, retry: false, refetchOnWindowFocus: false } as any });
   useEffect(() => { setReadOnly(admin?.role === "staff"); }, [admin?.role]);
-  const { data: products } = useListProducts();
+  const {
+    data: products,
+    isLoading: productsLoading,
+    isError: productsError,
+    refetch: refetchProducts,
+  } = useListProducts();
   const { data: categories } = useListCategories();
   const queryClient = useQueryClient();
   const inv = { queryKey: ["/api/products"] };
@@ -1126,7 +1131,26 @@ export default function AdminProducts() {
       </div>
 
       {/* Product Cards Grid */}
-      {filtered.length === 0 ? (
+      {productsLoading ? (
+        <div className="bg-white border border-gray-100 rounded-2xl py-20 text-center">
+          <Loader2 size={30} className="mx-auto text-amber-500 mb-3 animate-spin" />
+          <p className="font-semibold text-gray-600">Loading products…</p>
+          <p className="text-sm text-gray-400 mt-1">Fetching the latest catalog</p>
+        </div>
+      ) : productsError ? (
+        <div className="bg-white border border-rose-100 rounded-2xl py-16 px-6 text-center">
+          <Package size={42} className="mx-auto text-rose-300 mb-3" />
+          <p className="font-semibold text-rose-700">Products could not be loaded</p>
+          <p className="text-sm text-gray-500 mt-1">The catalog request failed. Your existing products have not been deleted.</p>
+          <button
+            type="button"
+            onClick={() => void refetchProducts()}
+            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-stone-900 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-800"
+          >
+            <Loader2 size={14} /> Try again
+          </button>
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="bg-white border border-dashed border-gray-200 rounded-2xl py-20 text-center">
           <Package size={44} className="mx-auto text-gray-200 mb-3" />
           <p className="font-semibold text-gray-400">No products yet</p>

@@ -98,13 +98,24 @@ router.get("/", async (req, res) => {
         .orderBy(productsTable.sortOrder);
     } catch (err) {
       if (!isMissingColumn(err)) throw err;
-      // invoice_name column not yet migrated — fall back without it
-      products = await db
-        .select(legacyBaseSelect())
-        .from(productsTable)
-        .leftJoin(categoriesTable, eq(productsTable.categoryId, categoriesTable.id))
-        .where(where)
-        .orderBy(productsTable.sortOrder);
+      // invoice_name may not be migrated yet; keep product_format when it exists.
+      try {
+        products = await db
+          .select(baseSelect())
+          .from(productsTable)
+          .leftJoin(categoriesTable, eq(productsTable.categoryId, categoriesTable.id))
+          .where(where)
+          .orderBy(productsTable.sortOrder);
+      } catch (legacyErr) {
+        if (!isMissingColumn(legacyErr)) throw legacyErr;
+        // Very old databases may predate both optional columns.
+        products = await db
+          .select(legacyBaseSelect())
+          .from(productsTable)
+          .leftJoin(categoriesTable, eq(productsTable.categoryId, categoriesTable.id))
+          .where(where)
+          .orderBy(productsTable.sortOrder);
+      }
     }
 
     res.json(products.map((p) => ({ ...p, invoiceName: p.invoiceName ?? null, galleryImages: parseGallery(p.galleryImages) })));
