@@ -7454,3 +7454,59 @@ body {
     animation: none;
   }
 }
+
+
+/* CHECKOUT ITEM REMOVAL — compact, visible, touch-safe control */
+[data-public-site] .checkout-summary-item-info {
+  min-width: 0;
+}
+[data-public-site] .checkout-summary-item-total {
+  white-space: nowrap;
+  padding-top: 1px;
+}
+[data-public-site] .checkout-remove-item {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  min-height: 30px !important;
+  margin: 7px 0 0 !important;
+  padding: 0 7px 0 0 !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  color: rgba(76, 35, 112, .62) !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  letter-spacing: .13em !important;
+  line-height: 1 !important;
+  text-transform: uppercase !important;
+  transition: color 160ms ease, background-color 160ms ease, transform 160ms ease !important;
+}
+[data-public-site] .checkout-remove-item svg {
+  flex: 0 0 auto;
+}
+[data-public-site] .checkout-remove-item:hover {
+  color: #4c2370 !important;
+  background: rgba(196, 154, 74, .18) !important;
+}
+[data-public-site] .checkout-remove-item:active {
+  transform: scale(.96) !important;
+}
+@media (max-width: 520px) {
+  [data-public-site] .checkout-summary-item {
+    align-items: flex-start !important;
+  }
+  [data-public-site] .checkout-summary-item-total {
+    font-size: 12px !important;
+  }
+  [data-public-site] .checkout-remove-item {
+    min-height: 34px !important;
+    margin-top: 6px !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-public-site] .checkout-remove-item {
+    transition: none !important;
+  }
+}
