@@ -622,6 +622,180 @@ h1, h2, h3 { font-weight: 700; }
 [data-admin-theme="dark"] .text-slate-400,
 [data-admin-theme="dark"] .text-slate-300 { color: hsl(var(--muted-foreground)) !important; }
 
+/* ─── Manual invoice modal — Liquid Glass admin surface ─────────────────── */
+[data-admin-panel] .invoice-manual-modal {
+  --invoice-surface: hsl(var(--card));
+  --invoice-surface-soft: hsl(var(--muted) / 0.48);
+  --invoice-border: hsl(var(--border));
+  --invoice-ink: hsl(var(--foreground));
+  --invoice-muted: hsl(var(--muted-foreground));
+  --invoice-gold: hsl(var(--secondary));
+  --invoice-gold-bright: hsl(var(--accent));
+  color: var(--invoice-ink);
+  font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+}
+[data-admin-panel] .invoice-modal-shell {
+  min-width: 0;
+  border: 1px solid hsl(var(--card-border));
+  background: linear-gradient(145deg, hsl(var(--card) / 0.98), hsl(var(--background) / 0.96));
+  box-shadow: 0 30px 90px rgba(15, 23, 42, 0.24), 0 0 0 1px hsl(var(--secondary) / 0.08);
+  backdrop-filter: blur(22px) saturate(1.16);
+  -webkit-backdrop-filter: blur(22px) saturate(1.16);
+}
+[data-admin-panel] .invoice-modal-header {
+  border-bottom-color: hsl(var(--secondary) / 0.2);
+  background: linear-gradient(135deg, hsl(var(--secondary) / 0.17), hsl(var(--card) / 0.92) 52%, hsl(var(--accent) / 0.1));
+}
+[data-admin-panel] .invoice-modal-header .text-amber-500,
+[data-admin-panel] .invoice-modal-header .text-amber-600 { color: var(--invoice-gold) !important; }
+[data-admin-panel] .invoice-modal-body {
+  min-height: 0;
+  background: radial-gradient(circle at 100% 0%, hsl(var(--secondary) / 0.08), transparent 34%), hsl(var(--background) / 0.72);
+}
+[data-admin-panel] .invoice-modal-content {
+  min-width: 0;
+}
+[data-admin-panel] .invoice-modal-section {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid hsl(var(--border) / 0.82);
+  border-radius: 1.1rem;
+  background: hsl(var(--card) / 0.72);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.045), inset 0 1px 0 hsl(var(--card) / 0.72);
+}
+[data-admin-panel] .invoice-modal-section > div:first-child .text-sm {
+  color: var(--invoice-ink) !important;
+  letter-spacing: -0.01em;
+}
+[data-admin-panel] .invoice-modal-section .input-field {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 2.75rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.8rem;
+  background: hsl(var(--input) / 0.92);
+  color: var(--invoice-ink) !important;
+  -webkit-text-fill-color: var(--invoice-ink);
+  padding-block: 0.62rem;
+  padding-inline: 0.85rem;
+  font-size: 0.8125rem;
+  line-height: 1.2;
+  outline: none;
+  box-shadow: inset 0 1px 0 hsl(var(--card) / 0.55);
+}
+[data-admin-panel] .invoice-modal-section .input-field.pl-9 { padding-left: 2.25rem; }
+[data-admin-panel] .invoice-modal-section .input-field.pl-11 { padding-left: 2.75rem; }
+[data-admin-panel] .invoice-modal-section .input-field.pr-10 { padding-right: 2.75rem; }
+[data-admin-panel] .invoice-modal-section textarea.input-field {
+  min-height: 5rem;
+  line-height: 1.45;
+}
+[data-admin-panel] .invoice-modal-section .input-field:focus {
+  border-color: hsl(var(--secondary) / 0.72);
+  box-shadow: 0 0 0 3px hsl(var(--secondary) / 0.14), inset 0 1px 0 hsl(var(--card) / 0.6);
+}
+[data-admin-panel] .invoice-modal-section .input-field::placeholder {
+  color: var(--invoice-muted) !important;
+  -webkit-text-fill-color: var(--invoice-muted);
+  opacity: 0.9;
+}
+[data-admin-panel] .invoice-catalog-panel {
+  border-color: hsl(var(--secondary) / 0.18);
+  background: linear-gradient(135deg, hsl(var(--secondary) / 0.08), hsl(var(--muted) / 0.4));
+}
+[data-admin-panel] .invoice-catalog-panel .input-field {
+  background: hsl(var(--card) / 0.88);
+}
+[data-admin-panel] .invoice-line-items-grid {
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(64px, 84px) minmax(112px, 1.1fr) minmax(98px, 112px) 28px !important;
+}
+[data-admin-panel] .invoice-line-items-grid > * {
+  min-width: 0;
+}
+[data-admin-panel] .invoice-line-item {
+  min-width: 0;
+  border: 1px solid hsl(var(--border) / 0.86);
+  background: linear-gradient(135deg, hsl(var(--muted) / 0.56), hsl(var(--card) / 0.9));
+  box-shadow: inset 0 1px 0 hsl(var(--card) / 0.65);
+}
+[data-admin-panel] .invoice-line-total {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--invoice-gold) !important;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+[data-admin-panel] .invoice-line-note {
+  min-height: 2.35rem !important;
+  background: hsl(var(--card) / 0.9) !important;
+}
+[data-admin-panel] .invoice-shipping-option {
+  display: flex;
+  min-width: 0;
+  min-height: 3rem;
+  align-items: center;
+  line-height: 1.3;
+  border-color: hsl(var(--border)) !important;
+  background: hsl(var(--card) / 0.72);
+  color: var(--invoice-ink) !important;
+}
+[data-admin-panel] .invoice-shipping-option:hover,
+[data-admin-panel] .invoice-shipping-option:focus-visible {
+  border-color: hsl(var(--secondary) / 0.62) !important;
+  background: hsl(var(--secondary) / 0.08);
+}
+[data-admin-panel] .invoice-shipping-option.border-amber-400 {
+  border-color: var(--invoice-gold-bright) !important;
+  background: hsl(var(--secondary) / 0.13);
+  color: var(--invoice-gold) !important;
+  box-shadow: 0 8px 20px hsl(var(--secondary) / 0.1);
+}
+[data-admin-panel] .invoice-totals {
+  border-color: hsl(var(--secondary) / 0.24) !important;
+  background: linear-gradient(135deg, hsl(var(--secondary) / 0.11), hsl(var(--muted) / 0.48)) !important;
+}
+[data-admin-panel] .invoice-totals .tabular-nums {
+  flex: 0 0 auto;
+  min-width: max-content;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+[data-admin-panel] .invoice-totals .text-amber-600 {
+  color: var(--invoice-gold) !important;
+}
+[data-admin-panel] .invoice-modal-footer {
+  border-top-color: hsl(var(--secondary) / 0.2);
+  background: hsl(var(--muted) / 0.5);
+}
+[data-admin-panel] .invoice-modal-footer > button {
+  min-width: 0;
+  min-height: 3rem;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+[data-admin-panel] .invoice-secondary-action {
+  border-color: hsl(var(--secondary) / 0.45) !important;
+  background: hsl(var(--card) / 0.72);
+  color: var(--invoice-gold) !important;
+}
+[data-admin-panel] .invoice-secondary-action:hover { background: hsl(var(--secondary) / 0.1); }
+[data-admin-panel] .invoice-primary-action {
+  background: linear-gradient(110deg, hsl(var(--secondary)), hsl(var(--primary)) 155%) !important;
+  box-shadow: 0 12px 24px hsl(var(--secondary) / 0.22) !important;
+}
+@media (max-width: 639px) {
+  [data-admin-panel] .invoice-modal-shell { max-height: calc(100svh - 16px) !important; border-radius: 1.25rem; }
+  [data-admin-panel] .invoice-modal-content { padding: 0.8rem; }
+  [data-admin-panel] .invoice-modal-section { padding: 0.8rem; border-radius: 1rem; }
+  [data-admin-panel] .invoice-modal-footer { flex-direction: column-reverse; align-items: stretch; }
+  [data-admin-panel] .invoice-modal-footer > button { width: 100%; flex: none; }
+  [data-admin-panel] .invoice-modal-section .grid.grid-cols-2 { grid-template-columns: 1fr; }
+}
+
 /* ─── Gold gradient text ────────────────────────────────────────────────── */
 .text-gradient {
   background: linear-gradient(120deg, #D96F52 0%, #E4B95F 48%, #B9D8CC 100%);

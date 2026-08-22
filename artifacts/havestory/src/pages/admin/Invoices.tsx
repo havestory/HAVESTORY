@@ -900,11 +900,11 @@ export default function AdminInvoices() {
 
       {/* ─── CREATE / EDIT MANUAL INVOICE POPUP ─── */}
       {showManual && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm" onClick={() => { setShowManual(false); resetForm(); }}>
+        <div className="invoice-manual-modal fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm" onClick={() => { setShowManual(false); resetForm(); }}>
           <div className="flex min-h-full items-center justify-center p-4">
-          <div className="bg-white w-full max-w-lg sm:max-w-2xl lg:max-w-3xl flex flex-col rounded-2xl shadow-2xl overflow-hidden" style={{ maxHeight: "calc(100vh - 48px)" }} onClick={e => e.stopPropagation()}>
+          <div className="invoice-modal-shell bg-white w-full max-w-lg sm:max-w-2xl lg:max-w-4xl flex flex-col rounded-2xl shadow-2xl overflow-hidden" style={{ maxHeight: "calc(100vh - 48px)" }} onClick={e => e.stopPropagation()}>
             {/* Header */}
-            <div className="flex items-start justify-between px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-amber-50 to-stone-50 shrink-0">
+            <div className="invoice-modal-header flex items-start justify-between px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-amber-50 to-stone-50 shrink-0">
               <div>
                 <div className="flex items-center gap-2">
                   <FileText size={16} className="text-amber-500" />
@@ -929,11 +929,11 @@ export default function AdminInvoices() {
             </div>
 
             {/* Scrollable Body */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="p-5 space-y-6">
+            <div className="invoice-modal-body flex-1 overflow-y-auto">
+              <div className="invoice-modal-content p-5 space-y-6">
 
                 {/* Client Information — Existing or Manual */}
-                <section>
+                <section className="invoice-modal-section">
                   <div className="flex items-center justify-between gap-2 mb-3">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-lg bg-amber-100 flex items-center justify-center"><User size={13} className="text-amber-600" /></div>
@@ -1094,12 +1094,12 @@ export default function AdminInvoices() {
                 </section>
 
                 {/* Line Items */}
-                <section>
+                <section className="invoice-modal-section">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-6 h-6 rounded-lg bg-stone-100 flex items-center justify-center"><ListOrdered size={13} className="text-stone-600" /></div>
                     <span className="text-sm font-bold text-gray-800">Line Items</span>
                   </div>
-                  <div className="relative mb-3 rounded-2xl border border-stone-100 bg-stone-50/60 p-3">
+                  <div className="invoice-catalog-panel relative mb-3 rounded-2xl border border-stone-100 bg-stone-50/60 p-3">
                     <div className="mb-2 flex items-center justify-between"><div><div className="text-xs font-bold text-stone-700">Add from Products & Services</div><div className="text-[10px] text-gray-400">Search the catalog, or continue with manual line items below.</div></div><span className="rounded-full bg-white px-2 py-1 text-[10px] font-bold text-stone-600">{catalogItems.length} items</span></div>
                     <div className="relative">
                       <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"/>
@@ -1109,7 +1109,7 @@ export default function AdminInvoices() {
                   </div>
                   <div className="space-y-2">
                     <div
-                      className="hidden sm:grid text-[10px] text-gray-400 font-semibold uppercase tracking-wide px-1 gap-2"
+                      className="invoice-line-items-grid hidden sm:grid text-[10px] text-gray-400 font-semibold uppercase tracking-wide px-1 gap-2"
                       style={{ gridTemplateColumns: "minmax(0,1fr) 90px 120px 110px 24px" }}
                     >
                       <span>Description *</span>
@@ -1121,7 +1121,7 @@ export default function AdminInvoices() {
                     {items.map((it, idx) => {
                       const lineTotal = it.qty * num(it.unitPrice);
                       return (
-                        <div key={it.id} className="bg-gray-50 rounded-xl p-2.5 sm:p-3 space-y-2">
+                        <div key={it.id} className="invoice-line-item bg-gray-50 rounded-xl p-2.5 sm:p-3 space-y-2">
                           {/* Mobile: stacked (description on its own row, then qty/price/total). */}
                           <div className="block sm:hidden space-y-2">
                             <div className="flex items-center gap-2">
@@ -1171,7 +1171,7 @@ export default function AdminInvoices() {
                                   className="input-field text-right text-sm font-semibold pl-9 w-full"
                                 />
                               </div>
-                              <span className="text-sm font-bold text-amber-600 text-right whitespace-nowrap pl-1 pr-0.5">
+                              <span className="invoice-line-total text-sm font-bold text-amber-600 text-right whitespace-nowrap pl-1 pr-0.5">
                                 Rs. {lineTotal.toLocaleString("en-IN")}
                               </span>
                             </div>
@@ -1179,7 +1179,7 @@ export default function AdminInvoices() {
 
                           {/* Desktop: original single-row grid. */}
                           <div
-                            className="hidden sm:grid gap-2 items-center"
+                            className="invoice-line-items-grid hidden sm:grid gap-2 items-center"
                             style={{ gridTemplateColumns: "minmax(0,1fr) 90px 120px 110px 24px" }}
                           >
                             <input value={it.description} onChange={e => updateItem(it.id, "description", e.target.value)} placeholder={`Item ${idx + 1}`} className="input-field text-base" />
@@ -1209,7 +1209,7 @@ export default function AdminInvoices() {
                                 className="input-field text-right text-base font-semibold pl-9"
                               />
                             </div>
-                            <span className="text-sm font-bold text-amber-600 text-right truncate">
+                            <span className="invoice-line-total text-sm font-bold text-amber-600 text-right truncate">
                               Rs. {lineTotal.toLocaleString("en-IN")}
                             </span>
                             {items.length > 1 ? (
@@ -1224,7 +1224,7 @@ export default function AdminInvoices() {
                           </div>
 
                           <input value={it.notes} onChange={e => updateItem(it.id, "notes", e.target.value)} placeholder="Notes / specifications (optional)"
-                            className="w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-amber-200 placeholder:text-gray-300 text-gray-600" />
+                            className="invoice-line-note w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-amber-200 placeholder:text-gray-300 text-gray-600" />
                         </div>
                       );
                     })}
@@ -1242,7 +1242,7 @@ export default function AdminInvoices() {
                 </section>
 
                 {/* Shipping */}
-                <section>
+                <section className="invoice-modal-section">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-6 h-6 rounded-lg bg-blue-100 flex items-center justify-center"><Truck size={13} className="text-blue-600" /></div>
                     <span className="text-sm font-bold text-gray-800">Shipping Charges</span>
@@ -1250,7 +1250,7 @@ export default function AdminInvoices() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {SHIPPING_OPTIONS.map(opt => (
                       <button key={opt.key} onClick={() => setShipping(opt.key)}
-                        className={`px-3 py-2.5 rounded-xl text-xs font-semibold text-left border-2 transition-all ${shipping === opt.key ? "border-amber-400 bg-amber-50 text-amber-700" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}>
+                        className={`invoice-shipping-option px-3 py-2.5 rounded-xl text-xs font-semibold text-left border-2 transition-all ${shipping === opt.key ? "border-amber-400 bg-amber-50 text-amber-700" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}>
                         {opt.key === "standard" ? `🚚 Standard — Rs. ${cfgStandard.toLocaleString("en-IN")}` :
                          opt.key === "express"  ? `⚡ Express — Rs. ${cfgExpress.toLocaleString("en-IN")}` :
                          opt.key === "weight"   ? "⚖️ Weight-based" :
@@ -1328,7 +1328,7 @@ export default function AdminInvoices() {
                 </section>
 
                 {/* Advance & Totals */}
-                <section>
+                <section className="invoice-modal-section">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-6 h-6 rounded-lg bg-green-100 flex items-center justify-center"><DollarSign size={13} className="text-green-600" /></div>
                     <span className="text-sm font-bold text-gray-800">Advance Payment</span>
@@ -1344,7 +1344,7 @@ export default function AdminInvoices() {
                       className="input-field pl-11 pr-3 text-right font-semibold"
                     />
                   </div>
-                  <div className="mt-3 bg-gradient-to-r from-amber-50 to-stone-50 rounded-xl p-3 space-y-1.5 border border-amber-100">
+                  <div className="invoice-totals mt-3 bg-gradient-to-r from-amber-50 to-stone-50 rounded-xl p-3 space-y-1.5 border border-amber-100">
                     <div className="flex items-start justify-between gap-3 text-xs text-gray-500">
                       <span className="min-w-0">Subtotal</span><span className="shrink-0 text-right font-semibold tabular-nums">Rs. {subtotal.toLocaleString("en-IN")}</span>
                     </div>
@@ -1370,7 +1370,7 @@ export default function AdminInvoices() {
                 </section>
 
                 {/* Private Profit Tracking — owner or finance-authorized staff only */}
-                {canViewFinance && <section>
+                {canViewFinance && <section className="invoice-modal-section">
                   <div className="flex items-center justify-between gap-2 mb-3">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center"><TrendingUp size={13} className="text-emerald-600" /></div>
@@ -1459,7 +1459,7 @@ export default function AdminInvoices() {
                 </section>}
 
                 {/* Notes */}
-                <section>
+                <section className="invoice-modal-section">
                   <div className="space-y-2.5">
                     <div>
                       <label className="text-xs text-gray-500 block mb-1">Additional Notes (shown on invoice)</label>
@@ -1475,13 +1475,13 @@ export default function AdminInvoices() {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center gap-2 px-5 py-4 border-t border-gray-100 bg-gray-50/50 shrink-0">
+            <div className="invoice-modal-footer flex items-center gap-2 px-5 py-4 border-t border-gray-100 bg-gray-50/50 shrink-0">
               <button onClick={() => setShowPreview(true)} disabled={!form.clientName.trim()}
-                className="flex-1 py-2.5 border-2 border-amber-200 text-amber-600 text-sm font-bold rounded-xl hover:bg-amber-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
+                className="invoice-secondary-action flex-1 py-2.5 border-2 border-amber-200 text-amber-600 text-sm font-bold rounded-xl hover:bg-amber-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
                 <Eye size={14} /> Preview
               </button>
               <button onClick={handleSave} disabled={isPending || isUpdating || !form.clientName.trim()}
-                className="flex-1 py-2.5 bg-gradient-to-r from-amber-500 to-stone-600 text-white text-sm font-bold rounded-xl disabled:opacity-60 flex items-center justify-center gap-2">
+                className="invoice-primary-action flex-1 py-2.5 bg-gradient-to-r from-amber-500 to-stone-600 text-white text-sm font-bold rounded-xl disabled:opacity-60 flex items-center justify-center gap-2">
                 {isPending || isUpdating ? "Saving…" : editingFullId !== null ? "Update Invoice" : "Save & Continue"}
               </button>
             </div>
