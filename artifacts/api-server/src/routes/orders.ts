@@ -20,6 +20,19 @@ function parseArr(s: string): any[] {
   try { return JSON.parse(s); } catch { return []; }
 }
 
+function parseProductPaymentRules(raw: string | null | undefined) {
+  try {
+    const config = JSON.parse(raw || "{}");
+    return {
+      codEnabled: config?.codEnabled === true,
+      fullPaymentOfferEnabled: config?.fullPaymentOfferEnabled === true,
+      fullPaymentOfferDiscount: Math.min(100, Math.max(0, Number(config?.fullPaymentOfferDiscount) || 0)),
+    };
+  } catch {
+    return { codEnabled: false, fullPaymentOfferEnabled: false, fullPaymentOfferDiscount: 0 };
+  }
+}
+
 const TRACKING_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no I,O,0,1 to avoid confusion
 
 function randomSuffix(len = 3): string {
@@ -170,9 +183,13 @@ router.post("/", async (req, res) => {
     // hold a transaction open, but the actual coupon *claim* is atomic inside.
     const adminAuth = getAdminAuth(req);
     const clientDiscountAmount = req.body.discountAmount;
+    const normalizedPaymentMethod = ["bank_transfer", "full_payment", "cod"].includes(String(paymentMethod))
+      ? String(paymentMethod)
+      : "bank_transfer";
 
     const requestedItems = Array.isArray(items) ? items : [];
     let trustedItems = requestedItems;
+    let productMap = new Map<number, any>();
     if (!adminAuth && requestedItems.length > 0) {
       const productIds = requestedItems
         .map((it: any) => Number(it.productId)).filter((id: number) => Number.isFinite(id) && id > 0);
@@ -180,7 +197,7 @@ router.post("/", async (req, res) => {
         ? await db.select({ id: productsTable.id, name: productsTable.name, price: productsTable.price, active: productsTable.active, customConfig: productsTable.customConfig })
           .from(productsTable).where(inArray(productsTable.id, productIds))
         : [];
-      const productMap = new Map(dbProducts.map(product => [product.id, product]));
+      productMap = new Map(dbProducts.map(product => [product.id, product]));
 
       trustedItems = requestedItems.map((item: any) => {
         const product = productMap.get(Number(item.productId));
@@ -209,6 +226,31 @@ router.post("/", async (req, res) => {
       const price = Number.parseFloat(String(item.unitPrice ?? item.price ?? 0)) || 0;
       return sum + qty * price;
     }, 0);
+
+    let productOfferDiscount = 0;
+    if (!adminAuth && requestedItems.length > 0 && (normalizedPaymentMethod === "cod" || normalizedPaymentMethod === "full_payment")) {
+      const cartProducts = requestedItems.map((item: any) => productMap.get(Number(item.productId)));
+      if (cartProducts.some(product => !product || !product.active)) {
+        return res.status(400).json({ error: "One or more products in your cart are no longer available. Please refresh your cart." });
+      }
+      const rules = cartProducts.map(product => parseProductPaymentRules(product.customConfig));
+      if (normalizedPaymentMethod === "cod" && !rules.every(rule => rule.codEnabled)) {
+        return res.status(400).json({ error: "Cash on delivery is not available for every product in this order." });
+      }
+      if (normalizedPaymentMethod === "full_payment") {
+        if (!rules.every(rule => rule.fullPaymentOfferEnabled)) {
+          return res.status(400).json({ error: "The full-payment offer is not available for every product in this order." });
+        }
+        productOfferDiscount = trustedItems.reduce((sum: number, item: any) => {
+          const product = productMap.get(Number(item.productId));
+          const rule = parseProductPaymentRules(product?.customConfig);
+          const qty = Math.max(1, Number(item.quantity ?? 1) || 1);
+          const price = Number.parseFloat(String(item.unitPrice ?? item.price ?? 0)) || 0;
+          const lineTotal = Math.max(0, qty * price);
+          return sum + Math.min(lineTotal, lineTotal * rule.fullPaymentOfferDiscount / 100);
+        }, 0);
+      }
+    }
 
     const [checkoutSettings] = await db.select().from(settingsTable).limit(1);
     const deliveryConfig = {
@@ -257,7 +299,7 @@ router.post("/", async (req, res) => {
     // conditions still hold at commit time, preventing overselling under
     // concurrent requests.  If the claim fails the transaction is rolled back
     // and the order is never created.
-    let discountAmount = 0;
+    let discountAmount = Math.max(0, Math.round(productOfferDiscount));
 
     let order: typeof ordersTable.$inferSelect;
     try {
@@ -295,7 +337,7 @@ router.post("/", async (req, res) => {
           const rawDiscount = couponType === "percentage"
             ? Math.round(Math.min(100, couponValue) * itemTotalForCoupon / 100)
             : Math.min(couponValue, itemTotalForCoupon);
-          discountAmount = Math.max(0, rawDiscount);
+          discountAmount = Math.min(itemTotalForCoupon, Math.max(0, discountAmount + rawDiscount));
         } else if (adminAuth && Number.isFinite(Number(clientDiscountAmount))) {
           // Admin-created orders may supply a manual discount — still bounded
           discountAmount = Math.max(0, Math.round(Number(clientDiscountAmount)));
@@ -322,9 +364,9 @@ router.post("/", async (req, res) => {
           discountAmount,
           advancePaid: Number.isFinite(Number(advancePaid)) ? Math.max(0, Math.round(Number(advancePaid))) : 0,
           tags: JSON.stringify(Array.isArray(tags) ? tags : []),
-          paymentMethod: ["bank_transfer", "full_payment", "cod"].includes(String(paymentMethod)) ? String(paymentMethod) : "bank_transfer",
+          paymentMethod: normalizedPaymentMethod,
           paymentAmount: Number.isFinite(Number(paymentAmount)) ? Math.max(0, Math.round(Number(paymentAmount))) : 0,
-          paymentStatus: String(paymentMethod) === "cod" ? "cod_pending" : "pending",
+          paymentStatus: normalizedPaymentMethod === "cod" ? "cod_pending" : "pending",
           paymentProofStatus: "not_uploaded",
         }).returning();
       });

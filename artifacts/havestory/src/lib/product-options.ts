@@ -23,6 +23,11 @@ export type ProductConfig = {
   offerEnabled?: boolean;
   offerMinAmount?: number;
   offerMessage?: string;
+  codEnabled?: boolean;
+  codMessage?: string;
+  fullPaymentOfferEnabled?: boolean;
+  fullPaymentOfferDiscount?: number;
+  fullPaymentOfferMessage?: string;
 };
 
 export function parseProductConfig(raw: unknown): ProductConfig {

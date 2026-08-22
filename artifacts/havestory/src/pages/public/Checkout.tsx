@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useShopCart } from "@/lib/shop-cart";
+import { parseProductConfig } from "@/lib/product-options";
 
 type ShippingMethod = "courier" | "sl_post" | "pickup";
 type PaymentMethod = "bank_transfer" | "full_payment" | "cod";
@@ -34,11 +35,6 @@ const FALLBACK_SETTINGS = {
   checkoutBankTransferEnabled: 1,
   checkoutDepositAmount: 500,
   checkoutDepositMessage: "A Rs. 500 deposit is required to confirm this order. Upload your payment proof after paying.",
-  checkoutFullPaymentEnabled: 0,
-  checkoutFullPaymentOffer: "Pay the full amount upfront and receive a special offer.",
-  checkoutFullPaymentDiscount: 0,
-  checkoutCodEnabled: 0,
-  checkoutCodMessage: "Cash on delivery is currently unavailable.",
   bankDetails: "[]",
 };
 
@@ -58,6 +54,30 @@ function parseBankDetails(value: unknown) {
   } catch {
     return [];
   }
+}
+
+type ProductPaymentRule = {
+  codEnabled: boolean;
+  codMessage: string;
+  fullPaymentOfferEnabled: boolean;
+  fullPaymentOfferDiscount: number;
+  fullPaymentOfferMessage: string;
+};
+
+function getProductPaymentRule(product: any): ProductPaymentRule {
+  const config = parseProductConfig(product?.customConfig);
+  return {
+    codEnabled: config.codEnabled === true,
+    codMessage: String(config.codMessage || "Pay cash when your order is delivered."),
+    fullPaymentOfferEnabled: config.fullPaymentOfferEnabled === true,
+    fullPaymentOfferDiscount: Math.min(100, Math.max(0, Number(config.fullPaymentOfferDiscount) || 0)),
+    fullPaymentOfferMessage: String(config.fullPaymentOfferMessage || "Pay the full amount upfront and receive a special offer."),
+  };
+}
+
+function uniqueMessages(rules: ProductPaymentRule[], field: "codMessage" | "fullPaymentOfferMessage", fallback: string) {
+  const messages = [...new Set(rules.map(rule => rule[field].trim()).filter(Boolean))];
+  return messages.join(" • ") || fallback;
 }
 
 export default function Checkout() {
@@ -81,10 +101,13 @@ export default function Checkout() {
   const [submittedOrderId, setSubmittedOrderId] = useState("");
 
   const bankTransferEnabled = settingEnabled(settings.checkoutBankTransferEnabled, true);
-  const fullPaymentEnabled = settingEnabled(settings.checkoutFullPaymentEnabled, false);
-  const codEnabled = settingEnabled(settings.checkoutCodEnabled, false);
   const depositAmount = Number(settings.checkoutDepositAmount) || 500;
-  const fullPaymentDiscount = Math.max(0, Number(settings.checkoutFullPaymentDiscount) || 0);
+  const productPaymentRules = useMemo(() => items.map(item => ({ item, rule: getProductPaymentRule(item.product) })), [items]);
+  const allProductRules = productPaymentRules.map(entry => entry.rule);
+  const fullPaymentEnabled = items.length > 0 && productPaymentRules.every(entry => entry.rule.fullPaymentOfferEnabled);
+  const codEnabled = items.length > 0 && productPaymentRules.every(entry => entry.rule.codEnabled);
+  const fullPaymentOfferMessage = uniqueMessages(allProductRules.filter(rule => rule.fullPaymentOfferEnabled), "fullPaymentOfferMessage", "Pay the full amount upfront and receive a special offer.");
+  const codMessage = uniqueMessages(allProductRules.filter(rule => rule.codEnabled), "codMessage", "Pay cash when your order is delivered.");
   const courierCharge = Math.max(0, Number(settings.courierCharge) || 450);
   const slPostCharge = Math.max(0, Number(settings.slPostCharge) || 250);
   const deliveryOptions = useMemo(() => [
@@ -123,7 +146,13 @@ export default function Checkout() {
   const shippingCost = selectedDelivery?.price || 0;
   const shippingAddressRequired = shippingMethod !== "pickup";
   const couponDiscount = coupon?.valid ? Number(coupon.discount) || 0 : 0;
-  const fullPaymentOffer = paymentMethod === "full_payment" ? Math.min(fullPaymentDiscount, subtotal) : 0;
+  const fullPaymentOffer = paymentMethod === "full_payment"
+    ? productPaymentRules.reduce((sum, { item, rule }) => {
+      if (!rule.fullPaymentOfferEnabled) return sum;
+      const lineTotal = Math.max(0, Number(item.unitPrice) || 0) * Math.max(1, Number(item.quantity) || 1);
+      return sum + Math.min(lineTotal, lineTotal * rule.fullPaymentOfferDiscount / 100);
+    }, 0)
+    : 0;
   const total = Math.max(0, subtotal + shippingCost - couponDiscount - fullPaymentOffer);
   const isQuote = items.some(item => item.product?.isCustomInquiry || item.product?.priceType === "custom_quote");
   const bankDetails = parseBankDetails(settings.bankDetails);
@@ -136,29 +165,29 @@ export default function Checkout() {
       title: "Direct bank transfer",
       description: String(settings.checkoutDepositMessage || `A ${money(depositAmount)} deposit is required to confirm this order.`),
     } : null,
-    fullPaymentEnabled ? {
-      value: "full_payment" as const,
-      icon: CreditCard,
-      eyebrow: fullPaymentDiscount > 0 ? `Save ${money(fullPaymentDiscount)}` : "Fastest route",
-      title: "Pay in full",
-      description: String(settings.checkoutFullPaymentOffer || "Pay the full amount upfront and receive a special offer."),
-    } : null,
-    codEnabled ? {
-      value: "cod" as const,
-      icon: Wallet,
-      eyebrow: "On delivery",
-      title: "Cash on delivery",
-      description: String(settings.checkoutCodMessage || "Pay when your order arrives."),
-    } : null,
-  ].filter(Boolean) as { value: PaymentMethod; icon: typeof Banknote; eyebrow: string; title: string; description: string }[], [
+      fullPaymentEnabled ? {
+        value: "full_payment" as const,
+        icon: CreditCard,
+        eyebrow: fullPaymentOffer > 0 ? `Save ${money(fullPaymentOffer)}` : "Fastest route",
+        title: "Pay in full",
+        description: fullPaymentOfferMessage,
+      } : null,
+      codEnabled ? {
+        value: "cod" as const,
+        icon: Wallet,
+        eyebrow: "On delivery",
+        title: "Cash on delivery",
+        description: codMessage,
+      } : null,
+    ].filter(Boolean) as { value: PaymentMethod; icon: typeof Banknote; eyebrow: string; title: string; description: string }[], [
     bankTransferEnabled,
     codEnabled,
+    codMessage,
     depositAmount,
-    fullPaymentDiscount,
     fullPaymentEnabled,
-    settings.checkoutCodMessage,
+    fullPaymentOffer,
+    fullPaymentOfferMessage,
     settings.checkoutDepositMessage,
-    settings.checkoutFullPaymentOffer,
   ]);
 
   useEffect(() => {

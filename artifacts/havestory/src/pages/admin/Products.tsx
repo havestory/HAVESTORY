@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useListProducts, useListCategories, useCreateProduct, useUpdateProduct, useDeleteProduct, createCategory, useGetAdminMe } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { broadcastAdminSave } from "@/lib/home-cache";
-import { Search, Plus, Edit2, Trash2, Package, Image, X, GripVertical, ChevronDown, ChevronUp, Tag, Layers, Upload, Loader2, ImagePlus, Star as StarIcon, FileText, ExternalLink, Sparkles, Hash, Ruler, Gift } from "lucide-react";
+import { Search, Plus, Edit2, Trash2, Package, Image, X, GripVertical, ChevronDown, ChevronUp, Tag, Layers, Upload, Loader2, ImagePlus, Star as StarIcon, FileText, ExternalLink, Sparkles, Hash, Ruler, Gift, CreditCard } from "lucide-react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { DescriptionEditor } from "@/components/admin/DescriptionEditor";
 import { parseDescriptionLines } from "@/lib/description-utils";
@@ -52,6 +52,11 @@ type CustomConfig = {
   offerEnabled: boolean;
   offerMinAmount: number;
   offerMessage: string;
+  codEnabled: boolean;
+  codMessage: string;
+  fullPaymentOfferEnabled: boolean;
+  fullPaymentOfferDiscount: number;
+  fullPaymentOfferMessage: string;
 };
 
 const DEFAULT_CONFIG: CustomConfig = {
@@ -70,6 +75,11 @@ const DEFAULT_CONFIG: CustomConfig = {
   offerEnabled: false,
   offerMinAmount: 0,
   offerMessage: "",
+  codEnabled: false,
+  codMessage: "Pay cash when your order is delivered.",
+  fullPaymentOfferEnabled: false,
+  fullPaymentOfferDiscount: 0,
+  fullPaymentOfferMessage: "Pay the full amount upfront and receive a special offer.",
 };
 
 /* ── Multi Prints helpers ── */
@@ -1729,8 +1739,55 @@ export default function AdminProducts() {
                     </div>
                   </div>
                 )}
+                            </section>
+              {/* Product-level checkout payment rules */}
+              <section className="space-y-4 rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50/75 to-slate-50/80 p-4 sm:p-5">
+                <div>
+                  <h3 className="flex items-center gap-2 text-sm font-bold text-gray-800"><CreditCard size={16} className="text-violet-600" /> Checkout Payment Options</h3>
+                  <p className="mt-1 text-[11px] leading-relaxed text-gray-500">Control payment methods for this product. These settings override the old global checkout switches and are applied when this product is in the cart.</p>
+                </div>
+                <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                  <div className={`rounded-2xl border p-4 transition-colors ${config.codEnabled ? "border-emerald-200 bg-emerald-50/70" : "border-gray-200 bg-white/75"}`}>
+                    <label className="flex cursor-pointer items-start gap-3">
+                      <input type="checkbox" checked={config.codEnabled} onChange={e => setC({ codEnabled: e.target.checked })} className="mt-0.5 h-4 w-4 accent-emerald-600" />
+                      <span>
+                        <span className="block text-sm font-bold text-gray-800">Cash on delivery</span>
+                        <span className="mt-1 block text-[11px] leading-relaxed text-gray-500">Allow customers to pay cash when this product is delivered.</span>
+                      </span>
+                    </label>
+                    {config.codEnabled && (
+                      <div className="mt-3">
+                        <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-500">COD message</label>
+                        <input value={config.codMessage} onChange={e => setC({ codMessage: e.target.value })} className="w-full rounded-xl border border-emerald-200 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-200" placeholder="Pay cash when your order is delivered." />
+                      </div>
+                    )}
+                  </div>
+                  <div className={`rounded-2xl border p-4 transition-colors ${config.fullPaymentOfferEnabled ? "border-violet-200 bg-violet-50/70" : "border-gray-200 bg-white/75"}`}>
+                    <label className="flex cursor-pointer items-start gap-3">
+                      <input type="checkbox" checked={config.fullPaymentOfferEnabled} onChange={e => setC({ fullPaymentOfferEnabled: e.target.checked })} className="mt-0.5 h-4 w-4 accent-violet-600" />
+                      <span>
+                        <span className="block text-sm font-bold text-gray-800">Full-payment offer</span>
+                        <span className="mt-1 block text-[11px] leading-relaxed text-gray-500">Offer a discount when the customer pays the full order amount upfront.</span>
+                      </span>
+                    </label>
+                    {config.fullPaymentOfferEnabled && (
+                      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-[120px_1fr]">
+                        <div>
+                          <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-500">Discount (%)</label>
+                          <div className="relative">
+                            <input type="number" min={0} max={100} step="0.1" value={config.fullPaymentOfferDiscount || ""} onChange={e => setC({ fullPaymentOfferDiscount: Math.min(100, Math.max(0, Number(e.target.value) || 0)) })} className="w-full rounded-xl border border-violet-200 bg-white px-3 py-2.5 pr-8 text-sm outline-none focus:ring-2 focus:ring-violet-200" placeholder="5" />
+                            <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-bold text-violet-500">%</span>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-500">Offer message</label>
+                          <input value={config.fullPaymentOfferMessage} onChange={e => setC({ fullPaymentOfferMessage: e.target.value })} className="w-full rounded-xl border border-violet-200 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-violet-200" placeholder="Pay in full and save on this product." />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </section>
-
               {/* Submit */}
               <div className="pt-2">
                 <button

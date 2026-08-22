@@ -477,11 +477,6 @@ export default function AdminSettings() {
       checkoutBankTransferEnabled: (settings as any).checkoutBankTransferEnabled !== 0,
       checkoutDepositAmount: String((settings as any).checkoutDepositAmount ?? "500"),
       checkoutDepositMessage: (settings as any).checkoutDepositMessage || "A Rs. 500 deposit is required to confirm this order. Upload your payment proof after paying.",
-      checkoutFullPaymentEnabled: (settings as any).checkoutFullPaymentEnabled === 1,
-      checkoutFullPaymentOffer: (settings as any).checkoutFullPaymentOffer || "Pay the full amount upfront and receive a special offer.",
-      checkoutFullPaymentDiscount: String((settings as any).checkoutFullPaymentDiscount ?? "0"),
-      checkoutCodEnabled: (settings as any).checkoutCodEnabled === 1,
-      checkoutCodMessage: (settings as any).checkoutCodMessage || "Cash on delivery is currently unavailable.",
       siteClosedEnabled: (settings as any).siteClosedEnabled === 1,
       siteClosedMessage: (settings as any).siteClosedMessage || "We are currently closed for maintenance. We will be back soon!",
       ipayEnabled: (settings as any).ipayEnabled === 1,
@@ -557,11 +552,6 @@ export default function AdminSettings() {
         checkoutBankTransferEnabled: form.checkoutBankTransferEnabled ? 1 : 0,
         checkoutDepositAmount: Math.max(0, Number(form.checkoutDepositAmount) || 0),
         checkoutDepositMessage: form.checkoutDepositMessage || null,
-        checkoutFullPaymentEnabled: form.checkoutFullPaymentEnabled ? 1 : 0,
-        checkoutFullPaymentOffer: form.checkoutFullPaymentOffer || null,
-        checkoutFullPaymentDiscount: Math.max(0, Number(form.checkoutFullPaymentDiscount) || 0),
-        checkoutCodEnabled: form.checkoutCodEnabled ? 1 : 0,
-        checkoutCodMessage: form.checkoutCodMessage || null,
         checkoutCourierEnabled: form.checkoutCourierEnabled ? 1 : 0,
         checkoutCourierLabel: form.checkoutCourierLabel || null,
         checkoutCourierDescription: form.checkoutCourierDescription || null,
@@ -1385,7 +1375,7 @@ export default function AdminSettings() {
             <h2 className="font-bold text-gray-900">Store Checkout Payment Rules</h2>
           </div>
           <p className="text-xs text-gray-400 mb-5">
-            These options control what customers see after clicking Buy Now. Disabled methods stay hidden from checkout.
+            Bank-transfer and delivery defaults are managed here. Cash on Delivery and full-payment offers are configured per product in the Products editor.
           </p>
 
           <div className="space-y-4">
@@ -1413,46 +1403,9 @@ export default function AdminSettings() {
               )}
             </div>
 
-            <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <div className="text-sm font-semibold text-slate-800">Full Payment Offer</div>
-                  <div className="text-xs text-slate-500 mt-0.5">Offer a discount or special message when the customer pays the full amount upfront.</div>
-                </div>
-                <button type="button" onClick={() => setForm((f: any) => ({ ...f, checkoutFullPaymentEnabled: !f.checkoutFullPaymentEnabled }))} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${form.checkoutFullPaymentEnabled ? "bg-violet-500" : "bg-slate-300"}`}>
-                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${form.checkoutFullPaymentEnabled ? "translate-x-6" : "translate-x-1"}`} />
-                </button>
-              </div>
-              {form.checkoutFullPaymentEnabled && (
-                <div className="mt-4 grid grid-cols-1 md:grid-cols-[180px_1fr] gap-3">
-                  <div>
-                    <label className="text-[10px] text-slate-500 font-semibold block mb-1">Discount (%)</label>
-                    <input type="number" min="0" max="100" value={form.checkoutFullPaymentDiscount || ""} onChange={e => setForm((f: any) => ({ ...f, checkoutFullPaymentDiscount: e.target.value }))} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-violet-200" />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-slate-500 font-semibold block mb-1">Offer message</label>
-                    <input value={form.checkoutFullPaymentOffer || ""} onChange={e => setForm((f: any) => ({ ...f, checkoutFullPaymentOffer: e.target.value }))} placeholder="Pay in full and receive 5% off." className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-violet-200" />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <div className="text-sm font-semibold text-slate-800">Cash on Delivery (COD)</div>
-                  <div className="text-xs text-slate-500 mt-0.5">Only enable this when you are ready to accept COD orders.</div>
-                </div>
-                <button type="button" onClick={() => setForm((f: any) => ({ ...f, checkoutCodEnabled: !f.checkoutCodEnabled }))} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${form.checkoutCodEnabled ? "bg-violet-500" : "bg-slate-300"}`}>
-                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${form.checkoutCodEnabled ? "translate-x-6" : "translate-x-1"}`} />
-                </button>
-              </div>
-              {form.checkoutCodEnabled && (
-                <div className="mt-4">
-                  <label className="text-[10px] text-slate-500 font-semibold block mb-1">COD message</label>
-                  <input value={form.checkoutCodMessage || ""} onChange={e => setForm((f: any) => ({ ...f, checkoutCodMessage: e.target.value }))} placeholder="Pay cash when your order is delivered." className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-violet-200" />
-                </div>
-              )}
+            <div className="rounded-2xl border border-violet-100 bg-violet-50/60 p-4">
+              <div className="text-sm font-semibold text-slate-800">Product-level payment controls</div>
+              <p className="mt-1 text-xs leading-relaxed text-slate-500">Full-payment offers and Cash on Delivery are now configured individually inside <strong>Admin → Products → Edit product → Checkout Payment Options</strong>. This keeps payment availability accurate when customers have different products in the same cart.</p>
             </div>
           </div>
 
