@@ -1,6 +1,6 @@
 import { pool } from "@workspace/db";
 
-const SCHEMA_VERSION = "2026-08-20-delivery-options-columns-v2";
+const SCHEMA_VERSION = "2026-08-23-product-format-column-v3";
 let runtimeSchemaReady: Promise<void> | null = null;
 
 async function versionExists(version: string): Promise<boolean> {
@@ -60,7 +60,7 @@ async function applyRuntimeSchema(): Promise<void> {
         price_type TEXT NOT NULL DEFAULT 'per_item', image_url TEXT, gallery_images TEXT,
         artwork_guide_url TEXT, artwork_guide_name TEXT, featured BOOLEAN NOT NULL DEFAULT FALSE,
         active BOOLEAN NOT NULL DEFAULT TRUE, sort_order INTEGER NOT NULL DEFAULT 0,
-        custom_config TEXT, invoice_name TEXT, created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        custom_config TEXT, invoice_name TEXT, product_format TEXT NOT NULL DEFAULT 'ready_made', created_at TIMESTAMP NOT NULL DEFAULT NOW()
       );
       ALTER TABLE products
         ADD COLUMN IF NOT EXISTS category_id INTEGER,
@@ -76,6 +76,7 @@ async function applyRuntimeSchema(): Promise<void> {
         ADD COLUMN IF NOT EXISTS sort_order INTEGER NOT NULL DEFAULT 0,
         ADD COLUMN IF NOT EXISTS custom_config TEXT,
         ADD COLUMN IF NOT EXISTS invoice_name TEXT,
+        ADD COLUMN IF NOT EXISTS product_format TEXT NOT NULL DEFAULT 'ready_made',
         ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW();
 
       CREATE TABLE IF NOT EXISTS reviews (
