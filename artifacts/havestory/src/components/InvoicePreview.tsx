@@ -49,7 +49,13 @@ const P1_AFTER_HEADER = PAGE_CONTENT_H - H_FULL_HEADER - H_DIVIDER - H_BILL_TO;
 /* Subsequent item page content height after SmallHeader */
 const PN_AFTER_HEADER = PAGE_CONTENT_H - H_SMALL_HEADER - H_DIVIDER;
 
-function itemsHeight(count: number) { return H_TBL_HEADER + count * H_ITEM_ROW; }
+function itemsHeight(items: LineItem[]) {
+  return H_TBL_HEADER + items.reduce((height, item) => {
+    const selectionRows = Array.isArray(item.selectedOptions) ? item.selectedOptions.length : 0;
+    const noteRows = item.notes?.trim() ? 1 : 0;
+    return height + H_ITEM_ROW + Math.min(4, selectionRows + noteRows) * 13;
+  }, 0);
+}
 
 const STATUS_BADGE: Record<string, { bg: string; border: string; color: string; label: string }> = {
   pending:   { bg: "#fffbeb", border: "#d6b98c", color: "#9a6b3f", label: "PENDING" },
@@ -112,13 +118,23 @@ function ItemsTable({ chunk, startIdx }: { chunk: LineItem[]; startIdx: number }
         {chunk.map((it, i) => {
           const total = it.qty * num(it.unitPrice);
           const bg = (startIdx + i) % 2 === 0 ? "#fff" : "#fffbeb";
-          const desc = it.description.length > 35 ? it.description.slice(0, 35) : it.description;
+          const selectedDetails = Array.isArray(it.selectedOptions) ? it.selectedOptions : [];
           return (
             <tr key={it.id} style={{ borderBottom: "1px solid #f3e8ff", background: bg }}>
               <td style={{ padding: "8px 12px", fontSize: 12, color: "#888", width: 26, textAlign: "left" }}>{startIdx + i + 1}</td>
               <td style={{ padding: "8px 8px", fontSize: 13, color: "#111", minWidth: 0, overflowWrap: "anywhere", wordBreak: "break-word" }}>
-                <div style={{ fontWeight: 600, overflowWrap: "anywhere", wordBreak: "break-word" }}>{desc}</div>
-                {it.notes && <div style={{ fontSize: 10, color: "#888", marginTop: 1 }}>{it.notes}</div>}
+                <div style={{ fontWeight: 600, overflowWrap: "anywhere", wordBreak: "break-word" }}>{it.description}</div>
+                {selectedDetails.map((detail, detailIndex) => {
+                  const title = String(detail.groupTitle || "Option");
+                  const name = String(detail.choiceName || "Selected");
+                  const price = num(detail.price);
+                  return (
+                    <div key={`${detail.groupId || "option"}-${detail.choiceId || detailIndex}`} style={{ fontSize: 10, color: "#6b7280", marginTop: 2, overflowWrap: "anywhere", wordBreak: "break-word" }}>
+                      {title}: {name}{price > 0 ? ` (+${rs(price)})` : ""}
+                    </div>
+                  );
+                })}
+                {it.notes && <div style={{ fontSize: 10, color: "#888", marginTop: selectedDetails.length ? 3 : 1, overflowWrap: "anywhere", wordBreak: "break-word" }}>{it.notes}</div>}
               </td>
               <td style={{ padding: "8px 6px", fontSize: 13, color: "#555", textAlign: "right", whiteSpace: "normal", overflowWrap: "anywhere", fontVariantNumeric: "tabular-nums" }}>{it.qty}</td>
               <td style={{ padding: "8px 6px", fontSize: 13, color: "#555", textAlign: "right", whiteSpace: "normal", overflowWrap: "anywhere", fontVariantNumeric: "tabular-nums" }}>{rs(num(it.unitPrice))}</td>
@@ -299,11 +315,11 @@ export function InvoicePreview({
   const totalPages    = itemPageCount + 1; // +1 for the always-separate legal/banking page
 
   /* Verify summary fits on last item page; if not, warn via overflow-x indicator */
-  const lastChunkCount = chunks[chunks.length - 1]?.length ?? 0;
+  const lastChunk = chunks[chunks.length - 1] ?? [];
   const lastPageIsFirst = itemPageCount === 1;
   const availableOnLastPage = lastPageIsFirst
-    ? P1_AFTER_HEADER - itemsHeight(lastChunkCount)
-    : PN_AFTER_HEADER - H_CONTINUED - itemsHeight(lastChunkCount);
+    ? P1_AFTER_HEADER - itemsHeight(lastChunk)
+    : PN_AFTER_HEADER - H_CONTINUED - itemsHeight(lastChunk);
   const summaryFitsOnLastPage = availableOnLastPage >= H_SUMMARY;
   // If it doesn't fit, we still render it there — the container uses overflow: hidden
   // and the PDF captures the visible region. 10 items + summary should always fit

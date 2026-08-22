@@ -1,4 +1,22 @@
-export type LineItem = { id: string; description: string; qty: number; unitPrice: string; notes: string; costPrice?: string };
+export type InvoiceSelection = {
+  groupId?: string;
+  groupTitle?: string;
+  choiceId?: string;
+  choiceName?: string;
+  price?: number;
+  imageUrl?: string;
+};
+
+export type LineItem = {
+  id: string;
+  description: string;
+  qty: number;
+  unitPrice: string;
+  notes: string;
+  imageUrl?: string;
+  selectedOptions?: InvoiceSelection[];
+  costPrice?: string;
+};
 export type ShippingOption = "none" | "standard" | "express" | "weight" | "custom" | "courier_service";
 
 export const SHIPPING_OPTIONS: { key: ShippingOption; label: string; amount: number | null }[] = [

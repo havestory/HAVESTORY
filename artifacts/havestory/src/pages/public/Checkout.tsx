@@ -229,11 +229,17 @@ export default function Checkout() {
     productName: item.product?.name || "HAVESTORY item",
     quantity: Math.max(1, item.quantity),
     unitPrice: Number(item.unitPrice) || 0,
+    imageUrl: item.imageUrl || undefined,
     selectedOptions: (item.selections || []).map(selection => ({ groupId: selection.groupId, choiceId: selection.choiceId })),
-    notes: [
-      item.selections?.length ? item.selections.map(selection => `${selection.groupTitle}: ${selection.choiceName}`).join(", ") : "",
-      item.product?.description || "",
-    ].filter(Boolean).join(" — ") || null,
+    selectedDetails: (item.selections || []).map(selection => ({
+      groupId: selection.groupId,
+      groupTitle: selection.groupTitle,
+      choiceId: selection.choiceId,
+      choiceName: selection.choiceName,
+      price: Number(selection.price) || 0,
+      imageUrl: selection.imageUrl || undefined,
+    })),
+    notes: item.product?.description || null,
   }));
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {

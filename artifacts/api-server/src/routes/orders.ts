@@ -33,6 +33,59 @@ function parseProductPaymentRules(raw: string | null | undefined) {
   }
 }
 
+function resolveProductLine(rawConfig: string | null | undefined, selectedOptions: unknown, quantity: number, basePrice: number) {
+  let config: any = {};
+  try { config = JSON.parse(rawConfig || "{}"); } catch { config = {}; }
+
+  const selected = Array.isArray(selectedOptions) ? selectedOptions : [];
+  const qty = Math.max(1, Number(quantity) || 1);
+  const selectedDetails: any[] = [];
+  let optionTotal = 0;
+  let resolvedBasePrice = Math.max(0, basePrice);
+
+  const selectedSize = selected.find((entry: any) => entry?.groupId === "product-size");
+  const size = Array.isArray(config.sizes)
+    ? config.sizes.find((entry: any) => entry?.id === selectedSize?.choiceId)
+    : undefined;
+  if (size) {
+    const tiers = Array.isArray(size.tiers) ? size.tiers : [];
+    const tier = tiers.find((entry: any) => qty >= Number(entry?.from || 0) && qty <= Number(entry?.to || Number.MAX_SAFE_INTEGER)) || tiers[tiers.length - 1];
+    const tierPrice = Number.parseFloat(String(tier?.pricePerUnit ?? 0));
+    if (Number.isFinite(tierPrice) && tierPrice > 0) resolvedBasePrice = tierPrice;
+    selectedDetails.push({
+      groupId: "product-size",
+      groupTitle: String(config.sizeLabel || "Size"),
+      choiceId: String(size.id),
+      choiceName: String(size.name || "Selected size"),
+      price: 0,
+      imageUrl: size.imageUrl || undefined,
+    });
+  }
+
+  for (const selection of selected) {
+    if (!selection?.groupId || selection.groupId === "product-size") continue;
+    const group = (Array.isArray(config.optionGroups) ? config.optionGroups : []).find((entry: any) => entry?.id === selection.groupId);
+    const choice = (Array.isArray(group?.choices) ? group.choices : []).find((entry: any) => entry?.id === selection.choiceId);
+    if (!choice) continue;
+    const choicePrice = Number.parseFloat(String(choice.price ?? 0));
+    const safeChoicePrice = Number.isFinite(choicePrice) && choicePrice > 0 ? choicePrice : 0;
+    optionTotal += safeChoicePrice;
+    selectedDetails.push({
+      groupId: String(group.id),
+      groupTitle: String(group.title || "Option"),
+      choiceId: String(choice.id),
+      choiceName: String(choice.name || "Selected option"),
+      price: safeChoicePrice,
+      imageUrl: choice.imageUrl || undefined,
+    });
+  }
+
+  return {
+    unitPrice: resolvedBasePrice + optionTotal,
+    selectedDetails,
+  };
+}
+
 const TRACKING_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no I,O,0,1 to avoid confusion
 
 function randomSuffix(len = 3): string {
@@ -202,21 +255,19 @@ router.post("/", async (req, res) => {
       trustedItems = requestedItems.map((item: any) => {
         const product = productMap.get(Number(item.productId));
         if (!product || !product.active) return { ...item, productId: null, unitPrice: 0 };
-        let optionTotal = 0;
-        try {
-          const config = JSON.parse(product.customConfig || "{}");
-          const selected = Array.isArray(item.selectedOptions) ? item.selectedOptions : [];
-          for (const selection of selected) {
-            const group = (Array.isArray(config.optionGroups) ? config.optionGroups : []).find((entry: any) => entry.id === selection.groupId);
-            const choice = (Array.isArray(group?.choices) ? group.choices : []).find((entry: any) => entry.id === selection.choiceId);
-            const optionPrice = Number.parseFloat(String(choice?.price ?? 0));
-            if (Number.isFinite(optionPrice) && optionPrice > 0) optionTotal += optionPrice;
-          }
-        } catch { /* malformed legacy config falls back to the product base price */ }
+        const quantity = Math.max(1, Number(item.quantity ?? 1) || 1);
+        const resolved = resolveProductLine(
+          product.customConfig,
+          item.selectedOptions,
+          quantity,
+          Number.parseFloat(String(product.price)) || 0,
+        );
         return {
           ...item,
           productName: product.name,
-          unitPrice: (Number.parseFloat(String(product.price)) || 0) + optionTotal,
+          quantity,
+          unitPrice: resolved.unitPrice,
+          selectedDetails: resolved.selectedDetails,
         };
       });
     }
@@ -587,12 +638,16 @@ router.post("/", async (req, res) => {
         } else {
           description = rawName;
         }
+        const selectedDetails = Array.isArray(it.selectedDetails) ? it.selectedDetails : [];
+        const baseNotes = String(it.notes ?? "").trim();
         return {
           id: randomUUID(),
           description,
           qty: Number(it.quantity ?? it.qty ?? 1) || 1,
           unitPrice: String(parseFloat(String(it.price ?? it.unitPrice ?? 0)) || 0),
-          notes: it.notes ?? "",
+          notes: baseNotes,
+          selectedOptions: selectedDetails,
+          imageUrl: it.imageUrl || undefined,
         };
       });
 
