@@ -55,7 +55,8 @@ export default function ProductDetail() {
     choiceId: activeSize.id,
     choiceName: activeSize.name,
     price: 0,
-    imageUrl: activeSize.imageUrl,
+    imageUrl: activeSize.imageUrls?.[0] || activeSize.imageUrl,
+    imageUrls: activeSize.imageUrls,
   }] : [];
   const optionSelections: CartSelection[] = optionGroups.flatMap(group => {
     const choiceId = selected[group.id] || (isFrameColourGroup(group) ? "" : group.choices[0]?.id);
@@ -66,30 +67,33 @@ export default function ProductDetail() {
       choiceId: choice.id,
       choiceName: choice.name,
       price: money(choice.price),
-      imageUrl: choice.imageUrl,
+      imageUrl: choice.imageUrls?.[0] || choice.imageUrl,
+      imageUrls: choice.imageUrls,
     }] : [];
   });
   const selections = [...sizeSelection, ...optionSelections];
   const hasRequiredSelections = (sizeOptions.length === 0 || Boolean(activeSize?.id)) && frameColourGroups.every(group => Boolean(selected[group.id]));
   const optionPrice = optionSelections.reduce((sum, item) => sum + item.price, 0);
   const unitPrice = sizeOptions.length > 0 ? sizeUnitPrice + optionPrice : basePrice + optionPrice;
-  const gallery = product
+  const baseGallery = product
     ? [...new Set([product.imageUrl, ...(Array.isArray(product.galleryImages) ? product.galleryImages : [])].filter(Boolean))] as string[]
     : [];
-  const selectedImage = [...selections].reverse().find(item => item.imageUrl)?.imageUrl;
+  const selectedVariantImages = [...selections].reverse().flatMap(item => [item.imageUrl, ...(item.imageUrls || [])].filter((image): image is string => Boolean(image)));
+  const gallery = [...new Set([...baseGallery, ...selectedVariantImages])];
+  const selectedImage = selectedVariantImages[0];
   const displayImage = activeImage || selectedImage || gallery[0] || "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=1200&q=86";
   const currentImageIndex = Math.max(0, gallery.indexOf(displayImage));
   const categoryName = product?.category?.name || "Frames & Prints";
 
-  const choose = (groupId: string, choiceId: string, imageUrl?: string) => {
+  const choose = (groupId: string, choiceId: string, imageUrl?: string, imageUrls: string[] = []) => {
     setSelected(current => ({ ...current, [groupId]: choiceId }));
-    setActiveImage(imageUrl || "");
+    setActiveImage(imageUrls[0] || imageUrl || "");
   };
 
   const chooseSize = (size: NonNullable<typeof activeSize>) => {
     setSelectedSizeId(size.id);
     setQuantity(current => Math.max(current, Number(size.minQty) || 1));
-    setActiveImage(size.imageUrl || "");
+    setActiveImage(size.imageUrls?.[0] || size.imageUrl || "");
   };
 
   const showImage = (direction: number) => {
@@ -169,7 +173,7 @@ export default function ProductDetail() {
                   </SelectContent>
                 </Select>
               </div>
-              {activeSize?.imageUrl && <div className="hs-product-selection-preview"><img src={activeSize.imageUrl} alt="" /><span>Preview for {activeSize.name}</span></div>}
+              {(activeSize?.imageUrls?.[0] || activeSize?.imageUrl) && <div className="hs-product-selection-preview"><img src={activeSize.imageUrls?.[0] || activeSize.imageUrl} alt="" /><span>Preview for {activeSize.name}</span></div>}
             </fieldset>
           )}
 
@@ -177,7 +181,7 @@ export default function ProductDetail() {
             <fieldset className="hs-product-options hs-product-dropdown-section" key={group.id}>
               <legend>{group.title}<span>{selections.find(item => item.groupId === group.id)?.choiceName || "Select one"}</span></legend>
               <div className="hs-product-select-shell">
-                <Select value={selected[group.id] || ""} onValueChange={value => { const choice = group.choices.find(item => item.id === value); if (choice) choose(group.id, choice.id, choice.imageUrl); }}>
+                <Select value={selected[group.id] || ""} onValueChange={value => { const choice = group.choices.find(item => item.id === value); if (choice) choose(group.id, choice.id, choice.imageUrl, choice.imageUrls); }}>
                   <SelectTrigger aria-label={group.title} className="hs-product-select-trigger"><SelectValue placeholder={`Select ${group.title.toLowerCase()}`} /></SelectTrigger>
                   <SelectContent position="item-aligned" className="hs-product-select-content">
                     {group.choices.map(choice => <SelectItem key={choice.id} value={choice.id}>{choice.name}{money(choice.price) > 0 ? ` — + ${formatMoney(choice.price)}` : ""}</SelectItem>)}
@@ -193,7 +197,7 @@ export default function ProductDetail() {
               <legend>{group.title}<span>{selections.find(item => item.groupId === group.id)?.choiceName}</span></legend>
               <div>{group.choices.map(choice => {
                 const isSelected = (selected[group.id] || group.choices[0]?.id) === choice.id;
-                return <button key={choice.id} type="button" className={isSelected ? "is-selected" : ""} onClick={() => choose(group.id, choice.id, choice.imageUrl)}>{choice.imageUrl && <img src={choice.imageUrl} alt="" />}<span>{choice.name}{money(choice.price) > 0 && <small>+ {formatMoney(choice.price)}</small>}</span>{isSelected && <Check />}</button>;
+                return <button key={choice.id} type="button" className={isSelected ? "is-selected" : ""} onClick={() => choose(group.id, choice.id, choice.imageUrl, choice.imageUrls)}>{(choice.imageUrls?.[0] || choice.imageUrl) && <img src={choice.imageUrls?.[0] || choice.imageUrl} alt="" />}<span>{choice.name}{money(choice.price) > 0 && <small>+ {formatMoney(choice.price)}</small>}</span>{isSelected && <Check />}</button>;
               })}</div>
             </fieldset>
           ))}

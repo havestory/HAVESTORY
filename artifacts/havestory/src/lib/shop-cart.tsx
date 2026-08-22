@@ -7,6 +7,7 @@ export type CartSelection = {
   choiceName: string;
   price: number;
   imageUrl?: string;
+  imageUrls?: string[];
 };
 
 export type ShopCartItem = {

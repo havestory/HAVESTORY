@@ -18,6 +18,7 @@ type CatalogConfig = {
     unitLabel?: string;
     minQty?: number;
     imageUrl?: string;
+    imageUrls?: string[];
     tiers?: Array<{ from?: number; to?: number; pricePerUnit?: string | number }>;
   }>;
   optionGroups?: Array<{
@@ -29,6 +30,7 @@ type CatalogConfig = {
       price?: string | number;
       chargeType?: string;
       imageUrl?: string;
+      imageUrls?: string[];
       sizePrices?: Array<{ sizeId?: string; price?: string | number }>;
     }>;
   }>;
@@ -79,8 +81,8 @@ export async function syncNormalizedProductCatalog(
   const sizes = Array.isArray(config.sizes) ? config.sizes : [];
   const optionGroups = Array.isArray(config.optionGroups) ? config.optionGroups : [];
   const linkedVariantUrls = [
-    ...sizes.map((size) => size.imageUrl),
-    ...optionGroups.flatMap((group) => (Array.isArray(group.choices) ? group.choices : []).map((choice) => choice.imageUrl)),
+    ...sizes.flatMap((size) => [size.imageUrl, ...(Array.isArray(size.imageUrls) ? size.imageUrls : [])]),
+    ...optionGroups.flatMap((group) => (Array.isArray(group.choices) ? group.choices : []).flatMap((choice) => [choice.imageUrl, ...(Array.isArray(choice.imageUrls) ? choice.imageUrls : [])])),
   ].filter((url): url is string => typeof url === "string" && url.trim().length > 0);
   const urls = uniqueUrls(imageUrl, [...galleryImages, ...linkedVariantUrls]);
 
@@ -111,7 +113,7 @@ export async function syncNormalizedProductCatalog(
         packSize: positiveInt(size.packSize, 1),
         unitLabel: cleanText(size.unitLabel, "piece"),
         minQty: positiveInt(size.minQty, 1),
-        mediaId: size.imageUrl ? mediaByUrl.get(cleanText(size.imageUrl)) ?? null : null,
+        mediaId: (size.imageUrls?.[0] || size.imageUrl) ? mediaByUrl.get(cleanText(size.imageUrls?.[0] || size.imageUrl)) ?? null : null,
         sortOrder: index,
       }).returning({ id: productSizesTable.id });
       if (!savedSize) continue;
@@ -147,7 +149,7 @@ export async function syncNormalizedProductCatalog(
           name: cleanText(choice.name, `Choice ${choiceIndex + 1}`),
           basePrice: moneyText(choice.price),
           chargeType: choice.chargeType === "per_unit" ? "per_unit" : "flat",
-          mediaId: choice.imageUrl ? mediaByUrl.get(cleanText(choice.imageUrl)) ?? null : null,
+          mediaId: (choice.imageUrls?.[0] || choice.imageUrl) ? mediaByUrl.get(cleanText(choice.imageUrls?.[0] || choice.imageUrl)) ?? null : null,
           sortOrder: choiceIndex,
         }).returning({ id: productOptionChoicesTable.id });
         if (!savedChoice) continue;

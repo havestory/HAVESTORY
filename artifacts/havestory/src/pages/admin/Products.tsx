@@ -23,10 +23,10 @@ const DEFAULT_PRINT_CATEGORIES = [
 /* ────────── Types ────────── */
 type FixedPrice = { qty: number; price: string };
 type RangePrice = { from: number; to: number; pricePerUnit: string };
-type Choice = { id: string; name: string; price: string; chargeType: "flat" | "per_unit"; imageUrl?: string; sizePrices?: { sizeId: string; price: string }[] };
+type Choice = { id: string; name: string; price: string; chargeType: "flat" | "per_unit"; imageUrl?: string; imageUrls?: string[]; sizePrices?: { sizeId: string; price: string }[] };
 type OptionGroup = { id: string; title: string; choices: Choice[] };
 type SizeTier = { from: number; to: number; pricePerUnit: string };
-type ProductSize = { id: string; name: string; packSize: number; unitLabel: string; minQty: number; tiers: SizeTier[]; imageUrl?: string };
+type ProductSize = { id: string; name: string; packSize: number; unitLabel: string; minQty: number; tiers: SizeTier[]; imageUrl?: string; imageUrls?: string[] };
 
 /* ── Multi Prints types ── */
 type MPPricingMode = "unit" | "qty-range";
@@ -542,9 +542,32 @@ function SizeTierBuilder({ sizes, onChange, productImages = [] }: { sizes: Produ
   );
 }
 
-function ChoiceRow({ choice, onChange, onRemove, sizes, productImages = [] }: { choice: Choice; onChange: (c: Choice) => void; onRemove: () => void; sizes?: ProductSize[]; productImages?: string[] }) {
+function ChoiceRow({ choice, onChange, onRemove, sizes, productImages = [], onUploadImages }: { choice: Choice; onChange: (c: Choice) => void; onRemove: () => void; sizes?: ProductSize[]; productImages?: string[]; onUploadImages?: (files: File[]) => Promise<string[]> }) {
   const [showSizePrices, setShowSizePrices] = useState(false);
+  const [itemUploading, setItemUploading] = useState(false);
+  const itemPhotoInputRef = useRef<HTMLInputElement>(null);
   const hasSizes = sizes && sizes.length > 0;
+
+  const handleItemPhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length || !onUploadImages) return;
+    setItemUploading(true);
+    try {
+      const urls = await onUploadImages(files);
+      const merged = [...new Set([...(choice.imageUrls || []), ...urls])];
+      onChange({ ...choice, imageUrls: merged });
+    } catch {
+      alert("Some item photos failed to upload. Please try again.");
+    } finally {
+      setItemUploading(false);
+      event.target.value = "";
+    }
+  };
+
+  const removeItemPhoto = (url: string) => {
+    const remaining = (choice.imageUrls || []).filter(image => image !== url);
+    onChange({ ...choice, imageUrls: remaining.length ? remaining : undefined });
+  };
 
   const updateSizePrice = (sizeId: string, price: string) => {
     const existing = choice.sizePrices || [];
@@ -611,6 +634,33 @@ function ChoiceRow({ choice, onChange, onRemove, sizes, productImages = [] }: { 
         )}
       </div>
 
+      <div className="rounded-xl border border-emerald-100 bg-emerald-50/45 p-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-600">Item-specific photos</p>
+            <p className="mt-1 text-[10px] leading-relaxed text-gray-500">Upload photos only for <span className="font-semibold text-gray-700">{choice.name || "this choice"}</span>. These stay linked to this item and never enter the default product photo list.</p>
+          </div>
+          <button type="button" onClick={() => itemPhotoInputRef.current?.click()} disabled={itemUploading || !onUploadImages} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-emerald-600 px-2.5 py-2 text-[10px] font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-wait disabled:opacity-60">
+            {itemUploading ? <Loader2 size={13} className="animate-spin" /> : <ImagePlus size={13} />}
+            {itemUploading ? "Uploading…" : "Upload item photos"}
+          </button>
+          <input ref={itemPhotoInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleItemPhotoUpload} />
+        </div>
+        {(choice.imageUrls || []).length > 0 ? (
+          <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">
+            {(choice.imageUrls || []).map((url, index) => (
+              <div key={url} className="group relative aspect-square overflow-hidden rounded-lg border border-white bg-white shadow-sm">
+                <img src={url} alt={`${choice.name || "Item"} photo ${index + 1}`} className="h-full w-full object-cover" />
+                <button type="button" onClick={() => removeItemPhoto(url)} title="Remove item photo" className="absolute right-1 top-1 rounded-full bg-black/65 p-1 text-white opacity-0 transition group-hover:opacity-100 focus:opacity-100"><X size={11} /></button>
+                <span className="absolute bottom-0 left-0 right-0 bg-black/55 px-1 py-0.5 text-center text-[9px] font-bold text-white">Item photo {index + 1}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-3 rounded-lg border border-dashed border-emerald-200 bg-white/60 px-3 py-2 text-[10px] text-emerald-700/65">No item-specific photos uploaded yet.</div>
+        )}
+      </div>
+
       {/* Size-dependent pricing */}
       {hasSizes && showSizePrices && (
         <div className="ml-2 pl-3 border-l-2 border-blue-200 space-y-1.5">
@@ -643,6 +693,7 @@ function OptionGroupCard({
   dragHandleProps,
   sizes,
   productImages,
+  onUploadImages,
 }: {
   group: OptionGroup; index: number; total: number;
   onChange: (g: OptionGroup) => void;
@@ -652,6 +703,7 @@ function OptionGroupCard({
   dragHandleProps: any;
   sizes?: ProductSize[];
   productImages?: string[];
+  onUploadImages?: (files: File[]) => Promise<string[]>;
 }) {
   const [collapsed, setCollapsed] = useState(false);
 
@@ -663,7 +715,7 @@ function OptionGroupCard({
           value={group.title}
           onChange={e => onChange({ ...group, title: e.target.value })}
           className="flex-1 text-sm font-semibold bg-transparent outline-none placeholder:text-gray-300"
-          placeholder="Option Group Title (e.g. Lamination)"
+          placeholder="Option Group Title (e.g. Frame Colour)"
           onClick={e => e.stopPropagation()}
         />
         <div className="flex items-center gap-1 ml-auto">
@@ -692,6 +744,7 @@ function OptionGroupCard({
               onRemove={() => onChange({ ...group, choices: group.choices.filter((_, xi) => xi !== ci) })}
               sizes={sizes}
               productImages={productImages}
+              onUploadImages={onUploadImages}
             />
           ))}
           <button
@@ -871,6 +924,8 @@ export default function AdminProducts() {
     const { url } = await res.json();
     return url;
   };
+
+  const uploadProductImages = (files: File[]): Promise<string[]> => Promise.all(files.map(uploadProductImage));
 
   const handleAddImages = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -1770,6 +1825,7 @@ export default function AdminProducts() {
                 </h3>
                 <p className="text-[11px] text-gray-400 -mt-2">
                   Add the choices customers can select — such as frame size, paper, finish, print side, or service type. Each choice can have its own price and linked product photo.
+                  <span className="block mt-1 text-emerald-600">For frame colours: add a group named <strong>Frame Colour</strong>, add each colour as a choice, then use <strong>Upload item photos</strong> inside that choice. Those photos stay with the selected colour and do not enter the default product gallery.</span>
                   {config.productType === "multi_size_tier" && config.sizes?.length > 0 && (
                     <span className="text-blue-500 font-medium"> You can set different prices per size using the ruler icon on each choice.</span>
                   )}
@@ -1796,6 +1852,7 @@ export default function AdminProducts() {
                         dragHandleProps={{}}
                         sizes={config.productType === "multi_size_tier" ? config.sizes : undefined}
                         productImages={form.galleryImages || []}
+                        onUploadImages={uploadProductImages}
                       />
                     ))}
                   </div>

@@ -4,6 +4,7 @@ export type ProductChoice = {
   price?: string;
   chargeType?: "flat" | "per_unit";
   imageUrl?: string;
+  imageUrls?: string[];
   sizePrices?: { sizeId: string; price: string }[];
 };
 
@@ -20,6 +21,7 @@ export type ProductSize = {
   unitLabel?: string;
   minQty?: number;
   imageUrl?: string;
+  imageUrls?: string[];
   tiers?: { from: number; to: number; pricePerUnit: string }[];
 };
 
