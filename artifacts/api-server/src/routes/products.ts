@@ -18,6 +18,32 @@ function parseGallery(raw: string | null | undefined): string[] {
   }
 }
 
+function normalizeCustomConfig(raw: unknown): string | null | undefined {
+  if (raw === undefined || raw === null) return raw as null | undefined;
+  if (typeof raw !== "string") return undefined;
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return raw;
+    const config = parsed as any;
+    if (Array.isArray(config.optionGroups)) {
+      config.optionGroups = config.optionGroups.map((group: any) => ({
+        ...group,
+        choices: Array.isArray(group?.choices) ? group.choices.map((choice: any) => ({
+          ...choice,
+          price: choice?.price === "" || choice?.price === null || choice?.price === undefined ? "0" : String(choice.price),
+          sizePrices: Array.isArray(choice?.sizePrices) ? choice.sizePrices.map((override: any) => ({
+            ...override,
+            price: override?.price === "" || override?.price === null || override?.price === undefined ? "0" : String(override.price),
+          })) : choice?.sizePrices,
+        })) : [],
+      }));
+    }
+    return JSON.stringify(config);
+  } catch {
+    return raw;
+  }
+}
+
 const PRODUCT_FORMATS = new Set(["ready_made", "frame_print", "print_service", "finishing"]);
 
 function parseProductFormat(raw: unknown): string | undefined {
@@ -128,7 +154,8 @@ router.get("/", async (req, res) => {
 router.post("/", requireOwner, async (req, res) => {
   try {
     const { categoryId, name, invoiceName, description = "", price = "0", priceType = "per_item", productFormat: requestedProductFormat, imageUrl, galleryImages, artworkGuideUrl, artworkGuideName, featured = false, active = true, sortOrder = 0, customConfig } = req.body;
-    const productFormat = parseProductFormat(requestedProductFormat) || parseProductFormat(customConfig) || "ready_made";
+    const normalizedCustomConfig = normalizeCustomConfig(customConfig);
+    const productFormat = parseProductFormat(requestedProductFormat) || parseProductFormat(normalizedCustomConfig) || "ready_made";
 
     let product: any;
     try {
@@ -147,7 +174,7 @@ router.post("/", requireOwner, async (req, res) => {
         featured,
         active,
         sortOrder,
-        customConfig,
+        customConfig: normalizedCustomConfig,
       }).returning();
     } catch (err) {
       if (!isMissingColumn(err)) throw err;
@@ -190,7 +217,7 @@ router.post("/", requireOwner, async (req, res) => {
       }
     }
 
-    await syncNormalizedProductCatalog(product.id, customConfig, imageUrl, Array.isArray(galleryImages) ? galleryImages : []);
+    await syncNormalizedProductCatalog(product.id, normalizedCustomConfig, imageUrl, Array.isArray(galleryImages) ? galleryImages : []);
     res.status(201).json({ ...product, invoiceName: product.invoiceName ?? null, category: null });
   } catch (err) {
     req.log.error(err);
@@ -234,6 +261,7 @@ router.put("/:id", requireOwner, async (req, res) => {
     const id = parseInt(String(req.params.id), 10);
     if (!Number.isFinite(id)) return res.status(400).json({ error: "Invalid product id" });
     const { categoryId, name, invoiceName, description, price, priceType, productFormat: requestedProductFormat, imageUrl, galleryImages, artworkGuideUrl, artworkGuideName, featured, active, sortOrder, customConfig } = req.body;
+    const normalizedCustomConfig = normalizeCustomConfig(customConfig);
     const updateData: any = {};
     if (categoryId !== undefined) updateData.categoryId = categoryId;
     if (name !== undefined) updateData.name = name;
@@ -242,7 +270,7 @@ router.put("/:id", requireOwner, async (req, res) => {
     if (priceType !== undefined) updateData.priceType = priceType;
     if (requestedProductFormat !== undefined) updateData.productFormat = parseProductFormat(requestedProductFormat) || "ready_made";
     else if (customConfig !== undefined) {
-      const derivedFormat = parseProductFormat(customConfig);
+      const derivedFormat = parseProductFormat(normalizedCustomConfig);
       if (derivedFormat) updateData.productFormat = derivedFormat;
     }
     if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
@@ -252,7 +280,7 @@ router.put("/:id", requireOwner, async (req, res) => {
     if (featured !== undefined) updateData.featured = featured;
     if (active !== undefined) updateData.active = active;
     if (sortOrder !== undefined) updateData.sortOrder = sortOrder;
-    if (customConfig !== undefined) updateData.customConfig = customConfig;
+    if (customConfig !== undefined) updateData.customConfig = normalizedCustomConfig;
 
     let product: any;
     try {

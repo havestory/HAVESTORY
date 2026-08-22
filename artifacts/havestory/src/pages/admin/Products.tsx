@@ -307,6 +307,37 @@ const EMPTY_FORM = { name: "", invoiceName: "", description: "", categoryId: "",
 function uid() { return Math.random().toString(36).slice(2, 8); }
 function rs(v: any) { return `Rs. ${Number(v || 0).toLocaleString("en-IN")}`; }
 
+function parseGalleryImages(raw: unknown): string[] {
+  if (Array.isArray(raw)) return raw.filter((value): value is string => typeof value === "string" && value.trim().length > 0);
+  if (typeof raw !== "string") return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((value): value is string => typeof value === "string" && value.trim().length > 0) : [];
+  } catch {
+    return [];
+  }
+}
+
+function normalizeConfigForSave(config: CustomConfig): CustomConfig {
+  return {
+    ...config,
+    optionGroups: (Array.isArray(config.optionGroups) ? config.optionGroups : []).map(group => ({
+      ...group,
+      title: String(group.title || "").trim(),
+      choices: (Array.isArray(group.choices) ? group.choices : []).map(choice => ({
+        ...choice,
+        name: String(choice.name || "").trim(),
+        price: choice.price === "" || choice.price === undefined || choice.price === null ? "0" : String(choice.price),
+        chargeType: choice.chargeType === "per_unit" ? "per_unit" : "flat",
+        sizePrices: Array.isArray(choice.sizePrices) ? choice.sizePrices.map(override => ({
+          ...override,
+          price: override.price === "" || override.price === undefined || override.price === null ? "0" : String(override.price),
+        })) : choice.sizePrices,
+      })),
+    })),
+  };
+}
+
 function parseConfig(raw: string | null | undefined): CustomConfig {
   if (!raw) return { ...DEFAULT_CONFIG };
   try {
@@ -318,7 +349,7 @@ function parseConfig(raw: string | null | undefined): CustomConfig {
       : saved.productType === "multi_prints"
       ? "finishing"
       : "ready_made";
-    return { ...DEFAULT_CONFIG, ...saved, productFormat: saved.productFormat || legacyFormat };
+    return normalizeConfigForSave({ ...DEFAULT_CONFIG, ...saved, productFormat: saved.productFormat || legacyFormat });
   } catch {
     return { ...DEFAULT_CONFIG };
   }
@@ -591,8 +622,16 @@ function ChoiceRow({ choice, onChange, onRemove, sizes, productImages = [], onUp
         <input value={choice.name} onChange={e => onChange({ ...choice, name: e.target.value })} className="flex-1 px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-200" placeholder="e.g. Matte" />
         <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg px-2">
           <span className="text-xs text-gray-400">Rs.</span>
-          <input type="number" value={choice.price} onChange={e => onChange({ ...choice, price: e.target.value })} className="w-16 py-1.5 text-sm outline-none" placeholder="500" />
+          <input type="number" min="0" value={choice.price} onChange={e => onChange({ ...choice, price: e.target.value })} className="w-16 py-1.5 text-sm outline-none" placeholder="0" aria-label={`${choice.name || "Choice"} price`} />
         </div>
+        <button
+          type="button"
+          onClick={() => onChange({ ...choice, price: "0" })}
+          className={`shrink-0 rounded-lg border px-2 py-1.5 text-[10px] font-bold transition-colors ${choice.price === "0" ? "border-emerald-200 bg-emerald-50 text-emerald-600" : "border-gray-200 bg-white text-gray-400 hover:border-emerald-200 hover:text-emerald-600"}`}
+          title="Set this choice to no extra charge"
+        >
+          No extra charge
+        </button>
         <select value={choice.chargeType} onChange={e => onChange({ ...choice, chargeType: e.target.value as any })} className="px-2 py-1.5 border border-gray-200 rounded-lg text-xs bg-white outline-none">
           <option value="flat">Flat Fee</option>
           <option value="per_unit">Per Unit</option>
@@ -609,6 +648,7 @@ function ChoiceRow({ choice, onChange, onRemove, sizes, productImages = [], onUp
         )}
         <button type="button" onClick={onRemove} className="p-1.5 text-gray-300 hover:text-red-400 transition-colors"><X size={14} /></button>
       </div>
+      <p className="px-1 text-[10px] leading-relaxed text-gray-400">Price is optional. Leave it blank or choose <span className="font-semibold text-emerald-600">No extra charge</span> for a zero-cost choice.</p>
 
       <div className="rounded-xl border border-violet-100 bg-violet-50/45 p-3">
         <div className="flex items-start gap-3">
@@ -891,12 +931,26 @@ export default function AdminProducts() {
   const { data: categories } = useListCategories();
   const queryClient = useQueryClient();
   const inv = { queryKey: ["/api/products"] };
+  const updateProductCache = (savedProduct: any) => {
+    if (!savedProduct?.id) return;
+    queryClient.setQueryData(inv.queryKey, (current: any) => Array.isArray(current)
+      ? current.map(item => item.id === savedProduct.id
+        ? {
+            ...item,
+            customConfig: savedProduct.customConfig ?? item.customConfig,
+            productFormat: savedProduct.productFormat ?? item.productFormat,
+            price: savedProduct.price ?? item.price,
+            priceType: savedProduct.priceType ?? item.priceType,
+          }
+        : item)
+      : current);
+  };
 
   const { mutate: createProduct, isPending: creating } = useCreateProduct({
-    mutation: { onSuccess: () => { queryClient.invalidateQueries(inv); broadcastAdminSave(); closeForm(); } }
+    mutation: { onSuccess: (savedProduct) => { updateProductCache(savedProduct); queryClient.invalidateQueries(inv); broadcastAdminSave(); closeForm(); } }
   });
   const { mutate: updateProduct, isPending: updating } = useUpdateProduct({
-    mutation: { onSuccess: () => { queryClient.invalidateQueries(inv); broadcastAdminSave(); closeForm(); } }
+    mutation: { onSuccess: (savedProduct) => { updateProductCache(savedProduct); queryClient.invalidateQueries(inv); broadcastAdminSave(); closeForm(); } }
   });
   const { mutate: deleteProduct } = useDeleteProduct({ mutation: { onSuccess: () => { queryClient.invalidateQueries(inv); broadcastAdminSave(); } } });
 
@@ -1115,7 +1169,8 @@ export default function AdminProducts() {
       ? (config.multiPrintsBoardTypes?.[0]?.baseUnitPrice || "0")
       : form.price;
     const priceType = (isCustom || isMultiSize || isMultiPrints) ? "custom_quote" : "per_item";
-    const customConfig = JSON.stringify(config);
+    const normalizedConfig = normalizeConfigForSave(config);
+    const customConfig = JSON.stringify(normalizedConfig);
     const gallery: string[] = form.galleryImages || [];
     const data = {
       name: form.name,
