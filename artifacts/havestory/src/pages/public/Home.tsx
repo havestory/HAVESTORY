@@ -66,13 +66,21 @@ export default function Home() {
   const { data: reviews } = useListReviews();
   const [dismissedNotices, setDismissedNotices] = useState<number[]>([]);
   const [activeHeroSlide, setActiveHeroSlide] = useState(0);
+  const [activePopularSet, setActivePopularSet] = useState(0);
 
   const activeNotices = (Array.isArray(notices) ? notices : []).filter(
     (item) => item.enabled && !dismissedNotices.includes(item.id),
   );
-  const productList = (Array.isArray(products) ? products : [])
-    .filter((item) => item.featured)
-    .slice(0, 6);
+  const allProducts = Array.isArray(products) ? products : [];
+  const featuredProducts = allProducts.filter((item) => item.featured);
+  const popularPool = featuredProducts.length ? featuredProducts : allProducts;
+  const popularProducts =
+    popularPool.length > 4
+      ? Array.from({ length: 4 }, (_, index) => {
+          const productIndex = (activePopularSet * 4 + index) % popularPool.length;
+          return popularPool[productIndex];
+        })
+      : popularPool.slice(0, 4);
   const serviceList = (Array.isArray(services) ? services : []).slice(0, 4);
   const portfolioList = (Array.isArray(portfolio) ? portfolio : []).slice(0, 6);
   const reviewList = (Array.isArray(reviews) ? reviews : [])
@@ -157,6 +165,20 @@ export default function Home() {
     }, 4500);
     return () => window.clearInterval(timer);
   }, [heroSlides.length, heroSlidesKey]);
+
+  const featuredProductsKey = popularPool.map((product) => product.id).join("|");
+
+  useEffect(() => {
+    setActivePopularSet(0);
+  }, [featuredProductsKey]);
+
+  useEffect(() => {
+    if (popularPool.length <= 4) return;
+    const timer = window.setInterval(() => {
+      setActivePopularSet((current) => current + 1);
+    }, 6500);
+    return () => window.clearInterval(timer);
+  }, [popularPool.length, featuredProductsKey]);
 
   return (
     <div className="hsc-home">
@@ -304,45 +326,54 @@ export default function Home() {
           href="/store"
           link="Shop everything"
         />
-        {productList.length ? (
-          <div className={`hsc-product-grid ${productList.length === 1 ? "hsc-product-grid-single" : ""}`}>
-            {productList.map((product, index) => (
-              <motion.article
-                key={product.id}
-                className={`hsc-product-card ${productList.length === 1 ? "hsc-product-card-featured" : ""}`}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: (index % 3) * 0.05 }}
-              >
-                <Link href={`/store/${product.id}`} className="hsc-product-image">
-                  {product.imageUrl ? (
-                    <img src={product.imageUrl} alt={product.name} />
-                  ) : (
-                    <ImageIcon />
-                  )}
-                  <span>{index === 0 ? "Popular" : "Studio pick"}</span>
-                </Link>
-                <div>
-                  <small>{product.category?.name || "HAVESTORY edition"}</small>
-                  <h3>{product.name}</h3>
-                  <p>
-                    {product.description ||
-                      "Made with carefully selected materials in our studio."}
-                  </p>
-                  <footer>
-                    <strong>
-                      {product.price
-                        ? `Rs. ${Number(product.price).toLocaleString()}`
-                        : "Quote on request"}
-                    </strong>
-                    <Link href={`/store/${product.id}`}>
-                      View edition <ArrowRight />
-                    </Link>
-                  </footer>
-                </div>
-              </motion.article>
-            ))}
+        {popularProducts.length ? (
+          <div
+            className={`hsc-product-grid hsc-popular-product-grid ${popularProducts.length === 1 ? "hsc-product-grid-single" : ""}`}
+            aria-live={popularPool.length > 4 ? "polite" : undefined}
+          >
+            <AnimatePresence initial={false} mode="sync">
+              {popularProducts.map((product, index) => (
+                <motion.article
+                  key={product.id}
+                  className={`hsc-product-card ${popularProducts.length === 1 ? "hsc-product-card-featured" : ""}`}
+                  initial={{ opacity: 0, y: 18, scale: 0.985 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -12, scale: 0.985 }}
+                  transition={{
+                    duration: 0.42,
+                    delay: (index % 4) * 0.06,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                >
+                  <Link href={`/store/${product.id}`} className="hsc-product-image">
+                    {product.imageUrl ? (
+                      <img src={product.imageUrl} alt={product.name} />
+                    ) : (
+                      <ImageIcon />
+                    )}
+                    <span>Popular</span>
+                  </Link>
+                  <div>
+                    <small>{product.category?.name || "HAVESTORY edition"}</small>
+                    <h3>{product.name}</h3>
+                    <p>
+                      {product.description ||
+                        "Made with carefully selected materials in our studio."}
+                    </p>
+                    <footer>
+                      <strong>
+                        {product.price
+                          ? `Rs. ${Number(product.price).toLocaleString()}`
+                          : "Quote on request"}
+                      </strong>
+                      <Link href={`/store/${product.id}`}>
+                        View edition <ArrowRight />
+                      </Link>
+                    </footer>
+                  </div>
+                </motion.article>
+              ))}
+            </AnimatePresence>
           </div>
         ) : (
           <ComingSoon
