@@ -6634,12 +6634,16 @@ h1, h2, h3 { font-weight: 700; }
   width: 100% !important;
   height: 46px !important;
   min-height: 46px !important;
+  margin: 0 !important;
+  align-self: stretch !important;
+  display: block !important;
   box-sizing: border-box !important;
 }
 [data-public-site] .checkout-coupon-apply {
   min-width: 0 !important;
   width: 100% !important;
   height: 46px !important;
+  margin: 0 !important;
   min-height: 46px !important;
   align-self: stretch !important;
   display: inline-flex !important;
