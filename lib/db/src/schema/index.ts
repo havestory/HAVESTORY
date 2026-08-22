@@ -13,3 +13,4 @@ export * from "./inventory";
 export * from "./crm-projects";
 export * from "./coupons";
 export * from "./project-service-types";
+export * from "./product-catalog";

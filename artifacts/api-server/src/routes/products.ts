@@ -4,6 +4,7 @@ import { productsTable, categoriesTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getAdminAuth, requireAdmin, requireOwner } from "../lib/auth-cookie";
 import { parseIdParam } from "../lib/parse-id";
+import { syncNormalizedProductCatalog } from "../lib/product-catalog";
 
 const router = Router();
 
@@ -15,6 +16,23 @@ function parseGallery(raw: string | null | undefined): string[] {
   } catch {
     return [];
   }
+}
+
+const PRODUCT_FORMATS = new Set(["ready_made", "frame_print", "print_service", "finishing"]);
+
+function parseProductFormat(raw: unknown): string | undefined {
+  let value: unknown = raw;
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      value = parsed && typeof parsed === "object" ? (parsed as any).productFormat : raw;
+    } catch {
+      value = raw;
+    }
+  } else if (raw && typeof raw === "object") {
+    value = (raw as any).productFormat;
+  }
+  return typeof value === "string" && PRODUCT_FORMATS.has(value) ? value : undefined;
 }
 
 /** Build the base select (without invoiceName) so we can fall back if column is missing */
@@ -31,6 +49,7 @@ function baseSelect() {
     featured: productsTable.featured,
     active: productsTable.active,
     sortOrder: productsTable.sortOrder,
+    productFormat: productsTable.productFormat,
     customConfig: productsTable.customConfig,
     artworkGuideUrl: productsTable.artworkGuideUrl,
     artworkGuideName: productsTable.artworkGuideName,
@@ -44,6 +63,11 @@ function baseSelect() {
       createdAt: categoriesTable.createdAt,
     },
   };
+}
+
+function legacyBaseSelect() {
+  const { productFormat: _productFormat, ...select } = baseSelect();
+  return select;
 }
 
 /** True when the Postgres error indicates a missing column (code 42703). */
@@ -76,7 +100,7 @@ router.get("/", async (req, res) => {
       if (!isMissingColumn(err)) throw err;
       // invoice_name column not yet migrated — fall back without it
       products = await db
-        .select(baseSelect())
+        .select(legacyBaseSelect())
         .from(productsTable)
         .leftJoin(categoriesTable, eq(productsTable.categoryId, categoriesTable.id))
         .where(where)
@@ -92,7 +116,8 @@ router.get("/", async (req, res) => {
 
 router.post("/", requireOwner, async (req, res) => {
   try {
-    const { categoryId, name, invoiceName, description = "", price = "0", priceType = "per_item", imageUrl, galleryImages, artworkGuideUrl, artworkGuideName, featured = false, active = true, sortOrder = 0, customConfig } = req.body;
+    const { categoryId, name, invoiceName, description = "", price = "0", priceType = "per_item", productFormat: requestedProductFormat, imageUrl, galleryImages, artworkGuideUrl, artworkGuideName, featured = false, active = true, sortOrder = 0, customConfig } = req.body;
+    const productFormat = parseProductFormat(requestedProductFormat) || parseProductFormat(customConfig) || "ready_made";
 
     let product: any;
     try {
@@ -103,6 +128,7 @@ router.post("/", requireOwner, async (req, res) => {
         description,
         price,
         priceType,
+        productFormat,
         imageUrl,
         galleryImages: galleryImages ? JSON.stringify(galleryImages) : null,
         artworkGuideUrl: artworkGuideUrl || null,
@@ -114,24 +140,46 @@ router.post("/", requireOwner, async (req, res) => {
       }).returning();
     } catch (err) {
       if (!isMissingColumn(err)) throw err;
-      // Fallback: insert without invoiceName
-      [product] = await db.insert(productsTable).values({
-        categoryId,
-        name,
-        description,
-        price,
-        priceType,
-        imageUrl,
-        galleryImages: galleryImages ? JSON.stringify(galleryImages) : null,
-        artworkGuideUrl: artworkGuideUrl || null,
-        artworkGuideName: artworkGuideName || null,
-        featured,
-        active,
-        sortOrder,
-        customConfig,
-      } as any).returning();
+      // Fallback for databases that still lack invoice_name.
+      try {
+        [product] = await db.insert(productsTable).values({
+          categoryId,
+          name,
+          description,
+          price,
+          priceType,
+          productFormat,
+          imageUrl,
+          galleryImages: galleryImages ? JSON.stringify(galleryImages) : null,
+          artworkGuideUrl: artworkGuideUrl || null,
+          artworkGuideName: artworkGuideName || null,
+          featured,
+          active,
+          sortOrder,
+          customConfig,
+        } as any).returning();
+      } catch (legacyErr) {
+        if (!isMissingColumn(legacyErr)) throw legacyErr;
+        // Older databases may also predate product_format.
+        [product] = await db.insert(productsTable).values({
+          categoryId,
+          name,
+          description,
+          price,
+          priceType,
+          imageUrl,
+          galleryImages: galleryImages ? JSON.stringify(galleryImages) : null,
+          artworkGuideUrl: artworkGuideUrl || null,
+          artworkGuideName: artworkGuideName || null,
+          featured,
+          active,
+          sortOrder,
+          customConfig,
+        } as any).returning();
+      }
     }
 
+    await syncNormalizedProductCatalog(product.id, customConfig, imageUrl, Array.isArray(galleryImages) ? galleryImages : []);
     res.status(201).json({ ...product, invoiceName: product.invoiceName ?? null, category: null });
   } catch (err) {
     req.log.error(err);
@@ -163,7 +211,7 @@ router.get("/:id", async (req, res) => {
     if (!result) return res.status(404).json({ error: "Product not found" });
     const p = result.products;
     if (!p.active && !getAdminAuth(req)) return res.status(404).json({ error: "Product not found" });
-    res.json({ ...p, invoiceName: (p as any).invoiceName ?? null, galleryImages: parseGallery(p.galleryImages), category: result.categories });
+    res.json({ ...p, productFormat: (p as any).productFormat ?? parseProductFormat(p.customConfig) ?? "ready_made", invoiceName: (p as any).invoiceName ?? null, galleryImages: parseGallery(p.galleryImages), category: result.categories });
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to fetch product" });
@@ -174,13 +222,18 @@ router.put("/:id", requireOwner, async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (!Number.isFinite(id)) return res.status(400).json({ error: "Invalid product id" });
-    const { categoryId, name, invoiceName, description, price, priceType, imageUrl, galleryImages, artworkGuideUrl, artworkGuideName, featured, active, sortOrder, customConfig } = req.body;
+    const { categoryId, name, invoiceName, description, price, priceType, productFormat: requestedProductFormat, imageUrl, galleryImages, artworkGuideUrl, artworkGuideName, featured, active, sortOrder, customConfig } = req.body;
     const updateData: any = {};
     if (categoryId !== undefined) updateData.categoryId = categoryId;
     if (name !== undefined) updateData.name = name;
     if (description !== undefined) updateData.description = description;
     if (price !== undefined) updateData.price = price;
     if (priceType !== undefined) updateData.priceType = priceType;
+    if (requestedProductFormat !== undefined) updateData.productFormat = parseProductFormat(requestedProductFormat) || "ready_made";
+    else if (customConfig !== undefined) {
+      const derivedFormat = parseProductFormat(customConfig);
+      if (derivedFormat) updateData.productFormat = derivedFormat;
+    }
     if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
     if (galleryImages !== undefined) updateData.galleryImages = galleryImages ? JSON.stringify(galleryImages) : null;
     if (artworkGuideUrl !== undefined) updateData.artworkGuideUrl = artworkGuideUrl || null;
@@ -196,12 +249,19 @@ router.put("/:id", requireOwner, async (req, res) => {
       [product] = await db.update(productsTable).set(updateData).where(eq(productsTable.id, id)).returning();
     } catch (err) {
       if (!isMissingColumn(err)) throw err;
-      // Retry without invoiceName
+      // Retry without invoiceName, then without product_format for very old schemas.
       delete updateData.invoiceName;
-      [product] = await db.update(productsTable).set(updateData).where(eq(productsTable.id, id)).returning();
+      try {
+        [product] = await db.update(productsTable).set(updateData).where(eq(productsTable.id, id)).returning();
+      } catch (legacyErr) {
+        if (!isMissingColumn(legacyErr)) throw legacyErr;
+        delete updateData.productFormat;
+        [product] = await db.update(productsTable).set(updateData).where(eq(productsTable.id, id)).returning();
+      }
     }
 
     if (!product) return res.status(404).json({ error: "Product not found" });
+    await syncNormalizedProductCatalog(product.id, product.customConfig, product.imageUrl, parseGallery(product.galleryImages));
     res.json({ ...product, invoiceName: (product as any).invoiceName ?? null, category: null });
   } catch (err) {
     req.log.error(err);

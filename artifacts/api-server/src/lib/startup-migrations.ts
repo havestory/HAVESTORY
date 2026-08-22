@@ -1,4 +1,5 @@
 import { pool } from "@workspace/db";
+import { syncAllNormalizedProductCatalog } from "./product-catalog";
 
 /**
  * Idempotent schema migrations that add any columns that might be missing
@@ -241,9 +242,84 @@ export async function runStartupMigrations(
     `);
     await client.query(`
       ALTER TABLE products
-        ADD COLUMN IF NOT EXISTS invoice_name TEXT;
+        ADD COLUMN IF NOT EXISTS invoice_name TEXT,
+        ADD COLUMN IF NOT EXISTS product_format TEXT NOT NULL DEFAULT 'ready_made';
+
+      CREATE TABLE IF NOT EXISTS product_media (
+        id SERIAL PRIMARY KEY,
+        product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+        url TEXT NOT NULL,
+        kind TEXT NOT NULL DEFAULT 'gallery',
+        alt_text TEXT NOT NULL DEFAULT '',
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        is_primary INTEGER NOT NULL DEFAULT 0,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS product_media_product_url_uidx ON product_media(product_id, url);
+      CREATE INDEX IF NOT EXISTS product_media_product_sort_idx ON product_media(product_id, sort_order);
+
+      CREATE TABLE IF NOT EXISTS product_sizes (
+        id SERIAL PRIMARY KEY,
+        product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+        legacy_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        pack_size INTEGER NOT NULL DEFAULT 1,
+        unit_label TEXT NOT NULL DEFAULT 'piece',
+        min_qty INTEGER NOT NULL DEFAULT 1,
+        media_id INTEGER REFERENCES product_media(id) ON DELETE SET NULL,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS product_sizes_product_legacy_uidx ON product_sizes(product_id, legacy_id);
+      CREATE INDEX IF NOT EXISTS product_sizes_product_sort_idx ON product_sizes(product_id, sort_order);
+
+      CREATE TABLE IF NOT EXISTS product_size_price_tiers (
+        id SERIAL PRIMARY KEY,
+        size_id INTEGER NOT NULL REFERENCES product_sizes(id) ON DELETE CASCADE,
+        qty_from INTEGER NOT NULL DEFAULT 1,
+        qty_to INTEGER,
+        price_per_unit NUMERIC(12, 2) NOT NULL DEFAULT 0,
+        sort_order INTEGER NOT NULL DEFAULT 0
+      );
+      CREATE INDEX IF NOT EXISTS product_size_price_tiers_size_idx ON product_size_price_tiers(size_id, qty_from);
+
+      CREATE TABLE IF NOT EXISTS product_option_groups (
+        id SERIAL PRIMARY KEY,
+        product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+        legacy_id TEXT NOT NULL,
+        title TEXT NOT NULL,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS product_option_groups_product_legacy_uidx ON product_option_groups(product_id, legacy_id);
+      CREATE INDEX IF NOT EXISTS product_option_groups_product_sort_idx ON product_option_groups(product_id, sort_order);
+
+      CREATE TABLE IF NOT EXISTS product_option_choices (
+        id SERIAL PRIMARY KEY,
+        group_id INTEGER NOT NULL REFERENCES product_option_groups(id) ON DELETE CASCADE,
+        legacy_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        base_price NUMERIC(12, 2) NOT NULL DEFAULT 0,
+        charge_type TEXT NOT NULL DEFAULT 'flat',
+        media_id INTEGER REFERENCES product_media(id) ON DELETE SET NULL,
+        sort_order INTEGER NOT NULL DEFAULT 0
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS product_option_choices_group_legacy_uidx ON product_option_choices(group_id, legacy_id);
+      CREATE INDEX IF NOT EXISTS product_option_choices_group_sort_idx ON product_option_choices(group_id, sort_order);
+
+      CREATE TABLE IF NOT EXISTS product_choice_size_prices (
+        id SERIAL PRIMARY KEY,
+        choice_id INTEGER NOT NULL REFERENCES product_option_choices(id) ON DELETE CASCADE,
+        size_id INTEGER NOT NULL REFERENCES product_sizes(id) ON DELETE CASCADE,
+        price NUMERIC(12, 2) NOT NULL DEFAULT 0
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS product_choice_size_prices_choice_size_uidx ON product_choice_size_prices(choice_id, size_id);
+      CREATE TABLE IF NOT EXISTS product_catalog_migrations (
+        version INTEGER PRIMARY KEY,
+        completed_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
     `);
-    log("[migrations] Schema columns verified/added successfully");
+    log("[migrations] Schema columns and normalized product catalog verified/added successfully");
 
     // Indexes for reports date-range queries.
     // Partial (WHERE deleted_at IS NULL) keeps index size small and matches
@@ -327,6 +403,27 @@ export async function runStartupMigrations(
     console.warn("[migrations] Invoice contact backfill warning:", e);
   } finally {
     client.release();
+  }
+
+  // Backfill the normalized product catalog once. A marker makes startup fast
+  // after the first successful run, and leaving the marker absent makes a
+  // failed backfill retry safely on the next restart.
+  const catalogClient = await pool.connect();
+  try {
+    const marker = await catalogClient.query(
+      `SELECT version FROM product_catalog_migrations WHERE version = 1 LIMIT 1`,
+    );
+    if (marker.rowCount === 0) {
+      await syncAllNormalizedProductCatalog();
+      await catalogClient.query(
+        `INSERT INTO product_catalog_migrations (version) VALUES (1) ON CONFLICT (version) DO NOTHING`,
+      );
+      log("[migrations] Normalized product catalog backfill completed");
+    }
+  } catch (e) {
+    console.warn("[migrations] Normalized product catalog backfill warning:", e);
+  } finally {
+    catalogClient.release();
   }
 
   // Status-from-advance reconciliation: any invoice that's flagged as
