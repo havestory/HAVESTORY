@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useListPortfolio } from '@workspace/api-client-react';
 import { ComingSoon } from '@/components/public/ComingSoon';
-import { ChevronLeft, ChevronRight, Image as ImageIcon, Maximize2, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Image as ImageIcon, LoaderCircle, Maximize2, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 export default function Portfolio() {
@@ -40,7 +40,10 @@ export default function Portfolio() {
       <main className="hs-gallery-content">
         <div className="hs-gallery-intro"><span>SELECTED WORK / {new Date().getFullYear()}</span><p>{portfolioItems.length ? `${portfolioItems.length} studio ${portfolioItems.length === 1 ? 'story' : 'stories'}` : 'The archive is being prepared'}</p></div>
         {isLoading ? (
-          <div className="hs-gallery-grid hs-gallery-skeleton">{[1,2,3,4,5,6].map(i => <div key={i} />)}</div>
+          <div className="hs-gallery-loading" role="status" aria-live="polite">
+            <LoaderCircle className="hs-gallery-loading-icon" aria-hidden="true" />
+            <span>Preparing the archive…</span>
+          </div>
         ) : portfolioItems.length === 0 ? (
           <ComingSoon eyebrow="The gallery is still developing" title="Our work is coming soon." description="We are preparing a considered gallery of frames, prints and client stories." href="/custom-project" cta="Create your project" />
         ) : (
