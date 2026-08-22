@@ -1,38 +1,32 @@
-import { useEffect, useRef, useState } from 'react';
-import { useGetSettings, useGetNotices, useListPortfolio, useListProducts, useListReviews, useListServices } from '@workspace/api-client-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useGetSettings } from '@workspace/api-client-react';
 import { Image as ImageIcon } from 'lucide-react';
 
 export function SplashScreen({ onDone }: { onDone: () => void }) {
   const { data: settings, isLoading: settingsLoading, isError: settingsError } = useGetSettings();
-  const { isLoading: productsLoading } = useListProducts();
-  const { isLoading: servicesLoading } = useListServices();
-  const { isLoading: portfolioLoading } = useListPortfolio();
-  const { isLoading: reviewsLoading } = useListReviews();
-  const { isLoading: noticesLoading } = useGetNotices();
-  const isLoading = settingsLoading || productsLoading || servicesLoading || portfolioLoading || reviewsLoading || noticesLoading;
-  const isError = settingsError;
   const [fading, setFading] = useState(false);
   const [minimumDone, setMinimumDone] = useState(false);
   const completed = useRef(false);
 
-  useEffect(() => {
-    const minimumTimer = setTimeout(() => setMinimumDone(true), 850);
-    const maximumTimer = setTimeout(() => {
-      if (completed.current) return;
-      completed.current = true;
-      setFading(true);
-      setTimeout(onDone, 480);
-    }, 5500);
-    return () => { clearTimeout(minimumTimer); clearTimeout(maximumTimer); };
+  const finish = useCallback(() => {
+    if (completed.current) return;
+    completed.current = true;
+    setFading(true);
+    window.setTimeout(onDone, 300);
   }, [onDone]);
 
   useEffect(() => {
-    if (!minimumDone || isLoading || completed.current) return;
-    completed.current = true;
-    setFading(true);
-    const timer = setTimeout(onDone, 480);
-    return () => clearTimeout(timer);
-  }, [minimumDone, isLoading, isError, onDone]);
+    const minimumTimer = window.setTimeout(() => setMinimumDone(true), 420);
+    const safetyTimer = window.setTimeout(finish, 1400);
+    return () => {
+      window.clearTimeout(minimumTimer);
+      window.clearTimeout(safetyTimer);
+    };
+  }, [finish]);
+
+  useEffect(() => {
+    if (minimumDone && !settingsLoading) finish();
+  }, [finish, minimumDone, settingsLoading]);
 
   return (
     <div
@@ -59,15 +53,15 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
           <h1>
             {settings?.businessName || 'HAVESTORY'}
           </h1>
-          {settings?.taglineEnabled !== false && settings?.tagline && (
-            <p>
-              {settings.tagline}
-            </p>
-          )}
+          <p>
+            {settings?.taglineEnabled !== false && settings?.tagline
+              ? settings.tagline
+              : 'A considered collection of frames and stories'}
+          </p>
         </div>
 
         <div className="hs-splash-progress animate-fade-up" style={{ animationDelay: '240ms' }}><i /></div>
-        <p className="hs-splash-status">{isError ? 'Opening the studio' : isLoading ? 'Preparing your experience' : 'Welcome to the studio'}</p>
+        <p className="hs-splash-status">{settingsError ? 'Opening the studio' : settingsLoading ? 'Setting the scene' : 'Welcome to the studio'}</p>
       </div>
     </div>
   );

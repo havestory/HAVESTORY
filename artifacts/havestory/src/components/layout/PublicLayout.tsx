@@ -53,7 +53,7 @@ function SpecialEventOverlay({ enabled, type, message }: { enabled?: boolean; ty
 
 export function PublicLayout({ children }: { children: ReactNode }) {
   const [location]   = useLocation();
-  const { data: settings, isLoading: settingsLoading, refetch: refetchSettings } = useGetSettings();
+  const { data: settings, refetch: refetchSettings } = useGetSettings();
   const { count: cartCount } = useShopCart();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -139,17 +139,6 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       icon.href = settings.faviconUrl;
     }
   }, [settings, publicThemePreset]);
-
-  if (settingsLoading && !settings) {
-    return (
-      <main className="hs-data-loader" role="status" aria-live="polite" aria-label="Preparing HAVESTORY">
-        <div className="hs-data-loader-mark"><span>HS</span></div>
-        <strong>HAVESTORY</strong>
-        <p>Preparing the studio collection</p>
-        <div className="hs-data-loader-line"><i /></div>
-      </main>
-    );
-  }
 
   if (settings?.siteClosedEnabled) {
     return (

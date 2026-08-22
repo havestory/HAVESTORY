@@ -7,10 +7,10 @@ type ThemeVars = {
 };
 
 export const THEME_VARS: Record<string, ThemeVars> = {
-  "atelier-light": { from: "#2E2721", to: "#9A7654", accent: "#B58A61", primary: "28 18% 16%", secondary: "28 29% 48%" },
-  "light-premium": { from: "#2E2721", to: "#9A7654", accent: "#B58A61", primary: "28 18% 16%", secondary: "28 29% 48%" },
-  "light-editorial": { from: "#2E2721", to: "#9A7654", accent: "#B58A61", primary: "28 18% 16%", secondary: "28 29% 48%" },
-  "havestory-gallery": { from: "#071A2B", to: "#B9D8CC", accent: "#D96F52", primary: "214 64% 10%", secondary: "43 68% 60%" },
+  "atelier-light": { from: "#f8f4fb", to: "#4c2370", accent: "#c49a4a", primary: "270 48% 29%", secondary: "43 52% 48%" },
+  "light-premium": { from: "#f8f4fb", to: "#4c2370", accent: "#c49a4a", primary: "270 48% 29%", secondary: "43 52% 48%" },
+  "light-editorial": { from: "#f8f4fb", to: "#4c2370", accent: "#c49a4a", primary: "270 48% 29%", secondary: "43 52% 48%" },
+  "havestory-gallery": { from: "#2b123f", to: "#4c2370", accent: "#d8b56a", primary: "270 48% 29%", secondary: "43 52% 48%" },
   "pink-purple": { from: "#ec4899", to: "#9333ea", accent: "#d946ef", primary: "330 85% 55%", secondary: "270 70% 60%" },
   // Website Editor historically stores this preset as `amber-purple`.
   // Keep both ids mapped so saved settings and live CSS always agree.

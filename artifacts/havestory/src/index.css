@@ -6694,3 +6694,156 @@ h1, h2, h3 { font-weight: 700; }
 @media (prefers-reduced-motion: reduce) {
   [data-public-site] .hsc-products-section::before { animation: none !important; }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STARTUP LIQUID GLASS — first-paint and route-loader correction
+   Keeps the loading experience aligned with the public purple/gold theme and
+   avoids the old brown/navy flicker while settings and lazy routes resolve.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  --background: 270 33% 98%;
+  --foreground: 270 32% 14%;
+  --primary: 270 48% 29%;
+  --secondary: 43 52% 48%;
+}
+body {
+  background:
+    radial-gradient(circle at 12% -10%, rgba(196,154,74,.12), transparent 26rem),
+    radial-gradient(circle at 92% 18%, rgba(232,220,242,.44), transparent 30rem),
+    #f8f6fb;
+}
+.hs-splash,
+.hs-data-loader,
+.hs-route-loader {
+  color: #251b32 !important;
+  background:
+    radial-gradient(circle at 78% 12%, rgba(196,154,74,.18), transparent 22rem),
+    radial-gradient(circle at 14% 86%, rgba(112,67,151,.16), transparent 24rem),
+    linear-gradient(135deg, #fbf9fd 0%, #f4edf9 52%, #f8f2e7 100%) !important;
+}
+.hs-splash::before,
+.hs-route-loader::before,
+.hs-data-loader::before {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border: 1px solid rgba(76,35,112,.09);
+  border-radius: 30px;
+  pointer-events: none;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.86);
+}
+.hs-splash-orb-one {
+  background: rgba(76,35,112,.12) !important;
+  animation: hs-startup-orb-one 8s ease-in-out infinite alternate;
+}
+.hs-splash-orb-two {
+  background: rgba(196,154,74,.15) !important;
+  animation: hs-startup-orb-two 9s ease-in-out infinite alternate;
+}
+.hs-splash-inner {
+  position: relative;
+  z-index: 1;
+  width: min(90vw, 560px) !important;
+  padding: clamp(28px, 6vw, 54px) !important;
+  border: 1px solid rgba(76,35,112,.12);
+  border-radius: 32px;
+  background: rgba(255,255,255,.58);
+  box-shadow: 0 28px 80px rgba(43,23,64,.1), inset 0 1px 0 rgba(255,255,255,.95);
+  -webkit-backdrop-filter: blur(26px) saturate(125%);
+  backdrop-filter: blur(26px) saturate(125%);
+  animation: hs-startup-card-in .55s cubic-bezier(.2,.8,.2,1) both;
+}
+.hs-splash-mark {
+  width: 80px !important;
+  height: 80px !important;
+  border-color: rgba(76,35,112,.26) !important;
+  border-radius: 26px !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.9), rgba(244,235,250,.7)) !important;
+  box-shadow: 0 20px 48px rgba(76,35,112,.16), inset 0 1px 0 rgba(255,255,255,.96) !important;
+  animation: hs-startup-mark 2.8s ease-in-out infinite;
+}
+.hs-splash-mark:after { border-color: rgba(196,154,74,.48) !important; }
+.hs-splash-mark span { color: #4c2370 !important; }
+.hs-splash-mark svg { color: #c49a4a !important; }
+.hs-splash-copy small,
+.hs-splash-status { color: #a1782f !important; }
+.hs-splash-copy h1 { color: #29153d !important; }
+.hs-splash-copy p { color: #655b6d !important; }
+.hs-splash-progress,
+.hs-data-loader-line,
+.hs-route-loader > div > div {
+  background: rgba(76,35,112,.12) !important;
+}
+.hs-splash-progress i,
+.hs-data-loader-line i,
+.hs-route-loader > div > div i {
+  background: linear-gradient(90deg, #4c2370, #c49a4a, #6b3a91) !important;
+}
+.hs-route-loader {
+  min-height: 52vh !important;
+  position: relative;
+  overflow: hidden;
+}
+.hs-route-loader > div {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 360px) !important;
+  padding: 34px 28px 30px;
+  border: 1px solid rgba(76,35,112,.12);
+  border-radius: 26px;
+  background: rgba(255,255,255,.62);
+  box-shadow: 0 22px 60px rgba(43,23,64,.09), inset 0 1px 0 rgba(255,255,255,.9);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+  backdrop-filter: blur(20px) saturate(120%);
+  animation: hs-startup-card-in .42s cubic-bezier(.2,.8,.2,1) both;
+}
+.hs-route-loader > div > span {
+  border-color: rgba(76,35,112,.2) !important;
+  border-radius: 18px !important;
+  background: linear-gradient(145deg, #f7f0fb, #fff9ec) !important;
+  color: #4c2370 !important;
+  box-shadow: 0 12px 28px rgba(76,35,112,.1), inset 0 1px 0 rgba(255,255,255,.9);
+  animation: hs-startup-mark 2.8s ease-in-out infinite;
+}
+.hs-route-loader strong { color: #29153d !important; }
+.hs-route-loader p {
+  margin: 7px 0 0;
+  color: #75687d;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+@keyframes hs-startup-card-in {
+  from { opacity: 0; transform: translateY(10px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes hs-startup-mark {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-4px) rotate(1.5deg); }
+}
+@keyframes hs-startup-orb-one {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(-3vw, 2vh, 0) scale(1.08); }
+}
+@keyframes hs-startup-orb-two {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(3vw, -2vh, 0) scale(1.1); }
+}
+@media (max-width: 600px) {
+  .hs-splash::before,
+  .hs-route-loader::before,
+  .hs-data-loader::before { inset: 8px; border-radius: 22px; }
+  .hs-splash-inner { width: min(92vw, 560px) !important; padding: 24px 18px !important; border-radius: 24px; }
+  .hs-splash-mark { width: 70px !important; height: 70px !important; }
+  .hs-route-loader > div { padding: 28px 20px 24px; border-radius: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hs-splash-inner,
+  .hs-route-loader > div,
+  .hs-splash-mark,
+  .hs-route-loader > div > span,
+  .hs-splash-orb-one,
+  .hs-splash-orb-two { animation: none !important; }
+}

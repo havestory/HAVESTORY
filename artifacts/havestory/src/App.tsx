@@ -100,10 +100,11 @@ const queryClient = new QueryClient({
 });
 function RouteLoader() {
   return (
-    <div className="hs-route-loader" role="status" aria-label="Loading section">
+    <div className="hs-route-loader" role="status" aria-live="polite" aria-label="Loading section">
       <div>
         <span>HS</span>
-        <strong>Preparing this collection</strong>
+        <strong>Curating your view</strong>
+        <p>Preparing your studio collection</p>
         <div><i /></div>
       </div>
     </div>
