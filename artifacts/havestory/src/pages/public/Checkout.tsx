@@ -56,6 +56,13 @@ function parseBankDetails(value: unknown) {
   }
 }
 
+function cartLineUnitPrice(item: any) {
+  const storedPrice = Number(item?.unitPrice);
+  if (Number.isFinite(storedPrice) && storedPrice > 0) return storedPrice;
+  const productPrice = Number(item?.product?.price);
+  return Number.isFinite(productPrice) && productPrice > 0 ? productPrice : 0;
+}
+
 type ProductPaymentRule = {
   codEnabled: boolean;
   codMessage: string;
@@ -82,7 +89,7 @@ function uniqueMessages(rules: ProductPaymentRule[], field: "codMessage" | "full
 
 export default function Checkout() {
   const [, navigate] = useLocation();
-  const { items, count, subtotal, clear } = useShopCart();
+  const { items, count, clear } = useShopCart();
   const { data: rawSettings } = useGetSettings();
   const createOrder = useCreateOrder();
   const { toast } = useToast();
@@ -103,6 +110,7 @@ export default function Checkout() {
   const bankTransferEnabled = settingEnabled(settings.checkoutBankTransferEnabled, true);
   const depositAmount = Number(settings.checkoutDepositAmount) || 500;
   const productPaymentRules = useMemo(() => items.map(item => ({ item, rule: getProductPaymentRule(item.product) })), [items]);
+  const calculatedSubtotal = items.reduce((sum, item) => sum + cartLineUnitPrice(item) * Math.max(1, Number(item.quantity) || 1), 0);
   const allProductRules = productPaymentRules.map(entry => entry.rule);
   const fullPaymentEnabled = items.length > 0 && productPaymentRules.every(entry => entry.rule.fullPaymentOfferEnabled);
   const codEnabled = items.length > 0 && productPaymentRules.every(entry => entry.rule.codEnabled);
@@ -149,12 +157,15 @@ export default function Checkout() {
   const fullPaymentOffer = paymentMethod === "full_payment"
     ? productPaymentRules.reduce((sum, { item, rule }) => {
       if (!rule.fullPaymentOfferEnabled) return sum;
-      const lineTotal = Math.max(0, Number(item.unitPrice) || 0) * Math.max(1, Number(item.quantity) || 1);
+      const lineTotal = cartLineUnitPrice(item) * Math.max(1, Number(item.quantity) || 1);
       return sum + Math.min(lineTotal, lineTotal * rule.fullPaymentOfferDiscount / 100);
     }, 0)
     : 0;
-  const total = Math.max(0, subtotal + shippingCost - couponDiscount - fullPaymentOffer);
-  const isQuote = items.some(item => item.product?.isCustomInquiry || item.product?.priceType === "custom_quote");
+  const total = Math.max(0, calculatedSubtotal + shippingCost - couponDiscount - fullPaymentOffer);
+  const isQuote = items.some(item => {
+    const hasNumericPrice = cartLineUnitPrice(item) > 0;
+    return !hasNumericPrice && (item.product?.isCustomInquiry || item.product?.priceType === "custom_quote");
+  });
   const bankDetails = parseBankDetails(settings.bankDetails);
 
   const paymentOptions = useMemo(() => [
@@ -210,7 +221,7 @@ export default function Checkout() {
       const response = await fetch("/api/coupons/validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, orderTotal: subtotal }),
+        body: JSON.stringify({ code, orderTotal: calculatedSubtotal }),
       });
       const data = await response.json();
       setCoupon(data);
@@ -228,7 +239,7 @@ export default function Checkout() {
     productId: typeof item.product?.id === "number" ? item.product.id : null,
     productName: item.product?.name || "HAVESTORY item",
     quantity: Math.max(1, item.quantity),
-    unitPrice: Number(item.unitPrice) || 0,
+    unitPrice: cartLineUnitPrice(item),
     imageUrl: item.imageUrl || undefined,
     selectedOptions: (item.selections || []).map(selection => ({ groupId: selection.groupId, choiceId: selection.choiceId })),
     selectedDetails: (item.selections || []).map(selection => ({
@@ -393,10 +404,10 @@ export default function Checkout() {
             <section className="glass-frame overflow-hidden bg-[rgba(185,216,204,0.34)] p-2">
               <div className="glass-panel-strong overflow-hidden rounded-[1.2rem] p-5 sm:p-6">
                 <div className="flex items-center justify-between gap-3"><span className="editorial-kicker">YOUR EDIT / {String(count).padStart(2, "0")}</span><Sparkles size={18} className="text-[var(--glass-saffron)]" /></div>
-                <div className="mt-6 space-y-4">{items.map(item => <div key={item.key} className="flex gap-3 border-b border-[rgba(7,26,43,0.1)] pb-4"><div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[rgba(185,216,204,0.45)]"><img src={item.imageUrl || item.product?.imageUrl || "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=300&q=80"} alt="" className="h-full w-full object-cover" /></div><div className="min-w-0 flex-1"><p className="truncate text-sm font-black text-[var(--glass-ink)]">{item.product?.name || "HAVESTORY piece"}</p><p className="mt-1 text-xs text-[rgba(7,26,43,0.58)]">{item.quantity} × {money(Number(item.unitPrice) || 0)}</p>{item.selections?.length ? <p className="mt-1 line-clamp-1 text-[10px] uppercase tracking-[0.08em] text-[rgba(7,26,43,0.5)]">{item.selections.map(selection => selection.choiceName).join(" · ")}</p> : null}</div><span className="text-sm font-black text-[var(--glass-ink)]">{money((Number(item.unitPrice) || 0) * item.quantity)}</span></div>)}</div>
-                {isQuote && <div className="mt-4 rounded-xl bg-[rgba(228,185,95,0.22)] p-3 text-xs leading-relaxed text-[var(--glass-ink)]"><strong>Quote on request.</strong> This edit includes a custom piece; the studio will confirm its final price with you.</div>}
-                <div className="mt-6 space-y-3 text-sm"><div className="flex justify-between gap-4"><span className="text-[rgba(7,26,43,0.6)]">Subtotal</span><strong>{money(subtotal)}</strong></div>{couponDiscount > 0 && <div className="flex justify-between gap-4 text-[var(--glass-clay)]"><span>Coupon</span><strong>− {money(couponDiscount)}</strong></div>}<div className="flex justify-between gap-4"><span className="text-[rgba(7,26,43,0.6)]">Delivery</span><strong>{shippingCost ? money(shippingCost) : "Free"}</strong></div>{fullPaymentOffer > 0 && <div className="flex justify-between gap-4 text-[var(--glass-clay)]"><span>Full payment offer</span><strong>− {money(fullPaymentOffer)}</strong></div>}<div className="flex justify-between gap-4 border-t border-[rgba(7,26,43,0.14)] pt-4 text-lg"><span className="font-black text-[var(--glass-ink)]">Estimated total</span><strong className="text-[var(--glass-ink)]">{isQuote ? "Quote" : money(total)}</strong></div></div>
-                <div className="checkout-coupon-row mt-6 flex gap-2"><Input value={couponCode} onChange={event => { setCouponCode(event.target.value.toUpperCase()); setCoupon(null); }} onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); applyCoupon(); } }} placeholder="Coupon code" className="checkout-input checkout-coupon-input h-10" /><Button type="button" onClick={applyCoupon} disabled={!couponCode.trim() || couponLoading} variant="outline" className="checkout-coupon-apply h-10 rounded-xl border-[rgba(7,26,43,0.16)] bg-white/35 px-4 text-[10px] font-black uppercase tracking-[0.12em]">{couponLoading ? "..." : "Apply"}</Button></div>{coupon?.valid && <p className="checkout-coupon-success mt-2 text-xs font-bold text-[var(--glass-clay)]">{coupon.code} applied — you save {money(couponDiscount)}.</p>}
+                <div className="mt-6 space-y-4">{items.map(item => <div key={item.key} className="flex gap-3 border-b border-[rgba(7,26,43,0.1)] pb-4"><div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[rgba(185,216,204,0.45)]"><img src={item.imageUrl || item.product?.imageUrl || "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=300&q=80"} alt="" className="h-full w-full object-cover" /></div><div className="min-w-0 flex-1"><p className="truncate text-sm font-black text-[var(--glass-ink)]">{item.product?.name || "HAVESTORY piece"}</p><p className="mt-1 text-xs text-[rgba(7,26,43,0.58)]">{item.quantity} × {money(cartLineUnitPrice(item))}</p>{item.selections?.length ? <p className="mt-1 line-clamp-1 text-[10px] uppercase tracking-[0.08em] text-[rgba(7,26,43,0.5)]">{item.selections.map(selection => selection.choiceName).join(" · ")}</p> : null}</div><span className="text-sm font-black text-[var(--glass-ink)]">{money(cartLineUnitPrice(item) * item.quantity)}</span></div>)}</div>
+                        {isQuote && <div className="mt-4 rounded-xl bg-[rgba(228,185,95,0.22)] p-3 text-xs leading-relaxed text-[var(--glass-ink)]"><strong>Quote on request.</strong> This edit includes a custom piece without a stored price; the studio will confirm its final price with you.</div>}
+                <div className="mt-6 space-y-3 text-sm"><div className="flex justify-between gap-4"><span className="text-[rgba(7,26,43,0.6)]">Subtotal</span><strong>{money(calculatedSubtotal)}</strong></div>{couponDiscount > 0 && <div className="flex justify-between gap-4 text-[var(--glass-clay)]"><span>Coupon</span><strong>− {money(couponDiscount)}</strong></div>}<div className="flex justify-between gap-4"><span className="text-[rgba(7,26,43,0.6)]">Delivery</span><strong>{shippingCost ? money(shippingCost) : "Free"}</strong></div>{fullPaymentOffer > 0 && <div className="flex justify-between gap-4 text-[var(--glass-clay)]"><span>Full payment offer</span><strong>− {money(fullPaymentOffer)}</strong></div>}<div className="flex justify-between gap-4 border-t border-[rgba(7,26,43,0.14)] pt-4 text-lg"><span className="font-black text-[var(--glass-ink)]">Estimated total</span><strong className="text-[var(--glass-ink)]">{isQuote ? "Quote" : money(total)}</strong></div></div>
+                <div className="checkout-coupon-row mt-6"><Input value={couponCode} onChange={event => { setCouponCode(event.target.value.toUpperCase()); setCoupon(null); }} onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); applyCoupon(); } }} placeholder="Coupon code" className="checkout-input checkout-coupon-input" /><Button type="button" onClick={applyCoupon} disabled={!couponCode.trim() || couponLoading} variant="outline" className="checkout-coupon-apply">{couponLoading ? "..." : "Apply"}</Button></div>{coupon?.valid && <p className="checkout-coupon-success mt-2 text-xs font-bold text-[var(--glass-clay)]">{coupon.code} applied — you save {money(couponDiscount)}.</p>}
               </div>
             </section>
             <div className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-1"><div className="glass-chip px-4 py-3 text-xs"><ClipboardCheck size={15} className="text-[var(--glass-clay)]" /><span><strong className="block text-[var(--glass-ink)]">Human checked</strong><small>Every order reviewed by the studio</small></span></div><div className="glass-chip px-4 py-3 text-xs"><ShieldCheck size={15} className="text-[var(--glass-clay)]" /><span><strong className="block text-[var(--glass-ink)]">Payment protected</strong><small>Proofs are automatically removed after 14 days</small></span></div></div>

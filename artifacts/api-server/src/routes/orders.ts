@@ -67,8 +67,11 @@ function resolveProductLine(rawConfig: string | null | undefined, selectedOption
     const group = (Array.isArray(config.optionGroups) ? config.optionGroups : []).find((entry: any) => entry?.id === selection.groupId);
     const choice = (Array.isArray(group?.choices) ? group.choices : []).find((entry: any) => entry?.id === selection.choiceId);
     if (!choice) continue;
-    const choicePrice = Number.parseFloat(String(choice.price ?? 0));
-    const safeChoicePrice = Number.isFinite(choicePrice) && choicePrice > 0 ? choicePrice : 0;
+    const sizeOverride = selectedSize?.choiceId && Array.isArray(choice.sizePrices)
+      ? choice.sizePrices.find((override: any) => String(override?.sizeId) === String(selectedSize.choiceId))
+      : undefined;
+    const choicePrice = Number.parseFloat(String(sizeOverride ? sizeOverride.price : choice.price ?? 0));
+    const safeChoicePrice = Number.isFinite(choicePrice) && choicePrice >= 0 ? choicePrice : 0;
     optionTotal += safeChoicePrice;
     selectedDetails.push({
       groupId: String(group.id),
@@ -76,7 +79,7 @@ function resolveProductLine(rawConfig: string | null | undefined, selectedOption
       choiceId: String(choice.id),
       choiceName: String(choice.name || "Selected option"),
       price: safeChoicePrice,
-      imageUrl: choice.imageUrl || undefined,
+      imageUrl: choice.imageUrls?.[0] || choice.imageUrl || undefined,
     });
   }
 
@@ -448,7 +451,7 @@ router.post("/", async (req, res) => {
         const shippingMethodVal = selectedDeliveryConfig?.label || null;
         let itemTotal = itemsAny.reduce((s, it) => {
           const qty = Number(it.quantity ?? it.qty ?? 1) || 1;
-          const unit = parseFloat(String(it.price ?? it.unitPrice ?? 0)) || 0;
+          const unit = parseFloat(String(it.unitPrice ?? it.price ?? 0)) || 0;
           return s + qty * unit;
         }, 0);
 
@@ -496,7 +499,7 @@ router.post("/", async (req, res) => {
           let itemsAny = trustedItems as any[];
           let itemTotal = itemsAny.reduce((s: number, it: any) => {
             const qty = Number(it.quantity ?? it.qty ?? 1) || 1;
-            const unit = parseFloat(String(it.price ?? it.unitPrice ?? 0)) || 0;
+            const unit = parseFloat(String(it.unitPrice ?? it.price ?? 0)) || 0;
             return s + qty * unit;
           }, 0);
           if (invoiceToLink && (itemsAny.length === 0 || itemTotal === 0)) {
@@ -644,7 +647,7 @@ router.post("/", async (req, res) => {
           id: randomUUID(),
           description,
           qty: Number(it.quantity ?? it.qty ?? 1) || 1,
-          unitPrice: String(parseFloat(String(it.price ?? it.unitPrice ?? 0)) || 0),
+          unitPrice: String(parseFloat(String(it.unitPrice ?? it.price ?? 0)) || 0),
           notes: baseNotes,
           selectedOptions: selectedDetails,
           imageUrl: it.imageUrl || undefined,
@@ -1117,7 +1120,7 @@ router.put("/:id", requireAdmin, async (req, res) => {
             const emailItems = orderItems.map((it: any) => ({
               name: it.name ?? it.productName ?? "Item",
               quantity: Number(it.quantity ?? it.qty ?? 1) || 1,
-              price: parseFloat(String(it.price ?? it.unitPrice ?? 0)) || 0,
+              price: parseFloat(String(it.unitPrice ?? it.price ?? 0)) || 0,
               description: it.notes || undefined,
               size: it.size || undefined,
             }));

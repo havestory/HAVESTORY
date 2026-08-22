@@ -34,7 +34,11 @@ export default function Store() {
   const [, navigate] = useLocation();
   
   const { items: cart, count: cartCount, subtotal: cartTotal, addItem } = useShopCart();
-  const estimatedTotalLabel = cartTotal > 0 ? `Rs. ${cartTotal.toFixed(2)}` : 'Quote on request';
+  const hasUnpricedInquiry = cart.some(item => {
+    const unitPrice = Number(item.unitPrice) || 0;
+    return unitPrice <= 0 && (item.product?.isCustomInquiry || item.product?.priceType === 'custom_quote');
+  });
+  const estimatedTotalLabel = hasUnpricedInquiry ? 'Quote on request' : `Rs. ${cartTotal.toFixed(2)}`;
 
   const productList = Array.isArray(products) ? products : [];
   const categoryList = Array.isArray(categories) ? categories : [];

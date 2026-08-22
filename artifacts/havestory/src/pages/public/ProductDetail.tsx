@@ -49,6 +49,12 @@ export default function ProductDetail() {
   const minQuantity = Math.max(1, Number(activeSize?.minQty) || Number(config.minQuantity) || 1);
   const quantityStep = Math.max(1, Number(activeSize?.packSize) || Number(config.quantityStep) || 1);
   const sizeUnitPrice = getSizeUnitPrice(activeSize, Math.max(minQuantity, quantity));
+  const getChoicePrice = (choice: { price?: string | number; sizePrices?: { sizeId: string; price: string }[] }) => {
+    const sizeOverride = activeSize?.id
+      ? choice.sizePrices?.find(override => String(override.sizeId) === String(activeSize.id))
+      : undefined;
+    return money(sizeOverride ? sizeOverride.price : choice.price);
+  };
   const sizeSelection: CartSelection[] = activeSize ? [{
     groupId: "product-size",
     groupTitle: config.sizeLabel || "Size",
@@ -66,7 +72,7 @@ export default function ProductDetail() {
       groupTitle: group.title,
       choiceId: choice.id,
       choiceName: choice.name,
-      price: money(choice.price),
+      price: getChoicePrice(choice),
       imageUrl: choice.imageUrls?.[0] || choice.imageUrl,
       imageUrls: choice.imageUrls,
     }] : [];
@@ -184,7 +190,7 @@ export default function ProductDetail() {
                 <Select value={selected[group.id] || ""} onValueChange={value => { const choice = group.choices.find(item => item.id === value); if (choice) choose(group.id, choice.id, choice.imageUrl, choice.imageUrls); }}>
                   <SelectTrigger aria-label={group.title} className="hs-product-select-trigger"><SelectValue placeholder={`Select ${group.title.toLowerCase()}`} /></SelectTrigger>
                   <SelectContent position="item-aligned" className="hs-product-select-content">
-                    {group.choices.map(choice => <SelectItem key={choice.id} value={choice.id}>{choice.name}{money(choice.price) > 0 ? ` — + ${formatMoney(choice.price)}` : ""}</SelectItem>)}
+                    {group.choices.map(choice => { const choicePrice = getChoicePrice(choice); return <SelectItem key={choice.id} value={choice.id}>{choice.name}{choicePrice > 0 ? ` — + ${formatMoney(choicePrice)}` : ""}</SelectItem>; })}
                   </SelectContent>
                 </Select>
               </div>
@@ -197,7 +203,7 @@ export default function ProductDetail() {
               <legend>{group.title}<span>{selections.find(item => item.groupId === group.id)?.choiceName}</span></legend>
               <div>{group.choices.map(choice => {
                 const isSelected = (selected[group.id] || group.choices[0]?.id) === choice.id;
-                return <button key={choice.id} type="button" className={isSelected ? "is-selected" : ""} onClick={() => choose(group.id, choice.id, choice.imageUrl, choice.imageUrls)}>{(choice.imageUrls?.[0] || choice.imageUrl) && <img src={choice.imageUrls?.[0] || choice.imageUrl} alt="" />}<span>{choice.name}{money(choice.price) > 0 && <small>+ {formatMoney(choice.price)}</small>}</span>{isSelected && <Check />}</button>;
+                return <button key={choice.id} type="button" className={isSelected ? "is-selected" : ""} onClick={() => choose(group.id, choice.id, choice.imageUrl, choice.imageUrls)}>{(choice.imageUrls?.[0] || choice.imageUrl) && <img src={choice.imageUrls?.[0] || choice.imageUrl} alt="" />}<span>{choice.name}{getChoicePrice(choice) > 0 && <small>+ {formatMoney(getChoicePrice(choice))}</small>}</span>{isSelected && <Check />}</button>;
               })}</div>
             </fieldset>
           ))}
