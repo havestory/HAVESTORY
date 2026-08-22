@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db } from "@workspace/db";
+import { db, pool } from "@workspace/db";
 import { ordersTable, settingsTable, productsTable, clientsTable, couponsTable } from "@workspace/db/schema";
 import { invoicesTable } from "@workspace/db/schema";
 import { eq, and, desc, isNull, inArray, sql } from "drizzle-orm";
@@ -35,26 +35,13 @@ async function generateOrderId(): Promise<string> {
   const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
   const month = months[now.getMonth()];
 
-  // Query all existing orders to determine the next sequential number
-  const allOrders = await db.select({ orderId: ordersTable.orderId }).from(ordersTable);
-
-  // Find the highest sequential number used so far (supports all formats:
-  //   accepted: BRAND-MON-NNNN and BRAND-MON-NNNN-XXX
-  //   current: MON-NNNN-XXX)
-  let maxSeq = 0;
-  for (const o of allOrders) {
-    const match = o.orderId?.match(/(?:[A-Z]{2}-)?[A-Z]+-(\d{4})(?:-[A-Z0-9]+)?$/);
-    if (match) {
-      const n = parseInt(match[1], 10);
-      if (n > maxSeq) maxSeq = n;
-    }
-  }
-
-  // Use max(total order count, highest existing sequence) + 1 as the next number
-  const nextSeq = Math.max(maxSeq, allOrders.length) + 1;
+  // The sequence is seeded from legacy order IDs during startup migration.
+  // nextval is O(1) and concurrency-safe, unlike the old full-table scan.
+  const { rows } = await pool.query<{ seq: string }>("SELECT nextval('order_number_seq') AS seq");
+  const nextSeq = Number(rows[0]?.seq) || 1;
   const padded = String(nextSeq).padStart(4, "0");
   // Append a 3-char random alphanumeric suffix so customers cannot enumerate
-  // adjacent order IDs and access other customers' details
+  // adjacent order IDs and access other customers' details.
   return `HS-${month}-${padded}-${randomSuffix()}`;
 }
 
@@ -133,6 +120,7 @@ router.get("/", requireAdmin, async (req, res) => {
     const orders = await db.select().from(ordersTable)
       .where(and(...conditions))
       .orderBy(desc(ordersTable.createdAt));
+    res.setHeader("Cache-Control", "private, max-age=15, stale-while-revalidate=30");
     res.json(orders.map(serializeOrder));
   } catch (err) {
     req.log.error(err);

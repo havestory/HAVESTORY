@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { db, pool } from "@workspace/db";
-import { clientsTable } from "@workspace/db/schema";
-import { eq, isNull, or } from "drizzle-orm";
-import { requireAdmin, requireOwner } from "../lib/auth-cookie";
+import { clientsTable, crmProjectsTable, invoicesTable } from "@workspace/db/schema";
+import { eq, isNull, or, and, desc, sql } from "drizzle-orm";
+import { getAdminAuth, hasPermission, requireAdmin, requireOwner } from "../lib/auth-cookie";
 import { parseIdParam } from "../lib/parse-id";
 import { DuplicateClientPhoneError, findClientIdByPhone, replaceClientPhoneClaims } from "../lib/client-dedupe";
 
@@ -26,10 +26,129 @@ router.use(requireAdmin);
 router.get("/", async (req, res) => {
   try {
     const clients = await db.select().from(clientsTable).where(isNull(clientsTable.deletedAt)).orderBy(clientsTable.createdAt);
+    res.setHeader("Cache-Control", "private, max-age=15, stale-while-revalidate=30");
     res.json(clients);
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to fetch clients" });
+  }
+});
+
+// Lightweight list metadata for the Clients screen. The old UI downloaded all
+// invoices and CRM projects and then performed an O(clients × records) join in
+// the browser. Keep the card payload bounded to one row per client instead.
+router.get("/summary", async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT c.id,c.name,c.business_name,c.email,c.phone,c.address,c.notes,c.approved,c.created_at,c.updated_at,
+        COALESCE(p.project_count,0)::int AS project_count,
+        COALESCE(i.invoice_count,0)::int AS invoice_count,
+        COALESCE(i.invoiced,0)::numeric AS invoiced,
+        COALESCE(i.paid,0)::numeric AS paid
+      FROM clients c
+      LEFT JOIN (
+        SELECT c2.id,COUNT(DISTINCT p.id) AS project_count
+        FROM clients c2
+        LEFT JOIN crm_projects p ON p.deleted_at IS NULL AND (
+          p.client_id=c2.id OR (p.client_id IS NULL AND LOWER(BTRIM(p.client_name))=LOWER(BTRIM(c2.name)))
+        )
+        WHERE c2.deleted_at IS NULL
+        GROUP BY c2.id
+      ) p ON p.id=c.id
+      LEFT JOIN (
+        SELECT c3.id,
+          COUNT(DISTINCT inv.id) AS invoice_count,
+          COALESCE(SUM(COALESCE(NULLIF(REGEXP_REPLACE(inv.amount,'[^0-9.-]','','g'),'')::numeric,0)),0) AS invoiced,
+          COALESCE(SUM(CASE
+            WHEN LOWER(inv.status)='paid' THEN COALESCE(NULLIF(REGEXP_REPLACE(inv.amount,'[^0-9.-]','','g'),'')::numeric,0)
+            WHEN LOWER(inv.status)='partial' AND COALESCE(inv.metadata,'') ~ '^\\s*\\{'
+              THEN LEAST(
+                COALESCE(NULLIF(REGEXP_REPLACE(inv.amount,'[^0-9.-]','','g'),'')::numeric,0),
+                COALESCE(NULLIF((regexp_match(inv.metadata, '"advance"[[:space:]]*:[[:space:]]*"?([0-9]+([.][0-9]+)?)"?'))[1], '')::numeric,0)
+              )
+            ELSE 0
+          END),0) AS paid
+        FROM clients c3
+        LEFT JOIN invoices inv ON inv.deleted_at IS NULL AND (
+          inv.client_id=c3.id OR (inv.client_id IS NULL AND LOWER(BTRIM(inv.client_name))=LOWER(BTRIM(c3.name)))
+        )
+        WHERE c3.deleted_at IS NULL
+        GROUP BY c3.id
+      ) i ON i.id=c.id
+      WHERE c.deleted_at IS NULL
+      ORDER BY c.created_at ASC
+    `);
+    res.setHeader("Cache-Control", "private, max-age=15, stale-while-revalidate=30");
+    res.json(rows.map((row: any) => ({
+      id: row.id,
+      name: row.name,
+      businessName: row.business_name,
+      email: row.email,
+      phone: row.phone,
+      address: row.address,
+      notes: row.notes,
+      approved: row.approved,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      projectCount: Number(row.project_count) || 0,
+      invoiceCount: Number(row.invoice_count) || 0,
+      invoiced: Number(row.invoiced) || 0,
+      paid: Number(row.paid) || 0,
+    })));
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to fetch client summaries" });
+  }
+});
+
+function parseInvoiceMetadata(value: unknown): any {
+  try { return typeof value === "string" ? JSON.parse(value) : (value || {}); } catch { return {}; }
+}
+
+function stripPrivateInvoiceFields(invoice: any): any {
+  const meta = parseInvoiceMetadata(invoice?.metadata);
+  const clean = {
+    ...meta,
+    form: meta.form ? { ...meta.form, internalNotes: "" } : meta.form,
+    items: Array.isArray(meta.items) ? meta.items.map((item: any) => {
+      const { costPrice: _costPrice, costComponents: _costComponents, deductStock: _deductStock, ...publicItem } = item || {};
+      return publicItem;
+    }) : meta.items,
+  };
+  return { ...invoice, metadata: JSON.stringify(clean) };
+}
+
+// Full linked records are loaded only when an admin opens a client card.
+router.get("/:id/activity", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: "Invalid client id" });
+    const [client] = await db.select({ id: clientsTable.id, name: clientsTable.name })
+      .from(clientsTable).where(and(eq(clientsTable.id, id), isNull(clientsTable.deletedAt))).limit(1);
+    if (!client) return res.status(404).json({ error: "Client not found" });
+
+    const [projects, invoices] = await Promise.all([
+      db.select().from(crmProjectsTable)
+        .where(and(isNull(crmProjectsTable.deletedAt), or(
+          eq(crmProjectsTable.clientId, id),
+          and(isNull(crmProjectsTable.clientId), sql`LOWER(BTRIM(${crmProjectsTable.clientName}))=LOWER(BTRIM(${client.name}))`),
+        )))
+        .orderBy(desc(crmProjectsTable.createdAt)),
+      db.select().from(invoicesTable)
+        .where(and(isNull(invoicesTable.deletedAt), or(
+          eq(invoicesTable.clientId, id),
+          and(isNull(invoicesTable.clientId), sql`LOWER(BTRIM(${invoicesTable.clientName}))=LOWER(BTRIM(${client.name}))`),
+        )))
+        .orderBy(desc(invoicesTable.createdAt)),
+    ]);
+    const visibleInvoices = hasPermission(getAdminAuth(req), "finance")
+      ? invoices
+      : invoices.map(stripPrivateInvoiceFields);
+    res.setHeader("Cache-Control", "private, max-age=15, stale-while-revalidate=30");
+    res.json({ projects, invoices: visibleInvoices });
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to fetch client activity" });
   }
 });
 

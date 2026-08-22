@@ -72,6 +72,21 @@ export async function runStartupMigrations(
       CREATE INDEX IF NOT EXISTS admin_activity_created_idx ON admin_activity_log(created_at DESC);
       CREATE INDEX IF NOT EXISTS admin_activity_actor_idx ON admin_activity_log(actor_id, created_at DESC);
 
+      -- O(1), concurrency-safe order numbering. Seed from legacy IDs once per startup.
+      CREATE SEQUENCE IF NOT EXISTS order_number_seq MINVALUE 1;
+      SELECT setval(
+        'order_number_seq',
+        GREATEST(1, seed.max_value),
+        seed.max_value > 0
+      )
+      FROM (
+        SELECT GREATEST(
+          COUNT(*)::bigint,
+          COALESCE(MAX(((regexp_match(order_id, '(?:[A-Z]{2}-)?[A-Z]+-([0-9]{4})(?:-[A-Z0-9]+)?$'))[1])::bigint), 0)
+        ) AS max_value
+        FROM orders
+      ) seed;
+
       -- Reports performance indexes (allow range scans without DATE() cast overhead)
       CREATE INDEX IF NOT EXISTS idx_orders_created_at       ON orders  (created_at DESC) WHERE deleted_at IS NULL;
       CREATE INDEX IF NOT EXISTS idx_orders_status_created   ON orders  (status, created_at DESC) WHERE deleted_at IS NULL;
@@ -79,6 +94,9 @@ export async function runStartupMigrations(
       CREATE INDEX IF NOT EXISTS idx_invoices_created_at     ON invoices(created_at DESC) WHERE deleted_at IS NULL;
       CREATE INDEX IF NOT EXISTS idx_invoices_status_created ON invoices(status, created_at DESC) WHERE deleted_at IS NULL;
       CREATE INDEX IF NOT EXISTS idx_invoices_client_created ON invoices(client_id, created_at DESC) WHERE deleted_at IS NULL;
+      CREATE INDEX IF NOT EXISTS idx_invoices_legacy_name ON invoices(LOWER(BTRIM(client_name))) WHERE deleted_at IS NULL AND client_id IS NULL;
+      CREATE INDEX IF NOT EXISTS idx_crm_projects_client_created ON crm_projects(client_id, created_at DESC) WHERE deleted_at IS NULL;
+      CREATE INDEX IF NOT EXISTS idx_crm_projects_legacy_name ON crm_projects(LOWER(BTRIM(client_name))) WHERE deleted_at IS NULL AND client_id IS NULL;
       CREATE INDEX IF NOT EXISTS idx_clients_created_at      ON clients (created_at DESC) WHERE deleted_at IS NULL;
       CREATE INDEX IF NOT EXISTS idx_inv_material_usage_item ON invoice_material_usage(inventory_item_id, created_at);
     `);

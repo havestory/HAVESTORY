@@ -185,9 +185,16 @@ export default function Orders() {
   const [sections, setSections] = useState({ status: true, customer: true, project: true, files: true, payment: true, delivery: true });
   const [paymentReviewLoading, setPaymentReviewLoading] = useState<'approve' | 'reject' | null>(null);
 
-  const { data: orders, isLoading, isError, refetch } = useListOrders(statusFilter !== 'all' ? { status: statusFilter } : {});
-  const { data: clients = [], isLoading: clientsLoading } = useListClients();
-  const { data: invoices = [], isLoading: invoicesLoading } = useListInvoices();
+  const { data: orders, isLoading, isError, refetch } = useListOrders(
+    statusFilter !== 'all' ? { status: statusFilter } : {},
+    { query: { staleTime: 15_000, gcTime: 5 * 60_000, refetchOnWindowFocus: false } as any },
+  );
+  const { data: clients = [], isLoading: clientsLoading } = useListClients({
+    query: { staleTime: 30_000, gcTime: 5 * 60_000, refetchOnWindowFocus: false } as any,
+  });
+  const { data: invoices = [], isLoading: invoicesLoading } = useListInvoices({
+    query: { staleTime: 30_000, gcTime: 5 * 60_000, refetchOnWindowFocus: false } as any,
+  });
   const createOrder = useCreateOrder();
   const createClient = useCreateClient();
   const createInvoice = useCreateInvoice();

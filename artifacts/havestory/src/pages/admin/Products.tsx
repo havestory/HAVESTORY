@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useListProducts, useListCategories, useCreateProduct, useUpdateProduct, useDeleteProduct, createCategory } from "@workspace/api-client-react";
+import { useListProducts, useListCategories, useCreateProduct, useUpdateProduct, useDeleteProduct, createCategory, useGetAdminMe } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { broadcastAdminSave } from "@/lib/home-cache";
 import { Search, Plus, Edit2, Trash2, Package, Image, X, GripVertical, ChevronDown, ChevronUp, Tag, Layers, Upload, Loader2, ImagePlus, Star as StarIcon, FileText, ExternalLink, Sparkles, Hash, Ruler, Gift } from "lucide-react";
@@ -765,8 +765,8 @@ export default function AdminProducts() {
   const [catFormError, setCatFormError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const guideInputRef = useRef<HTMLInputElement>(null);
-  useEffect(()=>{fetch("/api/admin/me",{credentials:"include",cache:"no-store"}).then(r=>r.json()).then(s=>setReadOnly(s?.role==="staff")).catch(()=>setReadOnly(true));},[]);
-
+    const { data: admin } = useGetAdminMe({ query: { staleTime: 5 * 60_000, retry: false, refetchOnWindowFocus: false } as any });
+  useEffect(() => { setReadOnly(admin?.role === "staff"); }, [admin?.role]);
   const { data: products } = useListProducts();
   const { data: categories } = useListCategories();
   const queryClient = useQueryClient();

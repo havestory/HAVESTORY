@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
-import { useListClients, useCreateClient, useUpdateClient, useDeleteClient, useListInvoices, useGetSettings } from "@workspace/api-client-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useCreateClient, useUpdateClient, useDeleteClient, useGetAdminMe, useGetSettings } from "@workspace/api-client-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Search, Plus, Download, RefreshCw, X, Users, Phone, MapPin, Mail, FileText, MoreVertical, Pencil, Trash2, UserCircle2, Briefcase, Receipt, ChevronRight, ExternalLink, CheckCircle2, PackageCheck, ShieldCheck, Copy, FileSignature } from "lucide-react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -20,6 +20,13 @@ type Client = {
   approved?: boolean;
   createdAt?: string | null;
   updatedAt?: string | null;
+};
+
+type ClientSummary = Client & {
+  projectCount: number;
+  invoiceCount: number;
+  invoiced: number;
+  paid: number;
 };
 
 type CrmProject = {
@@ -308,7 +315,6 @@ export default function AdminClients() {
   const businessName = getBusinessName(settings as any);
   const agreementTemplates = useMemo(() => buildAgreementTemplates(businessName), [businessName]);
   const [search, setSearch] = useState("");
-  const [isOwner,setIsOwner]=useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
@@ -329,20 +335,37 @@ export default function AdminClients() {
   const [showAgreementForm,setShowAgreementForm]=useState(false);
   const [, setLocation] = useLocation();
 
-  const { data: rawClients, refetch, isFetching } = useListClients();
-  const { data: rawInvoices, refetch: refetchInvoices } = useListInvoices();
-  const clients = (rawClients ?? []) as Client[];
-  const invoices = (rawInvoices ?? []) as InvoiceLite[];
+  const { data: admin } = useGetAdminMe({ query: { staleTime: 5 * 60_000, retry: false, refetchOnWindowFocus: false } as any });
+  const isOwner = Boolean(admin && admin.role !== "staff");
+  const {
+    data: clients = [],
+    refetch,
+    isFetching,
+  } = useQuery<ClientSummary[]>({
+    queryKey: ["/api/clients/summary"],
+    queryFn: async () => {
+      const response = await fetch("/api/clients/summary", { credentials: "include" });
+      if (!response.ok) throw new Error("Failed to fetch client summaries");
+      return response.json();
+    },
+    staleTime: 15_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+    placeholderData: (previous) => previous,
+  });
 
-  // CRM projects (no generated hook — fetch directly)
-  const [crmProjects, setCrmProjects] = useState<CrmProject[]>([]);
-  const fetchCrmProjects = async () => {
-    try {
-      const res = await fetch("/api/crm-projects");
-      if (res.ok) setCrmProjects(await res.json());
-    } catch {}
-  };
-  useEffect(() => { fetchCrmProjects(); fetch("/api/admin/me",{credentials:"include",cache:"no-store"}).then(r=>r.json()).then(s=>setIsOwner(s?.role!=="staff")).catch(()=>setIsOwner(false)); }, []);
+  const { data: activityData, isFetching: activityLoading } = useQuery<{ projects: CrmProject[]; invoices: InvoiceLite[] }>({
+    queryKey: ["/api/clients", viewingClient?.id, "activity"],
+    queryFn: async () => {
+      const response = await fetch(`/api/clients/${viewingClient!.id}/activity`, { credentials: "include" });
+      if (!response.ok) throw new Error("Failed to fetch client activity");
+      return response.json();
+    },
+    enabled: Boolean(viewingClient?.id),
+    staleTime: 15_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+  });
 
   useEffect(() => {
     setVerification(null);
@@ -405,7 +428,10 @@ export default function AdminClients() {
   };
 
   const queryClient = useQueryClient();
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ["/api/clients/summary"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+  };
 
   const { mutate: createClient, isPending: isCreating } = useCreateClient({ mutation: { onSuccess: () => { invalidate(); setShowAdd(false); setForm(EMPTY_FORM); } } });
   const { mutate: updateClient, isPending: isUpdating } = useUpdateClient({ mutation: { onSuccess: () => { invalidate(); setEditingClient(null); setForm(EMPTY_FORM); } } });
@@ -413,33 +439,22 @@ export default function AdminClients() {
 
   const clientCode = (c: Client) => `C${String(c.id).padStart(4, "0")}`;
 
-  // Per-client linked records: prefer clientId match, fall back to case-insensitive name match
-  // so legacy rows that only have clientName still show up.
-  const clientStats = useMemo(() => {
-    const map = new Map<number, {
-      projects: CrmProject[];
-      invoices: InvoiceLite[];
-      invoiced: number;
-      paid: number;
-    }>();
-    for (const c of clients) {
-      const nameKey = (c.name || "").trim().toLowerCase();
-      const projects = crmProjects.filter(p =>
-        (p.clientId != null && p.clientId === c.id) ||
-        (p.clientId == null && (p.clientName || "").trim().toLowerCase() === nameKey && nameKey !== "")
-      );
-      const invs = invoices.filter(inv =>
-        (inv.clientId != null && inv.clientId === c.id) ||
-        (inv.clientId == null && (inv.clientName || "").trim().toLowerCase() === nameKey && nameKey !== "")
-      );
-      const invoiced = invs.reduce((s, i) => s + num(i.amount), 0);
-      const paid = invs.reduce((s, i) => s + getInvoicePaidAmount(i as any), 0);
-      map.set(c.id, { projects, invoices: invs, invoiced, paid });
-    }
-    return map;
-  }, [clients, crmProjects, invoices]);
-
-  const statsFor = (c: Client) => clientStats.get(c.id) ?? { projects: [], invoices: [], invoiced: 0, paid: 0 };
+  // Summary rows keep the initial page payload small. Full linked records are
+  // requested only for the client whose details are currently open.
+  const statsFor = (c: Client) => {
+    const summary = c as ClientSummary;
+    const isSelected = viewingClient?.id === c.id && Boolean(activityData);
+    const linkedInvoices = isSelected ? activityData!.invoices : [];
+    const linkedProjects = isSelected ? activityData!.projects : [];
+    return {
+      projects: linkedProjects,
+      invoices: linkedInvoices,
+      projectCount: isSelected ? linkedProjects.length : (summary?.projectCount || 0),
+      invoiceCount: isSelected ? linkedInvoices.length : (summary?.invoiceCount || 0),
+      invoiced: isSelected ? linkedInvoices.reduce((total, invoice) => total + num(invoice.amount), 0) : (summary?.invoiced || 0),
+      paid: isSelected ? linkedInvoices.reduce((total, invoice) => total + getInvoicePaidAmount(invoice as any), 0) : (summary?.paid || 0),
+    };
+  };
 
   const openAdd = () => { setForm(EMPTY_FORM); setShowAdd(true); };
   const openEdit = (c: Client) => {
@@ -457,9 +472,12 @@ export default function AdminClients() {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
+      await queryClient.invalidateQueries({ queryKey: ["/api/clients/summary"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
-      await queryClient.invalidateQueries({ queryKey: ["/api/invoices"] });
-      await Promise.all([refetch(), refetchInvoices(), fetchCrmProjects()]);
+      await refetch();
+      if (viewingClient?.id) {
+        await queryClient.invalidateQueries({ queryKey: ["/api/clients", viewingClient.id, "activity"] });
+      }
     } finally {
       setTimeout(() => setRefreshing(false), 400);
     }
@@ -676,20 +694,20 @@ export default function AdminClients() {
                     below it (left-aligned with a green check icon), chevron
                     stays on the far right. Stacking the paid amount avoids
                     the mobile overflow we used to see on grid-cols-2 cards. */}
-                {(stats.projects.length > 0 || stats.invoices.length > 0) && (
+                {(stats.projectCount > 0 || stats.invoiceCount > 0) && (
                   <div className="pt-2 mt-auto border-t border-gray-100">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex flex-col gap-1 min-w-0 flex-1">
                         <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-[11px] sm:text-xs">
-                          {stats.projects.length > 0 && (
+                          {stats.projectCount > 0 && (
                             <div className="flex items-center gap-1 text-stone-600 font-semibold">
                               <Briefcase size={11} className="shrink-0" />
-                              <span>{stats.projects.length} {stats.projects.length === 1 ? "project" : "projects"}</span>
+                              <span>{stats.projectCount} {stats.projectCount === 1 ? "project" : "projects"}</span>
                             </div>
                           )}
-                          {stats.invoices.length > 0 && (
+                          {stats.invoiceCount > 0 && (
                             <>
-                              {stats.projects.length > 0 && <span className="text-gray-300">·</span>}
+                              {stats.projectCount > 0 && <span className="text-gray-300">·</span>}
                               <div className="flex items-center gap-1 text-amber-600 font-semibold min-w-0">
                                 <Receipt size={11} className="shrink-0" />
                                 <span className="truncate">{rs(stats.invoiced)}</span>
@@ -710,7 +728,7 @@ export default function AdminClients() {
                 )}
 
                 {/* Empty stats — keep the original simple footer */}
-                {stats.projects.length === 0 && stats.invoices.length === 0 && (
+                {stats.projectCount === 0 && stats.invoiceCount === 0 && (
                   <div className="flex items-center justify-between gap-1 pt-2 mt-auto border-t border-gray-100">
                     <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs text-gray-400 min-w-0">
                       <FileText size={11} className="text-gray-300 shrink-0" />
@@ -769,7 +787,7 @@ export default function AdminClients() {
               {/* Summary stats */}
               <div className="grid grid-cols-3 gap-2 sm:gap-3 px-4 sm:px-5 py-3 border-b border-gray-100 bg-gray-50/50">
                 <div className="text-center">
-                  <div className="text-lg sm:text-xl font-bold text-stone-600">{stats.projects.length}</div>
+                  <div className="text-lg sm:text-xl font-bold text-stone-600">{stats.projectCount}</div>
                   <div className="text-[10px] sm:text-xs text-gray-500 mt-0.5">Projects</div>
                 </div>
                 <div className="text-center">
@@ -784,6 +802,9 @@ export default function AdminClients() {
 
               {/* Scrollable content */}
               <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-5">
+                {activityLoading && !activityData && (
+                  <div className="rounded-2xl border border-amber-100 bg-amber-50/60 px-4 py-3 text-xs font-semibold text-amber-700">Loading client activity…</div>
+                )}
                 {/* Full customer profile */}
                 <div>
                   <div className="mb-2 flex items-center justify-between">

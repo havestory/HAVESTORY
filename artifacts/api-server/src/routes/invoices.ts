@@ -96,6 +96,7 @@ function preservePrivateMetadata(existingValue: unknown, incomingValue: unknown)
 router.get("/", async (req, res) => {
   try {
     const invoices = await db.select().from(invoicesTable).where(isNull(invoicesTable.deletedAt)).orderBy(desc(invoicesTable.createdAt));
+    res.setHeader("Cache-Control", "private, max-age=15, stale-while-revalidate=30");
     res.json(invoices.map(invoice => invoiceForCaller(req, invoice)));
   } catch (err) {
     req.log.error(err);
