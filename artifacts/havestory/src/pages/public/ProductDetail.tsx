@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useGetProduct } from "@workspace/api-client-react";
 import { Link, useLocation, useRoute } from "wouter";
-import { ArrowLeft, ArrowRight, Check, ChevronDown, ChevronLeft, ChevronRight, ExternalLink, Minus, Plus, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, ChevronLeft, ChevronRight, ExternalLink, Minus, Plus, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useShopCart, type CartSelection } from "@/lib/shop-cart";
@@ -161,11 +162,12 @@ export default function ProductDetail() {
             <fieldset className="hs-product-options hs-product-size-options hs-product-dropdown-section">
               <legend>{config.sizeLabel || "Choose a size"}<span>{activeSize?.name || "Select one"}</span></legend>
               <div className="hs-product-select-shell">
-                <select aria-label={config.sizeLabel || "Choose a size"} value={selectedSizeId} onChange={event => { const next = sizeOptions.find(size => size.id === event.target.value); if (next) chooseSize(next); }}>
-                  <option value="" disabled>Select a size</option>
-                  {sizeOptions.map(size => <option key={size.id} value={size.id}>{size.name || "Unnamed size"} — {formatMoney(getSizeUnitPrice(size, Math.max(minQuantity, quantity)))} / {size.unitLabel || "unit"}</option>)}
-                </select>
-                <ChevronDown aria-hidden="true" />
+                <Select value={selectedSizeId} onValueChange={value => { const next = sizeOptions.find(size => size.id === value); if (next) chooseSize(next); }}>
+                  <SelectTrigger aria-label={config.sizeLabel || "Choose a size"} className="hs-product-select-trigger"><SelectValue placeholder="Select a size" /></SelectTrigger>
+                  <SelectContent position="item-aligned" className="hs-product-select-content">
+                    {sizeOptions.map(size => <SelectItem key={size.id} value={size.id}>{size.name || "Unnamed size"} — {formatMoney(getSizeUnitPrice(size, Math.max(minQuantity, quantity)))} / {size.unitLabel || "unit"}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
               {activeSize?.imageUrl && <div className="hs-product-selection-preview"><img src={activeSize.imageUrl} alt="" /><span>Preview for {activeSize.name}</span></div>}
             </fieldset>
@@ -175,11 +177,12 @@ export default function ProductDetail() {
             <fieldset className="hs-product-options hs-product-dropdown-section" key={group.id}>
               <legend>{group.title}<span>{selections.find(item => item.groupId === group.id)?.choiceName || "Select one"}</span></legend>
               <div className="hs-product-select-shell">
-                <select aria-label={group.title} value={selected[group.id] || ""} onChange={event => { const choice = group.choices.find(item => item.id === event.target.value); if (choice) choose(group.id, choice.id, choice.imageUrl); }}>
-                  <option value="" disabled>Select {group.title.toLowerCase()}</option>
-                  {group.choices.map(choice => <option key={choice.id} value={choice.id}>{choice.name}{money(choice.price) > 0 ? ` — + ${formatMoney(choice.price)}` : ""}</option>)}
-                </select>
-                <ChevronDown aria-hidden="true" />
+                <Select value={selected[group.id] || ""} onValueChange={value => { const choice = group.choices.find(item => item.id === value); if (choice) choose(group.id, choice.id, choice.imageUrl); }}>
+                  <SelectTrigger aria-label={group.title} className="hs-product-select-trigger"><SelectValue placeholder={`Select ${group.title.toLowerCase()}`} /></SelectTrigger>
+                  <SelectContent position="item-aligned" className="hs-product-select-content">
+                    {group.choices.map(choice => <SelectItem key={choice.id} value={choice.id}>{choice.name}{money(choice.price) > 0 ? ` — + ${formatMoney(choice.price)}` : ""}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
               {selections.find(item => item.groupId === group.id)?.imageUrl && <div className="hs-product-selection-preview"><img src={selections.find(item => item.groupId === group.id)?.imageUrl} alt="" /><span>Preview for {selections.find(item => item.groupId === group.id)?.choiceName}</span></div>}
             </fieldset>
