@@ -1,6 +1,6 @@
 import { pool } from "@workspace/db";
 
-const SCHEMA_VERSION = "2026-08-23-product-format-column-v3";
+const SCHEMA_VERSION = "2026-08-24-product-catalog-metadata-v4";
 let runtimeSchemaReady: Promise<void> | null = null;
 
 async function versionExists(version: string): Promise<boolean> {

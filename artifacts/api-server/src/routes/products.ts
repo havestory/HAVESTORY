@@ -152,9 +152,15 @@ function legacyBaseSelect() {
   return select;
 }
 
-/** True when the Postgres error indicates a missing column (code 42703). */
+function legacyProductSelect() {
+  const { category: _category, ...select } = legacyBaseSelect();
+  return select;
+}
+
+/** True when the Postgres driver reports a missing column, regardless of error shape. */
 function isMissingColumn(err: unknown): boolean {
-  return (err as any)?.code === "42703";
+  const error = err as any;
+  return error?.code === "42703" || /column [^\n]+ does not exist/i.test(String(error?.message ?? err ?? ""));
 }
 
 router.get("/", async (req, res) => {
@@ -305,11 +311,20 @@ router.get("/:id", async (req, res) => {
         .where(lookup);
     } catch (err) {
       if (!isMissingColumn(err) || numericId === null) throw err;
-      [result] = await db
-        .select({ products: { id: productsTable.id, categoryId: productsTable.categoryId, name: productsTable.name, description: productsTable.description, price: productsTable.price, priceType: productsTable.priceType, imageUrl: productsTable.imageUrl, galleryImages: productsTable.galleryImages, featured: productsTable.featured, active: productsTable.active, sortOrder: productsTable.sortOrder, customConfig: productsTable.customConfig, artworkGuideUrl: productsTable.artworkGuideUrl, artworkGuideName: productsTable.artworkGuideName, createdAt: productsTable.createdAt }, categories: { id: categoriesTable.id, name: categoriesTable.name, description: categoriesTable.description, imageUrl: categoriesTable.imageUrl, sortOrder: categoriesTable.sortOrder, createdAt: categoriesTable.createdAt } })
-        .from(productsTable)
-        .leftJoin(categoriesTable, eq(productsTable.categoryId, categoriesTable.id))
-        .where(eq(productsTable.id, numericId));
+      try {
+        [result] = await db
+          .select({ products: { id: productsTable.id, categoryId: productsTable.categoryId, name: productsTable.name, description: productsTable.description, price: productsTable.price, priceType: productsTable.priceType, imageUrl: productsTable.imageUrl, galleryImages: productsTable.galleryImages, featured: productsTable.featured, active: productsTable.active, sortOrder: productsTable.sortOrder, customConfig: productsTable.customConfig, artworkGuideUrl: productsTable.artworkGuideUrl, artworkGuideName: productsTable.artworkGuideName, createdAt: productsTable.createdAt }, categories: { id: categoriesTable.id, name: categoriesTable.name, description: categoriesTable.description, imageUrl: categoriesTable.imageUrl, sortOrder: categoriesTable.sortOrder, createdAt: categoriesTable.createdAt } })
+          .from(productsTable)
+          .leftJoin(categoriesTable, eq(productsTable.categoryId, categoriesTable.id))
+          .where(eq(productsTable.id, numericId));
+      } catch (legacyArtworkErr) {
+        if (!isMissingColumn(legacyArtworkErr)) throw legacyArtworkErr;
+        [result] = await db
+          .select({ products: legacyProductSelect(), categories: { id: categoriesTable.id, name: categoriesTable.name, description: categoriesTable.description, imageUrl: categoriesTable.imageUrl, sortOrder: categoriesTable.sortOrder, createdAt: categoriesTable.createdAt } })
+          .from(productsTable)
+          .leftJoin(categoriesTable, eq(productsTable.categoryId, categoriesTable.id))
+          .where(eq(productsTable.id, numericId));
+      }
     }
 
     if (!result) return res.status(404).json({ error: "Product not found" });
