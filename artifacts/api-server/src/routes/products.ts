@@ -148,7 +148,7 @@ function baseSelect() {
 }
 
 function legacyBaseSelect() {
-  const { productFormat: _productFormat, slug: _slug, keywords: _keywords, ...select } = baseSelect();
+  const { productFormat: _productFormat, slug: _slug, keywords: _keywords, artworkGuideUrl: _artworkGuideUrl, artworkGuideName: _artworkGuideName, ...select } = baseSelect();
   return select;
 }
 

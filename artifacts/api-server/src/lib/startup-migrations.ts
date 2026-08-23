@@ -256,6 +256,8 @@ export async function runStartupMigrations(
       ALTER TABLE products
         ADD COLUMN IF NOT EXISTS slug TEXT,
         ADD COLUMN IF NOT EXISTS keywords TEXT,
+        ADD COLUMN IF NOT EXISTS artwork_guide_url TEXT,
+        ADD COLUMN IF NOT EXISTS artwork_guide_name TEXT,
         ADD COLUMN IF NOT EXISTS invoice_name TEXT,
         ADD COLUMN IF NOT EXISTS product_format TEXT NOT NULL DEFAULT 'ready_made';
       CREATE INDEX IF NOT EXISTS products_slug_idx ON products(slug);
