@@ -10,7 +10,7 @@ import { useShopCart, type CartSelection } from "@/lib/shop-cart";
 import { formatMoney, money, parseProductConfig } from "@/lib/product-options";
 
 function isFrameColourGroup(group: { title: string }) {
-  return /frame\s*(colour|color)|\b(colour|color)\b/i.test(group.title);
+  return /\bframes?\b|frame\s*(colour|color)|\b(colour|color)\b/i.test(group.title);
 }
 
 function isAddOnGroup(group: { title: string }) {
