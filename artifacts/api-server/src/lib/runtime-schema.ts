@@ -56,6 +56,7 @@ async function applyRuntimeSchema(): Promise<void> {
         ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW();
       CREATE TABLE IF NOT EXISTS products (
         id SERIAL PRIMARY KEY, category_id INTEGER, name TEXT NOT NULL,
+        slug TEXT, keywords TEXT,
         description TEXT NOT NULL DEFAULT '', price TEXT NOT NULL DEFAULT '0',
         price_type TEXT NOT NULL DEFAULT 'per_item', image_url TEXT, gallery_images TEXT,
         artwork_guide_url TEXT, artwork_guide_name TEXT, featured BOOLEAN NOT NULL DEFAULT FALSE,
@@ -64,6 +65,8 @@ async function applyRuntimeSchema(): Promise<void> {
       );
       ALTER TABLE products
         ADD COLUMN IF NOT EXISTS category_id INTEGER,
+        ADD COLUMN IF NOT EXISTS slug TEXT,
+        ADD COLUMN IF NOT EXISTS keywords TEXT,
         ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT '',
         ADD COLUMN IF NOT EXISTS price TEXT NOT NULL DEFAULT '0',
         ADD COLUMN IF NOT EXISTS price_type TEXT NOT NULL DEFAULT 'per_item',

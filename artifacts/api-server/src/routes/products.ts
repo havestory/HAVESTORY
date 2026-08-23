@@ -1,9 +1,8 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { productsTable, categoriesTable } from "@workspace/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, ne } from "drizzle-orm";
 import { getAdminAuth, requireAdmin, requireOwner } from "../lib/auth-cookie";
-import { parseIdParam } from "../lib/parse-id";
 import { syncNormalizedProductCatalog } from "../lib/product-catalog";
 
 const router = Router();
@@ -16,6 +15,61 @@ function parseGallery(raw: string | null | undefined): string[] {
   } catch {
     return [];
   }
+}
+
+function parseKeywords(raw: unknown): string[] {
+  const values = Array.isArray(raw)
+    ? raw
+    : typeof raw === "string"
+      ? raw.split(/[,\n]/)
+      : [];
+  return [...new Set(values
+    .map(value => String(value ?? "").trim())
+    .filter(Boolean)
+    .slice(0, 30))];
+}
+
+function parseStoredKeywords(raw: string | null | undefined): string[] {
+  if (!raw) return [];
+  try {
+    return parseKeywords(JSON.parse(raw));
+  } catch {
+    return parseKeywords(raw);
+  }
+}
+
+export function slugifyProductName(value: string): string {
+  return String(value || "product")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 85) || "product";
+}
+
+async function uniqueProductSlug(name: string, excludeId?: number): Promise<string> {
+  const base = slugifyProductName(name);
+  let candidate = base;
+  let suffix = 2;
+  while (true) {
+    const conditions = [eq(productsTable.slug, candidate)];
+    if (excludeId !== undefined) conditions.push(ne(productsTable.id, excludeId));
+    const [existing] = await db.select({ id: productsTable.id }).from(productsTable).where(and(...conditions));
+    if (!existing) return candidate;
+    candidate = `${base}-${suffix++}`;
+  }
+}
+
+function serializeProduct(product: any, category: any = null) {
+  return {
+    ...product,
+    slug: product.slug || slugifyProductName(product.name),
+    keywords: parseStoredKeywords(product.keywords),
+    invoiceName: product.invoiceName ?? null,
+    galleryImages: parseGallery(product.galleryImages),
+    category: category ?? product.category ?? null,
+  };
 }
 
 function normalizeCustomConfig(raw: unknown): string | null | undefined {
@@ -77,6 +131,8 @@ function baseSelect() {
     sortOrder: productsTable.sortOrder,
     productFormat: productsTable.productFormat,
     customConfig: productsTable.customConfig,
+    slug: productsTable.slug,
+    keywords: productsTable.keywords,
     artworkGuideUrl: productsTable.artworkGuideUrl,
     artworkGuideName: productsTable.artworkGuideName,
     createdAt: productsTable.createdAt,
@@ -92,7 +148,7 @@ function baseSelect() {
 }
 
 function legacyBaseSelect() {
-  const { productFormat: _productFormat, ...select } = baseSelect();
+  const { productFormat: _productFormat, slug: _slug, keywords: _keywords, ...select } = baseSelect();
   return select;
 }
 
@@ -144,7 +200,7 @@ router.get("/", async (req, res) => {
       }
     }
 
-    res.json(products.map((p) => ({ ...p, invoiceName: p.invoiceName ?? null, galleryImages: parseGallery(p.galleryImages) })));
+    res.json(products.map((p) => serializeProduct(p, p.category)));
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to fetch products" });
@@ -154,7 +210,9 @@ router.get("/", async (req, res) => {
 router.post("/", requireOwner, async (req, res) => {
   try {
     const { categoryId, name, invoiceName, description = "", price = "0", priceType = "per_item", productFormat: requestedProductFormat, imageUrl, galleryImages, artworkGuideUrl, artworkGuideName, featured = false, active = true, sortOrder = 0, customConfig } = req.body;
+    const keywords = parseKeywords(req.body.keywords);
     const normalizedCustomConfig = normalizeCustomConfig(customConfig);
+    const slug = await uniqueProductSlug(String(name || "product"));
     const productFormat = parseProductFormat(requestedProductFormat) || parseProductFormat(normalizedCustomConfig) || "ready_made";
 
     let product: any;
@@ -162,6 +220,8 @@ router.post("/", requireOwner, async (req, res) => {
       [product] = await db.insert(productsTable).values({
         categoryId,
         name,
+        slug,
+        keywords: JSON.stringify(keywords),
         invoiceName: invoiceName || null,
         description,
         price,
@@ -183,6 +243,8 @@ router.post("/", requireOwner, async (req, res) => {
         [product] = await db.insert(productsTable).values({
           categoryId,
           name,
+          slug,
+          keywords: JSON.stringify(keywords),
           description,
           price,
           priceType,
@@ -202,6 +264,8 @@ router.post("/", requireOwner, async (req, res) => {
         [product] = await db.insert(productsTable).values({
           categoryId,
           name,
+          slug,
+          keywords: JSON.stringify(keywords),
           description,
           price,
           priceType,
@@ -227,8 +291,10 @@ router.post("/", requireOwner, async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const id = parseIdParam(req, res);
-    if (id === null) return;
+    const identifier = String(req.params.id || "").trim();
+    if (!identifier) return res.status(400).json({ error: "Invalid product identifier" });
+    const numericId = /^\d+$/.test(identifier) ? Number(identifier) : null;
+    const lookup = numericId !== null ? eq(productsTable.id, numericId) : eq(productsTable.slug, identifier);
 
     let result: any;
     try {
@@ -236,20 +302,20 @@ router.get("/:id", async (req, res) => {
         .select()
         .from(productsTable)
         .leftJoin(categoriesTable, eq(productsTable.categoryId, categoriesTable.id))
-        .where(eq(productsTable.id, id));
+        .where(lookup);
     } catch (err) {
-      if (!isMissingColumn(err)) throw err;
+      if (!isMissingColumn(err) || numericId === null) throw err;
       [result] = await db
         .select({ products: { id: productsTable.id, categoryId: productsTable.categoryId, name: productsTable.name, description: productsTable.description, price: productsTable.price, priceType: productsTable.priceType, imageUrl: productsTable.imageUrl, galleryImages: productsTable.galleryImages, featured: productsTable.featured, active: productsTable.active, sortOrder: productsTable.sortOrder, customConfig: productsTable.customConfig, artworkGuideUrl: productsTable.artworkGuideUrl, artworkGuideName: productsTable.artworkGuideName, createdAt: productsTable.createdAt }, categories: { id: categoriesTable.id, name: categoriesTable.name, description: categoriesTable.description, imageUrl: categoriesTable.imageUrl, sortOrder: categoriesTable.sortOrder, createdAt: categoriesTable.createdAt } })
         .from(productsTable)
         .leftJoin(categoriesTable, eq(productsTable.categoryId, categoriesTable.id))
-        .where(eq(productsTable.id, id));
+        .where(eq(productsTable.id, numericId));
     }
 
     if (!result) return res.status(404).json({ error: "Product not found" });
     const p = result.products;
     if (!p.active && !getAdminAuth(req)) return res.status(404).json({ error: "Product not found" });
-    res.json({ ...p, productFormat: (p as any).productFormat ?? parseProductFormat(p.customConfig) ?? "ready_made", invoiceName: (p as any).invoiceName ?? null, galleryImages: parseGallery(p.galleryImages), category: result.categories });
+    res.json(serializeProduct({ ...p, productFormat: (p as any).productFormat ?? parseProductFormat(p.customConfig) ?? "ready_made" }, result.categories));
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to fetch product" });
@@ -262,9 +328,14 @@ router.put("/:id", requireOwner, async (req, res) => {
     if (!Number.isFinite(id)) return res.status(400).json({ error: "Invalid product id" });
     const { categoryId, name, invoiceName, description, price, priceType, productFormat: requestedProductFormat, imageUrl, galleryImages, artworkGuideUrl, artworkGuideName, featured, active, sortOrder, customConfig } = req.body;
     const normalizedCustomConfig = normalizeCustomConfig(customConfig);
+    const keywords = req.body.keywords === undefined ? undefined : parseKeywords(req.body.keywords);
     const updateData: any = {};
     if (categoryId !== undefined) updateData.categoryId = categoryId;
-    if (name !== undefined) updateData.name = name;
+    if (name !== undefined) {
+      updateData.name = name;
+      updateData.slug = await uniqueProductSlug(String(name || "product"), id);
+    }
+    if (keywords !== undefined) updateData.keywords = JSON.stringify(keywords);
     if (description !== undefined) updateData.description = description;
     if (price !== undefined) updateData.price = price;
     if (priceType !== undefined) updateData.priceType = priceType;
@@ -301,7 +372,7 @@ router.put("/:id", requireOwner, async (req, res) => {
 
     if (!product) return res.status(404).json({ error: "Product not found" });
     await syncNormalizedProductCatalog(product.id, product.customConfig, product.imageUrl, parseGallery(product.galleryImages));
-    res.json({ ...product, invoiceName: (product as any).invoiceName ?? null, category: null });
+    res.json(serializeProduct(product));
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to update product" });

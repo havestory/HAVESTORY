@@ -19,8 +19,8 @@ function isAddOnGroup(group: { title: string }) {
 
 export default function ProductDetail() {
   const [, params] = useRoute("/store/:id");
-  const productId = Number(params?.id);
-  const { data: rawProduct, isLoading, isError } = useGetProduct(Number.isFinite(productId) && productId > 0 ? productId : 0);
+  const productIdentifier = String(params?.id || "");
+  const { data: rawProduct, isLoading, isError } = useGetProduct(productIdentifier);
   const product: any = rawProduct;
   const config = useMemo(() => parseProductConfig(product?.customConfig), [product?.customConfig]);
   const optionGroups = useMemo(() => (config.optionGroups || []).filter(group => group.title && group.choices?.length), [config.optionGroups]);

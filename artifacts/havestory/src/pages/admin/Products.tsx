@@ -302,7 +302,17 @@ function MPBoardCard({ board, index, total, onChange, onRemove, onMoveUp, onMove
   );
 }
 
-const EMPTY_FORM = { name: "", invoiceName: "", description: "", categoryId: "", categoryNewName: "", price: "", imageUrl: "", galleryImages: [] as string[], artworkGuideUrl: "", artworkGuideName: "", featured: false, active: true };
+const EMPTY_FORM = { name: "", invoiceName: "", description: "", categoryId: "", categoryNewName: "", price: "", imageUrl: "", galleryImages: [] as string[], artworkGuideUrl: "", artworkGuideName: "", keywords: "", featured: false, active: true };
+
+function slugPreview(value: string): string {
+  return String(value || "product")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 85) || "product";
+}
 
 function uid() { return Math.random().toString(36).slice(2, 8); }
 function rs(v: any) { return `Rs. ${Number(v || 0).toLocaleString("en-IN")}`; }
@@ -960,7 +970,7 @@ export default function AdminProducts() {
     setEditing(p);
     const gallery: string[] = Array.isArray(p.galleryImages) ? p.galleryImages : [];
     const allImgs = p.imageUrl ? [p.imageUrl, ...gallery.filter((u: string) => u !== p.imageUrl)] : gallery;
-    setForm({ name: p.name, invoiceName: (p as any).invoiceName || "", description: p.description, categoryId: String(p.categoryId || ""), categoryNewName: "", imageUrl: p.imageUrl || "", galleryImages: allImgs, artworkGuideUrl: p.artworkGuideUrl || "", artworkGuideName: p.artworkGuideName || "", featured: p.featured, active: p.active, price: p.price });
+    setForm({ name: p.name, invoiceName: (p as any).invoiceName || "", description: p.description, categoryId: String(p.categoryId || ""), categoryNewName: "", imageUrl: p.imageUrl || "", galleryImages: allImgs, artworkGuideUrl: p.artworkGuideUrl || "", artworkGuideName: p.artworkGuideName || "", keywords: Array.isArray(p.keywords) ? p.keywords.join(", ") : "", featured: p.featured, active: p.active, price: p.price });
     if (p.categoryId && p.category) {
       setCatValue({ id: p.categoryId, name: p.category.name });
     } else {
@@ -1175,6 +1185,7 @@ export default function AdminProducts() {
     const data = {
       name: form.name,
       invoiceName: form.invoiceName?.trim() || null,
+      keywords: String(form.keywords || "").split(/[,\n]/).map((value: string) => value.trim()).filter(Boolean).filter((value: string, index: number, values: string[]) => values.indexOf(value) === index).slice(0, 30),
       description: form.description,
       categoryId: resolvedCatId,
       imageUrl: gallery[0] || form.imageUrl || null,
@@ -1194,7 +1205,7 @@ export default function AdminProducts() {
   const filtered = (products ?? []).filter(p => {
     if (!search) return true;
     const q = search.toLowerCase();
-    return p.name?.toLowerCase().includes(q) || p.category?.name?.toLowerCase().includes(q);
+    return p.name?.toLowerCase().includes(q) || p.category?.name?.toLowerCase().includes(q) || (Array.isArray(p.keywords) && p.keywords.some((keyword: string) => keyword.toLowerCase().includes(q)));
   });
 
   const f = (k: string, v: any) => setForm((prev: any) => ({ ...prev, [k]: v }));
@@ -1469,6 +1480,23 @@ export default function AdminProducts() {
                 <div>
                   <label className="text-xs text-gray-500 font-medium block mb-1">Product Name *</label>
                   <input required value={form.name} onChange={e => f("name", e.target.value)} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" placeholder="e.g. Gallery Walnut Frame" />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs text-gray-500 font-medium block mb-1">
+                      Search Keywords
+                      <span className="ml-1.5 text-gray-400 font-normal normal-case">(comma separated)</span>
+                    </label>
+                    <input value={form.keywords || ""} onChange={e => f("keywords", e.target.value)} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" placeholder="frame, wall art, gift" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 font-medium block mb-1">Product Link</label>
+                    <div className="px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-xs text-gray-500 truncate" title={`/store/${slugPreview(form.name)}`}>
+                      /store/<span className="font-semibold text-gray-800">{slugPreview(form.name)}</span>
+                    </div>
+                    <p className="mt-1 text-[10px] text-gray-400">Uses the item name. Duplicate names receive a safe suffix.</p>
+                  </div>
                 </div>
 
                 <div>

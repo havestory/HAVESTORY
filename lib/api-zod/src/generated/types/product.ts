@@ -11,6 +11,8 @@ export interface Product {
   id: number;
   categoryId?: number | null;
   name: string;
+  slug?: string | null;
+  keywords?: string[];
   description: string;
   price: string;
   priceType: string;

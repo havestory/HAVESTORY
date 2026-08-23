@@ -616,7 +616,7 @@ export const useCreateProduct = <TError = ErrorType<unknown>,
       return useMutation(getCreateProductMutationOptions(options));
     }
 
-export const getGetProductUrl = (id: number,) => {
+export const getGetProductUrl = (id: string,) => {
 
 
 
@@ -627,7 +627,7 @@ export const getGetProductUrl = (id: number,) => {
 /**
  * @summary Get a product
  */
-export const getProduct = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<Product> => {
+export const getProduct = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<Product> => {
 
   return customFetch<Product>(getGetProductUrl(id),
   {
@@ -642,14 +642,14 @@ export const getProduct = async (id: number, options?: Parameters<typeof customF
 
 
 
-export const getGetProductQueryKey = (id: number,) => {
+export const getGetProductQueryKey = (id: string,) => {
     return [
     `/api/products/${id}`
     ] as const;
     }
 
 
-export const getGetProductQueryOptions = <TData = Awaited<ReturnType<typeof getProduct>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProduct>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetProductQueryOptions = <TData = Awaited<ReturnType<typeof getProduct>>, TError = ErrorType<unknown>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProduct>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -676,7 +676,7 @@ export type GetProductQueryError = ErrorType<unknown>
  */
 
 export function useGetProduct<TData = Awaited<ReturnType<typeof getProduct>>, TError = ErrorType<unknown>>(
- id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProduct>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProduct>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 

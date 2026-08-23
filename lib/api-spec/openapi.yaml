@@ -170,13 +170,13 @@ paths:
     get:
       operationId: getProduct
       tags: [products]
-      summary: Get a product
+      summary: Get a product by readable slug or legacy numeric ID
       parameters:
         - name: id
           in: path
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         "200":
           description: Product
@@ -1203,6 +1203,13 @@ components:
           nullable: true
         name:
           type: string
+        slug:
+          type: string
+          nullable: true
+        keywords:
+          type: array
+          items:
+            type: string
         description:
           type: string
         price:
@@ -1247,6 +1254,13 @@ components:
           nullable: true
         name:
           type: string
+        slug:
+          type: string
+          nullable: true
+        keywords:
+          type: array
+          items:
+            type: string
         description:
           type: string
         price:

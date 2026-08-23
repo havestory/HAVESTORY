@@ -345,7 +345,7 @@ export default function Home() {
                     ease: [0.22, 1, 0.36, 1],
                   }}
                 >
-                  <Link href={`/store/${product.id}`} className="hsc-product-image">
+                  <Link href={`/store/${product.slug || product.id}`} className="hsc-product-image">
                     {product.imageUrl ? (
                       <img src={product.imageUrl} alt={product.name} />
                     ) : (
@@ -366,7 +366,7 @@ export default function Home() {
                           ? `Rs. ${Number(product.price).toLocaleString()}`
                           : "Quote on request"}
                       </strong>
-                      <Link href={`/store/${product.id}`}>
+                      <Link href={`/store/${product.slug || product.id}`}>
                         View edition <ArrowRight />
                       </Link>
                     </footer>

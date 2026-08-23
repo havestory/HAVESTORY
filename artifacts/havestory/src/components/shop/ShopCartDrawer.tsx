@@ -37,10 +37,10 @@ export function ShopCartDrawer({ trigger }: { trigger: ReactNode }) {
             <div className="hs-cart-items">
               {items.map(item => (
                 <article key={item.key} className="hs-cart-item">
-                  <Link href={`/store/${item.product.id}`} onClick={() => setOpen(false)} className="hs-cart-item-image"><img src={item.imageUrl || item.product.imageUrl} alt={item.product.name} /></Link>
+                  <Link href={`/store/${item.product.slug || item.product.id}`} onClick={() => setOpen(false)} className="hs-cart-item-image"><img src={item.imageUrl || item.product.imageUrl} alt={item.product.name} /></Link>
                   <div className="hs-cart-item-copy">
                     <div><span>{item.product.category?.name || "HAVESTORY EDITION"}</span><button type="button" onClick={() => removeItem(item.key)} aria-label={`Remove ${item.product.name}`}><Trash2 /></button></div>
-                    <Link href={`/store/${item.product.id}`} onClick={() => setOpen(false)}><h3>{item.product.name}</h3></Link>
+                    <Link href={`/store/${item.product.slug || item.product.id}`} onClick={() => setOpen(false)}><h3>{item.product.name}</h3></Link>
                     {item.selections?.length > 0 && <p>{item.selections.map(selection => `${selection.groupTitle}: ${selection.choiceName}`).join(" · ")}</p>}
                     <div className="hs-cart-item-base">
                       <div className="hs-cart-quantity"><button type="button" onClick={() => updateQuantity(item.key, -1)}><Minus /></button><strong>{item.quantity}</strong><button type="button" onClick={() => updateQuantity(item.key, 1)}><Plus /></button></div>

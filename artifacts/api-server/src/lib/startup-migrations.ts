@@ -1,6 +1,16 @@
 import { pool } from "@workspace/db";
 import { syncAllNormalizedProductCatalog } from "./product-catalog";
 
+function productSlug(value: string): string {
+  return String(value || "product")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 85) || "product";
+}
+
 /**
  * Idempotent schema migrations that add any columns that might be missing
  * in an older production database. Safe to run on every server start.
@@ -244,8 +254,11 @@ export async function runStartupMigrations(
     `);
     await client.query(`
       ALTER TABLE products
+        ADD COLUMN IF NOT EXISTS slug TEXT,
+        ADD COLUMN IF NOT EXISTS keywords TEXT,
         ADD COLUMN IF NOT EXISTS invoice_name TEXT,
         ADD COLUMN IF NOT EXISTS product_format TEXT NOT NULL DEFAULT 'ready_made';
+      CREATE INDEX IF NOT EXISTS products_slug_idx ON products(slug);
 
       CREATE TABLE IF NOT EXISTS product_media (
         id SERIAL PRIMARY KEY,
@@ -405,6 +418,28 @@ export async function runStartupMigrations(
     console.warn("[migrations] Invoice contact backfill warning:", e);
   } finally {
     client.release();
+  }
+
+  const slugClient = await pool.connect();
+  try {
+    const productRows = await slugClient.query<{ id: number; name: string; slug: string | null }>(
+      "SELECT id, name, slug FROM products ORDER BY id ASC",
+    );
+    const usedProductSlugs = new Set<string>();
+    for (const row of productRows.rows) {
+      const base = productSlug(row.name);
+      let candidate = row.slug?.trim() || base;
+      let suffix = 2;
+      while (usedProductSlugs.has(candidate)) candidate = `${base}-${suffix++}`;
+      usedProductSlugs.add(candidate);
+      if (row.slug !== candidate) {
+        await slugClient.query("UPDATE products SET slug = $1 WHERE id = $2", [candidate, row.id]);
+      }
+    }
+  } catch (e) {
+    console.warn("[migrations] Product slug backfill warning:", e);
+  } finally {
+    slugClient.release();
   }
 
   // Backfill the normalized product catalog once. A marker makes startup fast

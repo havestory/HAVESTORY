@@ -9,6 +9,8 @@
 export interface CreateProductBody {
   categoryId?: number | null;
   name: string;
+  slug?: string | null;
+  keywords?: string[];
   description: string;
   price: string;
   priceType: string;

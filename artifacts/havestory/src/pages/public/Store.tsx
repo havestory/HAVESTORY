@@ -46,8 +46,9 @@ export default function Store() {
     const matchesCategory = activeCategory === 'all' || p.categoryId?.toString() === activeCategory;
     const name = String(p.name || '');
     const description = String(p.description || '');
+    const keywords = Array.isArray(p.keywords) ? p.keywords.join(' ') : String(p.keywords || '');
     const query = searchQuery.trim().toLowerCase();
-    const matchesSearch = name.toLowerCase().includes(query) || description.toLowerCase().includes(query);
+    const matchesSearch = name.toLowerCase().includes(query) || description.toLowerCase().includes(query) || keywords.toLowerCase().includes(query);
     return matchesCategory && matchesSearch;
   });
 
@@ -188,7 +189,7 @@ export default function Store() {
                   className="hs-store-product-wrap"
                 >
                   <Link
-                    href={`/store/${product.id}`}
+                    href={`/store/${product.slug || product.id}`}
                     aria-label={`View ${product.name}`}
                     className="hs-store-product store-product-card group flex h-full flex-col"
                   >
