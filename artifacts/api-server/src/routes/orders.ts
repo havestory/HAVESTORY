@@ -8,6 +8,7 @@ import multer from "multer";
 import { uploadToCloudinary } from "../lib/cloudinary";
 import { randomUUID } from "node:crypto";
 import { sendOrderNotificationEmail, sendCustomerConfirmationEmail, sendOrderCompletionEmail } from "../lib/mailer";
+import { syncInvoiceFinance } from "./finance-inventory";
 
 const router = Router();
 
@@ -823,6 +824,8 @@ router.get("/track/:orderId", async (req, res) => {
       paymentMethod: order.paymentMethod,
       paymentStatus: order.paymentStatus,
       paymentAmount: order.paymentAmount,
+      paymentType: (order as any).paymentType,
+      paymentSubmittedAmount: (order as any).paymentSubmittedAmount,
       paymentProofStatus: order.paymentProofStatus,
       paymentProofUploadedAt: order.paymentProofUploadedAt?.toISOString?.() ?? order.paymentProofUploadedAt,
       paymentProofExpiresAt: order.paymentProofExpiresAt?.toISOString?.() ?? order.paymentProofExpiresAt,
@@ -883,6 +886,16 @@ router.post("/track/:orderId/payment-proof", upload.single("file"), async (req, 
 
     const [order] = await db.select().from(ordersTable).where(eq(ordersTable.orderId, orderId));
     if (!order) return res.status(404).json({ error: "Order not found" });
+    const paymentType = String(req.body?.paymentType || "").toLowerCase();
+    const paymentAmount = Number(req.body?.paymentAmount);
+    if (!["advance", "full", "custom"].includes(paymentType) || !Number.isFinite(paymentAmount) || paymentAmount <= 0) {
+      return res.status(400).json({ error: "Choose a payment type and enter a valid payment amount" });
+    }
+    const [linkedInvoice] = await db.select({ amount: invoicesTable.amount }).from(invoicesTable).where(eq(invoicesTable.orderId, orderId)).limit(1);
+    const invoiceTotal = Number(String(linkedInvoice?.amount || order.paymentAmount || 0).replace(/[^0-9.-]/g, "")) || 0;
+    if (invoiceTotal > 0 && paymentAmount > invoiceTotal) {
+      return res.status(400).json({ error: `Payment amount cannot exceed the invoice total of Rs. ${invoiceTotal.toLocaleString("en-LK")}` });
+    }
 
     const { url: fileUrl } = await uploadToCloudinary(req.file.buffer, "havestory/payment-proofs", req.file.originalname);
     const uploadedAt = new Date();
@@ -893,6 +906,8 @@ router.post("/track/:orderId/payment-proof", upload.single("file"), async (req, 
         paymentProofStatus: "uploaded",
         paymentProofUploadedAt: uploadedAt,
         paymentProofExpiresAt: expiresAt,
+        paymentType: paymentType as any,
+        paymentSubmittedAmount: Math.round(paymentAmount),
         paymentRejectionReason: null,
         updatedAt: new Date(),
       })
@@ -915,8 +930,23 @@ router.post("/track/:orderId/payment-confirm", async (req, res) => {
     if (order.paymentMethod === "cod") {
       return res.status(400).json({ error: "COD orders do not require payment confirmation" });
     }
+    const paymentType = String(req.body?.paymentType || "").toLowerCase();
+    const paymentAmount = Number(req.body?.paymentAmount);
+    if (!["advance", "full", "custom"].includes(paymentType)) {
+      return res.status(400).json({ error: "Choose advance, full, or custom payment type" });
+    }
+    if (!Number.isFinite(paymentAmount) || paymentAmount <= 0) {
+      return res.status(400).json({ error: "Enter a valid payment amount" });
+    }
+    const [linkedInvoice] = await db.select({ amount: invoicesTable.amount }).from(invoicesTable).where(eq(invoicesTable.orderId, orderId)).limit(1);
+    const invoiceTotal = Number(String(linkedInvoice?.amount || order.paymentAmount || 0).replace(/[^0-9.-]/g, "")) || 0;
+    if (invoiceTotal > 0 && paymentAmount > invoiceTotal) {
+      return res.status(400).json({ error: `Payment amount cannot exceed the invoice total of Rs. ${invoiceTotal.toLocaleString("en-LK")}` });
+    }
     const [updated] = await db.update(ordersTable).set({
       paymentStatus: "customer_confirmed",
+      paymentType,
+      paymentSubmittedAmount: paymentAmount.toFixed(2),
       customerPaymentConfirmedAt: new Date(),
       paymentProofStatus: order.paymentProofUrl ? "uploaded" : order.paymentProofStatus,
       updatedAt: new Date(),
@@ -999,20 +1029,58 @@ router.post("/:id/payment-review", requireAdmin, async (req, res) => {
     const id = String(req.params.id);
     const action = String(req.body?.action || "");
     if (!["approve", "reject"].includes(action)) return res.status(400).json({ error: "Action must be approve or reject" });
+    const paymentType = String(req.body?.paymentType || "").toLowerCase();
+    const approvedAmount = Number(req.body?.approvedAmount);
+    if (action === "approve" && !["advance", "full", "custom"].includes(paymentType)) {
+      return res.status(400).json({ error: "Choose advance, full, or custom payment type" });
+    }
+    if (action === "approve" && (!Number.isFinite(approvedAmount) || approvedAmount <= 0)) {
+      return res.status(400).json({ error: "Enter a valid approved payment amount" });
+    }
     const idNum = parseInt(id);
     const [order] = isNaN(idNum)
       ? await db.select().from(ordersTable).where(eq(ordersTable.orderId, id))
       : await db.select().from(ordersTable).where(eq(ordersTable.id, idNum));
     if (!order) return res.status(404).json({ error: "Order not found" });
+
+    let linkedInvoice: any = null;
+    let invoiceTotal = Math.max(0, Number(order.paymentAmount || 0) || 0);
+    if (order.orderId) {
+      [linkedInvoice] = await db.select().from(invoicesTable).where(eq(invoicesTable.orderId, order.orderId)).limit(1);
+      if (linkedInvoice) invoiceTotal = Math.max(0, Number(String(linkedInvoice.amount || 0).replace(/[^0-9.-]/g, "")) || 0);
+    }
+    if (action === "approve" && invoiceTotal > 0 && approvedAmount > invoiceTotal) {
+      return res.status(400).json({ error: `Approved amount cannot exceed the invoice total of Rs. ${invoiceTotal.toLocaleString("en-LK")}` });
+    }
+
     const updateData: any = {
       paymentProofStatus: action === "approve" ? "approved" : "rejected",
       paymentStatus: action === "approve" ? "paid" : "payment_action_required",
       paymentApprovedAt: action === "approve" ? new Date() : null,
       paymentRejectionReason: action === "reject" ? String(req.body?.reason || "Payment proof needs review") : null,
+      ...(action === "approve" ? { paymentType, paymentSubmittedAmount: Math.round(approvedAmount) } : {}),
       updatedAt: new Date(),
     };
     const [updated] = await db.update(ordersTable).set(updateData).where(eq(ordersTable.id, order.id)).returning();
-    res.json(serializeOrder(updated));
+
+    if (action === "approve" && linkedInvoice) {
+      let metadata: any = {};
+      try { metadata = JSON.parse(linkedInvoice.metadata || "{}"); } catch { metadata = {}; }
+      const received = Math.min(approvedAmount, invoiceTotal || approvedAmount);
+      const invoiceStatus = invoiceTotal > 0 && received >= invoiceTotal ? "paid" : "partial";
+      metadata.advance = Number(received.toFixed(2));
+      metadata.paymentType = paymentType;
+      metadata.paymentReceivedDate = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Colombo", year: "numeric", month: "2-digit", day: "2-digit",
+      }).format(new Date());
+      const [syncedInvoice] = await db.update(invoicesTable).set({
+        status: invoiceStatus,
+        metadata: JSON.stringify(metadata),
+      }).where(eq(invoicesTable.id, linkedInvoice.id)).returning();
+      linkedInvoice = syncedInvoice;
+      await syncInvoiceFinance(syncedInvoice).catch((syncErr) => req.log.error(syncErr));
+    }
+    res.json({ ...serializeOrder(updated), invoice: linkedInvoice ? { amount: linkedInvoice.amount, status: linkedInvoice.status, metadata: publicInvoiceMetadata(linkedInvoice.metadata) } : null });
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to review payment proof" });

@@ -10,6 +10,8 @@ export default function TrackOrder() {
   const [orderId, setOrderId] = useState('');
   const [searchId, setSearchId] = useState('');
   const [proofFile, setProofFile] = useState<File | null>(null);
+  const [paymentType, setPaymentType] = useState<'advance' | 'full' | 'custom'>('advance');
+  const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentActionLoading, setPaymentActionLoading] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
   const [previewMessage, setPreviewMessage] = useState<string | null>(null);
@@ -32,6 +34,15 @@ export default function TrackOrder() {
     if (searchId) setOrderId(searchId);
   }, [searchId]);
 
+  useEffect(() => {
+    const current = tracking as any;
+    if (!current) return;
+    const submittedType = ['advance', 'full', 'custom'].includes(String(current.paymentType)) ? current.paymentType : 'advance';
+    const submittedAmount = Number(current.paymentSubmittedAmount ?? 0) || 0;
+    setPaymentType(submittedType);
+    if (submittedAmount > 0) setPaymentAmount(String(submittedAmount));
+  }, [tracking]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (orderId.trim()) {
@@ -43,11 +54,18 @@ export default function TrackOrder() {
 
   const uploadPaymentProof = async () => {
     if (!tracking || !proofFile) return;
+    const amount = Number(paymentAmount);
+    if (!['advance', 'full', 'custom'].includes(paymentType) || !Number.isFinite(amount) || amount <= 0) {
+      setPaymentMessage('Choose a payment type and enter the exact amount paid before uploading proof.');
+      return;
+    }
     setPaymentActionLoading(true);
     setPaymentMessage(null);
     try {
       const body = new FormData();
       body.append('file', proofFile);
+      body.append('paymentType', paymentType);
+      body.append('paymentAmount', String(amount));
       const response = await fetch(`/api/orders/track/${encodeURIComponent(tracking.orderId)}/payment-proof`, { method: 'POST', body });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Could not upload payment proof');
@@ -63,10 +81,15 @@ export default function TrackOrder() {
 
   const confirmPayment = async () => {
     if (!tracking) return;
+    const amount = Number(paymentAmount);
+    if (!['advance', 'full', 'custom'].includes(paymentType) || !Number.isFinite(amount) || amount <= 0) {
+      setPaymentMessage('Choose a payment type and enter the exact amount paid.');
+      return;
+    }
     setPaymentActionLoading(true);
     setPaymentMessage(null);
     try {
-      const response = await fetch(`/api/orders/track/${encodeURIComponent(tracking.orderId)}/payment-confirm`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      const response = await fetch(`/api/orders/track/${encodeURIComponent(tracking.orderId)}/payment-confirm`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paymentType, paymentAmount: amount }) });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Could not confirm payment');
       setPaymentMessage('Payment confirmation sent. Your order will move forward after studio approval.');
@@ -272,6 +295,9 @@ export default function TrackOrder() {
               const requiresPayment = method !== 'cod';
               const proofStatus = String(payment.paymentProofStatus || 'pending');
               const paymentStatus = String(payment.paymentStatus || 'pending');
+              const invoiceTotal = Number(String(payment.invoice?.amount ?? payment.paymentAmount ?? 0).replace(/[^0-9.-]/g, '')) || 0;
+              const paidAmount = Number(payment.paymentSubmittedAmount ?? 0) || 0;
+              const balanceDue = Math.max(0, invoiceTotal - paidAmount);
               return requiresPayment ? (
                 <Card className="hs-track-card mb-6">
                   <CardContent className="p-6">
@@ -283,12 +309,21 @@ export default function TrackOrder() {
                       <CreditCard className="h-5 w-5 text-primary shrink-0" />
                     </div>
                     <div className="grid gap-2 text-sm mb-5">
-                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Amount recorded</span><strong>Rs. {Number(payment.paymentAmount || 0).toLocaleString('en-LK')}</strong></div>
+                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Invoice total</span><strong>Rs. {invoiceTotal.toLocaleString('en-LK')}</strong></div>
+                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Amount paid</span><strong className="text-emerald-700">Rs. {paidAmount.toLocaleString('en-LK')}</strong></div>
+                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Balance due</span><strong className={balanceDue > 0 ? 'text-amber-700' : 'text-emerald-700'}>Rs. {balanceDue.toLocaleString('en-LK')}</strong></div>
                       <div className="flex justify-between gap-4"><span className="text-muted-foreground">Payment status</span><strong className="capitalize">{paymentStatus.replaceAll('_', ' ')}</strong></div>
                       <div className="flex justify-between gap-4"><span className="text-muted-foreground">Proof status</span><strong className="capitalize">{proofStatus.replaceAll('_', ' ')}</strong></div>
                     </div>
                     <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 mb-5">
                       <div className="flex gap-2"><AlertCircle className="h-4 w-4 mt-0.5 shrink-0" /><p>After payment, upload a JPG, PNG, or PDF proof and press confirm payment. Uploaded proof is retained for 14 days and then permanently deleted.</p></div>
+                    </div>
+                    <div className="mb-4 rounded-2xl border border-primary/10 bg-primary/5 p-4">
+                      <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">What are you paying?</p>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="space-y-1.5 text-xs font-semibold text-muted-foreground">Payment type<select value={paymentType} onChange={(event) => { const next = event.target.value as typeof paymentType; setPaymentType(next); if (next === 'full') setPaymentAmount(String(invoiceTotal)); }} className="mt-1 h-11 w-full rounded-xl border border-border bg-background px-3 text-sm font-semibold text-foreground"><option value="advance">Advance payment</option><option value="full">Full payment</option><option value="custom">Custom amount</option></select></label>
+                        <label className="space-y-1.5 text-xs font-semibold text-muted-foreground">Amount paid (Rs.)<Input type="number" min="0.01" step="0.01" value={paymentAmount} onChange={(event) => setPaymentAmount(event.target.value)} placeholder="Enter exact amount" className="mt-1 h-11 rounded-xl bg-background text-sm font-semibold" /></label>
+                      </div>
                     </div>
                     <div className="grid gap-3 sm:grid-cols-2">
                       <label className="flex min-h-12 cursor-pointer items-center gap-2 rounded-xl border border-border px-4 py-3 text-sm font-semibold hover:bg-muted/40">

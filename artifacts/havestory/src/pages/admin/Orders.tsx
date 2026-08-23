@@ -81,6 +81,8 @@ type ManageForm = {
   courierTrackingNumber: string;
   estimatedCompletion: string;
   dueDate: string;
+  approvalPaymentType: 'advance' | 'full' | 'custom';
+  approvalPaymentAmount: string;
 };
 
 const EMPTY_CREATE_FORM: CreateForm = {
@@ -115,6 +117,8 @@ const EMPTY_MANAGE_FORM: ManageForm = {
   courierTrackingNumber: '',
   estimatedCompletion: '',
   dueDate: '',
+  approvalPaymentType: 'advance',
+  approvalPaymentAmount: '',
 };
 
 const STATUS_OPTIONS = ['pending', 'confirmed', 'processing', 'completed', 'cancelled', 'reviewing', 'ready', 'submitted'];
@@ -270,6 +274,10 @@ export default function Orders() {
 
   const openManage = (order: OrderRecord) => {
     const item = orderItem(order);
+    const submittedAmount = Number(order.paymentSubmittedAmount ?? order.paymentAmount ?? 0) || 0;
+    const submittedType = ['advance', 'full', 'custom'].includes(String(order.paymentType))
+      ? String(order.paymentType) as ManageForm['approvalPaymentType']
+      : 'advance';
     setManageOrder(order);
     setManageForm({
       status: order.status || 'pending',
@@ -285,6 +293,8 @@ export default function Orders() {
       courierTrackingNumber: order.courierTrackingNumber || '',
       estimatedCompletion: order.estimatedCompletion || '',
       dueDate: order.dueDate || '',
+      approvalPaymentType: submittedType,
+      approvalPaymentAmount: submittedAmount > 0 ? String(submittedAmount) : String(orderTotalForRow(order) || ''),
     });
     setSections({ status: true, customer: true, project: true, files: true, payment: true, delivery: true });
     setManageOpen(true);
@@ -502,7 +512,12 @@ export default function Orders() {
       const response = await fetch(`/api/orders/${manageOrder.id}/payment-review`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, reason: reason || undefined }),
+        body: JSON.stringify({
+          action,
+          reason: reason || undefined,
+          paymentType: action === 'approve' ? manageForm.approvalPaymentType : undefined,
+          approvedAmount: action === 'approve' ? Number(manageForm.approvalPaymentAmount) : undefined,
+        }),
       });
       const payload = await response.json().catch(() => null);
       if (!response.ok) throw new Error(payload?.error || 'Payment review failed');
@@ -709,6 +724,15 @@ export default function Orders() {
                   <div className="rounded-2xl bg-slate-50 p-3"><div className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Proof</div><div className="mt-1 text-sm font-bold text-slate-700">{String(manageOrder.paymentProofStatus || 'not uploaded').replace('_', ' ')}</div></div>
                   <div className="rounded-2xl bg-slate-50 p-3"><div className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Amount</div><div className="mt-1 text-sm font-bold text-slate-700">{money(manageOrder.paymentAmount || orderTotalForRow(manageOrder))}</div></div>
                 </div>
+                {manageOrder.paymentProofUrl && manageOrder.paymentProofStatus !== 'approved' && (
+                  <div className="rounded-2xl border border-violet-100 bg-gradient-to-br from-white via-violet-50/60 to-fuchsia-50/50 p-4 shadow-sm">
+                    <div className="mb-3"><p className="text-sm font-bold text-slate-800">Confirm received payment</p><p className="mt-1 text-xs leading-5 text-slate-500">Choose what this proof represents and verify the exact amount before approving.</p></div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Payment type</Label><select value={manageForm.approvalPaymentType} onChange={(event) => setManageForm((form) => ({ ...form, approvalPaymentType: event.target.value as ManageForm['approvalPaymentType'], ...(event.target.value === 'full' ? { approvalPaymentAmount: String(orderTotalForRow(manageOrder)) } : {}) }))} className="h-11 w-full rounded-xl border border-white bg-white/90 px-4 text-sm font-semibold text-slate-700 shadow-sm outline-none transition focus:border-violet-300 focus:ring-2 focus:ring-violet-100"><option value="advance">Advance payment</option><option value="full">Full payment</option><option value="custom">Custom amount</option></select></div>
+                      <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Approved amount (Rs.)</Label><Input type="number" min="0.01" step="0.01" value={manageForm.approvalPaymentAmount} onChange={(event) => setManageForm((form) => ({ ...form, approvalPaymentAmount: event.target.value }))} className="h-11 rounded-xl border-white bg-white/90 text-sm font-semibold shadow-sm" placeholder="Enter exact amount" /></div>
+                    </div>
+                  </div>
+                )}
                 {manageOrder.paymentProofUrl ? <div className="flex flex-col gap-3 rounded-2xl border border-violet-100 bg-violet-50/50 p-4 sm:flex-row sm:items-center sm:justify-between"><div><a href={manageOrder.paymentProofUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 font-semibold text-violet-700 hover:underline"><ExternalLink className="h-4 w-4" /> View customer payment proof</a>{manageOrder.paymentProofExpiresAt && <div className="mt-1 text-xs text-violet-500">Proof retention ends {safeDate(manageOrder.paymentProofExpiresAt)}.</div>}</div><div className="flex gap-2"><Button type="button" onClick={() => void reviewPayment('reject')} disabled={paymentReviewLoading !== null} variant="outline" className="h-9 rounded-full border-rose-200 px-4 text-xs font-bold text-rose-600">{paymentReviewLoading === 'reject' ? 'Rejecting…' : 'Reject'}</Button><Button type="button" onClick={() => void reviewPayment('approve')} disabled={paymentReviewLoading !== null} className="h-9 rounded-full bg-emerald-600 px-4 text-xs font-bold text-white hover:bg-emerald-700">{paymentReviewLoading === 'approve' ? 'Approving…' : 'Approve & Process'}</Button></div></div> : <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-400"><CreditCard className="mx-auto mb-2 h-6 w-6 text-slate-300" />No customer payment proof yet. The customer must upload a slip from the tracking link.</div>}
               </div>
             </SectionCard>
