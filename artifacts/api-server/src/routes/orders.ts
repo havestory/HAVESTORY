@@ -20,6 +20,48 @@ function parseArr(s: string): any[] {
   try { return JSON.parse(s); } catch { return []; }
 }
 
+function isWebUrl(value: unknown): value is string {
+  try {
+    const url = new URL(String(value || ""));
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function parseDesignPreviews(raw: string | null | undefined): any[] {
+  return parseArr(raw || "[]")
+    .filter((entry: any) => entry && typeof entry === "object" && entry.type === "design-preview")
+    .map((entry: any, index: number) => ({
+      id: String(entry.id || `preview-${index + 1}`),
+      type: "design-preview",
+      name: String(entry.name || `Design preview ${index + 1}`),
+      previewUrl: isWebUrl(entry.previewUrl) ? String(entry.previewUrl) : "",
+      driveUrl: isWebUrl(entry.driveUrl) ? String(entry.driveUrl) : "",
+      downloadEnabled: entry.downloadEnabled === true,
+      watermarkText: String(entry.watermarkText || "HAVESTORY"),
+      watermarkOpacity: Math.min(0.6, Math.max(0.05, Number(entry.watermarkOpacity) || 0.18)),
+      createdAt: String(entry.createdAt || ""),
+    }))
+    .filter((entry: any) => entry.previewUrl);
+}
+
+function publicDesignPreviews(order: any) {
+  const paymentApproved = ["paid", "approved"].includes(String(order.paymentStatus || "").toLowerCase())
+    || String(order.paymentProofStatus || "").toLowerCase() === "approved"
+    || String(order.status || "").toLowerCase() === "completed";
+  return parseDesignPreviews(order.designLinks).map((preview: any) => ({
+    id: preview.id,
+    name: preview.name,
+    previewUrl: preview.previewUrl,
+    watermarkText: preview.watermarkText,
+    watermarkOpacity: preview.watermarkOpacity,
+    downloadEnabled: preview.downloadEnabled,
+    downloadUrl: preview.downloadEnabled && paymentApproved && preview.driveUrl ? preview.driveUrl : null,
+    downloadLocked: preview.downloadEnabled && !paymentApproved,
+  }));
+}
+
 function parseProductPaymentRules(raw: string | null | undefined) {
   try {
     const config = JSON.parse(raw || "{}");
@@ -119,6 +161,7 @@ function serializeOrder(o: any) {
     ...o,
     items: parseArr(o.items),
     designLinks: parseArr(o.designLinks),
+    designPreviews: parseDesignPreviews(o.designLinks),
     attachments: parseArr(o.attachments),
     statusHistory: parseArr(o.statusHistory),
     onlineDeliveryFiles: parseArr(o.onlineDeliveryFiles),
@@ -787,6 +830,7 @@ router.get("/track/:orderId", async (req, res) => {
       paymentRejectionReason: order.paymentRejectionReason,
       customerPaymentConfirmedAt: (order as any).customerPaymentConfirmedAt?.toISOString?.() ?? (order as any).customerPaymentConfirmedAt,
       attachments: parseArr(order.attachments),
+      designPreviews: publicDesignPreviews(order),
       invoice: invoice ? {
         invoiceNumber: invoice.invoiceNumber,
         clientName:    invoice.clientName,
@@ -975,6 +1019,44 @@ router.post("/:id/payment-review", requireAdmin, async (req, res) => {
   }
 });
 
+// Admin uploads a customer-facing design preview (requires auth).
+// The preview is stored separately as a typed design-preview entry inside
+// designLinks so legacy design links and customer attachments stay untouched.
+router.post("/:id/design-preview", upload.single("file"), async (req, res) => {
+  try {
+    if (!getAdminAuth(req)) return res.status(401).json({ error: "Unauthorized" });
+    const id = String(req.params.id);
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+    const idNum = parseInt(id);
+    const [order] = isNaN(idNum)
+      ? await db.select().from(ordersTable).where(eq(ordersTable.orderId, id))
+      : await db.select().from(ordersTable).where(eq(ordersTable.id, idNum));
+    if (!order) return res.status(404).json({ error: "Order not found" });
+
+    const { url: previewUrl } = await uploadToCloudinary(req.file.buffer, "havestory/design-previews", req.file.originalname);
+    const preview = {
+      id: randomUUID(),
+      type: "design-preview",
+      name: req.file.originalname,
+      previewUrl,
+      driveUrl: "",
+      downloadEnabled: false,
+      watermarkText: "HAVESTORY",
+      watermarkOpacity: 0.18,
+      createdAt: new Date().toISOString(),
+    };
+    const existing = parseArr(order.designLinks);
+    const [updated] = await db.update(ordersTable)
+      .set({ designLinks: JSON.stringify([...existing, preview]), updatedAt: new Date() })
+      .where(eq(ordersTable.id, order.id))
+      .returning();
+    res.json({ preview, order: serializeOrder(updated) });
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to upload design preview" });
+  }
+});
+
 // Admin uploads design proof (requires auth)
 router.post("/:id/proof-file", upload.single("file"), async (req, res) => {
   try {
@@ -1024,7 +1106,7 @@ router.put("/:id", requireAdmin, async (req, res) => {
     const {
       status, adminNotes, estimatedCompletion,
       deliveryMethod, courierName, courierTrackingNumber, orderDescription,
-      onlineDeliveryLinks, serviceTypeId,
+      onlineDeliveryLinks, designLinks, serviceTypeId,
       customerName, customerPhone, customerEmail, customerAddress,
       discountAmount, advancePaid, dueDate, startDate, priority, tags,
     } = req.body;
@@ -1049,6 +1131,9 @@ router.put("/:id", requireAdmin, async (req, res) => {
     if (courierTrackingNumber !== undefined) updateData.courierTrackingNumber = courierTrackingNumber || null;
     if (orderDescription !== undefined) updateData.orderDescription = orderDescription || null;
     if (onlineDeliveryLinks !== undefined) updateData.onlineDeliveryLinks = JSON.stringify(onlineDeliveryLinks);
+    if (designLinks !== undefined) {
+      updateData.designLinks = JSON.stringify(Array.isArray(designLinks) ? designLinks : []);
+    }
     if (serviceTypeId !== undefined) updateData.serviceTypeId = serviceTypeId ? Number(serviceTypeId) : null;
     if (customerName !== undefined) {
       const trimmed = String(customerName ?? "").trim();

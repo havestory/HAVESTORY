@@ -3,7 +3,7 @@ import { useTrackOrder } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { AlertCircle, CheckCircle, CheckCircle2, Clock, CreditCard, FileCheck, Package, Search, Truck, UploadCloud } from 'lucide-react';
+import { AlertCircle, CheckCircle, CheckCircle2, Clock, CreditCard, Download, Eye, FileCheck, LockKeyhole, Package, Search, ShieldCheck, Truck, UploadCloud } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function TrackOrder() {
@@ -12,6 +12,7 @@ export default function TrackOrder() {
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [paymentActionLoading, setPaymentActionLoading] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
+  const [previewMessage, setPreviewMessage] = useState<string | null>(null);
   
   // Allow the order link from checkout/admin to open this page already populated.
   useEffect(() => {
@@ -35,6 +36,7 @@ export default function TrackOrder() {
     e.preventDefault();
     if (orderId.trim()) {
       setPaymentMessage(null);
+      setPreviewMessage(null);
       setSearchId(orderId.trim());
     }
   };
@@ -75,6 +77,12 @@ export default function TrackOrder() {
       setPaymentActionLoading(false);
     }
   };
+
+  const showPaymentReminder = () => {
+    setPreviewMessage('Download access is protected. Please complete payment and ask the studio to approve it before downloading the final design.');
+  };
+
+  const designPreviews = Array.isArray((tracking as any)?.designPreviews) ? (tracking as any).designPreviews : [];
 
   const getStatusIcon = (status: string) => {
     switch (status.toLowerCase()) {
@@ -215,6 +223,48 @@ export default function TrackOrder() {
                 </div>
               </CardContent>
             </Card>
+
+            {designPreviews.length > 0 && <Card className="hs-track-card mb-6 overflow-hidden">
+              <CardContent className="p-0">
+                <div className="border-b border-border px-6 py-5 sm:px-8">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground"><Eye className="h-4 w-4 text-primary" /> Design preview</p>
+                      <h3 className="font-serif text-xl">Review your design.</h3>
+                      <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">This preview is for viewing only. The light HAVESTORY watermark protects the artwork until the order payment is approved.</p>
+                    </div>
+                    <ShieldCheck className="h-5 w-5 shrink-0 text-primary" />
+                  </div>
+                </div>
+                <div className="space-y-5 p-6 sm:p-8">
+                  {designPreviews.map((preview: any) => <div key={preview.id} className="overflow-hidden rounded-2xl border border-border bg-muted/20">
+                    <div
+                      className="relative select-none overflow-hidden bg-slate-900"
+                      tabIndex={0}
+                      onContextMenu={(event) => { event.preventDefault(); showPaymentReminder(); }}
+                      onDragStart={(event) => { event.preventDefault(); showPaymentReminder(); }}
+                      onCopy={(event) => { event.preventDefault(); showPaymentReminder(); }}
+                      onKeyDown={(event) => {
+                        if (event.key === 'PrintScreen' || ((event.ctrlKey || event.metaKey) && ['c', 's', 'p'].includes(event.key.toLowerCase()))) {
+                          event.preventDefault();
+                          showPaymentReminder();
+                        }
+                      }}
+                    >
+                      <img src={preview.previewUrl} alt={`${preview.name} preview`} className="block max-h-[620px] w-full object-contain" draggable={false} />
+                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle,transparent_20%,rgba(15,23,42,0.05)_100%)]">
+                        <span className="rotate-[-18deg] text-4xl font-black tracking-[0.35em] text-white sm:text-6xl" style={{ opacity: Number(preview.watermarkOpacity) || 0.18 }}>{preview.watermarkText || 'HAVESTORY'}</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-3 border-t border-border bg-background px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                      <div className="min-w-0"><p className="truncate text-sm font-semibold">{preview.name}</p><p className="mt-1 text-xs text-muted-foreground">Right-click and save actions are disabled for this preview.</p></div>
+                      {preview.downloadEnabled && (preview.downloadUrl ? <Button type="button" asChild className="h-11 shrink-0 rounded-xl"><a href={preview.downloadUrl} target="_blank" rel="noreferrer"><Download className="mr-2 h-4 w-4" /> Download final file</a></Button> : <Button type="button" variant="outline" onClick={showPaymentReminder} className="h-11 shrink-0 rounded-xl border-amber-200 text-amber-700 hover:bg-amber-50"><LockKeyhole className="mr-2 h-4 w-4" /> {preview.downloadLocked ? 'Payment required' : 'Download pending'}</Button>)}
+                    </div>
+                  </div>)}
+                  {previewMessage && <div role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-5 text-amber-900"><div className="flex gap-2"><LockKeyhole className="mt-0.5 h-4 w-4 shrink-0" /><span>{previewMessage}</span></div></div>}
+                </div>
+              </CardContent>
+            </Card>}
 
             {(() => {
               const payment = tracking as any;

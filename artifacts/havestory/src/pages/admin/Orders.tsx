@@ -28,7 +28,9 @@ import {
   Clipboard,
   Copy,
   CreditCard,
+  Download,
   ExternalLink,
+  Eye,
   FileText,
   FolderOpen,
   Link2,
@@ -36,6 +38,7 @@ import {
   PackageOpen,
   Printer,
   Search,
+  ShieldCheck,
   Trash2,
   UploadCloud,
   UserRound,
@@ -141,6 +144,25 @@ function money(value: unknown) {
 function orderItem(order: OrderRecord) {
   const item = Array.isArray(order.items) ? order.items[0] : null;
   return item || {};
+}
+
+type DesignPreview = {
+  id: string;
+  type: 'design-preview';
+  name: string;
+  previewUrl: string;
+  driveUrl: string;
+  downloadEnabled: boolean;
+  watermarkText: string;
+  watermarkOpacity: number;
+  createdAt?: string;
+};
+
+function designPreviewsFor(order: OrderRecord | null): DesignPreview[] {
+  if (!order) return [];
+  if (Array.isArray(order.designPreviews)) return order.designPreviews as DesignPreview[];
+  return (Array.isArray(order.designLinks) ? order.designLinks : [])
+    .filter((entry: any) => entry && typeof entry === 'object' && entry.type === 'design-preview') as DesignPreview[];
 }
 
 function SectionCard({
@@ -421,6 +443,56 @@ export default function Orders() {
     }
   };
 
+  const uploadDesignPreview = async (file: File | undefined) => {
+    if (!file || !manageOrder) return;
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const response = await fetch(`/api/orders/${manageOrder.id}/design-preview`, { method: 'POST', body: formData });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(payload?.error || 'Upload failed');
+      setManageOrder(payload?.order || manageOrder);
+      toast({ title: 'Preview uploaded', description: 'A watermarked customer preview was added to this order.' });
+    } catch (error) {
+      toast({ title: 'Preview upload failed', description: error instanceof Error ? error.message : 'Could not upload this preview.', variant: 'destructive' });
+    }
+  };
+
+  const patchDesignPreview = (id: string, patch: Partial<DesignPreview>) => {
+    setManageOrder((current) => {
+      if (!current) return current;
+      const previews = designPreviewsFor(current).map((preview) => preview.id === id ? { ...preview, ...patch } : preview);
+      return { ...current, designPreviews: previews };
+    });
+  };
+
+  const removeDesignPreview = (id: string) => {
+    setManageOrder((current) => {
+      if (!current) return current;
+      return { ...current, designPreviews: designPreviewsFor(current).filter((preview) => preview.id !== id) };
+    });
+  };
+
+  const saveDesignPreviews = () => {
+    if (!manageOrder) return;
+    const previews = designPreviewsFor(manageOrder).map((preview) => ({
+      ...preview,
+      name: preview.name.trim() || 'Design preview',
+      driveUrl: preview.driveUrl.trim(),
+      watermarkText: preview.watermarkText.trim() || 'HAVESTORY',
+      watermarkOpacity: Math.min(0.6, Math.max(0.05, Number(preview.watermarkOpacity) || 0.18)),
+    }));
+    const legacyLinks = (Array.isArray(manageOrder.designLinks) ? manageOrder.designLinks : [])
+      .filter((entry: any) => !(entry && typeof entry === 'object' && entry.type === 'design-preview'));
+    updateOrder.mutate({ id: String(manageOrder.id), data: { designLinks: [...legacyLinks, ...previews] } as any }, {
+      onSuccess: (updated: any) => {
+        setManageOrder(updated && typeof updated === 'object' ? updated : (current) => current ? { ...current, designPreviews: previews, designLinks: [...legacyLinks, ...previews] } : current);
+        toast({ title: 'Preview settings saved', description: 'Customer visibility, watermark, and Drive access were updated.' });
+      },
+      onError: () => toast({ title: 'Preview settings failed', description: 'Could not save the customer preview settings.', variant: 'destructive' }),
+    });
+  };
+
   const reviewPayment = async (action: 'approve' | 'reject') => {
     if (!manageOrder) return;
     const reason = action === 'reject' ? window.prompt('Reason for rejecting this payment proof:', 'Please upload a clearer payment slip.') : '';
@@ -582,7 +654,52 @@ export default function Orders() {
 
             <SectionCard title="Project Details" icon={PackageOpen} open={sections.project} onToggle={() => setSections((value) => ({ ...value, project: !value.project }))}><div className="space-y-4"><div className="space-y-1.5"><Label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Product / print type</Label><Input value={manageForm.productName} onChange={(event) => setManageForm((form) => ({ ...form, productName: event.target.value }))} placeholder="e.g. Event Banners, Business Cards..." className="h-11 rounded-full border-slate-200" /></div><div className="space-y-1.5"><Label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Project notes / specs</Label><Textarea value={manageForm.projectNotes} onChange={(event) => setManageForm((form) => ({ ...form, projectNotes: event.target.value }))} placeholder="No notes from customer" rows={4} className="resize-none rounded-2xl border-slate-200" /></div><div className="space-y-1.5"><Label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Internal notes</Label><Textarea value={manageForm.adminNotes} onChange={(event) => setManageForm((form) => ({ ...form, adminNotes: event.target.value }))} placeholder="Private production notes..." rows={3} className="resize-none rounded-2xl border-slate-200" /></div></div></SectionCard>
 
-            <SectionCard title="Design / Reference Files" icon={FolderOpen} open={sections.files} onToggle={() => setSections((value) => ({ ...value, files: !value.files }))}><div className="space-y-4"><div><div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">Customer-uploaded files</div><div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-400"><FolderOpen className="mx-auto mb-2 h-6 w-6 text-slate-300" />{Array.isArray(manageOrder.attachments) && manageOrder.attachments.length > 0 ? `${manageOrder.attachments.length} file(s) attached` : 'No files uploaded by customer yet'}</div></div><div><div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">Admin proof / design file</div><label htmlFor="order-proof-upload" className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-violet-200 bg-violet-50/40 px-4 py-5 text-sm font-semibold text-violet-600 transition hover:bg-violet-50"><UploadCloud className="h-5 w-5" /> {manageOrder.proofFileName || 'Upload Proof / Design File'}</label><input id="order-proof-upload" type="file" className="sr-only" onChange={(event) => void uploadProofFile(event.target.files?.[0])} /></div></div></SectionCard>
+            <SectionCard title="Design / Reference Files" icon={FolderOpen} open={sections.files} onToggle={() => setSections((value) => ({ ...value, files: !value.files }))}>
+              <div className="space-y-4">
+                <div>
+                  <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">Customer-uploaded files</div>
+                  <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-400"><FolderOpen className="mx-auto mb-2 h-6 w-6 text-slate-300" />{Array.isArray(manageOrder.attachments) && manageOrder.attachments.length > 0 ? `${manageOrder.attachments.length} file(s) attached` : 'No files uploaded by customer yet'}</div>
+                </div>
+                <div>
+                  <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">Admin proof / design file</div>
+                  <label htmlFor="order-proof-upload" className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-violet-200 bg-violet-50/40 px-4 py-5 text-sm font-semibold text-violet-600 transition hover:bg-violet-50"><UploadCloud className="h-5 w-5" /> {manageOrder.proofFileName || 'Upload Proof / Design File'}</label>
+                  <input id="order-proof-upload" type="file" className="sr-only" onChange={(event) => void uploadProofFile(event.target.files?.[0])} />
+                </div>
+                <div className="rounded-3xl border border-violet-100 bg-gradient-to-br from-violet-50/70 via-white to-pink-50/60 p-4 sm:p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-violet-600"><Eye className="h-3.5 w-3.5" /> Customer design preview</div>
+                      <p className="mt-1 max-w-xl text-xs leading-5 text-slate-500">Upload a sample image for the customer to view from the tracking link. The preview stays watermarked and download access remains locked until you enable it and payment is approved.</p>
+                    </div>
+                    <ShieldCheck className="h-5 w-5 shrink-0 text-violet-400" />
+                  </div>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
+                    <label htmlFor="order-design-preview-upload" className="flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-violet-200 bg-white/80 px-4 py-3 text-sm font-bold text-violet-700 transition hover:border-violet-300 hover:bg-white"><UploadCloud className="h-4 w-4" /> Upload preview image</label>
+                    <input id="order-design-preview-upload" type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(event) => { void uploadDesignPreview(event.target.files?.[0]); event.currentTarget.value = ''; }} />
+                    <Button type="button" variant="outline" onClick={saveDesignPreviews} disabled={updateOrder.isPending} className="h-12 rounded-2xl border-violet-200 bg-white px-5 text-xs font-bold text-violet-700 hover:bg-violet-50"><Check className="mr-2 h-4 w-4" /> {updateOrder.isPending ? 'Saving…' : 'Save preview settings'}</Button>
+                  </div>
+                  {designPreviewsFor(manageOrder).length === 0 ? <div className="mt-4 rounded-2xl border border-dashed border-violet-100 bg-white/70 px-4 py-6 text-center text-xs text-slate-400">No customer preview uploaded yet.</div> : <div className="mt-4 space-y-3">
+                    {designPreviewsFor(manageOrder).map((preview) => <div key={preview.id} className="rounded-2xl border border-white bg-white/90 p-3 shadow-sm">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+                          <img src={preview.previewUrl} alt={preview.name} className="h-full w-full object-cover" />
+                          <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-[8px] font-black tracking-[0.22em] text-white" style={{ opacity: preview.watermarkOpacity }}>{preview.watermarkText}</span>
+                        </div>
+                        <div className="min-w-0 flex-1 space-y-3">
+                          <div className="flex items-center justify-between gap-2"><p className="truncate text-sm font-bold text-slate-800">{preview.name}</p><button type="button" onClick={() => removeDesignPreview(preview.id)} className="rounded-full p-2 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600" aria-label={`Remove ${preview.name}`}><Trash2 className="h-4 w-4" /></button></div>
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Watermark text</Label><Input value={preview.watermarkText} onChange={(event) => patchDesignPreview(preview.id, { watermarkText: event.target.value })} className="h-10 rounded-xl border-slate-200 text-sm" /></div>
+                            <div className="space-y-1.5"><Label className="flex justify-between text-[10px] font-bold uppercase tracking-wide text-slate-400"><span>Watermark opacity</span><span>{Math.round(preview.watermarkOpacity * 100)}%</span></Label><input type="range" min="0.05" max="0.6" step="0.01" value={preview.watermarkOpacity} onChange={(event) => patchDesignPreview(preview.id, { watermarkOpacity: Number(event.target.value) })} className="mt-3 w-full accent-violet-600" /></div>
+                          </div>
+                          <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Google Drive download link</Label><Input value={preview.driveUrl} onChange={(event) => patchDesignPreview(preview.id, { driveUrl: event.target.value })} placeholder="https://drive.google.com/file/d/..." className="h-10 rounded-xl border-slate-200 text-sm" /></div>
+                          <label className="flex cursor-pointer items-start gap-2 rounded-xl border border-emerald-100 bg-emerald-50/70 px-3 py-2.5 text-xs text-emerald-800"><input type="checkbox" checked={preview.downloadEnabled} onChange={(event) => patchDesignPreview(preview.id, { downloadEnabled: event.target.checked })} className="mt-0.5 h-4 w-4 accent-emerald-600" /><span><span className="block font-bold">Enable customer download after payment</span><span className="mt-0.5 block text-[11px] leading-4 text-emerald-700/80">The button appears only after the Drive link is saved and the payment status becomes paid.</span></span></label>
+                        </div>
+                      </div>
+                    </div>)}
+                  </div>}
+                </div>
+              </div>
+            </SectionCard>
 
             <SectionCard title="Payment Proof & Approval" icon={CreditCard} open={sections.payment} onToggle={() => setSections((value) => ({ ...value, payment: !value.payment }))}>
               <div className="space-y-4">
