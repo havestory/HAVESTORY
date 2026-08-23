@@ -196,6 +196,8 @@ export async function runStartupMigrations(
         ADD COLUMN IF NOT EXISTS payment_method TEXT NOT NULL DEFAULT 'bank_transfer',
         ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'pending',
         ADD COLUMN IF NOT EXISTS payment_amount INTEGER NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS payment_type TEXT NOT NULL DEFAULT 'advance',
+        ADD COLUMN IF NOT EXISTS payment_submitted_amount INTEGER NOT NULL DEFAULT 0,
         ADD COLUMN IF NOT EXISTS payment_proof_status TEXT NOT NULL DEFAULT 'not_uploaded',
         ADD COLUMN IF NOT EXISTS payment_proof_uploaded_at TIMESTAMP,
         ADD COLUMN IF NOT EXISTS payment_proof_expires_at TIMESTAMP,

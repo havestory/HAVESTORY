@@ -30,6 +30,8 @@ export const ordersTable = pgTable("orders", {
   paymentMethod: text("payment_method").notNull().default("bank_transfer"),
   paymentStatus: text("payment_status").notNull().default("pending"),
   paymentAmount: integer("payment_amount").notNull().default(0),
+  paymentType: text("payment_type").notNull().default("advance"),
+  paymentSubmittedAmount: integer("payment_submitted_amount").notNull().default(0),
   paymentProofStatus: text("payment_proof_status").notNull().default("not_uploaded"),
   paymentProofUploadedAt: timestamp("payment_proof_uploaded_at"),
   paymentProofExpiresAt: timestamp("payment_proof_expires_at"),
