@@ -13,6 +13,10 @@ function isFrameColourGroup(group: { title: string }) {
   return /frame\s*(colour|color)|\b(colour|color)\b/i.test(group.title);
 }
 
+function isAddOnGroup(group: { title: string }) {
+  return /\b(add[\s-]?ons?|extras?)\b/i.test(group.title);
+}
+
 export default function ProductDetail() {
   const [, params] = useRoute("/store/:id");
   const productId = Number(params?.id);
@@ -21,7 +25,8 @@ export default function ProductDetail() {
   const config = useMemo(() => parseProductConfig(product?.customConfig), [product?.customConfig]);
   const optionGroups = useMemo(() => (config.optionGroups || []).filter(group => group.title && group.choices?.length), [config.optionGroups]);
   const frameColourGroups = useMemo(() => optionGroups.filter(isFrameColourGroup), [optionGroups]);
-  const regularOptionGroups = useMemo(() => optionGroups.filter(group => !isFrameColourGroup(group)), [optionGroups]);
+  const addOnGroups = useMemo(() => optionGroups.filter(group => !isFrameColourGroup(group) && isAddOnGroup(group)), [optionGroups]);
+  const regularOptionGroups = useMemo(() => optionGroups.filter(group => !isFrameColourGroup(group) && !isAddOnGroup(group)), [optionGroups]);
   const sizeOptions = useMemo(() => (config.sizes || []).filter(size => size.name || size.tiers?.length), [config.sizes]);
   const [selected, setSelected] = useState<Record<string, string>>({});
   const [selectedSizeId, setSelectedSizeId] = useState("");
@@ -186,6 +191,21 @@ export default function ProductDetail() {
           {frameColourGroups.map(group => (
             <fieldset className="hs-product-options hs-product-dropdown-section" key={group.id}>
               <legend>{group.title}<span>{selections.find(item => item.groupId === group.id)?.choiceName || "Select one"}</span></legend>
+              <div className="hs-product-select-shell">
+                <Select value={selected[group.id] || ""} onValueChange={value => { const choice = group.choices.find(item => item.id === value); if (choice) choose(group.id, choice.id, choice.imageUrl, choice.imageUrls); }}>
+                  <SelectTrigger aria-label={group.title} className="hs-product-select-trigger"><SelectValue placeholder={`Select ${group.title.toLowerCase()}`} /></SelectTrigger>
+                  <SelectContent position="item-aligned" className="hs-product-select-content">
+                    {group.choices.map(choice => { const choicePrice = getChoicePrice(choice); return <SelectItem key={choice.id} value={choice.id}>{choice.name}{choicePrice > 0 ? ` — + ${formatMoney(choicePrice)}` : ""}</SelectItem>; })}
+                  </SelectContent>
+                </Select>
+              </div>
+              {selections.find(item => item.groupId === group.id)?.imageUrl && <div className="hs-product-selection-preview"><img src={selections.find(item => item.groupId === group.id)?.imageUrl} alt="" /><span>Preview for {selections.find(item => item.groupId === group.id)?.choiceName}</span></div>}
+            </fieldset>
+          ))}
+
+          {addOnGroups.map(group => (
+            <fieldset className="hs-product-options hs-product-dropdown-section" key={group.id}>
+              <legend>{group.title}<span>{selections.find(item => item.groupId === group.id)?.choiceName || "Optional"}</span></legend>
               <div className="hs-product-select-shell">
                 <Select value={selected[group.id] || ""} onValueChange={value => { const choice = group.choices.find(item => item.id === value); if (choice) choose(group.id, choice.id, choice.imageUrl, choice.imageUrls); }}>
                   <SelectTrigger aria-label={group.title} className="hs-product-select-trigger"><SelectValue placeholder={`Select ${group.title.toLowerCase()}`} /></SelectTrigger>
