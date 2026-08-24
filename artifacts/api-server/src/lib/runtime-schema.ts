@@ -1,6 +1,6 @@
 import { pool } from "@workspace/db";
 
-const SCHEMA_VERSION = "2026-08-24-product-catalog-metadata-v4";
+const SCHEMA_VERSION = "2026-08-24-product-catalog-metadata-v5";
 let runtimeSchemaReady: Promise<void> | null = null;
 
 function runtimeSlugify(value: unknown): string {
