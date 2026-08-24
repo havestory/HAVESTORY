@@ -1,6 +1,6 @@
 import { pool } from "@workspace/db";
 
-const SCHEMA_VERSION = "2026-08-24-product-catalog-metadata-v5";
+const SCHEMA_VERSION = "2026-08-24-checkout-order-sequence-v6";
 let runtimeSchemaReady: Promise<void> | null = null;
 
 function runtimeSlugify(value: unknown): string {
@@ -214,6 +214,22 @@ async function applyRuntimeSchema(): Promise<void> {
         ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW(),
         ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
         ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+
+      -- O(1), concurrency-safe order numbering for the Vercel serverless path.
+      -- Seed from legacy order IDs once when this migration is applied.
+      CREATE SEQUENCE IF NOT EXISTS order_number_seq MINVALUE 1;
+      SELECT setval(
+        'order_number_seq',
+        GREATEST(1, seed.max_value),
+        seed.max_value > 0
+      )
+      FROM (
+        SELECT GREATEST(
+          COUNT(*)::bigint,
+          COALESCE(MAX(((regexp_match(order_id, '(?:[A-Z]{2}-)?[A-Z]+-([0-9]{4})(?:-[A-Z0-9]+)?$'))[1])::bigint), 0)
+        ) AS max_value
+        FROM orders
+      ) seed;
 
       CREATE TABLE IF NOT EXISTS project_service_types (
         id SERIAL PRIMARY KEY, name TEXT NOT NULL,
