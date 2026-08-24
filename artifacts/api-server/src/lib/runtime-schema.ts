@@ -3,6 +3,16 @@ import { pool } from "@workspace/db";
 const SCHEMA_VERSION = "2026-08-24-product-catalog-metadata-v4";
 let runtimeSchemaReady: Promise<void> | null = null;
 
+function runtimeSlugify(value: unknown): string {
+  return String(value || "product")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 85) || "product";
+}
+
 async function versionExists(version: string): Promise<boolean> {
   try {
     const result = await pool.query(
@@ -81,6 +91,8 @@ async function applyRuntimeSchema(): Promise<void> {
         ADD COLUMN IF NOT EXISTS invoice_name TEXT,
         ADD COLUMN IF NOT EXISTS product_format TEXT NOT NULL DEFAULT 'ready_made',
         ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW();
+
+      CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug);
 
       CREATE TABLE IF NOT EXISTS reviews (
         id SERIAL PRIMARY KEY, customer_name TEXT NOT NULL, rating INTEGER NOT NULL,
@@ -449,6 +461,23 @@ async function applyRuntimeSchema(): Promise<void> {
       CREATE INDEX IF NOT EXISTS idx_invoices_status_created ON invoices(status, created_at DESC) WHERE deleted_at IS NULL;
       CREATE INDEX IF NOT EXISTS idx_clients_created_at_active ON clients(created_at DESC) WHERE deleted_at IS NULL;
     `);
+
+    // Backfill readable links for products created before slug persistence was introduced.
+    const productRows = await client.query<{ id: number; name: string; slug: string | null }>(
+      "SELECT id, name, slug FROM products ORDER BY id ASC",
+    );
+    const usedSlugs = new Set(
+      productRows.rows.map((row) => String(row.slug || "").trim()).filter(Boolean),
+    );
+    for (const row of productRows.rows) {
+      if (String(row.slug || "").trim()) continue;
+      const base = runtimeSlugify(row.name);
+      let candidate = base;
+      let suffix = 2;
+      while (usedSlugs.has(candidate)) candidate = `${base}-${suffix++}`;
+      await client.query("UPDATE products SET slug = $1 WHERE id = $2", [candidate, row.id]);
+      usedSlugs.add(candidate);
+    }
 
     // Promote the former built-in themes once; future admin-selected themes remain untouched.
     await client.query(
