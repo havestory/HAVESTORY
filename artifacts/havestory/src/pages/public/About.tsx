@@ -1,6 +1,5 @@
 import { useGetSettings } from '@workspace/api-client-react';
-import { Link } from 'wouter';
-import { ArrowRight, CheckCircle2, Heart, ScanLine, Sparkles } from 'lucide-react';
+import { CheckCircle2, Heart, ScanLine, Sparkles } from 'lucide-react';
 
 export default function About() {
   const { data: settings } = useGetSettings();
@@ -18,14 +17,6 @@ export default function About() {
             {settings?.aboutStory ||
               'HAVESTORY is a colour lab and frame studio built around one simple idea: the photographs that matter should be made beautifully, and made to last.'}
           </p>
-          <div className="hsx-about-actions">
-            <Link href="/custom-project" className="hsx-btn hsx-btn-dark">
-              Start a project <ArrowRight />
-            </Link>
-            <Link href="/store" className="hsx-about-text-link">
-              Explore the collection <ArrowRight />
-            </Link>
-          </div>
           <div className="hsx-about-hero-stats" aria-label="HAVESTORY studio highlights">
             <div><strong>{founded}</strong><span>Studio founded</span></div>
             <div><strong>{completedPieces}+</strong><span>Pieces completed</span></div>
@@ -57,7 +48,7 @@ export default function About() {
 
       <section className="hsx-page-cta hsx-about-cta">
         <div><span>Come with an idea</span><h2>Leave with something<br />worth keeping.</h2></div>
-        <div><p><CheckCircle2 /> Personal guidance from first image to final frame.</p><Link href="/custom-project" className="hsx-btn hsx-btn-dark">Start a project <ArrowRight /></Link></div>
+        <div><p><CheckCircle2 /> Personal guidance from first image to final frame.</p></div>
       </section>
     </div>
   );
