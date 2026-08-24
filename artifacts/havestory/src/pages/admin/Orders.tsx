@@ -216,10 +216,10 @@ export default function Orders() {
     { query: { staleTime: 15_000, gcTime: 5 * 60_000, refetchOnWindowFocus: false } as any },
   );
   const { data: clients = [], isLoading: clientsLoading } = useListClients({
-    query: { staleTime: 30_000, gcTime: 5 * 60_000, refetchOnWindowFocus: false } as any,
+    query: { enabled: createOpen, staleTime: 30_000, gcTime: 5 * 60_000, refetchOnWindowFocus: false } as any,
   });
   const { data: invoices = [], isLoading: invoicesLoading } = useListInvoices({
-    query: { staleTime: 30_000, gcTime: 5 * 60_000, refetchOnWindowFocus: false } as any,
+    query: { enabled: createOpen, staleTime: 30_000, gcTime: 5 * 60_000, refetchOnWindowFocus: false } as any,
   });
   const createOrder = useCreateOrder();
   const createClient = useCreateClient();

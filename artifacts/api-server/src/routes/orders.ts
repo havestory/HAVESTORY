@@ -241,22 +241,13 @@ router.get("/", requireAdmin, async (req, res) => {
   }
 });
 
-async function generateInvoiceNumber(): Promise<string> {
+function generateInvoiceNumber(): string {
   const now = new Date();
   const yyyyMMdd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
-  // Retry on the (rare) case the random suffix collides with an existing
-  // invoice number — the DB has a unique constraint on `invoiceNumber`.
-  for (let attempt = 0; attempt < 8; attempt++) {
-    const suffix = Math.floor(Math.random() * 900 + 100);
-    const candidate = `HS-INV-${yyyyMMdd}-${suffix}`;
-    const [existing] = await db
-      .select({ id: invoicesTable.id })
-      .from(invoicesTable)
-      .where(eq(invoicesTable.invoiceNumber, candidate))
-      .limit(1);
-    if (!existing) return candidate;
-  }
-  return `HS-INV-${yyyyMMdd}-${Date.now().toString().slice(-6)}`;
+  // A six-character suffix gives hundreds of millions of combinations while
+  // avoiding the old 1–8 sequential uniqueness queries on every checkout.
+  // The invoiceNumber unique constraint remains the final safeguard.
+  return `HS-INV-${yyyyMMdd}-${randomSuffix(6)}`;
 }
 
 router.post("/", async (req, res) => {
@@ -290,13 +281,17 @@ router.post("/", async (req, res) => {
     const requestedItems = Array.isArray(items) ? items : [];
     let trustedItems = requestedItems;
     let productMap = new Map<number, any>();
+    const productIds = requestedItems
+      .map((it: any) => Number(it.productId)).filter((id: number) => Number.isFinite(id) && id > 0);
+    const dbProductsPromise = !adminAuth && productIds.length > 0
+      ? db.select({ id: productsTable.id, name: productsTable.name, price: productsTable.price, active: productsTable.active, customConfig: productsTable.customConfig, invoiceName: productsTable.invoiceName })
+        .from(productsTable).where(inArray(productsTable.id, productIds))
+      : Promise.resolve([] as any[]);
+    // Settings do not depend on the product lookup; start both reads together
+    // so checkout avoids an unnecessary serial database round trip.
+    const checkoutSettingsPromise = db.select().from(settingsTable).limit(1);
     if (!adminAuth && requestedItems.length > 0) {
-      const productIds = requestedItems
-        .map((it: any) => Number(it.productId)).filter((id: number) => Number.isFinite(id) && id > 0);
-      const dbProducts = productIds.length > 0
-        ? await db.select({ id: productsTable.id, name: productsTable.name, price: productsTable.price, active: productsTable.active, customConfig: productsTable.customConfig })
-          .from(productsTable).where(inArray(productsTable.id, productIds))
-        : [];
+      const dbProducts = await dbProductsPromise;
       productMap = new Map(dbProducts.map(product => [product.id, product]));
 
       trustedItems = requestedItems.map((item: any) => {
@@ -350,7 +345,7 @@ router.post("/", async (req, res) => {
       }
     }
 
-    const [checkoutSettings] = await db.select().from(settingsTable).limit(1);
+    const [checkoutSettings] = await checkoutSettingsPromise;
     const deliveryConfig = {
       courier: {
         enabled: Number(checkoutSettings?.checkoutCourierEnabled ?? 1) !== 0,
@@ -486,7 +481,7 @@ router.post("/", async (req, res) => {
     // 0.00".
     void (async () => {
       try {
-        const [settingsRow] = await db.select().from(settingsTable);
+        const settingsRow = checkoutSettings;
         const enabled = (settingsRow?.orderEmailNotificationsEnabled ?? 1) !== 0;
         const recipients = String(settingsRow?.orderEmailRecipients ?? "")
           .split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
@@ -537,7 +532,7 @@ router.post("/", async (req, res) => {
     if (customerEmail) {
       void (async () => {
         try {
-          const [settingsRow] = await db.select().from(settingsTable);
+          const settingsRow = checkoutSettings;
           const shipCost = selectedDeliveryConfig?.charge || 0;
           const disc = Number.isFinite(Number(discountAmount)) ? Math.max(0, Math.round(Number(discountAmount))) : 0;
           let itemsAny = trustedItems as any[];
@@ -657,7 +652,14 @@ router.post("/", async (req, res) => {
           .filter(n => Number.isFinite(n) && n > 0)
       )];
       const productInvoiceNameMap: Record<number, string> = {};
-      if (productIdSet.length > 0) {
+      for (const pid of productIdSet) {
+        const invoiceName = productMap.get(pid)?.invoiceName;
+        if (invoiceName) productInvoiceNameMap[pid] = invoiceName;
+      }
+      // Admin-created orders may bypass the customer product lookup. Only
+      // fetch invoice names in that path; customer checkout already selected
+      // them in the initial trusted-price query above.
+      if (productIdSet.length > 0 && Object.keys(productInvoiceNameMap).length === 0 && adminAuth) {
         try {
           const fetchedProducts = await db
             .select({ id: productsTable.id, invoiceName: productsTable.invoiceName })

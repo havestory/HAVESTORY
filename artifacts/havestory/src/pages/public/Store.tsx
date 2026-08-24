@@ -197,6 +197,8 @@ export default function Store() {
                       <img
                         src={product.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&q=85'}
                         alt={product.name || 'HAVESTORY frame'}
+                        loading={i < 3 ? 'eager' : 'lazy'}
+                        decoding="async"
                         className="h-full w-full object-cover"
                       />
                     </div>

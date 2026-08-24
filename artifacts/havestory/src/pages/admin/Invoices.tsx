@@ -121,6 +121,7 @@ export default function AdminInvoices() {
   const [items, setItems] = useState<LineItem[]>([newItem()]);
   const [catalogItems, setCatalogItems] = useState<CatalogInvoiceItem[]>([]);
   const [invoiceCostSources, setInvoiceCostSources] = useState<Array<{ key: string; type: "inventory" | "production"; refId: number; name: string; unit: string; unitCost: string }>>([]);
+  const [catalogLoaded, setCatalogLoaded] = useState(false);
   const [costSearchByItem, setCostSearchByItem] = useState<Record<string, string>>({});
   const [catalogSearch, setCatalogSearch] = useState("");
   const [showCatalogDropdown, setShowCatalogDropdown] = useState(false);
@@ -131,8 +132,12 @@ export default function AdminInvoices() {
   const [addKgRate, setAddKgRate]     = useState("200");
   const [advance, setAdvance] = useState("0");
 
-  const { data: invoices } = useListInvoices();
-  const { data: crmClients, refetch: refetchClients } = useListClients();
+  const { data: invoices } = useListInvoices({
+    query: { staleTime: 30_000, gcTime: 5 * 60_000, refetchOnWindowFocus: false } as any,
+  });
+  const { data: crmClients, refetch: refetchClients } = useListClients({
+    query: { enabled: showManual, staleTime: 30_000, gcTime: 5 * 60_000, refetchOnWindowFocus: false } as any,
+  });
   const { data: settings } = useGetSettings();
   const queryClient = useQueryClient();
   const { data: adminSession } = useQuery({
@@ -153,6 +158,7 @@ export default function AdminInvoices() {
   const [allowDuplicateCustomer, setAllowDuplicateCustomer] = useState(false);
 
   useEffect(() => {
+    if (!showManual || catalogLoaded) return;
     let active = true;
     Promise.all([
       fetch("/api/products", { credentials: "include" }).then(r => r.ok ? r.json() : []),
@@ -167,9 +173,10 @@ export default function AdminInvoices() {
       const materialSources = (Array.isArray(inventory) ? inventory : []).map((item: any) => ({ key: `inventory-${item.id}`, type: "inventory" as const, refId: Number(item.id), name: item.name, unit: item.unit || "unit", unitCost: String(item.cost || "0") }));
       const productionSources = (Array.isArray(costValues) ? costValues : []).map((item: any) => ({ key: `production-${item.id}`, type: "production" as const, refId: Number(item.id), name: item.name, unit: item.unit || "unit", unitCost: String(item.unit_cost || "0") }));
       setInvoiceCostSources([...materialSources, ...productionSources]);
+      setCatalogLoaded(true);
     }).catch(() => { if (active) { setCatalogItems([]); setInvoiceCostSources([]); } });
     return () => { active = false; };
-  }, []);
+  }, [catalogLoaded, showManual]);
 
 
   // Configured shipping rates from settings

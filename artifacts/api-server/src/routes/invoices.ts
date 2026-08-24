@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { randomUUID } from "node:crypto";
 import { db } from "@workspace/db";
 import { invoicesTable, ordersTable } from "@workspace/db/schema";
 import { eq, desc, isNull } from "drizzle-orm";
@@ -12,25 +13,13 @@ const router = Router();
 // Every invoice route is admin-only. Customers never need direct access.
 router.use(requireAdmin);
 
-async function generateInvoiceNumber(): Promise<string> {
+function generateInvoiceNumber(): string {
   const now = new Date();
   const y = now.getFullYear();
   const m = String(now.getMonth() + 1).padStart(2, "0");
-  // Retry on the (rare) case the random suffix collides with an existing
-  // invoice number — the DB has a unique constraint on `invoiceNumber`.
-  for (let attempt = 0; attempt < 8; attempt++) {
-    const r = Math.floor(Math.random() * 9000) + 1000;
-    const candidate = `INV-${y}${m}-${r}`;
-    const [existing] = await db
-      .select({ id: invoicesTable.id })
-      .from(invoicesTable)
-      .where(eq(invoicesTable.invoiceNumber, candidate))
-      .limit(1);
-    if (!existing) return candidate;
-  }
-  // After 8 random tries, fall back to a timestamp-based suffix that cannot
-  // collide on the same insert path.
-  return `INV-${y}${m}-${Date.now().toString().slice(-6)}`;
+  // Keep invoice creation to one insert-path round trip. The UUID-derived
+  // suffix makes collisions practically impossible without probing the table.
+  return `INV-${y}${m}-${randomUUID().replace(/-/g, "").slice(0, 10).toUpperCase()}`;
 }
 
 function normInt(v: unknown): number | null | undefined {

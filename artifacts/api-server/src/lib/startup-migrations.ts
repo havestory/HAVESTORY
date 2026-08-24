@@ -261,6 +261,9 @@ export async function runStartupMigrations(
         ADD COLUMN IF NOT EXISTS invoice_name TEXT,
         ADD COLUMN IF NOT EXISTS product_format TEXT NOT NULL DEFAULT 'ready_made';
       CREATE INDEX IF NOT EXISTS products_slug_idx ON products(slug);
+      CREATE INDEX IF NOT EXISTS products_active_sort_idx ON products(active, sort_order, id);
+      CREATE INDEX IF NOT EXISTS products_featured_sort_idx ON products(featured, active, sort_order, id);
+      CREATE INDEX IF NOT EXISTS products_category_sort_idx ON products(category_id, active, sort_order, id);
 
       CREATE TABLE IF NOT EXISTS product_media (
         id SERIAL PRIMARY KEY,

@@ -347,7 +347,7 @@ export default function Home() {
                 >
                   <Link href={`/store/${product.slug || product.id}`} className="hsc-product-image">
                     {product.imageUrl ? (
-                      <img src={product.imageUrl} alt={product.name} />
+                      <img src={product.imageUrl} alt={product.name} loading={index < 2 ? "eager" : "lazy"} decoding="async" />
                     ) : (
                       <ImageIcon />
                     )}
