@@ -39,6 +39,7 @@ import {
   Printer,
   Search,
   ShieldCheck,
+  Truck,
   Trash2,
   UploadCloud,
   UserRound,
@@ -121,7 +122,7 @@ const EMPTY_MANAGE_FORM: ManageForm = {
   approvalPaymentAmount: '',
 };
 
-const STATUS_OPTIONS = ['pending', 'confirmed', 'processing', 'completed', 'cancelled', 'reviewing', 'ready', 'submitted'];
+const STATUS_OPTIONS = ['pending', 'confirmed', 'processing', 'ready', 'shipped', 'delivered', 'completed', 'cancelled', 'reviewing', 'submitted'];
 
 function statusLabel(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1);
@@ -133,6 +134,8 @@ function statusClass(value: string) {
     case 'processing': return 'bg-violet-50 text-violet-600 border-violet-100';
     case 'confirmed': return 'bg-blue-50 text-blue-600 border-blue-100';
     case 'ready': return 'bg-cyan-50 text-cyan-600 border-cyan-100';
+    case 'shipped': return 'bg-indigo-50 text-indigo-600 border-indigo-100';
+    case 'delivered': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
     case 'cancelled': return 'bg-rose-50 text-rose-600 border-rose-100';
     case 'reviewing': return 'bg-amber-50 text-amber-600 border-amber-100';
     case 'submitted': return 'bg-sky-50 text-sky-600 border-sky-100';
@@ -239,7 +242,7 @@ export default function Orders() {
     total: orders?.length || 0,
     pending: orders?.filter((order) => ['pending', 'submitted', 'reviewing'].includes(String(order.status).toLowerCase())).length || 0,
     processing: orders?.filter((order) => ['processing', 'confirmed', 'ready'].includes(String(order.status).toLowerCase())).length || 0,
-    completed: orders?.filter((order) => String(order.status).toLowerCase() === 'completed').length || 0,
+    completed: orders?.filter((order) => ['completed', 'delivered'].includes(String(order.status).toLowerCase())).length || 0,
   }), [orders]);
 
   const selectedClient = clients.find((client) => client.id === createForm.clientId);
@@ -427,6 +430,30 @@ export default function Orders() {
     });
   };
 
+  const setDeliveryStatus = (nextStatus: 'shipped' | 'delivered') => {
+    if (!manageOrder) return;
+    updateOrder.mutate({ id: String(manageOrder.id), data: {
+      status: nextStatus,
+      statusNote: nextStatus === 'delivered'
+        ? 'Order delivered to the customer.'
+        : 'Order handed over for delivery.',
+      deliveryMethod: manageForm.deliveryMethod || null,
+      courierName: manageForm.courierName.trim() || null,
+      courierTrackingNumber: manageForm.courierTrackingNumber.trim() || null,
+    } as any }, {
+      onSuccess: (updatedOrder) => {
+        setManageForm((form) => ({ ...form, status: nextStatus }));
+        setManageOrder((current) => current ? { ...current, ...(updatedOrder as any), status: nextStatus } : current);
+        toast({
+          title: nextStatus === 'delivered' ? 'Order marked as delivered' : 'Order marked as shipped',
+          description: 'The customer tracking timeline is now updated.',
+        });
+        void refetch();
+      },
+      onError: () => toast({ title: 'Status update failed', description: 'Could not update the delivery status.', variant: 'destructive' }),
+    });
+  };
+
   const copyTrackLink = async () => {
     if (!manageOrder) return;
     const link = `${window.location.origin}/track-order?id=${encodeURIComponent(manageOrder.orderId)}`;
@@ -571,7 +598,7 @@ export default function Orders() {
               <Input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search orders..." className="h-11 rounded-full border-slate-200 bg-slate-50 pl-11 shadow-none focus-visible:ring-violet-200" />
             </div>
             <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0">
-              {['all', 'pending', 'confirmed', 'processing', 'completed', 'cancelled'].map((status) => (
+              {['all', 'pending', 'confirmed', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'].map((status) => (
                 <button type="button" key={status} onClick={() => setStatusFilter(status)} className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${statusFilter === status ? 'bg-gradient-to-r from-pink-500 to-violet-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}>
                   {status === 'all' ? 'All' : statusLabel(status)}
                 </button>
@@ -737,7 +764,24 @@ export default function Orders() {
               </div>
             </SectionCard>
 
-            <SectionCard title="Delivery & Timeline" icon={BadgeDollarSign} open={sections.delivery} onToggle={() => setSections((value) => ({ ...value, delivery: !value.delivery }))}><div className="grid grid-cols-1 gap-4 sm:grid-cols-2"><div className="space-y-1.5"><Label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Delivery method</Label><select value={manageForm.deliveryMethod} onChange={(event) => setManageForm((form) => ({ ...form, deliveryMethod: event.target.value }))} className="h-11 w-full rounded-full border border-slate-200 bg-white px-4 text-sm text-slate-700"><option value="">Not selected</option><option value="pickup">Pickup</option><option value="courier">Courier</option><option value="sl_post">Sri Lanka Post</option></select></div><div className="space-y-1.5"><Label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Due date</Label><Input type="date" value={manageForm.dueDate} onChange={(event) => setManageForm((form) => ({ ...form, dueDate: event.target.value }))} className="h-11 rounded-full border-slate-200" /></div><div className="space-y-1.5"><Label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Courier name</Label><Input value={manageForm.courierName} onChange={(event) => setManageForm((form) => ({ ...form, courierName: event.target.value }))} className="h-11 rounded-full border-slate-200" /></div><div className="space-y-1.5"><Label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Tracking number</Label><Input value={manageForm.courierTrackingNumber} onChange={(event) => setManageForm((form) => ({ ...form, courierTrackingNumber: event.target.value }))} className="h-11 rounded-full border-slate-200" /></div></div></SectionCard>
+            <SectionCard title="Delivery & Timeline" icon={Truck} open={sections.delivery} onToggle={() => setSections((value) => ({ ...value, delivery: !value.delivery }))}>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5"><Label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Delivery method</Label><select value={manageForm.deliveryMethod} onChange={(event) => setManageForm((form) => ({ ...form, deliveryMethod: event.target.value }))} className="h-11 w-full rounded-full border border-slate-200 bg-white px-4 text-sm text-slate-700"><option value="">Not selected</option><option value="pickup">Pickup</option><option value="courier">Courier</option><option value="sl_post">Sri Lanka Post</option></select></div>
+                  <div className="space-y-1.5"><Label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Due date</Label><Input type="date" value={manageForm.dueDate} onChange={(event) => setManageForm((form) => ({ ...form, dueDate: event.target.value }))} className="h-11 rounded-full border-slate-200" /></div>
+                  <div className="space-y-1.5"><Label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Courier name</Label><Input value={manageForm.courierName} onChange={(event) => setManageForm((form) => ({ ...form, courierName: event.target.value }))} className="h-11 rounded-full border-slate-200" /></div>
+                  <div className="space-y-1.5"><Label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Tracking number</Label><Input value={manageForm.courierTrackingNumber} onChange={(event) => setManageForm((form) => ({ ...form, courierTrackingNumber: event.target.value }))} className="h-11 rounded-full border-slate-200" /></div>
+                </div>
+                <div className="rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50/80 via-white to-emerald-50/80 p-4">
+                  <p className="text-sm font-bold text-slate-800">Update customer delivery tracking</p>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">Save the courier details above and publish the latest delivery state to the customer's Track Order timeline.</p>
+                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                    <Button type="button" variant="outline" onClick={() => setDeliveryStatus('shipped')} disabled={updateOrder.isPending || manageForm.status === 'shipped'} className="h-11 rounded-xl border-indigo-200 bg-white font-bold text-indigo-700 hover:bg-indigo-50"><Truck className="mr-2 h-4 w-4" /> {manageForm.status === 'shipped' ? 'Marked as Shipped' : 'Mark as Shipped'}</Button>
+                    <Button type="button" onClick={() => setDeliveryStatus('delivered')} disabled={updateOrder.isPending || manageForm.status === 'delivered'} className="h-11 rounded-xl bg-emerald-600 font-bold text-white hover:bg-emerald-700"><Check className="mr-2 h-4 w-4" /> {manageForm.status === 'delivered' ? 'Marked as Delivered' : 'Mark as Delivered'}</Button>
+                  </div>
+                </div>
+              </div>
+            </SectionCard>
           </div>}
           <DialogFooter className="sticky bottom-0 z-10 gap-3 border-t border-slate-100 bg-white px-6 py-4 sm:justify-end"><Button type="button" variant="outline" onClick={() => setManageOpen(false)} disabled={updateOrder.isPending} className="h-11 rounded-full border-slate-200 px-8 text-slate-600">Cancel</Button><Button type="button" onClick={saveManageOrder} disabled={updateOrder.isPending || !manageOrder} className="h-11 rounded-full bg-gradient-to-r from-pink-500 to-violet-600 px-8 font-bold text-white hover:from-pink-600 hover:to-violet-700">{updateOrder.isPending ? 'Saving…' : 'Save Changes'}</Button></DialogFooter>
         </DialogContent>
