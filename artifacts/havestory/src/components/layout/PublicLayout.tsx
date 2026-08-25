@@ -53,7 +53,7 @@ function SpecialEventOverlay({ enabled, type, message }: { enabled?: boolean; ty
 
 export function PublicLayout({ children }: { children: ReactNode }) {
   const [location]   = useLocation();
-  const { data: settings, refetch: refetchSettings } = useGetSettings();
+  const { data: settings, isLoading: settingsLoading, isError: settingsError, refetch: refetchSettings } = useGetSettings();
   const { count: cartCount } = useShopCart();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -139,6 +139,38 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       icon.href = settings.faviconUrl;
     }
   }, [settings, publicThemePreset]);
+
+  // Keep the first public paint stable. Previously the children, header and
+  // footer mounted with hardcoded copy and swapped to settings a moment later.
+  // Background refetches keep the existing settings object and therefore do
+  // not interrupt an already-rendered page.
+  if (!settings && settingsLoading) {
+    return (
+      <div data-public-site="" className="atelier-shell min-h-[100dvh] bg-[hsl(var(--background))]">
+        <div className="hs-route-loader" role="status" aria-live="polite" aria-label="Loading HAVESTORY">
+          <div>
+            <span>HS</span>
+            <strong>Preparing your studio</strong>
+            <p>Loading the latest HAVESTORY settings</p>
+            <div><i /></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!settings && settingsError) {
+    return (
+      <main data-public-site="" className="min-h-[100dvh] bg-[hsl(var(--background))] text-[hsl(var(--foreground))] flex items-center justify-center px-6">
+        <div className="max-w-md rounded-[28px] border border-[hsl(var(--border))] bg-white/70 p-8 text-center shadow-[0_20px_60px_rgba(53,25,67,.08)] backdrop-blur-xl">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6d3f86]">HAVESTORY</p>
+          <h1 className="mt-3 font-serif text-3xl font-semibold">The studio is taking a moment.</h1>
+          <p className="mt-3 text-sm text-[hsl(var(--muted-foreground))]">Please refresh to load the latest studio details.</p>
+          <button type="button" onClick={() => void refetchSettings()} className="mt-6 rounded-full bg-[#29153d] px-5 py-3 text-xs font-bold uppercase tracking-[0.16em] text-white transition-transform active:scale-95">Try again</button>
+        </div>
+      </main>
+    );
+  }
 
   if (settings?.siteClosedEnabled) {
     return (
@@ -285,15 +317,40 @@ export function PublicLayout({ children }: { children: ReactNode }) {
         {children}
       </main>
 
-      <footer className="hsx-footer">
-        <div className="hsx-footer-top"><div><span>THE COLOUR & FRAME STUDIO</span><h2>{settings?.businessName || 'HAVESTORY'}</h2></div><p>{settings?.tagline || 'Photographs made tangible. Stories made to stay.'}</p></div>
-        <div className="hsx-footer-grid">
-          <div><p>Studio</p>{settings?.address && <span>{settings.address}</span>}{settings?.phone && <a href={`tel:${settings.phone}`}>{settings.phone}</a>}{settings?.email && <a href={`mailto:${settings.email}`}>{settings.email}</a>}</div>
-          <div><p>Shop & create</p>{[{ href: '/store', label: 'Frames & Prints' }, { href: '/services', label: 'Studio Services' }, { href: '/gallery', label: 'Gallery' }, { href: '/custom-project', label: 'Custom Project' }].map(l => <Link key={l.href} href={l.href}>{l.label}</Link>)}</div>
-          <div><p>Help</p>{[{ href: '/track-order', label: 'Track Order' }, { href: '/contact', label: 'Contact' }, { href: '/about', label: 'Our Studio' }, { href: '/privacy', label: 'Privacy' }, { href: '/terms', label: 'Terms' }].map(l => <Link key={l.href} href={l.href}>{l.label}</Link>)}</div>
-          <div><p>Stay connected</p>{settings?.instagramUrl && <a href={settings.instagramUrl} target="_blank" rel="noreferrer"><Instagram /> Instagram</a>}{settings?.facebookUrl && <a href={settings.facebookUrl} target="_blank" rel="noreferrer"><Facebook /> Facebook</a>}{settings?.whatsappNumber && <a href={`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer"><MessageCircle /> WhatsApp</a>}</div>
+      <footer className="hsx-footer" aria-label="HAVESTORY studio footer">
+        <div className="hsx-footer-top">
+          <div>
+            <span>THE COLOUR &amp; FRAME STUDIO</span>
+            <h2>{settings?.businessName || 'HAVESTORY'}</h2>
+          </div>
+          <p>{settings?.tagline || 'Photographs made tangible. Stories made to stay.'}</p>
         </div>
-        <div className="hsx-footer-base"><span>© {new Date().getFullYear()} {settings?.businessName || 'HAVESTORY'}</span><span>Made with care in Sri Lanka</span></div>
+        <div className="hsx-footer-grid">
+          <div>
+            <p>Studio</p>
+            {settings?.address && <span>{settings.address}</span>}
+            {settings?.phone && <a href={`tel:${settings.phone}`}>{settings.phone}</a>}
+            {settings?.email && <a href={`mailto:${settings.email}`}>{settings.email}</a>}
+          </div>
+          <div>
+            <p>Shop &amp; create</p>
+            {[{ href: '/store', label: 'Frames & Prints' }, { href: '/services', label: 'Studio Services' }, { href: '/gallery', label: 'Gallery' }, { href: '/custom-project', label: 'Custom Project' }].map(l => <Link key={l.href} href={l.href}>{l.label}</Link>)}
+          </div>
+          <div>
+            <p>Help</p>
+            {[{ href: '/track-order', label: 'Track Order' }, { href: '/contact', label: 'Contact' }, { href: '/about', label: 'Our Studio' }, { href: '/privacy', label: 'Privacy' }, { href: '/terms', label: 'Terms' }].map(l => <Link key={l.href} href={l.href}>{l.label}</Link>)}
+          </div>
+          <div>
+            <p>Stay connected</p>
+            {settings?.instagramUrl && <a href={settings.instagramUrl} target="_blank" rel="noreferrer"><Instagram /> Instagram</a>}
+            {settings?.facebookUrl && <a href={settings.facebookUrl} target="_blank" rel="noreferrer"><Facebook /> Facebook</a>}
+            {settings?.whatsappNumber && <a href={`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer"><MessageCircle /> WhatsApp</a>}
+          </div>
+        </div>
+        <div className="hsx-footer-base">
+          <span>© {new Date().getFullYear()} {settings?.businessName || 'HAVESTORY'}</span>
+          <span>Made with care in Sri Lanka</span>
+        </div>
       </footer>
 
       {/* ── WhatsApp FAB + FAQ ── */}

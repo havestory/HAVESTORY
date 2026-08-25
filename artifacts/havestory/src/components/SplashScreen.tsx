@@ -43,7 +43,7 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
       {/* Logo mark */}
       <div className="hs-splash-inner relative z-10 flex flex-col items-center">
         <div className="hs-splash-mark animate-fade-up" style={{ animationDelay: '0ms' }}>
-          {settings?.logoUrl
+          {!settingsLoading && settings?.logoUrl
             ? <img src={settings.logoUrl} alt="" />
             : <><span>HS</span><ImageIcon /></>}
         </div>
@@ -51,12 +51,14 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
         <div className="hs-splash-copy text-center animate-fade-up" style={{ animationDelay: '120ms' }}>
           <small>COLOUR LAB · FRAME STUDIO</small>
           <h1>
-            {settings?.businessName || 'HAVESTORY'}
+            {settingsLoading ? 'HAVESTORY' : settings?.businessName || 'HAVESTORY'}
           </h1>
           <p>
-            {settings?.taglineEnabled !== false && settings?.tagline
-              ? settings.tagline
-              : 'A considered collection of frames and stories'}
+            {settingsLoading
+              ? ' '
+              : settings?.taglineEnabled !== false && settings?.tagline
+                ? settings.tagline
+                : 'A considered collection of frames and stories'}
           </p>
         </div>
 
