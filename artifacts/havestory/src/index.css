@@ -8473,3 +8473,19 @@ body {
   .hs-hero-gradient-note strong,
   .hs-hero-gradient-note em { animation: none !important; }
 }
+
+/* Final loader authority: legacy splash rules must not create a second dark layer */
+.hs-studio-loader-overlay {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(211,177,102,.16), transparent 22rem),
+    linear-gradient(135deg, #f7f1ff 0%, #fffdf8 48%, #efe6f8 100%) !important;
+}
+.hs-studio-loader-overlay::before,
+.hs-studio-loader-overlay::after {
+  display: none !important;
+  content: none !important;
+}
+.hs-studio-loader-overlay .hs-studio-loader {
+  position: relative;
+  z-index: 1;
+}
