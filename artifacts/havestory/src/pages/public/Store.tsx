@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingCart, Search, ArrowRight, Sparkles, ArrowUpRight } from 'lucide-react';
+import { ShoppingCart, Search, ArrowRight, Sparkles, ArrowUpRight, SlidersHorizontal, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link, useLocation } from 'wouter';
 import { useShopCart } from '@/lib/shop-cart';
@@ -30,6 +30,11 @@ export default function Store() {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortMode, setSortMode] = useState<'featured' | 'price-low' | 'price-high'>('featured');
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+  const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const { toast } = useToast();
   const [, navigate] = useLocation();
   
@@ -42,15 +47,38 @@ export default function Store() {
 
   const productList = Array.isArray(products) ? products : [];
   const categoryList = Array.isArray(categories) ? categories : [];
-  const filteredProducts = productList.filter(p => {
-    const matchesCategory = activeCategory === 'all' || p.categoryId?.toString() === activeCategory;
+  const selectedFilterText = (p: any) => {
     const name = String(p.name || '');
     const description = String(p.description || '');
     const keywords = Array.isArray(p.keywords) ? p.keywords.join(' ') : String(p.keywords || '');
+    return `${name} ${description} ${keywords}`.toLowerCase();
+  };
+
+  const filteredProducts = productList.filter(p => {
+    const filterText = selectedFilterText(p);
+    const matchesCategory = activeCategory === 'all' || p.categoryId?.toString() === activeCategory;
     const query = searchQuery.trim().toLowerCase();
-    const matchesSearch = name.toLowerCase().includes(query) || description.toLowerCase().includes(query) || keywords.toLowerCase().includes(query);
-    return matchesCategory && matchesSearch;
+    const matchesSearch = !query || filterText.includes(query);
+    const matchesSize = selectedSizes.length === 0 || selectedSizes.some(size => filterText.includes(size.toLowerCase()));
+    const matchesMaterial = selectedMaterials.length === 0 || selectedMaterials.some(material => filterText.includes(material.toLowerCase()));
+    const numericPrice = Number.parseFloat(String(p.price || 0)) || 0;
+    const matchesMin = !minPrice || numericPrice >= Number(minPrice);
+    const matchesMax = !maxPrice || numericPrice <= Number(maxPrice);
+    return matchesCategory && matchesSearch && matchesSize && matchesMaterial && matchesMin && matchesMax;
   });
+
+  const toggleFilter = (value: string, selected: string[], setSelected: (next: string[]) => void) => {
+    setSelected(selected.includes(value) ? selected.filter(item => item !== value) : [...selected, value]);
+  };
+
+  const clearFilters = () => {
+    setActiveCategory('all');
+    setSearchQuery('');
+    setSelectedSizes([]);
+    setSelectedMaterials([]);
+    setMinPrice('');
+    setMaxPrice('');
+  };
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     if (sortMode === 'price-low') return parseFloat(String(a.price || 0)) - parseFloat(String(b.price || 0));
@@ -77,16 +105,17 @@ export default function Store() {
           <h1 id="store-heading">Find your <em>frame.</em></h1>
           <p>Search the collection, then choose the finish that feels right.</p>
         </motion.div>
-        <div className="hs-store-search-line">
-          <div className="hs-store-search">
+        <div className="hs-store-search-line" role="search">
+          <label className="hs-store-search" aria-label="Search frames and prints">
             <Search aria-hidden="true" />
             <Input
-              placeholder="Search frames..."
+              aria-label="Search frames and prints"
+              placeholder=""
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="hs-store-search-input"
             />
-          </div>
+          </label>
           <div className="hs-store-controls">
             <div className="hs-store-sort">
               <select aria-label="Sort products" value={sortMode} onChange={e => setSortMode(e.target.value as typeof sortMode)}>
@@ -95,6 +124,9 @@ export default function Store() {
                 <option value="price-high">Price: High</option>
               </select>
             </div>
+            <button type="button" className="hs-store-filter-toggle" onClick={() => setFiltersOpen(value => !value)} aria-expanded={filtersOpen}>
+              <SlidersHorizontal size={15} /> <span>Filters</span>
+            </button>
           </div>
         </div>
       </section>
@@ -130,7 +162,29 @@ export default function Store() {
               );
             })}
           </div>
-          {activeCategory !== 'all' && (
+          <div className={`hs-store-filter-panel ${filtersOpen ? 'is-open' : ''}`}>
+            <div className="hs-store-filter-group">
+              <p>Size</p>
+              {['A4', 'A3', '12×18'].map(size => (
+                <label key={size}><input type="checkbox" checked={selectedSizes.includes(size)} onChange={() => toggleFilter(size, selectedSizes, setSelectedSizes)} /><span className="hs-filter-check"><Check size={11} /></span>{size}</label>
+              ))}
+            </div>
+            <div className="hs-store-filter-group">
+              <p>Material</p>
+              {['Wood', 'Metal', 'Acrylic'].map(material => (
+                <label key={material}><input type="checkbox" checked={selectedMaterials.includes(material)} onChange={() => toggleFilter(material, selectedMaterials, setSelectedMaterials)} /><span className="hs-filter-check"><Check size={11} /></span>{material}</label>
+              ))}
+            </div>
+            <div className="hs-store-filter-group hs-store-price-filter">
+              <p>Price range</p>
+              <div className="hs-store-price-inputs">
+                <Input aria-label="Minimum price" inputMode="numeric" placeholder="Min" value={minPrice} onChange={event => setMinPrice(event.target.value.replace(/[^0-9]/g, ''))} />
+                <Input aria-label="Maximum price" inputMode="numeric" placeholder="Max" value={maxPrice} onChange={event => setMaxPrice(event.target.value.replace(/[^0-9]/g, ''))} />
+              </div>
+            </div>
+            {(selectedSizes.length > 0 || selectedMaterials.length > 0 || minPrice || maxPrice || activeCategory !== 'all' || searchQuery) && <button type="button" className="hs-store-clear-category" onClick={clearFilters}>Clear filters <ArrowRight size={13} /></button>}
+          </div>
+          {activeCategory !== 'all' && !filtersOpen && (
             <button type="button" className="hs-store-clear-category" onClick={() => setActiveCategory('all')}>Show all products <ArrowRight size={13} /></button>
           )}
         </aside>
@@ -172,7 +226,7 @@ export default function Store() {
               <Button 
                 variant="outline" 
                 className="mt-6 border-primary text-primary hover:bg-primary/5 rounded-[0.25rem] font-semibold text-xs uppercase tracking-widest"
-                onClick={() => { setActiveCategory('all'); setSearchQuery(''); }}
+                onClick={clearFilters}
               >
                 Clear Filters
               </Button>
