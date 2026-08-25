@@ -8066,3 +8066,17 @@ body {
 @keyframes hs-hero-wash{0%{opacity:.72}100%{opacity:.92}}
 @keyframes hs-hero-ui-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @media (prefers-reduced-motion:reduce){.hs-new-hero,.hs-new-hero-photo img,.hs-new-hero-card,.hs-new-hero-wash,.hs-new-hero-index,.hs-new-hero-dots{animation:none!important}}
+
+/* Header readability and alignment correction */
+[data-public-site] .hsx-shell-header{padding-inline:clamp(12px,2.2vw,30px)!important}
+[data-public-site] .hsx-shell-nav{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto!important;align-items:center!important;column-gap:clamp(18px,3vw,54px)!important;min-height:66px!important}
+[data-public-site] .hsx-shell-brand{display:inline-flex!important;align-items:center!important;gap:11px!important;white-space:nowrap!important}
+[data-public-site] .hsx-shell-brand strong{font-size:clamp(13px,1.05vw,16px)!important;letter-spacing:.14em!important;line-height:1!important}
+[data-public-site] .hsx-shell-brand .hsx-shell-monogram{width:34px!important;height:34px!important;display:grid!important;place-items:center!important;border-radius:10px!important}
+[data-public-site] .hsx-shell-links{display:flex!important;align-items:center!important;justify-content:center!important;gap:clamp(14px,1.8vw,28px)!important;min-width:0!important}
+[data-public-site] .hsx-shell-links a{display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:8px 0!important;font-size:clamp(11px,.82vw,14px)!important;font-weight:600!important;letter-spacing:.01em!important;line-height:1.1!important;white-space:nowrap!important}
+[data-public-site] .hsx-shell-actions{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:10px!important}
+[data-public-site] .hsx-shell-actions>button{display:grid!important;place-items:center!important}
+[data-public-site] .hsx-header-cart{width:44px!important;height:44px!important;border-radius:14px!important}
+@media (max-width:1050px) and (min-width:781px){[data-public-site] .hsx-shell-nav{column-gap:18px!important}[data-public-site] .hsx-shell-links{gap:10px!important}[data-public-site] .hsx-shell-links a{font-size:10.5px!important}}
+@media (max-width:780px){[data-public-site] .hsx-shell-nav{display:flex!important;justify-content:space-between!important;column-gap:0!important;min-height:58px!important}[data-public-site] .hsx-shell-brand strong{font-size:12px!important}[data-public-site] .hsx-header-cart{width:38px!important;height:38px!important}}
