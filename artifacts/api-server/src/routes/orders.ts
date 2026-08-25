@@ -816,7 +816,9 @@ router.get("/track/:orderId", requireOrderAccess, async (req: any, res) => {
           const couriers: { name: string; trackingUrl: string }[] = JSON.parse(settings.courierServices);
           const matched = couriers.find(c => c.name === order.courierName);
           if (matched?.trackingUrl) {
-            courierTrackingUrl = matched.trackingUrl;
+            const template = String(matched.trackingUrl).trim();
+            const encodedTrackingNumber = encodeURIComponent(String(order.courierTrackingNumber).trim());
+            courierTrackingUrl = template.replace(/\{trackingNumber\}|\{tracking_number\}|:trackingNumber/g, encodedTrackingNumber);
           }
         } catch {}
       }

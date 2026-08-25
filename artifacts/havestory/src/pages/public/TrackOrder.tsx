@@ -3,7 +3,7 @@ import { useTrackOrder } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { AlertCircle, CheckCircle, CheckCircle2, Clock, CreditCard, Download, Eye, FileCheck, LockKeyhole, Package, Phone, Search, ShieldCheck, Truck, UploadCloud } from 'lucide-react';
+import { AlertCircle, CheckCircle, CheckCircle2, Clock, CreditCard, Download, ExternalLink, Eye, FileCheck, LockKeyhole, Package, Phone, Search, ShieldCheck, Truck, UploadCloud } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function TrackOrder() {
@@ -235,7 +235,7 @@ export default function TrackOrder() {
                       <p className="font-medium flex items-center gap-2">
                         {tracking.courierTrackingNumber}
                         {tracking.courierTrackingUrl && (
-                          <a href={tracking.courierTrackingUrl} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline">Track &rarr;</a>
+                          <a href={tracking.courierTrackingUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-primary/5 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-primary transition hover:-translate-y-0.5 hover:bg-primary hover:text-primary-foreground"><ExternalLink className="h-3 w-3" /> Track shipment</a>
                         )}
                       </p>
                     </div>

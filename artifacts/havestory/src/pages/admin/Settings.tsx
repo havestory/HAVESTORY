@@ -68,7 +68,7 @@ function CourierServicesManager({ couriers, onChange }: {
         <Truck size={18} className="text-orange-400" />
         <h2 className="font-bold text-gray-900">Courier Services</h2>
       </div>
-      <p className="text-xs text-gray-400 mb-4">Add courier services with weight-based charges. These will appear in invoices and the order manager.</p>
+      <p className="text-xs text-gray-400 mb-4">Add courier services with weight-based charges. Use <code className="rounded bg-gray-100 px-1 py-0.5 text-[11px] text-gray-600">{'{trackingNumber}'}</code> in the tracking URL to automatically open the courier page for each saved tracking number.</p>
 
       {couriers.length === 0 && (
         <div className="border border-dashed border-gray-200 rounded-xl py-5 text-center text-xs text-gray-400 mb-4">
@@ -83,7 +83,7 @@ function CourierServicesManager({ couriers, onChange }: {
               <div key={i} className="border border-orange-300 bg-orange-50/40 rounded-xl px-4 py-3 space-y-2">
                 <div className="text-[10px] font-semibold text-orange-500 uppercase tracking-wide mb-1">Editing Courier</div>
                 <input value={editName} onChange={e => setEditName(e.target.value)} placeholder="Courier name" className={editInp} />
-                <input value={editUrl} onChange={e => setEditUrl(e.target.value)} placeholder="Tracking URL" className={editInp} />
+                <input value={editUrl} onChange={e => setEditUrl(e.target.value)} placeholder="Tracking URL (use {trackingNumber})" className={editInp} />
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="text-[10px] text-gray-500 block mb-1">First kg (Rs.)</label>
@@ -143,7 +143,7 @@ function CourierServicesManager({ couriers, onChange }: {
           <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Courier name (e.g. Pronto Lanka)" className={inp} />
         </div>
         <div className="flex gap-2">
-          <input value={newUrl} onChange={e => setNewUrl(e.target.value)} placeholder="Tracking URL (tracking number appended at end)" className={inp} />
+          <input value={newUrl} onChange={e => setNewUrl(e.target.value)} placeholder="Tracking URL (use {trackingNumber})" className={inp} />
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div>
@@ -155,7 +155,7 @@ function CourierServicesManager({ couriers, onChange }: {
             <div className="relative">{rsPrefix}<input value={newAddKg} onChange={e => setNewAddKg(e.target.value.replace(/[^\d.]/g, ""))} placeholder="200" className={rateInp} /></div>
           </div>
         </div>
-        <p className="text-[10px] text-gray-400">Example URL: <span className="font-mono">https://track.prontolanka.lk/tracking/</span> — the tracking number will be added at the end automatically.</p>
+        <p className="text-[10px] text-gray-400">Example: <span className="font-mono">https://courier.example/track/{'{trackingNumber}'}</span> — the saved tracking number is inserted automatically. Direct URLs without the placeholder are also supported.</p>
         <button type="button" onClick={add} disabled={!newName.trim() || !newUrl.trim()}
           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500 text-white text-sm font-bold hover:bg-orange-600 disabled:opacity-50 transition-colors">
           <Plus size={14} /> Add Courier
