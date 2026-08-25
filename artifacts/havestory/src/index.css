@@ -8418,3 +8418,58 @@ body {
   .hs-studio-loader,
   .hs-studio-loader-ring { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
 }
+
+/* Home hero note: minimal animated studio signature ----------------------- */
+.hs-new-hero-note.hs-hero-gradient-note {
+  align-items: center;
+  gap: 13px;
+  border-top: 1px solid rgba(76,35,112,.12);
+  padding-top: 18px;
+  animation: hs-hero-note-rise .8s .35s cubic-bezier(.22,1,.36,1) both;
+}
+.hs-hero-gradient-note > span {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid rgba(196,154,74,.5);
+  border-radius: 50%;
+  color: #c49a4a;
+  font-size: 13px;
+  animation: hs-hero-sparkle 2.8s ease-in-out infinite;
+}
+.hs-hero-gradient-note p {
+  margin: 0;
+  font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(11px, 1.25vw, 14px);
+  font-weight: 800;
+  letter-spacing: .08em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+.hs-hero-gradient-note strong,
+.hs-hero-gradient-note em {
+  display: inline-block;
+  background: linear-gradient(105deg, #321642 8%, #6d2e94 42%, #c49a4a 73%, #321642 96%);
+  background-size: 220% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: hs-hero-gradient-shift 5.5s ease-in-out infinite;
+}
+.hs-hero-gradient-note em {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.12em;
+  font-weight: 500;
+  letter-spacing: .03em;
+  text-transform: none;
+}
+@keyframes hs-hero-note-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes hs-hero-sparkle { 0%,100% { transform: rotate(0deg) scale(1); opacity: .75; } 50% { transform: rotate(12deg) scale(1.08); opacity: 1; } }
+@keyframes hs-hero-gradient-shift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+@media (prefers-reduced-motion: reduce) {
+  .hs-new-hero-note.hs-hero-gradient-note,
+  .hs-hero-gradient-note > span,
+  .hs-hero-gradient-note strong,
+  .hs-hero-gradient-note em { animation: none !important; }
+}

@@ -148,7 +148,7 @@ export default function Home() {
             <Link href={cfg?.heroCtaLink || "/store"} className="hs-new-button hs-new-button-dark">{cfg?.heroCtaText || "Find your frame"}<ArrowRight size={17} /></Link>
             <Link href="/custom-project" className="hs-new-button hs-new-button-light">Create something custom</Link>
           </div>
-          <div className="hs-new-hero-note"><span>01</span><p>Thoughtfully finished<br />for the places you love.</p></div>
+          <div className="hs-new-hero-note hs-hero-gradient-note" aria-label="Made to stay, made for you"><span aria-hidden="true">✦</span><p><strong>Made to stay.</strong><br /><em>Made for you.</em></p></div>
         </motion.div>
       </section>
 
