@@ -30,7 +30,7 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
 
   return (
     <div
-      className="hs-splash hs-studio-loader-overlay fixed inset-0 z-[9999] flex items-center justify-center"
+      className="hs-studio-loader-overlay fixed inset-0 z-[9999] flex items-center justify-center"
       style={{
         transition: 'opacity 0.6s ease',
         opacity: fading ? 0 : 1,
