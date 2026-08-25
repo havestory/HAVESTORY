@@ -142,13 +142,12 @@ export default function Home() {
         </div>
         <motion.div className="hs-new-hero-card" initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, delay: 0.12 }}>
           <span className="hs-new-kicker"><Sparkles size={15} /> {cfg?.heroBadgeText || "Photo studio · Print lab · Frame shop"}</span>
-          <h1>{heroTitle}</h1>
+          <h1 className="hs-hero-title-animated">{heroTitle}</h1>
           <p>{heroSubtitle}</p>
           <div className="hs-new-hero-actions">
             <Link href={cfg?.heroCtaLink || "/store"} className="hs-new-button hs-new-button-dark">{cfg?.heroCtaText || "Find your frame"}<ArrowRight size={17} /></Link>
             <Link href="/custom-project" className="hs-new-button hs-new-button-light">Create something custom</Link>
           </div>
-          <div className="hs-new-hero-note hs-hero-gradient-note" aria-label="Made to stay, made for you"><span aria-hidden="true">✦</span><p><strong>Made to stay.</strong><br /><em>Made for you.</em></p></div>
         </motion.div>
       </section>
 

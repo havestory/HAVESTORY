@@ -8489,3 +8489,35 @@ body {
   position: relative;
   z-index: 1;
 }
+
+/* Final Home hero title treatment ----------------------------------------- */
+.hs-new-hero-card h1.hs-hero-title-animated {
+  position: relative;
+  background: linear-gradient(110deg, #24132f 5%, #6d2e94 38%, #c49a4a 62%, #24132f 92%);
+  background-size: 230% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 500;
+  letter-spacing: -.065em;
+  animation: hs-title-gradient-sweep 6s ease-in-out infinite, hs-title-reveal .85s .18s cubic-bezier(.22,1,.36,1) both;
+}
+.hs-new-hero-card h1.hs-hero-title-animated::after {
+  content: '';
+  display: block;
+  width: 2.8rem;
+  height: 2px;
+  margin-top: 1.05rem;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #c49a4a, rgba(196,154,74,0));
+  transform-origin: left center;
+  animation: hs-title-rule-grow .8s .65s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes hs-title-gradient-sweep { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+@keyframes hs-title-reveal { from { opacity: 0; transform: translateY(12px); filter: blur(4px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
+@keyframes hs-title-rule-grow { from { transform: scaleX(0); opacity: 0; } to { transform: scaleX(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .hs-new-hero-card h1.hs-hero-title-animated,
+  .hs-new-hero-card h1.hs-hero-title-animated::after { animation: none !important; }
+}
