@@ -8634,3 +8634,48 @@ body {
   width: calc(100% - 20px) !important;
   margin: 0 10px 10px !important;
 }
+
+/* Centered premium footer identity */
+[data-public-site] .hsx-footer-top {
+  grid-template-columns: 1fr !important;
+  justify-items: center !important;
+  align-items: center !important;
+  gap: 16px !important;
+  text-align: center !important;
+}
+[data-public-site] .hsx-footer-top > div {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  text-align: center !important;
+}
+[data-public-site] .hsx-footer-top > div > span {
+  display: block !important;
+  margin: 0 !important;
+  letter-spacing: .24em !important;
+}
+[data-public-site] .hsx-footer-top h2 {
+  margin: 12px 0 0 !important;
+  text-align: center !important;
+  font-family: var(--app-font-sans), ui-sans-serif, system-ui, sans-serif !important;
+  font-size: clamp(48px, 8vw, 104px) !important;
+  font-weight: 950 !important;
+  letter-spacing: -.075em !important;
+  line-height: .86 !important;
+}
+[data-public-site] .hsx-footer-top > p {
+  width: min(100%, 520px) !important;
+  margin: 0 auto !important;
+  text-align: center !important;
+  font-family: Georgia, 'Times New Roman', serif !important;
+  font-size: clamp(14px, 1.5vw, 18px) !important;
+  font-style: italic !important;
+  letter-spacing: .01em !important;
+}
+@media (max-width: 640px) {
+  [data-public-site] .hsx-footer-top { gap: 13px !important; }
+  [data-public-site] .hsx-footer-top h2 { font-size: clamp(42px, 15vw, 68px) !important; }
+  [data-public-site] .hsx-footer-top > p { font-size: 14px !important; }
+}
