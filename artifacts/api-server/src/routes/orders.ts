@@ -1187,7 +1187,7 @@ router.put("/:id", requireAdmin, async (req, res) => {
     const id = String(req.params.id);
     const idNum = parseInt(id);
     const {
-      status, adminNotes, estimatedCompletion,
+      status, statusNote, adminNotes, estimatedCompletion,
       deliveryMethod, courierName, courierTrackingNumber, orderDescription,
       onlineDeliveryLinks, designLinks, serviceTypeId,
       customerName, customerPhone, customerEmail, customerAddress,
@@ -1201,10 +1201,14 @@ router.put("/:id", requireAdmin, async (req, res) => {
     if (!existing) return res.status(404).json({ error: "Order not found" });
 
     const updateData: any = { updatedAt: new Date() };
-    if (status !== undefined) {
+    if (status !== undefined && status !== existing.status) {
       updateData.status = status;
       const history = parseArr(existing.statusHistory);
-      history.push({ status, timestamp: new Date().toISOString(), note: "" });
+      history.push({
+        status,
+        timestamp: new Date().toISOString(),
+        note: typeof statusNote === "string" ? statusNote.trim().slice(0, 240) : "",
+      });
       updateData.statusHistory = JSON.stringify(history);
     }
     if (adminNotes !== undefined) updateData.adminNotes = adminNotes;

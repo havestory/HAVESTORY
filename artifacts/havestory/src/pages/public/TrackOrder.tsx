@@ -202,6 +202,18 @@ export default function TrackOrder() {
                   </div>
                 </div>
 
+                {String(tracking.status).toLowerCase() === 'delivered' && (
+                  <div className="mb-8 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-900 sm:p-5">
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+                      <div>
+                        <p className="font-bold">Your order has been delivered.</p>
+                        <p className="mt-1 text-sm leading-6 text-emerald-800">Thank you for choosing HAVESTORY. The delivery update is recorded in your order timeline below.</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid sm:grid-cols-2 gap-6 mb-8">
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">Customer</p>
