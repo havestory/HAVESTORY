@@ -116,18 +116,6 @@ export default function Store() {
               className="hs-store-search-input"
             />
           </label>
-          <div className="hs-store-controls">
-            <div className="hs-store-sort">
-              <select aria-label="Sort products" value={sortMode} onChange={e => setSortMode(e.target.value as typeof sortMode)}>
-                <option value="featured">Featured</option>
-                <option value="price-low">Price: Low</option>
-                <option value="price-high">Price: High</option>
-              </select>
-            </div>
-            <button type="button" className="hs-store-filter-toggle" onClick={() => setFiltersOpen(value => !value)} aria-expanded={filtersOpen}>
-              <SlidersHorizontal size={15} /> <span>Filters</span>
-            </button>
-          </div>
         </div>
       </section>
 
@@ -138,6 +126,10 @@ export default function Store() {
             <h2>Choose your<br /><em>finish.</em></h2>
             <p>Start with a collection, then let the details make it yours.</p>
           </div>
+          <button type="button" className="hs-store-sidebar-filter-toggle" onClick={() => setFiltersOpen(value => !value)} aria-expanded={filtersOpen}>
+            <span><SlidersHorizontal size={14} /> Filters</span>
+            <span aria-hidden="true">{filtersOpen ? '−' : '+'}</span>
+          </button>
           <div className="hs-store-category-list">
             <button
               type="button"
