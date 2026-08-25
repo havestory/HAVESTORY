@@ -512,24 +512,28 @@ const PORTFOLIO_CATEGORIES = [
 ];
 const DEFAULT_HOME_FEATURE_CARDS = [
   {
-    title: "Frame Editions",
+    title: "Custom Frames",
     copy: "Made-to-measure frames in refined timber finishes.",
     href: "/store",
+    image: "",
   },
   {
-    title: "Colour Prints",
+    title: "Fine Art Prints",
     copy: "Colour-checked archival prints for lasting clarity.",
     href: "/store",
+    image: "",
   },
   {
-    title: "Story Collages",
-    copy: "Thoughtful multi-image layouts for meaningful moments.",
+    title: "Personal Gifts",
+    copy: "Thoughtful pieces made for meaningful moments.",
     href: "/custom-project",
+    image: "",
   },
   {
     title: "Studio Sessions",
     copy: "Portrait and product photography with a gallery finish.",
     href: "/services",
+    image: "",
   },
 ];
 
@@ -1199,6 +1203,21 @@ export default function WebsiteEditor() {
                         placeholder="/store"
                         className={inp}
                       />
+                      {index < 3 && (
+                        <SiteImageUpload
+                          label={`${card.title || `Card ${index + 1}`} image`}
+                          value={(card as any).image || ""}
+                          onChange={(url) =>
+                            setHomeFeatureCards((cards) =>
+                              cards.map((item, i) =>
+                                i === index ? { ...item, image: url } : item,
+                              ),
+                            )
+                          }
+                          hint="This photo appears on the Home page category card."
+                          sizeHint="1000 × 1200 px"
+                        />
+                      )}
                     </div>
                   ))}
                 </div>

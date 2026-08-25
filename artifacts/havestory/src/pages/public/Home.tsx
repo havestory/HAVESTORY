@@ -74,13 +74,13 @@ export default function Home() {
   const allProducts = Array.isArray(products) ? products : [];
   const featuredProducts = allProducts.filter((item) => item.featured);
   const popularPool = featuredProducts.length ? featuredProducts : allProducts;
-  const popularProducts =
-    popularPool.length > 4
-      ? Array.from({ length: 4 }, (_, index) => {
-          const productIndex = (activePopularSet * 4 + index) % popularPool.length;
-          return popularPool[productIndex];
-        })
-      : popularPool.slice(0, 4);
+  const popularWindowSize = Math.min(4, popularPool.length);
+  const popularProducts = popularWindowSize
+    ? Array.from({ length: popularWindowSize }, (_, index) => {
+        const productIndex = (activePopularSet * popularWindowSize + index) % popularPool.length;
+        return popularPool[productIndex];
+      })
+    : [];
   const serviceList = (Array.isArray(services) ? services : []).slice(0, 4);
   const portfolioList = (Array.isArray(portfolio) ? portfolio : []).slice(0, 6);
   const reviewList = (Array.isArray(reviews) ? reviews : [])
@@ -130,26 +130,35 @@ export default function Home() {
     { label: "Securely packed", Icon: PackageCheck },
     { label: "Island-wide delivery", Icon: Truck },
   ];
+  let savedFeatureCards: Array<{ title?: string; copy?: string; href?: string; image?: string }> = [];
+  try {
+    const parsed = typeof (settings as any)?.homeFeatureCards === "string"
+      ? JSON.parse((settings as any).homeFeatureCards)
+      : (settings as any)?.homeFeatureCards;
+    if (Array.isArray(parsed)) savedFeatureCards = parsed;
+  } catch {
+    savedFeatureCards = [];
+  }
   const categories = [
     {
-      title: "Custom Frames",
-      copy: "Made to your photograph and space.",
-      href: "/store",
-      image: heroImages[1],
+      title: savedFeatureCards[0]?.title || "Custom Frames",
+      copy: savedFeatureCards[0]?.copy || "Made to your photograph and space.",
+      href: savedFeatureCards[0]?.href || "/store",
+      image: savedFeatureCards[0]?.image || heroImages[1],
       tone: "plum",
     },
     {
-      title: "Fine Art Prints",
-      copy: "Colour-managed, crisp and lasting.",
-      href: "/store",
-      image: heroImages[2],
+      title: savedFeatureCards[1]?.title || "Fine Art Prints",
+      copy: savedFeatureCards[1]?.copy || "Colour-managed, crisp and lasting.",
+      href: savedFeatureCards[1]?.href || "/store",
+      image: savedFeatureCards[1]?.image || heroImages[2],
       tone: "gold",
     },
     {
-      title: "Personal Gifts",
-      copy: "Meaningful pieces for every occasion.",
-      href: "/custom-project",
-      image: portfolioList[0]?.imageUrl || heroImages[0],
+      title: savedFeatureCards[2]?.title || "Personal Gifts",
+      copy: savedFeatureCards[2]?.copy || "Meaningful pieces for every occasion.",
+      href: savedFeatureCards[2]?.href || "/custom-project",
+      image: savedFeatureCards[2]?.image || portfolioList[0]?.imageUrl || heroImages[0],
       tone: "ink",
     },
   ];
@@ -173,10 +182,10 @@ export default function Home() {
   }, [featuredProductsKey]);
 
   useEffect(() => {
-    if (popularPool.length <= 4) return;
+    if (popularPool.length <= 1) return;
     const timer = window.setInterval(() => {
       setActivePopularSet((current) => current + 1);
-    }, 6500);
+    }, 5200);
     return () => window.clearInterval(timer);
   }, [popularPool.length, featuredProductsKey]);
 
