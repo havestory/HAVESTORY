@@ -3,7 +3,7 @@ import { useGetSettings, useUpdateSettings, updateSettings as apiUpdateSettings 
 import { useQueryClient } from "@tanstack/react-query";
 import { broadcastAdminSave } from "@/lib/home-cache";
 import { AdminErrorState, AdminPageSkeleton } from "@/components/admin/AdminPageState";
-import { Settings as SettingsIcon, Save, Globe, Phone, Users, Landmark, Truck, Plus, Trash2, ExternalLink, Upload, Loader2, Image as ImageIcon, X, Pencil, Check, CheckCircle2, Download, RotateCcw, AlertTriangle, HardDrive, QrCode, Link, CreditCard, Eye, EyeOff, ToggleLeft, ToggleRight, Archive, ArchiveRestore, Sparkles, Mail, Send } from "lucide-react";
+import { Settings as SettingsIcon, Save, Globe, Phone, Users, Landmark, Truck, Plus, Trash2, ExternalLink, Upload, Loader2, Image as ImageIcon, X, Pencil, Check, CheckCircle2, Download, RotateCcw, AlertTriangle, QrCode, Link, CreditCard, Eye, EyeOff, ToggleLeft, ToggleRight, Archive, ArchiveRestore, Sparkles, Mail, Send } from "lucide-react";
 
 
 const EMPTY_BANK = { bankName: "", accountHolder: "", accountNumber: "", branch: "", swiftBic: "" };
@@ -324,8 +324,6 @@ export default function AdminSettings() {
   const [backupRestoring, setBackupRestoring] = useState(false);
   const [restoreSuccess, setRestoreSuccess] = useState(false);
   const restoreInputRef = useRef<HTMLInputElement>(null);
-  const [cleanupRunning, setCleanupRunning] = useState(false);
-  const [cleanupResult, setCleanupResult] = useState<{ success: boolean; message: string; filesDeleted?: number } | null>(null);
   // Data Management (soft-delete / trash)
   // `custom-orders` is a subset of the orders table — only rows where
   // orderType = 'custom'. The backend SECTION_MAP handles the WHERE clause
@@ -361,7 +359,7 @@ export default function AdminSettings() {
   const handleTrashSection = async (section: TrashSection) => {
     const label = TRASH_SECTIONS.find(s => s.key === section)?.label ?? section;
     const labelLower = label.toLowerCase();
-    if (!window.confirm(`This will move ALL ${labelLower} to trash. They can be restored within 30 days. Continue?`)) return;
+    if (!window.confirm(`This will move ALL ${labelLower} to trash. They remain recoverable until restored. Continue?`)) return;
     setTrashLoading(section);
     setTrashResult(null);
     try {
@@ -753,21 +751,6 @@ export default function AdminSettings() {
     } finally {
       setBackupRestoring(false);
       if (restoreInputRef.current) restoreInputRef.current.value = "";
-    }
-  };
-
-  const handleCleanup = async () => {
-    if (!window.confirm("This will permanently delete all customer-uploaded files (design files, payment proofs, delivery files) from orders older than 3 months. This cannot be undone. Continue?")) return;
-    setCleanupRunning(true);
-    setCleanupResult(null);
-    try {
-      const res = await fetch("/api/admin/cleanup-files", { method: "POST", credentials: "include" });
-      const data = await res.json();
-      setCleanupResult({ success: data.success, message: data.message, filesDeleted: data.filesDeleted });
-    } catch {
-      setCleanupResult({ success: false, message: "Cleanup failed. Please try again." });
-    } finally {
-      setCleanupRunning(false);
     }
   };
 
@@ -1760,44 +1743,13 @@ export default function AdminSettings() {
           <CourierServicesManager couriers={couriers} onChange={setCouriers} />
         </div>
 
-        {/* Storage Cleanup */}
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
-          <div className="flex items-center gap-2 mb-2">
-            <HardDrive size={18} className="text-rose-400" />
-            <h2 className="font-bold text-gray-900">Storage Cleanup</h2>
-          </div>
-          <p className="text-xs text-gray-400 mb-4">Remove customer-uploaded files (design attachments, payment proofs, delivery files) from orders older than 3 months. The order records are kept — only the uploaded files are deleted from cloud storage.</p>
-
-          {cleanupResult && (
-            <div className={`flex items-start gap-2 px-4 py-3 rounded-xl text-sm font-medium mb-4 border ${cleanupResult.success ? "bg-green-50 border-green-200 text-green-700" : "bg-red-50 border-red-200 text-red-600"}`}>
-              {cleanupResult.success ? <Check size={15} className="mt-0.5 shrink-0" /> : <AlertTriangle size={15} className="mt-0.5 shrink-0" />}
-              <span>{cleanupResult.message}</span>
-            </div>
-          )}
-
-          <button
-            type="button"
-            onClick={handleCleanup}
-            disabled={cleanupRunning}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 text-sm font-semibold hover:bg-rose-100 disabled:opacity-60 transition-colors"
-          >
-            {cleanupRunning ? <Loader2 size={14} className="animate-spin" /> : <HardDrive size={14} />}
-            {cleanupRunning ? "Cleaning up..." : "Run Storage Cleanup"}
-          </button>
-
-          <div className="flex items-start gap-2 mt-4 p-3 bg-amber-50 border border-amber-100 rounded-xl">
-            <AlertTriangle size={13} className="text-amber-500 shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-700">Deleted files cannot be recovered. Only files from orders older than 3 months will be removed.</p>
-          </div>
-        </div>
-
-        {/* Data Management — Soft-delete / Trash */}
+        {/* Data Management — Soft-delete / Trash */}        {/* Data Management — Soft-delete / Trash */}
         <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
           <div className="flex items-center gap-2 mb-2">
             <Archive size={18} className="text-red-400" />
             <h2 className="font-bold text-gray-900">Data Management</h2>
           </div>
-          <p className="text-xs text-gray-400 mb-5">Clear data by section. Items are moved to trash and can be recovered within 30 days. After 30 days, trashed items are permanently deleted.</p>
+          <p className="text-xs text-gray-400 mb-5">Clear data by section. Items are moved to trash and remain recoverable; this action does not permanently delete production records.</p>
 
           {trashResult && (
             <div className={`flex items-start gap-2 px-4 py-3 rounded-xl text-sm font-medium mb-4 border ${trashResult.success ? "bg-green-50 border-green-200 text-green-700" : "bg-red-50 border-red-200 text-red-600"}`}>
@@ -1839,7 +1791,7 @@ export default function AdminSettings() {
               <ArchiveRestore size={16} className="text-green-500" />
               <h3 className="font-bold text-gray-800 text-sm">Trash Recovery</h3>
             </div>
-            <p className="text-xs text-gray-400 mb-4">Restore trashed items back to their original state within 30 days.</p>
+            <p className="text-xs text-gray-400 mb-4">Restore trashed items back to their original state at any time.</p>
 
             {restoreResult && (
               <div className={`flex items-start gap-2 px-4 py-3 rounded-xl text-sm font-medium mb-4 border ${restoreResult.success ? "bg-green-50 border-green-200 text-green-700" : "bg-red-50 border-red-200 text-red-600"}`}>
@@ -1872,7 +1824,7 @@ export default function AdminSettings() {
 
           <div className="flex items-start gap-2 mt-4 p-3 bg-amber-50 border border-amber-100 rounded-xl">
             <AlertTriangle size={13} className="text-amber-500 shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-700">Items in trash are automatically and permanently deleted after 30 days. Restore them before the 30-day window expires.</p>
+            <p className="text-xs text-amber-700">Items in trash are retained for recovery and are never automatically purged.</p>
           </div>
         </div>
 

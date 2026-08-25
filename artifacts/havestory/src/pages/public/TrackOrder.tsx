@@ -3,12 +3,14 @@ import { useTrackOrder } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { AlertCircle, CheckCircle, CheckCircle2, Clock, CreditCard, Download, Eye, FileCheck, LockKeyhole, Package, Search, ShieldCheck, Truck, UploadCloud } from 'lucide-react';
+import { AlertCircle, CheckCircle, CheckCircle2, Clock, CreditCard, Download, Eye, FileCheck, LockKeyhole, Package, Phone, Search, ShieldCheck, Truck, UploadCloud } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function TrackOrder() {
   const [orderId, setOrderId] = useState('');
+  const [phone, setPhone] = useState('');
   const [searchId, setSearchId] = useState('');
+  const [searchPhone, setSearchPhone] = useState('');
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [paymentType, setPaymentType] = useState<'advance' | 'full' | 'custom'>('advance');
   const [paymentAmount, setPaymentAmount] = useState('');
@@ -19,15 +21,23 @@ export default function TrackOrder() {
   // Allow the order link from checkout/admin to open this page already populated.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const linkedOrder = params.get('id') || params.get('order');
-    if (linkedOrder?.trim()) setSearchId(linkedOrder.trim());
+    const linkedOrder = (params.get('id') || params.get('order') || '').trim();
+    const savedPhone = window.sessionStorage.getItem('havestory-order-phone') || '';
+    if (linkedOrder) setOrderId(linkedOrder);
+    if (savedPhone) setPhone(savedPhone);
+    if (linkedOrder && savedPhone) {
+      setSearchId(linkedOrder);
+      setSearchPhone(savedPhone);
+    }
   }, []);
 
   const { data: tracking, isLoading, isError, error, refetch } = useTrackOrder(searchId, {
     query: {
-      enabled: !!searchId,
-      retry: false
-    } as any
+      enabled: !!searchId && !!searchPhone,
+      retry: false,
+      queryKey: ['track-order', searchId, searchPhone],
+    } as any,
+    request: { headers: { 'x-order-phone': searchPhone } },
   });
 
   useEffect(() => {
@@ -45,10 +55,12 @@ export default function TrackOrder() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (orderId.trim()) {
+    if (orderId.trim() && phone.trim()) {
       setPaymentMessage(null);
       setPreviewMessage(null);
       setSearchId(orderId.trim());
+      setSearchPhone(phone.trim());
+      window.sessionStorage.setItem('havestory-order-phone', phone.trim());
     }
   };
 
@@ -66,7 +78,7 @@ export default function TrackOrder() {
       body.append('file', proofFile);
       body.append('paymentType', paymentType);
       body.append('paymentAmount', String(amount));
-      const response = await fetch(`/api/orders/track/${encodeURIComponent(tracking.orderId)}/payment-proof`, { method: 'POST', body });
+      const response = await fetch(`/api/orders/track/${encodeURIComponent(tracking.orderId)}/payment-proof`, { method: 'POST', headers: { 'x-order-phone': searchPhone }, body });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Could not upload payment proof');
       setProofFile(null);
@@ -89,7 +101,7 @@ export default function TrackOrder() {
     setPaymentActionLoading(true);
     setPaymentMessage(null);
     try {
-      const response = await fetch(`/api/orders/track/${encodeURIComponent(tracking.orderId)}/payment-confirm`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paymentType, paymentAmount: amount }) });
+      const response = await fetch(`/api/orders/track/${encodeURIComponent(tracking.orderId)}/payment-confirm`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-order-phone': searchPhone }, body: JSON.stringify({ paymentType, paymentAmount: amount }) });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Could not confirm payment');
       setPaymentMessage('Payment confirmation sent. Your order will move forward after studio approval.');
@@ -137,7 +149,7 @@ export default function TrackOrder() {
           <span>ORDER JOURNEY</span>
           <h1>Track your order.</h1>
           <p>
-            Enter your order ID below to see real-time updates on your project's progress.
+            Enter your private order ID and checkout phone number to see real-time updates.
           </p>
           
           <form onSubmit={handleSearch} className="hs-track-form">
@@ -145,6 +157,11 @@ export default function TrackOrder() {
               <Search aria-hidden="true" />
               <span className="sr-only">Order ID or tracking number</span>
               <Input id="public-order-id" value={orderId} onChange={(e) => setOrderId(e.target.value)} placeholder="Order ID or tracking number" aria-label="Order ID or tracking number" className="hs-track-input" />
+            </label>
+            <label className="hs-track-field" htmlFor="public-order-phone">
+              <Phone aria-hidden="true" />
+              <span className="sr-only">Checkout phone number</span>
+              <Input id="public-order-phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Checkout phone number" aria-label="Checkout phone number" className="hs-track-input" required />
             </label>
             <Button type="submit" className="hs-track-submit">
               Track
