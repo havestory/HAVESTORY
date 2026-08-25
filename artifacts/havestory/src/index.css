@@ -8053,3 +8053,16 @@ body {
 [data-public-site] .hsx-footer-top h2{position:static!important;text-transform:uppercase!important}
 [data-public-site] .hsx-footer-top > div{display:block!important}
 @media (max-width:780px){[data-public-site] .hsx-shell-brand{min-width:auto!important}.hsx-shell-brand strong{letter-spacing:.11em!important}}
+
+/* Home hero motion finish: one composition, never a static block */
+.hs-new-hero{isolation:isolate;animation:hs-hero-breathe 9s ease-in-out infinite}
+.hs-new-hero-photo img{animation:hs-hero-pan 12s ease-in-out infinite alternate;transform-origin:center}
+.hs-new-hero-card{animation:hs-hero-card-float 6s ease-in-out infinite;will-change:transform}
+.hs-new-hero-wash{animation:hs-hero-wash 7s ease-in-out infinite alternate}
+.hs-new-hero-index,.hs-new-hero-dots{animation:hs-hero-ui-in 1s .35s both ease-out}
+@keyframes hs-hero-breathe{0%,100%{box-shadow:0 28px 80px rgba(54,23,67,.14)}50%{box-shadow:0 34px 94px rgba(103,56,122,.22)}}
+@keyframes hs-hero-pan{0%{transform:scale(1.02) translate3d(0,0,0)}100%{transform:scale(1.07) translate3d(-1.2%, -0.8%, 0)}}
+@keyframes hs-hero-card-float{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-7px,0)}}
+@keyframes hs-hero-wash{0%{opacity:.72}100%{opacity:.92}}
+@keyframes hs-hero-ui-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion:reduce){.hs-new-hero,.hs-new-hero-photo img,.hs-new-hero-card,.hs-new-hero-wash,.hs-new-hero-index,.hs-new-hero-dots{animation:none!important}}
