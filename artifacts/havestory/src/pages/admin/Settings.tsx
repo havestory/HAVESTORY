@@ -754,7 +754,7 @@ export default function AdminSettings() {
     }
   };
 
-  const sections = [  const sections = [
+  const sections = [
     {
       title: "Business Identity",
       icon: Globe,
