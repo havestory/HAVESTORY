@@ -22,13 +22,7 @@ export default function TrackOrder() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const linkedOrder = (params.get('id') || params.get('order') || '').trim();
-    const savedPhone = window.sessionStorage.getItem('havestory-order-phone') || '';
     if (linkedOrder) setOrderId(linkedOrder);
-    if (savedPhone) setPhone(savedPhone);
-    if (linkedOrder && savedPhone) {
-      setSearchId(linkedOrder);
-      setSearchPhone(savedPhone);
-    }
   }, []);
 
   const { data: tracking, isLoading, isError, error, refetch } = useTrackOrder(searchId, {
@@ -60,7 +54,6 @@ export default function TrackOrder() {
       setPreviewMessage(null);
       setSearchId(orderId.trim());
       setSearchPhone(phone.trim());
-      window.sessionStorage.setItem('havestory-order-phone', phone.trim());
     }
   };
 
