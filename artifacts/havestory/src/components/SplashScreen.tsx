@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useGetSettings } from '@workspace/api-client-react';
-import { Image as ImageIcon } from 'lucide-react';
+import { StudioLoader } from './StudioLoader';
 
 export function SplashScreen({ onDone }: { onDone: () => void }) {
-  const { data: settings, isLoading: settingsLoading, isError: settingsError } = useGetSettings();
+  const { isLoading: settingsLoading } = useGetSettings();
   const [fading, setFading] = useState(false);
   const [minimumDone, setMinimumDone] = useState(false);
   const completed = useRef(false);
@@ -30,41 +30,14 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
 
   return (
     <div
-      className="hs-splash fixed inset-0 z-[9999] flex flex-col items-center justify-center"
+      className="hs-splash hs-studio-loader-overlay fixed inset-0 z-[9999] flex items-center justify-center"
       style={{
         transition: 'opacity 0.6s ease',
         opacity: fading ? 0 : 1,
         pointerEvents: fading ? 'none' : 'all',
       }}
     >
-      <div className="hs-splash-orb hs-splash-orb-one" />
-      <div className="hs-splash-orb hs-splash-orb-two" />
-
-      {/* Logo mark */}
-      <div className="hs-splash-inner relative z-10 flex flex-col items-center">
-        <div className="hs-splash-mark animate-fade-up" style={{ animationDelay: '0ms' }}>
-          {!settingsLoading && settings?.logoUrl
-            ? <img src={settings.logoUrl} alt="" />
-            : <><span>HS</span><ImageIcon /></>}
-        </div>
-
-        <div className="hs-splash-copy text-center animate-fade-up" style={{ animationDelay: '120ms' }}>
-          <small>COLOUR LAB · FRAME STUDIO</small>
-          <h1>
-            {settingsLoading ? 'HAVESTORY' : settings?.businessName || 'HAVESTORY'}
-          </h1>
-          <p>
-            {settingsLoading
-              ? ' '
-              : settings?.taglineEnabled !== false && settings?.tagline
-                ? settings.tagline
-                : 'A considered collection of frames and stories'}
-          </p>
-        </div>
-
-        <div className="hs-splash-progress animate-fade-up" style={{ animationDelay: '240ms' }}><i /></div>
-        <p className="hs-splash-status">{settingsError ? 'Opening the studio' : settingsLoading ? 'Setting the scene' : 'Welcome to the studio'}</p>
-      </div>
+      <StudioLoader label="Preparing your studio collection" />
     </div>
   );
 }

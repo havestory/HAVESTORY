@@ -8332,3 +8332,89 @@ body {
     padding: 9px !important;
   }
 }
+
+/* Unified HAVESTORY loader -------------------------------------------------- */
+.hs-studio-loader-overlay,
+.hs-studio-loader {
+  isolation: isolate;
+}
+.hs-studio-loader-overlay {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(211,177,102,.16), transparent 22rem),
+    linear-gradient(135deg, #f7f1ff 0%, #fffdf8 48%, #efe6f8 100%);
+}
+.hs-studio-loader {
+  display: flex;
+  min-width: min(82vw, 320px);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #24132f;
+  text-align: center;
+  animation: hs-loader-reveal .7s cubic-bezier(.22,1,.36,1) both;
+}
+.hs-studio-loader-rings {
+  position: relative;
+  width: clamp(132px, 18vw, 184px);
+  height: clamp(132px, 18vw, 184px);
+}
+.hs-studio-loader-ring {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(76,35,112,.24);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.55) inset, 0 16px 34px rgba(76,35,112,.09);
+}
+.hs-studio-loader-ring-one {
+  border-top: 3px solid #4c2370;
+  animation: hs-loader-spin 2.8s linear infinite;
+}
+.hs-studio-loader-ring-two {
+  inset: 13%;
+  border-right: 3px solid #c49a4a;
+  animation: hs-loader-spin-reverse 2.1s linear infinite;
+}
+.hs-studio-loader-ring-three {
+  inset: 26%;
+  border-bottom: 3px solid #9a5fc4;
+  animation: hs-loader-spin 1.45s linear infinite;
+}
+.hs-studio-loader-core {
+  position: absolute;
+  inset: 39%;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #321642;
+  color: #fffaf2;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: .08em;
+  box-shadow: 0 8px 24px rgba(50,22,66,.24);
+}
+.hs-studio-loader-brand {
+  margin-top: 28px;
+  color: #321642;
+  font-size: clamp(18px, 3vw, 26px);
+  font-weight: 950;
+  letter-spacing: .24em;
+  line-height: 1;
+}
+.hs-studio-loader-caption {
+  margin-top: 12px;
+  color: rgba(50,22,66,.58);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+@keyframes hs-loader-spin { to { transform: rotate(360deg); } }
+@keyframes hs-loader-spin-reverse { to { transform: rotate(-360deg); } }
+@keyframes hs-loader-reveal {
+  from { opacity: 0; transform: translateY(12px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hs-studio-loader,
+  .hs-studio-loader-ring { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}

@@ -10,6 +10,7 @@ import { AdminLayout }    from './components/layout/AdminLayout';
 import { AuthGuard }      from './components/layout/AuthGuard';
 import { SplashScreen }   from './components/SplashScreen';
 import { ShopCartProvider } from './lib/shop-cart';
+import { StudioLoader } from './components/StudioLoader';
 
 // Public Pages
 import Home           from './pages/public/Home';
@@ -99,16 +100,7 @@ const queryClient = new QueryClient({
   },
 });
 function RouteLoader() {
-  return (
-    <div className="hs-route-loader" role="status" aria-live="polite" aria-label="Loading section">
-      <div>
-        <span>HS</span>
-        <strong>Curating your view</strong>
-        <p>Preparing your studio collection</p>
-        <div><i /></div>
-      </div>
-    </div>
-  );
+  return <StudioLoader label="Preparing your studio collection" />;
 }
 
 function AdminRouteFallback({ error, resetError }: ErrorFallbackProps) {
