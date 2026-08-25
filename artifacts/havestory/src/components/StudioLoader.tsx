@@ -8,7 +8,6 @@ export function StudioLoader({ label = 'Preparing your studio experience' }: { l
         <span className="hs-studio-loader-core">HS</span>
       </div>
       <div className="hs-studio-loader-brand">HAVESTORY</div>
-      <div className="hs-studio-loader-caption">{label}</div>
     </div>
   );
 }
