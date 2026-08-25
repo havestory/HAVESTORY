@@ -302,6 +302,7 @@ export default function Checkout() {
     }, {
       onSuccess: (order: any) => {
         const orderId = String(order?.orderId || order?.id || "");
+        window.sessionStorage.setItem('havestory-order-phone', customerPhone.trim());
         clear();
         setSubmittedOrderId(orderId);
         toast({ title: "Order received", description: orderId ? `Your tracking number is ${orderId}.` : "Your order has been received by the studio.", className: "hs-order-received-toast" });

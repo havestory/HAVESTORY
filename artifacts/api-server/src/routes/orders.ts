@@ -157,6 +157,31 @@ async function generateOrderId(): Promise<string> {
   return `HS-${month}-${padded}-${randomSuffix()}`;
 }
 
+function normalizedPhone(value: unknown): string {
+  const digits = String(value || "").replace(/\D/g, "");
+  return digits.length >= 9 ? digits.slice(-9) : digits;
+}
+
+async function requireOrderAccess(req: any, res: any, next: any) {
+  try {
+    const orderId = String(req.params.orderId || "");
+    const [order] = await db.select().from(ordersTable).where(eq(ordersTable.orderId, orderId));
+    if (!order) return res.status(404).json({ error: "Order not found" });
+
+    const suppliedPhone = normalizedPhone(req.get("x-order-phone"));
+    const savedPhone = normalizedPhone(order.customerPhone);
+    if (!suppliedPhone || suppliedPhone.length < 7 || suppliedPhone !== savedPhone) {
+      return res.status(403).json({ error: "Order ID and phone number do not match" });
+    }
+
+    req.trackedOrder = order;
+    next();
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to verify order access" });
+  }
+}
+
 function serializeOrder(o: any) {
   return {
     ...o,
@@ -774,11 +799,10 @@ router.post("/", async (req, res) => {
 });
 
 // IMPORTANT: named routes must be before /:id
-router.get("/track/:orderId", async (req, res) => {
+router.get("/track/:orderId", requireOrderAccess, async (req: any, res) => {
   try {
     const orderId = String(req.params.orderId);
-    const [order] = await db.select().from(ordersTable).where(eq(ordersTable.orderId, orderId));
-    if (!order) return res.status(404).json({ error: "Order not found" });
+    const order = req.trackedOrder;
 
     // Look up attached invoice
     const [invoice] = await db.select().from(invoicesTable).where(eq(invoicesTable.orderId, orderId));
@@ -807,7 +831,6 @@ router.get("/track/:orderId", async (req, res) => {
     res.json({
       orderId: order.orderId,
       customerName: order.customerName,
-      customerPhone: order.customerPhone,
       status: order.status,
       estimatedCompletion: order.estimatedCompletion,
       createdAt: order.createdAt?.toISOString?.() ?? order.createdAt,
@@ -820,9 +843,6 @@ router.get("/track/:orderId", async (req, res) => {
       courierTrackingUrl,
       onlineDeliveryFiles: parseArr(order.onlineDeliveryFiles),
       onlineDeliveryLinks: parseArr(order.onlineDeliveryLinks),
-      paymentProofUrl: order.paymentProofUrl,
-      proofFileUrl: order.proofFileUrl,
-      proofFileName: order.proofFileName,
       paymentMethod: order.paymentMethod,
       paymentStatus: order.paymentStatus,
       paymentAmount: order.paymentAmount,
@@ -834,15 +854,11 @@ router.get("/track/:orderId", async (req, res) => {
       paymentApprovedAt: order.paymentApprovedAt?.toISOString?.() ?? order.paymentApprovedAt,
       paymentRejectionReason: order.paymentRejectionReason,
       customerPaymentConfirmedAt: (order as any).customerPaymentConfirmedAt?.toISOString?.() ?? (order as any).customerPaymentConfirmedAt,
-      attachments: parseArr(order.attachments),
       designPreviews: publicDesignPreviews(order),
       invoice: invoice ? {
         invoiceNumber: invoice.invoiceNumber,
-        clientName:    invoice.clientName,
-        orderId:       invoice.orderId,
         amount:        invoice.amount,
         status:        invoice.status,
-        metadata:      publicInvoiceMetadata(invoice.metadata),
         createdAt:     invoice.createdAt?.toISOString?.() ?? invoice.createdAt,
       } : null,
     });
@@ -853,14 +869,13 @@ router.get("/track/:orderId", async (req, res) => {
 });
 
 // Customer uploads design files (no auth)
-router.post("/track/:orderId/design-files", upload.array("files", 10), async (req, res) => {
+router.post("/track/:orderId/design-files", requireOrderAccess, upload.array("files", 10), async (req: any, res) => {
   try {
     const orderId = String(req.params.orderId);
     const files = req.files as Express.Multer.File[];
     if (!files || files.length === 0) return res.status(400).json({ error: "No files uploaded" });
 
-    const [order] = await db.select().from(ordersTable).where(eq(ordersTable.orderId, orderId));
-    if (!order) return res.status(404).json({ error: "Order not found" });
+    const order = req.trackedOrder;
 
     const existing = parseArr(order.attachments) as any[];
     const uploaded = await Promise.all(
@@ -881,13 +896,12 @@ router.post("/track/:orderId/design-files", upload.array("files", 10), async (re
 });
 
 // Customer uploads payment proof (no auth)
-router.post("/track/:orderId/payment-proof", upload.single("file"), async (req, res) => {
+router.post("/track/:orderId/payment-proof", requireOrderAccess, upload.single("file"), async (req: any, res) => {
   try {
     const orderId = String(req.params.orderId);
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-    const [order] = await db.select().from(ordersTable).where(eq(ordersTable.orderId, orderId));
-    if (!order) return res.status(404).json({ error: "Order not found" });
+    const order = req.trackedOrder;
     const paymentType = String(req.body?.paymentType || "").toLowerCase();
     const paymentAmount = Number(req.body?.paymentAmount);
     if (!["advance", "full", "custom"].includes(paymentType) || !Number.isFinite(paymentAmount) || paymentAmount <= 0) {
@@ -924,11 +938,10 @@ router.post("/track/:orderId/payment-proof", upload.single("file"), async (req, 
 
 // Customer confirms that the transfer/payment has been made. Admin approval
 // remains required before the order moves into production.
-router.post("/track/:orderId/payment-confirm", async (req, res) => {
+router.post("/track/:orderId/payment-confirm", requireOrderAccess, async (req: any, res) => {
   try {
     const orderId = String(req.params.orderId);
-    const [order] = await db.select().from(ordersTable).where(eq(ordersTable.orderId, orderId));
-    if (!order) return res.status(404).json({ error: "Order not found" });
+    const order = req.trackedOrder;
     if (order.paymentMethod === "cod") {
       return res.status(400).json({ error: "COD orders do not require payment confirmation" });
     }
@@ -1323,17 +1336,17 @@ router.put("/:id", requireAdmin, async (req, res) => {
 });
 
 // Delete an order (admin only)
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", requireAdmin, async (req, res) => {
   try {
-    if (!getAdminAuth(req)) return res.status(401).json({ error: "Unauthorized" });
-    const { id } = req.params;
+    const id = String(req.params.id);
     const idNum = Number(id);
     const [existing] = isNaN(idNum)
       ? await db.select().from(ordersTable).where(eq(ordersTable.orderId, id))
       : await db.select().from(ordersTable).where(eq(ordersTable.id, idNum));
     if (!existing) return res.status(404).json({ error: "Order not found" });
-    await db.delete(invoicesTable).where(eq(invoicesTable.orderId, existing.orderId));
-    await db.delete(ordersTable).where(eq(ordersTable.id, existing.id));
+    const deletedAt = new Date();
+    await db.update(invoicesTable).set({ deletedAt }).where(eq(invoicesTable.orderId, existing.orderId));
+    await db.update(ordersTable).set({ deletedAt, updatedAt: deletedAt }).where(eq(ordersTable.id, existing.id));
     res.json({ success: true });
   } catch (err) {
     req.log.error(err);

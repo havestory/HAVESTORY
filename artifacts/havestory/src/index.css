@@ -7631,3 +7631,12 @@ body {
 @media (prefers-reduced-motion: reduce) {
   [data-public-site] .hsx-about-text-link svg { transition: none; }
 }
+
+
+/* Secure tracking verification layout */
+@media (min-width: 801px) {
+  [data-public-site] .hs-track-form {
+    width: min(100%, 780px);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  }
+}

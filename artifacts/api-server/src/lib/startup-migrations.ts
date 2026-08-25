@@ -524,28 +524,5 @@ export async function runStartupMigrations(
     reconcileClient.release();
   }
 
-  // Auto-purge: permanently delete items that have been in trash for over 30 days
-  const purgeClient = await pool.connect();
-  try {
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - 30);
-    const tables = ["orders", "invoices", "clients", "crm_projects"] as const;
-    let totalPurged = 0;
-    for (const table of tables) {
-      const result = await purgeClient.query(
-        `DELETE FROM ${table} WHERE deleted_at IS NOT NULL AND deleted_at < $1`,
-        [cutoff],
-      );
-      totalPurged += result.rowCount ?? 0;
-    }
-    if (totalPurged > 0) {
-      log(
-        `[migrations] Auto-purged ${totalPurged} expired trash item(s) (older than 30 days)`,
-      );
-    }
-  } catch (e) {
-    console.warn("[migrations] Trash auto-purge warning:", e);
-  } finally {
-    purgeClient.release();
-  }
+
 }

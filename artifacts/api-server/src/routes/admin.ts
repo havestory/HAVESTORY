@@ -7,7 +7,7 @@ import {
   clientsTable,
   crmProjectsTable,
 } from "@workspace/db/schema";
-import { eq, lt, isNull, isNotNull, sql, and, type SQL } from "drizzle-orm";
+import { eq, isNull, isNotNull, sql, and, type SQL } from "drizzle-orm";
 import { runInvoiceClientBackfill } from "@workspace/invoice-client-link";
 import { deleteCloudinaryUrls } from "../lib/cloudinary";
 import {
@@ -602,93 +602,7 @@ router.get("/activity", requireOwner, async (req: Request, res: Response) => {
   res.json(rows);
 });
 
-/* ── Storage Cleanup ─────────────────────────────────────────────────────── */
-router.post(
-  "/cleanup-files",
-  requireOwner,
-  async (req: Request, res: Response) => {
-    if (!getAdminAuth(req)) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
-    try {
-      const cutoff = new Date();
-      cutoff.setMonth(cutoff.getMonth() - 3);
-
-      const oldOrders = await db
-        .select()
-        .from(ordersTable)
-        .where(lt(ordersTable.createdAt, cutoff));
-
-      let ordersProcessed = 0;
-      let filesDeleted = 0;
-
-      for (const order of oldOrders) {
-        const urls: string[] = [];
-
-        if (order.paymentProofUrl) urls.push(order.paymentProofUrl);
-        if (order.proofFileUrl) urls.push(order.proofFileUrl);
-
-        try {
-          const attachments = JSON.parse(order.attachments || "[]");
-          for (const a of attachments) {
-            if (typeof a === "string") urls.push(a);
-            else if (a?.url) urls.push(a.url);
-          }
-        } catch {}
-
-        try {
-          const onlineFiles = JSON.parse(order.onlineDeliveryFiles || "[]");
-          for (const f of onlineFiles) {
-            if (typeof f === "string") urls.push(f);
-            else if (f?.url) urls.push(f.url);
-          }
-        } catch {}
-
-        const cloudinaryUrls = urls.filter(
-          (u) => u && u.includes("cloudinary.com"),
-        );
-        if (cloudinaryUrls.length === 0) continue;
-
-        const deleted = await deleteCloudinaryUrls(cloudinaryUrls);
-        filesDeleted += deleted;
-
-        // Scope the update to the current order. The previous implementation
-        // re-applied this UPDATE to every old order on every loop iteration
-        // because it used `lt(createdAt, cutoff)`.
-        await db
-          .update(ordersTable)
-          .set({
-            attachments: "[]",
-            onlineDeliveryFiles: "[]",
-            paymentProofUrl: null,
-            proofFileUrl: null,
-            proofFileName: null,
-            updatedAt: new Date(),
-          })
-          .where(eq(ordersTable.id, order.id));
-
-        ordersProcessed++;
-      }
-
-      return res.json({
-        success: true,
-        ordersProcessed,
-        filesDeleted,
-        message:
-          ordersProcessed === 0
-            ? "No orders older than 3 months with files were found."
-            : `Cleaned ${ordersProcessed} order(s) and removed ${filesDeleted} file(s) from cloud storage.`,
-      });
-    } catch (err: any) {
-      req.log.error(err);
-      return res
-        .status(500)
-        .json({ error: "Cleanup failed", details: err?.message });
-    }
-  },
-);
-
-/* ── Logout ───────────────────────────────────────────────────────────────── */
+/* ── Logout/* ── Logout ───────────────────────────────────────────────────────────────── */
 router.post("/logout", (req: Request, res: Response) => {
   clearAuthCookies(res);
   res.json({ success: true, message: "Logged out" });
@@ -1220,40 +1134,6 @@ router.post(
       return res
         .status(500)
         .json({ error: `Failed to restore ${section}`, details: err?.message });
-    }
-  },
-);
-
-/* ── Permanently delete items that have been in trash for over 30 days ──── */
-router.post(
-  "/purge/:section",
-  requireOwner,
-  async (req: Request, res: Response) => {
-    if (!getAdminAuth(req)) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
-    const section = String(req.params.section);
-    if (!isSectionKey(section)) {
-      return res.status(400).json({ error: `Invalid section: ${section}` });
-    }
-    try {
-      const { table, extraFilter } = SECTION_MAP[section];
-      const cutoff = new Date();
-      cutoff.setDate(cutoff.getDate() - 30);
-      const result = await db
-        .delete(table)
-        .where(withExtra(lt(table.deletedAt, cutoff), extraFilter));
-      const count = (result as any).rowCount ?? 0;
-      return res.json({
-        success: true,
-        purgedCount: count,
-        message: `${count} ${section} permanently deleted.`,
-      });
-    } catch (err: any) {
-      req.log.error(err);
-      return res
-        .status(500)
-        .json({ error: `Failed to purge ${section}`, details: err?.message });
     }
   },
 );
