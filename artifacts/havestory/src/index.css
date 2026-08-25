@@ -8566,3 +8566,71 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .hs-new-category > a:hover img { transform: none; }
 }
+
+/* Final Store sidebar alignment: one shared inner rail for every control */
+[data-public-site] .hs-store-category-panel {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+[data-public-site] .hs-store-category-intro,
+[data-public-site] .hs-store-sidebar-filter-toggle,
+[data-public-site] .hs-store-category-list,
+[data-public-site] .hs-store-filter-panel {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+[data-public-site] .hs-store-sidebar-filter-toggle {
+  margin: 10px 0 0 !important;
+  min-height: 44px !important;
+  border-radius: 12px !important;
+}
+[data-public-site] .hs-store-category-list {
+  display: grid !important;
+  gap: 4px !important;
+  padding: 10px !important;
+}
+[data-public-site] .hs-store-category-list button {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 42px !important;
+  margin: 0 !important;
+  border-radius: 12px !important;
+}
+[data-public-site] .hs-store-category-list button span {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+[data-public-site] .hs-store-category-list button small {
+  flex: 0 0 auto !important;
+}
+[data-public-site] .hs-store-category-panel .hs-store-filter-panel.is-open {
+  box-sizing: border-box !important;
+  width: calc(100% - 20px) !important;
+  margin: 0 10px 10px !important;
+  padding: 14px 12px !important;
+}
+[data-public-site] .hs-store-category-panel .hs-store-clear-category {
+  box-sizing: border-box !important;
+  max-width: calc(100% - 40px) !important;
+}
+@media (max-width: 640px) {
+  [data-public-site] .hs-store-category-panel { width: 100% !important; }
+  [data-public-site] .hs-store-category-intro { padding: 18px 16px 15px !important; }
+  [data-public-site] .hs-store-sidebar-filter-toggle { margin-top: 8px !important; }
+  [data-public-site] .hs-store-category-list { padding: 10px !important; }
+}
+
+/* Sidebar final inset: filter trigger and category rows share the same rail */
+[data-public-site] .hs-store-category-panel > .hs-store-sidebar-filter-toggle {
+  width: calc(100% - 20px) !important;
+  margin: 10px 10px 0 !important;
+}
+[data-public-site] .hs-store-category-panel > .hs-store-filter-panel.is-open {
+  width: calc(100% - 20px) !important;
+  margin: 0 10px 10px !important;
+}
