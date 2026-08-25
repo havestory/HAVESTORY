@@ -104,8 +104,8 @@ export default function Home() {
     ["03", "Approve the details", "Receive a clear quote before production begins."],
     ["04", "Receive it safely", "We finish, check, pack and deliver your piece."],
   ];
-  const heroTitle = cfg?.heroTitle || "Frame the moments that stay.";
-  const heroSubtitle = cfg?.heroSubtitle || "Premium prints, custom frames and thoughtful gifts, made in our studio and delivered across Sri Lanka.";
+  const heroTitle = cfg?.heroTitle || "Frame the Moments That Stay";
+  const heroSubtitle = cfg?.heroSubtitle || "Thoughtfully made photo frames that turn everyday moments into a gallery of your own.";
 
   useEffect(() => setHeroIndex(0), [heroKey]);
   useEffect(() => {
