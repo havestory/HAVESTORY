@@ -8679,3 +8679,57 @@ body {
   [data-public-site] .hsx-footer-top h2 { font-size: clamp(42px, 15vw, 68px) !important; }
   [data-public-site] .hsx-footer-top > p { font-size: 14px !important; }
 }
+
+/* Final About page cleanup and readable glass mission cards */
+[data-public-site] .hsx-about-hero-clean {
+  min-height: 0 !important;
+  padding-top: clamp(34px, 5vw, 64px) !important;
+  padding-bottom: clamp(28px, 4vw, 48px) !important;
+}
+[data-public-site] .hsx-about-hero-note { display: none !important; }
+[data-public-site] .hsx-about-hero-stats { margin-top: 30px !important; }
+[data-public-site] .hsx-about-intro-clean {
+  padding-top: clamp(44px, 6vw, 78px) !important;
+  padding-bottom: clamp(42px, 6vw, 72px) !important;
+}
+[data-public-site] .hsx-values-clean { padding-bottom: clamp(48px, 6vw, 72px) !important; }
+[data-public-site] .hsx-about-mission-clean {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: clamp(14px, 2vw, 24px) !important;
+  margin: 0 auto clamp(48px, 6vw, 76px) !important;
+  width: min(calc(100% - 40px), 1180px) !important;
+}
+[data-public-site] .hsx-about-mission-clean > div {
+  min-width: 0 !important;
+  padding: clamp(24px, 3vw, 38px) !important;
+  border: 1px solid rgba(109, 63, 134, .16) !important;
+  border-radius: 24px !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.86), rgba(248,242,255,.72)) !important;
+  box-shadow: 0 18px 48px rgba(53,25,67,.09), inset 0 1px 0 rgba(255,255,255,.95) !important;
+  backdrop-filter: blur(22px) saturate(125%) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(125%) !important;
+}
+[data-public-site] .hsx-about-mission-clean > div > span {
+  color: #7a1648 !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  letter-spacing: .2em !important;
+  text-transform: uppercase !important;
+}
+[data-public-site] .hsx-about-mission-clean > div > h2 {
+  margin-top: 16px !important;
+  color: #281d31 !important;
+  font-family: Georgia, 'Times New Roman', serif !important;
+  font-size: clamp(22px, 2.4vw, 34px) !important;
+  font-weight: 500 !important;
+  line-height: 1.14 !important;
+  letter-spacing: -.035em !important;
+}
+@media (max-width: 800px) {
+  [data-public-site] .hsx-about-hero-clean { padding-top: 30px !important; padding-bottom: 24px !important; }
+  [data-public-site] .hsx-about-hero-stats { margin-top: 24px !important; }
+  [data-public-site] .hsx-about-intro-clean { width: calc(100% - 32px) !important; padding-top: 42px !important; padding-bottom: 44px !important; }
+  [data-public-site] .hsx-about-mission-clean { grid-template-columns: 1fr !important; width: calc(100% - 32px) !important; margin-bottom: 42px !important; }
+  [data-public-site] .hsx-about-mission-clean > div { padding: 24px !important; }
+}
