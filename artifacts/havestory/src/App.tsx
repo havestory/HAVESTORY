@@ -103,6 +103,14 @@ function RouteLoader() {
   return <StudioLoader label="Preparing your studio collection" />;
 }
 
+function PublicRouteLoader() {
+  return (
+    <div className="hs-public-route-pending" role="status" aria-live="polite" aria-label="Loading page">
+      <span />
+    </div>
+  );
+}
+
 function AdminRouteFallback({ error, resetError }: ErrorFallbackProps) {
   return (
     <div className="flex min-h-[55vh] items-center justify-center px-4">
@@ -123,7 +131,7 @@ function AdminRouteFallback({ error, resetError }: ErrorFallbackProps) {
 function PublicRoutes() {
   return (
     <PublicLayout>
-      <Suspense fallback={<RouteLoader />}>
+      <Suspense fallback={<PublicRouteLoader />}>
         <Switch>
           <Route path="/"                   component={Home} />
           <Route path="/store"              component={Store} />

@@ -152,7 +152,13 @@ export default function Home() {
       </section>
 
       <section className="hs-new-benefits" aria-label="HAVESTORY service benefits">
-        <div className="hs-new-benefits-track">{[...benefits, ...benefits].map(({ label, Icon }, index) => <span key={`${label}-${index}`}><Icon size={18} />{label}</span>)}</div>
+        <div className="hs-new-benefits-track">
+          {[0, 1].map((group) => (
+            <div key={group} className="hs-new-benefits-group" aria-hidden={group === 1}>
+              {benefits.map(({ label, Icon }) => <span key={`${group}-${label}`}><Icon size={18} />{label}</span>)}
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="hs-new-section hs-new-category-section">
