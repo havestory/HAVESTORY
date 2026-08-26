@@ -8764,3 +8764,102 @@ body {
   [data-public-site] .hsx-about-hero-clean h1 { margin-top: 12px !important; margin-bottom: 16px !important; }
   [data-public-site] .hsx-about-hero-stats { margin-top: 22px !important; padding-top: 14px !important; }
 }
+
+
+/* SEAMLESS BENEFITS + SINGLE PUBLIC LOADER — final authority --------------- */
+[data-public-site] .hs-new-benefits {
+  width: min(calc(100% - 2rem), 1280px) !important;
+  margin: 1rem auto 0 !important;
+  padding: .55rem !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(76,35,112,.13) !important;
+  border-radius: 1.35rem !important;
+  background: linear-gradient(120deg, rgba(255,255,255,.94), rgba(247,240,252,.9), rgba(255,248,232,.9)) !important;
+  box-shadow: 0 18px 52px rgba(47,25,59,.11), inset 0 1px 0 rgba(255,255,255,.98) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(125%) !important;
+  backdrop-filter: blur(18px) saturate(125%) !important;
+}
+[data-public-site] .hs-new-benefits-track {
+  display: flex !important;
+  width: 200% !important;
+  gap: 0 !important;
+  animation: hs-new-benefits-seamless 25s linear infinite !important;
+  will-change: transform;
+}
+[data-public-site] .hs-new-benefits:hover .hs-new-benefits-track { animation-play-state: paused !important; }
+[data-public-site] .hs-new-benefits-group {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: 50% !important;
+  min-width: 50% !important;
+  padding-right: .55rem;
+  gap: .55rem;
+  box-sizing: border-box;
+}
+[data-public-site] .hs-new-benefits-group > span {
+  display: flex !important;
+  min-width: 0 !important;
+  min-height: 4.15rem !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: .6rem !important;
+  padding: .65rem .8rem !important;
+  border: 1px solid rgba(76,35,112,.1) !important;
+  border-radius: .95rem !important;
+  color: #2d2035 !important;
+  font-size: .69rem !important;
+  font-weight: 900 !important;
+  letter-spacing: .07em !important;
+  text-align: center;
+  text-transform: uppercase !important;
+  white-space: nowrap;
+  box-shadow: 0 9px 24px rgba(43,23,64,.08), inset 0 1px 0 rgba(255,255,255,.92) !important;
+}
+[data-public-site] .hs-new-benefits-group > span:nth-child(1) { background: linear-gradient(135deg, #efe3fa, #fcf9ff) !important; }
+[data-public-site] .hs-new-benefits-group > span:nth-child(2) { background: linear-gradient(135deg, #ffedbd, #fffaf0) !important; }
+[data-public-site] .hs-new-benefits-group > span:nth-child(3) { background: linear-gradient(135deg, #d9f2e7, #f5fcf9) !important; }
+[data-public-site] .hs-new-benefits-group > span:nth-child(4) { background: linear-gradient(135deg, #dfedff, #f8fbff) !important; }
+[data-public-site] .hs-new-benefits-group svg {
+  flex: 0 0 auto;
+  color: #7a3768 !important;
+  filter: drop-shadow(0 5px 8px rgba(76,35,112,.18));
+}
+@keyframes hs-new-benefits-seamless {
+  from { transform: translate3d(0,0,0); }
+  to { transform: translate3d(-50%,0,0); }
+}
+.hs-public-route-pending {
+  position: fixed;
+  z-index: 80;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 3px;
+  overflow: hidden;
+  background: rgba(76,35,112,.08);
+  pointer-events: none;
+}
+.hs-public-route-pending > span {
+  display: block;
+  width: 34%;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg,#4c2370,#c49a4a,#75419a);
+  animation: hs-public-route-progress .9s ease-in-out infinite;
+}
+@keyframes hs-public-route-progress {
+  from { transform: translateX(-115%); }
+  to { transform: translateX(345%); }
+}
+@media (max-width: 700px) {
+  [data-public-site] .hs-new-benefits { width: calc(100% - 1rem) !important; padding: .42rem !important; }
+  [data-public-site] .hs-new-benefits-track { width: 400% !important; animation-duration: 28s !important; }
+  [data-public-site] .hs-new-benefits-group { padding-right: .42rem; gap: .42rem; }
+  [data-public-site] .hs-new-benefits-group > span { min-height: 3.65rem !important; padding: .55rem .65rem !important; font-size: .6rem !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-public-site] .hs-new-benefits-track { width: 100% !important; animation: none !important; }
+  [data-public-site] .hs-new-benefits-group:first-child { width: 100% !important; min-width: 100% !important; padding-right: 0; }
+  [data-public-site] .hs-new-benefits-group:last-child { display: none !important; }
+  .hs-public-route-pending > span { width: 100%; animation: none; }
+}
