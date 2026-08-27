@@ -5,6 +5,7 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { applyThemeVars } from '@/lib/theme-utils';
 
 import './index.css';
+import './public-spacing.css';
 
 // Seed the public Liquid Glass palette before settings arrive so the first paint
 // never flashes the legacy darkroom or brown editorial theme.
