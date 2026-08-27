@@ -17,6 +17,7 @@ export default function TrackOrder() {
   const [paymentActionLoading, setPaymentActionLoading] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
   const [previewMessage, setPreviewMessage] = useState<string | null>(null);
+  const [searchError, setSearchError] = useState<string | null>(null);
   
   // Allow the order link from checkout/admin to open this page already populated.
   useEffect(() => {
@@ -39,6 +40,12 @@ export default function TrackOrder() {
   }, [searchId]);
 
   useEffect(() => {
+    if (isError) {
+      setSearchError('We could not find that order. Check the order ID and the phone number used at checkout, then try again.');
+    }
+  }, [isError]);
+
+  useEffect(() => {
     const current = tracking as any;
     if (!current) return;
     const submittedType = ['advance', 'full', 'custom'].includes(String(current.paymentType)) ? current.paymentType : 'advance';
@@ -49,12 +56,25 @@ export default function TrackOrder() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (orderId.trim() && phone.trim()) {
-      setPaymentMessage(null);
-      setPreviewMessage(null);
-      setSearchId(orderId.trim());
-      setSearchPhone(phone.trim());
+    const nextId = orderId.trim();
+    const nextPhone = phone.trim();
+    if (!nextId || !nextPhone) {
+      setSearchError('Please enter both your order ID and the phone number used at checkout.');
+      return;
     }
+    if (nextId.length < 3) {
+      setSearchError('Your order ID looks a little short. Please check the confirmation message and try again.');
+      return;
+    }
+    if (nextPhone.replace(/\D/g, '').length < 9) {
+      setSearchError('Please enter a valid checkout phone number so we can securely find your order.');
+      return;
+    }
+    setSearchError(null);
+    setPaymentMessage(null);
+    setPreviewMessage(null);
+    setSearchId(nextId);
+    setSearchPhone(nextPhone);
   };
 
   const uploadPaymentProof = async () => {
@@ -149,17 +169,23 @@ export default function TrackOrder() {
             <label className="hs-track-field" htmlFor="public-order-id">
               <Search aria-hidden="true" />
               <span className="sr-only">Order ID or tracking number</span>
-              <Input id="public-order-id" value={orderId} onChange={(e) => setOrderId(e.target.value)} placeholder="Order ID or tracking number" aria-label="Order ID or tracking number" className="hs-track-input" />
+              <Input id="public-order-id" value={orderId} onChange={(e) => { setOrderId(e.target.value); setSearchError(null); }} placeholder="Order ID or tracking number" aria-label="Order ID or tracking number" className="hs-track-input" />
             </label>
             <label className="hs-track-field" htmlFor="public-order-phone">
               <Phone aria-hidden="true" />
               <span className="sr-only">Checkout phone number</span>
-              <Input id="public-order-phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Checkout phone number" aria-label="Checkout phone number" className="hs-track-input" required />
+              <Input id="public-order-phone" type="tel" value={phone} onChange={(e) => { setPhone(e.target.value); setSearchError(null); }} placeholder="Checkout phone number" aria-label="Checkout phone number" className="hs-track-input" required />
             </label>
             <Button type="submit" className="hs-track-submit">
               Track
             </Button>
           </form>
+          {searchError && (
+            <div role="alert" className="hs-track-search-error mt-4 flex items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-left text-sm text-amber-900 shadow-sm">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+              <span>{searchError}</span>
+            </div>
+          )}
         </div>
       </section>
 
@@ -173,8 +199,8 @@ export default function TrackOrder() {
 
         {isError && (
           <div className="hs-track-state hs-track-error">
-            <p className="font-medium mb-2">Order Not Found</p>
-            <p className="text-sm">We couldn't find an order matching "{searchId}". Please check your order ID and try again.</p>
+            <p className="font-medium mb-2">Let’s try that again</p>
+            <p className="text-sm">We couldn’t find an order matching those details. Please check the order ID and checkout phone number, then search again.</p>
           </div>
         )}
 

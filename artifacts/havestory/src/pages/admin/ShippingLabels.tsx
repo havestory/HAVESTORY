@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import html2canvas from 'html2canvas';
+import { captureElement } from '@/lib/html2canvas-capture';
 import { AlertTriangle, ArrowUp, CalendarDays, CheckCircle2, Download, Droplets, FileText, Package2, Printer, RotateCcw, Save, Search, ShieldCheck, Truck, User, Zap } from 'lucide-react';
 import { useGetSettings, useListOrders } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
@@ -183,9 +183,27 @@ export default function ShippingLabels() {
   }
   async function handleDownload() {
     if (!ensureReady()) return;
-    const label = document.querySelector<HTMLElement>('.label-print-target'); if (!label) return;
-    try { const canvas = await html2canvas(label, { useCORS: true, allowTaint: false, scale: 2.5, backgroundColor: '#fff' }); const link = document.createElement('a'); link.download = `HAVESTORY-${form.orderNumber || form.recipientName || 'shipping-label'}.jpg`.replace(/[^a-zA-Z0-9._-]/g, '-'); link.href = canvas.toDataURL('image/jpeg', .96); link.click(); toast({ title: 'Shipping label downloaded', description: link.download }); }
-    catch (error: any) { toast({ title: 'Download failed', description: error.message || 'Could not create the JPG.', variant: 'destructive' }); }
+    const label = document.querySelector<HTMLElement>('.label-print-target');
+    if (!label) return;
+    try {
+      const isA5 = form.labelSize === 'a5';
+      const width = isA5 ? 559 : 378;
+      const height = isA5 ? 794 : 560;
+      const canvas = await captureElement(label, {
+        width,
+        height,
+        scale: 2,
+        backgroundColor: '#ffffff',
+        overflowVisible: false,
+      });
+      const link = document.createElement('a');
+      link.download = `HAVESTORY-${form.orderNumber || form.recipientName || 'shipping-label'}.jpg`.replace(/[^a-zA-Z0-9._-]/g, '-');
+      link.href = canvas.toDataURL('image/jpeg', 0.96);
+      link.click();
+      toast({ title: 'Shipping label downloaded', description: link.download });
+    } catch (error: any) {
+      toast({ title: 'Download failed', description: error.message || 'Could not create the JPG.', variant: 'destructive' });
+    }
   }
   function handleClear() { setForm({ ...EMPTY_FORM, labelSize: labelSettings.defaultSize || 'standard' }); setOrderQuery(''); setLookupPhone(''); setSelectedOrderId(null); setClientId(null); setDetailsSaved(false); setQrUrl(''); autoLoaded.current = true; }
 

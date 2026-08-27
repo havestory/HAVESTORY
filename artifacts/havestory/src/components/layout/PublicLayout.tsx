@@ -149,7 +149,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       <div data-public-site="" className="atelier-shell min-h-[100dvh] bg-[hsl(var(--background))]">
         <div className="hs-route-loader" role="status" aria-live="polite" aria-label="Loading HAVESTORY">
           <div>
-            <span>HS</span>
+            <span>HAVESTORY</span>
             <strong>Preparing your studio</strong>
             <p>Loading the latest HAVESTORY settings</p>
             <div><i /></div>
@@ -318,9 +318,12 @@ export function PublicLayout({ children }: { children: ReactNode }) {
 
       <footer className="hsx-footer" aria-label="HAVESTORY studio footer">
         <div className="hsx-footer-top">
-          <div>
-            <span>THE COLOUR &amp; FRAME STUDIO</span>
-            <h2>{settings?.businessName || 'HAVESTORY'}</h2>
+          <div className="hsx-footer-signature">
+            {settings?.logoUrl && <img src={settings.logoUrl} alt={settings.businessName || 'HAVESTORY'} />}
+            <div>
+              <span>THE COLOUR &amp; FRAME STUDIO</span>
+              <h2>{settings?.businessName || 'HAVESTORY'}</h2>
+            </div>
           </div>
           <p>{settings?.tagline || 'Photographs made tangible. Stories made to stay.'}</p>
         </div>

@@ -3,7 +3,7 @@ import { useGetSettings } from '@workspace/api-client-react';
 import { StudioLoader } from './StudioLoader';
 
 export function SplashScreen({ onDone }: { onDone: () => void }) {
-  const { isLoading: settingsLoading } = useGetSettings();
+  const { data: settings, isLoading: settingsLoading } = useGetSettings();
   const [fading, setFading] = useState(false);
   const [minimumDone, setMinimumDone] = useState(false);
   const completed = useRef(false);
@@ -37,7 +37,7 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
         pointerEvents: fading ? 'none' : 'all',
       }}
     >
-      <StudioLoader label="Preparing your studio collection" />
+      <StudioLoader label="Preparing your studio collection" logoUrl={settings?.logoUrl} />
     </div>
   );
 }

@@ -8863,3 +8863,42 @@ body {
   [data-public-site] .hs-new-benefits-group:last-child { display: none !important; }
   .hs-public-route-pending > span { width: 100%; animation: none; }
 }
+
+/* Final HAVESTORY branding and tracking feedback authority. */
+.hs-studio-loader-core img {
+  display: block;
+  width: 72%;
+  height: 72%;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #fffaf2;
+  padding: 3px;
+}
+[data-public-site] .hsx-footer-signature {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+[data-public-site] .hsx-footer-signature img {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  border-radius: 16px;
+  background: rgba(255,255,255,.96);
+  padding: 6px;
+}
+[data-public-site] .hsx-footer-signature > div { min-width: 0; }
+[data-public-site] .hs-track-search-error {
+  width: min(100%, 590px);
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (max-width: 800px) {
+  [data-public-site] .hs-track-search-error { width: 100%; }
+}
+@media (max-width: 600px) {
+  [data-public-site] .hsx-footer-signature { align-items: flex-start; }
+  [data-public-site] .hsx-footer-signature img { width: 44px; height: 44px; border-radius: 13px; }
+}

@@ -54,15 +54,15 @@ export default function Contact() {
         <div><p>From one meaningful frame to a complete gallery wall, tell us what you are planning and we will reply with a clear next step.</p><Link href="/store" className="hsx-text-link">Browse the shop <ArrowRight /></Link></div>
       </header>
 
-      <div className="hsx-contact-layout">
+      <div className="hsx-contact-layout items-start">
         
         {/* Contact Info (Left) */}
         <aside className="hsx-contact-info">
           <div>
-            <h3 className="font-serif text-3xl font-bold mb-6">Visit Us</h3>
-            <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-primary/5 text-primary rounded-full flex items-center justify-center shrink-0">
+            <h3 className="font-serif text-2xl font-bold mb-4">Visit Us</h3>
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white/80 text-primary flex items-center justify-center shrink-0 shadow-sm border border-primary/10">
                   <MapPin className="w-4 h-4" />
                 </div>
                 <div>
@@ -70,8 +70,8 @@ export default function Contact() {
                   <p className="text-sm font-medium">{settings?.address || '123 Printing Ave, Colombo, Sri Lanka'}</p>
                 </div>
               </div>
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-primary/5 text-primary rounded-full flex items-center justify-center shrink-0">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white/80 text-primary flex items-center justify-center shrink-0 shadow-sm border border-primary/10">
                   <Clock className="w-4 h-4" />
                 </div>
                 <div>
@@ -85,10 +85,10 @@ export default function Contact() {
           <div className="gold-rule" />
 
           <div>
-            <h3 className="font-serif text-3xl font-bold mb-6">Reach Out</h3>
-            <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-primary/5 text-primary rounded-full flex items-center justify-center shrink-0">
+            <h3 className="font-serif text-2xl font-bold mb-4">Reach Out</h3>
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white/80 text-primary flex items-center justify-center shrink-0 shadow-sm border border-primary/10">
                   <Phone className="w-4 h-4" />
                 </div>
                 <div>
@@ -96,8 +96,8 @@ export default function Contact() {
                   <p className="text-sm font-medium">{settings?.phone || '+94 11 234 5678'}</p>
                 </div>
               </div>
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-primary/5 text-primary rounded-full flex items-center justify-center shrink-0">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white/80 text-primary flex items-center justify-center shrink-0 shadow-sm border border-primary/10">
                   <Mail className="w-4 h-4" />
                 </div>
                 <div>
@@ -125,14 +125,14 @@ export default function Contact() {
 
         {/* Form (Right) */}
         <div className="hsx-contact-form">
-          <div className="mb-8">
+          <div className="mb-6">
             <h2 className="text-2xl font-serif font-bold mb-2">Send an Inquiry</h2>
             <p className="text-muted-foreground text-sm">Fill out the form below and our team will get back to you within 24 hours.</p>
           </div>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <div className="grid sm:grid-cols-2 gap-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+              <div className="grid sm:grid-cols-2 gap-5">
                 <FormField
                   control={form.control}
                   name="fullName"
@@ -161,7 +161,7 @@ export default function Contact() {
                 />
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-8">
+              <div className="grid sm:grid-cols-2 gap-5">
                 <FormField
                   control={form.control}
                   name="email"
