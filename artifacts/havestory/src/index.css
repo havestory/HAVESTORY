@@ -8902,3 +8902,48 @@ body {
   [data-public-site] .hsx-footer-signature { align-items: flex-start; }
   [data-public-site] .hsx-footer-signature img { width: 44px; height: 44px; border-radius: 13px; }
 }
+
+
+/* Final Contact refinement: compact studio information and a calmer inquiry surface. */
+[data-public-site] .hsx-contact-compact {
+  align-items: start;
+  gap: 18px;
+}
+[data-public-site] .hsx-contact-compact .hsx-contact-info,
+[data-public-site] .hsx-contact-compact .hsx-contact-form {
+  padding: 22px !important;
+  border-radius: 18px !important;
+}
+[data-public-site] .hsx-contact-compact .hsx-contact-info {
+  display: grid;
+  gap: 18px;
+}
+[data-public-site] .hsx-contact-compact .gold-rule {
+  margin: 0;
+}
+[data-public-site] .hsx-contact-compact .hsx-contact-info a[href*="wa.me"] {
+  min-height: 46px;
+  padding: 12px 16px;
+}
+[data-public-site] .hsx-contact-compact .hsx-contact-form {
+  background: rgba(255, 255, 255, .82);
+}
+@media (max-width: 800px) {
+  [data-public-site] .hsx-contact-compact .hsx-contact-info,
+  [data-public-site] .hsx-contact-compact .hsx-contact-form {
+    padding: 18px !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-public-site] .hsx-contact-compact * {
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Checkout failure feedback must remain visible after a toast disappears. */
+[data-public-site] .hs-store-checkout [role="alert"] {
+  box-shadow: 0 8px 24px rgba(123, 35, 35, .08);
+}
+
+/* Cache-busting marker for the final storefront refinement. */
+:root { --havestory-build-revision: "checkout-preflight-2026-08-27"; }
