@@ -63,32 +63,40 @@ function LabelPreview({ form, sender, qrUrl, showQr, showBarcode }: {
   qrUrl: string; showQr: boolean; showBarcode: boolean;
 }) {
   const isA5 = form.labelSize === 'a5';
+  const width = isA5 ? 559 : 378;
+  const height = isA5 ? 794 : 560;
   const marks = [
-    form.urgent && ['⚡', 'URGENT'], form.fragile && ['◇', 'FRAGILE'],
-    form.handleWithCare && ['✋', 'HANDLE WITH CARE'], form.thisSideUp && ['↑', 'THIS SIDE UP'],
+    form.fragile && ['♢', 'FRAGILE'],
+    form.handleWithCare && ['✋', 'HANDLE WITH CARE'],
+    form.thisSideUp && ['↑', 'THIS SIDE UP'],
     form.keepDry && ['☂', 'KEEP DRY'],
   ].filter(Boolean) as string[][];
+  const detailFont = isA5 ? 15 : 12;
   return (
-    <div className="label-print-target" style={{ width: isA5 ? 559 : 378, minHeight: isA5 ? 794 : 560, display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid #ddd5df', background: '#fff', color: '#151019', fontFamily: 'Arial,sans-serif', fontSize: 12, boxShadow: '0 26px 70px rgba(35,20,43,.2)' }}>
-      <div style={{ height: 7, background: 'linear-gradient(90deg,#4c2370,#8c4ba7,#c49a4a)' }} />
-      <header style={{ padding: isA5 ? '18px 20px 15px' : '13px 15px 11px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, borderBottom: '1px solid #ddd5df' }}>
+    <div className="label-print-target" style={{ width, height, minHeight: height, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid #d9d0dc', background: '#fff', color: '#151019', fontFamily: 'Arial,sans-serif', fontSize: 12, boxShadow: '0 26px 70px rgba(35,20,43,.2)' }}>
+      <div style={{ height: isA5 ? 9 : 7, flex: '0 0 auto', background: 'linear-gradient(90deg,#4c2370 0%,#8c4ba7 55%,#c49a4a 100%)' }} />
+      <header style={{ padding: isA5 ? '18px 20px 15px' : '13px 15px 11px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, flex: '0 0 auto', borderBottom: '1px solid #ddd5df' }}>
         <div style={{ minWidth: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: isA5 ? 48 : 38, height: isA5 ? 48 : 38, flex: '0 0 auto', display: 'grid', placeItems: 'center', overflow: 'hidden', border: '1px solid #d8c2e1', borderRadius: 12, background: '#f7f0fb', color: '#4c2370', fontFamily: 'Georgia,serif', fontWeight: 900 }}>{sender.logo ? <img crossOrigin="anonymous" src={sender.logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : 'HS'}</div>
-          <div><div style={{ fontSize: isA5 ? 20 : 15, fontWeight: 900, letterSpacing: .5 }}>{sender.name}</div>{sender.phone && <div style={{ marginTop: 3, fontSize: isA5 ? 11 : 9, fontWeight: 700 }}>☎ {sender.phone}</div>}</div>
+          <div style={{ width: isA5 ? 48 : 38, height: isA5 ? 48 : 38, flex: '0 0 auto', display: 'grid', placeItems: 'center', overflow: 'hidden', border: '1px solid #d8c2e1', borderRadius: 12, background: '#f7f0fb', color: '#4c2370', fontFamily: 'Georgia,serif', fontWeight: 900 }}>{sender.logo ? <img crossOrigin="anonymous" src={sender.logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} /> : 'HS'}</div>
+          <div style={{ minWidth: 0 }}><div style={{ overflowWrap: 'anywhere', fontSize: isA5 ? 20 : 15, fontWeight: 900, letterSpacing: .5 }}>{sender.name}</div>{sender.phone && <div style={{ marginTop: 3, fontSize: isA5 ? 11 : 9, fontWeight: 700 }}>☎ {sender.phone}</div>}</div>
         </div>
-        <div style={{ textAlign: 'right' }}><div style={{ color: '#7e6b84', fontSize: 7, fontWeight: 900, letterSpacing: 1.2 }}>ORDER NUMBER</div><div style={{ marginTop: 4, fontFamily: 'monospace', fontSize: isA5 ? 13 : 10, fontWeight: 900 }}>{form.orderNumber || 'NOT LINKED'}</div></div>
+        <div style={{ flex: '0 0 auto', textAlign: 'right' }}><div style={{ color: '#7e6b84', fontSize: 7, fontWeight: 900, letterSpacing: 1.2 }}>ORDER NUMBER</div><div style={{ marginTop: 4, fontFamily: 'monospace', fontSize: isA5 ? 13 : 10, fontWeight: 900 }}>{form.orderNumber || 'NOT LINKED'}</div></div>
       </header>
-      {marks.length > 0 && <div style={{ padding: isA5 ? '10px 20px' : '7px 15px', display: 'flex', flexWrap: 'wrap', gap: 5, borderBottom: '1px solid #eadff0', background: '#fbf7fd' }}>{marks.map(([icon, label]) => <span key={label} style={{ padding: '4px 7px', display: 'inline-flex', alignItems: 'center', gap: 4, border: '1px solid #cfaadd', borderRadius: 999, background: '#fff', color: '#4c2370', fontSize: 7, fontWeight: 900, letterSpacing: .65 }}>{icon} {label}</span>)}</div>}
-      <main style={{ padding: isA5 ? '24px 20px 14px' : '17px 15px 10px', flex: 1 }}>
-        <div style={{ color: '#8a768f', fontSize: 8, fontWeight: 900, letterSpacing: 1.4 }}>DELIVER TO</div>
-        <div style={{ marginTop: 7, fontSize: isA5 ? 29 : 21, fontWeight: 950, lineHeight: 1.08 }}>{form.recipientName || 'Recipient name'}</div>
-        <div style={{ marginTop: 10, display: 'grid', gap: 5 }}>{form.phone && <div style={{ fontSize: isA5 ? 15 : 12, fontWeight: 900 }}>☎ {form.phone}{form.alternatePhone ? ` / ${form.alternatePhone}` : ''}</div>}<div style={{ maxWidth: isA5 ? 440 : 300, fontSize: isA5 ? 15 : 12, fontWeight: 700, lineHeight: 1.48 }}>{form.address || 'Delivery address'}{(form.city || form.district || form.postalCode) && <><br />{[form.city, form.district, form.postalCode].filter(Boolean).join(', ')}</>}</div></div>
-        {(form.courierService || form.deliveryDate || form.deliveryTime) && <div style={{ marginTop: 15, padding: '9px 10px', display: 'flex', flexWrap: 'wrap', gap: 8, border: '1px solid #e5d7eb', borderRadius: 8, background: '#faf6fc', color: '#4c3d52', fontSize: isA5 ? 10 : 8, fontWeight: 800 }}>{form.courierService && <span>COURIER · {form.courierService}</span>}{form.deliveryDate && <span>DATE · {form.deliveryDate}</span>}{form.deliveryTime && <span>TIME · {form.deliveryTime}</span>}</div>}
-        {form.deliveryNotes && <div style={{ marginTop: 10, padding: '8px 10px', borderLeft: '3px solid #c49a4a', background: '#fff8e7', color: '#5b4216', fontSize: isA5 ? 10 : 8, fontWeight: 700, lineHeight: 1.45 }}><b>DELIVERY NOTE:</b> {form.deliveryNotes}</div>}
+      {form.urgent && <div style={{ padding: isA5 ? '8px 20px' : '6px 15px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, flex: '0 0 auto', background: '#e21f2f', color: '#fff', fontSize: isA5 ? 15 : 11, fontWeight: 950, letterSpacing: 1.4, textAlign: 'center' }}><span style={{ fontSize: isA5 ? 19 : 14 }}>⚡</span> URGENT DELIVERY</div>}
+      {marks.length > 0 && <div style={{ padding: isA5 ? '11px 20px' : '8px 15px', display: 'grid', gridTemplateColumns: `repeat(${Math.min(marks.length, 4)}, minmax(0, 1fr))`, gap: isA5 ? 8 : 5, flex: '0 0 auto', borderBottom: '1px solid #eadff0', background: '#fff9f9' }}>{marks.map(([icon, label]) => <div key={label} style={{ minWidth: 0, minHeight: isA5 ? 60 : 43, padding: isA5 ? '7px 4px' : '5px 2px', display: 'grid', alignContent: 'center', justifyItems: 'center', gap: 3, border: '2px solid #e21f2f', borderRadius: 8, background: '#fff', color: '#d51d2c', textAlign: 'center' }}><span style={{ fontSize: isA5 ? 22 : 16, lineHeight: 1, fontWeight: 900 }}>{icon}</span><span style={{ fontSize: isA5 ? 7.5 : 5.5, lineHeight: 1.1, fontWeight: 950, letterSpacing: .35, overflowWrap: 'anywhere' }}>{label}</span></div>)}</div>}
+      <main style={{ padding: isA5 ? '18px 20px 14px' : '13px 15px 10px', flex: '1 1 auto', minHeight: 0 }}>
+        <div style={{ padding: isA5 ? '13px 14px 16px' : '10px 11px 12px', border: '2px solid #4c2370', borderRadius: 10, background: '#fcf8fd' }}>
+          <div style={{ color: '#8a768f', fontSize: 8, fontWeight: 900, letterSpacing: 1.4 }}>DELIVER TO</div>
+          <div style={{ marginTop: 6, overflowWrap: 'anywhere', fontSize: isA5 ? 29 : 21, fontWeight: 950, lineHeight: 1.08 }}>{form.recipientName || 'Recipient name'}</div>
+          {form.phone && <div style={{ marginTop: 9, overflowWrap: 'anywhere', color: '#4c2370', fontSize: isA5 ? 17 : 13, fontWeight: 950 }}>☎ {form.phone}{form.alternatePhone ? `  /  ${form.alternatePhone}` : ''}</div>}
+          <div style={{ marginTop: 8, overflowWrap: 'anywhere', fontSize: detailFont, fontWeight: 750, lineHeight: 1.45 }}>{form.address || 'Delivery address'}{(form.city || form.district || form.postalCode) && <><br />{[form.city, form.district, form.postalCode].filter(Boolean).join(', ')}</>}</div>
+        </div>
+        {(form.courierService || form.deliveryDate || form.deliveryTime) && <div style={{ marginTop: 11, padding: '8px 10px', display: 'flex', flexWrap: 'wrap', gap: 8, border: '1px solid #e5d7eb', borderRadius: 8, background: '#faf6fc', color: '#4c3d52', fontSize: isA5 ? 10 : 8, fontWeight: 800 }}>{form.courierService && <span>COURIER · {form.courierService}</span>}{form.deliveryDate && <span>DATE · {form.deliveryDate}</span>}{form.deliveryTime && <span>TIME · {form.deliveryTime}</span>}</div>}
+        {form.deliveryNotes && <div style={{ marginTop: 9, padding: '8px 10px', borderLeft: '3px solid #c49a4a', background: '#fff8e7', color: '#5b4216', fontSize: isA5 ? 10 : 8, fontWeight: 700, lineHeight: 1.45, overflowWrap: 'anywhere' }}><b>DELIVERY NOTE:</b> {form.deliveryNotes}</div>}
       </main>
-      {showBarcode && form.orderNumber && <div style={{ padding: isA5 ? '0 20px 13px' : '0 15px 9px' }}><Barcode value={form.orderNumber} /></div>}
-      <footer style={{ padding: isA5 ? '13px 20px' : '9px 15px', display: 'grid', gridTemplateColumns: qrUrl && showQr ? '1fr auto' : '1fr', alignItems: 'end', gap: 13, borderTop: '1px solid #1e1722' }}>
-        <div><div style={{ fontSize: isA5 ? 10 : 8, fontWeight: 950, letterSpacing: .8 }}>{sender.footer}</div>{sender.whatsapp && <div style={{ marginTop: 4, fontSize: isA5 ? 10 : 8, fontWeight: 700 }}>WhatsApp {sender.whatsapp}</div>}{sender.website && <div style={{ marginTop: 3, color: '#72577d', fontSize: isA5 ? 9 : 7 }}>{sender.website}</div>}{sender.address && <div style={{ marginTop: 3, color: '#8a7e8d', fontSize: isA5 ? 8 : 6.5 }}>{sender.address}</div>}</div>
+      {showBarcode && form.orderNumber && <div style={{ padding: isA5 ? '0 20px 13px' : '0 15px 9px', flex: '0 0 auto' }}><Barcode value={form.orderNumber} /></div>}
+      <footer style={{ padding: isA5 ? '13px 20px' : '9px 15px', display: 'grid', gridTemplateColumns: qrUrl && showQr ? '1fr auto' : '1fr', alignItems: 'end', gap: 13, flex: '0 0 auto', borderTop: '1px solid #1e1722' }}>
+        <div style={{ minWidth: 0 }}><div style={{ overflowWrap: 'anywhere', fontSize: isA5 ? 10 : 8, fontWeight: 950, letterSpacing: .8 }}>{sender.footer}</div>{sender.whatsapp && <div style={{ marginTop: 4, fontSize: isA5 ? 10 : 8, fontWeight: 700 }}>WhatsApp {sender.whatsapp}</div>}{sender.website && <div style={{ marginTop: 3, color: '#72577d', fontSize: isA5 ? 9 : 7 }}>{sender.website}</div>}{sender.address && <div style={{ marginTop: 3, color: '#8a7e8d', fontSize: isA5 ? 8 : 6.5, overflowWrap: 'anywhere' }}>{sender.address}</div>}</div>
         {qrUrl && showQr && <div style={{ display: 'grid', justifyItems: 'center', gap: 3 }}><VerificationCode url={qrUrl} size={isA5 ? 88 : 64} /><span style={{ color: '#786b7d', fontSize: 6, fontWeight: 800 }}>SECURE VERIFICATION</span></div>}
       </footer>
     </div>

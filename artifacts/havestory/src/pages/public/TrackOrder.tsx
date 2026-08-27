@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTrackOrder } from '@workspace/api-client-react';
+import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,6 +8,7 @@ import { AlertCircle, CheckCircle, CheckCircle2, Clock, CreditCard, Download, Ex
 import { format } from 'date-fns';
 
 export default function TrackOrder() {
+  const { toast } = useToast();
   const [orderId, setOrderId] = useState('');
   const [phone, setPhone] = useState('');
   const [searchId, setSearchId] = useState('');
@@ -41,9 +43,11 @@ export default function TrackOrder() {
 
   useEffect(() => {
     if (isError) {
-      setSearchError('We could not find that order. Check the order ID and the phone number used at checkout, then try again.');
+      const message = 'We could not find that order. Check the order ID and the phone number used at checkout, then try again.';
+      setSearchError(message);
+      toast({ title: 'Order not found', description: message, variant: 'destructive' });
     }
-  }, [isError]);
+  }, [isError, toast]);
 
   useEffect(() => {
     const current = tracking as any;
@@ -59,15 +63,21 @@ export default function TrackOrder() {
     const nextId = orderId.trim();
     const nextPhone = phone.trim();
     if (!nextId || !nextPhone) {
-      setSearchError('Please enter both your order ID and the phone number used at checkout.');
+      const message = 'Please enter both your order ID and the phone number used at checkout.';
+      setSearchError(message);
+      toast({ title: 'Almost there', description: message, variant: 'destructive' });
       return;
     }
     if (nextId.length < 3) {
-      setSearchError('Your order ID looks a little short. Please check the confirmation message and try again.');
+      const message = 'Your order ID looks a little short. Please check the confirmation message and try again.';
+      setSearchError(message);
+      toast({ title: 'Check your order ID', description: message, variant: 'destructive' });
       return;
     }
     if (nextPhone.replace(/\D/g, '').length < 9) {
-      setSearchError('Please enter a valid checkout phone number so we can securely find your order.');
+      const message = 'Please enter a valid checkout phone number so we can securely find your order.';
+      setSearchError(message);
+      toast({ title: 'Check your phone number', description: message, variant: 'destructive' });
       return;
     }
     setSearchError(null);
