@@ -23,6 +23,10 @@ function ensureSettingsCompatibility(): Promise<void> {
       .query(
         `
       ALTER TABLE settings ADD COLUMN IF NOT EXISTS home_feature_cards TEXT NOT NULL DEFAULT '[]';
+      ALTER TABLE settings ADD COLUMN IF NOT EXISTS home_benefits TEXT NOT NULL DEFAULT '[{"title":"Easy Online Ordering","copy":"Simple steps from photo to checkout.","icon":"shopping-cart","color":"rose","enabled":true},{"title":"Print-Ready Quality","copy":"Colour-checked prints with premium materials.","icon":"badge-check","color":"blue","enabled":true},{"title":"Islandwide Delivery","copy":"Carefully packed and delivered across Sri Lanka.","icon":"truck","color":"rose","enabled":true},{"title":"Friendly Studio Support","copy":"Real guidance from idea to finished frame.","icon":"headphones","color":"blue","enabled":true}]';
+      ALTER TABLE settings ADD COLUMN IF NOT EXISTS home_benefits_enabled INTEGER NOT NULL DEFAULT 1;
+      ALTER TABLE settings ADD COLUMN IF NOT EXISTS home_benefits_animated INTEGER NOT NULL DEFAULT 1;
+      ALTER TABLE settings ADD COLUMN IF NOT EXISTS home_benefits_speed INTEGER NOT NULL DEFAULT 28;
       ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image6 TEXT;
       ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image7 TEXT;
       ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image8 TEXT;
@@ -169,6 +173,8 @@ router.put("/", requireAdmin, async (req, res) => {
       "heroSlideImage10",
       "heroSlideEnabled",
       "homeFeatureCards",
+      "homeBenefits",
+      "homeBenefitsSpeed",
       "paymentQrUrl",
       "paymentButtonUrl",
       "paymentButtonLabel",
@@ -233,17 +239,31 @@ router.put("/", requireAdmin, async (req, res) => {
     if (req.body.specialEventEnabled !== undefined) {
       updateData.specialEventEnabled = req.body.specialEventEnabled ? 1 : 0;
     }
+    if (req.body.homeBenefitsEnabled !== undefined) {
+      updateData.homeBenefitsEnabled = req.body.homeBenefitsEnabled ? 1 : 0;
+    }
+    if (req.body.homeBenefitsAnimated !== undefined) {
+      updateData.homeBenefitsAnimated = req.body.homeBenefitsAnimated ? 1 : 0;
+    }
     if (req.body.checkoutBankTransferEnabled !== undefined) {
-      updateData.checkoutBankTransferEnabled = req.body.checkoutBankTransferEnabled ? 1 : 0;
+      updateData.checkoutBankTransferEnabled = req.body
+        .checkoutBankTransferEnabled
+        ? 1
+        : 0;
     }
     if (req.body.checkoutFullPaymentEnabled !== undefined) {
-      updateData.checkoutFullPaymentEnabled = req.body.checkoutFullPaymentEnabled ? 1 : 0;
+      updateData.checkoutFullPaymentEnabled = req.body
+        .checkoutFullPaymentEnabled
+        ? 1
+        : 0;
     }
     if (req.body.checkoutCodEnabled !== undefined) {
       updateData.checkoutCodEnabled = req.body.checkoutCodEnabled ? 1 : 0;
     }
     if (req.body.checkoutCourierEnabled !== undefined) {
-      updateData.checkoutCourierEnabled = req.body.checkoutCourierEnabled ? 1 : 0;
+      updateData.checkoutCourierEnabled = req.body.checkoutCourierEnabled
+        ? 1
+        : 0;
     }
     if (req.body.checkoutSlPostEnabled !== undefined) {
       updateData.checkoutSlPostEnabled = req.body.checkoutSlPostEnabled ? 1 : 0;
@@ -278,12 +298,10 @@ router.post("/test-email", requireAdmin, async (req, res) => {
       .map((s) => s.trim())
       .filter(Boolean);
     if (recipients.length === 0) {
-      return res
-        .status(400)
-        .json({
-          ok: false,
-          error: "No recipient email configured. Add one in Settings first.",
-        });
+      return res.status(400).json({
+        ok: false,
+        error: "No recipient email configured. Add one in Settings first.",
+      });
     }
     // Allow the admin to test a value typed into the form *before* it has
     // been saved to the DB (so they can verify a fresh App Password
@@ -307,13 +325,11 @@ router.post("/test-email", requireAdmin, async (req, res) => {
     });
     if (result.ok) return res.json({ ok: true, recipients });
     if (result.reason === "smtp_not_configured") {
-      return res
-        .status(503)
-        .json({
-          ok: false,
-          error:
-            "Mailer is not configured. Enter your Gmail address and App Password in Settings.",
-        });
+      return res.status(503).json({
+        ok: false,
+        error:
+          "Mailer is not configured. Enter your Gmail address and App Password in Settings.",
+      });
     }
     return res
       .status(502)
@@ -457,6 +473,10 @@ router.post("/restore", requireAdmin, async (req, res) => {
       "heroSlideImage10",
       "heroSlideEnabled",
       "homeFeatureCards",
+      "homeBenefits",
+      "homeBenefitsEnabled",
+      "homeBenefitsAnimated",
+      "homeBenefitsSpeed",
       "paymentQrUrl",
       "paymentButtonUrl",
       "paymentButtonLabel",
@@ -491,6 +511,12 @@ router.post("/restore", requireAdmin, async (req, res) => {
     ];
     for (const f of fields) {
       if (incoming[f] !== undefined) updateData[f] = incoming[f];
+    }
+    if (incoming.homeBenefitsEnabled !== undefined) {
+      updateData.homeBenefitsEnabled = incoming.homeBenefitsEnabled ? 1 : 0;
+    }
+    if (incoming.homeBenefitsAnimated !== undefined) {
+      updateData.homeBenefitsAnimated = incoming.homeBenefitsAnimated ? 1 : 0;
     }
     const [updated] = await db
       .update(settingsTable)

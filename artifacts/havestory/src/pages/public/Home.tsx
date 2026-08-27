@@ -1,15 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "wouter";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
+  BadgeCheck,
   ChevronLeft,
   ChevronRight,
+  Headphones,
   Image as ImageIcon,
   PackageCheck,
   Palette,
   Quote,
   Ruler,
+  ShoppingCart,
   Sparkles,
   Truck,
   X,
@@ -29,6 +32,32 @@ const DEFAULT_IMAGES = [
   "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=format&fit=crop&w=1200&q=86",
   "https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&w=1200&q=86",
 ];
+
+const BENEFIT_ICONS = {
+  "shopping-cart": ShoppingCart, "badge-check": BadgeCheck, truck: Truck,
+  headphones: Headphones, palette: Palette, ruler: Ruler,
+  package: PackageCheck, sparkles: Sparkles,
+} as const;
+type BenefitIconName = keyof typeof BENEFIT_ICONS;
+type HomeBenefit = { title: string; copy: string; icon: BenefitIconName; color: string; enabled: boolean };
+const DEFAULT_HOME_BENEFITS: HomeBenefit[] = [
+  { title: "Easy Online Ordering", copy: "Simple steps from photo to checkout.", icon: "shopping-cart", color: "rose", enabled: true },
+  { title: "Print-Ready Quality", copy: "Colour-checked prints with premium materials.", icon: "badge-check", color: "blue", enabled: true },
+  { title: "Islandwide Delivery", copy: "Carefully packed and delivered across Sri Lanka.", icon: "truck", color: "rose", enabled: true },
+  { title: "Friendly Studio Support", copy: "Real guidance from idea to finished frame.", icon: "headphones", color: "blue", enabled: true },
+];
+function readHomeBenefits(value: unknown): HomeBenefit[] {
+  try {
+    const parsed = typeof value === "string" ? JSON.parse(value) : value;
+    if (!Array.isArray(parsed) || !parsed.length) return DEFAULT_HOME_BENEFITS;
+    return DEFAULT_HOME_BENEFITS.map((fallback, index) => {
+      const item = parsed[index];
+      if (!item || typeof item !== "object") return fallback;
+      const candidate = item as Partial<HomeBenefit>;
+      return { ...fallback, ...candidate, icon: candidate.icon && candidate.icon in BENEFIT_ICONS ? candidate.icon : fallback.icon, enabled: candidate.enabled !== false };
+    });
+  } catch { return DEFAULT_HOME_BENEFITS; }
+}
 
 function Heading({ eyebrow, title, copy, href, link }: { eyebrow: string; title: string; copy?: string; href?: string; link?: string }) {
   return (
@@ -62,6 +91,10 @@ export default function Home() {
   const reviewList = (Array.isArray(reviews) ? reviews : []).filter((item) => item.approved).slice(0, 3);
   const activeNotices = (Array.isArray(notices) ? notices : []).filter((item) => item.enabled && !dismissedNotices.includes(item.id));
   const cfg = settings as any;
+  const benefits = readHomeBenefits(cfg?.homeBenefits).filter((item) => item.enabled);
+  const benefitsVisible = cfg?.homeBenefitsEnabled !== 0 && benefits.length > 0;
+  const benefitsAnimated = cfg?.homeBenefitsAnimated !== 0 && benefits.length > 1;
+  const benefitsSpeed = Math.min(60, Math.max(18, Number(cfg?.homeBenefitsSpeed) || 28));
 
   let featureCards: Array<{ title?: string; copy?: string; href?: string; image?: string }> = [];
   try {
@@ -92,12 +125,6 @@ export default function Home() {
   const categories = categoryFallbacks.map((fallback, index) => ({ ...fallback, ...(featureCards[index] || {}), image: featureCards[index]?.image || fallback.image }));
   const favouriteWindow = Math.min(4, favouritePool.length);
   const favouriteProducts = favouriteWindow ? Array.from({ length: favouriteWindow }, (_, index) => favouritePool[(favouriteIndex * favouriteWindow + index) % favouritePool.length]) : [];
-  const benefits = [
-    { label: "Colour checked", Icon: Palette },
-    { label: "Made to measure", Icon: Ruler },
-    { label: "Securely packed", Icon: PackageCheck },
-    { label: "Island-wide delivery", Icon: Truck },
-  ];
   const process = [
     ["01", "Share your idea", "Upload the photo and tell us where it will live."],
     ["02", "Choose together", "We help select size, paper, finish and frame."],
@@ -151,15 +178,13 @@ export default function Home() {
         </motion.div>
       </section>
 
-      <section className="hs-new-benefits" aria-label="HAVESTORY service benefits">
-        <div className="hs-new-benefits-track">
-          {[0, 1].map((group) => (
-            <div key={group} className="hs-new-benefits-group" aria-hidden={group === 1}>
-              {benefits.map(({ label, Icon }) => <span key={`${group}-${label}`}><Icon size={18} />{label}</span>)}
-            </div>
-          ))}
+      {benefitsVisible && <section className={`hs-benefit-glass ${benefitsAnimated ? "is-moving" : "is-static"}`} aria-label="HAVESTORY service benefits" style={{ "--hs-benefit-speed": `${benefitsSpeed}s` } as CSSProperties}>
+        <div className="hs-benefit-glass-track">
+          {(benefitsAnimated ? [0, 1] : [0]).map((group) => <div key={group} className="hs-benefit-glass-group" aria-hidden={group === 1}>
+            {benefits.map((benefit, index) => { const Icon = BENEFIT_ICONS[benefit.icon] || Sparkles; return <article key={`${group}-${benefit.title}-${index}`} className="hs-benefit-glass-item" data-color={benefit.color}><span className="hs-benefit-glass-icon"><Icon aria-hidden="true" /></span><span className="hs-benefit-glass-copy"><strong>{benefit.title}</strong><small>{benefit.copy}</small></span></article>; })}
+          </div>)}
         </div>
-      </section>
+      </section>}
 
       <section className="hs-new-section hs-new-category-section">
         <Heading eyebrow="01 / Choose your story" title="Find the right way to frame it." copy="Start with the feeling. We will help with every material, crop and finish after that." />

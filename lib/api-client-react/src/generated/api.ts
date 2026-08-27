@@ -625,7 +625,7 @@ export const getGetProductUrl = (id: string,) => {
 }
 
 /**
- * @summary Get a product
+ * @summary Get a product by readable slug or legacy numeric ID
  */
 export const getProduct = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<Product> => {
 
@@ -672,7 +672,7 @@ export type GetProductQueryError = ErrorType<unknown>
 
 
 /**
- * @summary Get a product
+ * @summary Get a product by readable slug or legacy numeric ID
  */
 
 export function useGetProduct<TData = Awaited<ReturnType<typeof getProduct>>, TError = ErrorType<unknown>>(
