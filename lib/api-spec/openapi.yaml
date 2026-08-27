@@ -2091,6 +2091,15 @@ components:
         homeFeatureCards:
           type: string
           nullable: true
+        homeBenefits:
+          type: string
+          nullable: true
+        homeBenefitsEnabled:
+          type: boolean
+        homeBenefitsAnimated:
+          type: boolean
+        homeBenefitsSpeed:
+          type: integer
         siteClosedEnabled:
           type: boolean
         siteClosedMessage:
@@ -2381,6 +2390,15 @@ components:
         homeFeatureCards:
           type: string
           nullable: true
+        homeBenefits:
+          type: string
+          nullable: true
+        homeBenefitsEnabled:
+          type: boolean
+        homeBenefitsAnimated:
+          type: boolean
+        homeBenefitsSpeed:
+          type: integer
         siteClosedEnabled:
           type: boolean
         siteClosedMessage:

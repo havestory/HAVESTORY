@@ -99,6 +99,8 @@ export const ListProductsResponseItem = zod.object({
   "id": zod.int(),
   "categoryId": zod.int().nullish(),
   "name": zod.string(),
+  "slug": zod.string().nullish(),
+  "keywords": zod.array(zod.string()).optional(),
   "description": zod.string(),
   "price": zod.string(),
   "priceType": zod.string(),
@@ -126,6 +128,8 @@ export const ListProductsResponse = zod.array(ListProductsResponseItem)
 export const CreateProductBody = zod.object({
   "categoryId": zod.int().nullish(),
   "name": zod.string(),
+  "slug": zod.string().nullish(),
+  "keywords": zod.array(zod.string()).optional(),
   "description": zod.string(),
   "price": zod.string(),
   "priceType": zod.string(),
@@ -140,6 +144,8 @@ export const CreateProductResponse = zod.object({
   "id": zod.int(),
   "categoryId": zod.int().nullish(),
   "name": zod.string(),
+  "slug": zod.string().nullish(),
+  "keywords": zod.array(zod.string()).optional(),
   "description": zod.string(),
   "price": zod.string(),
   "priceType": zod.string(),
@@ -161,16 +167,18 @@ export const CreateProductResponse = zod.object({
 
 
 /**
- * @summary Get a product
+ * @summary Get a product by readable slug or legacy numeric ID
  */
 export const GetProductParams = zod.object({
-  "id": zod.coerce.number().int()
+  "id": zod.coerce.string()
 })
 
 export const GetProductResponse = zod.object({
   "id": zod.int(),
   "categoryId": zod.int().nullish(),
   "name": zod.string(),
+  "slug": zod.string().nullish(),
+  "keywords": zod.array(zod.string()).optional(),
   "description": zod.string(),
   "price": zod.string(),
   "priceType": zod.string(),
@@ -201,6 +209,8 @@ export const UpdateProductParams = zod.object({
 export const UpdateProductBody = zod.object({
   "categoryId": zod.int().nullish(),
   "name": zod.string(),
+  "slug": zod.string().nullish(),
+  "keywords": zod.array(zod.string()).optional(),
   "description": zod.string(),
   "price": zod.string(),
   "priceType": zod.string(),
@@ -215,6 +225,8 @@ export const UpdateProductResponse = zod.object({
   "id": zod.int(),
   "categoryId": zod.int().nullish(),
   "name": zod.string(),
+  "slug": zod.string().nullish(),
+  "keywords": zod.array(zod.string()).optional(),
   "description": zod.string(),
   "price": zod.string(),
   "priceType": zod.string(),
@@ -1076,6 +1088,10 @@ export const GetSettingsResponse = zod.object({
   "googlePayInstructions": zod.string().nullish(),
   "overdueDays": zod.int().optional(),
   "homeFeatureCards": zod.string().nullish(),
+  "homeBenefits": zod.string().nullish(),
+  "homeBenefitsEnabled": zod.boolean().optional(),
+  "homeBenefitsAnimated": zod.boolean().optional(),
+  "homeBenefitsSpeed": zod.int().optional(),
   "siteClosedEnabled": zod.boolean().optional(),
   "siteClosedMessage": zod.string().nullish(),
   "ipayEnabled": zod.boolean().optional(),
@@ -1181,6 +1197,10 @@ export const UpdateSettingsBody = zod.object({
   "googlePayInstructions": zod.string().nullish(),
   "overdueDays": zod.int().optional(),
   "homeFeatureCards": zod.string().nullish(),
+  "homeBenefits": zod.string().nullish(),
+  "homeBenefitsEnabled": zod.boolean().optional(),
+  "homeBenefitsAnimated": zod.boolean().optional(),
+  "homeBenefitsSpeed": zod.int().optional(),
   "siteClosedEnabled": zod.boolean().optional(),
   "siteClosedMessage": zod.string().nullish(),
   "ipayEnabled": zod.boolean().optional(),
@@ -1282,6 +1302,10 @@ export const UpdateSettingsResponse = zod.object({
   "googlePayInstructions": zod.string().nullish(),
   "overdueDays": zod.int().optional(),
   "homeFeatureCards": zod.string().nullish(),
+  "homeBenefits": zod.string().nullish(),
+  "homeBenefitsEnabled": zod.boolean().optional(),
+  "homeBenefitsAnimated": zod.boolean().optional(),
+  "homeBenefitsSpeed": zod.int().optional(),
   "siteClosedEnabled": zod.boolean().optional(),
   "siteClosedMessage": zod.string().nullish(),
   "ipayEnabled": zod.boolean().optional(),

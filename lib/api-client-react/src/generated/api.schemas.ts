@@ -384,6 +384,10 @@ export interface SiteSettings {
   googlePayInstructions?: string | null;
   overdueDays?: number;
   homeFeatureCards?: string | null;
+  homeBenefits?: string | null;
+  homeBenefitsEnabled?: boolean;
+  homeBenefitsAnimated?: boolean;
+  homeBenefitsSpeed?: number;
   siteClosedEnabled?: boolean;
   siteClosedMessage?: string | null;
   ipayEnabled?: boolean;
@@ -485,6 +489,10 @@ export interface UpdateSettingsBody {
   googlePayInstructions?: string | null;
   overdueDays?: number;
   homeFeatureCards?: string | null;
+  homeBenefits?: string | null;
+  homeBenefitsEnabled?: boolean;
+  homeBenefitsAnimated?: boolean;
+  homeBenefitsSpeed?: number;
   siteClosedEnabled?: boolean;
   siteClosedMessage?: string | null;
   ipayEnabled?: boolean;

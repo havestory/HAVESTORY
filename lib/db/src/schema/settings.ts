@@ -98,16 +98,36 @@ export const settingsTable = pgTable("settings", {
   bankDetails: text("bank_details").notNull().default("[]"),
   courierCharge: text("courier_charge").notNull().default("450"),
   slPostCharge: text("sl_post_charge").notNull().default("250"),
-  checkoutCourierEnabled: integer("checkout_courier_enabled").notNull().default(1),
-  checkoutCourierLabel: text("checkout_courier_label").notNull().default("Studio courier"),
-  checkoutCourierDescription: text("checkout_courier_description").notNull().default("Carefully packed and delivered to your door."),
-  checkoutSlPostEnabled: integer("checkout_sl_post_enabled").notNull().default(1),
-  checkoutSlPostLabel: text("checkout_sl_post_label").notNull().default("Sri Lanka Post"),
-  checkoutSlPostDescription: text("checkout_sl_post_description").notNull().default("A considered island-wide delivery route."),
-  checkoutPickupEnabled: integer("checkout_pickup_enabled").notNull().default(0),
-  checkoutPickupLabel: text("checkout_pickup_label").notNull().default("Studio pickup"),
-  checkoutPickupDescription: text("checkout_pickup_description").notNull().default("Collect your order from the HAVESTORY studio."),
-  checkoutPickupAddress: text("checkout_pickup_address").notNull().default("Contact us for pickup details."),
+  checkoutCourierEnabled: integer("checkout_courier_enabled")
+    .notNull()
+    .default(1),
+  checkoutCourierLabel: text("checkout_courier_label")
+    .notNull()
+    .default("Studio courier"),
+  checkoutCourierDescription: text("checkout_courier_description")
+    .notNull()
+    .default("Carefully packed and delivered to your door."),
+  checkoutSlPostEnabled: integer("checkout_sl_post_enabled")
+    .notNull()
+    .default(1),
+  checkoutSlPostLabel: text("checkout_sl_post_label")
+    .notNull()
+    .default("Sri Lanka Post"),
+  checkoutSlPostDescription: text("checkout_sl_post_description")
+    .notNull()
+    .default("A considered island-wide delivery route."),
+  checkoutPickupEnabled: integer("checkout_pickup_enabled")
+    .notNull()
+    .default(0),
+  checkoutPickupLabel: text("checkout_pickup_label")
+    .notNull()
+    .default("Studio pickup"),
+  checkoutPickupDescription: text("checkout_pickup_description")
+    .notNull()
+    .default("Collect your order from the HAVESTORY studio."),
+  checkoutPickupAddress: text("checkout_pickup_address")
+    .notNull()
+    .default("Contact us for pickup details."),
   invoiceStandardRate: text("invoice_standard_rate").notNull().default("350"),
   invoiceExpressRate: text("invoice_express_rate").notNull().default("530"),
   invoiceWeightFirstKg: text("invoice_weight_first_kg")
@@ -136,6 +156,14 @@ export const settingsTable = pgTable("settings", {
     .notNull()
     .default("[true,true,true,true,true,true,true,true,true,true]"),
   homeFeatureCards: text("home_feature_cards").notNull().default("[]"),
+  homeBenefits: text("home_benefits")
+    .notNull()
+    .default(
+      '[{"title":"Easy Online Ordering","copy":"Simple steps from photo to checkout.","icon":"shopping-cart","color":"rose","enabled":true},{"title":"Print-Ready Quality","copy":"Colour-checked prints with premium materials.","icon":"badge-check","color":"blue","enabled":true},{"title":"Islandwide Delivery","copy":"Carefully packed and delivered across Sri Lanka.","icon":"truck","color":"rose","enabled":true},{"title":"Friendly Studio Support","copy":"Real guidance from idea to finished frame.","icon":"headphones","color":"blue","enabled":true}]',
+    ),
+  homeBenefitsEnabled: integer("home_benefits_enabled").notNull().default(1),
+  homeBenefitsAnimated: integer("home_benefits_animated").notNull().default(1),
+  homeBenefitsSpeed: integer("home_benefits_speed").notNull().default(28),
   paymentQrUrl: text("payment_qr_url"),
   paymentButtonUrl: text("payment_button_url"),
   paymentButtonLabel: text("payment_button_label"),

@@ -537,6 +537,56 @@ const DEFAULT_HOME_FEATURE_CARDS = [
   },
 ];
 
+const DEFAULT_HOME_BENEFITS = [
+  {
+    title: "Easy Online Ordering",
+    copy: "Simple steps from photo to checkout.",
+    icon: "shopping-cart",
+    color: "rose",
+    enabled: true,
+  },
+  {
+    title: "Print-Ready Quality",
+    copy: "Colour-checked prints with premium materials.",
+    icon: "badge-check",
+    color: "blue",
+    enabled: true,
+  },
+  {
+    title: "Islandwide Delivery",
+    copy: "Carefully packed and delivered across Sri Lanka.",
+    icon: "truck",
+    color: "rose",
+    enabled: true,
+  },
+  {
+    title: "Friendly Studio Support",
+    copy: "Real guidance from idea to finished frame.",
+    icon: "headphones",
+    color: "blue",
+    enabled: true,
+  },
+];
+
+const HOME_BENEFIT_ICONS = [
+  ["shopping-cart", "Shopping cart"],
+  ["badge-check", "Quality badge"],
+  ["truck", "Delivery truck"],
+  ["headphones", "Customer support"],
+  ["palette", "Colour palette"],
+  ["ruler", "Made to measure"],
+  ["package", "Secure package"],
+  ["sparkles", "Premium sparkle"],
+];
+
+const HOME_BENEFIT_COLORS = [
+  ["rose", "Rose"],
+  ["blue", "Blue"],
+  ["violet", "Violet"],
+  ["gold", "Gold"],
+  ["emerald", "Emerald"],
+];
+
 const emptyPForm = () => ({
   title: "",
   category: "Custom Frames",
@@ -660,6 +710,10 @@ export default function WebsiteEditor() {
   const [homeFeatureCards, setHomeFeatureCards] = useState(
     DEFAULT_HOME_FEATURE_CARDS,
   );
+  const [homeBenefits, setHomeBenefits] = useState(DEFAULT_HOME_BENEFITS);
+  const [homeBenefitsEnabled, setHomeBenefitsEnabled] = useState(true);
+  const [homeBenefitsAnimated, setHomeBenefitsAnimated] = useState(true);
+  const [homeBenefitsSpeed, setHomeBenefitsSpeed] = useState(28);
 
   /* ── ABOUT STATE ── */
   const [aboutImage, setAboutImage] = useState("");
@@ -858,6 +912,28 @@ export default function WebsiteEditor() {
     } catch {
       setHomeFeatureCards(DEFAULT_HOME_FEATURE_CARDS);
     }
+    try {
+      const parsed =
+        typeof s.homeBenefits === "string"
+          ? JSON.parse(s.homeBenefits)
+          : s.homeBenefits;
+      setHomeBenefits(
+        Array.isArray(parsed) && parsed.length
+          ? DEFAULT_HOME_BENEFITS.map((fallback, index) => ({
+              ...fallback,
+              ...(parsed[index] || {}),
+              enabled: parsed[index]?.enabled !== false,
+            }))
+          : DEFAULT_HOME_BENEFITS,
+      );
+    } catch {
+      setHomeBenefits(DEFAULT_HOME_BENEFITS);
+    }
+    setHomeBenefitsEnabled(s.homeBenefitsEnabled !== 0);
+    setHomeBenefitsAnimated(s.homeBenefitsAnimated !== 0);
+    setHomeBenefitsSpeed(
+      Math.min(60, Math.max(18, Number(s.homeBenefitsSpeed) || 28)),
+    );
     setAboutImage(s.aboutImage || "");
     setAboutStory(s.aboutStory || "");
     setAboutMission(s.aboutMission || "");
@@ -904,6 +980,10 @@ export default function WebsiteEditor() {
     heroSlideEnabled: JSON.stringify(heroSlideEnabled),
     designerCredit,
     homeFeatureCards: JSON.stringify(homeFeatureCards),
+    homeBenefits: JSON.stringify(homeBenefits),
+    homeBenefitsEnabled,
+    homeBenefitsAnimated,
+    homeBenefitsSpeed,
   };
   const {
     save: saveHome,
@@ -1218,6 +1298,180 @@ export default function WebsiteEditor() {
                           sizeHint="1000 × 1200 px"
                         />
                       )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-violet-100 bg-gradient-to-br from-white to-violet-50/50 p-4 space-y-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <label className="text-[10px] text-violet-600 font-black tracking-widest block">
+                      HOME GLASS BENEFITS STRIP
+                    </label>
+                    <p className="mt-1 max-w-2xl text-[10px] leading-relaxed text-gray-500">
+                      Edit the four icon, title and description items shown in
+                      the clean glass panel below the Home hero.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setHomeBenefitsEnabled((value) => !value)}
+                    className={`inline-flex min-w-[100px] items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-[10px] font-black transition-colors ${homeBenefitsEnabled ? "bg-emerald-100 text-emerald-700" : "bg-gray-200 text-gray-600"}`}
+                    aria-pressed={homeBenefitsEnabled}
+                  >
+                    <Eye size={13} />{" "}
+                    {homeBenefitsEnabled ? "Published" : "Hidden"}
+                  </button>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={() => setHomeBenefitsAnimated((value) => !value)}
+                    disabled={!homeBenefitsEnabled}
+                    className={`flex items-center justify-between rounded-xl border px-3 py-3 text-left transition-colors ${homeBenefitsAnimated && homeBenefitsEnabled ? "border-violet-200 bg-white text-violet-700" : "border-gray-100 bg-gray-50 text-gray-500"}`}
+                  >
+                    <span>
+                      <strong className="block text-xs">
+                        Continuous movement
+                      </strong>
+                      <small className="mt-1 block text-[10px]">
+                        Turn off for a fixed four-column panel.
+                      </small>
+                    </span>
+                    <span
+                      className={`h-5 w-9 rounded-full p-0.5 ${homeBenefitsAnimated && homeBenefitsEnabled ? "bg-violet-500" : "bg-gray-300"}`}
+                    >
+                      <i
+                        className={`block h-4 w-4 rounded-full bg-white shadow transition-transform ${homeBenefitsAnimated && homeBenefitsEnabled ? "translate-x-4" : "translate-x-0"}`}
+                      />
+                    </span>
+                  </button>
+                  <div className="rounded-xl border border-gray-100 bg-white px-3 py-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <span>
+                        <strong className="block text-xs text-gray-700">
+                          Movement speed
+                        </strong>
+                        <small className="mt-1 block text-[10px] text-gray-400">
+                          Higher value moves more slowly.
+                        </small>
+                      </span>
+                      <b className="text-xs text-violet-600">
+                        {homeBenefitsSpeed}s
+                      </b>
+                    </div>
+                    <input
+                      type="range"
+                      min="18"
+                      max="60"
+                      step="2"
+                      value={homeBenefitsSpeed}
+                      onChange={(event) =>
+                        setHomeBenefitsSpeed(Number(event.target.value))
+                      }
+                      disabled={!homeBenefitsEnabled || !homeBenefitsAnimated}
+                      className="mt-3 w-full accent-violet-600 disabled:opacity-40"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-3 lg:grid-cols-2">
+                  {homeBenefits.map((benefit, index) => (
+                    <div
+                      key={index}
+                      className="space-y-2 rounded-2xl border border-white bg-white/80 p-3 shadow-sm"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-[10px] font-black uppercase tracking-wide text-violet-500">
+                          Benefit {index + 1}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setHomeBenefits((items) =>
+                              items.map((item, itemIndex) =>
+                                itemIndex === index
+                                  ? { ...item, enabled: !item.enabled }
+                                  : item,
+                              ),
+                            )
+                          }
+                          className={`rounded-lg px-2.5 py-1.5 text-[9px] font-black ${benefit.enabled ? "bg-emerald-50 text-emerald-700" : "bg-gray-100 text-gray-500"}`}
+                        >
+                          {benefit.enabled ? "Visible" : "Hidden"}
+                        </button>
+                      </div>
+                      <input
+                        value={benefit.title}
+                        onChange={(event) =>
+                          setHomeBenefits((items) =>
+                            items.map((item, itemIndex) =>
+                              itemIndex === index
+                                ? { ...item, title: event.target.value }
+                                : item,
+                            ),
+                          )
+                        }
+                        placeholder="Benefit title"
+                        className={inp}
+                      />
+                      <textarea
+                        value={benefit.copy}
+                        onChange={(event) =>
+                          setHomeBenefits((items) =>
+                            items.map((item, itemIndex) =>
+                              itemIndex === index
+                                ? { ...item, copy: event.target.value }
+                                : item,
+                            ),
+                          )
+                        }
+                        rows={2}
+                        placeholder="Short benefit description"
+                        className={ta}
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <select
+                          value={benefit.icon}
+                          onChange={(event) =>
+                            setHomeBenefits((items) =>
+                              items.map((item, itemIndex) =>
+                                itemIndex === index
+                                  ? { ...item, icon: event.target.value }
+                                  : item,
+                              ),
+                            )
+                          }
+                          className={inp}
+                        >
+                          {HOME_BENEFIT_ICONS.map(([value, label]) => (
+                            <option key={value} value={value}>
+                              {label}
+                            </option>
+                          ))}
+                        </select>
+                        <select
+                          value={benefit.color}
+                          onChange={(event) =>
+                            setHomeBenefits((items) =>
+                              items.map((item, itemIndex) =>
+                                itemIndex === index
+                                  ? { ...item, color: event.target.value }
+                                  : item,
+                              ),
+                            )
+                          }
+                          className={inp}
+                        >
+                          {HOME_BENEFIT_COLORS.map(([value, label]) => (
+                            <option key={value} value={value}>
+                              {label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
                   ))}
                 </div>
