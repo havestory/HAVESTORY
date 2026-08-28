@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -93,8 +93,6 @@ export default function Home() {
   const cfg = settings as any;
   const benefits = readHomeBenefits(cfg?.homeBenefits).filter((item) => item.enabled);
   const benefitsVisible = cfg?.homeBenefitsEnabled !== 0 && benefits.length > 0;
-  const benefitsAnimated = cfg?.homeBenefitsAnimated !== 0 && benefits.length > 1;
-  const benefitsSpeed = Math.min(60, Math.max(18, Number(cfg?.homeBenefitsSpeed) || 28));
 
   let featureCards: Array<{ title?: string; copy?: string; href?: string; image?: string }> = [];
   try {
@@ -178,11 +176,11 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {benefitsVisible && <section className={`hs-benefit-glass ${benefitsAnimated ? "is-moving" : "is-static"}`} aria-label="HAVESTORY service benefits" style={{ "--hs-benefit-speed": `${benefitsSpeed}s` } as CSSProperties}>
+      {benefitsVisible && <section className="hs-benefit-glass is-static" aria-label="HAVESTORY service benefits">
         <div className="hs-benefit-glass-track">
-          {(benefitsAnimated ? [0, 1] : [0]).map((group) => <div key={group} className="hs-benefit-glass-group" aria-hidden={group === 1}>
-            {benefits.map((benefit, index) => { const Icon = BENEFIT_ICONS[benefit.icon] || Sparkles; return <article key={`${group}-${benefit.title}-${index}`} className="hs-benefit-glass-item" data-color={benefit.color}><span className="hs-benefit-glass-icon"><Icon aria-hidden="true" /></span><span className="hs-benefit-glass-copy"><strong>{benefit.title}</strong><small>{benefit.copy}</small></span></article>; })}
-          </div>)}
+          <div className="hs-benefit-glass-group">
+            {benefits.map((benefit, index) => { const Icon = BENEFIT_ICONS[benefit.icon] || Sparkles; return <article key={`${benefit.title}-${index}`} className="hs-benefit-glass-item" data-color={benefit.color}><span className="hs-benefit-glass-icon"><Icon aria-hidden="true" /></span><span className="hs-benefit-glass-copy"><strong>{benefit.title}</strong><small>{benefit.copy}</small></span></article>; })}
+          </div>
         </div>
       </section>}
 

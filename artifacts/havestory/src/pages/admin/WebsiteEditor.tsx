@@ -712,8 +712,6 @@ export default function WebsiteEditor() {
   );
   const [homeBenefits, setHomeBenefits] = useState(DEFAULT_HOME_BENEFITS);
   const [homeBenefitsEnabled, setHomeBenefitsEnabled] = useState(true);
-  const [homeBenefitsAnimated, setHomeBenefitsAnimated] = useState(true);
-  const [homeBenefitsSpeed, setHomeBenefitsSpeed] = useState(28);
 
   /* ── ABOUT STATE ── */
   const [aboutImage, setAboutImage] = useState("");
@@ -930,10 +928,6 @@ export default function WebsiteEditor() {
       setHomeBenefits(DEFAULT_HOME_BENEFITS);
     }
     setHomeBenefitsEnabled(s.homeBenefitsEnabled !== 0);
-    setHomeBenefitsAnimated(s.homeBenefitsAnimated !== 0);
-    setHomeBenefitsSpeed(
-      Math.min(60, Math.max(18, Number(s.homeBenefitsSpeed) || 28)),
-    );
     setAboutImage(s.aboutImage || "");
     setAboutStory(s.aboutStory || "");
     setAboutMission(s.aboutMission || "");
@@ -982,8 +976,6 @@ export default function WebsiteEditor() {
     homeFeatureCards: JSON.stringify(homeFeatureCards),
     homeBenefits: JSON.stringify(homeBenefits),
     homeBenefitsEnabled,
-    homeBenefitsAnimated,
-    homeBenefitsSpeed,
   };
   const {
     save: saveHome,
@@ -1310,8 +1302,9 @@ export default function WebsiteEditor() {
                       HOME GLASS BENEFITS STRIP
                     </label>
                     <p className="mt-1 max-w-2xl text-[10px] leading-relaxed text-gray-500">
-                      Edit the four icon, title and description items shown in
-                      the clean glass panel below the Home hero.
+                      Edit the four fixed sections shown in the clean glass
+                      panel below the Home hero. Mobile uses a compact 2 × 2
+                      layout.
                     </p>
                   </div>
                   <button
@@ -1323,58 +1316,6 @@ export default function WebsiteEditor() {
                     <Eye size={13} />{" "}
                     {homeBenefitsEnabled ? "Published" : "Hidden"}
                   </button>
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <button
-                    type="button"
-                    onClick={() => setHomeBenefitsAnimated((value) => !value)}
-                    disabled={!homeBenefitsEnabled}
-                    className={`flex items-center justify-between rounded-xl border px-3 py-3 text-left transition-colors ${homeBenefitsAnimated && homeBenefitsEnabled ? "border-violet-200 bg-white text-violet-700" : "border-gray-100 bg-gray-50 text-gray-500"}`}
-                  >
-                    <span>
-                      <strong className="block text-xs">
-                        Continuous movement
-                      </strong>
-                      <small className="mt-1 block text-[10px]">
-                        Turn off for a fixed four-column panel.
-                      </small>
-                    </span>
-                    <span
-                      className={`h-5 w-9 rounded-full p-0.5 ${homeBenefitsAnimated && homeBenefitsEnabled ? "bg-violet-500" : "bg-gray-300"}`}
-                    >
-                      <i
-                        className={`block h-4 w-4 rounded-full bg-white shadow transition-transform ${homeBenefitsAnimated && homeBenefitsEnabled ? "translate-x-4" : "translate-x-0"}`}
-                      />
-                    </span>
-                  </button>
-                  <div className="rounded-xl border border-gray-100 bg-white px-3 py-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <span>
-                        <strong className="block text-xs text-gray-700">
-                          Movement speed
-                        </strong>
-                        <small className="mt-1 block text-[10px] text-gray-400">
-                          Higher value moves more slowly.
-                        </small>
-                      </span>
-                      <b className="text-xs text-violet-600">
-                        {homeBenefitsSpeed}s
-                      </b>
-                    </div>
-                    <input
-                      type="range"
-                      min="18"
-                      max="60"
-                      step="2"
-                      value={homeBenefitsSpeed}
-                      onChange={(event) =>
-                        setHomeBenefitsSpeed(Number(event.target.value))
-                      }
-                      disabled={!homeBenefitsEnabled || !homeBenefitsAnimated}
-                      className="mt-3 w-full accent-violet-600 disabled:opacity-40"
-                    />
-                  </div>
                 </div>
 
                 <div className="grid gap-3 lg:grid-cols-2">
