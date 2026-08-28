@@ -20,7 +20,7 @@ export default function TrackOrder() {
   const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
   const [previewMessage, setPreviewMessage] = useState<string | null>(null);
   const [searchError, setSearchError] = useState<string | null>(null);
-  
+
   // Allow the order link from checkout/admin to open this page already populated.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -147,7 +147,7 @@ export default function TrackOrder() {
       case 'pending': return Clock;
       case 'processing': return Package;
       case 'shipped': return Truck;
-      case 'delivered': 
+      case 'delivered':
       case 'completed': return CheckCircle;
       default: return Package;
     }
@@ -158,7 +158,7 @@ export default function TrackOrder() {
       case 'pending': return 'text-amber-500 bg-amber-50';
       case 'processing': return 'text-blue-500 bg-blue-50';
       case 'shipped': return 'text-indigo-500 bg-indigo-50';
-      case 'delivered': 
+      case 'delivered':
       case 'completed': return 'text-green-500 bg-green-50';
       case 'cancelled': return 'text-red-500 bg-red-50';
       default: return 'text-primary bg-primary/10';
@@ -174,7 +174,7 @@ export default function TrackOrder() {
           <p>
             Enter your private order ID and checkout phone number to see real-time updates.
           </p>
-          
+
           <form onSubmit={handleSearch} className="hs-track-form">
             <label className="hs-track-field" htmlFor="public-order-id">
               <Search aria-hidden="true" />

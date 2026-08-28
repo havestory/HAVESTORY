@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { staffActivityLogger, staffPermissionGate } from "./lib/team-access";
+import { createRateLimit } from "./lib/rate-limit";
 
 const app: Express = express();
 
@@ -31,25 +32,33 @@ app.use(
   }),
 );
 const isProduction = process.env.NODE_ENV === "production";
+const publicMutationLimit = createRateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  message: "Too many submissions from this connection. Please wait a few minutes and try again.",
+});
+const trackingLimit = createRateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  message: "Too many tracking attempts. Please wait a few minutes and try again.",
+});
 
 // Allow the Replit dev host OR a specific FRONTEND_ORIGIN in production.
 // The FRONTEND_ORIGIN env var should be the full URL of your Vercel frontend,
 // e.g. https://havestory.vercel.app
-const allowedOrigins = process.env.FRONTEND_ORIGIN
-  ? process.env.FRONTEND_ORIGIN.split(",").map((o) => o.trim())
-  : [];
+const normalizeOrigin = (value: string) => value.trim().replace(/\/$/, "");
+const allowedOrigins = (process.env.FRONTEND_ORIGIN
+  ? process.env.FRONTEND_ORIGIN.split(",")
+  : ["https://havestory.vercel.app"])
+  .map(normalizeOrigin)
+  .filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
       if (!isProduction) return callback(null, true);
-      if (allowedOrigins.length === 0) {
-        // Keep local/development flexibility, but do not silently widen a production deployment.
-        if (isProduction) return callback(new Error("FRONTEND_ORIGIN must be configured in production"));
-        return callback(null, true);
-      }
-      if (allowedOrigins.includes(origin)) return callback(null, true);
+      if (allowedOrigins.includes(normalizeOrigin(origin))) return callback(null, true);
       callback(new Error(`CORS: origin ${origin} not allowed`));
     },
     credentials: true,
@@ -63,12 +72,33 @@ app.use(cookieParser());
 app.use(staffPermissionGate);
 app.use(staffActivityLogger);
 
+app.use("/api", (req, res, next) => {
+  const publicWritePaths = new Set([
+    "/orders",
+    "/custom-projects",
+    "/client-agreements",
+    "/client-verifications",
+    "/staff-verifications",
+  ]);
+  const isPublicWrite = req.method === "POST" && publicWritePaths.has(req.path);
+  const isTrackingRequest = req.path.startsWith("/orders/track/") && ["GET", "POST"].includes(req.method);
+  if (isTrackingRequest) return trackingLimit(req, res, next);
+  if (isPublicWrite) return publicMutationLimit(req, res, next);
+  next();
+});
+
 app.use("/api", router);
 
 // Keep API failures machine-readable, especially Multer/body-limit errors.
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   if (err?.code === "LIMIT_FILE_SIZE") {
     return res.status(413).json({ error: "The uploaded file is too large. Please choose a smaller file." });
+  }
+  if (err?.code === "INVALID_FILE_TYPE" || err?.code === "INVALID_FILE_CONTENT") {
+    return res.status(400).json({ error: String(err.message || "Unsupported or invalid file.") });
+  }
+  if (err?.code === "LIMIT_UNEXPECTED_FILE") {
+    return res.status(400).json({ error: "An unexpected upload field was submitted." });
   }
   if (err?.code === "LIMIT_FILE_COUNT" || err?.code === "LIMIT_PART_COUNT" || err?.code === "LIMIT_FIELD_COUNT") {
     return res.status(413).json({ error: "Too many files or form fields were submitted." });

@@ -5,7 +5,8 @@ import { invoicesTable } from "@workspace/db/schema";
 import { eq, and, desc, isNull, inArray, sql } from "drizzle-orm";
 import { getAdminAuth, requireAdmin } from "../lib/auth-cookie";
 import { uploadToCloudinary } from "../lib/cloudinary";
-import { safeUpload } from "../lib/upload-policy";
+import { safeUpload, validateUploadedFile, validateUploadedFiles } from "../lib/upload-policy";
+import { normalizeCreateOrderBody } from "../lib/order-validation";
 import { randomUUID } from "node:crypto";
 import { sendOrderNotificationEmail, sendCustomerConfirmationEmail, sendOrderCompletionEmail } from "../lib/mailer";
 import { syncInvoiceFinance } from "./finance-inventory";
@@ -279,28 +280,28 @@ function generateInvoiceNumber(): string {
 
 router.post("/", async (req, res) => {
   try {
+    const adminAuth = getAdminAuth(req);
+    let payload;
+    try {
+      payload = normalizeCreateOrderBody(req.body, Boolean(adminAuth));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "The order details are invalid.";
+      return res.status(400).json({ error: message });
+    }
+
     const {
       customerName, customerPhone, customerEmail, customerAddress,
-      orderType = "standard", items = [], designLinks = [], attachments = [],
+      orderType, items, designLinks, attachments,
       notes, shippingMethod, serviceTypeId,
       dueDate, startDate, priority, advancePaid, tags,
-      paymentMethod = "bank_transfer", paymentAmount = 0,
-      // couponCode: validated server-side; discountAmount is only used for
-      // admin-created orders (when the caller is authenticated as admin).
-      couponCode,
-      // Optional invoice handling. Defaults preserve the original behaviour
-      // (auto-create a fresh invoice) so customer checkout keeps working
-      // unchanged. The admin "New Order" modal now passes autoInvoice=false
-      // and optionally linkInvoiceId to attach an existing manual invoice.
-      autoInvoice = true,
-      linkInvoiceId,
-    } = req.body;
+      paymentMethod, paymentAmount,
+      couponCode, discountAmount: clientDiscountAmount,
+      autoInvoice, linkInvoiceId,
+    } = payload;
 
     // ── Pre-computation: trusted item total from DB prices ───────────────────
     // This runs outside the transaction so the heavy product lookup doesn't
     // hold a transaction open, but the actual coupon *claim* is atomic inside.
-    const adminAuth = getAdminAuth(req);
-    const clientDiscountAmount = req.body.discountAmount;
     const normalizedPaymentMethod = ["bank_transfer", "full_payment", "cod"].includes(String(paymentMethod))
       ? String(paymentMethod)
       : "bank_transfer";
@@ -399,7 +400,7 @@ router.post("/", async (req, res) => {
     // Resolve the invoice we are linking to (if any) BEFORE the transaction
     // so we can fail fast on bad input without rolling back.
     let invoiceToLink: typeof invoicesTable.$inferSelect | null = null;
-    if (linkInvoiceId !== undefined && linkInvoiceId !== null && linkInvoiceId !== "") {
+    if (linkInvoiceId !== undefined && linkInvoiceId !== null) {
       const linkId = Number(linkInvoiceId);
       if (!Number.isFinite(linkId) || linkId <= 0) {
         return res.status(400).json({ error: "Invalid linkInvoiceId" });
@@ -635,7 +636,7 @@ router.post("/", async (req, res) => {
       }
       return res.status(201).json(serializeOrder(order));
     }
-    if (autoInvoice === false || autoInvoice === "false") {
+    if (autoInvoice === false) {
       req.log.info({ orderId }, "Order created without auto-invoice (autoInvoice=false)");
       return res.status(201).json(serializeOrder(order));
     }
@@ -884,6 +885,9 @@ router.post("/track/:orderId/design-files", requireOrderAccess, upload.array("fi
     const orderId = String(req.params.orderId);
     const files = req.files as Express.Multer.File[];
     if (!files || files.length === 0) return res.status(400).json({ error: "No files uploaded" });
+    if (!validateUploadedFiles(files)) {
+      return res.status(400).json({ error: "The uploaded file contents do not match their declared type." });
+    }
 
     const order = req.trackedOrder;
 
@@ -910,6 +914,9 @@ router.post("/track/:orderId/payment-proof", requireOrderAccess, upload.single("
   try {
     const orderId = String(req.params.orderId);
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+    if (!validateUploadedFile(req.file)) {
+      return res.status(400).json({ error: "The uploaded file contents do not match its declared type." });
+    }
 
     const order = req.trackedOrder;
     const paymentType = String(req.body?.paymentType || "").toLowerCase();
@@ -991,6 +998,9 @@ router.post("/:id/online-files", upload.array("files", 20), async (req, res) => 
     const id = String(req.params.id);
     if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
       return res.status(400).json({ error: "No files uploaded" });
+    }
+    if (!validateUploadedFiles(req.files as Express.Multer.File[])) {
+      return res.status(400).json({ error: "The uploaded file contents do not match their declared type." });
     }
 
     const idNum = parseInt(id);
@@ -1120,6 +1130,9 @@ router.post("/:id/design-preview", upload.single("file"), async (req, res) => {
     if (!getAdminAuth(req)) return res.status(401).json({ error: "Unauthorized" });
     const id = String(req.params.id);
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+    if (!validateUploadedFile(req.file)) {
+      return res.status(400).json({ error: "The uploaded file contents do not match its declared type." });
+    }
     const idNum = parseInt(id);
     const [order] = isNaN(idNum)
       ? await db.select().from(ordersTable).where(eq(ordersTable.orderId, id))
@@ -1157,6 +1170,9 @@ router.post("/:id/proof-file", upload.single("file"), async (req, res) => {
 
     const id = String(req.params.id);
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+    if (!validateUploadedFile(req.file)) {
+      return res.status(400).json({ error: "The uploaded file contents do not match its declared type." });
+    }
 
     const idNum = parseInt(id);
     const [order] = isNaN(idNum)

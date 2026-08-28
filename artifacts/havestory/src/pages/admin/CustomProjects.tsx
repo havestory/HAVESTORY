@@ -15,7 +15,7 @@ export default function CustomProjects() {
     type: 'custom',
     ...(statusFilter !== 'all' ? { status: statusFilter } : {})
   });
-  
+
   const updateOrder = useUpdateOrder();
   const deleteOrder = useDeleteOrder();
   const { toast } = useToast();
@@ -115,8 +115,8 @@ export default function CustomProjects() {
                     </TableCell>
                     <TableCell className="text-sm">{format(new Date(order.createdAt), 'MMM d, yyyy')}</TableCell>
                     <TableCell>
-                      <Select 
-                        defaultValue={order.status} 
+                      <Select
+                        defaultValue={order.status}
                         onValueChange={(val) => handleStatusChange(order.id, val)}
                       >
                         <SelectTrigger className={`w-[130px] h-7 text-[10px] rounded-none border-none font-bold uppercase tracking-widest ${getStatusColor(order.status)}`}>

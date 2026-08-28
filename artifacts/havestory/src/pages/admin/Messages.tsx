@@ -109,7 +109,7 @@ export default function Messages() {
                             </div>
                           </DialogContent>
                         </Dialog>
-                        
+
                         {!msg.isRead && (
                           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none text-green-600 hover:bg-green-50" onClick={() => handleMarkRead(msg.id, true)} title="Mark Read">
                             <CheckCircle className="w-4 h-4" />

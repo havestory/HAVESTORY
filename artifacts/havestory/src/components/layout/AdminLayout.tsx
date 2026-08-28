@@ -1,12 +1,12 @@
 import { type ReactNode, useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
-import { 
-  LayoutDashboard, 
-  ShoppingCart, 
-  PenTool, 
-  Users, 
-  FileText, 
-  Package, 
+import {
+  LayoutDashboard,
+  ShoppingCart,
+  PenTool,
+  Users,
+  FileText,
+  Package,
   Image as ImageIcon,
   MessageSquare,
   Settings,

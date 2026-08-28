@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { Router, type Request } from "express";
-import multer from "multer";
+import { safeUpload, validateUploadedFile } from "../lib/upload-policy";
 import { pool } from "@workspace/db";
 import { requireOwner } from "../lib/auth-cookie";
 import { parseIdParam } from "../lib/parse-id";
@@ -51,7 +51,7 @@ async function ensureTable(){
     CONSTRAINT client_agreements_status_check CHECK(status IN ('pending','signed','void'))
   )`);
 }
-const upload=multer({storage:multer.memoryStorage(),limits:{fileSize:3*1024*1024,files:1,fields:8},fileFilter:(_r,f,cb)=>cb(null,["image/png","image/jpeg","image/webp"].includes(f.mimetype))});
+const upload = safeUpload({ maxFileSize: 3 * 1024 * 1024, maxFiles: 1, maxFields: 8 });
 function documentPayload(x:any){return JSON.stringify({title:x.title,agreementText:x.agreement_text,brandName:x.brand_name,operatorName:x.operator_name,clientName:x.client_name_snapshot,clientBusiness:x.client_business_snapshot||""});}
 
 publicRouter.get("/:token",async(req,res)=>{
@@ -70,6 +70,7 @@ publicRouter.post("/:token/sign",upload.single("signature"),async(req:Request,re
   if(row.status!=="pending"){res.status(409).json({error:row.status==="signed"?"Agreement is already signed":"Agreement is no longer available"});return;}
   if(sha(documentPayload(row))!==row.document_hash){res.status(409).json({error:"Agreement integrity check failed"});return;}
   if(String(req.body.consent)!=="true"||!req.file){res.status(400).json({error:"Explicit consent and electronic signature are required"});return;}
+  if(!validateUploadedFile(req.file)){res.status(400).json({error:"The uploaded file contents do not match their declared type."});return;}
   const signer={name:safe(req.body.signerName,160),nic:safe(req.body.nicNumber,80),phone:safe(req.body.phone,80),email:safe(req.body.email,180)};
   if(!signer.name||!signer.nic||!signer.phone){res.status(400).json({error:"Signer name, NIC/ID and phone are required"});return;}
   const consent="I have read this agreement, agree to its terms, and intend my electronic signature to sign it.";

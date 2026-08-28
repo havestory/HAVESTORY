@@ -3,7 +3,7 @@
  * POST /custom-projects  — no auth required (public-facing enquiry form)
  */
 import { Router } from "express";
-import multer from "multer";
+import { safeUpload, validateUploadedFile } from "../lib/upload-policy";
 import { db } from "@workspace/db";
 import { crmProjectsTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
@@ -11,11 +11,10 @@ import { eq } from "drizzle-orm";
 const router = Router();
 
 // Accept multipart (referenceImage optional) or urlencoded fallback
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024, files: 1, fields: 20 },
-  fileFilter: (_req, file, cb) =>
-    cb(null, ["image/png", "image/jpeg", "image/webp", "image/gif"].includes(file.mimetype)),
+const upload = safeUpload({
+  maxFileSize: 5 * 1024 * 1024,
+  maxFiles: 1,
+  maxFields: 20,
 });
 
 function txt(v: unknown, max = 500): string {
@@ -44,6 +43,9 @@ router.post(
   async (req, res) => {
     try {
       const b = (req.body ?? {}) as Record<string, string>;
+      if (req.file && !validateUploadedFile(req.file)) {
+        return res.status(400).json({ error: "The uploaded file contents do not match their declared type." });
+      }
 
       const customerName = txt(b.customerName, 120);
       const phone        = txt(b.phone, 30);

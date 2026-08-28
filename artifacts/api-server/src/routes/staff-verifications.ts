@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { Router, type Request } from "express";
-import multer from "multer";
+import { safeUpload, validateUploadedFile } from "../lib/upload-policy";
 import { pool } from "@workspace/db";
 import { requireOwner } from "../lib/auth-cookie";
 import { parseIdParam } from "../lib/parse-id";
@@ -75,13 +75,10 @@ function safeText(value: unknown, max = 500): string {
   return String(value ?? "").trim().slice(0, max);
 }
 
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 6 * 1024 * 1024, files: 3, fields: 10 },
-  fileFilter: (_req, file, cb) => {
-    const allowed = new Set(["image/jpeg", "image/png", "image/webp"]);
-    cb(null, allowed.has(file.mimetype));
-  },
+const upload = safeUpload({
+  maxFileSize: 6 * 1024 * 1024,
+  maxFiles: 3,
+  maxFields: 10,
 });
 
 function uploaded(req: Request, field: string): { buffer: Buffer; mimetype: string } | undefined {
@@ -130,6 +127,10 @@ publicRouter.post(
       const idBack = uploaded(req, "idBack");
       if (!selfie || !idFront || !idBack) {
         res.status(400).json({ error: "Live selfie, ID front and ID back are all required" });
+        return;
+      }
+      if (![selfie, idFront, idBack].every(validateUploadedFile)) {
+        res.status(400).json({ error: "The uploaded file contents do not match their declared type." });
         return;
       }
       const profile: ProfileData = {

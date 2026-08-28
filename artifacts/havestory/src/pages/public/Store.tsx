@@ -37,7 +37,7 @@ export default function Store() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const { toast } = useToast();
   const [, navigate] = useLocation();
-  
+
   const { items: cart, count: cartCount, subtotal: cartTotal, addItem } = useShopCart();
   const hasUnpricedInquiry = cart.some(item => {
     const unitPrice = Number(item.unitPrice) || 0;
@@ -215,8 +215,8 @@ export default function Store() {
             <div className="text-center py-32 border border-dashed border-border bg-muted/20 rounded-[0.25rem]">
               <h3 className="font-serif text-2xl font-bold text-foreground mb-2">No frames found</h3>
               <p className="text-muted-foreground text-sm">Try adjusting your category or search filters.</p>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="mt-6 border-primary text-primary hover:bg-primary/5 rounded-[0.25rem] font-semibold text-xs uppercase tracking-widest"
                 onClick={clearFilters}
               >

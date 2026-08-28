@@ -3,7 +3,7 @@ import { db, pool } from "@workspace/db";
 import { settingsTable, noticeTable, noticesTable } from "@workspace/db/schema";
 import { eq, asc } from "drizzle-orm";
 import { uploadToCloudinary } from "../lib/cloudinary";
-import { safeUpload } from "../lib/upload-policy";
+import { safeUpload, validateUploadedFile } from "../lib/upload-policy";
 import { getAdminAuth, requireAdmin } from "../lib/auth-cookie";
 import { parseIdParam } from "../lib/parse-id";
 import { sendTestEmail } from "../lib/mailer";
@@ -348,6 +348,9 @@ router.post(
   async (req, res) => {
     try {
       if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+      if (!validateUploadedFile(req.file)) {
+        return res.status(400).json({ error: "The uploaded file contents do not match their declared type." });
+      }
       const { url: fileUrl } = await uploadToCloudinary(
         req.file.buffer,
         "havestory/site-images",

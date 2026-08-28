@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { 
-  Plus, 
-  Trash2, 
-  Download, 
-  Printer, 
-  FileText, 
-  Building2, 
-  User, 
+import {
+  Plus,
+  Trash2,
+  Download,
+  Printer,
+  FileText,
+  Building2,
+  User,
   Calendar,
   Calculator,
   ChevronLeft,
@@ -67,7 +67,7 @@ export default function Procurement() {
       return DEFAULT_PROCUREMENT_TYPOGRAPHY;
     }
   });
-  
+
   const [supplier, setSupplier] = useState({
     name: '',
     address: '',
@@ -188,7 +188,7 @@ export default function Procurement() {
     setItems(items.map(item => {
       if (item.id === id) {
         const updatedValues = { ...item.values, [colId]: value };
-        
+
         // Only calculate the total when both source fields are filled.
         // Leaving either field empty keeps the total empty for handwriting.
         if (colId === 'qty' || colId === 'price') {
@@ -200,7 +200,7 @@ export default function Procurement() {
             updatedValues['total'] = '';
           }
         }
-        
+
         return { ...item, values: updatedValues };
       }
       return item;
@@ -273,7 +273,7 @@ export default function Procurement() {
       });
 
       documentElement.classList.add('is-capturing');
-      
+
       // Ensure all input and textarea values are mirrored to HTML attributes
       // so html2canvas correctly serializes and renders them without truncation.
       documentElement.querySelectorAll<HTMLInputElement>('input').forEach(input => {
@@ -357,17 +357,17 @@ export default function Procurement() {
         </div>
         <div className="flex items-center gap-2">
           <div className="flex bg-muted p-1 rounded-none border border-border">
-            <Button 
-              variant={format === 'A4' ? 'secondary' : 'ghost'} 
-              size="sm" 
+            <Button
+              variant={format === 'A4' ? 'secondary' : 'ghost'}
+              size="sm"
               onClick={() => setFormat('A4')}
               className="rounded-none h-8 text-[10px] font-bold uppercase tracking-widest px-4"
             >
               A4 Format
             </Button>
-            <Button 
-              variant={format === 'A5' ? 'secondary' : 'ghost'} 
-              size="sm" 
+            <Button
+              variant={format === 'A5' ? 'secondary' : 'ghost'}
+              size="sm"
               onClick={() => setFormat('A5')}
               className="rounded-none h-8 text-[10px] font-bold uppercase tracking-widest px-4"
             >
@@ -521,13 +521,13 @@ export default function Procurement() {
             <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Document Preview</h3>
             <span className="text-[10px] text-muted-foreground font-medium">Auto-calculating totals</span>
           </div>
-          
+
           <div className="bg-muted p-4 md:p-8 flex justify-center overflow-x-auto min-h-[800px]">
             {/* The Document to Capture */}
-            <div 
+            <div
               ref={printRef}
-              style={{ 
-                width: format === 'A4' ? '794px' : '559px', 
+              style={{
+                width: format === 'A4' ? '794px' : '559px',
                 minHeight: format === 'A4' ? '1123px' : '794px',
                 padding: '0',
                 backgroundColor: 'white',
@@ -736,19 +736,19 @@ export default function Procurement() {
                     ))}
                   </tbody>
                 </table>
-                
+
                 <div className="flex items-center gap-4 mt-4 no-print-capture">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={addItem}
                     className="rounded-none h-8 text-[9px] font-bold uppercase tracking-widest text-primary hover:text-primary/80 hover:bg-primary/5"
                   >
                     <Plus className="w-3 h-3 mr-1" /> Add Line Item
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={addColumn}
                     className="rounded-none h-8 text-[9px] font-bold uppercase tracking-widest text-secondary hover:text-secondary/80 hover:bg-secondary/5"
                   >
@@ -798,7 +798,7 @@ export default function Procurement() {
               </div>{/* end inner padded area */}
             </div>
           </div>
-          
+
           <style>{`
             @media screen {
               .no-print-capture {
