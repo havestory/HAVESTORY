@@ -2,15 +2,16 @@ import { Router } from "express";
 import { db, pool } from "@workspace/db";
 import { settingsTable, noticeTable, noticesTable } from "@workspace/db/schema";
 import { eq, asc } from "drizzle-orm";
-import multer from "multer";
 import { uploadToCloudinary } from "../lib/cloudinary";
+import { safeUpload } from "../lib/upload-policy";
 import { getAdminAuth, requireAdmin } from "../lib/auth-cookie";
 import { parseIdParam } from "../lib/parse-id";
 import { sendTestEmail } from "../lib/mailer";
 
-const siteUpload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 },
+const siteUpload = safeUpload({
+  maxFileSize: 10 * 1024 * 1024,
+  maxFiles: 1,
+  maxFields: 10,
 });
 
 const router = Router();

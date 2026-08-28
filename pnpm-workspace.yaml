@@ -38,6 +38,7 @@ minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   - '@replit/*'
   - stripe-replit-sync
+  - nodemailer@9.0.6
 
 onlyBuiltDependencies:
   - '@swc/core'

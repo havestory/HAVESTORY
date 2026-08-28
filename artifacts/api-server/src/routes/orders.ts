@@ -4,17 +4,19 @@ import { ordersTable, settingsTable, productsTable, clientsTable, couponsTable }
 import { invoicesTable } from "@workspace/db/schema";
 import { eq, and, desc, isNull, inArray, sql } from "drizzle-orm";
 import { getAdminAuth, requireAdmin } from "../lib/auth-cookie";
-import multer from "multer";
 import { uploadToCloudinary } from "../lib/cloudinary";
+import { safeUpload } from "../lib/upload-policy";
 import { randomUUID } from "node:crypto";
 import { sendOrderNotificationEmail, sendCustomerConfirmationEmail, sendOrderCompletionEmail } from "../lib/mailer";
 import { syncInvoiceFinance } from "./finance-inventory";
 
 const router = Router();
 
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 20 * 1024 * 1024 },
+const upload = safeUpload({
+  maxFileSize: 20 * 1024 * 1024,
+  maxFiles: 20,
+  maxFields: 40,
+  allowPdf: true,
 });
 
 function parseArr(s: string): any[] {
@@ -483,7 +485,13 @@ router.post("/", async (req, res) => {
           advancePaid: Number.isFinite(Number(advancePaid)) ? Math.max(0, Math.round(Number(advancePaid))) : 0,
           tags: JSON.stringify(Array.isArray(tags) ? tags : []),
           paymentMethod: normalizedPaymentMethod,
-          paymentAmount: Number.isFinite(Number(paymentAmount)) ? Math.max(0, Math.round(Number(paymentAmount))) : 0,
+          // Customer checkout never gets to choose the persisted total. Use the
+          // trusted catalog total plus the selected delivery fee after all
+          // validated discounts have been applied. Admin-created orders retain
+          // their explicit amount for manual/invoice workflows.
+          paymentAmount: adminAuth
+            ? (Number.isFinite(Number(paymentAmount)) ? Math.max(0, Math.round(Number(paymentAmount))) : 0)
+            : Math.max(0, Math.round(itemTotalForCoupon + (selectedDeliveryConfig?.charge || 0) - discountAmount)),
           paymentStatus: normalizedPaymentMethod === "cod" ? "cod_pending" : "pending",
           paymentProofStatus: "not_uploaded",
         }).returning();

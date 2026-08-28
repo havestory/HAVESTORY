@@ -1,4 +1,4 @@
-import express, { type Express } from "express";
+import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
 import cookieParser from "cookie-parser";
@@ -44,7 +44,11 @@ app.use(
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
       if (!isProduction) return callback(null, true);
-      if (allowedOrigins.length === 0) return callback(null, true);
+      if (allowedOrigins.length === 0) {
+        // Keep local/development flexibility, but do not silently widen a production deployment.
+        if (isProduction) return callback(new Error("FRONTEND_ORIGIN must be configured in production"));
+        return callback(null, true);
+      }
       if (allowedOrigins.includes(origin)) return callback(null, true);
       callback(new Error(`CORS: origin ${origin} not allowed`));
     },
@@ -52,12 +56,31 @@ app.use(
   })
 );
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Bound request bodies to protect the API from accidental or abusive memory use.
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 app.use(cookieParser());
 app.use(staffPermissionGate);
 app.use(staffActivityLogger);
 
 app.use("/api", router);
+
+// Keep API failures machine-readable, especially Multer/body-limit errors.
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  if (err?.code === "LIMIT_FILE_SIZE") {
+    return res.status(413).json({ error: "The uploaded file is too large. Please choose a smaller file." });
+  }
+  if (err?.code === "LIMIT_FILE_COUNT" || err?.code === "LIMIT_PART_COUNT" || err?.code === "LIMIT_FIELD_COUNT") {
+    return res.status(413).json({ error: "Too many files or form fields were submitted." });
+  }
+  if (err?.message?.startsWith("CORS:")) {
+    return res.status(403).json({ error: "This website is not allowed to access the API." });
+  }
+  if (err?.type === "entity.too.large") {
+    return res.status(413).json({ error: "The request is too large." });
+  }
+  console.error("Unhandled API error", err);
+  return res.status(500).json({ error: "Something went wrong. Please try again." });
+});
 
 export default app;
