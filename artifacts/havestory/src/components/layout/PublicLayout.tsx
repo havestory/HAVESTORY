@@ -237,6 +237,16 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="hsx-shell-actions">
+            <button
+              type="button"
+              className="hsx-mobile-menu-button"
+              aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={menuOpen}
+              aria-controls="public-mobile-drawer"
+              onClick={() => setMenuOpen(open => !open)}
+            >
+              {menuOpen ? <X /> : <Menu />}
+            </button>
             <ShopCartDrawer trigger={<button type="button" className="hsx-header-cart" aria-label={`Open shopping cart with ${cartCount} items`}><ShoppingBag />{cartCount > 0 && <span>{cartCount}</span>}</button>} />
           </div>
         </div>
