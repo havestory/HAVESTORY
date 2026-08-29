@@ -3,7 +3,6 @@ import { Link, useLocation } from 'wouter';
 import {
   LayoutDashboard,
   ShoppingCart,
-  PenTool,
   Users,
   FileText,
   Package,
@@ -56,7 +55,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
   const canAccess = (permission?: string) => !permission || admin?.role === 'owner' || permissions.includes(permission);
 
   const routeTitles = [
-    ['/admin/custom-projects', 'Custom Projects'], ['/admin/crm-projects', 'CRM Projects'],
+    ['/admin/crm-projects', 'CRM Projects'],
     ['/admin/shipping-labels', 'Shipping Labels'], ['/admin/production-usage', 'Production Usage'],
     ['/admin/website-editor', 'Website Editor'], ['/admin/raw-materials', 'Inventory'],
     ['/admin/price-lists', 'Price Lists'], ['/admin/procurement', 'Procurement'], ['/admin/attendance', 'Attendance'],
@@ -142,7 +141,6 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             <div className="space-y-1">
               <p className="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/70">Orders</p>
               <NavItem href="/admin/orders"          label="Orders"          icon={ShoppingCart} permission="orders" />
-              <NavItem href="/admin/custom-projects" label="Custom Projects" icon={PenTool} permission="orders" />
               <NavItem href="/admin/clients"         label="Clients"         icon={Users} permission="customers" />
               <NavItem href="/admin/crm-projects"    label="CRM Projects"    icon={FolderKanban} permission="customers" />
               <NavItem href="/admin/invoices"        label="Invoices"        icon={FileText} permission="invoices" />

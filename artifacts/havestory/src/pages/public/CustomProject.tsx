@@ -21,6 +21,7 @@ export default function CustomProject() {
   const { toast } = useToast();
 
   const [submitted, setSubmitted] = useState(false);
+  const [projectReference, setProjectReference] = useState('');
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     customerName: '',
@@ -60,6 +61,7 @@ export default function CustomProject() {
       });
       const data = await res.json();
       if (res.ok && (data.id || data.success)) {
+        setProjectReference(data.projectId || '');
         setSubmitted(true);
       } else {
         throw new Error(data?.error || 'Submission failed');
@@ -82,6 +84,7 @@ export default function CustomProject() {
           <p className="text-muted-foreground mb-8 leading-relaxed">
             Thank you for reaching out. Our studio team will review your custom project request and get back to you shortly.
           </p>
+          {projectReference && <div className="mx-auto mb-8 w-fit rounded-full border border-secondary/25 bg-secondary/10 px-5 py-2 text-xs font-black tracking-[.14em] text-secondary">REFERENCE · {projectReference}</div>}
           <div className="flex gap-3 justify-center">
             <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 btn-glow uppercase text-xs tracking-widest px-6">
               <Link href="/">Back to Home</Link>

@@ -4,9 +4,11 @@
  */
 import { Router } from "express";
 import { safeUpload, validateUploadedFile } from "../lib/upload-policy";
-import { db } from "@workspace/db";
-import { crmProjectsTable } from "@workspace/db/schema";
+import { db, pool } from "@workspace/db";
+import { clientsTable, crmProjectsTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
+import { findClientIdByPhone, replaceClientPhoneClaims } from "../lib/client-dedupe";
+import { uploadToCloudinary } from "../lib/cloudinary";
 
 const router = Router();
 
@@ -58,6 +60,31 @@ router.post(
         });
       }
 
+      let referenceImageUrl = "";
+      if (req.file) {
+        const uploaded = await uploadToCloudinary(
+          req.file.buffer,
+          "havestory/custom-projects",
+          req.file.originalname,
+        );
+        referenceImageUrl = uploaded.url;
+      }
+
+      let clientId = await findClientIdByPhone(phone);
+      if (!clientId) {
+        const [client] = await db.insert(clientsTable).values({
+          name: customerName,
+          businessName: txt(b.businessName, 160) || null,
+          email: txt(b.email, 200) || null,
+          phone,
+          address: txt(b.deliveryAddress, 500) || null,
+          approved: false,
+          notes: "Created automatically from the public custom project form.",
+        }).returning({ id: clientsTable.id });
+        clientId = client.id;
+        await replaceClientPhoneClaims(pool, client.id, phone);
+      }
+
       // Pack extra fields + contact info into the notes column as JSON
       const notes = JSON.stringify({
         phone,
@@ -69,7 +96,7 @@ router.post(
         deadline:        txt(b.deadline),
         deliveryAddress: txt(b.deliveryAddress),
         additionalNotes: txt(b.additionalNotes, 1000),
-        hasReferenceImage: !!req.file,
+        referenceImageUrl,
         submittedAt:     new Date().toISOString(),
         source:          "public_form",
       });
@@ -82,6 +109,7 @@ router.post(
           projectId,
           title:      projectType,
           clientName: customerName,
+          clientId,
           description,
           notes,
           status:     "enquiry",
@@ -91,7 +119,7 @@ router.post(
           projectId: crmProjectsTable.projectId,
         });
 
-      return res.status(201).json({ id: project.id, projectId: project.projectId, success: true });
+      return res.status(201).json({ id: project.id, projectId: project.projectId, clientId, success: true });
     } catch (err) {
       req.log.error(err);
       return res.status(500).json({ error: "Failed to submit project request" });
