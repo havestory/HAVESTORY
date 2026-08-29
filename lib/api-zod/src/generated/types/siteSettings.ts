@@ -33,6 +33,9 @@ export interface SiteSettings {
   faviconUrl?: string | null;
   ownerName?: string | null;
   designerCredit?: string | null;
+  footerCopyrightText?: string | null;
+  footerDeveloperCredit?: string | null;
+  footerDeveloperUrl?: string | null;
   themePreset?: string | null;
   specialEventEnabled?: boolean;
   specialEventType?: string | null;
