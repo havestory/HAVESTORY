@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useGetSettings } from '@workspace/api-client-react';
-import { Menu, X, Phone, Mail, Instagram, Facebook, ArrowRight, ShoppingBag, Sparkles, MessageCircle, ChevronDown } from 'lucide-react';
+import { Menu, X, Phone, Mail, MapPin, Instagram, Facebook, ArrowRight, ShoppingBag, Sparkles, MessageCircle, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { applyThemeVars } from '@/lib/theme-utils';
 import { useShopCart } from '@/lib/shop-cart';
@@ -342,9 +342,9 @@ export function PublicLayout({ children }: { children: ReactNode }) {
         <div className="hsx-footer-grid">
           <div>
             <p>Studio</p>
-            {settings?.address && <span>{settings.address}</span>}
-            {settings?.phone && <a href={`tel:${settings.phone}`}>{settings.phone}</a>}
-            {settings?.email && <a href={`mailto:${settings.email}`}>{settings.email}</a>}
+            {settings?.address && <span className="hsx-footer-contact"><MapPin aria-hidden="true" />{settings.address}</span>}
+            {settings?.phone && <a className="hsx-footer-contact" href={`tel:${settings.phone}`}><Phone aria-hidden="true" />{settings.phone}</a>}
+            {settings?.email && <a className="hsx-footer-contact" href={`mailto:${settings.email}`}><Mail aria-hidden="true" />{settings.email}</a>}
           </div>
           <div>
             <p>Shop &amp; create</p>
