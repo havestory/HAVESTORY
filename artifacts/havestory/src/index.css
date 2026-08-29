@@ -1117,6 +1117,113 @@ h1, h2, h3 { font-weight: 700; }
   .cursor-dot, .cursor-ring { display: none; }
 }
 
+/* HAVESTORY finalized public theme — compact mobile rhythm + clear glass UI */
+[data-public-site] .hsx-shell-nav {
+  border-color: rgba(100, 53, 116, .22) !important;
+  background: rgba(255, 252, 255, .76) !important;
+  box-shadow: 0 14px 40px rgba(48, 24, 61, .13), inset 0 1px 0 rgba(255,255,255,.96) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.35) !important;
+  backdrop-filter: blur(22px) saturate(1.35) !important;
+}
+[data-public-site] .hsx-mobile-menu-button {
+  border: 1px solid rgba(255,255,255,.24) !important;
+  background: linear-gradient(145deg, #71417e, #432451) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 22px rgba(66, 34, 78, .28), inset 0 1px 0 rgba(255,255,255,.22) !important;
+}
+[data-public-site] .hsx-mobile-menu-button svg,
+[data-public-site] .hsx-header-cart svg { stroke-width: 2.15 !important; }
+[data-public-site] .hsx-header-cart {
+  border-color: rgba(101,55,117,.22) !important;
+  background: rgba(255,255,255,.88) !important;
+  color: #5d2e68 !important;
+  box-shadow: 0 8px 22px rgba(54,29,68,.12), inset 0 1px 0 #fff !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  backdrop-filter: blur(14px) !important;
+}
+[data-public-site] .hs-new-final {
+  border: 1px solid rgba(255,255,255,.18) !important;
+  background:
+    radial-gradient(circle at 92% 8%, rgba(224,188,111,.24), transparent 42%),
+    linear-gradient(125deg, #2a1836 0%, #563063 62%, #6b3a6b 100%) !important;
+  box-shadow: 0 22px 60px rgba(53,25,65,.22), inset 0 1px 0 rgba(255,255,255,.15) !important;
+}
+[data-public-site] .hs-new-final .hs-new-button-gold {
+  border: 1px solid rgba(255,255,255,.34) !important;
+  background: rgba(255,250,239,.92) !important;
+  color: #432451 !important;
+  box-shadow: 0 12px 30px rgba(25,12,34,.18), inset 0 1px 0 #fff !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+@media (max-width: 560px) {
+  [data-public-site] .hs-new-category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: .65rem !important;
+  }
+  [data-public-site] .hs-new-category,
+  [data-public-site] .hs-new-category > a {
+    min-height: 230px !important;
+    border-radius: 1rem !important;
+  }
+  [data-public-site] .hs-new-category:last-child {
+    grid-column: auto !important;
+  }
+  [data-public-site] .hs-new-category-copy { padding: .9rem !important; }
+  [data-public-site] .hs-new-category-copy h3 {
+    margin-block: .3rem !important;
+    font-size: 1.12rem !important;
+    line-height: 1.05 !important;
+  }
+  [data-public-site] .hs-new-category-copy p {
+    display: -webkit-box !important;
+    overflow: hidden !important;
+    font-size: .68rem !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+  }
+  [data-public-site] .hs-new-category-copy b { margin-top: .6rem !important; }
+
+  [data-public-site] .hs-new-final {
+    gap: 1.15rem !important;
+    padding: 1.5rem !important;
+  }
+  [data-public-site] .hs-new-final h2 {
+    margin-block: .65rem .4rem !important;
+    font-size: clamp(2rem, 10vw, 2.8rem) !important;
+  }
+
+  [data-public-site] .hsx-footer {
+    margin-top: 22px !important;
+    padding: 20px 16px 13px !important;
+  }
+  [data-public-site] .hsx-footer-top { display: none !important; }
+  [data-public-site] .hsx-footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 20px 15px !important;
+    padding: 3px 0 18px !important;
+  }
+  [data-public-site] .hsx-footer-grid > div:first-child {
+    grid-column: 1 / -1 !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    column-gap: 14px !important;
+  }
+  [data-public-site] .hsx-footer-grid > div:first-child p { grid-column: 1 / -1 !important; }
+  [data-public-site] .hsx-footer-grid p { margin-bottom: 2px !important; }
+  [data-public-site] .hsx-footer-grid a,
+  [data-public-site] .hsx-footer-grid span { font-size: 10px !important; }
+  [data-public-site] .hsx-footer-base {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    align-items: center !important;
+    gap: 6px 12px !important;
+    padding-top: 12px !important;
+    font-size: 8px !important;
+  }
+}
+
 
 /* ═══════════════════════════════════════════════════════
    HAVESTORY — Premium Editorial storefront layer

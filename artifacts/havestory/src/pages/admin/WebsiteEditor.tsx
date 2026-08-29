@@ -47,10 +47,11 @@ const TABS = [
   { id: "terms", label: "Terms of Service", icon: FileText },
   { id: "seo", label: "SEO Settings", icon: Search },
   { id: "icon", label: "Website Icon", icon: ImageIcon },
-  { id: "theme", label: "Color Theme", icon: Palette },
 ] as const;
 
-type TabId = (typeof TABS)[number]["id"];
+// `theme` remains in the internal union while the legacy editor is retained
+// below for migration safety; it is no longer exposed in the settings UI.
+type TabId = (typeof TABS)[number]["id"] | "theme";
 
 const THEME_PRESETS = [
   {
