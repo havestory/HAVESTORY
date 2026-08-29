@@ -34,6 +34,9 @@ function ensureSettingsCompatibility(): Promise<void> {
       ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image9 TEXT;
       ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_image10 TEXT;
       ALTER TABLE settings ADD COLUMN IF NOT EXISTS hero_slide_enabled TEXT NOT NULL DEFAULT '[true,true,true,true,true,true,true,true,true,true]';
+      ALTER TABLE settings ADD COLUMN IF NOT EXISTS footer_copyright_text TEXT NOT NULL DEFAULT '© 2026 HAVESTORY';
+      ALTER TABLE settings ADD COLUMN IF NOT EXISTS footer_developer_credit TEXT NOT NULL DEFAULT 'Designed & Built by CODEARTIX';
+      ALTER TABLE settings ADD COLUMN IF NOT EXISTS footer_developer_url TEXT;
     `,
       )
       .then(() => undefined)
@@ -143,6 +146,9 @@ router.put("/", requireAdmin, async (req, res) => {
       "heroAvatarImage3",
       "heroAvatarImage4",
       "designerCredit",
+      "footerCopyrightText",
+      "footerDeveloperCredit",
+      "footerDeveloperUrl",
       "ownerName",
       "logoUrl",
       "tiktokUrl",
@@ -445,6 +451,9 @@ router.post("/restore", requireAdmin, async (req, res) => {
       "heroAvatarImage3",
       "heroAvatarImage4",
       "designerCredit",
+      "footerCopyrightText",
+      "footerDeveloperCredit",
+      "footerDeveloperUrl",
       "ownerName",
       "logoUrl",
       "tiktokUrl",
