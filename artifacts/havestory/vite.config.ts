@@ -61,6 +61,17 @@ export default defineConfig({
     fs: {
       strict: true,
     },
+    // Local design preview: proxy API calls to the deployed backend when
+    // VITE_API_PROXY_TARGET is provided (e.g. https://havestory.vercel.app).
+    proxy: process.env.VITE_API_PROXY_TARGET
+      ? {
+          '/api': {
+            target: process.env.VITE_API_PROXY_TARGET,
+            changeOrigin: true,
+            secure: true,
+          },
+        }
+      : undefined,
   },
   preview: {
     port,
