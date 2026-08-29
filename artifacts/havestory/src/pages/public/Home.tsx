@@ -119,6 +119,7 @@ export default function Home() {
     { title: "Custom Frames", copy: "Made to your photograph and space.", href: "/store", tone: "violet", image: DEFAULT_IMAGES[1] },
     { title: "Fine Art Prints", copy: "Colour-managed, crisp and lasting.", href: "/store", tone: "gold", image: DEFAULT_IMAGES[2] },
     { title: "Personal Gifts", copy: "Meaningful pieces for every occasion.", href: "/custom-project", tone: "rose", image: portfolioList[0]?.imageUrl || DEFAULT_IMAGES[0] },
+    { title: "Studio Sessions", copy: "Portrait and product photography with a gallery finish.", href: "/services", tone: "sage", image: portfolioList[1]?.imageUrl || DEFAULT_IMAGES[1] },
   ];
   const categories = categoryFallbacks.map((fallback, index) => ({ ...fallback, ...(featureCards[index] || {}), image: featureCards[index]?.image || fallback.image }));
   const favouriteWindow = Math.min(4, favouritePool.length);
