@@ -1918,6 +1918,15 @@ components:
         designerCredit:
           type: string
           nullable: true
+        footerCopyrightText:
+          type: string
+          nullable: true
+        footerDeveloperCredit:
+          type: string
+          nullable: true
+        footerDeveloperUrl:
+          type: string
+          nullable: true
         themePreset:
           type: string
           nullable: true
@@ -2215,6 +2224,15 @@ components:
           type: string
           nullable: true
         designerCredit:
+          type: string
+          nullable: true
+        footerCopyrightText:
+          type: string
+          nullable: true
+        footerDeveloperCredit:
+          type: string
+          nullable: true
+        footerDeveloperUrl:
           type: string
           nullable: true
         themePreset:
