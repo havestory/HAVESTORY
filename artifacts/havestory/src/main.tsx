@@ -11,6 +11,9 @@ import './home-benefits.css';
 // legacy responsive rules bundled in the older public stylesheets.
 import './premium-footer.css';
 import './admin-stability.css';
+// Modern Atelier redesign skin — must load LAST so it wins the cascade over
+// every legacy theme generation above.
+import './atelier.css';
 
 // Seed the public Liquid Glass palette before settings arrive so the first paint
 // never flashes the legacy darkroom or brown editorial theme.
