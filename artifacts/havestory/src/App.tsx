@@ -57,7 +57,6 @@ const ClientAgreement = lazyWithRecovery(() => import('./pages/ClientAgreement')
 const AdminLogin = lazyWithRecovery(() => import('./pages/admin/Login'));
 const Dashboard = lazyWithRecovery(() => import('./pages/admin/Dashboard'));
 const Orders = lazyWithRecovery(() => import('./pages/admin/Orders'));
-const CustomProjects = lazyWithRecovery(() => import('./pages/admin/CustomProjects'));
 const Clients = lazyWithRecovery(() => import('./pages/admin/Clients'));
 const CRMProjects = lazyWithRecovery(() => import('./pages/admin/CRMProjects'));
 const Invoices = lazyWithRecovery(() => import('./pages/admin/Invoices'));
@@ -170,7 +169,6 @@ function AdminRoutes() {
             <Switch>
           <Route path="/admin"                 component={Dashboard} />
           <Route path="/admin/orders"          component={Orders} />
-          <Route path="/admin/custom-projects" component={CustomProjects} />
           <Route path="/admin/clients"         component={Clients} />
           <Route path="/admin/crm-projects"    component={CRMProjects} />
           <Route path="/admin/invoices"        component={Invoices} />
