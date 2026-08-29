@@ -107,7 +107,9 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     };
   }, [refetchSettings]);
 
-  const publicThemePreset = settings?.themePreset || 'atelier-light';
+  // HAVESTORY now has one intentionally art-directed public palette. Keeping
+  // this fixed prevents an old saved preset from producing mixed page styles.
+  const publicThemePreset = 'atelier-light';
   const isLightTheme = true;
 
   useEffect(() => {
