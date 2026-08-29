@@ -262,7 +262,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               aria-controls="public-mobile-drawer"
               onClick={() => setMenuOpen(open => !open)}
             >
-              {menuOpen ? <X /> : <Menu />}
+              {menuOpen ? <X /> : <span className="hsx-liquid-menu-icon" aria-hidden="true"><i /><i /><i /></span>}
             </button>}
             <ShopCartDrawer trigger={<button type="button" className="hsx-header-cart" aria-label={`Open shopping cart with ${cartCount} items`}><ShoppingBag />{cartCount > 0 && <span>{cartCount}</span>}</button>} />
           </div>
@@ -377,8 +377,12 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
         <div className="hsx-footer-base">
-          <span>© {new Date().getFullYear()} {settings?.businessName || 'HAVESTORY'}</span>
-          <span>Made with care in Sri Lanka</span>
+          <span>{(settings as any)?.footerCopyrightText || `© ${new Date().getFullYear()} ${settings?.businessName || 'HAVESTORY'}`}</span>
+          {(settings as any)?.footerDeveloperCredit && (
+            (settings as any)?.footerDeveloperUrl
+              ? <a href={(settings as any).footerDeveloperUrl} target="_blank" rel="noreferrer">{(settings as any).footerDeveloperCredit}</a>
+              : <span>{(settings as any).footerDeveloperCredit}</span>
+          )}
         </div>
       </footer>
 
