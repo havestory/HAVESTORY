@@ -56,6 +56,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   const { data: settings, isLoading: settingsLoading, isError: settingsError, refetch: refetchSettings } = useGetSettings();
   const { count: cartCount } = useShopCart();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileNav, setMobileNav] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showWa,   setShowWa]   = useState(false);
   const [waFaqOpen, setWaFaqOpen] = useState(false);
@@ -81,16 +82,17 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   }, [menuOpen]);
 
   useEffect(() => {
-    const desktop = window.matchMedia('(min-width: 781px)');
-    const closeDesktopDrawer = (event: MediaQueryListEvent | MediaQueryList) => {
-      if (event.matches) {
+    const mobile = window.matchMedia('(max-width: 780px)');
+    const syncNavigationMode = (event: MediaQueryListEvent | MediaQueryList) => {
+      setMobileNav(event.matches);
+      if (!event.matches) {
         setMenuOpen(false);
         document.body.style.overflow = '';
       }
     };
-    closeDesktopDrawer(desktop);
-    desktop.addEventListener('change', closeDesktopDrawer);
-    return () => desktop.removeEventListener('change', closeDesktopDrawer);
+    syncNavigationMode(mobile);
+    mobile.addEventListener('change', syncNavigationMode);
+    return () => mobile.removeEventListener('change', syncNavigationMode);
   }, []);
 
   useEffect(() => {
@@ -252,7 +254,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="hsx-shell-actions">
-            <button
+            {mobileNav && <button
               type="button"
               className="hsx-mobile-menu-button"
               aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
@@ -261,7 +263,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               onClick={() => setMenuOpen(open => !open)}
             >
               {menuOpen ? <X /> : <Menu />}
-            </button>
+            </button>}
             <ShopCartDrawer trigger={<button type="button" className="hsx-header-cart" aria-label={`Open shopping cart with ${cartCount} items`}><ShoppingBag />{cartCount > 0 && <span>{cartCount}</span>}</button>} />
           </div>
         </div>
@@ -275,7 +277,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
 
       {/* ── Mobile drawer ── */}
       <AnimatePresence>
-        {menuOpen && (
+        {mobileNav && menuOpen && (
           <>
             <motion.div
               key="overlay"
