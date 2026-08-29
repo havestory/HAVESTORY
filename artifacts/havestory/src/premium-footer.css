@@ -61,13 +61,13 @@
 }
 [data-public-site] .hsx-footer-top > p {
   width: 100% !important; max-width: 410px !important; margin: 0 !important;
-  color: rgba(255,255,255,.9) !important; font-size: clamp(18px, 2vw, 25px) !important; line-height: 1.35 !important;
+  color: rgba(255,255,255,.9) !important; font-size: clamp(19px, 2vw, 27px) !important; line-height: 1.3 !important;
   text-align: center !important;
   justify-self: center !important;
-  font-family: "Segoe Script", "Brush Script MT", "Lucida Handwriting", cursive !important;
+  font-family: "Cormorant Garamond", Georgia, serif !important;
   font-style: italic !important;
-  font-weight: 800 !important;
-  letter-spacing: .01em !important;
+  font-weight: 700 !important;
+  letter-spacing: .015em !important;
   text-wrap: balance !important;
   text-shadow: 0 5px 20px rgba(12,5,18,.34) !important;
 }
@@ -101,10 +101,17 @@
 [data-public-site] .hsx-footer-grid a:hover { color: #fff !important; transform: translateX(3px) !important; }
 [data-public-site] .hsx-footer-base {
   position: relative !important; z-index: 1 !important; display: flex !important;
-  justify-content: space-between !important; gap: 12px !important; padding-top: 17px !important;
+  flex-direction: column !important; align-items: center !important; justify-content: center !important;
+  gap: 5px !important; padding-top: 17px !important; text-align: center !important;
   border-top: 1px solid rgba(255,255,255,.12) !important; color: rgba(255,255,255,.45) !important;
   font-size: 8px !important; letter-spacing: .1em !important;
 }
+[data-public-site] .hsx-footer-base a {
+  color: #edc96d !important;
+  text-decoration: none !important;
+  transition: color .2s ease !important;
+}
+[data-public-site] .hsx-footer-base a:hover { color: #fff !important; }
 
 [data-public-site] .hsx-mobile-menu-button {
   display: none !important;
@@ -113,11 +120,22 @@
   place-items: center !important;
   padding: 0 !important;
   overflow: hidden !important;
-  border: 1px solid rgba(82,43,96,.18) !important; border-radius: 13px !important;
-  background: linear-gradient(145deg, #fff, #f7f1fa) !important;
-  color: #32183d !important; box-shadow: 0 8px 22px rgba(55,29,68,.14), inset 0 1px 0 #fff !important;
-  -webkit-backdrop-filter: blur(16px) !important; backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255,255,255,.94) !important; border-radius: 14px !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.96), rgba(245,237,249,.78)) !important;
+  color: #32183d !important;
+  box-shadow: 0 9px 24px rgba(55,29,68,.13), inset 0 1px 0 #fff, inset 0 -1px 0 rgba(93,49,108,.07) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.35) !important; backdrop-filter: blur(22px) saturate(1.35) !important;
 }
+[data-public-site] .hsx-liquid-menu-icon {
+  width: 19px !important; height: 15px !important; display: flex !important;
+  flex-direction: column !important; justify-content: space-between !important;
+}
+[data-public-site] .hsx-liquid-menu-icon i {
+  display: block !important; width: 100% !important; height: 2.5px !important;
+  border-radius: 999px !important; background: #32183d !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,.7) !important;
+}
+[data-public-site] .hsx-liquid-menu-icon i:nth-child(2) { width: 72% !important; align-self: flex-end !important; }
 [data-public-site] .hsx-mobile-menu-button svg {
   display: block !important; width: 18px !important; height: 18px !important;
   margin: 0 !important; transform: none !important; color: #43234f !important;
@@ -159,11 +177,14 @@
   }
   [data-public-site] .hsx-footer-grid > div:first-child { grid-column: 1 / -1 !important; }
   [data-public-site] .hsx-footer-grid > div:first-child {
+    display: grid !important;
+    grid-template-columns: minmax(0,1fr) !important;
     width: 100% !important;
     align-items: flex-start !important;
     text-align: left !important;
   }
   [data-public-site] .hsx-footer-grid > div:first-child > :where(p,a,span) {
+    grid-column: 1 / -1 !important;
     width: 100% !important;
     max-width: 100% !important;
     justify-self: stretch !important;
@@ -187,13 +208,13 @@
   [data-public-site] .hsx-footer-grid > div:last-child p { grid-column: 1 / -1 !important; }
   [data-public-site] .hsx-footer-grid a,
   [data-public-site] .hsx-footer-grid span { font-size: 10px !important; line-height: 1.42 !important; }
-  [data-public-site] .hsx-footer-base { flex-direction: column !important; align-items: flex-start !important; gap: 4px !important; }
+  [data-public-site] .hsx-footer-base { align-items: center !important; justify-content: center !important; gap: 4px !important; text-align: center !important; }
 }
 
 @media (max-width: 780px) {
   [data-public-site] .hsx-mobile-menu-button {
     display: grid !important;
-    width: 38px !important; height: 38px !important; flex: 0 0 38px !important;
+    width: 42px !important; height: 42px !important; flex: 0 0 42px !important;
   }
 }
 
