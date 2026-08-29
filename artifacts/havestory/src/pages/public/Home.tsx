@@ -207,7 +207,7 @@ export default function Home() {
 
       {reviewList.length > 0 && <section className="hs-new-section hs-new-reviews"><Heading eyebrow="06 / Loved by our clients" title="Stories from happy walls." /><div>{reviewList.map((review) => <blockquote key={review.id}><Quote size={24} /><p>“{review.comment}”</p><footer><strong>{review.customerName}</strong><span>{"★".repeat(Math.min(5, review.rating || 5))}</span></footer></blockquote>)}</div></section>}
 
-      <section className="hs-new-final"><div><span>Have a photograph in mind?</span><h2>Make something<br /><em>worth keeping.</em></h2><p>Tell us the idea. We will help with the rest.</p></div><Link href="/custom-project" className="hs-new-button hs-new-button-gold">Start a custom project <ArrowRight size={17} /></Link></section>
+      <section className="hs-new-final"><div><span>Have a photograph in mind?</span><h2>Make something<br /><em>worth keeping.</em></h2><p>Tell us the idea. We will help with the rest.</p></div></section>
     </main>
   );
 }
