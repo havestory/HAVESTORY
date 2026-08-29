@@ -81,6 +81,19 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   }, [menuOpen]);
 
   useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 781px)');
+    const closeDesktopDrawer = (event: MediaQueryListEvent | MediaQueryList) => {
+      if (event.matches) {
+        setMenuOpen(false);
+        document.body.style.overflow = '';
+      }
+    };
+    closeDesktopDrawer(desktop);
+    desktop.addEventListener('change', closeDesktopDrawer);
+    return () => desktop.removeEventListener('change', closeDesktopDrawer);
+  }, []);
+
+  useEffect(() => {
     if (!waFaqOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setWaFaqOpen(false);
