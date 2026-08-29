@@ -92,6 +92,13 @@ export const settingsTable = pgTable("settings", {
   heroAvatarImage3: text("hero_avatar_image3"),
   heroAvatarImage4: text("hero_avatar_image4"),
   designerCredit: text("designer_credit").notNull().default("HAVESTORY"),
+  footerCopyrightText: text("footer_copyright_text")
+    .notNull()
+    .default("© 2026 HAVESTORY"),
+  footerDeveloperCredit: text("footer_developer_credit")
+    .notNull()
+    .default("Designed & Built by CODEARTIX"),
+  footerDeveloperUrl: text("footer_developer_url"),
   ownerName: text("owner_name"),
   logoUrl: text("logo_url"),
   tiktokUrl: text("tiktok_url"),
