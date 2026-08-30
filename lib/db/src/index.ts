@@ -17,10 +17,12 @@ const needsSsl = dbUrl.includes("neon.tech") || process.env.NODE_ENV === "produc
 
 export const pool = new Pool({
   connectionString: dbUrl,
-  ssl: needsSsl ? { rejectUnauthorized: false } : undefined,
-  /* Neon-friendly pool settings: keep connections alive to avoid cold starts */
-  max: 5,
-  idleTimeoutMillis: 300000,       // keep idle connections open for 5 min
+  ssl: needsSsl ? true : undefined,
+  // Keep each serverless instance small so a traffic burst cannot multiply
+  // into hundreds of idle database connections. Neon should use its pooled
+  // connection URL in production.
+  max: Math.min(10, Math.max(1, Number(process.env.DB_POOL_MAX) || 3)),
+  idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,  // fail fast rather than hang indefinitely
   keepAlive: true,
   keepAliveInitialDelayMillis: 0,
