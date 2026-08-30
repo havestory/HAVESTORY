@@ -12,6 +12,16 @@ const app: Express = express();
 // Trust Vercel's reverse proxy so secure cookies work over HTTPS
 app.set("trust proxy", 1);
 
+// Small, dependency-free baseline security headers for both API responses and
+// error paths. Static assets receive their own headers from Vercel.
+app.use((_req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  next();
+});
+
 app.use(
   pinoHttp({
     logger,
@@ -76,6 +86,8 @@ app.use("/api", (req, res, next) => {
   const publicWritePaths = new Set([
     "/orders",
     "/custom-projects",
+    "/messages",
+    "/reviews",
     "/client-agreements",
     "/client-verifications",
     "/staff-verifications",
