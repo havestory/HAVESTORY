@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { captureElement } from '@/lib/html2canvas-capture';
-import { AlertTriangle, ArrowUp, CalendarDays, CheckCircle2, Download, Droplets, FileImage, FileText, Package2, Printer, RotateCcw, Save, Search, ShieldCheck, Truck, Upload, User, X, Zap } from 'lucide-react';
+import { CalendarDays, CheckCircle2, Download, FileImage, FileText, Package2, Printer, RotateCcw, Save, Search, ShieldCheck, Truck, Upload, User, X, Zap } from 'lucide-react';
 import { useGetSettings, useListOrders } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,19 +12,19 @@ type LabelForm = {
   recipientName: string; phone: string; alternatePhone: string; address: string;
   city: string; district: string; postalCode: string; deliveryNotes: string;
   orderNumber: string; courierService: string; deliveryDate: string; deliveryTime: string;
-  urgent: boolean; fragile: boolean; handleWithCare: boolean; thisSideUp: boolean; keepDry: boolean;
+  urgent: boolean; handlingArtwork: boolean;
   labelSize: LabelSize;
 };
 type LabelSettings = {
   senderName: string; senderPhone: string; senderWhatsapp: string; senderAddress: string;
   footerText: string; defaultSize: LabelSize; showQr?: boolean; showBarcode?: boolean;
-  fragileImageUrl?: string; handleWithCareImageUrl?: string; thisSideUpImageUrl?: string; keepDryImageUrl?: string;
+  handlingArtworkImageUrl?: string;
 };
 
 const EMPTY_FORM: LabelForm = {
   recipientName: '', phone: '', alternatePhone: '', address: '', city: '', district: '', postalCode: '',
   deliveryNotes: '', orderNumber: '', courierService: '', deliveryDate: '', deliveryTime: '',
-  urgent: false, fragile: false, handleWithCare: false, thisSideUp: false, keepDry: false, labelSize: 'standard',
+  urgent: false, handlingArtwork: false, labelSize: 'standard',
 };
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -73,21 +73,15 @@ function deliverySchedule(dateValue: string, timeValue: string) {
   return { sinhalaDate, englishDate, time24: timeValue, englishTime };
 }
 
-function LabelPreview({ form, sender, qrUrl, showQr, showBarcode, handlingImages }: {
+function LabelPreview({ form, sender, qrUrl, showQr, showBarcode, handlingArtworkImage }: {
   form: LabelForm;
   sender: { name: string; phone: string; whatsapp: string; address: string; website: string; logo: string; footer: string };
   qrUrl: string; showQr: boolean; showBarcode: boolean;
-  handlingImages: Record<'fragile' | 'handleWithCare' | 'thisSideUp' | 'keepDry', string>;
+  handlingArtworkImage: string;
 }) {
   const isA5 = form.labelSize === 'a5';
   const width = isA5 ? 559 : 378;
   const height = isA5 ? 794 : 560;
-  const marks = [
-    form.fragile && { key: 'fragile', icon: '♢', label: 'FRAGILE', image: handlingImages.fragile },
-    form.handleWithCare && { key: 'handleWithCare', icon: '✋', label: 'HANDLE WITH CARE', image: handlingImages.handleWithCare },
-    form.thisSideUp && { key: 'thisSideUp', icon: '↑', label: 'THIS SIDE UP', image: handlingImages.thisSideUp },
-    form.keepDry && { key: 'keepDry', icon: '☂', label: 'KEEP DRY', image: handlingImages.keepDry },
-  ].filter(Boolean) as Array<{ key: string; icon: string; label: string; image: string }>;
   const schedule = deliverySchedule(form.deliveryDate, form.deliveryTime);
   const detailFont = isA5 ? 17 : 14;
   return (
@@ -101,7 +95,7 @@ function LabelPreview({ form, sender, qrUrl, showQr, showBarcode, handlingImages
         <div style={{ flex: '0 0 auto', textAlign: 'right' }}><div style={{ color: '#7e6b84', fontSize: 7, fontWeight: 900, letterSpacing: 1.2 }}>ORDER NUMBER</div><div style={{ marginTop: 4, fontFamily: 'monospace', fontSize: isA5 ? 13 : 10, fontWeight: 900 }}>{form.orderNumber || 'NOT LINKED'}</div></div>
       </header>
       {form.urgent && <div style={{ padding: isA5 ? '8px 20px' : '6px 15px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, flex: '0 0 auto', background: '#e21f2f', color: '#fff', fontSize: isA5 ? 15 : 11, fontWeight: 950, letterSpacing: 1.4, textAlign: 'center' }}><span style={{ fontSize: isA5 ? 19 : 14 }}>⚡</span> URGENT DELIVERY</div>}
-      {marks.length > 0 && <div style={{ padding: isA5 ? '11px 20px' : '8px 15px', display: 'grid', gridTemplateColumns: `repeat(${Math.min(marks.length, 4)}, minmax(0, 1fr))`, gap: isA5 ? 8 : 5, flex: '0 0 auto', borderBottom: '1px solid #eadff0', background: '#fff' }}>{marks.map((mark) => mark.image ? <div key={mark.key} style={{ minWidth: 0, height: isA5 ? 72 : 50, display: 'grid', placeItems: 'center', overflow: 'hidden', background: '#fff' }}><img crossOrigin="anonymous" src={mark.image} alt={mark.label} style={{ width: '100%', height: '100%', display: 'block', objectFit: 'contain' }} /></div> : <div key={mark.key} style={{ minWidth: 0, minHeight: isA5 ? 60 : 43, padding: isA5 ? '7px 4px' : '5px 2px', display: 'grid', alignContent: 'center', justifyItems: 'center', gap: 3, border: '2px solid #e21f2f', borderRadius: 8, background: '#fff', color: '#d51d2c', textAlign: 'center' }}><span style={{ fontSize: isA5 ? 22 : 16, lineHeight: 1, fontWeight: 900 }}>{mark.icon}</span><span style={{ fontSize: isA5 ? 7.5 : 5.5, lineHeight: 1.1, fontWeight: 950, letterSpacing: .35, overflowWrap: 'anywhere' }}>{mark.label}</span></div>)}</div>}
+      {form.handlingArtwork && handlingArtworkImage && <div style={{ height: isA5 ? 86 : 60, padding: isA5 ? '8px 20px' : '6px 15px', flex: '0 0 auto', overflow: 'hidden', borderBottom: '1px solid #eadff0', background: '#fff' }}><img crossOrigin="anonymous" src={handlingArtworkImage} alt="Handling instructions" style={{ width: '100%', height: '100%', display: 'block', objectFit: 'contain' }} /></div>}
       <main style={{ padding: isA5 ? '18px 20px 14px' : '13px 15px 10px', flex: '1 1 auto', minHeight: 0 }}>
         <div style={{ padding: isA5 ? '13px 14px 16px' : '10px 11px 12px', border: '2px solid #4c2370', borderRadius: 10, background: '#fcf8fd' }}>
           <div style={{ color: '#8a768f', fontSize: 8, fontWeight: 900, lineHeight: 1.25, letterSpacing: 1.4 }}>DELIVER TO</div>
@@ -239,18 +233,18 @@ export default function ShippingLabels() {
     }
   }
   function handleClear() { setForm({ ...EMPTY_FORM, labelSize: labelSettings.defaultSize || 'standard' }); setOrderQuery(''); setLookupPhone(''); setSelectedOrderId(null); setClientId(null); setDetailsSaved(false); setQrUrl(''); autoLoaded.current = true; }
-  async function uploadHandlingImage(key: 'fragileImageUrl' | 'handleWithCareImageUrl' | 'thisSideUpImageUrl' | 'keepDryImageUrl', file: File) {
+  async function uploadHandlingImage(file: File) {
     if (!/^image\/(png|jpe?g)$/i.test(file.type)) {
       toast({ title: 'PNG or JPG required', description: 'Please choose a PNG, JPG or JPEG image.', variant: 'destructive' });
       return;
     }
-    setUploadingMark(key);
+    setUploadingMark('handlingArtworkImageUrl');
     try {
       const body = new FormData(); body.append('file', file);
       const response = await fetch('/api/settings/upload-image', { method: 'POST', credentials: 'include', body });
       if (!response.ok) throw new Error('Upload failed');
       const data = await response.json();
-      setLabelSettings((current) => ({ ...current, [key]: data.url }));
+      setLabelSettings((current) => ({ ...current, handlingArtworkImageUrl: data.url }));
       toast({ title: 'Artwork uploaded', description: 'Click Save artwork to keep this image.' });
     } catch (error: any) {
       toast({ title: 'Artwork upload failed', description: error.message, variant: 'destructive' });
@@ -259,17 +253,9 @@ export default function ShippingLabels() {
 
   const inputClass = 'h-11 rounded-xl border-slate-200 bg-white px-3 text-sm font-semibold text-slate-800 shadow-sm focus-visible:border-violet-300 focus-visible:ring-violet-100';
   const handling = [
-    { key: 'urgent', label: 'Urgent', Icon: Zap }, { key: 'fragile', label: 'Fragile', Icon: AlertTriangle },
-    { key: 'handleWithCare', label: 'Handle with care', Icon: ShieldCheck }, { key: 'thisSideUp', label: 'This side up', Icon: ArrowUp },
-    { key: 'keepDry', label: 'Keep dry', Icon: Droplets },
+    { key: 'urgent', label: 'Urgent', Icon: Zap, disabled: false },
+    { key: 'handlingArtwork', label: 'Handling artwork', Icon: FileImage, disabled: !labelSettings.handlingArtworkImageUrl },
   ] as const;
-  const handlingArtwork = [
-    { key: 'fragileImageUrl', label: 'Fragile', value: labelSettings.fragileImageUrl || '' },
-    { key: 'handleWithCareImageUrl', label: 'Handle with care', value: labelSettings.handleWithCareImageUrl || '' },
-    { key: 'thisSideUpImageUrl', label: 'This side up', value: labelSettings.thisSideUpImageUrl || '' },
-    { key: 'keepDryImageUrl', label: 'Keep dry', value: labelSettings.keepDryImageUrl || '' },
-  ] as const;
-  const handlingImages = { fragile: labelSettings.fragileImageUrl || '', handleWithCare: labelSettings.handleWithCareImageUrl || '', thisSideUp: labelSettings.thisSideUpImageUrl || '', keepDry: labelSettings.keepDryImageUrl || '' };
 
   return (
     <div className="space-y-6 pb-12 animate-in fade-in slide-in-from-bottom-3">
@@ -295,10 +281,10 @@ export default function ShippingLabels() {
             <div className="mb-5 flex items-center gap-3"><div className="grid h-10 w-10 place-items-center rounded-2xl bg-emerald-50 text-emerald-700"><Package2 className="h-4 w-4" /></div><div><h2 className="font-black text-slate-900">Label and handling</h2><p className="text-xs text-slate-500">Choose paper size, courier marks and delivery schedule.</p></div></div>
             <div className="grid grid-cols-2 gap-2 rounded-2xl bg-slate-50 p-1.5"><button type="button" onClick={() => setForm((current) => ({ ...current, labelSize: 'standard' }))} className={`rounded-xl px-3 py-3 text-xs font-black ${form.labelSize === 'standard' ? 'bg-white text-violet-700 shadow-sm ring-1 ring-violet-100' : 'text-slate-500'}`}>Standard · 10×14.8 cm</button><button type="button" onClick={() => setForm((current) => ({ ...current, labelSize: 'a5' }))} className={`rounded-xl px-3 py-3 text-xs font-black ${form.labelSize === 'a5' ? 'bg-white text-violet-700 shadow-sm ring-1 ring-violet-100' : 'text-slate-500'}`}>Large · A5</button></div>
             <div className="mt-4 grid gap-4 sm:grid-cols-2"><Field label="Order / invoice number"><Input value={form.orderNumber} onChange={(event) => setForm((current) => ({ ...current, orderNumber: event.target.value }))} placeholder="ORD-12345" className={inputClass} /></Field><div className="flex items-end"><Button type="button" variant="outline" onClick={() => form.orderNumber && tokenMut.mutate(form.orderNumber)} disabled={!form.orderNumber || tokenMut.isPending} className="h-11 w-full rounded-xl border-violet-200 bg-violet-50 text-violet-700"><ShieldCheck className="mr-2 h-4 w-4" /> {qrUrl ? 'Refresh verification code' : 'Create secure verification'}</Button></div></div>
-            <div className="mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">{handling.map(({ key, label, Icon }) => <button key={key} type="button" onClick={() => setForm((current) => ({ ...current, [key]: !current[key] }))} aria-pressed={form[key]} className={`flex min-h-12 items-center gap-2 rounded-2xl border px-3 text-left text-xs font-black transition ${form[key] ? 'border-violet-200 bg-violet-50 text-violet-700 shadow-sm' : 'border-slate-200 bg-white text-slate-500 hover:border-violet-200'}`}><Icon className="h-4 w-4" /> {label}<span className={`ml-auto h-4 w-4 rounded-full border ${form[key] ? 'border-violet-600 bg-violet-600 shadow-[inset_0_0_0_3px_white]' : 'border-slate-300'}`} /></button>)}</div>
+            <div className="mt-5 grid gap-2 sm:grid-cols-2">{handling.map(({ key, label, Icon, disabled }) => <button key={key} type="button" disabled={disabled} onClick={() => setForm((current) => ({ ...current, [key]: !current[key] }))} aria-pressed={form[key]} className={`flex min-h-12 items-center gap-2 rounded-2xl border px-3 text-left text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-45 ${form[key] ? 'border-violet-200 bg-violet-50 text-violet-700 shadow-sm' : 'border-slate-200 bg-white text-slate-500 hover:border-violet-200'}`}><Icon className="h-4 w-4" /> <span>{label}{disabled && <small className="mt-0.5 block text-[9px] font-semibold">Upload and save artwork first</small>}</span><span className={`ml-auto h-4 w-4 rounded-full border ${form[key] ? 'border-violet-600 bg-violet-600 shadow-[inset_0_0_0_3px_white]' : 'border-slate-300'}`} /></button>)}</div>
             <div className="mt-5 rounded-2xl border border-violet-100 bg-violet-50/35 p-4">
-              <div className="flex flex-wrap items-start justify-between gap-3"><div><div className="flex items-center gap-2 text-sm font-black text-slate-800"><FileImage className="h-4 w-4 text-violet-600" /> Handling artwork</div><p className="mt-1 text-xs text-slate-500">Upload a PNG or JPG for each handling mark. Urgent keeps its current red design.</p><p className="mt-2 rounded-xl border border-violet-100 bg-white px-3 py-2 text-[11px] font-semibold leading-5 text-violet-700"><b>Recommended size:</b> 800 × 500 px (8:5 ratio) · PNG/JPG · white or transparent background · keep a small safe margin around the artwork.</p></div><Button type="button" size="sm" onClick={() => saveLabelSettingsMut.mutate(labelSettings)} disabled={saveLabelSettingsMut.isPending || !!uploadingMark} className="rounded-xl bg-violet-700 text-white"><Save className="mr-1.5 h-3.5 w-3.5" /> Save artwork</Button></div>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">{handlingArtwork.map((item) => <div key={item.key} className="rounded-2xl border border-violet-100 bg-white p-3"><div className="mb-2 flex items-center justify-between gap-2"><span><span className="block text-xs font-black text-slate-700">{item.label}</span><span className="mt-0.5 block text-[9px] font-bold text-slate-400">800 × 500 px</span></span>{item.value && <button type="button" aria-label={`Remove ${item.label} image`} onClick={() => setLabelSettings((current) => ({ ...current, [item.key]: '' }))} className="grid h-7 w-7 place-items-center rounded-full text-slate-400 hover:bg-red-50 hover:text-red-500"><X className="h-3.5 w-3.5" /></button>}</div><label className="grid min-h-24 cursor-pointer place-items-center overflow-hidden rounded-xl border border-dashed border-violet-200 bg-violet-50/40 text-center transition hover:border-violet-400">{item.value ? <img crossOrigin="anonymous" src={item.value} alt={`${item.label} artwork`} className="h-24 w-full object-contain p-2" /> : <span className="grid justify-items-center gap-1 p-3 text-[10px] font-bold text-violet-600"><Upload className="h-5 w-5" />{uploadingMark === item.key ? 'Uploading…' : 'Upload PNG / JPG'}<small className="font-semibold text-slate-400">800 × 500 px</small></span>}<input type="file" accept="image/png,image/jpeg" className="hidden" disabled={!!uploadingMark} onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadHandlingImage(item.key, file); event.currentTarget.value = ''; }} /></label></div>)}</div>
+              <div className="flex flex-wrap items-start justify-between gap-3"><div><div className="flex items-center gap-2 text-sm font-black text-slate-800"><FileImage className="h-4 w-4 text-violet-600" /> Combined handling artwork</div><p className="mt-1 text-xs text-slate-500">Upload one image containing Fragile, Handle with Care, This Side Up and Keep Dry. Urgent keeps its current red design.</p><p className="mt-2 rounded-xl border border-violet-100 bg-white px-3 py-2 text-[11px] font-semibold leading-5 text-violet-700"><b>Recommended size:</b> 1200 × 300 px (4:1 ratio) · PNG/JPG · white or transparent background · keep a small safe margin around the artwork.</p></div><Button type="button" size="sm" onClick={() => saveLabelSettingsMut.mutate(labelSettings)} disabled={saveLabelSettingsMut.isPending || !!uploadingMark} className="rounded-xl bg-violet-700 text-white"><Save className="mr-1.5 h-3.5 w-3.5" /> Save artwork</Button></div>
+              <div className="mt-4 rounded-2xl border border-violet-100 bg-white p-3"><div className="mb-2 flex items-center justify-between gap-2"><span><span className="block text-xs font-black text-slate-700">Fragile & handling marks</span><span className="mt-0.5 block text-[9px] font-bold text-slate-400">1200 × 300 px</span></span>{labelSettings.handlingArtworkImageUrl && <button type="button" aria-label="Remove handling artwork" onClick={() => { setLabelSettings((current) => ({ ...current, handlingArtworkImageUrl: '' })); setForm((current) => ({ ...current, handlingArtwork: false })); }} className="grid h-7 w-7 place-items-center rounded-full text-slate-400 hover:bg-red-50 hover:text-red-500"><X className="h-3.5 w-3.5" /></button>}</div><label className="grid min-h-28 cursor-pointer place-items-center overflow-hidden rounded-xl border border-dashed border-violet-200 bg-violet-50/40 text-center transition hover:border-violet-400">{labelSettings.handlingArtworkImageUrl ? <img crossOrigin="anonymous" src={labelSettings.handlingArtworkImageUrl} alt="Combined handling artwork" className="h-28 w-full object-contain p-2" /> : <span className="grid justify-items-center gap-1 p-3 text-[10px] font-bold text-violet-600"><Upload className="h-5 w-5" />{uploadingMark ? 'Uploading…' : 'Upload combined PNG / JPG'}<small className="font-semibold text-slate-400">1200 × 300 px</small></span>}<input type="file" accept="image/png,image/jpeg" className="hidden" disabled={!!uploadingMark} onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadHandlingImage(file); event.currentTarget.value = ''; }} /></label></div>
             </div>
             <div className="mt-5 rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/80 to-violet-50/50 p-4"><div className="mb-3 flex items-center gap-2 text-sm font-black text-slate-800"><CalendarDays className="h-4 w-4 text-blue-600" /> Delivery schedule</div><div className="grid gap-3 sm:grid-cols-2"><Field label="Delivery date"><Input type="date" value={form.deliveryDate} onChange={(event) => setForm((current) => ({ ...current, deliveryDate: event.target.value }))} className={inputClass} /></Field><Field label="Delivery time"><Input type="time" value={form.deliveryTime} onChange={(event) => setForm((current) => ({ ...current, deliveryTime: event.target.value }))} className={inputClass} /></Field></div></div>
             <Field label="Other delivery notes" className="mt-4"><textarea value={form.deliveryNotes} onChange={(event) => setForm((current) => ({ ...current, deliveryNotes: event.target.value }))} rows={3} placeholder="Gate, landmark or courier instruction" className="resize-none rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold outline-none focus:border-violet-300 focus:ring-2 focus:ring-violet-100" /></Field>
@@ -308,7 +294,7 @@ export default function ShippingLabels() {
         <section aria-label="Live print preview" className="space-y-4 2xl:sticky 2xl:top-24 2xl:self-start">
           <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
             <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-4"><div><div className="text-[10px] font-black uppercase tracking-[.16em] text-violet-600">Live print preview</div><div className="mt-1 text-xs text-slate-500">{form.labelSize === 'a5' ? 'A5 · 14.8 × 21 cm' : 'Standard · 10 × 14.8 cm'}</div></div>{selectedOrderId && <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-[10px] font-black text-emerald-700">ORDER LINKED</span>}</div>
-            <div className="mt-4 overflow-auto rounded-2xl border border-slate-200 bg-[#f7f7f8] p-4 shadow-inner sm:p-7"><div className="mx-auto w-max"><LabelPreview form={form} sender={sender} qrUrl={qrUrl} showQr={labelSettings.showQr !== false} showBarcode={labelSettings.showBarcode !== false} handlingImages={handlingImages} /></div></div>
+            <div className="mt-4 overflow-auto rounded-2xl border border-slate-200 bg-[#f7f7f8] p-4 shadow-inner sm:p-7"><div className="mx-auto w-max"><LabelPreview form={form} sender={sender} qrUrl={qrUrl} showQr={labelSettings.showQr !== false} showBarcode={labelSettings.showBarcode !== false} handlingArtworkImage={labelSettings.handlingArtworkImageUrl || ''} /></div></div>
           </div>
           <div className="grid gap-2 sm:grid-cols-2"><Button type="button" variant="outline" onClick={() => void handleDownload()} disabled={missingRequired} className="h-12 rounded-2xl border-violet-200 bg-white font-black text-violet-700"><Download className="mr-2 h-4 w-4" /> Download JPG</Button><Button type="button" onClick={handlePrint} disabled={missingRequired} className="h-12 rounded-2xl bg-gradient-to-r from-violet-700 to-fuchsia-700 font-black text-white"><Printer className="mr-2 h-4 w-4" /> Print Label</Button></div>
           <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500"><div className="flex gap-2"><FileText className="mt-0.5 h-4 w-4 shrink-0 text-violet-500" /><span>For exact printing, disable browser headers and footers and keep scale at 100%. JPG uses the same preview without browser-added date, title or URL.</span></div></div>
