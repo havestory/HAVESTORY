@@ -189,7 +189,7 @@ export default function Home() {
         <Heading eyebrow="01 / Choose your story" title="Find the right way to frame it." copy="Start with the feeling. We will help with every material, crop and finish after that." />
         <div className="hs-new-category-grid">
           {categories.map((item, index) => <motion.article key={`${item.title}-${index}`} className={`hs-new-category hs-new-category-${item.tone}`} initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.18 }} transition={{ delay: index * 0.08 }}>
-            <Link href={item.href || "/store"}><div className="hs-new-category-copy"><span>0{index + 1}</span><h3>{item.title}</h3><p>{item.copy}</p><b>Explore <ArrowRight size={15} /></b></div><img src={item.image} alt={item.title} loading="lazy" /></Link>
+            <Link href={item.href || "/store"}><div className="hs-new-category-copy"><span>0{index + 1}</span><h3>{item.title}</h3><p>{item.copy}</p><b>Explore <ArrowRight size={15} /></b></div><img src={item.image} alt={item.title} loading="lazy" decoding="async" /></Link>
           </motion.article>)}
         </div>
       </section>
