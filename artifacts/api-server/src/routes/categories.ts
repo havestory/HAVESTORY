@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { categoriesTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
-import { requireAdmin } from "../lib/auth-cookie";
+import { getAdminAuth, requireAdmin } from "../lib/auth-cookie";
 import { parseIdParam } from "../lib/parse-id";
 
 const router = Router();
@@ -10,6 +10,7 @@ const router = Router();
 router.get("/", async (req, res) => {
   try {
     const categories = await db.select().from(categoriesTable).orderBy(categoriesTable.sortOrder);
+    res.setHeader("Cache-Control", getAdminAuth(req) ? "private, no-store" : "public, s-maxage=60, stale-while-revalidate=300");
     res.json(categories);
   } catch (err) {
     req.log.error(err);
