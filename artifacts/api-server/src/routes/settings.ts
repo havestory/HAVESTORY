@@ -69,6 +69,7 @@ router.get("/", async (req, res) => {
   try {
     const settings = await getOrCreateSettings();
     if (getAdminAuth(req)) {
+      res.setHeader("Cache-Control", "private, no-store");
       return res.json(settings);
     }
 
@@ -83,6 +84,7 @@ router.get("/", async (req, res) => {
       financeReportEmailRecipient: _financeReportEmailRecipient,
       ...publicSettings
     } = settings;
+    res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
     return res.json(publicSettings);
   } catch (err) {
     req.log.error(err);
