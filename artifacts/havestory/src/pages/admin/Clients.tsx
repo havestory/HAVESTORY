@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useDeferredValue } from "react";
 import { useLocation } from "wouter";
 import { useCreateClient, useUpdateClient, useDeleteClient, useGetAdminMe, useGetSettings } from "@workspace/api-client-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -27,6 +27,15 @@ type ClientSummary = Client & {
   invoiceCount: number;
   invoiced: number;
   paid: number;
+};
+
+type ClientSummaryPage = {
+  items: ClientSummary[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  stats: { total: number; withBusiness: number; withEmail: number; withPhone: number };
 };
 
 type CrmProject = {
@@ -315,6 +324,8 @@ export default function AdminClients() {
   const businessName = getBusinessName(settings as any);
   const agreementTemplates = useMemo(() => buildAgreementTemplates(businessName), [businessName]);
   const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search.trim());
+  const [page, setPage] = useState(1);
   const [showAdd, setShowAdd] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
@@ -338,13 +349,15 @@ export default function AdminClients() {
   const { data: admin } = useGetAdminMe({ query: { staleTime: 5 * 60_000, retry: false, refetchOnWindowFocus: false } as any });
   const isOwner = Boolean(admin && admin.role !== "staff");
   const {
-    data: clients = [],
+    data: clientPage,
     refetch,
     isFetching,
-  } = useQuery<ClientSummary[]>({
-    queryKey: ["/api/clients/summary"],
+  } = useQuery<ClientSummaryPage>({
+    queryKey: ["/api/clients/summary", page, deferredSearch],
     queryFn: async () => {
-      const response = await fetch("/api/clients/summary", { credentials: "include" });
+      const params = new URLSearchParams({ page: String(page), pageSize: "30" });
+      if (deferredSearch) params.set("search", deferredSearch);
+      const response = await fetch(`/api/clients/summary?${params}`, { credentials: "include" });
       if (!response.ok) throw new Error("Failed to fetch client summaries");
       return response.json();
     },
@@ -353,6 +366,8 @@ export default function AdminClients() {
     refetchOnWindowFocus: false,
     placeholderData: (previous) => previous,
   });
+  const clients = clientPage?.items || [];
+  useEffect(() => { setPage(1); }, [deferredSearch]);
 
   const { data: activityData, isFetching: activityLoading } = useQuery<{ projects: CrmProject[]; invoices: InvoiceLite[] }>({
     queryKey: ["/api/clients", viewingClient?.id, "activity"],
@@ -511,9 +526,12 @@ export default function AdminClients() {
     } } as any);
   };
 
-  const exportCsv = () => {
+  const exportCsv = async () => {
+    const response = await fetch("/api/clients/export", { credentials: "include" });
+    if (!response.ok) return;
+    const exportClients = await response.json() as Client[];
     const header = ["Client ID", "Full Name", "Business Name", "Phones", "Email", "Address", "Notes", "Added"];
-    const rows = [header, ...clients.map(c => [
+    const rows = [header, ...exportClients.map(c => [
       clientCode(c),
       c.name,
       c.businessName || "",
@@ -523,28 +541,21 @@ export default function AdminClients() {
       c.notes || "",
       c.createdAt ? format(new Date(c.createdAt), "yyyy-MM-dd") : "",
     ])];
-    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const csvSafe = (value: unknown) => {
+      const text = String(value ?? "");
+      return /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
+    };
+    const csv = rows.map(r => r.map(v => `"${csvSafe(v).replace(/"/g, '""')}"`).join(",")).join("\n");
     const a = document.createElement("a");
     a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
     a.download = "clients.csv";
     a.click();
   };
 
-  const filtered = clients.filter(c => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return (
-      c.name?.toLowerCase().includes(q) ||
-      c.businessName?.toLowerCase().includes(q) ||
-      c.phone?.includes(q) ||
-      c.email?.toLowerCase().includes(q) ||
-      clientCode(c).toLowerCase().includes(q)
-    );
-  });
-
-  const withBusiness = clients.filter(c => c.businessName).length;
-  const withEmail = clients.filter(c => c.email).length;
-  const withPhone = clients.filter(c => c.phone).length;
+  const filtered = clients;
+  const withBusiness = clientPage?.stats.withBusiness || 0;
+  const withEmail = clientPage?.stats.withEmail || 0;
+  const withPhone = clientPage?.stats.withPhone || 0;
 
   const isSpinning = refreshing || isFetching;
 
@@ -581,7 +592,7 @@ export default function AdminClients() {
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
-          { label: "Total Clients", val: clients.length, color: "from-amber-500 to-stone-600" },
+          { label: "Total Clients", val: clientPage?.stats.total || 0, color: "from-amber-500 to-stone-600" },
           { label: "With Business", val: withBusiness, color: "from-stone-500 to-blue-500" },
           { label: "With Email", val: withEmail, color: "from-blue-500 to-cyan-500" },
           { label: "With Phone", val: withPhone, color: "from-orange-400 to-amber-500" },
@@ -608,7 +619,7 @@ export default function AdminClients() {
               <X size={14} />
             </button>
           )}
-          <span className="text-[10px] sm:text-xs text-gray-400 shrink-0">{filtered.length} of {clients.length}</span>
+          <span className="text-[10px] sm:text-xs text-gray-400 shrink-0">{clientPage?.total || 0} found</span>
         </div>
       </div>
 
@@ -742,6 +753,14 @@ export default function AdminClients() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {(clientPage?.totalPages || 1) > 1 && (
+        <div className="flex items-center justify-center gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3 shadow-sm">
+          <button type="button" disabled={page <= 1 || isFetching} onClick={() => setPage(value => Math.max(1, value - 1))} className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-bold text-gray-600 disabled:opacity-40">Previous</button>
+          <span className="text-xs font-semibold text-gray-500">Page {clientPage?.page || page} of {clientPage?.totalPages || 1}</span>
+          <button type="button" disabled={page >= (clientPage?.totalPages || 1) || isFetching} onClick={() => setPage(value => value + 1)} className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-bold text-gray-600 disabled:opacity-40">Next</button>
         </div>
       )}
 
