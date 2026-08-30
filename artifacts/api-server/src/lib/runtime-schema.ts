@@ -1,6 +1,6 @@
 import { pool } from "@workspace/db";
 
-const SCHEMA_VERSION = "2026-08-24-checkout-order-sequence-v6";
+const SCHEMA_VERSION = "2026-08-30-client-scale-indexes-v7";
 let runtimeSchemaReady: Promise<void> | null = null;
 
 function runtimeSlugify(value: unknown): string {
@@ -398,6 +398,9 @@ async function applyRuntimeSchema(): Promise<void> {
         ADD COLUMN IF NOT EXISTS hero_avatar_image3 TEXT,
         ADD COLUMN IF NOT EXISTS hero_avatar_image4 TEXT,
         ADD COLUMN IF NOT EXISTS designer_credit TEXT NOT NULL DEFAULT 'HAVESTORY',
+        ADD COLUMN IF NOT EXISTS footer_copyright_text TEXT NOT NULL DEFAULT '© 2026 HAVESTORY',
+        ADD COLUMN IF NOT EXISTS footer_developer_credit TEXT NOT NULL DEFAULT 'Designed & Built by CODEARTIX',
+        ADD COLUMN IF NOT EXISTS footer_developer_url TEXT,
         ADD COLUMN IF NOT EXISTS owner_name TEXT,
         ADD COLUMN IF NOT EXISTS logo_url TEXT,
         ADD COLUMN IF NOT EXISTS tiktok_url TEXT,
@@ -476,6 +479,10 @@ async function applyRuntimeSchema(): Promise<void> {
       CREATE INDEX IF NOT EXISTS idx_invoices_created_at_active ON invoices(created_at DESC) WHERE deleted_at IS NULL;
       CREATE INDEX IF NOT EXISTS idx_invoices_status_created ON invoices(status, created_at DESC) WHERE deleted_at IS NULL;
       CREATE INDEX IF NOT EXISTS idx_clients_created_at_active ON clients(created_at DESC) WHERE deleted_at IS NULL;
+      CREATE INDEX IF NOT EXISTS idx_invoices_client_created ON invoices(client_id, created_at DESC) WHERE deleted_at IS NULL;
+      CREATE INDEX IF NOT EXISTS idx_invoices_legacy_name ON invoices(LOWER(BTRIM(client_name))) WHERE deleted_at IS NULL AND client_id IS NULL;
+      CREATE INDEX IF NOT EXISTS idx_crm_projects_client_created ON crm_projects(client_id, created_at DESC) WHERE deleted_at IS NULL;
+      CREATE INDEX IF NOT EXISTS idx_crm_projects_legacy_name ON crm_projects(LOWER(BTRIM(client_name))) WHERE deleted_at IS NULL AND client_id IS NULL;
     `);
 
     // Backfill readable links for products created before slug persistence was introduced.

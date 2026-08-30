@@ -206,6 +206,7 @@ router.get("/", async (req, res) => {
       }
     }
 
+    res.setHeader("Cache-Control", getAdminAuth(req) ? "private, no-store" : "public, s-maxage=60, stale-while-revalidate=300");
     res.json(products.map((p) => serializeProduct(p, p.category)));
   } catch (err) {
     req.log.error(err);

@@ -31,6 +31,7 @@ router.get("/", async (req, res) => {
       .orderBy(servicesTable.sortOrder);
     const categories = await db.select().from(serviceCategoriesTable).orderBy(serviceCategoriesTable.sortOrder);
     const catMap = Object.fromEntries(categories.map(c => [c.id, c.name]));
+    res.setHeader("Cache-Control", getAdminAuth(req) ? "private, no-store" : "public, s-maxage=60, stale-while-revalidate=300");
     res.json(services.map(s => ({
       ...s,
       highlights: parseHighlights(s.highlights),

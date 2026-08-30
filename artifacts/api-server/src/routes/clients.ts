@@ -39,24 +39,29 @@ router.get("/", async (req, res) => {
 // the browser. Keep the card payload bounded to one row per client instead.
 router.get("/summary", async (req, res) => {
   try {
-    const { rows } = await pool.query(`
+    const page = Math.max(1, Math.floor(Number(req.query.page) || 1));
+    const pageSize = Math.min(60, Math.max(12, Math.floor(Number(req.query.pageSize) || 30)));
+    const search = String(req.query.search || "").trim().slice(0, 100);
+    const searchPattern = `%${search.replace(/[\\%_]/g, "\\$&")}%`;
+    const offset = (page - 1) * pageSize;
+    const whereSearch = search
+      ? `AND (c.name ILIKE $1 ESCAPE '\\' OR COALESCE(c.business_name,'') ILIKE $1 ESCAPE '\\' OR COALESCE(c.email,'') ILIKE $1 ESCAPE '\\' OR COALESCE(c.phone,'') ILIKE $1 ESCAPE '\\' OR ('C' || LPAD(c.id::text,4,'0')) ILIKE $1 ESCAPE '\\')`
+      : "";
+
+    const [pageResult, countResult, statsResult] = await Promise.all([
+      pool.query(`
       SELECT c.id,c.name,c.business_name,c.email,c.phone,c.address,c.notes,c.approved,c.created_at,c.updated_at,
         COALESCE(p.project_count,0)::int AS project_count,
         COALESCE(i.invoice_count,0)::int AS invoice_count,
         COALESCE(i.invoiced,0)::numeric AS invoiced,
         COALESCE(i.paid,0)::numeric AS paid
       FROM clients c
-      LEFT JOIN (
-        SELECT c2.id,COUNT(DISTINCT p.id) AS project_count
-        FROM clients c2
-        LEFT JOIN crm_projects p ON p.deleted_at IS NULL AND (
-          p.client_id=c2.id OR (p.client_id IS NULL AND LOWER(BTRIM(p.client_name))=LOWER(BTRIM(c2.name)))
-        )
-        WHERE c2.deleted_at IS NULL
-        GROUP BY c2.id
-      ) p ON p.id=c.id
-      LEFT JOIN (
-        SELECT c3.id,
+      LEFT JOIN LATERAL (
+        SELECT COUNT(*) AS project_count FROM crm_projects p
+        WHERE p.deleted_at IS NULL AND (p.client_id=c.id OR (p.client_id IS NULL AND LOWER(BTRIM(p.client_name))=LOWER(BTRIM(c.name))))
+      ) p ON TRUE
+      LEFT JOIN LATERAL (
+        SELECT
           COUNT(DISTINCT inv.id) AS invoice_count,
           COALESCE(SUM(COALESCE(NULLIF(REGEXP_REPLACE(inv.amount,'[^0-9.-]','','g'),'')::numeric,0)),0) AS invoiced,
           COALESCE(SUM(CASE
@@ -68,18 +73,26 @@ router.get("/summary", async (req, res) => {
               )
             ELSE 0
           END),0) AS paid
-        FROM clients c3
-        LEFT JOIN invoices inv ON inv.deleted_at IS NULL AND (
-          inv.client_id=c3.id OR (inv.client_id IS NULL AND LOWER(BTRIM(inv.client_name))=LOWER(BTRIM(c3.name)))
-        )
-        WHERE c3.deleted_at IS NULL
-        GROUP BY c3.id
-      ) i ON i.id=c.id
+        FROM invoices inv
+        WHERE inv.deleted_at IS NULL AND (inv.client_id=c.id OR (inv.client_id IS NULL AND LOWER(BTRIM(inv.client_name))=LOWER(BTRIM(c.name))))
+      ) i ON TRUE
       WHERE c.deleted_at IS NULL
-      ORDER BY c.created_at ASC
-    `);
+      ${whereSearch}
+      ORDER BY c.created_at DESC
+      LIMIT $${search ? 2 : 1} OFFSET $${search ? 3 : 2}
+    `, search ? [searchPattern, pageSize, offset] : [pageSize, offset]),
+      pool.query(`SELECT COUNT(*)::int AS total FROM clients c WHERE c.deleted_at IS NULL ${whereSearch}`, search ? [searchPattern] : []),
+      pool.query(`SELECT COUNT(*)::int AS total,
+        COUNT(*) FILTER (WHERE NULLIF(BTRIM(business_name),'') IS NOT NULL)::int AS with_business,
+        COUNT(*) FILTER (WHERE NULLIF(BTRIM(email),'') IS NOT NULL)::int AS with_email,
+        COUNT(*) FILTER (WHERE NULLIF(BTRIM(phone),'') IS NOT NULL)::int AS with_phone
+        FROM clients WHERE deleted_at IS NULL`),
+    ]);
+    const rows = pageResult.rows;
+    const total = Number(countResult.rows[0]?.total) || 0;
+    const globalStats = statsResult.rows[0] || {};
     res.setHeader("Cache-Control", "private, max-age=15, stale-while-revalidate=30");
-    res.json(rows.map((row: any) => ({
+    res.json({ items: rows.map((row: any) => ({
       id: row.id,
       name: row.name,
       businessName: row.business_name,
@@ -94,10 +107,33 @@ router.get("/summary", async (req, res) => {
       invoiceCount: Number(row.invoice_count) || 0,
       invoiced: Number(row.invoiced) || 0,
       paid: Number(row.paid) || 0,
-    })));
+    })), total, page, pageSize, totalPages: Math.max(1, Math.ceil(total / pageSize)), stats: {
+      total: Number(globalStats.total) || 0,
+      withBusiness: Number(globalStats.with_business) || 0,
+      withEmail: Number(globalStats.with_email) || 0,
+      withPhone: Number(globalStats.with_phone) || 0,
+    }});
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to fetch client summaries" });
+  }
+});
+
+// Export is intentionally separate from the paginated card endpoint. It is
+// only requested on demand and avoids keeping thousands of client objects in
+// the browser during normal admin use.
+router.get("/export", async (req, res) => {
+  try {
+    const { rows } = await pool.query(`SELECT id,name,business_name,email,phone,address,notes,created_at
+      FROM clients WHERE deleted_at IS NULL ORDER BY created_at DESC`);
+    res.setHeader("Cache-Control", "no-store, private");
+    res.json(rows.map((row: any) => ({
+      id: row.id, name: row.name, businessName: row.business_name, email: row.email,
+      phone: row.phone, address: row.address, notes: row.notes, createdAt: row.created_at,
+    })));
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to export clients" });
   }
 });
 

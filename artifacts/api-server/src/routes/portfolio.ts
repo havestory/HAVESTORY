@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { portfolioTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
-import { requireAdmin } from "../lib/auth-cookie";
+import { getAdminAuth, requireAdmin } from "../lib/auth-cookie";
 import { parseIdParam } from "../lib/parse-id";
 
 const router = Router();
@@ -20,6 +20,7 @@ router.get("/", async (req, res) => {
     const items = await db.select().from(portfolioTable)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(portfolioTable.createdAt);
+    res.setHeader("Cache-Control", getAdminAuth(req) ? "private, no-store" : "public, s-maxage=60, stale-while-revalidate=300");
     res.json(items.map(i => ({ ...i, galleryImages: parseArr(i.galleryImages), tags: parseArr(i.tags) })));
   } catch (err) {
     req.log.error(err);
