@@ -202,6 +202,7 @@ function SectionCard({
 export default function Orders() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [orderPage, setOrderPage] = useState(1);
   const [createOpen, setCreateOpen] = useState(false);
   const [customerMenuOpen, setCustomerMenuOpen] = useState(false);
   const [clientSearch, setClientSearch] = useState('');
@@ -237,6 +238,9 @@ export default function Orders() {
     return (orders || []).filter((order) => [order.orderId, order.customerName, order.customerPhone, order.customerEmail]
       .some((value) => String(value || '').toLowerCase().includes(query)));
   }, [orders, searchTerm]);
+  const orderPageSize = 40;
+  const orderTotalPages = Math.max(1, Math.ceil(visibleOrders.length / orderPageSize));
+  const pagedOrders = visibleOrders.slice((orderPage - 1) * orderPageSize, orderPage * orderPageSize);
 
   const stats = useMemo(() => ({
     total: orders?.length || 0,
@@ -583,7 +587,7 @@ export default function Orders() {
 
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
         {[['total', stats.total, 'Total Orders', 'text-pink-500'], ['pending', stats.pending, 'Pending', 'text-amber-500'], ['processing', stats.processing, 'Processing', 'text-violet-500'], ['completed', stats.completed, 'Completed', 'text-emerald-500']].map(([key, value, label, color]) => (
-          <button type="button" key={String(key)} onClick={() => setStatusFilter(key === 'total' ? 'all' : key === 'processing' ? 'processing' : key === 'completed' ? 'completed' : 'pending')} className="rounded-2xl border border-slate-100 bg-white p-5 text-left shadow-[0_8px_22px_rgba(40,20,80,0.05)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(40,20,80,0.08)]">
+          <button type="button" key={String(key)} onClick={() => { setStatusFilter(key === 'total' ? 'all' : key === 'processing' ? 'processing' : key === 'completed' ? 'completed' : 'pending'); setOrderPage(1); }} className="rounded-2xl border border-slate-100 bg-white p-5 text-left shadow-[0_8px_22px_rgba(40,20,80,0.05)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(40,20,80,0.08)]">
             <div className={`text-3xl font-bold ${color}`}>{String(value)}</div>
             <div className="mt-1 text-sm text-slate-400">{String(label)}</div>
           </button>
@@ -595,11 +599,11 @@ export default function Orders() {
           <div className="flex flex-col gap-4 border-b border-slate-100 p-5 lg:flex-row lg:items-center">
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <Input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search orders..." className="h-11 rounded-full border-slate-200 bg-slate-50 pl-11 shadow-none focus-visible:ring-violet-200" />
+              <Input value={searchTerm} onChange={(event) => { setSearchTerm(event.target.value); setOrderPage(1); }} placeholder="Search orders..." className="h-11 rounded-full border-slate-200 bg-slate-50 pl-11 shadow-none focus-visible:ring-violet-200" />
             </div>
             <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0">
               {['all', 'pending', 'confirmed', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'].map((status) => (
-                <button type="button" key={status} onClick={() => setStatusFilter(status)} className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${statusFilter === status ? 'bg-gradient-to-r from-pink-500 to-violet-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}>
+                <button type="button" key={status} onClick={() => { setStatusFilter(status); setOrderPage(1); }} className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${statusFilter === status ? 'bg-gradient-to-r from-pink-500 to-violet-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}>
                   {status === 'all' ? 'All' : statusLabel(status)}
                 </button>
               ))}
@@ -615,7 +619,7 @@ export default function Orders() {
               <TableBody>
                 {isLoading ? <AdminTableLoading columns={7} /> : isError ? <AdminTableError columns={7} onRetry={() => void refetch()} /> : visibleOrders.length === 0 ? (
                   <TableRow><TableCell colSpan={7} className="py-16 text-center"><AlertTriangle className="mx-auto mb-3 h-8 w-8 text-slate-300" /><p className="text-slate-400">No orders found.</p></TableCell></TableRow>
-                ) : visibleOrders.map((order) => {
+                ) : pagedOrders.map((order) => {
                   const item = orderItem(order);
                   const total = Number(orderTotalForRow(order));
                   return <TableRow key={order.id} className="border-slate-100 transition hover:bg-violet-50/20">
@@ -636,6 +640,7 @@ export default function Orders() {
               </TableBody>
             </Table>
           </div>
+          {orderTotalPages > 1 && <div className="flex items-center justify-center gap-3 border-t border-slate-100 px-5 py-4"><Button type="button" variant="outline" size="sm" disabled={orderPage <= 1} onClick={() => setOrderPage(value => Math.max(1, value - 1))} className="rounded-full">Previous</Button><span className="text-xs font-semibold text-slate-500">Page {orderPage} of {orderTotalPages} · {visibleOrders.length} orders</span><Button type="button" variant="outline" size="sm" disabled={orderPage >= orderTotalPages} onClick={() => setOrderPage(value => Math.min(orderTotalPages, value + 1))} className="rounded-full">Next</Button></div>}
         </CardContent>
       </Card>
 
