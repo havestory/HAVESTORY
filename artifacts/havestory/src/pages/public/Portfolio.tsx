@@ -60,7 +60,7 @@ export default function Portfolio() {
                 onClick={() => setSelectedIndex(index)}
                 aria-label={`Open ${item.title || 'gallery image'}`}
               >
-                {item.imageUrl ? <img src={item.imageUrl} alt={item.title || 'HAVESTORY studio work'} /> : <span className="hs-gallery-placeholder"><ImageIcon /></span>}
+                {item.imageUrl ? <img src={item.imageUrl} alt={item.title || 'HAVESTORY studio work'} loading="lazy" decoding="async" /> : <span className="hs-gallery-placeholder"><ImageIcon /></span>}
                 <span className="hs-gallery-card-overlay"><small>{item.category || 'Studio work'}</small><strong>{item.title || `Story ${index + 1}`}</strong><i><Maximize2 /> View image</i></span>
               </motion.button>
             ))}
@@ -74,7 +74,7 @@ export default function Portfolio() {
             <button type="button" className="hs-gallery-close" onClick={() => setSelectedIndex(null)} aria-label="Close image"><X /></button>
             {portfolioItems.length > 1 && <button type="button" className="hs-gallery-prev" onClick={event => { event.stopPropagation(); move(-1); }} aria-label="Previous image"><ChevronLeft /></button>}
             <motion.figure key={selected.id} initial={{ opacity: 0, scale: .96, y: 14 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: .35 }} onClick={event => event.stopPropagation()}>
-              <img src={selected.imageUrl || ''} alt={selected.title || 'HAVESTORY studio work'} />
+              <img src={selected.imageUrl || ''} alt={selected.title || 'HAVESTORY studio work'} decoding="async" />
               <figcaption><span>{selected.category || 'Studio work'}</span><strong>{selected.title || `Story ${(selectedIndex || 0) + 1}`}</strong><small>{(selectedIndex || 0) + 1} / {portfolioItems.length}</small></figcaption>
             </motion.figure>
             {portfolioItems.length > 1 && <button type="button" className="hs-gallery-next" onClick={event => { event.stopPropagation(); move(1); }} aria-label="Next image"><ChevronRight /></button>}
