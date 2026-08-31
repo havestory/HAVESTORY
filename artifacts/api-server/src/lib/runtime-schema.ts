@@ -1,6 +1,6 @@
 import { pool } from "@workspace/db";
 
-const SCHEMA_VERSION = "2026-08-30-client-scale-indexes-v7";
+const SCHEMA_VERSION = "2026-08-31-secure-tracking-tokens-v8";
 let runtimeSchemaReady: Promise<void> | null = null;
 
 function runtimeSlugify(value: unknown): string {
