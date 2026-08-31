@@ -2,6 +2,7 @@ import { type ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useGetSettings } from '@workspace/api-client-react';
 import { Menu, X, Phone, Mail, MapPin, Instagram, Facebook, ArrowRight, ShoppingBag, Sparkles, MessageCircle, ChevronDown } from 'lucide-react';
+import './public-mobile-menu.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import { applyThemeVars } from '@/lib/theme-utils';
 import { useShopCart } from '@/lib/shop-cart';
