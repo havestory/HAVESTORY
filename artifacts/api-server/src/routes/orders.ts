@@ -7,7 +7,7 @@ import { getAdminAuth, requireAdmin } from "../lib/auth-cookie";
 import { uploadToCloudinary } from "../lib/cloudinary";
 import { safeUpload, validateUploadedFile, validateUploadedFiles } from "../lib/upload-policy";
 import { normalizeCreateOrderBody } from "../lib/order-validation";
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { sendOrderNotificationEmail, sendCustomerConfirmationEmail, sendOrderCompletionEmail } from "../lib/mailer";
 import { syncInvoiceFinance } from "./finance-inventory";
 
@@ -137,7 +137,7 @@ function resolveProductLine(rawConfig: string | null | undefined, selectedOption
 
 const TRACKING_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no I,O,0,1 to avoid confusion
 
-function randomSuffix(len = 3): string {
+function randomSuffix(len = 10): string {
   let out = "";
   for (let i = 0; i < len; i++) {
     out += TRACKING_CHARS[Math.floor(Math.random() * TRACKING_CHARS.length)];
@@ -146,39 +146,28 @@ function randomSuffix(len = 3): string {
 }
 
 async function generateOrderId(): Promise<string> {
-  const now = new Date();
   const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
-  const month = months[now.getMonth()];
+  const monthNumber = Number(new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Colombo", month: "numeric" }).format(new Date()));
+  const month = months[Math.max(0, Math.min(11, monthNumber - 1))];
 
-  // The sequence is seeded from legacy order IDs during startup migration.
-  // nextval is O(1) and concurrency-safe, unlike the old full-table scan.
-  const { rows } = await pool.query<{ seq: string }>("SELECT nextval('order_number_seq') AS seq");
-  const nextSeq = Number(rows[0]?.seq) || 1;
-  const padded = String(nextSeq).padStart(4, "0");
-  // Append a 3-char random alphanumeric suffix so customers cannot enumerate
-  // adjacent order IDs and access other customers' details.
-  return `HS-${month}-${padded}-${randomSuffix()}`;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const candidate = `HS-${month}${randomSuffix(10)}`;
+    const [existing] = await db.select({ id: ordersTable.id }).from(ordersTable).where(eq(ordersTable.orderId, candidate)).limit(1);
+    if (!existing) return candidate;
+  }
+  throw new Error("Could not allocate a unique order ID");
 }
 
-function normalizedPhone(value: unknown): string {
-  const digits = String(value || "").replace(/\D/g, "");
-  return digits.length >= 9 ? digits.slice(-9) : digits;
-}
+const generateTrackingToken = () => randomBytes(24).toString("base64url");
 
 async function requireOrderAccess(req: any, res: any, next: any) {
   try {
-    const orderId = String(req.params.orderId || "");
-    const [order] = await db.select().from(ordersTable).where(eq(ordersTable.orderId, orderId));
-    if (!order) return res.status(404).json({ error: "Order not found" });
-
-    const suppliedPhone = normalizedPhone(req.get("x-order-phone"));
-    const savedPhone = normalizedPhone(order.customerPhone);
-    if (!suppliedPhone || suppliedPhone.length < 7 || suppliedPhone !== savedPhone) {
-      return res.status(403).json({ error: "Order ID and phone number do not match" });
-    }
-
+    const accessKey = String(req.params.orderId || "").slice(0, 100);
+    const [order] = await db.select().from(ordersTable).where(eq(ordersTable.trackingToken, accessKey));
+    if (!order) return res.status(404).json({ error: "Tracking link not found" });
     req.trackedOrder = order;
-    next();
+    req.trackingAccessKey = accessKey;
+    return next();
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to verify order access" });
@@ -262,7 +251,9 @@ router.get("/", requireAdmin, async (req, res) => {
       .where(and(...conditions))
       .orderBy(desc(ordersTable.createdAt));
     res.setHeader("Cache-Control", "private, max-age=15, stale-while-revalidate=30");
-    res.json(orders.map(serializeOrder));
+    const invoiceRows = orders.length ? await db.select({ orderId: invoicesTable.orderId, invoiceNumber: invoicesTable.invoiceNumber }).from(invoicesTable).where(inArray(invoicesTable.orderId, orders.map(order => order.orderId))) : [];
+    const invoiceByOrder = new Map(invoiceRows.map(row => [row.orderId, row.invoiceNumber]));
+    res.json(orders.map(order => ({ ...serializeOrder(order), invoiceNumber: invoiceByOrder.get(order.orderId) || null })));
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to fetch orders" });
@@ -413,6 +404,7 @@ router.post("/", async (req, res) => {
     }
 
     const orderId = await generateOrderId();
+    const trackingToken = generateTrackingToken();
     const statusHistory = JSON.stringify([{ status: "submitted", timestamp: new Date().toISOString(), note: "Order request submitted" }]);
 
     // ── Atomic coupon claim + order insert in a single transaction ────────────
@@ -466,6 +458,7 @@ router.post("/", async (req, res) => {
 
         return tx.insert(ordersTable).values({
           orderId,
+          trackingToken,
           customerName,
           customerPhone,
           customerEmail,
@@ -589,7 +582,7 @@ router.post("/", async (req, res) => {
             .replace(/^https?:?\/+/i, "")
             .replace(/\/+$/, "");
           const trackingUrl = website
-            ? `https://${website}/track-order?id=${encodeURIComponent(orderId)}`
+            ? `https://${website}/track-order?token=${encodeURIComponent(trackingToken)}`
             : "";
 
           await sendCustomerConfirmationEmail({
@@ -810,8 +803,8 @@ router.post("/", async (req, res) => {
 // IMPORTANT: named routes must be before /:id
 router.get("/track/:orderId", requireOrderAccess, async (req: any, res) => {
   try {
-    const orderId = String(req.params.orderId);
     const order = req.trackedOrder;
+    const orderId = order.orderId;
 
     // Look up attached invoice
     const [invoice] = await db.select().from(invoicesTable).where(eq(invoicesTable.orderId, orderId));
@@ -841,6 +834,7 @@ router.get("/track/:orderId", requireOrderAccess, async (req: any, res) => {
 
     res.json({
       orderId: order.orderId,
+      trackingToken: req.trackingAccessKey,
       customerName: order.customerName,
       status: order.status,
       estimatedCompletion: order.estimatedCompletion,
@@ -1313,7 +1307,7 @@ router.put("/:id", requireAdmin, async (req, res) => {
               .replace(/^https?:?\/+/i, "")
               .replace(/\/+$/, "");
             const trackingUrl = website
-              ? `https://${website}/track-order?id=${encodeURIComponent(order.orderId)}`
+              ? `https://${website}/track-order?token=${encodeURIComponent(order.trackingToken)}`
               : "";
 
             // Build the item payload from stored order items, including per-item notes
