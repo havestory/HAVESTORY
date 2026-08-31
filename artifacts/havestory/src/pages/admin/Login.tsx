@@ -53,7 +53,7 @@ export default function AdminLogin() {
             setStep('pin');
           } else {
             toast({ title: 'Welcome back!', description: 'Logged in successfully.' });
-            setLocation('/admin');
+            window.location.replace('/admin');
           }
         } else {
           toast({ title: 'Login failed', description: (res as any).message || 'Invalid credentials.', variant: 'destructive' });
@@ -79,7 +79,9 @@ export default function AdminLogin() {
       const data = await res.json();
       if (res.ok && data.success) {
         toast({ title: 'Welcome back!', description: 'Logged in successfully.' });
-        setLocation('/admin');
+        // Start the workspace from a fresh document so an earlier anonymous
+        // `/me` query cannot send the user back to the PIN step.
+        window.location.replace('/admin');
       } else {
         const errMsg = data?.error || data?.message || 'Incorrect PIN.';
         toast({ title: 'Incorrect PIN', description: errMsg, variant: 'destructive' });
