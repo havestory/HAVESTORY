@@ -150,7 +150,7 @@ async function applyRuntimeSchema(): Promise<void> {
         ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
 
       CREATE TABLE IF NOT EXISTS orders (
-        id SERIAL PRIMARY KEY, order_id TEXT NOT NULL UNIQUE, customer_name TEXT NOT NULL,
+        id SERIAL PRIMARY KEY, order_id TEXT NOT NULL UNIQUE, tracking_token TEXT NOT NULL UNIQUE, customer_name TEXT NOT NULL,
         customer_phone TEXT NOT NULL, customer_email TEXT, customer_address TEXT NOT NULL DEFAULT '',
         order_type TEXT NOT NULL DEFAULT 'standard', items TEXT NOT NULL DEFAULT '[]',
         design_links TEXT NOT NULL DEFAULT '[]', attachments TEXT NOT NULL DEFAULT '[]',
@@ -171,6 +171,11 @@ async function applyRuntimeSchema(): Promise<void> {
       );
       ALTER TABLE orders
         ADD COLUMN IF NOT EXISTS order_id TEXT,
+        ADD COLUMN IF NOT EXISTS tracking_token TEXT;
+      UPDATE orders SET tracking_token = encode(sha256((id::text || order_id || random()::text || clock_timestamp()::text)::bytea), 'hex') WHERE tracking_token IS NULL OR tracking_token = '';
+      ALTER TABLE orders ALTER COLUMN tracking_token SET NOT NULL;
+      CREATE UNIQUE INDEX IF NOT EXISTS orders_tracking_token_unique ON orders(tracking_token);
+      ALTER TABLE orders
         ADD COLUMN IF NOT EXISTS customer_name TEXT NOT NULL DEFAULT 'Customer',
         ADD COLUMN IF NOT EXISTS customer_phone TEXT NOT NULL DEFAULT '',
         ADD COLUMN IF NOT EXISTS customer_email TEXT,
