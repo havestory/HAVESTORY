@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   FileText, Download, Printer, ShoppingCart,
@@ -15,13 +15,15 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from '@/components/ui/select';
 import { useGetSettings } from '@workspace/api-client-react';
+import { A4PrintPortal, useA4Print } from '@/components/A4PrintPortal';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 function thisMonthRange() {
   const now = new Date();
+  const localDate = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
   const from = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
-  const to = now.toISOString().slice(0, 10);
+  const to = localDate(now);
   return { from, to };
 }
 
@@ -94,6 +96,8 @@ const TABS: { id: ReportTab; label: string; icon: any }[] = [
 // ─── main component ─────────────────────────────────────────────────────────
 
 export default function Reports() {
+  const printRef = useRef<HTMLDivElement>(null);
+  const { active: printActive, print: handlePrint } = useA4Print();
   const defaultRange = thisMonthRange();
   const [tab, setTab] = useState<ReportTab>('orders');
   const [from, setFrom] = useState(defaultRange.from);
@@ -241,8 +245,6 @@ export default function Reports() {
     }
   };
 
-  const handlePrint = () => window.print();
-
   const businessName = settings?.businessName ?? 'HAVESTORY';
 
   // ── Summary stats for current tab ─────────────────────────────────
@@ -293,7 +295,8 @@ export default function Reports() {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
       {/* ── Print Header (hidden on screen) ─────────────────────────── */}
-      <div className="hidden print:block mb-6 border-b border-black pb-4 text-center">
+      <div ref={printRef} className="hidden print:block">
+      <div className="mb-6 border-b border-black pb-4 text-center">
         {settings?.logoUrl && <img src={settings.logoUrl} alt="Logo" className="h-10 mx-auto mb-2" />}
         <h1 className="text-xl font-bold">{businessName}</h1>
         <h2 className="text-base font-semibold mt-1">
@@ -443,7 +446,7 @@ export default function Reports() {
       </div>
 
       {/* ── Print table (always rendered, screen: hidden) ─────────────── */}
-      <div className="hidden print:block">
+      <div>
         {tab === 'orders' && <OrdersTable rows={ordersRows} isLoading={false} />}
         {tab === 'invoices' && <InvoicesTable rows={invoicesRows} isLoading={false} />}
         {tab === 'clients' && <ClientsTable rows={clientsRows} isLoading={false} />}
@@ -452,6 +455,10 @@ export default function Reports() {
           Printed {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} · {businessName}
         </p>
       </div>
+      </div>
+      <A4PrintPortal active={printActive}>
+        <div dangerouslySetInnerHTML={{ __html: printRef.current?.innerHTML ?? '' }} />
+      </A4PrintPortal>
     </div>
   );
 }
