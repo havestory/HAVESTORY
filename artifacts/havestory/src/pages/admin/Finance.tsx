@@ -24,6 +24,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useGetSettings } from '@workspace/api-client-react';
 import { A4PrintPortal, useA4Print } from '@/components/A4PrintPortal';
+import './admin-insights.css';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -105,7 +106,7 @@ function StatCard({
   label: string; value: string; icon: any; accent?: string; sub?: string;
 }) {
   return (
-    <Card className="rounded-none border border-border shadow-sm bg-card">
+    <Card className="finance-stat-card border border-border shadow-sm bg-card">
       <CardContent className="p-5">
         <div className="flex items-start justify-between">
           <div>
@@ -248,7 +249,7 @@ export default function Finance() {
   const netColor = (summary?.netProfit ?? 0) >= 0 ? 'text-emerald-600' : 'text-red-600';
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+    <div data-admin-insights="finance" className="admin-insights-page space-y-6 animate-in fade-in slide-in-from-bottom-4">
       {/* ── Print layout (A4, hidden on screen) ─────────────────────── */}
       <div ref={printRef} className="hidden print:block print-report">
         <div className="text-center mb-6 border-b border-black pb-4">
@@ -325,14 +326,15 @@ export default function Finance() {
       </A4PrintPortal>
 
       {/* ── Screen UI ─────────────────────────────────────────────────── */}
-      <div className="print:hidden">
+      <div className="admin-insights-screen print:hidden">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="admin-insights-hero flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-serif font-bold text-foreground">Finance</h1>
+            <span className="admin-insights-kicker">Financial overview</span>
+            <h1 className="text-3xl font-black tracking-tight text-foreground">Finance</h1>
             <p className="text-muted-foreground mt-1">Track revenue, expenses and monthly profit.</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="admin-insights-actions flex items-center gap-2">
             <Button variant="outline" size="icon" className="rounded-none h-9 w-9" onClick={prevMonth}>
               <ChevronLeft className="w-4 h-4" />
             </Button>
@@ -356,7 +358,7 @@ export default function Finance() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="finance-stat-grid grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="col-span-1 relative">
             <StatCard
               label="Opening Balance"
@@ -400,7 +402,7 @@ export default function Finance() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
             {/* Income by category — horizontal bar chart */}
-            <Card className="rounded-none border border-border shadow-sm bg-card">
+            <Card className="finance-surface border border-border shadow-sm bg-card">
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <BarChart2 className="w-4 h-4 text-secondary" />
@@ -465,7 +467,7 @@ export default function Finance() {
             </Card>
 
             {/* Top products from orders */}
-            <Card className="rounded-none border border-border shadow-sm bg-card">
+            <Card className="finance-surface border border-border shadow-sm bg-card">
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <ShoppingBag className="w-4 h-4 text-secondary" />
@@ -513,7 +515,7 @@ export default function Finance() {
         )}
 
         {/* Transaction Table */}
-        <Card className="rounded-none border border-border shadow-sm bg-card">
+        <Card className="finance-surface finance-table-surface border border-border shadow-sm bg-card">
           <CardContent className="p-0">
             <Table className="admin-table">
               <TableHeader className="bg-muted/50 border-b border-border">
