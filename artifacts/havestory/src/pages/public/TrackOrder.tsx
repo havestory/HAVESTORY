@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertCircle, CheckCircle, CheckCircle2, Clock, CreditCard, Download, ExternalLink, Eye, FileCheck, LockKeyhole, Package, Phone, Search, ShieldCheck, Truck, UploadCloud } from 'lucide-react';
 import { format } from 'date-fns';
+import { InvoicePreview } from '@/components/InvoicePreview';
+import { num } from '@/lib/invoiceTypes';
 
 export default function TrackOrder() {
   const { toast } = useToast();
@@ -20,6 +22,7 @@ export default function TrackOrder() {
   const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
   const [previewMessage, setPreviewMessage] = useState<string | null>(null);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [showInvoice, setShowInvoice] = useState(false);
 
   // Allow the order link from checkout/admin to open this page already populated.
   useEffect(() => {
@@ -418,6 +421,9 @@ export default function TrackOrder() {
                           </Button>
                         ))}
                       </div>
+                      <Button type="button" className="w-full gap-2" onClick={() => setShowInvoice(true)}>
+                        <Eye className="h-4 w-4" /> View &amp; download invoice
+                      </Button>
                     </CardContent>
                   </Card>
                 )}
@@ -449,6 +455,31 @@ export default function TrackOrder() {
           </div>
         )}
       </div>
+      {showInvoice && tracking?.invoice && (() => {
+        const invoice = tracking.invoice as any;
+        const meta = invoice.metadata || {};
+        const items = Array.isArray(meta.items) ? meta.items : [{ id: 'total', description: 'Invoice total', qty: 1, unitPrice: String(invoice.amount), notes: '' }];
+        const subtotal = items.reduce((sum: number, item: any) => sum + num(item.qty) * num(item.unitPrice), 0);
+        const grandTotal = num(invoice.amount);
+        const shippingAmt = Math.max(0, grandTotal - subtotal);
+        return <InvoicePreview
+          form={meta.form || { clientName: (tracking as any).customerName, address: '', phone: '', email: '', projectTitle: '' }}
+          items={items}
+          shipping={(meta.shipping || 'none') as any}
+          shippingCustom={meta.shippingCustom || ''}
+          shippingLabelOverride={meta.shippingLabel || ''}
+          courierName={meta.courierName || ''}
+          advance={String(meta.advance || '0')}
+          subtotal={subtotal}
+          shippingAmt={shippingAmt}
+          grandTotal={grandTotal}
+          invoiceNumberOverride={invoice.invoiceNumber}
+          createdAtOverride={invoice.createdAt ? new Date(invoice.createdAt) : undefined}
+          status={invoice.status}
+          linkedOrderId={(tracking as any).orderId}
+          onClose={() => setShowInvoice(false)}
+        />;
+      })()}
     </div>
   );
 }
