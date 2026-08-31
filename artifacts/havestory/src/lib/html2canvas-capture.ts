@@ -200,15 +200,17 @@ export async function captureElement(
   ].join(";");
 
   const clone = el.cloneNode(true) as HTMLElement;
-  clone.style.cssText = [
-    `width:${width}px`,
-    `height:${height}px`,
-    `overflow:${overflow}`,
-    "position:relative",
-    "flex-shrink:0",
-    "box-shadow:none",
-    "box-sizing:border-box",
-  ].join(";");
+  // Keep the source root's inline layout declarations. Replacing cssText here
+  // used to erase display:flex/grid, flex-direction, font and background
+  // declarations from fixed-size labels/invoices. The live preview therefore
+  // looked correct while the exported clone reflowed vertically.
+  clone.style.width = `${width}px`;
+  clone.style.height = `${height}px`;
+  clone.style.overflow = overflow;
+  clone.style.position = "relative";
+  clone.style.flexShrink = "0";
+  clone.style.boxShadow = "none";
+  clone.style.boxSizing = "border-box";
 
   // ── Copy React-controlled input values into the intermediate clone ─────────
   const liveInputs = Array.from(
