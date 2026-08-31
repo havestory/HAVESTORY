@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/select';
 import { useGetSettings } from '@workspace/api-client-react';
 import { A4PrintPortal, useA4Print } from '@/components/A4PrintPortal';
+import './admin-insights.css';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -293,7 +294,7 @@ export default function Reports() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+    <div data-admin-insights="reports" className="admin-insights-page space-y-6 animate-in fade-in slide-in-from-bottom-4">
       {/* ── Print Header (hidden on screen) ─────────────────────────── */}
       <div ref={printRef} className="hidden print:block">
       <div className="mb-6 border-b border-black pb-4 text-center">
@@ -305,14 +306,15 @@ export default function Reports() {
       </div>
 
       {/* ── Screen UI ─────────────────────────────────────────────────── */}
-      <div className="print:hidden">
+      <div className="admin-insights-screen print:hidden">
         {/* Page header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="admin-insights-hero flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-serif font-bold text-foreground">Reports</h1>
+            <span className="admin-insights-kicker">Business intelligence</span>
+            <h1 className="text-3xl font-black tracking-tight text-foreground">Reports</h1>
             <p className="text-muted-foreground mt-1">Generate and export data reports.</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="admin-insights-actions flex items-center gap-2">
             <Button variant="outline" className="rounded-none h-9 text-xs uppercase tracking-widest font-semibold" onClick={handleExport}>
               <Download className="w-4 h-4 mr-2" /> CSV
             </Button>
@@ -323,7 +325,7 @@ export default function Reports() {
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-border gap-0">
+        <div className="admin-insights-tabs flex border-b border-border gap-0">
           {TABS.map(t => (
             <button
               key={t.id}
@@ -337,7 +339,7 @@ export default function Reports() {
         </div>
 
         {/* Filters */}
-        <Card className="rounded-none border border-border shadow-sm bg-card">
+        <Card className="admin-insights-filter border border-border shadow-sm bg-card">
           <CardContent className="p-4">
             <div className="flex flex-wrap gap-4 items-end">
               <div>
@@ -386,7 +388,7 @@ export default function Reports() {
         </Card>
 
         {/* Report Table */}
-        <Card className="rounded-none border border-border shadow-sm bg-card">
+        <Card className="admin-insights-table border border-border shadow-sm bg-card">
           <CardContent className="p-0">
             {tab === 'orders' && (
               <OrdersTable rows={ordersRows} isLoading={ordersLoading} />
