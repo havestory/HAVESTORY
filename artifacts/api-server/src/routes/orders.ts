@@ -871,6 +871,9 @@ router.get("/track/:orderId", requireOrderAccess, async (req: any, res) => {
         amount:        invoice.amount,
         status:        invoice.status,
         createdAt:     invoice.createdAt?.toISOString?.() ?? invoice.createdAt,
+        dueDate:       invoice.dueDate,
+        notes:         invoice.notes,
+        metadata:      JSON.parse(publicInvoiceMetadata(invoice.metadata)),
       } : null,
     });
   } catch (err) {
