@@ -239,7 +239,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
         {/* Mobile topbar */}
         <header className="h-14 flex items-center justify-between px-4 bg-sidebar border-b border-sidebar-border lg:hidden shrink-0">
           <button onClick={() => setSidebarOpen(true)} className="text-sidebar-foreground">
-            <Menu className="w-5 h-5" />
+            <Menu className="w-5 h-5" strokeWidth={2.7} />
           </button>
           <span className="font-serif font-semibold text-base text-sidebar-foreground">HAVESTORY</span>
           {/* Night mode toggle on mobile topbar */}

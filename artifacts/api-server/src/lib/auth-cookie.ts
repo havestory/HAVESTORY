@@ -69,8 +69,9 @@ export function setAdminCookie(res: Response, username: string, role: AdminRole 
 }
 
 export function clearAuthCookies(res: Response): void {
-  res.clearCookie(COOKIE_PENDING, { path: "/" });
-  res.clearCookie(COOKIE_ADMIN,   { path: "/" });
+  const clearOptions = { path: "/", secure: isProduction, sameSite: "lax" as const };
+  res.clearCookie(COOKIE_PENDING, clearOptions);
+  res.clearCookie(COOKIE_ADMIN, clearOptions);
 }
 
 export function getPendingAuth(req: Request): { username: string } | null {

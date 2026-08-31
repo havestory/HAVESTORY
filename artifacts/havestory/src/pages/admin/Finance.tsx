@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   TrendingUp, TrendingDown, DollarSign, Wallet,
-  Plus, Trash2, Printer, ChevronLeft, ChevronRight,
+  Plus, Trash2, Printer, Download, ChevronLeft, ChevronRight,
   AlertCircle, Lock, Edit2, BarChart2, ShoppingBag
 } from 'lucide-react';
 import {
@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { useGetSettings } from '@workspace/api-client-react';
+import { A4PrintPortal, useA4Print } from '@/components/A4PrintPortal';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -127,6 +128,7 @@ export default function Finance() {
   const qc = useQueryClient();
   const { toast } = useToast();
   const printRef = useRef<HTMLDivElement>(null);
+  const { active: printActive, print: handlePrint } = useA4Print();
 
   const [month, setMonth] = useState(todayYYYYMM);
   const [showAdd, setShowAdd] = useState(false);
@@ -227,7 +229,21 @@ export default function Finance() {
     });
   };
 
-  const handlePrint = () => window.print();
+  const handleExport = () => {
+    const escape = (value: string) => `"${value.replace(/"/g, '""')}"`;
+    const rows = (transactions ?? []).map(tx => [
+      fmtDate(tx.transaction_date), tx.type, CATEGORY_LABELS[tx.category] ?? tx.category,
+      tx.description, String(tx.amount),
+    ]);
+    const csv = [['Date', 'Type', 'Category', 'Description', 'Amount (LKR)'], ...rows]
+      .map(row => row.map(value => escape(String(value))).join(',')).join('\n');
+    const url = URL.createObjectURL(new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `finance-${month}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   const netColor = (summary?.netProfit ?? 0) >= 0 ? 'text-emerald-600' : 'text-red-600';
 
@@ -304,6 +320,10 @@ export default function Finance() {
         </p>
       </div>
 
+      <A4PrintPortal active={printActive}>
+        <div dangerouslySetInnerHTML={{ __html: printRef.current?.innerHTML ?? '' }} />
+      </A4PrintPortal>
+
       {/* ── Screen UI ─────────────────────────────────────────────────── */}
       <div className="print:hidden">
         {/* Header */}
@@ -322,6 +342,9 @@ export default function Finance() {
             </Button>
             <Button variant="outline" className="rounded-none h-9 text-xs uppercase tracking-widest font-semibold" onClick={handlePrint}>
               <Printer className="w-4 h-4 mr-2" /> Print
+            </Button>
+            <Button variant="outline" className="rounded-none h-9 text-xs uppercase tracking-widest font-semibold" onClick={handleExport}>
+              <Download className="w-4 h-4 mr-2" /> CSV
             </Button>
             <Button
               className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90 btn-glow uppercase text-xs tracking-widest px-5 h-9 font-semibold"
