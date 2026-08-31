@@ -203,6 +203,11 @@ export async function runStartupMigrations(
     `);
     await client.query(`
       ALTER TABLE orders
+        ADD COLUMN IF NOT EXISTS tracking_token TEXT;
+      UPDATE orders SET tracking_token = encode(sha256((id::text || order_id || random()::text || clock_timestamp()::text)::bytea), 'hex') WHERE tracking_token IS NULL OR tracking_token = '';
+      ALTER TABLE orders ALTER COLUMN tracking_token SET NOT NULL;
+      CREATE UNIQUE INDEX IF NOT EXISTS orders_tracking_token_unique ON orders(tracking_token);
+      ALTER TABLE orders
         ADD COLUMN IF NOT EXISTS payment_method TEXT NOT NULL DEFAULT 'bank_transfer',
         ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'pending',
         ADD COLUMN IF NOT EXISTS payment_amount INTEGER NOT NULL DEFAULT 0,
