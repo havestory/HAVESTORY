@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { AlertCircle, CheckCircle, CheckCircle2, Clock, CreditCard, Download, ExternalLink, Eye, FileCheck, LockKeyhole, Package, Phone, Search, ShieldCheck, Truck, UploadCloud } from 'lucide-react';
+import { AlertCircle, CheckCircle, CheckCircle2, Clock, CreditCard, Download, ExternalLink, Eye, FileCheck, LockKeyhole, Package, Search, ShieldCheck, Truck, UploadCloud } from 'lucide-react';
 import { format } from 'date-fns';
 import { InvoicePreview } from '@/components/InvoicePreview';
 import { num } from '@/lib/invoiceTypes';
@@ -12,9 +12,7 @@ import { num } from '@/lib/invoiceTypes';
 export default function TrackOrder() {
   const { toast } = useToast();
   const [orderId, setOrderId] = useState('');
-  const [phone, setPhone] = useState('');
   const [searchId, setSearchId] = useState('');
-  const [searchPhone, setSearchPhone] = useState('');
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [paymentType, setPaymentType] = useState<'advance' | 'full' | 'custom'>('advance');
   const [paymentAmount, setPaymentAmount] = useState('');
@@ -27,17 +25,16 @@ export default function TrackOrder() {
   // Allow the order link from checkout/admin to open this page already populated.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const linkedOrder = (params.get('id') || params.get('order') || '').trim();
+    const linkedOrder = (params.get('token') || params.get('id') || params.get('order') || '').trim();
     if (linkedOrder) setOrderId(linkedOrder);
   }, []);
 
   const { data: tracking, isLoading, isError, error, refetch } = useTrackOrder(searchId, {
     query: {
-      enabled: !!searchId && !!searchPhone,
+      enabled: !!searchId,
       retry: false,
-      queryKey: ['track-order', searchId, searchPhone],
+      queryKey: ['track-order', searchId],
     } as any,
-    request: { headers: { 'x-order-phone': searchPhone } },
   });
 
   useEffect(() => {
@@ -46,7 +43,7 @@ export default function TrackOrder() {
 
   useEffect(() => {
     if (isError) {
-      const message = 'We could not find that order. Check the order ID and the phone number used at checkout, then try again.';
+      const message = 'We could not open that tracking link. Check the secure tracking code and try again.';
       setSearchError(message);
       toast({ title: 'Order not found', description: message, variant: 'destructive' });
     }
@@ -64,9 +61,8 @@ export default function TrackOrder() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const nextId = orderId.trim();
-    const nextPhone = phone.trim();
-    if (!nextId || !nextPhone) {
-      const message = 'Please enter both your order ID and the phone number used at checkout.';
+    if (!nextId) {
+      const message = 'Please enter your secure tracking code.';
       setSearchError(message);
       toast({ title: 'Almost there', description: message, variant: 'destructive' });
       return;
@@ -77,17 +73,10 @@ export default function TrackOrder() {
       toast({ title: 'Check your order ID', description: message, variant: 'destructive' });
       return;
     }
-    if (nextPhone.replace(/\D/g, '').length < 9) {
-      const message = 'Please enter a valid checkout phone number so we can securely find your order.';
-      setSearchError(message);
-      toast({ title: 'Check your phone number', description: message, variant: 'destructive' });
-      return;
-    }
     setSearchError(null);
     setPaymentMessage(null);
     setPreviewMessage(null);
     setSearchId(nextId);
-    setSearchPhone(nextPhone);
   };
 
   const uploadPaymentProof = async () => {
@@ -104,7 +93,7 @@ export default function TrackOrder() {
       body.append('file', proofFile);
       body.append('paymentType', paymentType);
       body.append('paymentAmount', String(amount));
-      const response = await fetch(`/api/orders/track/${encodeURIComponent(tracking.orderId)}/payment-proof`, { method: 'POST', headers: { 'x-order-phone': searchPhone }, body });
+      const response = await fetch(`/api/orders/track/${encodeURIComponent((tracking as any).trackingToken || searchId)}/payment-proof`, { method: 'POST', body });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Could not upload payment proof');
       setProofFile(null);
@@ -127,7 +116,7 @@ export default function TrackOrder() {
     setPaymentActionLoading(true);
     setPaymentMessage(null);
     try {
-      const response = await fetch(`/api/orders/track/${encodeURIComponent(tracking.orderId)}/payment-confirm`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-order-phone': searchPhone }, body: JSON.stringify({ paymentType, paymentAmount: amount }) });
+      const response = await fetch(`/api/orders/track/${encodeURIComponent((tracking as any).trackingToken || searchId)}/payment-confirm`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paymentType, paymentAmount: amount }) });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Could not confirm payment');
       setPaymentMessage('Payment confirmation sent. Your order will move forward after studio approval.');
@@ -175,19 +164,14 @@ export default function TrackOrder() {
           <span>ORDER JOURNEY</span>
           <h1>Track your order.</h1>
           <p>
-            Enter your private order ID and checkout phone number to see real-time updates.
+            Open your private tracking link or enter its secure tracking code.
           </p>
 
           <form onSubmit={handleSearch} className="hs-track-form">
             <label className="hs-track-field" htmlFor="public-order-id">
               <Search aria-hidden="true" />
-              <span className="sr-only">Order ID or tracking number</span>
-              <Input id="public-order-id" value={orderId} onChange={(e) => { setOrderId(e.target.value); setSearchError(null); }} placeholder="Order ID or tracking number" aria-label="Order ID or tracking number" className="hs-track-input" />
-            </label>
-            <label className="hs-track-field" htmlFor="public-order-phone">
-              <Phone aria-hidden="true" />
-              <span className="sr-only">Checkout phone number</span>
-              <Input id="public-order-phone" type="tel" value={phone} onChange={(e) => { setPhone(e.target.value); setSearchError(null); }} placeholder="Checkout phone number" aria-label="Checkout phone number" className="hs-track-input" required />
+              <span className="sr-only">Secure tracking code</span>
+              <Input id="public-order-id" value={orderId} onChange={(e) => { setOrderId(e.target.value); setSearchError(null); }} placeholder="Secure tracking code" aria-label="Secure tracking code" className="hs-track-input" />
             </label>
             <Button type="submit" className="hs-track-submit">
               Track
@@ -213,7 +197,7 @@ export default function TrackOrder() {
         {isError && (
           <div className="hs-track-state hs-track-error">
             <p className="font-medium mb-2">Let’s try that again</p>
-            <p className="text-sm">We couldn’t find an order matching those details. Please check the order ID and checkout phone number, then search again.</p>
+            <p className="text-sm">We couldn’t find an order matching that secure tracking code.</p>
           </div>
         )}
 
