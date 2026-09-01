@@ -51,7 +51,7 @@ router.get("/orders", async (req, res) => {
     if (offset === 0) {
       const { rows: agg } = await pool.query(`
         SELECT COUNT(*) AS total,
-               COALESCE(SUM(o.amount::numeric), 0) AS total_amount,
+               COALESCE(SUM(o.payment_amount::numeric), 0) AS total_amount,
                COALESCE(SUM(o.advance_paid::numeric), 0) AS total_advance
         FROM orders o
         WHERE ${whereClause}
@@ -74,7 +74,7 @@ router.get("/orders", async (req, res) => {
         o.customer_name,
         o.customer_phone,
         o.status,
-        o.amount,
+        o.payment_amount AS amount,
         o.advance_paid,
         o.discount_amount,
         o.created_at,
@@ -227,7 +227,6 @@ router.get("/clients", async (req, res) => {
                WHERE deleted_at IS NULL
                  AND created_at >= $1::date
                  AND created_at < ($2::date + interval '1 day')
-             )
            SELECT COUNT(DISTINCT c.id)::int AS cnt
            FROM clients c
            WHERE c.deleted_at IS NULL
