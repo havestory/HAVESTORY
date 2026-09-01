@@ -1,4 +1,5 @@
-import { useGetNotices, useDeleteNoticeById } from '@workspace/api-client-react';
+import { useState } from 'react';
+import { useGetNotices, useDeleteNoticeById, useCreateNotice, useUpdateNoticeById } from '@workspace/api-client-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -6,11 +7,36 @@ import { Bell, Trash2, Edit2, MoreHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AdminTableError, AdminTableLoading } from '@/components/admin/AdminPageState';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
+const EMPTY_NOTICE = { message: '', style: 'info', placement: 'banner', enabled: true, sortOrder: 0 };
 
 export default function Notices() {
   const { data: notices, isLoading, isError, refetch } = useGetNotices();
   const deleteNotice = useDeleteNoticeById();
+  const createNotice = useCreateNotice();
+  const updateNotice = useUpdateNoticeById();
   const { toast } = useToast();
+  const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [form, setForm] = useState(EMPTY_NOTICE);
+
+  const openCreate = () => { setEditingId(null); setForm(EMPTY_NOTICE); setOpen(true); };
+  const openEdit = (notice: any) => {
+    setEditingId(notice.id);
+    setForm({ message: notice.message || '', style: notice.style || 'info', placement: notice.placement || 'banner', enabled: !!notice.enabled, sortOrder: Number(notice.sortOrder || 0) });
+    setOpen(true);
+  };
+  const saveNotice = () => {
+    if (!form.message.trim()) { toast({ title: 'Message is required', variant: 'destructive' }); return; }
+    const request = editingId
+      ? updateNotice.mutateAsync({ id: editingId, data: { ...form, message: form.message.trim() } })
+      : createNotice.mutateAsync({ data: { ...form, message: form.message.trim() } });
+    void request.then(() => { toast({ title: editingId ? 'Notice updated' : 'Notice created' }); setOpen(false); void refetch(); })
+      .catch(() => toast({ title: 'Notice could not be saved', variant: 'destructive' }));
+  };
 
   const handleDelete = (id: number) => {
     if (confirm('Delete this notice?')) {
@@ -25,7 +51,7 @@ export default function Notices() {
           <h1 className="text-3xl font-serif font-bold text-foreground">Site Notices</h1>
           <p className="text-muted-foreground mt-1">Manage announcement banners for the public site.</p>
         </div>
-        <Button className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90 btn-glow uppercase text-xs tracking-widest px-5 h-9 font-semibold">Add Notice</Button>
+        <Button onClick={openCreate} className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 uppercase text-xs tracking-widest px-5 h-10 font-semibold">Add Notice</Button>
       </div>
 
       <Card className="rounded-none border border-border shadow-sm bg-card">
@@ -68,7 +94,7 @@ export default function Notices() {
                           <Button variant="ghost" className="h-8 w-8 p-0 rounded-none text-muted-foreground hover:text-foreground"><MoreHorizontal className="h-4 w-4" /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="rounded-none border-border shadow-md">
-                          <DropdownMenuItem className="cursor-pointer text-xs uppercase tracking-widest font-medium"><Edit2 className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openEdit(notice)} className="cursor-pointer text-xs uppercase tracking-widest font-medium"><Edit2 className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
                           <DropdownMenuItem className="cursor-pointer text-xs uppercase tracking-widest font-medium text-destructive focus:bg-destructive/10 focus:text-destructive" onClick={() => handleDelete(notice.id)}>
                             <Trash2 className="mr-2 h-4 w-4" /> Delete
                           </DropdownMenuItem>
@@ -82,6 +108,20 @@ export default function Notices() {
           </Table>
         </CardContent>
       </Card>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-lg rounded-2xl border-border bg-card">
+          <DialogHeader><DialogTitle>{editingId ? 'Edit notice' : 'Add notice'}</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5"><Label>Message</Label><Input value={form.message} onChange={e => setForm(v => ({ ...v, message: e.target.value }))} placeholder="Announcement shown on the website" /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5"><Label>Style</Label><select value={form.style} onChange={e => setForm(v => ({ ...v, style: e.target.value }))} className="h-10 w-full rounded-xl border border-border bg-card px-3 text-foreground"><option value="info">Info</option><option value="success">Success</option><option value="warning">Warning</option><option value="urgent">Urgent</option></select></div>
+              <div className="space-y-1.5"><Label>Placement</Label><select value={form.placement} onChange={e => setForm(v => ({ ...v, placement: e.target.value }))} className="h-10 w-full rounded-xl border border-border bg-card px-3 text-foreground"><option value="banner">Banner</option><option value="popup">Popup</option></select></div>
+            </div>
+            <label className="flex items-center gap-2 text-sm font-semibold text-foreground"><input type="checkbox" checked={form.enabled} onChange={e => setForm(v => ({ ...v, enabled: e.target.checked }))} /> Enabled</label>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button onClick={saveNotice} disabled={createNotice.isPending || updateNotice.isPending}>{createNotice.isPending || updateNotice.isPending ? 'Saving…' : 'Save notice'}</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
