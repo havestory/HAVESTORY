@@ -444,6 +444,7 @@ export default function Orders() {
       deliveryMethod: manageForm.deliveryMethod || null,
       courierName: manageForm.courierName.trim() || null,
       courierTrackingNumber: manageForm.courierTrackingNumber.trim() || null,
+      estimatedCompletion: manageForm.estimatedCompletion || null,
     } as any }, {
       onSuccess: (updatedOrder) => {
         setManageForm((form) => ({ ...form, status: nextStatus }));
@@ -774,6 +775,7 @@ export default function Orders() {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-1.5"><Label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Delivery method</Label><select value={manageForm.deliveryMethod} onChange={(event) => setManageForm((form) => ({ ...form, deliveryMethod: event.target.value }))} className="h-11 w-full rounded-full border border-slate-200 bg-white px-4 text-sm text-slate-700"><option value="">Not selected</option><option value="pickup">Pickup</option><option value="courier">Courier</option><option value="sl_post">Sri Lanka Post</option></select></div>
                   <div className="space-y-1.5"><Label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Due date</Label><Input type="date" value={manageForm.dueDate} onChange={(event) => setManageForm((form) => ({ ...form, dueDate: event.target.value }))} className="h-11 rounded-full border-slate-200" /></div>
+                  <div className="space-y-1.5 sm:col-span-2"><Label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Expected delivery handover date</Label><Input type="date" value={manageForm.estimatedCompletion} onChange={(event) => setManageForm((form) => ({ ...form, estimatedCompletion: event.target.value }))} className="h-11 rounded-full border-slate-200" /><p className="px-1 text-[11px] leading-4 text-slate-400">The date you expect to hand this order to the courier or customer. It appears on the customer tracking page.</p></div>
                   <div className="space-y-1.5"><Label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Courier name</Label><Input value={manageForm.courierName} onChange={(event) => setManageForm((form) => ({ ...form, courierName: event.target.value }))} className="h-11 rounded-full border-slate-200" /></div>
                   <div className="space-y-1.5"><Label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Tracking number</Label><Input value={manageForm.courierTrackingNumber} onChange={(event) => setManageForm((form) => ({ ...form, courierTrackingNumber: event.target.value }))} className="h-11 rounded-full border-slate-200" /></div>
                 </div>
