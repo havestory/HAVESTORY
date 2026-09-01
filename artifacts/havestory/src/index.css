@@ -9574,3 +9574,28 @@ body {
     animation: none !important;
   }
 }
+
+/* Final public contrast guard — surface colour owns its foreground. Keep this
+   last so legacy theme layers cannot put dark copy on a dark surface. */
+[data-public-site] :is(.bg-black,.bg-gray-950,.bg-gray-900,.bg-slate-950,.bg-slate-900,.bg-zinc-950,.bg-zinc-900,.bg-neutral-950,.bg-neutral-900,.bg-stone-950,.bg-stone-900) {
+  color: #fffaf7 !important;
+}
+[data-public-site] :is(.bg-black,.bg-gray-950,.bg-gray-900,.bg-slate-950,.bg-slate-900,.bg-zinc-950,.bg-zinc-900,.bg-neutral-950,.bg-neutral-900,.bg-stone-950,.bg-stone-900)
+  :is(h1,h2,h3,h4,strong,b,.text-foreground,.text-card-foreground,.text-gray-900,.text-gray-800,.text-slate-950,.text-slate-900,.text-slate-800) {
+  color: #fffaf7 !important;
+}
+[data-public-site] :is(.bg-black,.bg-gray-950,.bg-gray-900,.bg-slate-950,.bg-slate-900,.bg-zinc-950,.bg-zinc-900,.bg-neutral-950,.bg-neutral-900,.bg-stone-950,.bg-stone-900)
+  :is(p,small,.text-muted-foreground,.text-gray-700,.text-gray-600,.text-gray-500,.text-gray-400,.text-slate-700,.text-slate-600,.text-slate-500,.text-slate-400) {
+  color: rgb(255 250 247 / .76) !important;
+}
+[data-public-site] :is(.hsx-footer,.hs-new-final,.hsc-final,.hs-gallery-hero,.hs-cart-drawer-head,.hs-store-cart-head) {
+  color: #fffaf7 !important;
+}
+[data-public-site] :is(.hsx-footer,.hs-new-final,.hsc-final,.hs-gallery-hero,.hs-cart-drawer-head,.hs-store-cart-head)
+  :is(h1,h2,h3,h4,strong,b,.text-foreground,.text-card-foreground) {
+  color: #fffaf7 !important;
+}
+[data-public-site] :is(.hsx-footer,.hs-new-final,.hsc-final,.hs-gallery-hero,.hs-cart-drawer-head,.hs-store-cart-head)
+  :is(p,small,.text-muted-foreground) {
+  color: rgb(255 250 247 / .72) !important;
+}
