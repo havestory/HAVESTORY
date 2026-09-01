@@ -80,6 +80,49 @@
   background: hsl(var(--card)) !important;
 }
 
+/* Sidebar contrast is explicit because the sidebar is always a dark studio
+   surface, independent of the selected workspace theme. */
+[data-admin-panel] .admin-sidebar {
+  color: #f8f3fb !important;
+}
+[data-admin-panel] .admin-sidebar-wordmark {
+  color: #f4d58d !important;
+}
+[data-admin-panel] .admin-sidebar-subtitle {
+  color: rgb(255 255 255 / .72) !important;
+}
+[data-admin-panel] .admin-sidebar-monogram {
+  border: 1px solid rgb(255 255 255 / .22);
+  background: #f4d58d !important;
+  color: #2b1738 !important;
+}
+[data-admin-panel] .admin-sidebar :is(.text-sidebar-foreground,.text-sidebar-foreground\/60,.text-sidebar-foreground\/70,.text-sidebar-foreground\/75) {
+  color: rgb(255 255 255 / .78) !important;
+}
+[data-admin-panel] .admin-sidebar :is(a,button):hover,
+[data-admin-panel] .admin-sidebar a > div:hover {
+  color: #fff !important;
+}
+[data-admin-panel] .admin-sidebar svg {
+  color: rgb(255 255 255 / .78) !important;
+  opacity: 1 !important;
+}
+[data-admin-panel] .admin-sidebar :is(.text-sidebar-primary,[class*="text-sidebar-primary"]) {
+  color: #f4d58d !important;
+}
+[data-admin-panel] .admin-sidebar a > div[class*="bg-sidebar-primary"] svg,
+[data-admin-panel] .admin-sidebar a > div[class*="bg-sidebar-primary"] span {
+  color: #fff !important;
+}
+[data-admin-panel] .admin-mobile-topbar {
+  background: #2b1738 !important;
+  color: #fff !important;
+}
+[data-admin-panel] .admin-mobile-topbar :is(button,span,svg) {
+  color: #fff !important;
+  opacity: 1 !important;
+}
+
 /* Final admin visual policy: solid surfaces only. Legacy Tailwind gradient
    utilities remain in old screens, but are deliberately flattened here. */
 [data-admin-panel] [class*="bg-gradient"] {
@@ -97,4 +140,33 @@
 }
 [data-admin-panel] main > div {
   background-image: none !important;
+}
+
+/* One elevation system only. This replaces stacked page, utility and legacy
+   shadows that previously produced dark halos and apparent overlaps. */
+[data-admin-panel] {
+  --admin-shadow-card: 0 7px 20px rgb(43 23 56 / .07);
+  --admin-shadow-float: 0 16px 42px rgb(27 15 36 / .16);
+}
+[data-admin-panel] main :is(.shadow-sm,.shadow,.shadow-md,.shadow-lg,.shadow-xl,[class*="shadow-["]):not(button):not(a):not(input):not(textarea):not(select) {
+  box-shadow: var(--admin-shadow-card) !important;
+}
+[data-admin-panel] main :is(.rounded-lg,.rounded-xl,.rounded-2xl,.rounded-3xl).border {
+  box-shadow: var(--admin-shadow-card) !important;
+}
+[data-admin-panel] main :is(button,a,input,textarea,select)[class*="shadow"] {
+  box-shadow: none !important;
+}
+[data-admin-panel] main :is(button,a):hover {
+  filter: none;
+}
+[data-admin-panel] main > header {
+  box-shadow: 0 5px 16px rgb(43 23 56 / .055) !important;
+}
+[data-admin-panel] :is([role="dialog"],.invoice-modal-shell) {
+  box-shadow: var(--admin-shadow-float) !important;
+}
+[data-admin-panel] main :is(.shadow-sm,.shadow,.shadow-md,.shadow-lg,.shadow-xl,[class*="shadow-"])::before,
+[data-admin-panel] main :is(.shadow-sm,.shadow,.shadow-md,.shadow-lg,.shadow-xl,[class*="shadow-"])::after {
+  box-shadow: none !important;
 }

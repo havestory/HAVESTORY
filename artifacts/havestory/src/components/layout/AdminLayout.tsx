@@ -111,19 +111,19 @@ export function AdminLayout({ children }: { children: ReactNode }) {
       )}
 
       {/* ── Sidebar ─────────────────────────────────────────────── */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-72 flex flex-col bg-sidebar border-r border-sidebar-border
+      <aside className={`admin-sidebar fixed inset-y-0 left-0 z-50 w-72 flex flex-col bg-sidebar border-r border-sidebar-border
         transition-transform duration-300 lg:translate-x-0 lg:static lg:flex
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         {/* Logo header */}
         <div className="h-[4.75rem] flex items-center justify-between px-5 border-b border-sidebar-border shrink-0 bg-gradient-to-br from-sidebar to-sidebar-accent/40">
-          <Link href="/admin" className="flex items-center gap-3">
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-secondary-foreground font-serif font-bold text-sm shadow-[0_8px_25px_rgba(201,168,76,0.22)]">
+          <Link href="/admin" className="admin-sidebar-brand flex items-center gap-3">
+            <div className="admin-sidebar-monogram relative flex h-10 w-10 items-center justify-center rounded-2xl font-serif font-bold text-sm shadow-[0_8px_25px_rgba(201,168,76,0.22)]">
               HS<span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-sidebar bg-emerald-400" />
             </div>
             <div className="flex flex-col">
-              <span className="text-sidebar-primary font-serif font-bold text-lg leading-tight tracking-wide">HAVESTORY</span>
-              <span className="text-sidebar-foreground/60 font-bold text-[9px] uppercase tracking-[0.24em] leading-tight">Studio OS</span>
+              <span className="admin-sidebar-wordmark font-serif font-bold text-lg leading-tight tracking-wide">HAVESTORY</span>
+              <span className="admin-sidebar-subtitle font-bold text-[9px] uppercase tracking-[0.24em] leading-tight">Studio OS</span>
             </div>
           </Link>
           <button className="lg:hidden text-sidebar-foreground/60 hover:text-sidebar-foreground" onClick={() => setSidebarOpen(false)}>
@@ -237,7 +237,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
       {/* ── Main content ─────────────────────────────────────────── */}
       <main className="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
         {/* Mobile topbar */}
-        <header className="h-14 flex items-center justify-between px-4 bg-sidebar border-b border-sidebar-border lg:hidden shrink-0">
+        <header className="admin-mobile-topbar h-14 flex items-center justify-between px-4 bg-sidebar border-b border-sidebar-border lg:hidden shrink-0">
           <button onClick={() => setSidebarOpen(true)} className="text-sidebar-foreground">
             <Menu className="w-5 h-5" strokeWidth={2.7} />
           </button>
