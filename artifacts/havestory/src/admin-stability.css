@@ -170,3 +170,26 @@
 [data-admin-panel] main :is(.shadow-sm,.shadow,.shadow-md,.shadow-lg,.shadow-xl,[class*="shadow-"])::after {
   box-shadow: none !important;
 }
+
+/* Operational identifiers need stronger contrast than decorative accent copy. */
+[data-admin-panel] main .admin-record-id {
+  color: #4d2c63 !important;
+  -webkit-text-fill-color: #4d2c63 !important;
+  font-weight: 800 !important;
+}
+[data-admin-panel][data-admin-theme="light"] main :is(.text-amber-400,.text-amber-500,.text-yellow-400,.text-yellow-500) {
+  color: #80510b !important;
+}
+[data-admin-panel][data-admin-theme="light"] main :is(.text-blue-400,.text-violet-400,.text-purple-400,.text-pink-400) {
+  color: #664078 !important;
+}
+[data-admin-panel][data-admin-theme="dark"] main .admin-record-id {
+  color: #f1d28f !important;
+  -webkit-text-fill-color: #f1d28f !important;
+}
+[data-admin-panel][data-admin-theme="dark"] main :is(.text-amber-400,.text-amber-500,.text-yellow-400,.text-yellow-500) {
+  color: #f1d28f !important;
+}
+[data-admin-panel][data-admin-theme="dark"] main :is(.text-blue-400,.text-violet-400,.text-purple-400,.text-pink-400) {
+  color: #d9b7ea !important;
+}
