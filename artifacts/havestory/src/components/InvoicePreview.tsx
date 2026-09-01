@@ -20,6 +20,18 @@ function triggerDownload(url: string, filename: string) {
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
+/** Escape user/settings data before writing it into the isolated print window. */
+function escapeReceipt(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+type ThermalWidth = "58" | "80";
+
 /* ─── A4 constants (96 dpi) ─── */
 const A4_W = 794;   // 210mm @ 96dpi
 const A4_H = 1123;  // 297mm @ 96dpi
@@ -228,6 +240,7 @@ export function InvoicePreview({
   const s = settings as any;
   const [downloadingZip, setDownloadingZip] = useState(false);
   const [generatingPDF, setGeneratingPDF] = useState(false);
+  const [thermalWidth, setThermalWidth] = useState<ThermalWidth>("80");
 
   /* ─── Auto-fit A4 page to mobile/tablet viewport ───
    * Measures the canvas container width and computes a CSS scale so the
@@ -410,6 +423,46 @@ export function InvoicePreview({
     } finally { setDownloadingZip(false); }
   };
 
+  /** Native receipt print for common 58 mm and 80 mm bill printers. */
+  const printThermalInvoice = () => {
+    const widthMm = thermalWidth === "58" ? 58 : 80;
+    const receipt = window.open("", "_blank", "popup=yes,width=520,height=760");
+    if (!receipt) {
+      window.alert("Please allow pop-ups to print the thermal invoice.");
+      return;
+    }
+
+    const isPaid = (status || "").toLowerCase() === "paid";
+    const paidAdvance = num(advance);
+    const balance = isPaid ? 0 : Math.max(0, grandTotal - paidAdvance);
+    const customerLines = [form.businessName, form.address, form.phone, form.email]
+      .filter(Boolean)
+      .map((line: unknown) => `<div>${escapeReceipt(line)}</div>`)
+      .join("");
+    const itemRows = validItems.map((item, index) => {
+      const options = (item.selectedOptions || [])
+        .map(option => `${option.groupTitle || "Option"}: ${option.choiceName || "Selected"}`)
+        .join(", ");
+      const detail = [options, item.notes].filter(Boolean).map(value => `<div class="muted wrap">${escapeReceipt(value)}</div>`).join("");
+      return `<tr><td class="item"><strong>${index + 1}. ${escapeReceipt(item.description)}</strong>${detail}<div class="muted">${escapeReceipt(item.qty)} × ${escapeReceipt(rs(num(item.unitPrice)))}</div></td><td class="amount">${escapeReceipt(rs(item.qty * num(item.unitPrice)))}</td></tr>`;
+    }).join("");
+    const summaryRow = (label: string, amount: number, className = "") =>
+      `<div class="summary-row ${className}"><span>${escapeReceipt(label)}</span><strong>${escapeReceipt(rs(amount))}</strong></div>`;
+
+    receipt.document.open();
+    receipt.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Invoice ${escapeReceipt(invoiceNo)}</title>
+<style>
+@page{size:${widthMm}mm auto;margin:0}*{box-sizing:border-box}html,body{width:${widthMm}mm;min-width:${widthMm}mm;margin:0;padding:0;background:#fff;color:#000}body{font-family:Arial,Helvetica,sans-serif;font-size:${thermalWidth === "58" ? 10 : 11}px;line-height:1.35;font-variant-numeric:tabular-nums}.receipt{width:${widthMm}mm;padding:${thermalWidth === "58" ? 3 : 4}mm;overflow:hidden}.center{text-align:center}.brand{font-size:${thermalWidth === "58" ? 16 : 19}px;font-weight:900;letter-spacing:.5px;overflow-wrap:anywhere}.tagline{margin-top:1mm;font-size:.92em}.meta{margin-top:2mm}.rule{border-top:1px dashed #000;margin:2.5mm 0}.section-title{margin-bottom:1mm;font-weight:800;text-transform:uppercase;letter-spacing:.7px}.customer-name{font-size:1.15em;font-weight:800;overflow-wrap:anywhere}.wrap{overflow-wrap:anywhere;word-break:break-word}table{width:100%;border-collapse:collapse;table-layout:fixed}td{vertical-align:top;padding:1.4mm 0;border-bottom:1px dotted #aaa}td.item{width:68%;padding-right:2mm;overflow-wrap:anywhere}td.amount{width:32%;text-align:right;white-space:nowrap;font-weight:700}.muted{color:#333;font-size:.88em;font-weight:400}.summary{margin-top:2mm}.summary-row{display:flex;justify-content:space-between;gap:2mm;padding:.7mm 0}.summary-row.total{border-top:1px solid #000;margin-top:1mm;padding-top:1.5mm;font-size:1.12em}.summary-row.balance{border:1.5px solid #000;margin-top:1.5mm;padding:1.5mm;font-size:1.12em}.status{display:inline-block;margin-top:2mm;border:1px solid #000;padding:1mm 2mm;font-weight:800}.footer{margin-top:3mm;font-size:.9em}@media print{html,body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+</style></head><body><main class="receipt"><header class="center"><div class="brand">${escapeReceipt(biz)}</div>${tagline ? `<div class="tagline wrap">${escapeReceipt(tagline)}</div>` : ""}<div class="meta wrap">${[bizAddr, bizPhone, bizEmail, website].filter(Boolean).map(value => escapeReceipt(value)).join("<br>")}</div></header><div class="rule"></div><div class="center"><strong>INVOICE</strong><br>${escapeReceipt(invoiceNo)}<br>${escapeReceipt(format(now, "dd MMM yyyy, hh:mm a"))}</div>${linkedOrderId ? `<div class="center muted wrap">Order: ${escapeReceipt(linkedOrderId)}</div>` : ""}<div class="rule"></div><section><div class="section-title">Bill to</div><div class="customer-name">${escapeReceipt(form.clientName || "Walk-in customer")}</div>${customerLines}</section><div class="rule"></div><table><tbody>${itemRows || `<tr><td>No line items</td><td></td></tr>`}</tbody></table><section class="summary">${summaryRow("Subtotal", subtotal)}${shippingAmt > 0 ? summaryRow(`Shipping${shippingLabels[shipping] ? ` (${shippingLabels[shipping]})` : ""}`, shippingAmt) : ""}${paidAdvance > 0 ? summaryRow("Advance paid", -paidAdvance) : ""}${summaryRow("Grand total", grandTotal, "total")}${summaryRow(isPaid ? "Balance (PAID)" : "Balance due", balance, "balance")}</section><div class="center"><span class="status">${escapeReceipt(badge.label)}</span></div>${form.additionalNotes ? `<div class="rule"></div><div class="wrap"><strong>Note:</strong> ${escapeReceipt(form.additionalNotes)}</div>` : ""}<footer class="footer center"><div class="rule"></div>Thank you for choosing ${escapeReceipt(biz)}.</footer></main></body></html>`);
+    receipt.document.close();
+    receipt.focus();
+    window.setTimeout(() => {
+      if (receipt.closed) return;
+      receipt.print();
+      receipt.close();
+    }, 250);
+  };
+
   /* ─── Shared page shell styles ─── */
   const pageShell: React.CSSProperties = {
     width: A4_W, height: A4_H, background: "#fff",
@@ -512,6 +565,25 @@ export function InvoicePreview({
                 className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold rounded-xl disabled:opacity-60 hover:opacity-90 whitespace-nowrap shrink-0">
                 <ImageDown size={13} /> {downloadingZip ? "Zipping…" : "JPG ZIP"}
               </button>
+            </div>
+            {/* Dedicated receipt-printer controls; separate from A4 exports. */}
+            <div className="rounded-xl border border-violet-200 bg-violet-50 px-3 py-2.5 sm:flex sm:items-center sm:justify-between sm:gap-3">
+              <div className="flex items-start gap-2 min-w-0">
+                <Printer size={15} className="mt-0.5 text-violet-700 shrink-0" />
+                <div>
+                  <div className="text-xs font-extrabold text-violet-950">Thermal / Bill Printer</div>
+                  <p className="text-[10px] leading-4 text-violet-800">Compact invoice automatically fits the selected paper width.</p>
+                </div>
+              </div>
+              <div className="mt-2 sm:mt-0 flex items-center gap-2 shrink-0">
+                <label htmlFor="thermal-paper-width" className="sr-only">Thermal paper width</label>
+                <select id="thermal-paper-width" value={thermalWidth} onChange={event => setThermalWidth(event.target.value as ThermalWidth)} className="h-9 rounded-lg border border-violet-300 bg-white px-2.5 text-xs font-bold text-violet-950 outline-none focus:ring-2 focus:ring-violet-300">
+                  <option value="80">80 mm</option><option value="58">58 mm</option>
+                </select>
+                <button onClick={printThermalInvoice} className="h-9 flex items-center gap-1.5 rounded-lg bg-violet-950 px-3 text-xs font-bold text-white hover:bg-violet-900">
+                  <Printer size={13} /> Print receipt
+                </button>
+              </div>
             </div>
           </div>
 
