@@ -379,7 +379,7 @@ export default function CRMProjects() {
           <button
             type="button"
             onClick={openNew}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-semibold shadow-sm hover:opacity-90 transition-opacity"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold shadow-sm hover:opacity-90 transition-opacity"
           >
             <Plus size={14} /> New Project
           </button>
@@ -389,14 +389,14 @@ export default function CRMProjects() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         {[
-          { label: "Total Projects", val: stats.total, gradient: "from-pink-500 to-purple-600" },
-          { label: "Active", val: stats.active, gradient: "from-purple-500 to-purple-600" },
-          { label: "Total Value", val: rs(stats.totalValue), gradient: "from-blue-500 to-blue-600" },
-          { label: "Amount Paid", val: rs(stats.amountPaid), gradient: "from-green-500 to-green-600" },
-          { label: "Balance", val: rs(stats.totalValue - stats.amountPaid), gradient: (stats.totalValue - stats.amountPaid) > 0 ? "from-red-500 to-orange-500" : "from-green-500 to-green-600" },
+          { label: "Total Projects", val: stats.total },
+          { label: "Active", val: stats.active },
+          { label: "Total Value", val: rs(stats.totalValue) },
+          { label: "Amount Paid", val: rs(stats.amountPaid) },
+          { label: "Balance", val: rs(stats.totalValue - stats.amountPaid) },
         ].map((c, i, arr) => (
           <div key={c.label} className={`bg-white border border-gray-100 rounded-xl px-4 py-3.5 shadow-sm${i === arr.length - 1 ? " col-span-2 sm:col-span-1" : ""}`}>
-            <div className={`font-bold bg-gradient-to-r ${c.gradient} bg-clip-text text-transparent whitespace-nowrap`} style={{ fontSize: "clamp(0.9rem,4.5vw,1.5rem)" }}>{c.val}</div>
+            <div className="font-bold text-foreground whitespace-nowrap" style={{ fontSize: "clamp(0.9rem,4.5vw,1.5rem)" }}>{c.val}</div>
             <div className="text-xs sm:text-sm text-gray-400 mt-0.5">{c.label}</div>
           </div>
         ))}
@@ -410,9 +410,9 @@ export default function CRMProjects() {
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
           <div className="flex gap-1 flex-wrap flex-1">
-            <button onClick={() => setStatusFilter("all")} className={`px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold rounded-lg border transition-all ${statusFilter === "all" ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white border-transparent" : "border-gray-200 text-gray-600 hover:border-pink-200"}`}>All</button>
+            <button onClick={() => setStatusFilter("all")} className={`px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold rounded-lg border transition-all ${statusFilter === "all" ? "bg-primary text-primary-foreground border-primary" : "border-gray-200 text-gray-600 hover:border-primary/40"}`}>All</button>
             {STATUS_OPTIONS.map(s => (
-              <button key={s} onClick={() => setStatusFilter(s)} className={`px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold rounded-lg border capitalize transition-all ${statusFilter === s ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white border-transparent" : "border-gray-200 text-gray-600 hover:border-pink-200"}`}>
+              <button key={s} onClick={() => setStatusFilter(s)} className={`px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold rounded-lg border capitalize transition-all ${statusFilter === s ? "bg-primary text-primary-foreground border-primary" : "border-gray-200 text-gray-600 hover:border-primary/40"}`}>
                 {s.replace("_", " ")}
               </button>
             ))}
@@ -661,7 +661,7 @@ export default function CRMProjects() {
 
                 <div className="flex gap-3 pt-1">
                   <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50">Cancel</button>
-                  <button type="submit" disabled={saving} className="flex-1 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl text-sm font-bold hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2">
+                  <button type="submit" disabled={saving} className="flex-1 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-bold hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2">
                     {saving ? "Saving..." : <><Check size={14} /> {editing ? "Save Changes" : "Create Project"}</>}
                   </button>
                 </div>
@@ -714,7 +714,7 @@ export default function CRMProjects() {
                     <button
                       type="submit"
                       disabled={typeSaving}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs sm:text-sm font-bold rounded-lg hover:opacity-90 disabled:opacity-60"
+                      className="flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-xs sm:text-sm font-bold rounded-lg hover:opacity-90 disabled:opacity-60"
                     >
                       {typeSaving ? <Loader2 size={13} className="animate-spin" /> : typeEditing ? <Edit2 size={13} /> : <Plus size={13} />}
                       {typeSaving ? "Saving..." : typeEditing ? "Update" : "Add Service Type"}
@@ -792,4 +792,3 @@ export default function CRMProjects() {
     </div>
   );
 }
-
