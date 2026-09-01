@@ -961,7 +961,7 @@ export default function AdminClients() {
                           <div key={inv.id} className="flex items-center gap-2 sm:gap-3 px-3 py-2.5 bg-gray-50 hover:bg-amber-50 border border-gray-100 rounded-xl transition-colors">
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-[11px] font-mono text-gray-400 truncate">{inv.invoiceNumber}</span>
+                                <span className="admin-record-id text-[11px] font-mono truncate">{inv.invoiceNumber}</span>
                                 <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold capitalize ${invoiceStatusStyle[inv.status] || "bg-gray-100 text-gray-600"}`}>
                                   {inv.status}
                                 </span>

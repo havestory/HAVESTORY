@@ -746,7 +746,7 @@ export default function AdminInvoices() {
                         aria-label={`Select invoice ${inv.invoiceNumber}`}
                       />
                     </td>
-                    <td className="px-4 py-3 font-mono text-amber-500 text-xs font-bold whitespace-nowrap">{inv.invoiceNumber}</td>
+                    <td className="admin-record-id px-4 py-3 font-mono text-xs font-bold whitespace-nowrap">{inv.invoiceNumber}</td>
                     <td className="px-4 py-3 font-medium text-gray-800">{inv.clientName}</td>
                     <td className="px-4 py-3 text-gray-400 text-xs">
                       {inv.orderId ? (
@@ -826,7 +826,7 @@ export default function AdminInvoices() {
                       aria-label={`Select invoice ${inv.invoiceNumber}`}
                     />
                     <div className="min-w-0 flex-1">
-                      <div className="font-mono text-amber-500 text-[11px] font-bold truncate">{inv.invoiceNumber}</div>
+                      <div className="admin-record-id font-mono text-[11px] font-bold truncate">{inv.invoiceNumber}</div>
                       <div className="font-semibold text-gray-900 text-sm mt-0.5 truncate">{inv.clientName}</div>
                       {inv.orderId && (
                         <div className="font-mono text-[10px] text-gray-500 bg-gray-50 inline-block px-1.5 py-0.5 rounded mt-1">{inv.orderId}</div>
