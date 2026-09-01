@@ -6,9 +6,7 @@
   color: hsl(var(--foreground)) !important;
 }
 [data-admin-panel][data-admin-theme="light"] main {
-  background:
-    radial-gradient(circle at 92% 0%, hsl(var(--secondary) / .10), transparent 24rem),
-    hsl(var(--background)) !important;
+  background: hsl(var(--background)) !important;
 }
 [data-admin-panel][data-admin-theme="light"] main > header {
   border-bottom-color: hsl(var(--border) / .72) !important;
@@ -23,9 +21,7 @@
   color: hsl(var(--foreground)) !important;
 }
 [data-admin-panel][data-admin-theme="dark"] main {
-  background:
-    radial-gradient(circle at 92% 0%, hsl(var(--secondary) / .10), transparent 24rem),
-    hsl(var(--background)) !important;
+  background: hsl(var(--background)) !important;
   color: hsl(var(--foreground)) !important;
 }
 [data-admin-panel][data-admin-theme="dark"] main > header {
@@ -82,4 +78,23 @@
 [data-admin-panel] aside :is(input,textarea,select) {
   color: hsl(var(--foreground)) !important;
   background: hsl(var(--card)) !important;
+}
+
+/* Final admin visual policy: solid surfaces only. Legacy Tailwind gradient
+   utilities remain in old screens, but are deliberately flattened here. */
+[data-admin-panel] [class*="bg-gradient"] {
+  background-image: none !important;
+}
+[data-admin-panel] :is(button,a,[role="button"])[class*="bg-gradient"],
+[data-admin-panel] [class*="bg-gradient"][class~="text-white"] {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+[data-admin-panel] [class*="bg-gradient"][class*="bg-clip-text"] {
+  background: none !important;
+  color: hsl(var(--foreground)) !important;
+  -webkit-text-fill-color: hsl(var(--foreground)) !important;
+}
+[data-admin-panel] main > div {
+  background-image: none !important;
 }
