@@ -27,9 +27,9 @@ const PAD  = 40;    // horizontal + top padding
 const FOOT = 50;    // footer bar height
 const ITEMS_PER_PAGE = 10;
 
-const PINK   = "#9a6b3f";
-const PURPLE = "#292524";
-const GRAD   = "linear-gradient(90deg,#9a6b3f,#292524)";
+const PINK   = "#6b2f7b";
+const PURPLE = "#2f1638";
+const GRAD   = "linear-gradient(90deg,#6b2f7b,#c5963f)";
 
 /* ─── Rough height estimates (px) used for pagination decisions ─── */
 const H_FULL_HEADER  = 78;   // logo + address block
@@ -454,7 +454,7 @@ export function InvoicePreview({
 
   const BillToBlock = () => (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))", gap: 12, margin: "12px 0" }}>
-      <div style={{ background: "#fffbeb", borderRadius: 10, padding: "12px 14px", border: `1px solid #d6b98c` }}>
+      <div style={{ background: "#fbf7fc", borderRadius: 10, padding: "12px 14px", border: `1px solid #dfcfe4` }}>
         <div style={{ fontSize: 8.5, fontWeight: 700, color: PINK, letterSpacing: 2, textTransform: "uppercase", marginBottom: 7 }}>BILL TO</div>
         <div style={{ fontWeight: 800, fontSize: 14.5, color: "#111" }}>{form.clientName || "—"}</div>
         {form.businessName && <div style={{ fontSize: 12, color: "#555", marginTop: 2 }}>{form.businessName}</div>}
@@ -462,7 +462,7 @@ export function InvoicePreview({
         {form.phone && <div style={{ fontSize: 12, color: "#777" }}>{form.phone}</div>}
         {form.email && <div style={{ fontSize: 12, color: "#777" }}>{form.email}</div>}
       </div>
-      <div style={{ background: "#f5f3ff", borderRadius: 10, padding: "12px 14px", border: "1px solid #ddd6fe" }}>
+      <div style={{ background: "#fffaf0", borderRadius: 10, padding: "12px 14px", border: "1px solid #ead7ac" }}>
         <div style={{ fontSize: 8.5, fontWeight: 700, color: PURPLE, letterSpacing: 2, textTransform: "uppercase", marginBottom: 7 }}>ORDER DETAILS</div>
         <div style={{ fontSize: 11.5, color: "#555", lineHeight: 1.9 }}>
           <div><span style={{ color: "#999" }}>Invoice No: </span><strong style={{ color: "#333" }}>{invoiceNo}</strong></div>
@@ -478,7 +478,7 @@ export function InvoicePreview({
   return (
     <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm overflow-y-auto">
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[860px] flex flex-col" style={{ maxHeight: "calc(100vh - 32px)" }}>
+        <div className="bg-[#fffdf9] rounded-[28px] border border-[#dfcfe4] shadow-2xl w-full max-w-[860px] flex flex-col" style={{ maxHeight: "calc(100vh - 32px)" }}>
 
           {/* ── Toolbar ── */}
           <div className="px-4 py-3 border-b border-gray-100 flex-shrink-0 space-y-2">

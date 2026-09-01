@@ -163,10 +163,11 @@ const generateTrackingToken = () => randomBytes(24).toString("base64url");
 async function requireOrderAccess(req: any, res: any, next: any) {
   try {
     const accessKey = String(req.params.orderId || "").slice(0, 100);
-    const [order] = await db.select().from(ordersTable).where(eq(ordersTable.trackingToken, accessKey));
-    if (!order) return res.status(404).json({ error: "Tracking link not found" });
+    const normalizedOrderId = accessKey.trim().toUpperCase();
+    const [order] = await db.select().from(ordersTable).where(eq(ordersTable.orderId, normalizedOrderId));
+    if (!order) return res.status(404).json({ error: "Order ID not found" });
     req.trackedOrder = order;
-    req.trackingAccessKey = accessKey;
+    req.trackingAccessKey = order.orderId;
     return next();
   } catch (err) {
     req.log.error(err);
@@ -582,7 +583,7 @@ router.post("/", async (req, res) => {
             .replace(/^https?:?\/+/i, "")
             .replace(/\/+$/, "");
           const trackingUrl = website
-            ? `https://${website}/track-order?token=${encodeURIComponent(trackingToken)}`
+            ? `https://${website}/track-order?id=${encodeURIComponent(orderId)}`
             : "";
 
           await sendCustomerConfirmationEmail({
@@ -834,7 +835,6 @@ router.get("/track/:orderId", requireOrderAccess, async (req: any, res) => {
 
     res.json({
       orderId: order.orderId,
-      trackingToken: req.trackingAccessKey,
       customerName: order.customerName,
       status: order.status,
       estimatedCompletion: order.estimatedCompletion,
@@ -1307,7 +1307,7 @@ router.put("/:id", requireAdmin, async (req, res) => {
               .replace(/^https?:?\/+/i, "")
               .replace(/\/+$/, "");
             const trackingUrl = website
-              ? `https://${website}/track-order?token=${encodeURIComponent(order.trackingToken)}`
+              ? `https://${website}/track-order?id=${encodeURIComponent(order.orderId)}`
               : "";
 
             // Build the item payload from stored order items, including per-item notes

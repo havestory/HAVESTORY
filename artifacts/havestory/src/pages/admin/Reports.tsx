@@ -296,8 +296,8 @@ export default function Reports() {
   return (
     <div data-admin-insights="reports" className="admin-insights-page space-y-6 animate-in fade-in slide-in-from-bottom-4">
       {/* ── Print Header (hidden on screen) ─────────────────────────── */}
-      <div ref={printRef} className="hidden print:block">
-      <div className="mb-6 border-b border-black pb-4 text-center">
+      <div ref={printRef} className="hidden print:block pb-report-document">
+      <div className="pb-report-letterhead mb-6 border-b border-black pb-4 text-center">
         {settings?.logoUrl && <img src={settings.logoUrl} alt="Logo" className="h-10 mx-auto mb-2" />}
         <h1 className="text-xl font-bold">{businessName}</h1>
         <h2 className="text-base font-semibold mt-1">

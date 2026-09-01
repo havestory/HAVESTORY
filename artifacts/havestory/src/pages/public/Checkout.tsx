@@ -366,7 +366,7 @@ export default function Checkout() {
               <strong className="mt-2 block text-xl tracking-[0.08em] text-[var(--glass-ink)]">{submittedOrderId || "Created successfully"}</strong>
             </div>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              {submittedOrderId && <Link href={`/track-order?token=${encodeURIComponent(window.sessionStorage.getItem('havestory-tracking-token') || '')}`} className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[var(--glass-saffron)] px-6 text-xs font-black uppercase tracking-[0.15em] text-[var(--glass-ink)] shadow-[0_12px_28px_rgba(228,185,95,0.24)]">Track &amp; confirm payment <ArrowRight size={15} /></Link>}
+              {submittedOrderId && <Link href={`/track-order?id=${encodeURIComponent(submittedOrderId)}`} className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[var(--glass-saffron)] px-6 text-xs font-black uppercase tracking-[0.15em] text-[var(--glass-ink)] shadow-[0_12px_28px_rgba(228,185,95,0.24)]">Track &amp; confirm payment <ArrowRight size={15} /></Link>}
               <Link href="/store" className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-[rgba(7,26,43,0.16)] bg-white/35 px-6 text-xs font-black uppercase tracking-[0.15em] text-[var(--glass-ink)]">Continue browsing</Link>
             </div>
           </motion.section>

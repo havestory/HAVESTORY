@@ -25,7 +25,7 @@ export default function TrackOrder() {
   // Allow the order link from checkout/admin to open this page already populated.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const linkedOrder = (params.get('token') || params.get('id') || params.get('order') || '').trim();
+    const linkedOrder = (params.get('id') || params.get('order') || '').trim();
     if (linkedOrder) setOrderId(linkedOrder);
   }, []);
 
@@ -43,7 +43,7 @@ export default function TrackOrder() {
 
   useEffect(() => {
     if (isError) {
-      const message = 'We could not open that tracking link. Check the secure tracking code and try again.';
+      const message = 'We could not find that order. Check the Order ID and try again.';
       setSearchError(message);
       toast({ title: 'Order not found', description: message, variant: 'destructive' });
     }
@@ -62,7 +62,7 @@ export default function TrackOrder() {
     e.preventDefault();
     const nextId = orderId.trim();
     if (!nextId) {
-      const message = 'Please enter your secure tracking code.';
+      const message = 'Please enter your Order ID.';
       setSearchError(message);
       toast({ title: 'Almost there', description: message, variant: 'destructive' });
       return;
@@ -93,7 +93,7 @@ export default function TrackOrder() {
       body.append('file', proofFile);
       body.append('paymentType', paymentType);
       body.append('paymentAmount', String(amount));
-      const response = await fetch(`/api/orders/track/${encodeURIComponent((tracking as any).trackingToken || searchId)}/payment-proof`, { method: 'POST', body });
+      const response = await fetch(`/api/orders/track/${encodeURIComponent((tracking as any).orderId || searchId)}/payment-proof`, { method: 'POST', body });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Could not upload payment proof');
       setProofFile(null);
@@ -116,7 +116,7 @@ export default function TrackOrder() {
     setPaymentActionLoading(true);
     setPaymentMessage(null);
     try {
-      const response = await fetch(`/api/orders/track/${encodeURIComponent((tracking as any).trackingToken || searchId)}/payment-confirm`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paymentType, paymentAmount: amount }) });
+      const response = await fetch(`/api/orders/track/${encodeURIComponent((tracking as any).orderId || searchId)}/payment-confirm`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paymentType, paymentAmount: amount }) });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Could not confirm payment');
       setPaymentMessage('Payment confirmation sent. Your order will move forward after studio approval.');
@@ -164,14 +164,14 @@ export default function TrackOrder() {
           <span>ORDER JOURNEY</span>
           <h1>Track your order.</h1>
           <p>
-            Open your private tracking link or enter its secure tracking code.
+            Enter the Order ID from your confirmation message.
           </p>
 
           <form onSubmit={handleSearch} className="hs-track-form">
             <label className="hs-track-field" htmlFor="public-order-id">
               <Search aria-hidden="true" />
-              <span className="sr-only">Secure tracking code</span>
-              <Input id="public-order-id" value={orderId} onChange={(e) => { setOrderId(e.target.value); setSearchError(null); }} placeholder="Secure tracking code" aria-label="Secure tracking code" className="hs-track-input" />
+              <span className="sr-only">Order ID</span>
+              <Input id="public-order-id" value={orderId} onChange={(e) => { setOrderId(e.target.value.toUpperCase()); setSearchError(null); }} placeholder="HS-SEPXXXXXXXXXX" aria-label="Order ID" className="hs-track-input" />
             </label>
             <Button type="submit" className="hs-track-submit">
               Track
@@ -197,7 +197,7 @@ export default function TrackOrder() {
         {isError && (
           <div className="hs-track-state hs-track-error">
             <p className="font-medium mb-2">Let’s try that again</p>
-            <p className="text-sm">We couldn’t find an order matching that secure tracking code.</p>
+            <p className="text-sm">We couldn’t find an order matching that Order ID.</p>
           </div>
         )}
 

@@ -251,8 +251,8 @@ export default function Finance() {
   return (
     <div data-admin-insights="finance" className="admin-insights-page space-y-6 animate-in fade-in slide-in-from-bottom-4">
       {/* ── Print layout (A4, hidden on screen) ─────────────────────── */}
-      <div ref={printRef} className="hidden print:block print-report">
-        <div className="text-center mb-6 border-b border-black pb-4">
+      <div ref={printRef} className="hidden print:block print-report pb-report-document">
+        <div className="pb-report-letterhead text-center mb-6 border-b border-black pb-4">
           {settings?.logoUrl && (
             <img src={settings.logoUrl} alt="Logo" className="h-12 mx-auto mb-2" />
           )}
