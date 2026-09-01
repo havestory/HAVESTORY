@@ -405,9 +405,6 @@ export default function TrackOrder() {
                           </Button>
                         ))}
                       </div>
-                      <Button type="button" className="w-full gap-2" onClick={() => setShowInvoice(true)}>
-                        <Eye className="h-4 w-4" /> View &amp; download invoice
-                      </Button>
                     </CardContent>
                   </Card>
                 )}
@@ -431,6 +428,9 @@ export default function TrackOrder() {
                           </span>
                         </div>
                       </div>
+                      <Button type="button" className="w-full gap-2 rounded-xl bg-gradient-to-r from-[#6b2f7b] to-[#2f1638] text-white" onClick={() => setShowInvoice(true)}>
+                        <Eye className="h-4 w-4" /> View / Download PDF
+                      </Button>
                     </CardContent>
                   </Card>
                 )}
