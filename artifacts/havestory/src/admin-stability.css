@@ -141,3 +141,32 @@
 [data-admin-panel] main > div {
   background-image: none !important;
 }
+
+/* One elevation system only. This replaces stacked page, utility and legacy
+   shadows that previously produced dark halos and apparent overlaps. */
+[data-admin-panel] {
+  --admin-shadow-card: 0 7px 20px rgb(43 23 56 / .07);
+  --admin-shadow-float: 0 16px 42px rgb(27 15 36 / .16);
+}
+[data-admin-panel] main :is(.shadow-sm,.shadow,.shadow-md,.shadow-lg,.shadow-xl,[class*="shadow-["]):not(button):not(a):not(input):not(textarea):not(select) {
+  box-shadow: var(--admin-shadow-card) !important;
+}
+[data-admin-panel] main :is(.rounded-lg,.rounded-xl,.rounded-2xl,.rounded-3xl).border {
+  box-shadow: var(--admin-shadow-card) !important;
+}
+[data-admin-panel] main :is(button,a,input,textarea,select)[class*="shadow"] {
+  box-shadow: none !important;
+}
+[data-admin-panel] main :is(button,a):hover {
+  filter: none;
+}
+[data-admin-panel] main > header {
+  box-shadow: 0 5px 16px rgb(43 23 56 / .055) !important;
+}
+[data-admin-panel] :is([role="dialog"],.invoice-modal-shell) {
+  box-shadow: var(--admin-shadow-float) !important;
+}
+[data-admin-panel] main :is(.shadow-sm,.shadow,.shadow-md,.shadow-lg,.shadow-xl,[class*="shadow-"])::before,
+[data-admin-panel] main :is(.shadow-sm,.shadow,.shadow-md,.shadow-lg,.shadow-xl,[class*="shadow-"])::after {
+  box-shadow: none !important;
+}
