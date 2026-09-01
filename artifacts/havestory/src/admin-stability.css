@@ -1,16 +1,16 @@
 /* Final admin cascade guard.
    Legacy utility classes remain supported, but the selected theme owns the
    workspace surfaces and text instead of late hard-coded light colours. */
-[data-admin-theme="light"] [data-admin-panel] {
+[data-admin-panel][data-admin-theme="light"] {
   background: hsl(var(--background)) !important;
   color: hsl(var(--foreground)) !important;
 }
-[data-admin-theme="light"] [data-admin-panel] main {
+[data-admin-panel][data-admin-theme="light"] main {
   background:
     radial-gradient(circle at 92% 0%, hsl(var(--secondary) / .10), transparent 24rem),
     hsl(var(--background)) !important;
 }
-[data-admin-theme="light"] [data-admin-panel] main > header {
+[data-admin-panel][data-admin-theme="light"] main > header {
   border-bottom-color: hsl(var(--border) / .72) !important;
   background: hsl(var(--card) / .82) !important;
   box-shadow: 0 10px 30px hsl(var(--foreground) / .045) !important;
@@ -18,47 +18,68 @@
   backdrop-filter: blur(20px) saturate(1.15) !important;
 }
 
-[data-admin-theme="dark"] [data-admin-panel] {
+[data-admin-panel][data-admin-theme="dark"] {
   background: hsl(var(--background)) !important;
   color: hsl(var(--foreground)) !important;
 }
-[data-admin-theme="dark"] [data-admin-panel] main {
+[data-admin-panel][data-admin-theme="dark"] main {
   background:
     radial-gradient(circle at 92% 0%, hsl(var(--secondary) / .10), transparent 24rem),
     hsl(var(--background)) !important;
   color: hsl(var(--foreground)) !important;
 }
-[data-admin-theme="dark"] [data-admin-panel] main > header {
+[data-admin-panel][data-admin-theme="dark"] main > header {
   border-bottom-color: hsl(var(--border) / .78) !important;
   background: hsl(var(--card) / .86) !important;
   box-shadow: 0 10px 30px rgb(0 0 0 / .16) !important;
   -webkit-backdrop-filter: blur(20px) saturate(1.1) !important;
   backdrop-filter: blur(20px) saturate(1.1) !important;
 }
-[data-admin-theme="dark"] [data-admin-panel] main > header .bg-card,
-[data-admin-theme="dark"] [data-admin-panel] main > header .bg-background {
+[data-admin-panel][data-admin-theme="dark"] main > header .bg-card,
+[data-admin-panel][data-admin-theme="dark"] main > header .bg-background {
   background: hsl(var(--card) / .9) !important;
 }
-[data-admin-theme="dark"] [data-admin-panel] main :where(.bg-white,.bg-gray-50,.bg-gray-100,.bg-slate-50,.bg-slate-100) {
+[data-admin-panel][data-admin-theme="dark"] main :where(.bg-white,.bg-gray-50,.bg-gray-100,.bg-slate-50,.bg-slate-100) {
   background-color: hsl(var(--card)) !important;
 }
-[data-admin-theme="dark"] [data-admin-panel] main :where(.border-gray-100,.border-gray-200,.border-slate-100,.border-slate-200) {
+[data-admin-panel][data-admin-theme="dark"] main :where(.border-gray-100,.border-gray-200,.border-slate-100,.border-slate-200) {
   border-color: hsl(var(--border)) !important;
 }
-[data-admin-theme="dark"] [data-admin-panel] main :where(input,textarea,select) {
+[data-admin-panel][data-admin-theme="dark"] main :where(input,textarea,select) {
   border-color: hsl(var(--input)) !important;
   background: hsl(var(--card)) !important;
   color: hsl(var(--foreground)) !important;
 }
-[data-admin-theme="dark"] [data-admin-panel] main :where(input,textarea)::placeholder {
+[data-admin-panel][data-admin-theme="dark"] main :where(input,textarea)::placeholder {
   color: hsl(var(--muted-foreground)) !important;
 }
-[data-admin-theme="dark"] [data-admin-panel] main :where(.text-gray-900,.text-gray-800,.text-slate-950,.text-slate-900,.text-slate-800) {
+[data-admin-panel][data-admin-theme="dark"] main :where(.text-gray-900,.text-gray-800,.text-slate-950,.text-slate-900,.text-slate-800) {
   color: hsl(var(--foreground)) !important;
 }
-[data-admin-theme="dark"] [data-admin-panel] main :where(.text-gray-700,.text-gray-600,.text-slate-700,.text-slate-600) {
+[data-admin-panel][data-admin-theme="dark"] main :where(.text-gray-700,.text-gray-600,.text-slate-700,.text-slate-600) {
   color: hsl(var(--foreground) / .84) !important;
 }
-[data-admin-theme="dark"] [data-admin-panel] main :where(.text-gray-500,.text-gray-400,.text-gray-300,.text-slate-500,.text-slate-400,.text-slate-300) {
+[data-admin-panel][data-admin-theme="dark"] main :where(.text-gray-500,.text-gray-400,.text-gray-300,.text-slate-500,.text-slate-400,.text-slate-300) {
   color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Surface-aware contrast guard. Dark operational controls and panels must not
+   inherit charcoal text from a light page or from legacy utility classes. */
+[data-admin-panel] main :is(.bg-black,.bg-gray-950,.bg-gray-900,.bg-slate-950,.bg-slate-900,.bg-zinc-950,.bg-zinc-900,.bg-neutral-950,.bg-neutral-900,.bg-stone-950,.bg-stone-900) {
+  color: #fff !important;
+}
+[data-admin-panel] main :is(.bg-black,.bg-gray-950,.bg-gray-900,.bg-slate-950,.bg-slate-900,.bg-zinc-950,.bg-zinc-900,.bg-neutral-950,.bg-neutral-900,.bg-stone-950,.bg-stone-900)
+  :is(h1,h2,h3,h4,strong,b,.text-foreground,.text-card-foreground,.text-gray-900,.text-gray-800,.text-slate-950,.text-slate-900,.text-slate-800) {
+  color: #fff !important;
+}
+[data-admin-panel] main :is(.bg-black,.bg-gray-950,.bg-gray-900,.bg-slate-950,.bg-slate-900,.bg-zinc-950,.bg-zinc-900,.bg-neutral-950,.bg-neutral-900,.bg-stone-950,.bg-stone-900)
+  :is(p,small,.text-muted-foreground,.text-gray-700,.text-gray-600,.text-gray-500,.text-gray-400,.text-slate-700,.text-slate-600,.text-slate-500,.text-slate-400) {
+  color: rgb(226 232 240 / .82) !important;
+}
+[data-admin-panel] aside :is(h1,h2,h3,h4,strong,b,a,button,span,p,small,svg) {
+  text-shadow: none;
+}
+[data-admin-panel] aside :is(input,textarea,select) {
+  color: hsl(var(--foreground)) !important;
+  background: hsl(var(--card)) !important;
 }
