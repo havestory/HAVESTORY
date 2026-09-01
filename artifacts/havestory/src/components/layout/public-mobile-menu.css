@@ -14,3 +14,17 @@
   background: currentColor;
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
 }
+
+@media (max-width: 780px) {
+  [data-public-site] .hsx-shell-nav { min-height: 64px !important; padding: 0 10px !important; border: 1px solid rgba(255,255,255,.82) !important; border-radius: 20px !important; background: linear-gradient(145deg,rgba(255,255,255,.82),rgba(247,239,250,.68)) !important; box-shadow: 0 16px 38px rgba(49,23,61,.14),inset 0 1px 0 rgba(255,255,255,.98) !important; -webkit-backdrop-filter: blur(24px) saturate(1.45) !important; backdrop-filter: blur(24px) saturate(1.45) !important; }
+  [data-public-site] .hsx-shell-brand { gap: 9px !important; max-width: calc(100% - 98px) !important; }
+  [data-public-site] .hsx-shell-brand img,
+  [data-public-site] .hsx-shell-brand .hsx-shell-monogram { width: 40px !important; height: 40px !important; max-width: 40px !important; max-height: 40px !important; flex: 0 0 40px !important; border-radius: 13px !important; box-shadow: 0 9px 22px rgba(71,34,86,.18) !important; }
+  [data-public-site] .hsx-shell-actions { gap: 7px !important; }
+  [data-public-site] .hsx-mobile-menu-button,
+  [data-public-site] .hsx-header-cart { display: grid !important; place-items: center !important; width: 40px !important; height: 40px !important; min-width: 40px !important; min-height: 40px !important; flex: 0 0 40px !important; padding: 0 !important; border: 1px solid rgba(255,255,255,.9) !important; border-radius: 13px !important; background: linear-gradient(145deg,rgba(255,255,255,.92),rgba(238,225,244,.72)) !important; color: #35183f !important; box-shadow: 0 10px 25px rgba(52,25,65,.13),inset 0 1px 0 #fff,inset 0 -1px 0 rgba(91,47,106,.08) !important; -webkit-backdrop-filter: blur(20px) saturate(1.45) !important; backdrop-filter: blur(20px) saturate(1.45) !important; }
+  [data-public-site] .hsx-liquid-menu-icon { width: 20px !important; height: 16px !important; }
+  [data-public-site] .hsx-liquid-menu-icon i { width: 100% !important; height: 3.25px !important; align-self: center !important; background: #35183f !important; }
+  [data-public-site] .hsx-liquid-menu-icon i:nth-child(2) { width: 100% !important; }
+  [data-public-site] .hsx-header-cart svg { width: 18px !important; height: 18px !important; stroke-width: 2.35 !important; }
+}
