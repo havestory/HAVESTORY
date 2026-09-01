@@ -26,7 +26,11 @@ export default function TrackOrder() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const linkedOrder = (params.get('id') || params.get('order') || '').trim();
-    if (linkedOrder) setOrderId(linkedOrder);
+    if (linkedOrder) {
+      const normalizedOrderId = linkedOrder.toUpperCase();
+      setOrderId(normalizedOrderId);
+      setSearchId(normalizedOrderId);
+    }
   }, []);
 
   const { data: tracking, isLoading, isError, error, refetch } = useTrackOrder(searchId, {
@@ -236,7 +240,7 @@ export default function TrackOrder() {
                     <p className="font-medium">{tracking.customerName}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Estimated Completion</p>
+                    <p className="text-xs text-muted-foreground mb-1">Expected Delivery Handover</p>
                     <p className="font-medium">{tracking.estimatedCompletion ? format(new Date(tracking.estimatedCompletion), 'MMMM d, yyyy') : 'TBD'}</p>
                   </div>
                   {tracking.courierName && (
