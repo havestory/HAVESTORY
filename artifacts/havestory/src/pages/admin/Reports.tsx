@@ -295,16 +295,6 @@ export default function Reports() {
 
   return (
     <div data-admin-insights="reports" className="admin-insights-page space-y-6 animate-in fade-in slide-in-from-bottom-4">
-      {/* ── Print Header (hidden on screen) ─────────────────────────── */}
-      <div ref={printRef} className="hidden print:block pb-report-document">
-      <div className="pb-report-letterhead mb-6 border-b border-black pb-4 text-center">
-        {settings?.logoUrl && <img src={settings.logoUrl} alt="Logo" className="h-10 mx-auto mb-2" />}
-        <h1 className="text-xl font-bold">{businessName}</h1>
-        <h2 className="text-base font-semibold mt-1">
-          {TABS.find(t => t.id === tab)?.label} Report — {fmtDate(from + 'T00:00:00')} to {fmtDate(to + 'T00:00:00')}
-        </h2>
-      </div>
-
       {/* ── Screen UI ─────────────────────────────────────────────────── */}
       <div className="admin-insights-screen print:hidden">
         {/* Page header */}
@@ -448,7 +438,14 @@ export default function Reports() {
       </div>
 
       {/* ── Print table (always rendered, screen: hidden) ─────────────── */}
-      <div>
+      <div ref={printRef} className="hidden print:block pb-report-document">
+        <div className="pb-report-letterhead mb-6 border-b border-black pb-4 text-center">
+          {settings?.logoUrl && <img src={settings.logoUrl} alt="Logo" className="h-10 mx-auto mb-2" />}
+          <h1 className="text-xl font-bold">{businessName}</h1>
+          <h2 className="text-base font-semibold mt-1">
+            {TABS.find(t => t.id === tab)?.label} Report — {fmtDate(from + 'T00:00:00')} to {fmtDate(to + 'T00:00:00')}
+          </h2>
+        </div>
         {tab === 'orders' && <OrdersTable rows={ordersRows} isLoading={false} />}
         {tab === 'invoices' && <InvoicesTable rows={invoicesRows} isLoading={false} />}
         {tab === 'clients' && <ClientsTable rows={clientsRows} isLoading={false} />}
@@ -456,7 +453,6 @@ export default function Reports() {
         <p className="text-xs text-gray-400 mt-6 text-center">
           Printed {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} · {businessName}
         </p>
-      </div>
       </div>
       <A4PrintPortal active={printActive}>
         <div dangerouslySetInnerHTML={{ __html: printRef.current?.innerHTML ?? '' }} />
