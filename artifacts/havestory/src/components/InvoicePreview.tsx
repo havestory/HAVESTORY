@@ -583,6 +583,11 @@ export function InvoicePreview({
                 <button onClick={printThermalInvoice} className="h-9 flex items-center gap-1.5 rounded-lg bg-violet-950 px-3 text-xs font-bold text-white hover:bg-violet-900">
                   <Printer size={13} /> Print receipt
                 </button>
+                {invoiceNumberOverride && status !== "paid" && (
+                  <button onClick={() => { window.location.href = `/admin/pos?invoice=${encodeURIComponent(invoiceNo)}`; }} className="h-9 rounded-lg border border-violet-300 bg-white px-3 text-xs font-bold text-violet-950 hover:bg-violet-100">
+                    Collect via POS
+                  </button>
+                )}
               </div>
             </div>
           </div>

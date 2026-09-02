@@ -81,6 +81,7 @@ const Procurement = lazyWithRecovery(() => import('./pages/admin/Procurement'));
 const ClientVerificationReport = lazyWithRecovery(() => import('./pages/admin/ClientVerificationReport'));
 const StaffVerificationReport = lazyWithRecovery(() => import('./pages/admin/StaffVerificationReport'));
 const ClientAgreementReport = lazyWithRecovery(() => import('./pages/admin/ClientAgreementReport'));
+const POS = lazyWithRecovery(() => import('./pages/admin/POS'));
 
 // Public (unlisted)
 const PriceListView = lazyWithRecovery(() => import('./pages/public/PriceListView'));
@@ -172,6 +173,7 @@ function AdminRoutes() {
           <Route path="/admin/clients"         component={Clients} />
           <Route path="/admin/crm-projects"    component={CRMProjects} />
           <Route path="/admin/invoices"        component={Invoices} />
+          <Route path="/admin/pos"             component={POS} />
           <Route path="/admin/products"        component={Products} />
           <Route path="/admin/services"        component={AdminServices} />
           <Route path="/admin/portfolio"       component={WebsiteEditor} />

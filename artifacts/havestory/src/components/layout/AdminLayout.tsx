@@ -33,6 +33,7 @@ import {
   ChevronRight,
   Command,
   Clock3,
+  BadgeDollarSign,
 } from 'lucide-react';
 import { useAdminLogout, useGetAdminMe } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
@@ -59,7 +60,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
     ['/admin/shipping-labels', 'Shipping Labels'], ['/admin/production-usage', 'Production Usage'],
     ['/admin/website-editor', 'Website Editor'], ['/admin/raw-materials', 'Inventory'],
     ['/admin/price-lists', 'Price Lists'], ['/admin/procurement', 'Procurement'], ['/admin/attendance', 'Attendance'],
-    ['/admin/invoices', 'Invoices'], ['/admin/products', 'Products'], ['/admin/services', 'Services'],
+    ['/admin/invoices', 'Invoices'], ['/admin/pos', 'POS / Counter Sales'], ['/admin/products', 'Products'], ['/admin/services', 'Services'],
     ['/admin/portfolio', 'Portfolio'], ['/admin/reviews', 'Reviews'], ['/admin/messages', 'Messages'],
     ['/admin/notices', 'Notices'], ['/admin/finance', 'Finance'], ['/admin/reports', 'Reports'],
     ['/admin/coupons', 'Coupons'], ['/admin/clients', 'Clients'], ['/admin/orders', 'Orders'],
@@ -144,6 +145,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
               <NavItem href="/admin/clients"         label="Clients"         icon={Users} permission="customers" />
               <NavItem href="/admin/crm-projects"    label="CRM Projects"    icon={FolderKanban} permission="customers" />
               <NavItem href="/admin/invoices"        label="Invoices"        icon={FileText} permission="invoices" />
+              <NavItem href="/admin/pos"             label="POS / Counter Sales" icon={BadgeDollarSign} permission="orders" />
             </div>
 
             <div className="space-y-1">

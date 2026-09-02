@@ -30,6 +30,7 @@ import staffVerificationsRouter, { publicStaffVerificationsRouter } from "./staf
 import clientAgreementsRouter, { publicClientAgreementsRouter } from "./client-agreements";
 import staffProfilesRouter from "./staff-profiles";
 import { orderClientAndDeletionMiddleware } from "./order-client-sync";
+import posRouter from "./pos";
 
 const router: IRouter = Router();
 
@@ -71,5 +72,6 @@ router.use("/price-lists", priceListsRouter);
 router.use("/shipping-labels", shippingLabelsRouter);
 router.use("/finance-inventory", financeInventoryRouter);
 router.use("/reports", reportsRouter);
+router.use("/pos", posRouter);
 
 export default router;

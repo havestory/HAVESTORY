@@ -121,6 +121,11 @@ export async function syncInvoiceFinance(invoice: any) {
     const advance = Math.max(0, Number(String(metadata?.advance || 0).replace(/[^0-9.-]/g, "")) || 0);
     received = Math.min(advance, total);
   }
+  // POS invoice settlement records only the balance collected at the counter.
+  // Preserve an earlier advance so later edits cannot double-count that balance.
+  if (metadata?.posSettlementReceipt) {
+    received = Math.min(Math.max(0, Number(metadata?.posPriorAdvance) || 0), total);
+  }
   const requestedPaymentDate = String(metadata?.paymentReceivedDate || "").trim();
   const paymentDate = /^\d{4}-\d{2}-\d{2}$/.test(requestedPaymentDate)
     ? requestedPaymentDate
