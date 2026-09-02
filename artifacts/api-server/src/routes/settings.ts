@@ -37,6 +37,9 @@ function ensureSettingsCompatibility(): Promise<void> {
       ALTER TABLE settings ADD COLUMN IF NOT EXISTS footer_copyright_text TEXT NOT NULL DEFAULT '© 2026 HAVESTORY';
       ALTER TABLE settings ADD COLUMN IF NOT EXISTS footer_developer_credit TEXT NOT NULL DEFAULT 'Designed & Built by CODEARTIX';
       ALTER TABLE settings ADD COLUMN IF NOT EXISTS footer_developer_url TEXT;
+      ALTER TABLE settings ALTER COLUMN tagline SET DEFAULT 'THE COLOUR & FRAME STUDIO';
+      UPDATE settings SET tagline='THE COLOUR & FRAME STUDIO'
+        WHERE tagline='Premium Photo Frames & Story Galleries';
     `,
       )
       .then(() => undefined)

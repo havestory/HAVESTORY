@@ -32,6 +32,21 @@ const clean = (value: unknown, max = 160) =>
   String(value ?? "")
     .trim()
     .slice(0, max);
+
+async function issuerFirstName(auth: ReturnType<typeof getAdminAuth>): Promise<string> {
+  if (!auth) return "HAVESTORY";
+  let name = auth.username;
+  try {
+    if (auth.role === "staff" && auth.staffId) {
+      const result = await pool.query("SELECT name FROM admin_staff WHERE id=$1", [auth.staffId]);
+      name = clean(result.rows[0]?.name, 160) || auth.username;
+    } else {
+      const result = await pool.query("SELECT owner_name FROM settings ORDER BY id LIMIT 1");
+      name = clean(result.rows[0]?.owner_name, 160) || auth.username;
+    }
+  } catch {}
+  return name.trim().split(/\s+/)[0] || auth.username;
+}
 let ready: Promise<void> | null = null;
 
 async function initialize() {
@@ -386,6 +401,7 @@ router.post("/sales", async (req, res) => {
     )
       ? req.body.paymentMethod
       : "cash";
+    const soldBy = await issuerFirstName(auth);
     const inserted = await client.query(
       `INSERT INTO pos_sales(receipt_number,session_id,invoice_id,invoice_number,customer_name,items,subtotal,total,amount_tendered,change_due,payment_method,sold_by)
       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,
@@ -401,7 +417,7 @@ router.post("/sales", async (req, res) => {
         tendered,
         change,
         paymentMethod,
-        auth.username,
+        soldBy,
       ],
     );
     await client.query(

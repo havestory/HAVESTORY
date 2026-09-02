@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useGetSettings } from "@workspace/api-client-react";
+import { useGetAdminMe, useGetSettings } from "@workspace/api-client-react";
 import { format, addDays } from "date-fns";
 import JSZip from "jszip";
 import { jsPDF } from "jspdf";
@@ -237,6 +237,7 @@ export function InvoicePreview({
   onClose, onSave, isSaving, invoiceNumberOverride, createdAtOverride, status, linkedOrderId, showPrivateFinancials = false,
 }: InvoicePreviewProps) {
   const { data: settings } = useGetSettings();
+  const { data: currentAdmin } = useGetAdminMe();
   const s = settings as any;
   const [downloadingZip, setDownloadingZip] = useState(false);
   const [generatingPDF, setGeneratingPDF] = useState(false);
@@ -285,6 +286,12 @@ export function InvoicePreview({
   const bizLogo  = s?.logoUrl      || "";
   const website  = s?.website      || "";
   const tagline  = s?.tagline      || "";
+  const receiptTagline = !tagline || tagline === "Premium Photo Frames & Story Galleries"
+    ? "THE COLOUR & FRAME STUDIO"
+    : tagline;
+  const issuer = String((currentAdmin as any)?.displayName || (currentAdmin as any)?.username || s?.ownerName || "")
+    .trim()
+    .split(/\s+/)[0];
 
   /* Bank details — prefer bankDetails JSON array, fall back to legacy single fields */
   let banks: { bankName: string; accountHolder: string; accountNumber: string; branch: string; swiftBic: string }[] = [];
@@ -453,7 +460,7 @@ export function InvoicePreview({
     receipt.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Invoice ${escapeReceipt(invoiceNo)}</title>
 <style>
 @page{size:${widthMm}mm auto;margin:0}*{box-sizing:border-box}html,body{width:${widthMm}mm;min-width:${widthMm}mm;margin:0;padding:0;background:#fff;color:#000}body{font-family:Arial,Helvetica,sans-serif;font-size:${thermalWidth === "58" ? 10 : 11}px;line-height:1.35;font-variant-numeric:tabular-nums}.receipt{width:${widthMm}mm;padding:${thermalWidth === "58" ? 3 : 4}mm;overflow:hidden}.center{text-align:center}.brand{font-size:${thermalWidth === "58" ? 16 : 19}px;font-weight:900;letter-spacing:.5px;overflow-wrap:anywhere}.tagline{margin-top:1mm;font-size:.92em}.meta{margin-top:2mm}.rule{border-top:1px dashed #000;margin:2.5mm 0}.section-title{margin-bottom:1mm;font-weight:800;text-transform:uppercase;letter-spacing:.7px}.customer-name{font-size:1.15em;font-weight:800;overflow-wrap:anywhere}.wrap{overflow-wrap:anywhere;word-break:break-word}table{width:100%;border-collapse:collapse;table-layout:fixed}td{vertical-align:top;padding:1.4mm 0;border-bottom:1px dotted #aaa}td.item{width:68%;padding-right:2mm;overflow-wrap:anywhere}td.amount{width:32%;text-align:right;white-space:nowrap;font-weight:700}.muted{color:#333;font-size:.88em;font-weight:400}.summary{margin-top:2mm}.summary-row{display:flex;justify-content:space-between;gap:2mm;padding:.7mm 0}.summary-row.total{border-top:1px solid #000;margin-top:1mm;padding-top:1.5mm;font-size:1.12em}.summary-row.balance{border:1.5px solid #000;margin-top:1.5mm;padding:1.5mm;font-size:1.12em}.status{display:inline-block;margin-top:2mm;border:1px solid #000;padding:1mm 2mm;font-weight:800}.footer{margin-top:3mm;font-size:.9em}@media print{html,body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
-</style></head><body><main class="receipt"><header class="center"><div class="brand">${escapeReceipt(biz)}</div>${tagline ? `<div class="tagline wrap">${escapeReceipt(tagline)}</div>` : ""}<div class="meta wrap">${[bizAddr, bizPhone, bizEmail, website].filter(Boolean).map(value => escapeReceipt(value)).join("<br>")}</div></header><div class="rule"></div><div class="center"><strong>INVOICE</strong><br>${escapeReceipt(invoiceNo)}<br>${escapeReceipt(format(now, "dd MMM yyyy, hh:mm a"))}</div>${linkedOrderId ? `<div class="center muted wrap">Order: ${escapeReceipt(linkedOrderId)}</div>` : ""}<div class="rule"></div><section><div class="section-title">Bill to</div><div class="customer-name">${escapeReceipt(form.clientName || "Walk-in customer")}</div>${customerLines}</section><div class="rule"></div><table><tbody>${itemRows || `<tr><td>No line items</td><td></td></tr>`}</tbody></table><section class="summary">${summaryRow("Subtotal", subtotal)}${shippingAmt > 0 ? summaryRow(`Shipping${shippingLabels[shipping] ? ` (${shippingLabels[shipping]})` : ""}`, shippingAmt) : ""}${paidAdvance > 0 ? summaryRow("Advance paid", -paidAdvance) : ""}${summaryRow("Grand total", grandTotal, "total")}${summaryRow(isPaid ? "Balance (PAID)" : "Balance due", balance, "balance")}</section><div class="center"><span class="status">${escapeReceipt(badge.label)}</span></div>${form.additionalNotes ? `<div class="rule"></div><div class="wrap"><strong>Note:</strong> ${escapeReceipt(form.additionalNotes)}</div>` : ""}<footer class="footer center"><div class="rule"></div>Thank you for choosing ${escapeReceipt(biz)}.</footer></main></body></html>`);
+</style></head><body><main class="receipt"><header class="center"><div class="brand">${escapeReceipt(biz)}</div><div class="tagline wrap">${escapeReceipt(receiptTagline)}</div><div class="meta wrap">${[bizAddr, bizPhone, bizEmail, website].filter(Boolean).map(value => escapeReceipt(value)).join("<br>")}</div></header><div class="rule"></div><div class="center"><strong>INVOICE</strong><br>${escapeReceipt(invoiceNo)}<br>${escapeReceipt(format(now, "dd MMM yyyy, hh:mm a"))}</div>${linkedOrderId ? `<div class="center muted wrap">Order: ${escapeReceipt(linkedOrderId)}</div>` : ""}<div class="rule"></div><section><div class="section-title">Bill to</div><div class="customer-name">${escapeReceipt(form.clientName || "Walk-in customer")}</div>${customerLines}</section><div class="rule"></div><table><tbody>${itemRows || `<tr><td>No line items</td><td></td></tr>`}</tbody></table><section class="summary">${summaryRow("Subtotal", subtotal)}${shippingAmt > 0 ? summaryRow(`Shipping${shippingLabels[shipping] ? ` (${shippingLabels[shipping]})` : ""}`, shippingAmt) : ""}${paidAdvance > 0 ? summaryRow("Advance paid", -paidAdvance) : ""}${summaryRow("Grand total", grandTotal, "total")}${summaryRow(isPaid ? "Balance (PAID)" : "Balance due", balance, "balance")}</section><div class="center"><span class="status">${escapeReceipt(badge.label)}</span></div>${form.additionalNotes ? `<div class="rule"></div><div class="wrap"><strong>Note:</strong> ${escapeReceipt(form.additionalNotes)}</div>` : ""}<footer class="footer center"><div class="rule"></div>${issuer ? `Issued by ${escapeReceipt(issuer)}<br>` : ""}Thank you for choosing ${escapeReceipt(biz)}.</footer></main></body></html>`);
     receipt.document.close();
     receipt.focus();
     window.setTimeout(() => {

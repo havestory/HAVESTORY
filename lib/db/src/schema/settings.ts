@@ -14,7 +14,7 @@ export const settingsTable = pgTable("settings", {
   businessName: text("business_name").notNull().default("HAVESTORY"),
   tagline: text("tagline")
     .notNull()
-    .default("Premium Photo Frames & Story Galleries"),
+    .default("THE COLOUR & FRAME STUDIO"),
   heroTitle: text("hero_title")
     .notNull()
     .default("Frame the Moments That Stay"),

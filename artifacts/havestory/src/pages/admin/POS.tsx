@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { useToast } from "@/hooks/use-toast";
-import { useGetAdminMe } from "@workspace/api-client-react";
+import { useGetAdminMe, useGetSettings } from "@workspace/api-client-react";
 
 type Product = {
   id: string;
@@ -97,7 +97,15 @@ function esc(value: unknown) {
     .replace(/"/g, "&quot;");
 }
 
-function printReceipt(sale: Sale, width: "58" | "80") {
+type ReceiptBrand = {
+  businessName: string;
+  address: string;
+  phone: string;
+  email: string;
+  website: string;
+};
+
+function printReceipt(sale: Sale, width: "58" | "80", brand: ReceiptBrand) {
   const win = window.open("", "_blank", "popup=yes,width=500,height=760");
   if (!win) {
     window.alert("Please allow pop-ups to print the POS bill.");
@@ -106,7 +114,7 @@ function printReceipt(sale: Sale, width: "58" | "80") {
   const mm = width === "58" ? 58 : 80;
   const items = Array.isArray(sale.items) ? sale.items : [];
   win.document.write(
-    `<!doctype html><html><head><meta charset="utf-8"><title>${esc(sale.receipt_number)}</title><style>@page{size:${mm}mm auto;margin:0}*{box-sizing:border-box}html,body{width:${mm}mm;margin:0;color:#000;background:#fff;font-family:Arial,sans-serif;font-size:${width === "58" ? 10 : 11}px}.r{padding:${width === "58" ? 3 : 4}mm}.c{text-align:center}.brand{font-size:1.7em;font-weight:900}.rule{border-top:1px dashed #000;margin:2.5mm 0}.row{display:flex;justify-content:space-between;gap:2mm;padding:1mm 0}.item{border-bottom:1px dotted #aaa}.item span:first-child{max-width:68%;overflow-wrap:anywhere}.total{font-size:1.2em;font-weight:900;border-top:1px solid #000;margin-top:1mm;padding-top:1.5mm}.change{border:1.5px solid #000;padding:1.5mm;font-size:1.15em}.small{font-size:.88em}.bold{font-weight:800}</style></head><body><main class="r"><div class="c brand">HAVESTORY</div><div class="c small">THE COLOUR &amp; FRAME STUDIO</div><div class="rule"></div><div class="c bold">POS RECEIPT</div><div class="c">${esc(sale.receipt_number)}</div>${sale.invoice_number ? `<div class="c small">Invoice: ${esc(sale.invoice_number)}</div>` : ""}<div class="c small">${esc(new Date(sale.sold_at).toLocaleString("en-LK", { timeZone: "Asia/Colombo" }))}</div><div class="rule"></div><div class="bold">${esc(sale.customer_name || "Walk-in customer")}</div><div class="rule"></div>${items.map((i) => `<div class="row item"><span><b>${esc(i.name)}</b><br><span class="small">${i.qty} × ${rs(Number(i.price))}${i.code ? ` · ${esc(i.code)}` : ""}</span></span><b>${rs(Number(i.price) * Number(i.qty))}</b></div>`).join("")}<div class="row total"><span>Total</span><span>${rs(Number(sale.total))}</span></div><div class="row"><span>Received</span><b>${rs(Number(sale.amount_tendered))}</b></div><div class="row change"><span>Balance / Change</span><b>${rs(Number(sale.change_due))}</b></div><div class="row small"><span>Payment</span><b>${esc(sale.payment_method.toUpperCase())}</b></div><div class="rule"></div><div class="c small">Payment collected · Served by ${esc(sale.sold_by)}<br>Thank you for choosing HAVESTORY.</div></main></body></html>`,
+    `<!doctype html><html><head><meta charset="utf-8"><title>${esc(sale.receipt_number)}</title><style>@page{size:${mm}mm auto;margin:0}*{box-sizing:border-box}html,body{width:${mm}mm;margin:0;color:#000;background:#fff;font-family:Arial,sans-serif;font-size:${width === "58" ? 10 : 11}px}.r{padding:${width === "58" ? 3 : 4}mm}.c{text-align:center}.brand{font-size:1.7em;font-weight:900}.meta{margin-top:1mm;overflow-wrap:anywhere}.rule{border-top:1px dashed #000;margin:2.5mm 0}.row{display:flex;justify-content:space-between;gap:2mm;padding:1mm 0}.item{border-bottom:1px dotted #aaa}.item span:first-child{max-width:68%;overflow-wrap:anywhere}.total{font-size:1.2em;font-weight:900;border-top:1px solid #000;margin-top:1mm;padding-top:1.5mm}.change{border:1.5px solid #000;padding:1.5mm;font-size:1.15em}.small{font-size:.88em}.bold{font-weight:800}</style></head><body><main class="r"><header class="c"><div class="brand">${esc(brand.businessName || "HAVESTORY")}</div><div class="small bold">THE COLOUR &amp; FRAME STUDIO</div><div class="meta small">${[brand.address, brand.phone, brand.email, brand.website].filter(Boolean).map(esc).join("<br>")}</div></header><div class="rule"></div><div class="c bold">POS RECEIPT</div><div class="c">${esc(sale.receipt_number)}</div>${sale.invoice_number ? `<div class="c small">Invoice: ${esc(sale.invoice_number)}</div>` : ""}<div class="c small">${esc(new Date(sale.sold_at).toLocaleString("en-LK", { timeZone: "Asia/Colombo" }))}</div><div class="rule"></div><div class="bold">${esc(sale.customer_name || "Walk-in customer")}</div><div class="rule"></div>${items.map((i) => `<div class="row item"><span><b>${esc(i.name)}</b><br><span class="small">${i.qty} × ${rs(Number(i.price))}${i.code ? ` · ${esc(i.code)}` : ""}</span></span><b>${rs(Number(i.price) * Number(i.qty))}</b></div>`).join("")}<div class="row total"><span>Total</span><span>${rs(Number(sale.total))}</span></div><div class="row"><span>Received</span><b>${rs(Number(sale.amount_tendered))}</b></div><div class="row change"><span>Balance / Change</span><b>${rs(Number(sale.change_due))}</b></div><div class="row small"><span>Payment</span><b>${esc(sale.payment_method.toUpperCase())}</b></div><div class="rule"></div><div class="c small">Payment collected · Issued by ${esc(sale.sold_by)}<br>Thank you for choosing ${esc(brand.businessName || "HAVESTORY")}.</div></main></body></html>`,
   );
   win.document.close();
   win.focus();
@@ -121,6 +129,15 @@ function printReceipt(sale: Sale, width: "58" | "80") {
 export default function POS() {
   const { toast } = useToast();
   const { data: me } = useGetAdminMe();
+  const { data: settings } = useGetSettings();
+  const receiptSettings = settings as any;
+  const receiptBrand: ReceiptBrand = {
+    businessName: receiptSettings?.businessName || "HAVESTORY",
+    address: receiptSettings?.address || "",
+    phone: receiptSettings?.phone || "",
+    email: receiptSettings?.email || "",
+    website: receiptSettings?.website || "",
+  };
   const codeRef = useRef<HTMLInputElement>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [day, setDay] = useState<DayData | null>(null);
@@ -272,7 +289,7 @@ export default function POS() {
           paymentMethod: method,
         }),
       });
-      printReceipt(sale, width);
+      printReceipt(sale, width, receiptBrand);
       toast({
         title: "Payment collected & bill printed",
         description: `${sale.receipt_number} · Change ${rs(Number(sale.change_due))}`,
@@ -904,7 +921,7 @@ export default function POS() {
                       <td className="px-3 font-black">{rs(Number(s.total))}</td>
                       <td className="px-3">
                         <button
-                          onClick={() => printReceipt(s, width)}
+                          onClick={() => printReceipt(s, width, receiptBrand)}
                           className="rounded-lg bg-slate-100 p-2"
                         >
                           <Printer size={14} />

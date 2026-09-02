@@ -353,7 +353,7 @@ async function applyRuntimeSchema(): Promise<void> {
       CREATE TABLE IF NOT EXISTS settings (id SERIAL PRIMARY KEY);
       ALTER TABLE settings
         ADD COLUMN IF NOT EXISTS business_name TEXT NOT NULL DEFAULT 'HAVESTORY',
-        ADD COLUMN IF NOT EXISTS tagline TEXT NOT NULL DEFAULT 'Premium Photo Frames & Story Galleries',
+        ADD COLUMN IF NOT EXISTS tagline TEXT NOT NULL DEFAULT 'THE COLOUR & FRAME STUDIO',
         ADD COLUMN IF NOT EXISTS hero_title TEXT NOT NULL DEFAULT 'Frame the Moments That Stay',
         ADD COLUMN IF NOT EXISTS hero_subtitle TEXT NOT NULL DEFAULT 'Thoughtfully made photo frames that turn everyday moments into a gallery of your own.',
         ADD COLUMN IF NOT EXISTS whatsapp_number TEXT NOT NULL DEFAULT '94700000000',

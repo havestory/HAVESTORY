@@ -609,15 +609,26 @@ router.post("/logout", (req: Request, res: Response) => {
 });
 
 /* ── Session check ───────────────────────────────────────────────────────── */
-router.get("/me", (req: Request, res: Response) => {
+router.get("/me", async (req: Request, res: Response) => {
   const admin = getAdminAuth(req);
   if (admin) {
+    let displayName = admin.username;
+    try {
+      if (admin.role === "staff" && admin.staffId) {
+        const result = await pool.query("SELECT name FROM admin_staff WHERE id=$1", [admin.staffId]);
+        displayName = String(result.rows[0]?.name || admin.username).trim().split(/\s+/)[0];
+      } else {
+        const result = await pool.query("SELECT owner_name FROM settings ORDER BY id LIMIT 1");
+        displayName = String(result.rows[0]?.owner_name || admin.username).trim().split(/\s+/)[0];
+      }
+    } catch {}
     res.json({
       authenticated: true,
       username: admin.username,
       role: admin.role,
       permissions: admin.permissions,
       staffId: admin.staffId,
+      displayName,
     });
   } else {
     res.status(401).json({ error: "Not authenticated", authenticated: false });
@@ -776,7 +787,7 @@ CREATE TABLE IF NOT EXISTS "notices" (
 CREATE TABLE IF NOT EXISTS "settings" (
   "id" serial PRIMARY KEY NOT NULL,
   "business_name" text DEFAULT 'HAVESTORY' NOT NULL,
-  "tagline" text DEFAULT 'Premium Photo Frames & Story Galleries' NOT NULL,
+  "tagline" text DEFAULT 'THE COLOUR & FRAME STUDIO' NOT NULL,
   "hero_title" text DEFAULT 'Premium Printing for Every Vision' NOT NULL,
   "hero_subtitle" text DEFAULT 'From business cards to large banners, we bring your vision to life with precision and care.' NOT NULL,
   "whatsapp_number" text DEFAULT '94700000000' NOT NULL,
