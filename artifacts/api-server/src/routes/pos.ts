@@ -1,13 +1,21 @@
 import { Router } from "express";
 import { randomUUID } from "node:crypto";
 import { pool } from "@workspace/db";
-import { getAdminAuth, requireAdmin } from "../lib/auth-cookie";
+import { getAdminAuth, hasPermission, requireAdmin, requireOwner } from "../lib/auth-cookie";
 import { ensureFinanceStorage } from "./finance-inventory";
 
 const router = Router();
 router.use(requireAdmin);
 router.use((_req, res, next) => {
   res.set("Cache-Control", "no-store");
+  next();
+});
+router.use((req, res, next) => {
+  const auth = getAdminAuth(req);
+  if (!hasPermission(auth, "pos_access")) {
+    res.status(403).json({ error: "POS / Counter Sales access permission required" });
+    return;
+  }
   next();
 });
 
@@ -38,6 +46,22 @@ async function initialize() {
       closed_at TIMESTAMP,
       closing_cash NUMERIC(14,2)
     );
+    ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS closed_by TEXT;
+    ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS reopened_at TIMESTAMP;
+    ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS reopened_by TEXT;
+    CREATE TABLE IF NOT EXISTS pos_reopen_requests (
+      id BIGSERIAL PRIMARY KEY,
+      session_id INTEGER NOT NULL REFERENCES pos_sessions(id) ON DELETE CASCADE,
+      requested_by INTEGER,
+      requested_by_username TEXT NOT NULL,
+      reason TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','approved','rejected')),
+      decided_by TEXT,
+      decided_at TIMESTAMP,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS pos_reopen_pending_uidx
+      ON pos_reopen_requests(session_id) WHERE status='pending';
     CREATE TABLE IF NOT EXISTS pos_sales (
       id SERIAL PRIMARY KEY,
       receipt_number TEXT NOT NULL UNIQUE,
@@ -119,6 +143,9 @@ router.get("/catalog", async (_req, res) => {
 router.post("/items", async (req, res) => {
   try {
     await ensurePos();
+    const auth = getAdminAuth(req)!;
+    if (!hasPermission(auth, "pos_access"))
+      return res.status(403).json({ error: "POS access permission required" });
     const code = clean(req.body?.code, 40).toUpperCase();
     const name = clean(req.body?.name, 200);
     const price = money(req.body?.price);
@@ -188,9 +215,20 @@ router.get("/day", async (req, res) => {
     const cashSales = sales.rows
       .filter((sale) => sale.payment_method === "cash")
       .reduce((sum, sale) => sum + Number(sale.total), 0);
+    const auth = getAdminAuth(req)!;
+    const reopenRequest = session.rows[0]?.closed_at
+      ? await pool.query(
+          `SELECT id,reason,status,requested_by_username,created_at
+           FROM pos_reopen_requests
+           WHERE session_id=$1 AND ($2='owner' OR requested_by=$3)
+           ORDER BY created_at DESC LIMIT 1`,
+          [session.rows[0].id, auth.role, auth.staffId || null],
+        )
+      : { rows: [] };
     res.json({
       date,
       session: session.rows[0] || null,
+      reopenRequest: reopenRequest.rows[0] || null,
       sales: sales.rows,
       summary: {
         count: sales.rows.length,
@@ -236,8 +274,10 @@ router.get("/month", async (req, res) => {
 router.post("/start-day", async (req, res) => {
   try {
     await ensurePos();
-    const opening = money(req.body?.openingFloat);
     const auth = getAdminAuth(req)!;
+    if (!hasPermission(auth, "pos_day_start"))
+      return res.status(403).json({ error: "POS day-start permission required" });
+    const opening = money(req.body?.openingFloat);
     const { rows } = await pool.query(
       `INSERT INTO pos_sessions(business_date,opening_float,opened_by) VALUES($1,$2,$3)
       ON CONFLICT(business_date) DO UPDATE SET opening_float=CASE WHEN pos_sessions.closed_at IS NULL THEN EXCLUDED.opening_float ELSE pos_sessions.opening_float END
@@ -254,6 +294,8 @@ router.post("/start-day", async (req, res) => {
 router.post("/sales", async (req, res) => {
   await ensurePos();
   const auth = getAdminAuth(req)!;
+  if (!hasPermission(auth, "pos_access"))
+    return res.status(403).json({ error: "POS access permission required" });
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
@@ -389,10 +431,13 @@ router.post("/sales", async (req, res) => {
 router.post("/close-day", async (req, res) => {
   try {
     await ensurePos();
+    const auth = getAdminAuth(req)!;
+    if (!hasPermission(auth, "pos_day_close"))
+      return res.status(403).json({ error: "POS day-close permission required" });
     const amount = money(req.body?.closingCash);
     const { rows } = await pool.query(
-      "UPDATE pos_sessions SET closing_cash=$1,closed_at=NOW() WHERE business_date=$2 AND closed_at IS NULL RETURNING *",
-      [amount, lkDate()],
+      "UPDATE pos_sessions SET closing_cash=$1,closed_at=NOW(),closed_by=$2 WHERE business_date=$3 AND closed_at IS NULL RETURNING *",
+      [amount, auth.username, lkDate()],
     );
     if (!rows[0])
       return res.status(409).json({ error: "No open POS session found" });
@@ -400,6 +445,66 @@ router.post("/close-day", async (req, res) => {
   } catch (error) {
     req.log.error(error);
     res.status(500).json({ error: "Could not close POS day" });
+  }
+});
+
+router.post("/request-reopen", async (req, res) => {
+  try {
+    await ensurePos();
+    const auth = getAdminAuth(req)!;
+    if (auth.role !== "staff" || !auth.staffId)
+      return res.status(400).json({ error: "Staff accounts should use this request" });
+    const reason = clean(req.body?.reason, 300);
+    if (!reason) return res.status(400).json({ error: "Please explain why the day must be reopened" });
+    const session = await pool.query(
+      "SELECT id FROM pos_sessions WHERE business_date=$1 AND closed_at IS NOT NULL",
+      [lkDate()],
+    );
+    if (!session.rows[0]) return res.status(409).json({ error: "Today's POS day is not closed" });
+    const { rows } = await pool.query(
+      `INSERT INTO pos_reopen_requests(session_id,requested_by,requested_by_username,reason)
+       VALUES($1,$2,$3,$4)
+       ON CONFLICT (session_id) WHERE status='pending'
+       DO UPDATE SET reason=EXCLUDED.reason,requested_by=EXCLUDED.requested_by,
+         requested_by_username=EXCLUDED.requested_by_username,created_at=NOW()
+       RETURNING *`,
+      [session.rows[0].id, auth.staffId, auth.username, reason],
+    );
+    res.status(201).json(rows[0]);
+  } catch (error) {
+    req.log.error(error);
+    res.status(500).json({ error: "Could not send the reopen request" });
+  }
+});
+
+router.post("/reopen-day", requireOwner, async (req, res) => {
+  const client = await pool.connect();
+  try {
+    await ensurePos();
+    const auth = getAdminAuth(req)!;
+    await client.query("BEGIN");
+    const { rows } = await client.query(
+      `UPDATE pos_sessions SET closed_at=NULL,closing_cash=NULL,reopened_at=NOW(),reopened_by=$1
+       WHERE business_date=$2 AND closed_at IS NOT NULL RETURNING *`,
+      [auth.username, lkDate()],
+    );
+    if (!rows[0]) {
+      await client.query("ROLLBACK");
+      return res.status(409).json({ error: "Today's POS day is not closed" });
+    }
+    await client.query(
+      `UPDATE pos_reopen_requests SET status='approved',decided_by=$1,decided_at=NOW()
+       WHERE session_id=$2 AND status='pending'`,
+      [auth.username, rows[0].id],
+    );
+    await client.query("COMMIT");
+    res.json(rows[0]);
+  } catch (error) {
+    await client.query("ROLLBACK").catch(() => {});
+    req.log.error(error);
+    res.status(500).json({ error: "Could not reopen the POS day" });
+  } finally {
+    client.release();
   }
 });
 

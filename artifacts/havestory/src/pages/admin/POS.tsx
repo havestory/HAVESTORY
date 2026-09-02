@@ -12,10 +12,14 @@ import {
   Search,
   ShoppingBag,
   Store,
+  AlertTriangle,
+  RotateCcw,
+  Send,
   X,
 } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { useToast } from "@/hooks/use-toast";
+import { useGetAdminMe } from "@workspace/api-client-react";
 
 type Product = {
   id: string;
@@ -49,6 +53,7 @@ type Sale = {
 type DayData = {
   date: string;
   session: any;
+  reopenRequest?: { id: number; reason: string; status: string; requested_by_username: string; created_at: string } | null;
   sales: Sale[];
   summary: {
     count: number;
@@ -115,6 +120,7 @@ function printReceipt(sale: Sale, width: "58" | "80") {
 
 export default function POS() {
   const { toast } = useToast();
+  const { data: me } = useGetAdminMe();
   const codeRef = useRef<HTMLInputElement>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [day, setDay] = useState<DayData | null>(null);
@@ -131,6 +137,8 @@ export default function POS() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [closing, setClosing] = useState("");
+  const [reopenReason, setReopenReason] = useState("");
+  const [dayActionBusy, setDayActionBusy] = useState(false);
   const [reportMonth, setReportMonth] = useState(today().slice(0, 7));
   const [monthData, setMonthData] = useState<MonthData | null>(null);
   const [showNewItem, setShowNewItem] = useState(false);
@@ -395,6 +403,28 @@ export default function POS() {
       });
     }
   };
+  const requestReopen = async () => {
+    setDayActionBusy(true);
+    try {
+      await request("/api/pos/request-reopen", { method: "POST", body: JSON.stringify({ reason: reopenReason }) });
+      toast({ title: "Reopen request sent", description: "The owner will see a special notice on this page." });
+      setReopenReason("");
+      await load();
+    } catch (e: any) {
+      toast({ title: "Request could not be sent", description: e.message, variant: "destructive" });
+    } finally { setDayActionBusy(false); }
+  };
+  const reopenDay = async () => {
+    if (!window.confirm("Reopen today's POS day? New sales will be allowed again.")) return;
+    setDayActionBusy(true);
+    try {
+      await request("/api/pos/reopen-day", { method: "POST" });
+      toast({ title: "POS day reopened", description: "The counter can accept sales again." });
+      await load();
+    } catch (e: any) {
+      toast({ title: "Day could not be reopened", description: e.message, variant: "destructive" });
+    } finally { setDayActionBusy(false); }
+  };
   const input =
     "h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-900 outline-none focus:border-violet-400 focus:ring-4 focus:ring-violet-100";
   if (!day)
@@ -445,6 +475,39 @@ export default function POS() {
           </div>
         </div>
       </header>
+      {day.session?.closed_at && (
+        <section className="rounded-[22px] border-2 border-amber-400 bg-amber-50 p-5 text-amber-950 shadow-sm">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="mt-0.5 shrink-0 text-amber-700" />
+            <div className="min-w-0 flex-1">
+              <h2 className="font-black">This POS day is closed</h2>
+              <p className="mt-1 text-sm text-amber-900">Closed by {day.session.closed_by || "an administrator"}. Sales stay locked until the owner reopens the day.</p>
+              {me?.role === "owner" ? (
+                <div className="mt-4">
+                  {day.reopenRequest && (
+                    <div className="mb-3 rounded-xl border border-amber-300 bg-white/80 p-3 text-sm">
+                      <b>Reopen request from @{day.reopenRequest.requested_by_username}</b>
+                      <p className="mt-1 text-amber-900">{day.reopenRequest.reason}</p>
+                    </div>
+                  )}
+                  <button onClick={reopenDay} disabled={dayActionBusy} className="inline-flex h-11 items-center gap-2 rounded-xl bg-amber-900 px-5 text-xs font-black text-white disabled:opacity-50">
+                    <RotateCcw size={16} /> Reopen today’s POS day
+                  </button>
+                </div>
+              ) : day.reopenRequest?.status === "pending" ? (
+                <p className="mt-3 inline-flex rounded-lg bg-amber-200 px-3 py-2 text-xs font-black">Reopen request pending owner approval</p>
+              ) : (
+                <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                  <input value={reopenReason} onChange={e => setReopenReason(e.target.value)} placeholder="Why should this day be reopened?" className={`${input} sm:max-w-md`} />
+                  <button onClick={requestReopen} disabled={dayActionBusy || !reopenReason.trim()} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-amber-900 px-5 text-xs font-black text-white disabled:opacity-50">
+                    <Send size={15} /> Request owner to reopen
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
       {!day.session ? (
         <section className="mx-auto max-w-xl rounded-[26px] border border-amber-200 bg-amber-50 p-6">
           <Banknote className="text-amber-700" />
@@ -466,10 +529,14 @@ export default function POS() {
           </label>
           <button
             onClick={startDay}
-            className="mt-4 h-12 w-full rounded-xl bg-violet-950 font-black text-white"
+            disabled={me?.role !== "owner" && !(me?.permissions || []).includes("pos_day_start")}
+            className="mt-4 h-12 w-full rounded-xl bg-violet-950 font-black text-white disabled:cursor-not-allowed disabled:opacity-40"
           >
             Open counter with {rs(Number(opening))}
           </button>
+          {me?.role !== "owner" && !(me?.permissions || []).includes("pos_day_start") && (
+            <p className="mt-2 text-center text-xs font-bold text-amber-800">Your account can use POS after an owner starts the day.</p>
+          )}
         </section>
       ) : (
         <>
@@ -601,7 +668,7 @@ export default function POS() {
                 ))}
               </div>
             </section>
-            <aside className="h-fit rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm xl:sticky xl:top-24">
+            <aside className="pos-bill-panel h-fit rounded-[26px] border border-slate-200 bg-white p-5 text-slate-950 shadow-sm xl:sticky xl:top-24">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-black">Current bill</h2>
                 {(cart.length > 0 || selectedInvoice) && (
@@ -759,7 +826,7 @@ export default function POS() {
               </div>
               <button
                 onClick={complete}
-                disabled={saving || total <= 0 || received < total}
+                disabled={saving || !!day.session.closed_at || total <= 0 || received < total}
                 className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-violet-950 font-black text-white disabled:opacity-40"
               >
                 {saving ? (
@@ -782,7 +849,7 @@ export default function POS() {
                   Counter income is separate from online/website sales.
                 </p>
               </div>
-              {!day.session.closed_at && (
+              {!day.session.closed_at && (me?.role === "owner" || (me?.permissions || []).includes("pos_day_close")) && (
                 <div className="flex gap-2">
                   <input
                     type="number"

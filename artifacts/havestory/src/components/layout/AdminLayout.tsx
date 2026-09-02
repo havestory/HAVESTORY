@@ -145,7 +145,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
               <NavItem href="/admin/clients"         label="Clients"         icon={Users} permission="customers" />
               <NavItem href="/admin/crm-projects"    label="CRM Projects"    icon={FolderKanban} permission="customers" />
               <NavItem href="/admin/invoices"        label="Invoices"        icon={FileText} permission="invoices" />
-              <NavItem href="/admin/pos"             label="POS / Counter Sales" icon={BadgeDollarSign} permission="orders" />
+              <NavItem href="/admin/pos"             label="POS / Counter Sales" icon={BadgeDollarSign} permission="pos_access" />
             </div>
 
             <div className="space-y-1">

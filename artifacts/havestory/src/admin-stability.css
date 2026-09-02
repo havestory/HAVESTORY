@@ -80,6 +80,27 @@
   background: hsl(var(--card)) !important;
 }
 
+/* POS bill card needs explicit surface-aware contrast in both admin themes. */
+[data-admin-panel] main .pos-bill-panel {
+  background: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+[data-admin-panel] main .pos-bill-panel :is(h2,b,strong) {
+  color: inherit;
+}
+[data-admin-panel] main .pos-bill-panel :is(label,p,.text-slate-500,.text-slate-400) {
+  color: hsl(var(--muted-foreground)) !important;
+}
+[data-admin-panel] main .pos-bill-panel input,
+[data-admin-panel] main .pos-bill-panel select {
+  background: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+[data-admin-panel] main .pos-bill-panel .bg-emerald-50,
+[data-admin-panel] main .pos-bill-panel .bg-violet-50 {
+  color: hsl(var(--foreground)) !important;
+}
+
 /* Sidebar contrast is explicit because the sidebar is always a dark studio
    surface, independent of the selected workspace theme. */
 [data-admin-panel] .admin-sidebar {

@@ -55,6 +55,14 @@ const PERMISSIONS: { key: string; label: string }[] = [
   { key: 'reports',         label: 'Reports' },
 ];
 
+const POS_PERMISSIONS: { key: string; label: string; description: string }[] = [
+  { key: 'pos_access', label: 'Use POS / Counter Sales', description: 'View the POS, add items and collect payments.' },
+  { key: 'pos_day_start', label: 'Start POS Day', description: 'Enter the opening float and open the counter.' },
+  { key: 'pos_day_close', label: 'Close POS Day', description: 'Count the drawer and close the business day.' },
+];
+
+const ALL_PERMISSIONS = [...PERMISSIONS, ...POS_PERMISSIONS];
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, { credentials: 'include', ...init });
   if (!res.ok) {
@@ -71,7 +79,7 @@ function fmtDate(d: string | null | undefined) {
 }
 
 function PermissionBadges({ perms }: { perms: string[] }) {
-  const labels = perms.map(p => PERMISSIONS.find(x => x.key === p)?.label ?? p);
+  const labels = perms.map(p => ALL_PERMISSIONS.find(x => x.key === p)?.label ?? p);
   if (!labels.length) return <span className="text-muted-foreground text-xs">No permissions</span>;
   return (
     <div className="flex flex-wrap gap-1">
@@ -108,7 +116,18 @@ function StaffDialog({
   if (!open) return null;
 
   function togglePerm(key: string) {
-    setPerms(p => p.includes(key) ? p.filter(x => x !== key) : [...p, key]);
+    setPerms(current => {
+      if (current.includes(key)) {
+        if (key === 'pos_access') {
+          return current.filter(x => !['pos_access', 'pos_day_start', 'pos_day_close'].includes(x));
+        }
+        return current.filter(x => x !== key);
+      }
+      if (key === 'pos_day_start' || key === 'pos_day_close') {
+        return Array.from(new Set([...current, 'pos_access', key]));
+      }
+      return [...current, key];
+    });
   }
 
   async function handleSave() {
@@ -200,7 +219,7 @@ function StaffDialog({
           )}
 
           <div className="space-y-2">
-            <Label className="text-xs uppercase tracking-wider">Permissions</Label>
+            <Label className="text-xs uppercase tracking-wider">General Permissions</Label>
             <div className="grid grid-cols-2 gap-2 p-3 border border-border">
               {PERMISSIONS.map(p => (
                 <div key={p.key} className="flex items-center gap-2">
@@ -211,6 +230,29 @@ function StaffDialog({
                     className="rounded-none"
                   />
                   <Label htmlFor={`perm-${p.key}`} className="text-sm cursor-pointer">{p.label}</Label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2 border-t border-border pt-4">
+            <div>
+              <Label className="text-xs uppercase tracking-wider">POS / Counter Sales</Label>
+              <p className="mt-1 text-xs text-muted-foreground">Choose exactly what this team member may do at the counter. Reopening a closed day always remains owner-only.</p>
+            </div>
+            <div className="space-y-2 border border-border bg-muted/30 p-3">
+              {POS_PERMISSIONS.map(p => (
+                <div key={p.key} className="flex items-start gap-2.5 border-b border-border/60 pb-2 last:border-0 last:pb-0">
+                  <Checkbox
+                    id={`perm-${p.key}`}
+                    checked={perms.includes(p.key)}
+                    onCheckedChange={() => togglePerm(p.key)}
+                    className="mt-0.5 rounded-none"
+                  />
+                  <Label htmlFor={`perm-${p.key}`} className="cursor-pointer">
+                    <span className="block text-sm font-medium text-foreground">{p.label}</span>
+                    <span className="block text-xs font-normal text-muted-foreground">{p.description}</span>
+                  </Label>
                 </div>
               ))}
             </div>

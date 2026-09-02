@@ -6,6 +6,7 @@ import { getAdminAuth, hasPermission } from "./auth-cookie";
 export const STAFF_PERMISSIONS = [
   "dashboard", "orders", "customers", "invoices", "shipping",
   "catalog", "products_view", "price_lists_view", "inventory", "production", "website", "finance", "reports",
+  "pos_access", "pos_day_start", "pos_day_close",
 ] as const;
 export type StaffPermission = typeof STAFF_PERMISSIONS[number];
 
