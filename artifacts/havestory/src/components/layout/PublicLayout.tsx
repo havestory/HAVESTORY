@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { applyThemeVars } from '@/lib/theme-utils';
 import { useShopCart } from '@/lib/shop-cart';
 import { ShopCartDrawer } from '@/components/shop/ShopCartDrawer';
+import { StudioLoader } from '@/components/StudioLoader';
 
 const WHATSAPP_FAQS = [
   { question: 'What can HAVESTORY make for me?', answer: 'We create custom photo frames, archival prints, collages and studio pieces for homes, gifts, events and businesses.' },
@@ -165,14 +166,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   if (!settings && settingsLoading) {
     return (
       <div data-public-site="" className="atelier-shell min-h-[100dvh] bg-[hsl(var(--background))]">
-        <div className="hs-route-loader" role="status" aria-live="polite" aria-label="Loading HAVESTORY">
-          <div>
-            <span>HAVESTORY</span>
-            <strong>Preparing your studio</strong>
-            <p>Loading the latest HAVESTORY settings</p>
-            <div><i /></div>
-          </div>
-        </div>
+        <div className="grid min-h-[100dvh] place-items-center"><StudioLoader label="Loading HAVESTORY" /></div>
       </div>
     );
   }

@@ -100,15 +100,11 @@ const queryClient = new QueryClient({
   },
 });
 function RouteLoader() {
-  return <StudioLoader label="Preparing your studio collection" />;
+  return <div className="grid min-h-[55vh] place-items-center"><StudioLoader label="Loading HAVESTORY" /></div>;
 }
 
 function PublicRouteLoader() {
-  return (
-    <div className="hs-public-route-pending" role="status" aria-live="polite" aria-label="Loading page">
-      <span />
-    </div>
-  );
+  return <div className="grid min-h-[55vh] place-items-center"><StudioLoader label="Loading HAVESTORY" /></div>;
 }
 
 function AdminRouteFallback({ error, resetError }: ErrorFallbackProps) {
