@@ -289,9 +289,11 @@ export function InvoicePreview({
   const receiptTagline = !tagline || tagline === "Premium Photo Frames & Story Galleries"
     ? "THE COLOUR & FRAME STUDIO"
     : tagline;
-  const issuer = String((currentAdmin as any)?.displayName || (currentAdmin as any)?.username || s?.ownerName || "")
-    .trim()
-    .split(/\s+/)[0];
+  const issuerParts = String((currentAdmin as any)?.displayName || (currentAdmin as any)?.username || s?.ownerName || "")
+    .trim().split(/\s+/).filter(Boolean);
+  const issuer = /^(mr|mrs|ms|miss|dr)\.?$/i.test(issuerParts[0] || "")
+    ? issuerParts[1] || issuerParts[0] || ""
+    : issuerParts[0] || "";
 
   /* Bank details — prefer bankDetails JSON array, fall back to legacy single fields */
   let banks: { bankName: string; accountHolder: string; accountNumber: string; branch: string; swiftBic: string }[] = [];

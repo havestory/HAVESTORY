@@ -45,7 +45,10 @@ async function issuerFirstName(auth: ReturnType<typeof getAdminAuth>): Promise<s
       name = clean(result.rows[0]?.owner_name, 160) || auth.username;
     }
   } catch {}
-  return name.trim().split(/\s+/)[0] || auth.username;
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return /^(mr|mrs|ms|miss|dr)\.?$/i.test(parts[0] || "")
+    ? parts[1] || parts[0] || auth.username
+    : parts[0] || auth.username;
 }
 let ready: Promise<void> | null = null;
 

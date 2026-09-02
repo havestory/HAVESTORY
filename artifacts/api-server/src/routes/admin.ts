@@ -616,12 +616,16 @@ router.get("/me", async (req: Request, res: Response) => {
     try {
       if (admin.role === "staff" && admin.staffId) {
         const result = await pool.query("SELECT name FROM admin_staff WHERE id=$1", [admin.staffId]);
-        displayName = String(result.rows[0]?.name || admin.username).trim().split(/\s+/)[0];
+        displayName = String(result.rows[0]?.name || admin.username);
       } else {
         const result = await pool.query("SELECT owner_name FROM settings ORDER BY id LIMIT 1");
-        displayName = String(result.rows[0]?.owner_name || admin.username).trim().split(/\s+/)[0];
+        displayName = String(result.rows[0]?.owner_name || admin.username);
       }
     } catch {}
+    const nameParts = displayName.trim().split(/\s+/).filter(Boolean);
+    displayName = /^(mr|mrs|ms|miss|dr)\.?$/i.test(nameParts[0] || "")
+      ? nameParts[1] || nameParts[0] || admin.username
+      : nameParts[0] || admin.username;
     res.json({
       authenticated: true,
       username: admin.username,
