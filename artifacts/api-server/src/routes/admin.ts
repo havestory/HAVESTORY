@@ -25,6 +25,7 @@ import {
   hashStaffPassword,
   verifyStaffPassword,
   STAFF_PERMISSIONS,
+  invalidateStaffAccess,
 } from "../lib/team-access";
 
 const router = Router();
@@ -133,7 +134,7 @@ router.post("/login", async (req: Request, res: Response) => {
   try {
     await ensureTeamTables();
     const { rows } = await pool.query(
-      "SELECT id,name,username,password_hash,permissions,active FROM admin_staff WHERE LOWER(username)=LOWER($1) LIMIT 1",
+      "SELECT id,name,username,password_hash,permissions,active,updated_at FROM admin_staff WHERE LOWER(username)=LOWER($1) LIMIT 1",
       [username.trim()],
     );
     const staff = rows[0];
@@ -147,6 +148,7 @@ router.post("/login", async (req: Request, res: Response) => {
         "staff",
         permissions,
         Number(staff.id),
+        new Date(staff.updated_at).toISOString(),
       );
       await pool.query(
         "UPDATE admin_staff SET last_login_at=NOW() WHERE id=$1",
@@ -539,6 +541,7 @@ router.patch("/team/:id", requireOwner, async (req: Request, res: Response) => {
     );
     if (!rows[0])
       return res.status(404).json({ error: "Staff account not found" });
+    invalidateStaffAccess(id);
     res.json(rows[0]);
   } catch (error: any) {
     res
@@ -566,6 +569,7 @@ router.delete(
     );
     if (!result.rowCount)
       return res.status(404).json({ error: "Staff account not found" });
+    invalidateStaffAccess(id);
     res.json({ success: true });
   },
 );
@@ -587,6 +591,7 @@ router.post(
     );
     if (!result.rowCount)
       return res.status(404).json({ error: "Staff account not found" });
+    invalidateStaffAccess(id);
     res.json({ success: true });
   },
 );
