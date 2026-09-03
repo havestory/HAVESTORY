@@ -10,28 +10,19 @@ router.get("/healthz", (_req, res) => {
 });
 
 router.get("/healthz/db", async (_req, res) => {
-  const dbUrl = process.env.NEON_DATABASE_URL || process.env.DATABASE_URL || "";
-  const maskedUrl = dbUrl
-    ? dbUrl.replace(/:([^:@]+)@/, ":***@").slice(0, 80) + "..."
-    : "(not set)";
+  let client;
   try {
-    const client = await pool.connect();
-    const result = await client.query("SELECT NOW() as now");
-    client.release();
-    res.json({
-      db: "ok",
-      time: result.rows[0].now,
-      url_hint: maskedUrl,
-      node_env: process.env.NODE_ENV || "(not set)",
-    });
-  } catch (err: any) {
-    res.status(500).json({
-      db: "error",
-      message: err?.message,
-      code: err?.code,
-      url_hint: maskedUrl,
-      node_env: process.env.NODE_ENV || "(not set)",
-    });
+    client = await pool.connect();
+    await client.query("SELECT 1");
+    res.setHeader("Cache-Control", "no-store");
+    res.json({ db: "ok" });
+  } catch {
+    // Never expose connection strings, driver codes, environment names or raw
+    // database errors from a public health endpoint.
+    res.setHeader("Cache-Control", "no-store");
+    res.status(503).json({ db: "unavailable" });
+  } finally {
+    client?.release();
   }
 });
 
