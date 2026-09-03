@@ -62,10 +62,16 @@ export function setPendingCookie(res: Response, username: string): void {
 }
 
 export type AdminRole = "owner" | "staff";
-export type AdminAuth = { username: string; role: AdminRole; staffId?: number; permissions: string[] };
+export type AdminAuth = { username: string; role: AdminRole; staffId?: number; permissions: string[]; staffVersion?: string };
+const requestAuthOverrides = new WeakMap<Request, AdminAuth>();
 
-export function setAdminCookie(res: Response, username: string, role: AdminRole = "owner", permissions: string[] = [], staffId?: number): void {
-  res.cookie(COOKIE_ADMIN, sign({ isAdmin: true, username, role, permissions, staffId }, ADMIN_TTL_MS), cookieOpts(ADMIN_TTL_MS, isProduction));
+/** Use a freshly verified staff record for the rest of this request. */
+export function setRequestAdminAuth(req: Request, auth: AdminAuth): void {
+  requestAuthOverrides.set(req, auth);
+}
+
+export function setAdminCookie(res: Response, username: string, role: AdminRole = "owner", permissions: string[] = [], staffId?: number, staffVersion?: string): void {
+  res.cookie(COOKIE_ADMIN, sign({ isAdmin: true, username, role, permissions, staffId, staffVersion }, ADMIN_TTL_MS), cookieOpts(ADMIN_TTL_MS, isProduction));
 }
 
 export function clearAuthCookies(res: Response): void {
@@ -82,6 +88,8 @@ export function getPendingAuth(req: Request): { username: string } | null {
 }
 
 export function getAdminAuth(req: Request): AdminAuth | null {
+  const verified = requestAuthOverrides.get(req);
+  if (verified) return verified;
   const token = req.cookies?.[COOKIE_ADMIN];
   const data = verify(token);
   if (!data?.isAdmin) return null;
@@ -91,6 +99,7 @@ export function getAdminAuth(req: Request): AdminAuth | null {
     role,
     staffId: typeof data.staffId === "number" ? data.staffId : undefined,
     permissions: Array.isArray(data.permissions) ? data.permissions.map(String) : [],
+    staffVersion: typeof data.staffVersion === "string" ? data.staffVersion : undefined,
   };
 }
 
