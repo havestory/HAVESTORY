@@ -179,16 +179,24 @@
 [data-public-site] .hs-new-category-copy {
   box-sizing: border-box !important;
   width: calc(100% - 24px) !important;
-  min-height: 52% !important;
+  height: 64% !important;
+  min-height: 0 !important;
   margin: auto 12px 12px !important;
   padding: 22px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: flex-end !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(2.5em, auto) minmax(3.2em, auto) auto !important;
+  align-content: end !important;
   background: linear-gradient(145deg, rgba(255,253,249,.94), rgba(248,239,251,.86)) !important;
 }
-[data-public-site] .hs-new-category-copy h3 { font-size: clamp(1.35rem,2vw,2rem) !important; }
+[data-public-site] .hs-new-category-copy h3 {
+  margin-block: 8px 6px !important;
+  font-size: clamp(1.35rem,2vw,2rem) !important;
+}
 [data-public-site] .hs-new-category-copy p { color: rgba(36,19,47,.82) !important; }
+[data-public-site] .hs-new-category-copy b {
+  align-self: end !important;
+  margin-top: 12px !important;
+}
 
 [data-public-site] .hs-new-favourite-card,
 [data-public-site] .hs-new-work-item,
@@ -499,6 +507,7 @@ html[data-hs-admin-theme] body > div > [role="dialog"] :is(input,textarea,select
   [data-public-site] .hs-new-category > a { min-height: 290px !important; }
   [data-public-site] .hs-new-category-copy {
     width: calc(100% - 16px) !important;
+    height: auto !important;
     min-height: 0 !important;
     margin: auto 8px 8px !important;
     padding: 18px !important;
