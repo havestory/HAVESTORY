@@ -72,6 +72,43 @@ function Heading({ eyebrow, title, copy, href, link }: { eyebrow: string; title:
   );
 }
 
+function KineticStory() {
+  const loop = { duration: 9, repeat: Infinity, ease: "easeInOut" as const };
+  const sparks = Array.from({ length: 28 }, (_, index) => ({
+    x: 90 + ((index * 83) % 1020),
+    y: 90 + ((index * 47) % 430),
+    r: index % 4 === 0 ? 3 : index % 3 === 0 ? 2 : 1.2,
+    delay: (index % 9) * .18,
+  }));
+  return (
+    <section className="hs-kinetic-story" aria-label="From a bright idea to a framed HAVESTORY">
+      <div className="hs-kinetic-story-copy"><span>AN IDEA BECOMES A STORY</span><p>Light. Capture. Frame. Keep.</p></div>
+      <motion.svg viewBox="0 0 1200 560" role="img" aria-label="A glowing line draws a camera, photographs, frames and the HAVESTORY name">
+        <defs>
+          <linearGradient id="hsKineticGold" x1="0" y1="0" x2="1" y2="0"><stop stopColor="#b77a22"/><stop offset=".45" stopColor="#fff1a8"/><stop offset="1" stopColor="#d99d38"/></linearGradient>
+          <filter id="hsKineticGlow"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <motion.path className="hs-kinetic-trail" d="M65 305 C155 90 285 85 300 220 C314 348 185 405 126 310 C70 219 248 128 389 235 S555 420 690 272 S932 80 1135 260" fill="none" stroke="url(#hsKineticGold)" strokeWidth="3" strokeLinecap="round" filter="url(#hsKineticGlow)" initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: [0, 1, 1], opacity: [0, 1, .3] }} transition={loop} />
+        {sparks.map((spark, index) => <motion.circle key={index} cx={spark.x} cy={spark.y} r={spark.r} fill={index % 5 === 0 ? "#fff8ce" : "#e8b34f"} animate={{ opacity: [.12, 1, .15], scale: [.6, 1.8, .7], x: [0, index % 2 ? 14 : -12], y: [6, -12, 4] }} transition={{ duration: 2.8 + (index % 4) * .35, repeat: Infinity, delay: spark.delay, ease: "easeInOut" }} />)}
+        <motion.g className="hs-kinetic-bulb" initial={{ opacity: 0, scale: .6 }} animate={{ opacity: [0, 1, 1, 0], scale: [.6, 1.04, 1, .8] }} transition={{ ...loop, times: [0, .12, .78, 1] }} transform="translate(108 190)">
+          <circle cx="74" cy="70" r="48" fill="rgba(255,208,86,.18)" stroke="#f4cb6c" strokeWidth="3"/><path d="M52 106h44M57 118h34M63 129h22M49 65c8-28 42-28 50 0-4 13-17 17-17 35H66c0-18-13-22-17-35Z" fill="none" stroke="#fff2b0" strokeWidth="4"/>
+        </motion.g>
+        <motion.g className="hs-kinetic-camera" fill="none" stroke="#f7e6bd" strokeWidth="4" strokeLinejoin="round" initial={{ opacity: 0, x: 35 }} animate={{ opacity: [0, 0, 1, 1, 0], x: [35, 25, 0, 0, -18] }} transition={{ ...loop, times: [0, .18, .32, .82, 1] }}>
+          <path d="M420 218h55l18-25h64l18 25h66v116H420Z"/><circle cx="531" cy="276" r="42"/><circle cx="531" cy="276" r="23"/><path d="M594 237h24"/>
+        </motion.g>
+        <motion.g className="hs-kinetic-photos" fill="none" stroke="#f7e6bd" strokeWidth="4" initial={{ opacity: 0, rotate: -6 }} animate={{ opacity: [0, 0, 1, 1, 0], rotate: [-6, -6, 2, 0, 5] }} transition={{ ...loop, times: [0, .3, .45, .84, 1] }} style={{ transformOrigin: "760px 275px" }}>
+          <rect x="692" y="192" width="130" height="154" rx="4"/><path d="M710 313l32-38 21 20 20-28 22 46Z"/><circle cx="780" cy="230" r="12"/><rect x="805" y="171" width="108" height="132" rx="4" transform="rotate(9 859 237)"/>
+        </motion.g>
+        <motion.g initial={{ opacity: 0, scale: .82 }} animate={{ opacity: [0, 0, 1, 1, 0], scale: [.82, .82, 1.03, 1, .96] }} transition={{ ...loop, times: [0, .48, .63, .9, 1] }} style={{ transformOrigin: "880px 390px" }}>
+          <text x="600" y="430" textAnchor="middle" className="hs-kinetic-word">HAVESTORY</text>
+          <path d="M385 452 Q600 484 815 452" fill="none" stroke="url(#hsKineticGold)" strokeWidth="2"/>
+        </motion.g>
+      </motion.svg>
+      <Link href="/custom-project" className="hs-kinetic-cta">Create your story <ArrowRight size={17}/></Link>
+    </section>
+  );
+}
+
 export default function Home() {
   const { data: settings } = useGetSettings();
   const { data: products } = useListProducts();
@@ -208,6 +245,7 @@ export default function Home() {
       {reviewList.length > 0 && <section className="hs-new-section hs-new-reviews"><Heading eyebrow="06 / Loved by our clients" title="Stories from happy walls." /><div>{reviewList.map((review) => <blockquote key={review.id}><Quote size={24} /><p>“{review.comment}”</p><footer><strong>{review.customerName}</strong><span>{"★".repeat(Math.min(5, review.rating || 5))}</span></footer></blockquote>)}</div></section>}
 
       <section className="hs-new-final"><div><span>Have a photograph in mind?</span><h2>Make something<br /><em>worth keeping.</em></h2><p>Tell us the idea. We will help with the rest.</p></div></section>
+      <KineticStory />
     </main>
   );
 }
