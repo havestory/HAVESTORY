@@ -55,6 +55,11 @@ export function AdminLayout({ children }: { children: ReactNode }) {
   const permissions = Array.isArray(admin?.permissions) ? admin.permissions.map(String) : [];
   const canAccess = (permission?: string) => !permission || admin?.role === 'owner' || permissions.includes(permission);
 
+  useEffect(() => {
+    document.documentElement.dataset.hsAdminTheme = theme;
+    return () => { delete document.documentElement.dataset.hsAdminTheme; };
+  }, [theme]);
+
   const routeTitles = [
     ['/admin/crm-projects', 'CRM Projects'],
     ['/admin/shipping-labels', 'Shipping Labels'], ['/admin/production-usage', 'Production Usage'],
