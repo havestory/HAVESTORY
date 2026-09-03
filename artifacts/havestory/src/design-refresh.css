@@ -55,7 +55,7 @@
   color: rgba(255,255,255,.78) !important;
   background: rgba(43,23,56,.94) !important;
   box-shadow: 0 8px 25px rgba(43,23,56,.16) !important;
-  font-size: 8px !important;
+  font-size: 10px !important;
   letter-spacing: .15em !important;
 }
 [data-public-site] .hsx-shell-nav {
@@ -76,13 +76,13 @@
 }
 [data-public-site] .hsx-shell-brand strong { color: var(--hs-ink) !important; letter-spacing: .14em !important; }
 [data-public-site] .hsx-shell-brand { min-width: 190px !important; }
-[data-public-site] .hsx-shell-brand strong { font-size: 14px !important; }
+[data-public-site] .hsx-shell-brand strong { font-size: 16px !important; }
 [data-public-site] .hsx-shell-links a {
   min-height: 38px !important;
   padding-inline: 12px !important;
   border-radius: 999px !important;
   color: #716777 !important;
-  font-size: 12px !important;
+  font-size: 13px !important;
   font-weight: 800 !important;
 }
 [data-public-site] .hsx-shell-links a:hover,
