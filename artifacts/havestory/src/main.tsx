@@ -11,6 +11,9 @@ import './home-benefits.css';
 // legacy responsive rules bundled in the older public stylesheets.
 import './premium-footer.css';
 import './admin-stability.css';
+// Canonical 2026 design layer. Keep last so every legacy screen inherits the
+// same accessible public and admin visual system.
+import './design-refresh.css';
 
 // Seed the public Liquid Glass palette before settings arrive so the first paint
 // never flashes the legacy darkroom or brown editorial theme.
