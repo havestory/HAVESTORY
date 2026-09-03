@@ -391,6 +391,135 @@ export function InvoicePreview({
   };
 
   /**
+   * Data-driven PDF fallback. This deliberately avoids DOM/canvas rendering,
+   * remote images and application CSS, so an invoice can still be downloaded
+   * when html2canvas encounters a browser-specific CSS or CORS limitation.
+   */
+  const createFallbackPdf = (): jsPDF => {
+    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", compress: true });
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const left = 16;
+    const right = pageW - 16;
+    let y = 18;
+
+    const addHeader = () => {
+      pdf.setTextColor(47, 22, 56);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(17);
+      pdf.text(biz || "HAVESTORY", left, y);
+      pdf.setFontSize(7.5);
+      pdf.setTextColor(100, 100, 100);
+      const businessLine = [bizAddr, bizPhone, bizEmail].filter(Boolean).join(" | ");
+      if (businessLine) pdf.text(pdf.splitTextToSize(businessLine, 112), left, y + 5);
+      pdf.setTextColor(107, 47, 123);
+      pdf.setFontSize(20);
+      pdf.text("INVOICE", right, y, { align: "right" });
+      pdf.setFontSize(8);
+      pdf.setTextColor(75, 75, 75);
+      pdf.text(`No: ${invoiceNo}`, right, y + 5, { align: "right" });
+      pdf.text(`Date: ${format(now, "dd MMM yyyy")}`, right, y + 9, { align: "right" });
+      y += 20;
+      pdf.setDrawColor(107, 47, 123);
+      pdf.setLineWidth(.6);
+      pdf.line(left, y, right, y);
+      y += 8;
+    };
+
+    const newPage = () => {
+      pdf.addPage();
+      y = 18;
+      addHeader();
+    };
+
+    addHeader();
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(8);
+    pdf.setTextColor(107, 47, 123);
+    pdf.text("BILL TO", left, y);
+    y += 5;
+    pdf.setTextColor(25, 25, 25);
+    pdf.setFontSize(11);
+    pdf.text(form.clientName || "Walk-in customer", left, y);
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(8.5);
+    const customerLines = [form.businessName, form.address, form.phone, form.email].filter(Boolean);
+    customerLines.forEach(value => { y += 4.5; pdf.text(String(value), left, y); });
+    y += 9;
+
+    const drawTableHeader = () => {
+      pdf.setFillColor(47, 22, 56);
+      pdf.rect(left, y - 4, right - left, 7, "F");
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(8);
+      pdf.text("DESCRIPTION", left + 2, y);
+      pdf.text("QTY", 143, y, { align: "right" });
+      pdf.text("UNIT PRICE", 168, y, { align: "right" });
+      pdf.text("AMOUNT", right - 2, y, { align: "right" });
+      y += 7;
+    };
+    drawTableHeader();
+
+    (validItems.length ? validItems : [{ id: "empty", description: "No line items", qty: 0, unitPrice: "0", notes: "" }]).forEach((item, index) => {
+      const optionText = (item.selectedOptions || []).map(option => `${option.groupTitle || "Option"}: ${option.choiceName || "Selected"}`).join(", ");
+      const detail = [optionText, item.notes].filter(Boolean).join(" | ");
+      const description = pdf.splitTextToSize(`${index + 1}. ${item.description}`, 100);
+      const detailLines = detail ? pdf.splitTextToSize(detail, 100) : [];
+      const rowH = Math.max(9, 4.2 * (description.length + detailLines.length) + 3);
+      if (y + rowH > pageH - 30) { newPage(); drawTableHeader(); }
+      pdf.setTextColor(30, 30, 30);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(8.5);
+      pdf.text(description, left + 2, y);
+      if (detailLines.length) {
+        pdf.setFont("helvetica", "normal");
+        pdf.setTextColor(105, 105, 105);
+        pdf.setFontSize(7);
+        pdf.text(detailLines, left + 2, y + description.length * 4.2);
+      }
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(40, 40, 40);
+      pdf.setFontSize(8);
+      pdf.text(String(item.qty), 143, y, { align: "right" });
+      pdf.text(`Rs. ${num(item.unitPrice).toLocaleString()}`, 168, y, { align: "right" });
+      pdf.text(`Rs. ${(item.qty * num(item.unitPrice)).toLocaleString()}`, right - 2, y, { align: "right" });
+      y += rowH;
+      pdf.setDrawColor(225, 225, 225);
+      pdf.line(left, y - 3, right, y - 3);
+    });
+
+    if (y > pageH - 70) newPage();
+    y += 4;
+    const totalRow = (label: string, amount: number, bold = false) => {
+      pdf.setFont("helvetica", bold ? "bold" : "normal");
+      pdf.setFontSize(bold ? 11 : 8.5);
+      pdf.setTextColor(35, 35, 35);
+      pdf.text(label, 135, y);
+      pdf.text(`Rs. ${amount.toLocaleString()}`, right, y, { align: "right" });
+      y += bold ? 7 : 5;
+    };
+    totalRow("Subtotal", subtotal);
+    if (shippingAmt > 0) totalRow("Shipping", shippingAmt);
+    if (num(advance) > 0) totalRow("Advance paid", -num(advance));
+    totalRow("Grand total", grandTotal, true);
+    const fallbackBalance = (status || "").toLowerCase() === "paid" ? 0 : Math.max(0, grandTotal - num(advance));
+    totalRow(fallbackBalance === 0 ? "Balance (PAID)" : "Balance due", fallbackBalance, true);
+
+    if (form.additionalNotes) {
+      y += 3;
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      pdf.setTextColor(80, 80, 80);
+      pdf.text(pdf.splitTextToSize(`Note: ${form.additionalNotes}`, right - left), left, y);
+    }
+    pdf.setFontSize(7.5);
+    pdf.setTextColor(110, 110, 110);
+    pdf.text(`${issuer ? `Issued by Mr. ${issuer} | ` : ""}Thank you for choosing ${biz || "HAVESTORY"}.`, pageW / 2, pageH - 12, { align: "center" });
+    return pdf;
+  };
+
+  /**
    * PDF export: captures each invoice page with html2canvas, builds a jsPDF
    * document, then opens the resulting PDF as a blob URL in a new browser tab.
    * No print dialog — the tab shows the PDF directly and the user can save it.
@@ -416,8 +545,13 @@ export function InvoicePreview({
       // link across Chrome desktop, Android and installed web-app contexts.
       pdf.save(`Invoice-${invoiceNo}.pdf`);
     } catch (error) {
-      console.error("Invoice PDF export failed", error);
-      window.alert("The invoice could not be downloaded. Please wait for the preview to finish loading and try again.");
+      console.error("Invoice visual PDF export failed; using safe fallback", error);
+      try {
+        createFallbackPdf().save(`Invoice-${invoiceNo}.pdf`);
+      } catch (fallbackError) {
+        console.error("Invoice fallback PDF export failed", fallbackError);
+        window.alert("The invoice could not be downloaded. Please check that browser downloads are allowed and try again.");
+      }
     } finally {
       setGeneratingPDF(false);
     }
