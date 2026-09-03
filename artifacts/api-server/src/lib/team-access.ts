@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import type { NextFunction, Request, Response } from "express";
 import { pool } from "@workspace/db";
-import { getAdminAuth, hasPermission } from "./auth-cookie";
+import { getAdminAuth, hasPermission, setRequestAdminAuth, type AdminAuth } from "./auth-cookie";
 
 export const STAFF_PERMISSIONS = [
   "dashboard", "orders", "customers", "invoices", "shipping",
@@ -9,6 +9,39 @@ export const STAFF_PERMISSIONS = [
   "pos_access", "pos_day_start", "pos_day_close",
 ] as const;
 export type StaffPermission = typeof STAFF_PERMISSIONS[number];
+
+type CachedStaffAccess = { expiresAt: number; auth: AdminAuth | null };
+const staffAccessCache = new Map<number, CachedStaffAccess>();
+const STAFF_ACCESS_CACHE_MS = 15_000;
+
+export function invalidateStaffAccess(staffId: number): void {
+  staffAccessCache.delete(staffId);
+}
+
+async function currentStaffAccess(auth: AdminAuth): Promise<AdminAuth | null> {
+  if (!auth.staffId) return null;
+  const cached = staffAccessCache.get(auth.staffId);
+  if (cached && cached.expiresAt > Date.now()) {
+    return !auth.staffVersion || cached.auth?.staffVersion === auth.staffVersion ? cached.auth : null;
+  }
+  await ensureTeamTables();
+  const { rows } = await pool.query(
+    "SELECT username, permissions, active, updated_at FROM admin_staff WHERE id=$1 LIMIT 1",
+    [auth.staffId],
+  );
+  const row = rows[0];
+  const current = row?.active
+    ? {
+        username: String(row.username || auth.username),
+        role: "staff" as const,
+        staffId: auth.staffId,
+        permissions: Array.isArray(row.permissions) ? row.permissions.map(String) : [],
+        staffVersion: new Date(row.updated_at).toISOString(),
+      }
+    : null;
+  staffAccessCache.set(auth.staffId, { expiresAt: Date.now() + STAFF_ACCESS_CACHE_MS, auth: current });
+  return !auth.staffVersion || current?.staffVersion === auth.staffVersion ? current : null;
+}
 
 let teamTablesReady: Promise<void> | null = null;
 
@@ -156,8 +189,16 @@ const routePermission = (path: string, method: string): StaffPermission | "owner
 };
 
 export async function staffPermissionGate(req: Request, res: Response, next: NextFunction): Promise<void> {
-  const auth = getAdminAuth(req);
-  if (!auth || auth.role === "owner") { next(); return; }
+  const cookieAuth = getAdminAuth(req);
+  if (!cookieAuth || cookieAuth.role === "owner") { next(); return; }
+  const auth = await currentStaffAccess(cookieAuth);
+  if (!auth) {
+    res.status(401).json({ error: "This staff session is no longer active. Please sign in again." });
+    return;
+  }
+  // Downstream route checks and response filtering must use current database
+  // permissions, not the potentially stale permissions embedded in the cookie.
+  setRequestAdminAuth(req, auth);
   const needed = routePermission(req.path, req.method);
   if (needed === "owner") { res.status(403).json({ error: "Owner access required" }); return; }
   if (needed && !hasPermission(auth, needed)) {
