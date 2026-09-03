@@ -9,6 +9,13 @@ import { useShopCart } from '@/lib/shop-cart';
 import { ShopCartDrawer } from '@/components/shop/ShopCartDrawer';
 import { StudioLoader } from '@/components/StudioLoader';
 
+function safeExternalUrl(value: unknown): string | null {
+  try {
+    const url = new URL(String(value || ""));
+    return url.protocol === "https:" || url.protocol === "http:" ? url.toString() : null;
+  } catch { return null; }
+}
+
 const WHATSAPP_FAQS = [
   { question: 'What can HAVESTORY make for me?', answer: 'We create custom photo frames, archival prints, collages and studio pieces for homes, gifts, events and businesses.' },
   { question: 'How do I place a custom order?', answer: 'Send us your photo, preferred size and any style ideas. Our team will guide you through the materials, layout and final quote.' },
@@ -367,18 +374,18 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           </div>
           <div>
             <p>Stay connected</p>
-            {settings?.instagramUrl && <a href={settings.instagramUrl} target="_blank" rel="noreferrer"><Instagram /> Instagram</a>}
-            {settings?.facebookUrl && <a href={settings.facebookUrl} target="_blank" rel="noreferrer"><Facebook /> Facebook</a>}
+            {safeExternalUrl(settings?.instagramUrl) && <a href={safeExternalUrl(settings?.instagramUrl)!} target="_blank" rel="noopener noreferrer"><Instagram /> Instagram</a>}
+            {safeExternalUrl(settings?.facebookUrl) && <a href={safeExternalUrl(settings?.facebookUrl)!} target="_blank" rel="noopener noreferrer"><Facebook /> Facebook</a>}
             {settings?.whatsappNumber && <a href={`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer"><MessageCircle /> WhatsApp</a>}
           </div>
         </div>
         <div className="hsx-footer-base">
           <span>{(settings as any)?.footerCopyrightText || `© ${new Date().getFullYear()} ${settings?.businessName || 'HAVESTORY'}`}</span>
-          {(settings as any)?.footerDeveloperCredit && (
-            (settings as any)?.footerDeveloperUrl
-              ? <a href={(settings as any).footerDeveloperUrl} target="_blank" rel="noreferrer">{(settings as any).footerDeveloperCredit}</a>
+            {(settings as any)?.footerDeveloperCredit && (
+              safeExternalUrl((settings as any)?.footerDeveloperUrl)
+              ? <a href={safeExternalUrl((settings as any).footerDeveloperUrl)!} target="_blank" rel="noopener noreferrer">{(settings as any).footerDeveloperCredit}</a>
               : <span>{(settings as any).footerDeveloperCredit}</span>
-          )}
+            )}
         </div>
       </footer>
 
