@@ -218,8 +218,12 @@ function Router() {
 }
 
 function App() {
-  const [showSplash, setShowSplash] = useState(() => !window.location.pathname.startsWith('/admin'));
+  const [showSplash, setShowSplash] = useState(() => {
+    if (window.location.pathname.startsWith('/admin')) return false;
+    try { return sessionStorage.getItem('hs:splash-seen') !== '1'; } catch { return true; }
+  });
   const handleSplashDone = useCallback(() => {
+    try { sessionStorage.setItem('hs:splash-seen', '1'); } catch {}
     setShowSplash(false);
   }, []);
 
