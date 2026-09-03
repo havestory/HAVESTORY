@@ -283,6 +283,16 @@
 [data-public-site] .hs-new-final h2 {
   margin-block: 12px 7px !important;
   line-height: .9 !important;
+  perspective: 900px;
+}
+[data-public-site] .hs-final-animated-line { display: inline-flex; justify-content: center; }
+[data-public-site] .hs-final-animated-line i {
+  display: inline-block;
+  color: #fff;
+  font-style: normal;
+  transform-origin: 50% 100%;
+  text-shadow: 0 8px 28px rgba(11,4,15,.22);
+  will-change: transform, opacity, filter;
 }
 [data-public-site] .hs-new-final h2 em {
   display: inline-block;
