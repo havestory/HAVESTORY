@@ -61,6 +61,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   const [mobileNav, setMobileNav] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showWa,   setShowWa]   = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const [waFaqOpen, setWaFaqOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
@@ -68,6 +69,8 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     const onScroll = () => {
       setScrolled(window.scrollY > 40);
       setShowWa(window.scrollY > 200);
+      const available = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(available > 0 ? Math.min(100, (window.scrollY / available) * 100) : 0);
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -229,6 +232,8 @@ export function PublicLayout({ children }: { children: ReactNode }) {
 
   return (
     <div data-public-site="" data-public-theme={publicThemePreset} className="atelier-shell glass-gallery-shell min-h-[100dvh] flex flex-col bg-[hsl(var(--background))] relative overflow-x-clip">
+
+      <div className="hs-scroll-progress" aria-hidden="true"><span style={{ transform: `scaleX(${scrollProgress / 100})` }} /></div>
 
       <header className={`hsx-shell-header fixed inset-x-0 top-0 z-40 ${navBg}`}>
         <div className="hsx-announcement">
