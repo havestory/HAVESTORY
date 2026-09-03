@@ -236,10 +236,6 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       <div className="hs-scroll-progress" aria-hidden="true"><span style={{ transform: `scaleX(${scrollProgress / 100})` }} /></div>
 
       <header className={`hsx-shell-header fixed inset-x-0 top-0 z-40 ${navBg}`}>
-        <div className="hsx-announcement">
-          <span>COLOUR LAB · FRAME STUDIO · MADE IN SRI LANKA</span>
-          <span>Custom orders open <ArrowRight /></span>
-        </div>
         <div className="hsx-shell-nav">
           <Link href="/" className="hsx-shell-brand">
             {settings?.logoUrl
