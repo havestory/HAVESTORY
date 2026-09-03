@@ -376,7 +376,12 @@ export function InvoicePreview({
    *    canvas serializable for PDF/JPG downloads.
    */
   const capturePageIsolated = async (el: HTMLElement): Promise<HTMLCanvasElement> => {
-    const raw = await captureElement(el, { width: A4_W, height: A4_H, scale: 2 });
+    const raw = await captureElement(el, {
+      width: A4_W,
+      height: A4_H,
+      scale: 2,
+      isolateDocumentStyles: true,
+    });
     // Hard-crop to exact A4×2 dimensions so 1 canvas always maps to 1 PDF page.
     const OUT_W = A4_W * 2;
     const OUT_H = A4_H * 2;
@@ -545,13 +550,8 @@ export function InvoicePreview({
       // link across Chrome desktop, Android and installed web-app contexts.
       pdf.save(`Invoice-${invoiceNo}.pdf`);
     } catch (error) {
-      console.error("Invoice visual PDF export failed; using safe fallback", error);
-      try {
-        createFallbackPdf().save(`Invoice-${invoiceNo}.pdf`);
-      } catch (fallbackError) {
-        console.error("Invoice fallback PDF export failed", fallbackError);
-        window.alert("The invoice could not be downloaded. Please check that browser downloads are allowed and try again.");
-      }
+      console.error("Invoice visual PDF export failed", error);
+      window.alert("The original invoice preview could not be exported. Please refresh the page and try again.");
     } finally {
       setGeneratingPDF(false);
     }
