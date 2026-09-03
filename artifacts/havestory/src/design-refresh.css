@@ -99,12 +99,12 @@
   box-shadow: 0 8px 22px rgba(52,27,63,.1) !important;
 }
 
-[data-public-site] .hsx-main { padding-top: 110px !important; padding-inline: 0 !important; }
+[data-public-site] .hsx-main { padding-top: 94px !important; padding-inline: 0 !important; }
 [data-public-site] .hs-new-home { overflow: clip; background: transparent !important; }
 [data-public-site] .hs-new-hero {
   width: min(1600px, calc(100% - 32px)) !important;
   max-width: none !important;
-  min-height: min(790px, calc(100svh - 118px)) !important;
+  min-height: min(790px, calc(100svh - 94px)) !important;
   margin: 8px auto 0 !important;
   border: 1px solid rgba(255,255,255,.72) !important;
   border-radius: clamp(24px, 4vw, 46px) !important;
@@ -157,17 +157,38 @@
   text-wrap: balance;
 }
 [data-public-site] .hs-new-heading p { color: #6a6070 !important; }
-[data-public-site] .hs-new-category-grid { gap: 18px !important; }
+[data-public-site] .hs-new-category-grid {
+  gap: 18px !important;
+  align-items: stretch !important;
+}
 [data-public-site] .hs-new-category {
+  min-height: 390px !important;
   overflow: hidden;
   border: 1px solid rgba(255,255,255,.65) !important;
   border-radius: 28px !important;
   box-shadow: 0 18px 55px rgba(43,23,56,.13) !important;
   transition: transform .45s var(--hs-ease), box-shadow .45s ease !important;
 }
+[data-public-site] .hs-new-category > a { min-height: 390px !important; }
+[data-public-site] .hs-new-category img { z-index: 0 !important; }
+[data-public-site] .hs-new-category > a::after {
+  z-index: 0 !important;
+  background: linear-gradient(180deg, rgba(28,13,38,.02) 0%, rgba(28,13,38,.08) 48%, rgba(28,13,38,.35) 100%) !important;
+}
 [data-public-site] .hs-new-category:hover { transform: translateY(-10px) !important; box-shadow: 0 30px 75px rgba(43,23,56,.21) !important; }
-[data-public-site] .hs-new-category-copy { padding: clamp(20px,3vw,34px) !important; }
+[data-public-site] .hs-new-category-copy {
+  box-sizing: border-box !important;
+  width: calc(100% - 24px) !important;
+  min-height: 52% !important;
+  margin: auto 12px 12px !important;
+  padding: 22px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-end !important;
+  background: linear-gradient(145deg, rgba(255,253,249,.94), rgba(248,239,251,.86)) !important;
+}
 [data-public-site] .hs-new-category-copy h3 { font-size: clamp(1.35rem,2vw,2rem) !important; }
+[data-public-site] .hs-new-category-copy p { color: rgba(36,19,47,.82) !important; }
 
 [data-public-site] .hs-new-favourite-card,
 [data-public-site] .hs-new-work-item,
@@ -196,9 +217,13 @@
     #281432 !important;
   box-shadow: 0 40px 100px rgba(38,16,48,.24) !important;
 }
-[data-public-site] .hs-new-process :is(h2,h3) { color: #fffaf5 !important; }
-[data-public-site] .hs-new-process p { color: rgba(255,255,255,.68) !important; }
-[data-public-site] .hs-new-process-list > div { border-color: rgba(255,255,255,.13) !important; transition: padding .3s var(--hs-ease), background .3s ease !important; }
+[data-public-site] .hs-new-process :is(h2,h3) { color: #fff !important; }
+[data-public-site] .hs-new-process p { color: rgba(255,255,255,.88) !important; }
+[data-public-site] .hs-new-process-intro > span,
+[data-public-site] .hs-new-process-intro h2 em,
+[data-public-site] .hs-new-process-list > div > span { color: #f3bf55 !important; }
+[data-public-site] .hs-new-process-list svg { color: rgba(255,255,255,.82) !important; }
+[data-public-site] .hs-new-process-list > div { border-color: rgba(255,255,255,.22) !important; transition: padding .3s var(--hs-ease), background .3s ease !important; }
 [data-public-site] .hs-new-process-list > div:hover { padding-inline: 18px !important; border-radius: 16px; background: rgba(255,255,255,.06) !important; }
 [data-public-site] .hs-new-services > div:last-child > a {
   border-color: var(--hs-line) !important;
@@ -226,8 +251,7 @@
 }
 
 @media (min-width: 781px) {
-  [data-public-site] .hsx-announcement { display: flex !important; }
-  [data-public-site] .hsx-main { padding-top: 123px !important; }
+  [data-public-site] .hsx-main { padding-top: 94px !important; }
 }
 
 /* All secondary public pages share the same premium canvas and readable form language. */
@@ -427,7 +451,7 @@ html[data-hs-admin-theme] body > div > [role="dialog"] :is(input,textarea,select
 }
 
 @media (max-width: 1100px) {
-  [data-public-site] .hsx-main { padding-top: 102px !important; }
+  [data-public-site] .hsx-main { padding-top: 90px !important; }
   [data-public-site] .hs-new-category-grid { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
 }
 @media (max-width: 780px) {
@@ -436,7 +460,7 @@ html[data-hs-admin-theme] body > div > [role="dialog"] :is(input,textarea,select
   [data-public-site] .hsx-shell-nav { width: 100% !important; min-height: 62px !important; border-radius: 18px !important; }
   [data-public-site] .hsx-shell-brand { min-width: 0 !important; }
   [data-public-site] .hsx-shell-brand strong { font-size: 11px !important; }
-  [data-public-site] .hsx-main { padding-top: 96px !important; }
+  [data-public-site] .hsx-main { padding-top: 78px !important; }
   [data-public-site] .hs-new-hero { min-height: 680px !important; border-radius: 25px !important; }
   [data-public-site] .hs-new-hero-card { margin: auto 12px 16px !important; padding: 24px !important; border-radius: 23px !important; }
   [data-public-site] .hs-new-section { width: min(100% - 24px,1320px) !important; }
@@ -473,6 +497,12 @@ html[data-hs-admin-theme] body > div > [role="dialog"] :is(input,textarea,select
   [data-public-site] .hs-new-category-grid { grid-template-columns: 1fr !important; }
   [data-public-site] .hs-new-category,
   [data-public-site] .hs-new-category > a { min-height: 290px !important; }
+  [data-public-site] .hs-new-category-copy {
+    width: calc(100% - 16px) !important;
+    min-height: 0 !important;
+    margin: auto 8px 8px !important;
+    padding: 18px !important;
+  }
   [data-public-site] .hs-new-hero-card h1 { font-size: clamp(2.65rem, 13vw, 4.2rem) !important; }
 }
 @media (prefers-reduced-motion: reduce) {
