@@ -16,8 +16,8 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
   }, [onDone]);
 
   useEffect(() => {
-    const minimumTimer = window.setTimeout(() => setMinimumDone(true), 420);
-    const safetyTimer = window.setTimeout(finish, 1400);
+    const minimumTimer = window.setTimeout(() => setMinimumDone(true), 180);
+    const safetyTimer = window.setTimeout(finish, 900);
     return () => {
       window.clearTimeout(minimumTimer);
       window.clearTimeout(safetyTimer);
