@@ -94,7 +94,7 @@ function InvLogo({ biz, logoUrl, tagline }: { biz: string; logoUrl?: string; tag
       )}
       <div>
         <div style={{ fontWeight: 800, fontSize: 15, color: "#111", lineHeight: 1.1 }}>{biz}</div>
-        {tagline && <div style={{ fontSize: 11, color: "#888" }}>{tagline}</div>}
+        {tagline && <div style={{ fontSize: 11, color: "#454047", fontWeight: 600 }}>{tagline}</div>}
       </div>
     </div>
   );
@@ -103,8 +103,8 @@ function InvLogo({ biz, logoUrl, tagline }: { biz: string; logoUrl?: string; tag
 function InvFooter({ page, total, website, biz }: { page: number; total: number; website: string; biz: string }) {
   return (
     <div style={{ height: FOOT, borderTop: "1px solid #f0f0f0", display: "flex", alignItems: "center", justifyContent: "space-between", padding: `0 ${PAD}px`, fontFamily: "Inter,sans-serif", boxSizing: "border-box" }}>
-      <div style={{ fontSize: 9.5, color: "#666" }}>{biz}{website ? ` · ${website}` : ""}</div>
-      <div style={{ fontSize: 10, color: "#bbb" }}>Page {page} of {total}</div>
+      <div style={{ fontSize: 9.5, color: "#3f3943", fontWeight: 600 }}>{biz}{website ? ` · ${website}` : ""}</div>
+      <div style={{ fontSize: 10, color: "#615867", fontWeight: 600 }}>Page {page} of {total}</div>
     </div>
   );
 }
@@ -137,7 +137,7 @@ function ItemsTable({ chunk, startIdx }: { chunk: LineItem[]; startIdx: number }
           const selectedDetails = Array.isArray(it.selectedOptions) ? it.selectedOptions : [];
           return (
             <tr key={it.id} style={{ borderBottom: "1px solid #f3e8ff", background: bg }}>
-              <td style={{ padding: "8px 12px", fontSize: 12, color: "#888", width: 26, textAlign: "left" }}>{startIdx + i + 1}</td>
+              <td style={{ padding: "8px 12px", fontSize: 12, color: "#423b47", fontWeight: 600, width: 26, textAlign: "left" }}>{startIdx + i + 1}</td>
               <td style={{ padding: "8px 8px", fontSize: 13, color: "#111", minWidth: 0, overflowWrap: "anywhere", wordBreak: "break-word" }}>
                 <div style={{ fontWeight: 600, overflowWrap: "anywhere", wordBreak: "break-word" }}>{it.description}</div>
                 {selectedDetails.map((detail, detailIndex) => {
@@ -145,15 +145,15 @@ function ItemsTable({ chunk, startIdx }: { chunk: LineItem[]; startIdx: number }
                   const name = String(detail.choiceName || "Selected");
                   const price = num(detail.price);
                   return (
-                    <div key={`${detail.groupId || "option"}-${detail.choiceId || detailIndex}`} style={{ fontSize: 10, color: "#6b7280", marginTop: 2, overflowWrap: "anywhere", wordBreak: "break-word" }}>
+                    <div key={`${detail.groupId || "option"}-${detail.choiceId || detailIndex}`} style={{ fontSize: 10, color: "#49414d", fontWeight: 600, marginTop: 2, overflowWrap: "anywhere", wordBreak: "break-word" }}>
                       {title}: {name}{price > 0 ? ` (+${rs(price)})` : ""}
                     </div>
                   );
                 })}
-                {it.notes && <div style={{ fontSize: 10, color: "#888", marginTop: selectedDetails.length ? 3 : 1, overflowWrap: "anywhere", wordBreak: "break-word" }}>{it.notes}</div>}
+                {it.notes && <div style={{ fontSize: 10, color: "#49414d", fontWeight: 600, marginTop: selectedDetails.length ? 3 : 1, overflowWrap: "anywhere", wordBreak: "break-word" }}>{it.notes}</div>}
               </td>
-              <td style={{ padding: "8px 6px", fontSize: 13, color: "#555", textAlign: "right", whiteSpace: "normal", overflowWrap: "anywhere", fontVariantNumeric: "tabular-nums" }}>{it.qty}</td>
-              <td style={{ padding: "8px 6px", fontSize: 13, color: "#555", textAlign: "right", whiteSpace: "normal", overflowWrap: "anywhere", fontVariantNumeric: "tabular-nums" }}>{rs(num(it.unitPrice))}</td>
+              <td style={{ padding: "8px 6px", fontSize: 13, color: "#29242d", fontWeight: 600, textAlign: "right", whiteSpace: "normal", overflowWrap: "anywhere", fontVariantNumeric: "tabular-nums" }}>{it.qty}</td>
+              <td style={{ padding: "8px 6px", fontSize: 13, color: "#29242d", fontWeight: 600, textAlign: "right", whiteSpace: "normal", overflowWrap: "anywhere", fontVariantNumeric: "tabular-nums" }}>{rs(num(it.unitPrice))}</td>
               <td style={{ padding: "8px 6px", fontSize: 13, fontWeight: 700, color: "#111", textAlign: "right", whiteSpace: "normal", overflowWrap: "anywhere", fontVariantNumeric: "tabular-nums" }}>{rs(total)}</td>
             </tr>
           );
@@ -174,8 +174,8 @@ function SummaryBlock({ subtotal, shippingAmt, advance, grandTotal, shippingLabe
       <div style={{ flex: "1 1 300px", minWidth: 0 }}>
         {notes && (
           <div style={{ background: "#f9fafb", borderRadius: 8, border: "1px solid #f0f0f0", padding: "10px 14px" }}>
-            <div style={{ fontSize: 9, fontWeight: 700, color: "#aaa", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>NOTES</div>
-            <div style={{ fontSize: 12, color: "#555", lineHeight: 1.6, whiteSpace: "pre-line" }}>{notes}</div>
+            <div style={{ fontSize: 9, fontWeight: 800, color: "#514758", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>NOTES</div>
+            <div style={{ fontSize: 12, color: "#302a33", fontWeight: 500, lineHeight: 1.6, whiteSpace: "pre-line" }}>{notes}</div>
           </div>
         )}
       </div>
@@ -185,11 +185,11 @@ function SummaryBlock({ subtotal, shippingAmt, advance, grandTotal, shippingLabe
             <span style={{ fontSize: 9.5, fontWeight: 700, color: "#fff", letterSpacing: 1.5 }}>SUMMARY</span>
           </div>
           <div style={{ padding: "9px 14px 0", background: "#fff" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#555", paddingBottom: 6, borderBottom: "1px solid #f3e8ff" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#29242d", fontWeight: 600, paddingBottom: 6, borderBottom: "1px solid #d8c8dd" }}>
               <span>Subtotal</span><span style={{ fontWeight: 600 }}>{rs(subtotal)}</span>
             </div>
             {shippingAmt > 0 && (
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#555", padding: "6px 0", borderBottom: "1px solid #f3e8ff" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#29242d", fontWeight: 600, padding: "6px 0", borderBottom: "1px solid #d8c8dd" }}>
                 <span>Shipping ({shippingLabel})</span><span>{rs(shippingAmt)}</span>
               </div>
             )}
@@ -198,7 +198,7 @@ function SummaryBlock({ subtotal, shippingAmt, advance, grandTotal, shippingLabe
                 <span>Advance Paid</span><span>−{rs(num(advance))}</span>
               </div>
             )}
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#555", padding: "6px 0", borderBottom: "1px solid #f3e8ff" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#29242d", fontWeight: 600, padding: "6px 0", borderBottom: "1px solid #d8c8dd" }}>
               <span>Grand Total</span><span style={{ fontWeight: 600 }}>{rs(grandTotal)}</span>
             </div>
           </div>
@@ -636,16 +636,16 @@ export function InvoicePreview({
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
       <div>
         <InvLogo biz={biz} logoUrl={bizLogo} tagline={tagline} />
-        <div style={{ fontSize: 11, color: "#666", lineHeight: 1.8, marginTop: 6 }}>
+        <div style={{ fontSize: 11, color: "#38323c", fontWeight: 600, lineHeight: 1.8, marginTop: 6 }}>
           <div>{bizAddr}</div>
           {bizPhone && <div>{bizPhone}{bizEmail ? ` · ${bizEmail}` : ""}</div>}
         </div>
       </div>
       <div style={{ textAlign: "right" }}>
         <div style={{ fontSize: 30, fontWeight: 900, color: PINK, letterSpacing: 3 }}>INVOICE</div>
-        <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>No: <strong style={{ color: "#333" }}>{invoiceNo}</strong></div>
-        <div style={{ fontSize: 11, color: "#888" }}>Date: {format(now, "MMMM dd, yyyy")}</div>
-        <div style={{ fontSize: 11, color: "#888" }}>Due: {format(dueDate, "MMMM dd, yyyy")}</div>
+        <div style={{ fontSize: 12, color: "#423a47", fontWeight: 600, marginTop: 2 }}>No: <strong style={{ color: "#211c24" }}>{invoiceNo}</strong></div>
+        <div style={{ fontSize: 11, color: "#423a47", fontWeight: 600 }}>Date: {format(now, "MMMM dd, yyyy")}</div>
+        <div style={{ fontSize: 11, color: "#423a47", fontWeight: 600 }}>Due: {format(dueDate, "MMMM dd, yyyy")}</div>
         <div style={{ marginTop: 6, display: "inline-block", background: badge.bg, border: `1px solid ${badge.border}`, borderRadius: 6, padding: "3px 10px", fontSize: 10, color: badge.color, fontWeight: 700 }}>{badge.label}</div>
       </div>
     </div>
@@ -656,7 +656,7 @@ export function InvoicePreview({
       <InvLogo biz={biz} logoUrl={bizLogo} tagline={tagline} />
       <div style={{ textAlign: "right" }}>
         <div style={{ fontSize: 12, color: PINK, fontWeight: 800, letterSpacing: 1.5 }}>INVOICE</div>
-        <div style={{ fontSize: 10, color: "#888" }}>{invoiceNo} · {format(now, "MMM dd, yyyy")}</div>
+        <div style={{ fontSize: 10, color: "#423a47", fontWeight: 600 }}>{invoiceNo} · {format(now, "MMM dd, yyyy")}</div>
       </div>
     </div>
   );
@@ -666,19 +666,19 @@ export function InvoicePreview({
       <div style={{ background: "#fbf7fc", borderRadius: 10, padding: "12px 14px", border: `1px solid #dfcfe4` }}>
         <div style={{ fontSize: 8.5, fontWeight: 700, color: PINK, letterSpacing: 2, textTransform: "uppercase", marginBottom: 7 }}>BILL TO</div>
         <div style={{ fontWeight: 800, fontSize: 14.5, color: "#111" }}>{form.clientName || "—"}</div>
-        {form.businessName && <div style={{ fontSize: 12, color: "#555", marginTop: 2 }}>{form.businessName}</div>}
-        {form.address && <div style={{ fontSize: 12, color: "#777", marginTop: 2 }}>{form.address}</div>}
-        {form.phone && <div style={{ fontSize: 12, color: "#777" }}>{form.phone}</div>}
-        {form.email && <div style={{ fontSize: 12, color: "#777" }}>{form.email}</div>}
+        {form.businessName && <div style={{ fontSize: 12, color: "#302a33", fontWeight: 600, marginTop: 2 }}>{form.businessName}</div>}
+        {form.address && <div style={{ fontSize: 12, color: "#423a47", fontWeight: 500, marginTop: 2 }}>{form.address}</div>}
+        {form.phone && <div style={{ fontSize: 12, color: "#423a47", fontWeight: 500 }}>{form.phone}</div>}
+        {form.email && <div style={{ fontSize: 12, color: "#423a47", fontWeight: 500 }}>{form.email}</div>}
       </div>
       <div style={{ background: "#fffaf0", borderRadius: 10, padding: "12px 14px", border: "1px solid #ead7ac" }}>
         <div style={{ fontSize: 8.5, fontWeight: 700, color: PURPLE, letterSpacing: 2, textTransform: "uppercase", marginBottom: 7 }}>ORDER DETAILS</div>
-        <div style={{ fontSize: 11.5, color: "#555", lineHeight: 1.9 }}>
-          <div><span style={{ color: "#999" }}>Invoice No: </span><strong style={{ color: "#333" }}>{invoiceNo}</strong></div>
-          {linkedOrderId && <div><span style={{ color: "#999" }}>Order ID: </span><strong style={{ color: "#333" }}>{linkedOrderId}</strong></div>}
-          <div><span style={{ color: "#999" }}>Date: </span>{format(now, "dd MMM yyyy")}</div>
-          <div><span style={{ color: "#999" }}>Due: </span>{format(dueDate, "dd MMM yyyy")}</div>
-          <div><span style={{ color: "#999" }}>Items: </span>{validItems.length}</div>
+        <div style={{ fontSize: 11.5, color: "#302a33", fontWeight: 600, lineHeight: 1.9 }}>
+          <div><span style={{ color: "#5b5260" }}>Invoice No: </span><strong style={{ color: "#211c24" }}>{invoiceNo}</strong></div>
+          {linkedOrderId && <div><span style={{ color: "#5b5260" }}>Order ID: </span><strong style={{ color: "#211c24" }}>{linkedOrderId}</strong></div>}
+          <div><span style={{ color: "#5b5260" }}>Date: </span>{format(now, "dd MMM yyyy")}</div>
+          <div><span style={{ color: "#5b5260" }}>Due: </span>{format(dueDate, "dd MMM yyyy")}</div>
+          <div><span style={{ color: "#5b5260" }}>Items: </span>{validItems.length}</div>
         </div>
       </div>
     </div>
@@ -812,7 +812,7 @@ export function InvoicePreview({
                         <>
                           <SmallHeader />
                           <Divider />
-                          <div style={{ fontSize: 11, color: "#888", marginBottom: 10 }}>
+                          <div style={{ fontSize: 11, color: "#423a47", fontWeight: 600, marginBottom: 10 }}>
                             Continued · Items {chunkStart + 1}–{Math.min(chunkStart + ITEMS_PER_PAGE, validItems.length)} of {validItems.length}
                           </div>
                         </>
@@ -867,7 +867,7 @@ export function InvoicePreview({
                                 .filter(([, v]) => v)
                                 .map(([label, val]) => (
                                   <div key={label}>
-                                    <div style={{ fontSize: 9, color: "#aaa", fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 3 }}>{label}</div>
+                                    <div style={{ fontSize: 9, color: "#554b5b", fontWeight: 800, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 3 }}>{label}</div>
                                     <div style={{ fontSize: 14, fontWeight: 700, color: "#111", overflowWrap: "anywhere", wordBreak: "break-word" }}>{val}</div>
                                   </div>
                                 ))}
@@ -882,7 +882,7 @@ export function InvoicePreview({
                   ) : (
                     <div style={{ background: "#fffbeb", borderRadius: 10, padding: "14px 16px", marginBottom: 22, border: "1px solid #d6b98c" }}>
                       <div style={{ fontSize: 12, color: PINK }}>Please contact us for payment details.</div>
-                      {bizPhone && <div style={{ fontSize: 12, color: "#888", marginTop: 3 }}>{bizPhone}</div>}
+                      {bizPhone && <div style={{ fontSize: 12, color: "#423a47", fontWeight: 600, marginTop: 3 }}>{bizPhone}</div>}
                     </div>
                   )}
 
@@ -893,7 +893,7 @@ export function InvoicePreview({
                       {tcs.map((t, i) => (
                         <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
                           <div style={{ width: 17, height: 17, borderRadius: "50%", background: GRAD, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 9.5, fontWeight: 700, flexShrink: 0, marginTop: 1 }}>{i + 1}</div>
-                          <div style={{ fontSize: 12, color: "#555", lineHeight: 1.6 }}>{t}</div>
+                          <div style={{ fontSize: 12, color: "#302a33", fontWeight: 500, lineHeight: 1.6 }}>{t}</div>
                         </div>
                       ))}
                     </div>
