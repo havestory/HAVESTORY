@@ -309,6 +309,95 @@
   82%, 100% { background-position: -100% 50%; transform: translateY(0); }
 }
 
+/* Coded cinematic brand sequence — inspired by the supplied light-trail video. */
+[data-public-site] .hs-kinetic-story {
+  position: relative;
+  width: min(1380px, calc(100% - 24px));
+  min-height: 520px;
+  margin: 14px auto 38px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: clamp(28px, 5vw, 62px);
+  color: #fff;
+  background:
+    radial-gradient(circle at 18% 55%, rgba(181,111,203,.18), transparent 30%),
+    radial-gradient(circle at 82% 32%, rgba(226,170,65,.16), transparent 28%),
+    linear-gradient(145deg, #160b1e, #2d1737 52%, #1d1025);
+  box-shadow: 0 34px 90px rgba(34,15,43,.25);
+}
+[data-public-site] .hs-kinetic-story::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at center, transparent 30%, rgba(8,3,12,.38));
+}
+[data-public-site] .hs-kinetic-story svg {
+  position: relative;
+  z-index: 1;
+  width: min(1120px, 96%);
+  height: auto;
+  overflow: visible;
+}
+[data-public-site] .hs-kinetic-story-copy {
+  position: absolute;
+  z-index: 2;
+  top: 30px;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+[data-public-site] .hs-kinetic-story-copy span {
+  color: #f1c865;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .24em;
+}
+[data-public-site] .hs-kinetic-story-copy p {
+  margin: 7px 0 0;
+  color: rgba(255,255,255,.68) !important;
+  font-size: 12px;
+  letter-spacing: .08em;
+}
+[data-public-site] .hs-kinetic-word {
+  fill: url(#hsKineticGold);
+  stroke: rgba(255,241,183,.36);
+  stroke-width: 1px;
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-size: 74px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  filter: drop-shadow(0 0 20px rgba(241,190,74,.38));
+}
+[data-public-site] .hs-kinetic-cta {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: 27px;
+  transform: translateX(-50%);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 19px;
+  border: 1px solid rgba(248,210,123,.48);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(255,255,255,.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,.2);
+  backdrop-filter: blur(12px);
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: transform .3s var(--hs-ease), background .3s ease;
+}
+[data-public-site] .hs-kinetic-cta:hover {
+  transform: translateX(-50%) translateY(-4px);
+  background: rgba(232,181,73,.2);
+}
+
 [data-public-site] .hsx-footer {
   width: min(1380px, calc(100% - 24px)) !important;
   margin: 0 auto 12px !important;
@@ -558,6 +647,16 @@ html[data-hs-admin-theme] body > div > [role="dialog"] :is(input,textarea,select
     border-radius: 28px !important;
   }
   [data-public-site] .hs-new-final h2 { margin-block: 12px 8px !important; }
+  [data-public-site] .hs-kinetic-story {
+    width: calc(100% - 16px);
+    min-height: 390px;
+    margin: 10px 8px 24px;
+    border-radius: 28px;
+  }
+  [data-public-site] .hs-kinetic-story svg { width: 150%; }
+  [data-public-site] .hs-kinetic-word { font-size: 62px; }
+  [data-public-site] .hs-kinetic-story-copy { top: 22px; }
+  [data-public-site] .hs-kinetic-cta { bottom: 20px; }
   [data-public-site] .hsx-footer { width: calc(100% - 12px) !important; border-radius: 26px !important; }
   [data-admin-panel] main > div:last-child { padding: 16px !important; }
 }
