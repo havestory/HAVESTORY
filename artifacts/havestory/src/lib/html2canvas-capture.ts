@@ -236,7 +236,11 @@ export async function captureElement(
       scrollY: 0,
       backgroundColor,
       useCORS: true,
-      allowTaint: true,
+      // A tainted canvas cannot be serialized with toDataURL/toBlob, which
+      // made invoice downloads appear to do nothing when a remote logo lacked
+      // permissive CORS headers. Skip unsafe pixels instead of tainting output.
+      allowTaint: false,
+      imageTimeout: 12_000,
       logging: false,
       onclone: (_doc: Document, clonedEl: HTMLElement) => {
         // ── Fix 1: rewrite oklch tokens in all <style> elements ───────────
