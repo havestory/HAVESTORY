@@ -7,7 +7,6 @@ export function StudioLoader({ label = 'Preparing your studio experience', logoU
         <span className="hs-studio-loader-ring hs-studio-loader-ring-three" />
         <span className="hs-studio-loader-core">{logoUrl ? <img src={logoUrl} alt="" /> : 'HS'}</span>
       </div>
-      <div className="hs-studio-loader-brand">HAVESTORY</div>
     </div>
   );
 }
