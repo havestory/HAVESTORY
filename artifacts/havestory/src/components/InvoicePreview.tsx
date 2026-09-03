@@ -229,12 +229,14 @@ export interface InvoicePreviewProps {
   linkedOrderId?: string | null;
   /** Must be explicitly enabled by an authenticated admin surface. */
   showPrivateFinancials?: boolean;
+  /** Receipt-printer controls are operational admin tools, never customer-facing. */
+  allowThermalPrint?: boolean;
 }
 
 /* ─── Main Component ─── */
 export function InvoicePreview({
   form, items, shipping, shippingCustom, shippingLabelOverride, courierName, advance, subtotal, shippingAmt, grandTotal,
-  onClose, onSave, isSaving, invoiceNumberOverride, createdAtOverride, status, linkedOrderId, showPrivateFinancials = false,
+  onClose, onSave, isSaving, invoiceNumberOverride, createdAtOverride, status, linkedOrderId, showPrivateFinancials = false, allowThermalPrint = false,
 }: InvoicePreviewProps) {
   const { data: settings } = useGetSettings();
   const { data: currentAdmin } = useGetAdminMe();
@@ -575,8 +577,8 @@ export function InvoicePreview({
                 <ImageDown size={13} /> {downloadingZip ? "Zipping…" : "JPG ZIP"}
               </button>
             </div>
-            {/* Dedicated receipt-printer controls; separate from A4 exports. */}
-            <div className="rounded-xl border border-violet-200 bg-violet-50 px-3 py-2.5 sm:flex sm:items-center sm:justify-between sm:gap-3">
+            {/* Dedicated receipt-printer controls; admin-only and separate from A4 exports. */}
+            {allowThermalPrint && <div className="rounded-xl border border-violet-200 bg-violet-50 px-3 py-2.5 sm:flex sm:items-center sm:justify-between sm:gap-3">
               <div className="flex items-start gap-2 min-w-0">
                 <Printer size={15} className="mt-0.5 text-violet-700 shrink-0" />
                 <div>
@@ -598,7 +600,7 @@ export function InvoicePreview({
                   </button>
                 )}
               </div>
-            </div>
+            </div>}
           </div>
 
           {/* ── Private profit panel (admin-only, never captured/printed) ── */}
