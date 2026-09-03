@@ -132,6 +132,8 @@ export interface CaptureOptions {
    * for fixed-height A4 invoice pages).
    */
   overflowVisible?: boolean;
+  /** Remove application stylesheets from the html2canvas document clone. */
+  isolateDocumentStyles?: boolean;
 }
 
 /**
@@ -172,6 +174,7 @@ export async function captureElement(
     scale = 2,
     backgroundColor = "#ffffff",
     overflowVisible = false,
+    isolateDocumentStyles = false,
   } = opts;
 
   const overflow = overflowVisible ? "visible" : "hidden";
@@ -208,6 +211,10 @@ export async function captureElement(
   clone.style.height = `${height}px`;
   clone.style.overflow = overflow;
   clone.style.position = "relative";
+  // Preview pages are visually scaled to fit their modal. Export must always
+  // capture the unscaled A4 page, otherwise html2canvas inherits that transform.
+  clone.style.transform = "none";
+  clone.style.transformOrigin = "top left";
   clone.style.flexShrink = "0";
   clone.style.boxShadow = "none";
   clone.style.boxSizing = "border-box";
@@ -255,11 +262,21 @@ export async function captureElement(
         // cannot rewrite.
         inlineComputedColors(el, clonedEl);
 
+        // Invoice pages are built with complete inline layout styles. Removing
+        // the app's linked Tailwind/theme sheets prevents html2canvas from
+        // parsing unsupported color-mix/oklch declarations elsewhere in the
+        // production bundle while preserving the exact preview structure.
+        if (isolateDocumentStyles) {
+          _doc.querySelectorAll('link[rel="stylesheet"], style').forEach(node => node.remove());
+        }
+
         // ── Clone geometry ────────────────────────────────────────────────
         clonedEl.style.overflow = overflow;
         clonedEl.style.height = `${height}px`;
         clonedEl.style.width = `${width}px`;
         clonedEl.style.boxSizing = "border-box";
+        clonedEl.style.transform = "none";
+        clonedEl.style.transformOrigin = "top left";
 
         // ── Layer 2: stylesheet inside the clone ──────────────────────────
         const st = _doc.createElement("style");
