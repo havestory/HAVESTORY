@@ -886,7 +886,7 @@ export default function AdminInvoices() {
 
       {/* ─── VIEW INVOICE MODAL ─── */}
       {viewingInvoice && viewMeta && (
-        <InvoicePreview showPrivateFinancials
+        <InvoicePreview showPrivateFinancials allowThermalPrint
           form={viewMeta.form}
           items={viewMeta.items}
           shipping={viewMeta.shipping || "none"}
@@ -1499,7 +1499,7 @@ export default function AdminInvoices() {
 
       {/* ─── CREATE PREVIEW (before saving new invoice) ─── */}
       {showPreview && !editingFullId && (
-        <InvoicePreview showPrivateFinancials
+        <InvoicePreview showPrivateFinancials allowThermalPrint
           form={form} items={items} shipping={shipping} shippingCustom={shippingCustom}
           advance={advance} subtotal={subtotal} shippingAmt={shippingAmt} grandTotal={grandTotal}
           onClose={() => setShowPreview(false)}
