@@ -16,8 +16,12 @@ function triggerDownload(url: string, filename: string) {
   a.style.display = "none";
   document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  // Keep the object URL alive long enough for slower Chrome/Android download
+  // managers to consume it before cleanup.
+  setTimeout(() => {
+    a.remove();
+    URL.revokeObjectURL(url);
+  }, 60_000);
 }
 
 /** Escape user/settings data before writing it into the isolated print window. */
@@ -368,8 +372,8 @@ export function InvoicePreview({
    *    captured element taller than one A4 page.
    * 3. After capturing, we hard-crop the canvas to exactly A4_W×2 × A4_H×2
    *    so the PDF always maps 1 canvas → 1 PDF page with no leftover blank slice.
-   * 4. allowTaint: true lets html2canvas access cross-origin resources
-   *    (Google Fonts CSS, Cloudinary images) without tainting the canvas.
+   * 4. Remote assets use CORS mode and unsafe pixels are skipped, keeping the
+   *    canvas serializable for PDF/JPG downloads.
    */
   const capturePageIsolated = async (el: HTMLElement): Promise<HTMLCanvasElement> => {
     const raw = await captureElement(el, { width: A4_W, height: A4_H, scale: 2 });
@@ -392,10 +396,10 @@ export function InvoicePreview({
    * No print dialog — the tab shows the PDF directly and the user can save it.
    */
   const printInvoice = async () => {
+    const pages = pageRefs.current.slice(0, totalPages).filter(Boolean) as HTMLElement[];
     setGeneratingPDF(true);
     try {
-      const pages = pageRefs.current.filter(Boolean) as HTMLElement[];
-      if (pages.length === 0) return;
+      if (pages.length === 0) throw new Error("Invoice pages are not ready yet.");
 
       const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", compress: true });
       const pdfW = pdf.internal.pageSize.getWidth();
@@ -408,8 +412,12 @@ export function InvoicePreview({
         pdf.addImage(imgData, "JPEG", 0, 0, pdfW, pdfH);
       }
 
-      const blob = pdf.output("blob");
-      triggerDownload(URL.createObjectURL(blob), `Invoice-${invoiceNo}.pdf`);
+      // jsPDF's save path is more reliable than a short-lived hand-built blob
+      // link across Chrome desktop, Android and installed web-app contexts.
+      pdf.save(`Invoice-${invoiceNo}.pdf`);
+    } catch (error) {
+      console.error("Invoice PDF export failed", error);
+      window.alert("The invoice could not be downloaded. Please wait for the preview to finish loading and try again.");
     } finally {
       setGeneratingPDF(false);
     }
@@ -431,6 +439,9 @@ export function InvoicePreview({
       }
       const content = await zip.generateAsync({ type: "blob" });
       triggerDownload(URL.createObjectURL(content), `Invoice-${invoiceNo}.zip`);
+    } catch (error) {
+      console.error("Invoice JPG export failed", error);
+      window.alert("The invoice images could not be downloaded. Please wait for the preview to finish loading and try again.");
     } finally { setDownloadingZip(false); }
   };
 
