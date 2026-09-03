@@ -821,7 +821,8 @@ router.get("/track/:orderId", requireOrderAccess, async (req: any, res) => {
           if (matched?.trackingUrl) {
             const template = String(matched.trackingUrl).trim();
             const encodedTrackingNumber = encodeURIComponent(String(order.courierTrackingNumber).trim());
-            courierTrackingUrl = template.replace(/\{trackingNumber\}|\{tracking_number\}|:trackingNumber/g, encodedTrackingNumber);
+            const candidate = template.replace(/\{trackingNumber\}|\{tracking_number\}|:trackingNumber/g, encodedTrackingNumber);
+            if (isWebUrl(candidate)) courierTrackingUrl = candidate;
           }
         } catch {}
       }
@@ -988,10 +989,8 @@ router.post("/track/:orderId/payment-confirm", requireOrderAccess, async (req: a
 });
 
 // Admin uploads multiple online delivery files (requires auth)
-router.post("/:id/online-files", upload.array("files", 20), async (req, res) => {
+router.post("/:id/online-files", requireAdmin, upload.array("files", 20), async (req, res) => {
   try {
-    if (!getAdminAuth(req)) return res.status(401).json({ error: "Unauthorized" });
-
     const id = String(req.params.id);
     if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
       return res.status(400).json({ error: "No files uploaded" });
@@ -1028,10 +1027,8 @@ router.post("/:id/online-files", upload.array("files", 20), async (req, res) => 
 });
 
 // Admin removes a specific online delivery file (requires auth)
-router.delete("/:id/online-files", async (req, res) => {
+router.delete("/:id/online-files", requireAdmin, async (req, res) => {
   try {
-    if (!getAdminAuth(req)) return res.status(401).json({ error: "Unauthorized" });
-
     const id = String(req.params.id);
     const { url } = req.body;
 
@@ -1122,9 +1119,8 @@ router.post("/:id/payment-review", requireAdmin, async (req, res) => {
 // Admin uploads a customer-facing design preview (requires auth).
 // The preview is stored separately as a typed design-preview entry inside
 // designLinks so legacy design links and customer attachments stay untouched.
-router.post("/:id/design-preview", upload.single("file"), async (req, res) => {
+router.post("/:id/design-preview", requireAdmin, upload.single("file"), async (req, res) => {
   try {
-    if (!getAdminAuth(req)) return res.status(401).json({ error: "Unauthorized" });
     const id = String(req.params.id);
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
     if (!validateUploadedFile(req.file)) {
@@ -1161,10 +1157,8 @@ router.post("/:id/design-preview", upload.single("file"), async (req, res) => {
 });
 
 // Admin uploads design proof (requires auth)
-router.post("/:id/proof-file", upload.single("file"), async (req, res) => {
+router.post("/:id/proof-file", requireAdmin, upload.single("file"), async (req, res) => {
   try {
-    if (!getAdminAuth(req)) return res.status(401).json({ error: "Unauthorized" });
-
     const id = String(req.params.id);
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
     if (!validateUploadedFile(req.file)) {
