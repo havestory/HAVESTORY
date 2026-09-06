@@ -1,3 +1,4 @@
+import { posConfig, quotePosProduct } from "@workspace/api-zod";
 import { Router } from "express";
 import { randomUUID } from "node:crypto";
 import { pool } from "@workspace/db";
@@ -136,6 +137,7 @@ router.get("/catalog", async (_req, res) => {
         price: money(row.price),
         imageUrl: row.image_url || "",
         slug: row.slug || "",
+        customConfig: row.custom_config || "{}",
       };
     });
     const custom = await pool.query(
@@ -330,23 +332,34 @@ router.post("/sales", async (req, res) => {
     }
 
     const invoiceId = Number(req.body?.invoiceId) || null;
-    let items = Array.isArray(req.body?.items)
-      ? req.body.items
-          .slice(0, 100)
-          .map((item: any) => ({
-            code: clean(item.code, 40),
-            name: clean(item.name, 200),
-            qty: Math.max(1, Math.trunc(Number(item.qty) || 1)),
-            price: money(item.price),
-          }))
-          .filter((item: any) => item.name && item.price >= 0)
-      : [];
+    let items: any[] = [];
+    if (!invoiceId) {
+      const submitted = req.body?.items;
+      if (!Array.isArray(submitted) || !submitted.length || submitted.length > 100) throw new Error("Select 1–100 items");
+      for (const item of submitted) {
+        const match = /^(product|pos)-(\d+)$/.exec(String(item.id));
+        if (!match) throw new Error("Unknown catalogue item; reload POS");
+        const product = match[1] === 'product';
+        const result = await client.query(product
+          ? "SELECT name,invoice_name,price,custom_config FROM products WHERE id=$1 AND active=true"
+          : "SELECT name,code,price FROM pos_items WHERE id=$1 AND active=true", [Number(match[2])]);
+        const row = result.rows[0];
+        if (!row) throw new Error("Item is no longer available; reload POS");
+        const quote = quotePosProduct(Number(row.price), product ? row.custom_config : {}, Number(item.qty), item.sizeId || '', item.choices || {});
+        if (Math.abs(quote.price - Number(item.price)) > .001 || !Number.isFinite(Number(item.price))) throw new Error("Product price changed; reload POS before collecting payment");
+        const config = posConfig(row.custom_config);
+        items.push({ id: item.id, code: product ? clean(config.itemCode, 40) || `P${String(match[2]).padStart(4, '0')}` : row.code,
+          name: [row.invoice_name || row.name, quote.description].filter(Boolean).join(' · '),
+          qty: Number(item.qty), price: quote.price, unitLabel: quote.unitLabel });
+      }
+    }
     let customerName = clean(req.body?.customerName, 160) || "Walk-in customer";
     let invoiceNumber: string | null = null;
     let total = items.reduce(
-      (sum: number, item: any) => sum + item.qty * item.price,
+      (sum: number, item: any) => sum + item.qty * Math.round(item.price * 100),
       0,
     );
+    total /= 100;
     const receiptNumber = `POS-${lkDate().replace(/-/g, "")}-${randomUUID().replace(/-/g, "").slice(0, 6).toUpperCase()}`;
 
     if (invoiceId) {

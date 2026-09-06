@@ -8,3 +8,5 @@
 // directly out of the namespaced re-export below.
 export * from "./generated/api";
 export * as Types from "./generated/types";
+
+export { posConfig, quotePosProduct } from "./pos-pricing";

@@ -442,7 +442,7 @@ export const ShippingLabelDocument = forwardRef<HTMLDivElement, Props>(
                 WhatsApp {p.whatsapp}
               </div>
               <div style={{ color: "#6b7280", fontSize: 10, marginTop: 6 }}>
-                Scan to securely verify this delivery.
+                Scan to visit our website — explore products and order online.
               </div>
             </div>
             {p.showQr && p.qr}

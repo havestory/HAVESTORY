@@ -101,23 +101,16 @@ const CATEGORY_LABELS: Record<string, string> = {
 // ─── stat card ──────────────────────────────────────────────────────────────
 
 function StatCard({
-  label, value, icon: Icon, accent, sub,
+  label, value, icon: Icon, accent, sub, onEdit,
 }: {
-  label: string; value: string; icon: any; accent?: string; sub?: string;
+  label: string; value: string; icon: any; accent?: string; sub?: string; onEdit?: () => void;
 }) {
   return (
     <Card className="finance-stat-card border border-border shadow-sm bg-card">
       <CardContent className="p-5">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-semibold mb-1">{label}</p>
-            <p className={`text-2xl font-bold font-mono ${accent ?? 'text-foreground'}`}>{value}</p>
-            {sub && <p className="text-[10px] text-muted-foreground mt-1">{sub}</p>}
-          </div>
-          <div className="w-9 h-9 rounded-sm bg-muted flex items-center justify-center">
-            <Icon className="w-4 h-4 text-muted-foreground" />
-          </div>
-        </div>
+        <div className="finance-stat-heading"><span className="finance-stat-icon"><Icon aria-hidden="true" size={20} /></span><p>{label}</p>{onEdit && <button type="button" className="finance-edit-balance" onClick={onEdit} aria-label="Edit opening balance"><Edit2 size={15} /><span>Edit</span></button>}</div>
+        <p className={`finance-stat-value ${accent ?? 'text-foreground'}`}>{value}</p>
+        {sub && <p className="finance-stat-sub">{sub}</p>}
       </CardContent>
     </Card>
   );
@@ -335,11 +328,11 @@ export default function Finance() {
             <p className="text-muted-foreground mt-1">Track revenue, expenses and monthly profit.</p>
           </div>
           <div className="admin-insights-actions flex items-center gap-2">
-            <Button variant="outline" size="icon" className="rounded-none h-9 w-9" onClick={prevMonth}>
+            <Button variant="outline" size="icon" className="rounded-none h-9 w-9" onClick={prevMonth} aria-label="Previous month">
               <ChevronLeft className="w-4 h-4" />
             </Button>
             <span className="text-sm font-medium min-w-[130px] text-center">{monthLabel}</span>
-            <Button variant="outline" size="icon" className="rounded-none h-9 w-9" onClick={nextMonth}>
+            <Button variant="outline" size="icon" className="rounded-none h-9 w-9" onClick={nextMonth} aria-label="Next month">
               <ChevronRight className="w-4 h-4" />
             </Button>
             <Button variant="outline" className="rounded-none h-9 text-xs uppercase tracking-widest font-semibold" onClick={handlePrint}>
@@ -365,14 +358,9 @@ export default function Finance() {
               value={summaryLoading ? '—' : `LKR ${fmtAmount(summary?.initialBalance ?? 0)}`}
               icon={Wallet}
               sub="All-time initial capital"
+              onEdit={() => { setBalanceInput(String(summary?.initialBalance ?? 0)); setShowBalanceEdit(true); }}
             />
-            <button
-              className="absolute top-3 right-12 text-muted-foreground hover:text-foreground transition-colors"
-              onClick={() => { setBalanceInput(String(summary?.initialBalance ?? 0)); setShowBalanceEdit(true); }}
-              title="Edit opening balance"
-            >
-              <Edit2 className="w-3.5 h-3.5" />
-            </button>
+
           </div>
           <StatCard
             label="Revenue"

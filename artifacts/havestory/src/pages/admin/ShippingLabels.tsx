@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { captureElement } from '@/lib/html2canvas-capture';
-import { CalendarDays, CheckCircle2, Download, FileImage, FileText, Package2, Printer, RotateCcw, Save, Search, ShieldCheck, Truck, Upload, User, X, Zap } from 'lucide-react';
+import { CalendarDays, CheckCircle2, Download, FileImage, FileText, Package2, Printer, RotateCcw, Save, Search, Globe2, Truck, Upload, User, X, Zap } from 'lucide-react';
 import { useGetSettings, useListOrders } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +20,7 @@ type LabelForm = {
 type LabelSettings = {
   senderName: string; senderPhone: string; senderWhatsapp: string; senderAddress: string;
   footerText: string; defaultSize: LabelSize; showQr?: boolean; showBarcode?: boolean;
-  handlingArtworkImageUrl?: string;
+  handlingArtworkImageUrl?: string; labelLogoUrl?: string;
 };
 
 const EMPTY_FORM: LabelForm = {
@@ -39,15 +39,10 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-function VerificationCode({ url, size }: { url: string; size: number }) {
-  const token = url.split('/').filter(Boolean).pop() || '';
-  const code = token.replace(/[^a-zA-Z0-9]/g, '').slice(-10).toUpperCase() || 'PENDING';
-  return (
-    <div style={{ width: size, minHeight: size, display: 'grid', alignContent: 'center', justifyItems: 'center', gap: 3, border: '1px solid #cdbbd4', borderRadius: 8, background: '#fff', padding: 5, textAlign: 'center' }}>
-      <QRCodeSVG value={url} size={Math.round(size * .72)} level="M" marginSize={0} bgColor="#ffffff" fgColor="#26152f" />
-      <span style={{ color: '#4c2370', fontFamily: 'monospace', fontSize: Math.max(5.5, size * .075), fontWeight: 900, letterSpacing: .5, overflowWrap: 'anywhere' }}>{code}</span>
-    </div>
-  );
+function websiteQrUrl(value: unknown) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  try { const url = new URL(/^[a-z][a-z0-9+.-]*:/i.test(raw) ? raw : `https://${raw}`); return ['http:', 'https:'].includes(url.protocol) && url.hostname && !url.username && !url.password ? url.href : ''; } catch { return ''; }
 }
 
 function deliverySchedule(dateValue: string, timeValue: string) {
@@ -81,7 +76,7 @@ function LabelPreview({ form, sender, qrUrl, showQr, showBarcode, handlingArtwor
     deadlineEn={schedule ? `Please deliver this parcel before ${schedule.englishDate}${schedule.englishTime ? ` at ${schedule.englishTime}` : ''}.` : ''}
     notes={[form.courierService && `COURIER: ${form.courierService}`, form.deliveryNotes].filter(Boolean).join(' · ')}
     barcode={showBarcode && form.orderNumber ? <Code39Barcode value={form.orderNumber} /> : null}
-    showQr={showQr} qr={qrUrl ? <div style={{ flexShrink: 0, textAlign: 'center' }}><VerificationCode url={qrUrl} size={64} /><div style={{ fontSize: 6, marginTop: 3 }}>SECURE VERIFICATION</div></div> : null} />;
+    showQr={showQr} qr={qrUrl ? <div style={{ flexShrink: 0, textAlign: 'center' }}><QRCodeSVG value={qrUrl} title={`Website: ${qrUrl}`} size={64} level="M" marginSize={2} bgColor="#ffffff" fgColor="#000000" /><div style={{ fontSize: 7, marginTop: 3 }}>VISIT WEBSITE</div></div> : null} />;
 }
 
 function Field({ label, children, className = '' }: { label: string; children: React.ReactNode; className?: string }) {
@@ -97,7 +92,7 @@ export default function ShippingLabels() {
   const [orderQuery, setOrderQuery] = useState('');
   const [orderMenuOpen, setOrderMenuOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
-  const [qrUrl, setQrUrl] = useState('');
+  const qrUrl = websiteQrUrl((siteSettings as any)?.website);
   const [clientId, setClientId] = useState<number | null>(null);
   const [detailsSaved, setDetailsSaved] = useState(false);
   const [uploadingMark, setUploadingMark] = useState<string | null>(null);
@@ -106,7 +101,7 @@ export default function ShippingLabels() {
   const { data: settings } = useQuery<LabelSettings>({ queryKey: ['shipping-label-settings'], queryFn: () => apiFetch('/api/shipping-labels/settings') });
   const saveLabelSettingsMut = useMutation({
     mutationFn: (next: LabelSettings) => apiFetch<LabelSettings>('/api/shipping-labels/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next) }),
-    onSuccess: (saved) => { setLabelSettings((current) => ({ ...current, ...saved })); toast({ title: 'Handling artwork saved', description: 'Ticking a handling option now uses its saved image.' }); },
+    onSuccess: (saved) => { setLabelSettings((current) => ({ ...current, ...saved })); toast({ title: 'Shipping label images saved', description: 'Saved images will be used across shipping labels.' }); },
     onError: (error: any) => toast({ title: 'Artwork settings could not be saved', description: error.message, variant: 'destructive' }),
   });
 
@@ -119,7 +114,7 @@ export default function ShippingLabels() {
     whatsapp: labelSettings.senderWhatsapp || (siteSettings as any)?.whatsappNumber || (siteSettings as any)?.whatsapp || '',
     address: labelSettings.senderAddress || (siteSettings as any)?.address || '',
     website: String((siteSettings as any)?.website || window.location.host).replace(/^https?:\/\//, '').replace(/\/$/, ''),
-    logo: (siteSettings as any)?.logoUrl || '',
+    logo: labelSettings.labelLogoUrl ?? (siteSettings as any)?.logoUrl ?? '',
     footer: labelSettings.footerText || 'Thank you for choosing HAVESTORY',
   };
 
@@ -137,19 +132,12 @@ export default function ShippingLabels() {
     onSuccess: () => { setDetailsSaved(true); toast({ title: 'Customer shipping details saved' }); },
     onError: (error: any) => toast({ title: 'Save failed', description: error.message, variant: 'destructive' }),
   });
-  const tokenMut = useMutation({
-    mutationFn: (orderId: string) => apiFetch<{ token: string }>('/api/shipping-labels/token', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orderId }) }),
-    onSuccess: (data) => { const base = window.location.origin + (import.meta.env.BASE_URL || '/').replace(/\/$/, ''); setQrUrl(`${base}/verify-shipping/${data.token}`); },
-    onError: (error: any) => toast({ title: 'Verification code unavailable', description: error.message, variant: 'destructive' }),
-  });
-
   const applyOrder = (order: any) => {
     const orderId = String(order.orderId || order.id || '');
     const phone = String(order.customerPhone || '');
     setSelectedOrderId(Number(order.id) || null); setOrderQuery(orderId); setOrderMenuOpen(false); setLookupPhone(phone); setClientId(null); setDetailsSaved(false);
     setForm((current) => ({ ...current, recipientName: order.customerName || '', phone, alternatePhone: '', address: order.customerAddress || '', orderNumber: String(order.invoiceNumber || ''), courierService: order.courierName || String(order.deliveryMethod || order.shippingMethod || '').replaceAll('_', ' '), deliveryNotes: '' }));
     if (phone) lookupMut.mutate(phone);
-    if (orderId) tokenMut.mutate(orderId);
     toast({ title: 'Order linked', description: `${orderId} details loaded into the label.` });
   };
   useEffect(() => {
@@ -206,21 +194,21 @@ export default function ShippingLabels() {
       toast({ title: 'Download failed', description: error.message || 'Could not create the JPG.', variant: 'destructive' });
     }
   }
-  function handleClear() { setForm({ ...EMPTY_FORM, labelSize: labelSettings.defaultSize || 'standard' }); setOrderQuery(''); setLookupPhone(''); setSelectedOrderId(null); setClientId(null); setDetailsSaved(false); setQrUrl(''); autoLoaded.current = true; }
-  async function uploadHandlingImage(file: File) {
+  function handleClear() { setForm({ ...EMPTY_FORM, labelSize: labelSettings.defaultSize || 'standard' }); setOrderQuery(''); setLookupPhone(''); setSelectedOrderId(null); setClientId(null); setDetailsSaved(false); autoLoaded.current = true; }
+  async function uploadHandlingImage(file: File, field: 'handlingArtworkImageUrl' | 'labelLogoUrl' = 'handlingArtworkImageUrl') {
     if (!/^image\/(png|jpe?g)$/i.test(file.type)) {
       toast({ title: 'PNG or JPG required', description: 'Please choose a PNG, JPG or JPEG image.', variant: 'destructive' });
       return;
     }
     if (file.size > 2 * 1024 * 1024) { toast({ title: 'Image is too large', description: 'Choose a PNG/JPG up to 2 MB.', variant: 'destructive' }); return; }
-    setUploadingMark('handlingArtworkImageUrl');
+    setUploadingMark(field);
     try {
       const body = new FormData(); body.append('file', file);
       const response = await fetch('/api/settings/upload-image', { method: 'POST', credentials: 'include', body });
       if (!response.ok) throw new Error('Upload failed');
       const data = await response.json();
-      setLabelSettings((current) => ({ ...current, handlingArtworkImageUrl: data.url }));
-      toast({ title: 'Artwork uploaded', description: 'Click Save artwork to keep this image.' });
+      setLabelSettings((current) => ({ ...current, [field]: data.url }));
+      toast({ title: 'Image uploaded', description: 'Click Save to keep this image across shipping labels.' });
     } catch (error: any) {
       toast({ title: 'Artwork upload failed', description: error.message, variant: 'destructive' });
     } finally { setUploadingMark(null); }
@@ -255,8 +243,17 @@ export default function ShippingLabels() {
           <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
             <div className="mb-5 flex items-center gap-3"><div className="grid h-10 w-10 place-items-center rounded-2xl bg-emerald-50 text-emerald-700"><Package2 className="h-4 w-4" /></div><div><h2 className="font-black text-slate-900">Label and handling</h2><p className="text-xs text-slate-500">Choose paper size, courier marks and delivery schedule.</p></div></div>
             <div className="grid grid-cols-2 gap-2 rounded-2xl bg-slate-50 p-1.5"><button type="button" onClick={() => setForm((current) => ({ ...current, labelSize: 'standard' }))} className={`rounded-xl px-3 py-3 text-xs font-black ${form.labelSize === 'standard' ? 'bg-white text-violet-700 shadow-sm ring-1 ring-violet-100' : 'text-slate-500'}`}>Standard · 10×14.8 cm</button><button type="button" onClick={() => setForm((current) => ({ ...current, labelSize: 'a5' }))} className={`rounded-xl px-3 py-3 text-xs font-black ${form.labelSize === 'a5' ? 'bg-white text-violet-700 shadow-sm ring-1 ring-violet-100' : 'text-slate-500'}`}>Large · A5</button></div>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2"><Field label="Invoice number"><Input value={form.orderNumber} onChange={(event) => setForm((current) => ({ ...current, orderNumber: event.target.value }))} placeholder="HS-INV-..." className={inputClass} /></Field><div className="flex items-end"><Button type="button" variant="outline" onClick={() => { const linked = orderList.find(order => Number(order.id) === selectedOrderId); if (linked?.orderId) tokenMut.mutate(String(linked.orderId)); }} disabled={!selectedOrderId || tokenMut.isPending} className="h-11 w-full rounded-xl border-violet-200 bg-violet-50 text-violet-700"><ShieldCheck className="mr-2 h-4 w-4" /> {qrUrl ? 'Refresh verification QR' : 'Create secure verification QR'}</Button></div></div>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2"><Field label="Invoice number"><Input value={form.orderNumber} onChange={(event) => setForm((current) => ({ ...current, orderNumber: event.target.value }))} placeholder="HS-INV-..." className={inputClass} /></Field><div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600"><span className="flex items-center gap-2 font-bold"><Globe2 className="h-4 w-4" /> Website QR from Settings</span><p className="mt-1 break-all">{qrUrl || 'Add a valid website link in Settings to display the QR code.'}</p></div></div>
             <div className="mt-5 grid gap-2 sm:grid-cols-2">{handling.map(({ key, label, Icon, disabled }) => <button key={key} type="button" disabled={disabled} onClick={() => setForm((current) => ({ ...current, [key]: !current[key] }))} role="checkbox" aria-checked={form[key]} className={`flex min-h-12 items-center gap-2 rounded-2xl border px-3 text-left text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-45 ${form[key] ? 'border-violet-200 bg-violet-50 text-violet-700 shadow-sm' : 'border-slate-200 bg-white text-slate-500 hover:border-violet-200'}`}><Icon className="h-4 w-4" /> <span>{label}{disabled && <small className="mt-0.5 block text-[9px] font-semibold">Upload and save artwork first</small>}</span><span className={`ml-auto h-4 w-4 rounded-full border ${form[key] ? 'border-violet-600 bg-violet-600 text-white' : 'border-slate-300'}`}>{form[key] && '✓'}</span></button>)}</div>
+            <section aria-label="Shipping label logo" className="mt-5 space-y-4 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+              <h3 className="flex items-center gap-2 font-bold text-slate-900"><FileImage className="h-5 w-5 text-violet-700" /> Shipping label logo</h3>
+              <p className="text-sm leading-6 text-slate-600">Recommended: <b>750 × 220 px</b> · PNG/JPG · up to 2 MB. Use a transparent or white background. Saved once for all shipping labels.</p>
+              {sender.logo && <img src={sender.logo} alt="Shipping logo preview" className="h-24 w-full rounded-xl border border-slate-200 object-contain p-3" />}
+              <div className="flex flex-wrap gap-3"><label className="relative inline-flex min-h-11 items-center gap-2 rounded-xl border border-violet-300 bg-white px-4 text-sm font-bold text-violet-800 focus-within:ring-2 focus-within:ring-violet-500"><Upload className="h-4 w-4" />{uploadingMark === 'labelLogoUrl' ? 'Uploading…' : sender.logo ? 'Replace logo' : 'Choose logo'}<input aria-label="Upload shipping label logo" type="file" accept="image/png,image/jpeg" className="absolute inset-0 w-full cursor-pointer opacity-0" disabled={!settings || !!uploadingMark || saveLabelSettingsMut.isPending} onChange={event => { const file = event.target.files?.[0]; if (file) void uploadHandlingImage(file, 'labelLogoUrl'); event.currentTarget.value = ''; }} /></label>
+              <Button type="button" onClick={() => saveLabelSettingsMut.mutate(labelSettings)} disabled={!settings || !!uploadingMark || saveLabelSettingsMut.isPending} className="min-h-11 rounded-xl bg-violet-700 px-4 font-bold text-white hover:bg-violet-800"><Save className="mr-2 h-4 w-4" /> Save logo</Button>
+              {sender.logo && <Button type="button" variant="outline" disabled={!settings || !!uploadingMark || saveLabelSettingsMut.isPending} onClick={() => setLabelSettings(current => ({ ...current, labelLogoUrl: '' }))} className="min-h-11 rounded-xl border-red-200 text-red-700"><X className="mr-2 h-4 w-4" /> Remove logo</Button>}</div>
+              <p className="text-xs text-slate-500">Click Save logo after uploading, replacing or removing. This changes the shipping label logo only.</p>
+            </section>
             <section aria-label="Fragile artwork" className="mt-5 space-y-4 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
               <div><h3 className="flex items-center gap-2 font-bold text-slate-900"><FileImage className="h-5 w-5 text-violet-700" /> Fragile artwork</h3><p className="mt-2 text-sm leading-6 text-slate-600">Upload the complete FRAGILE panel with its heading and handling icons. Urgent delivery is controlled separately.</p></div>
               <p className="rounded-xl bg-slate-50 p-3 text-sm leading-6 text-slate-600"><b>Recommended size:</b> 1500 × 580 px (approximately 2.6:1) · PNG/JPG · up to 2 MB. Keep a small safe margin around the artwork.</p>

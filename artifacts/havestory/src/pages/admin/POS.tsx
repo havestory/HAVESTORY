@@ -1,3 +1,4 @@
+import { posConfig, quotePosProduct } from "@workspace/api-zod";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Banknote,
@@ -27,8 +28,9 @@ type Product = {
   name: string;
   price: number;
   imageUrl?: string;
+  customConfig?: string;
 };
-type CartItem = Product & { qty: number };
+type CartItem = Product & { qty: number; cartKey: string; sizeId: string; choices: Record<string, string>; basePrice: number; unitLabel: string };
 type Invoice = {
   id: number;
   invoiceNumber: string;
@@ -119,7 +121,7 @@ function printReceipt(sale: Sale, width: "58" | "80", brand: ReceiptBrand) {
     .map(esc)
     .join("<br>");
   win.document.write(
-    `<!doctype html><html><head><meta charset="utf-8"><title>${esc(sale.receipt_number)}</title><style>@page{size:${mm}mm auto;margin:0}*{box-sizing:border-box}html,body{width:${mm}mm;min-width:${mm}mm;margin:0;padding:0;background:#fff;color:#000}body{font-family:Arial,Helvetica,sans-serif;font-size:${width === "58" ? 10 : 11}px;line-height:1.35;font-variant-numeric:tabular-nums}.r{width:${mm}mm;padding:${width === "58" ? 3 : 4}mm;overflow:hidden}.c,.center{text-align:center}.brand{font-size:${width === "58" ? 16 : 19}px;font-weight:900;letter-spacing:.5px;overflow-wrap:anywhere}.tagline{margin-top:1mm;font-size:.92em}.meta{margin-top:2mm;overflow-wrap:anywhere}.rule{border-top:1px dashed #000;margin:2.5mm 0}.row{display:flex;justify-content:space-between;gap:2mm;padding:1mm 0}.item{border-bottom:1px dotted #aaa}.item span:first-child{max-width:68%;overflow-wrap:anywhere}.total{font-size:1.2em;font-weight:900;border-top:1px solid #000;margin-top:1mm;padding-top:1.5mm}.change{border:1.5px solid #000;padding:1.5mm;font-size:1.15em}.small{font-size:.88em}.bold{font-weight:800}.footer{margin-top:3mm;font-size:.9em}@media print{html,body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style></head><body><main class="r"><header class="center"><div class="brand">${esc(businessName)}</div><div class="tagline">THE COLOUR &amp; FRAME STUDIO</div><div class="meta small">${contactLines}</div></header><div class="rule"></div><div class="center bold">POS RECEIPT</div><div class="center">${esc(sale.receipt_number)}</div>${sale.invoice_number ? `<div class="center small">Invoice: ${esc(sale.invoice_number)}</div>` : ""}<div class="center small">${esc(new Date(sale.sold_at).toLocaleString("en-LK", { timeZone: "Asia/Colombo" }))}</div><div class="rule"></div><div class="bold">${esc(sale.customer_name || "Walk-in customer")}</div><div class="rule"></div>${items.map((i) => `<div class="row item"><span><b>${esc(i.name)}</b><br><span class="small">${i.qty} × ${rs(Number(i.price))}${i.code ? ` · ${esc(i.code)}` : ""}</span></span><b>${rs(Number(i.price) * Number(i.qty))}</b></div>`).join("")}<div class="row total"><span>Total</span><span>${rs(Number(sale.total))}</span></div><div class="row"><span>Received</span><b>${rs(Number(sale.amount_tendered))}</b></div><div class="row change"><span>Balance / Change</span><b>${rs(Number(sale.change_due))}</b></div><div class="row small"><span>Payment</span><b>${esc(sale.payment_method.toUpperCase())}</b></div><footer class="footer center"><div class="rule"></div>Issued by Mr. ${esc(sale.sold_by)}<br>Thank you for choosing ${esc(businessName)}.</footer></main></body></html>`,
+    `<!doctype html><html><head><meta charset="utf-8"><title>${esc(sale.receipt_number)}</title><style>@page{size:${mm}mm auto;margin:0}*{box-sizing:border-box}html,body{width:${mm}mm;min-width:${mm}mm;margin:0;padding:0;background:#fff;color:#000}body{font-family:Arial,Helvetica,sans-serif;font-size:${width === "58" ? 10 : 11}px;line-height:1.35;font-variant-numeric:tabular-nums}.r{width:${mm}mm;padding:${width === "58" ? 3 : 4}mm;overflow:hidden}.c,.center{text-align:center}.brand{font-size:${width === "58" ? 16 : 19}px;font-weight:900;letter-spacing:.5px;overflow-wrap:anywhere}.tagline{margin-top:1mm;font-size:.92em}.meta{margin-top:2mm;overflow-wrap:anywhere}.rule{border-top:1px dashed #000;margin:2.5mm 0}.row{display:flex;justify-content:space-between;gap:2mm;padding:1mm 0}.item{border-bottom:1px dotted #aaa}.item span:first-child{max-width:68%;overflow-wrap:anywhere}.total{font-size:1.2em;font-weight:900;border-top:1px solid #000;margin-top:1mm;padding-top:1.5mm}.change{border:1.5px solid #000;padding:1.5mm;font-size:1.15em}.small{font-size:.88em}.bold{font-weight:800}.footer{margin-top:3mm;font-size:.9em}@media print{html,body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style></head><body><main class="r"><header class="center"><div class="brand">${esc(businessName)}</div><div class="tagline">THE COLOUR &amp; FRAME STUDIO</div><div class="meta small">${contactLines}</div></header><div class="rule"></div><div class="center bold">POS RECEIPT</div><div class="center">${esc(sale.receipt_number)}</div>${sale.invoice_number ? `<div class="center small">Invoice: ${esc(sale.invoice_number)}</div>` : ""}<div class="center small">${esc(new Date(sale.sold_at).toLocaleString("en-LK", { timeZone: "Asia/Colombo" }))}</div><div class="rule"></div><div class="bold">${esc(sale.customer_name || "Walk-in customer")}</div><div class="rule"></div>${items.map((i) => `<div class="row item"><span><b>${esc(i.name)}</b><br><span class="small">${i.qty}${i.unitLabel ? ` ${esc(i.unitLabel)}` : ""} × ${rs(Number(i.price))}${i.code ? ` · ${esc(i.code)}` : ""}</span></span><b>${rs(Number(i.price) * Number(i.qty))}</b></div>`).join("")}<div class="row total"><span>Total</span><span>${rs(Number(sale.total))}</span></div><div class="row"><span>Received</span><b>${rs(Number(sale.amount_tendered))}</b></div><div class="row change"><span>Balance / Change</span><b>${rs(Number(sale.change_due))}</b></div><div class="row small"><span>Payment</span><b>${esc(sale.payment_method.toUpperCase())}</b></div><footer class="footer center"><div class="rule"></div>Issued by Mr. ${esc(sale.sold_by)}<br>Thank you for choosing ${esc(businessName)}.</footer></main></body></html>`,
   );
   win.document.close();
   win.focus();
@@ -144,6 +146,12 @@ export default function POS() {
     website: receiptSettings?.website || "",
   };
   const codeRef = useRef<HTMLInputElement>(null);
+  const configurationRef = useRef<HTMLElement>(null);
+  const [configuring, setConfiguring] = useState<Product | null>(null);
+  useEffect(() => { if (configuring) { configurationRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' }); configurationRef.current?.focus({ preventScroll: true }); } }, [configuring]);
+  const [sizeId, setSizeId] = useState("");
+  const [choices, setChoices] = useState<Record<string, string>>({});
+  const [quantity, setQuantity] = useState(1);
   const [products, setProducts] = useState<Product[]>([]);
   const [day, setDay] = useState<DayData | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -207,7 +215,7 @@ export default function POS() {
   }, [reportMonth]);
   const total = selectedInvoice
     ? selectedInvoice.balance
-    : cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+    : cart.reduce((sum, item) => sum + Math.round(item.price * 100) * item.qty, 0) / 100;
   const received = Number(tendered) || 0;
   const change = Math.max(0, received - total);
   const filtered = useMemo(() => {
@@ -216,16 +224,32 @@ export default function POS() {
       .filter((p) => !q || `${p.code} ${p.name}`.toLowerCase().includes(q))
       .slice(0, 30);
   }, [products, query]);
+  const addConfigured = (product: Product, qty: number, selectedSize = '', selectedChoices: Record<string, string> = {}) => {
+    try {
+      const quote = quotePosProduct(product.price, product.customConfig, qty, selectedSize, selectedChoices);
+      const cartKey = JSON.stringify([product.id, selectedSize, Object.entries(selectedChoices).sort()]);
+      const existing = cart.find(item => item.cartKey === cartKey);
+      const nextQty = existing ? existing.qty + qty : qty;
+      const nextQuote = quotePosProduct(product.price, product.customConfig, nextQty, selectedSize, selectedChoices);
+      const next: CartItem = { ...product, basePrice: product.price, price: nextQuote.price, qty: nextQty, cartKey, sizeId: selectedSize, choices: selectedChoices, unitLabel: quote.unitLabel, name: [product.name, quote.description].filter(Boolean).join(' · ') };
+      setCart(old => existing ? old.map(item => item.cartKey === cartKey ? next : item) : [...old, next]);
+      setConfiguring(null); setCode(''); codeRef.current?.focus();
+    } catch (e: any) { toast({ title: 'Check product quantity and options', description: e.message, variant: 'destructive' }); }
+  };
   const add = (product: Product) => {
     if (selectedInvoice) return;
-    setCart((old) => {
-      const found = old.find((i) => i.id === product.id);
-      return found
-        ? old.map((i) => (i.id === product.id ? { ...i, qty: i.qty + 1 } : i))
-        : [...old, { ...product, qty: 1 }];
-    });
-    setCode("");
-    codeRef.current?.focus();
+    const config = posConfig(product.customConfig);
+    if (config.sizes?.length || config.optionGroups?.length || config.minQuantity > 1 || config.quantityStep > 1) {
+      setConfiguring(product); setSizeId(''); setChoices({}); setQuantity(Math.max(1, Number(config.minQuantity) || 1));
+    } else addConfigured(product, 1);
+  };
+  const changeQuantity = (item: CartItem, direction: number) => {
+    try {
+      const current = quotePosProduct(item.basePrice, item.customConfig, item.qty, item.sizeId, item.choices);
+      const qty = Math.max(current.minQty, item.qty + direction * current.step);
+      const quote = quotePosProduct(item.basePrice, item.customConfig, qty, item.sizeId, item.choices);
+      setCart(old => old.map(line => line.cartKey === item.cartKey ? { ...line, qty, price: quote.price } : line));
+    } catch (e: any) { toast({ title: 'Quantity unavailable', description: e.message, variant: 'destructive' }); }
   };
   const addByCode = () => {
     const normalized = code.trim().toLowerCase();
@@ -457,6 +481,17 @@ export default function POS() {
     );
   return (
     <div className="space-y-5 pb-10">
+      {configuring && <section ref={configurationRef} tabIndex={-1} className="rounded-2xl border border-violet-200 bg-white p-5 shadow-sm" aria-label="Configure POS item">
+        <div className="flex items-center justify-between"><h2 className="text-lg font-bold">{configuring.name}</h2><button onClick={() => setConfiguring(null)} aria-label="Cancel product selection"><X /></button></div>
+        <p className="mt-1 text-sm text-slate-600">Choose the size, options and number of units. Quantity uses the product’s configured unit and quantity step.</p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          {!!posConfig(configuring.customConfig).sizes?.length && <label className="grid gap-2 text-sm font-semibold">Size<select className={input} value={sizeId} onChange={e => { setSizeId(e.target.value); const config = posConfig(configuring.customConfig); const size = config.sizes.find((s: any) => s.id === e.target.value); setQuantity(Math.max(1, Number(size?.minQty) || Number(config.minQuantity) || 1)); }}><option value="">Choose size</option>{posConfig(configuring.customConfig).sizes.map((size: any) => <option key={size.id} value={size.id}>{size.name} · {size.unitLabel || 'unit'}</option>)}</select></label>}
+          {(posConfig(configuring.customConfig).optionGroups || []).filter((g: any) => g.choices?.length).map((group: any) => <label key={group.id} className="grid gap-2 text-sm font-semibold">{group.title}<select className={input} value={choices[group.id] || ''} onChange={e => setChoices(old => ({ ...old, [group.id]: e.target.value }))}><option value="">Choose {group.title}</option>{group.choices.map((choice: any) => <option key={choice.id} value={choice.id}>{choice.name}</option>)}</select></label>)}
+          <label className="grid gap-2 text-sm font-semibold">Quantity (units)<input className={input} type="number" min="1" value={quantity} onChange={e => setQuantity(Number(e.target.value))} /></label>
+        </div>
+        {(() => { try { const quote = quotePosProduct(configuring.price, configuring.customConfig, quantity, sizeId, choices); return <p className="mt-4 font-bold">{rs(quote.price)} / {quote.unitLabel} × {quantity} = {rs(quote.price * quantity)}<small className="block font-normal">Minimum {quote.minQty} · quantity step {quote.step}</small></p>; } catch (e: any) { return <p className="mt-4 text-sm text-amber-800">{e.message}</p>; } })()}
+        <button className="mt-4 inline-flex h-11 items-center gap-2 rounded-xl bg-violet-950 px-5 font-bold text-white" onClick={() => addConfigured(configuring, quantity, sizeId, choices)}><Plus size={16} /> Add to bill</button>
+      </section>}
       <header className="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex gap-4">
@@ -684,7 +719,7 @@ export default function POS() {
                       {p.name}
                     </b>
                     <span className="mt-2 block text-sm font-black">
-                      {rs(p.price)}
+                      {posConfig(p.customConfig).sizes?.length ? "Choose size & unit price" : rs(p.price)}
                     </span>
                   </button>
                 ))}
@@ -755,43 +790,21 @@ export default function POS() {
                 ) : cart.length ? (
                   cart.map((item) => (
                     <div
-                      key={item.id}
+                      key={item.cartKey}
                       className="flex items-center gap-2 rounded-xl bg-slate-50 p-3"
                     >
                       <div className="min-w-0 flex-1">
                         <b className="block truncate text-xs">{item.name}</b>
                         <span className="text-[10px] text-slate-500">
-                          {item.code} · {rs(item.price)}
+                          {item.code} · {rs(item.price)} / {item.unitLabel}
                         </span>
                       </div>
+                      <button aria-label={`Decrease ${item.name}`} onClick={() => changeQuantity(item, -1)} className="h-9 w-9 rounded-lg border"><Minus size={14} /></button>
+                      <b className="min-w-6 text-center text-xs">{item.qty}</b>
+                      <button aria-label={`Increase ${item.name}`} onClick={() => changeQuantity(item, 1)} className="h-9 w-9 rounded-lg border"><Plus size={14} /></button>
                       <button
                         onClick={() =>
-                          setCart((c) =>
-                            c.map((i) =>
-                              i.id === item.id
-                                ? { ...i, qty: Math.max(1, i.qty - 1) }
-                                : i,
-                            ),
-                          )
-                        }
-                      >
-                        <Minus size={14} />
-                      </button>
-                      <b className="w-5 text-center text-xs">{item.qty}</b>
-                      <button
-                        onClick={() =>
-                          setCart((c) =>
-                            c.map((i) =>
-                              i.id === item.id ? { ...i, qty: i.qty + 1 } : i,
-                            ),
-                          )
-                        }
-                      >
-                        <Plus size={14} />
-                      </button>
-                      <button
-                        onClick={() =>
-                          setCart((c) => c.filter((i) => i.id !== item.id))
+                          setCart((c) => c.filter((i) => i.cartKey !== item.cartKey))
                         }
                       >
                         <X size={14} />

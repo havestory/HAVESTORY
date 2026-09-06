@@ -3,11 +3,11 @@ import { useGetNotices, useDeleteNoticeById, useCreateNotice, useUpdateNoticeByI
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Bell, Trash2, Edit2, MoreHorizontal } from 'lucide-react';
+import { Bell, Trash2, Edit2, MoreHorizontal, Plus, Save, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AdminTableError, AdminTableLoading } from '@/components/admin/AdminPageState';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -51,7 +51,7 @@ export default function Notices() {
           <h1 className="text-3xl font-serif font-bold text-foreground">Site Notices</h1>
           <p className="text-muted-foreground mt-1">Manage announcement banners for the public site.</p>
         </div>
-        <Button onClick={openCreate} className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 uppercase text-xs tracking-widest px-5 h-10 font-semibold">Add Notice</Button>
+        <Button onClick={openCreate} className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 uppercase text-xs tracking-widest px-5 h-10 font-semibold"><Plus className="mr-2 h-4 w-4" /> Add Notice</Button>
       </div>
 
       <Card className="rounded-none border border-border shadow-sm bg-card">
@@ -109,17 +109,18 @@ export default function Notices() {
         </CardContent>
       </Card>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg rounded-2xl border-border bg-card">
-          <DialogHeader><DialogTitle>{editingId ? 'Edit notice' : 'Add notice'}</DialogTitle></DialogHeader>
+        <DialogContent data-admin-theme="light" className="max-w-lg w-[calc(100%-2rem)] rounded-2xl border-slate-200 bg-white text-slate-900 p-6">
+          <DialogHeader><DialogTitle>{editingId ? 'Edit notice' : 'Add notice'}</DialogTitle><DialogDescription className="text-slate-600">Write an announcement, choose where it appears and preview it before saving.</DialogDescription></DialogHeader>
           <div className="space-y-4 py-2">
-            <div className="space-y-1.5"><Label>Message</Label><Input value={form.message} onChange={e => setForm(v => ({ ...v, message: e.target.value }))} placeholder="Announcement shown on the website" /></div>
+            <div className="space-y-1.5"><Label htmlFor="notice-message">Notice message</Label><textarea id="notice-message" rows={4} className="w-full rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-violet-500" value={form.message} onChange={e => setForm(v => ({ ...v, message: e.target.value }))} placeholder="Announcement shown on the website" /></div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5"><Label>Style</Label><select value={form.style} onChange={e => setForm(v => ({ ...v, style: e.target.value }))} className="h-10 w-full rounded-xl border border-border bg-card px-3 text-foreground"><option value="info">Info</option><option value="success">Success</option><option value="warning">Warning</option><option value="urgent">Urgent</option></select></div>
-              <div className="space-y-1.5"><Label>Placement</Label><select value={form.placement} onChange={e => setForm(v => ({ ...v, placement: e.target.value }))} className="h-10 w-full rounded-xl border border-border bg-card px-3 text-foreground"><option value="banner">Banner</option><option value="popup">Popup</option></select></div>
+              <div className="space-y-1.5"><Label htmlFor="notice-style">Notice style</Label><select id="notice-style" value={form.style} onChange={e => setForm(v => ({ ...v, style: e.target.value }))} className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-slate-900 focus:ring-2 focus:ring-violet-500"><option value="info">Info</option><option value="success">Success</option><option value="warning">Warning</option><option value="urgent">Urgent</option></select></div>
+              <div className="space-y-1.5"><Label htmlFor="notice-placement">Display location</Label><select id="notice-placement" value={form.placement} onChange={e => setForm(v => ({ ...v, placement: e.target.value }))} className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-slate-900 focus:ring-2 focus:ring-violet-500"><option value="banner">Banner</option><option value="popup">Popup</option></select></div>
             </div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-foreground"><input type="checkbox" checked={form.enabled} onChange={e => setForm(v => ({ ...v, enabled: e.target.checked }))} /> Enabled</label>
+            <label className="flex items-center gap-2 text-sm font-semibold text-foreground"><input type="checkbox" checked={form.enabled} onChange={e => setForm(v => ({ ...v, enabled: e.target.checked }))} className="h-4 w-4 accent-violet-700" /> Show this notice on the website</label>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4"><div className="mb-2 flex items-center gap-2 text-xs font-semibold text-slate-600"><Eye size={15} /> Message preview · {form.placement}</div><p className={`whitespace-pre-wrap break-words rounded-lg border p-3 text-sm ${form.style === 'urgent' ? 'border-red-200 bg-red-50 text-red-900' : form.style === 'warning' ? 'border-amber-200 bg-amber-50 text-amber-900' : form.style === 'success' ? 'border-green-200 bg-green-50 text-green-900' : 'border-blue-200 bg-blue-50 text-blue-900'}`}>{form.message || 'Your announcement will appear here.'}</p></div>
           </div>
-          <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button onClick={saveNotice} disabled={createNotice.isPending || updateNotice.isPending}>{createNotice.isPending || updateNotice.isPending ? 'Saving…' : 'Save notice'}</Button></DialogFooter>
+          <DialogFooter className="gap-2 border-t border-slate-200 pt-4"><Button variant="outline" className="h-11 rounded-xl border-slate-300 bg-white text-slate-800" onClick={() => setOpen(false)}>Cancel</Button><Button className="h-11 rounded-xl bg-violet-700 text-white hover:bg-violet-800" onClick={saveNotice} disabled={!form.message.trim() || createNotice.isPending || updateNotice.isPending}><Save className="mr-2 h-4 w-4" />{createNotice.isPending || updateNotice.isPending ? 'Saving…' : 'Save notice'}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
