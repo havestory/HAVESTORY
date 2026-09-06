@@ -1,3 +1,4 @@
+import { discountPosBill, validatePosOptions } from "../lib/pos-options";
 import { posConfig, quotePosProduct } from "@workspace/api-zod";
 import { Router } from "express";
 import { randomUUID } from "node:crypto";
@@ -108,6 +109,7 @@ async function initialize() {
       active BOOLEAN NOT NULL DEFAULT TRUE,
       created_at TIMESTAMP NOT NULL DEFAULT NOW()
     );
+    ALTER TABLE pos_items ADD COLUMN IF NOT EXISTS custom_config JSONB NOT NULL DEFAULT '{}'::jsonb;
   `);
 }
 const ensurePos = () =>
@@ -141,7 +143,7 @@ router.get("/catalog", async (_req, res) => {
       };
     });
     const custom = await pool.query(
-      "SELECT id,code,name,price FROM pos_items WHERE active=true ORDER BY name",
+      "SELECT id,code,name,price,custom_config FROM pos_items WHERE active=true ORDER BY name",
     );
     res.json([
       ...custom.rows.map((row) => ({
@@ -151,6 +153,7 @@ router.get("/catalog", async (_req, res) => {
         price: money(row.price),
         imageUrl: "",
         posOnly: true,
+        customConfig: JSON.stringify(row.custom_config || {}),
       })),
       ...productItems,
     ]);
@@ -168,18 +171,42 @@ router.post("/items", async (req, res) => {
       return res.status(403).json({ error: "POS access permission required" });
     const code = clean(req.body?.code, 40).toUpperCase();
     const name = clean(req.body?.name, 200);
-    const price = money(req.body?.price);
+    const price = Number(req.body?.price);
+    if (req.body?.price === "" || req.body?.price == null || !Number.isFinite(price) || price < 0) return res.status(400).json({ error: "Enter a valid unit price" });
+    let config;
+    try { config = validatePosOptions(req.body?.customConfig); } catch (error: any) { return res.status(400).json({ error: error.message }); }
     if (!code || !name)
       return res.status(400).json({ error: "Item code and name are required" });
     const { rows } = await pool.query(
-      `INSERT INTO pos_items(code,name,price) VALUES($1,$2,$3)
-      ON CONFLICT(code) DO UPDATE SET name=EXCLUDED.name,price=EXCLUDED.price,active=true RETURNING *`,
-      [code, name, price],
+      `INSERT INTO pos_items(code,name,price,custom_config) VALUES($1,$2,$3,$4::jsonb)
+      ON CONFLICT(code) DO NOTHING RETURNING *`,
+      [code, name, price, JSON.stringify(config)],
     );
+    if (!rows[0]) return res.status(409).json({ error: "Item code already exists. Edit the existing POS item or choose a different code." });
     res.status(201).json(rows[0]);
   } catch (error) {
     req.log.error(error);
     res.status(500).json({ error: "POS item could not be saved" });
+  }
+});
+
+router.put("/items/:id", async (req, res) => {
+  try {
+    await ensurePos();
+    const id = Number(req.params.id);
+    const code = clean(req.body?.code, 40).toUpperCase();
+    const name = clean(req.body?.name, 200);
+    const price = Number(req.body?.price);
+    if (!Number.isSafeInteger(id) || id <= 0 || !code || !name || req.body?.price === "" || req.body?.price == null || !Number.isFinite(price) || price < 0) return res.status(400).json({ error: "Enter a valid item code, name and price" });
+    let config;
+    try { config = req.body?.customConfig === undefined ? null : JSON.stringify(validatePosOptions(req.body.customConfig)); } catch (error: any) { return res.status(400).json({ error: error.message }); }
+    const { rows } = await pool.query("UPDATE pos_items SET code=$2,name=$3,price=$4,custom_config=COALESCE($5::jsonb,custom_config) WHERE id=$1 AND active=true RETURNING *", [id, code, name, price, config]);
+    if (!rows[0]) return res.status(404).json({ error: "POS item not found" });
+    res.json(rows[0]);
+  } catch (error: any) {
+    if (error.code === "23505") return res.status(409).json({ error: "Item code already exists" });
+    req.log.error(error);
+    res.status(500).json({ error: "POS item could not be updated" });
   }
 });
 
@@ -342,10 +369,10 @@ router.post("/sales", async (req, res) => {
         const product = match[1] === 'product';
         const result = await client.query(product
           ? "SELECT name,invoice_name,price,custom_config FROM products WHERE id=$1 AND active=true"
-          : "SELECT name,code,price FROM pos_items WHERE id=$1 AND active=true", [Number(match[2])]);
+          : "SELECT name,code,price,custom_config FROM pos_items WHERE id=$1 AND active=true", [Number(match[2])]);
         const row = result.rows[0];
         if (!row) throw new Error("Item is no longer available; reload POS");
-        const quote = quotePosProduct(Number(row.price), product ? row.custom_config : {}, Number(item.qty), item.sizeId || '', item.choices || {});
+        const quote = quotePosProduct(Number(row.price), row.custom_config, Number(item.qty), item.sizeId || '', item.choices || {});
         if (Math.abs(quote.price - Number(item.price)) > .001 || !Number.isFinite(Number(item.price))) throw new Error("Product price changed; reload POS before collecting payment");
         const config = posConfig(row.custom_config);
         items.push({ id: item.id, code: product ? clean(config.itemCode, 40) || `P${String(match[2]).padStart(4, '0')}` : row.code,
@@ -356,7 +383,7 @@ router.post("/sales", async (req, res) => {
     let customerName = clean(req.body?.customerName, 160) || "Walk-in customer";
     let invoiceNumber: string | null = null;
     let total = items.reduce(
-      (sum: number, item: any) => sum + item.qty * Math.round(item.price * 100),
+      (sum: number, item: any) => sum + Math.round(item.qty * item.price * 100),
       0,
     );
     total /= 100;
@@ -407,11 +434,14 @@ router.post("/sales", async (req, res) => {
       }
     }
 
-    if (total <= 0) throw new Error("Sale total must be greater than zero");
+    const discounted = discountPosBill(total, req.body?.discountType, req.body?.discountValue, !!invoiceId);
+    const subtotal = discounted.subtotal;
+    total = discounted.total;
+    if (total <= 0) throw new Error("Sale total after discount must be greater than zero");
     const tendered = money(req.body?.amountTendered);
     if (tendered < total)
       throw new Error("Customer payment is less than the amount due");
-    const change = tendered - total;
+    const change = Math.round((tendered - total) * 100) / 100;
     const paymentMethod = ["cash", "card", "transfer"].includes(
       req.body?.paymentMethod,
     )
@@ -428,7 +458,7 @@ router.post("/sales", async (req, res) => {
         invoiceNumber,
         customerName,
         JSON.stringify(items),
-        total,
+        subtotal,
         total,
         tendered,
         change,

@@ -43,6 +43,19 @@ export function quotePosProduct(
   if (tiers.length && !tier)
     throw new Error("No price configured for this quantity");
   let unitPrice = tier ? Number(tier.pricePerUnit) : Number(basePrice);
+  // Size tiers take precedence. Only active custom pricing models use base tiers.
+  if (!sizes.length && config.productType === "custom_print") {
+    if (config.pricingModel === "fixed_quantities") {
+      const fixed = config.fixedPrices?.find((r: any) => Number(r.qty) === quantity);
+      if (!fixed) throw new Error("No price configured for this quantity");
+      unitPrice = Number(fixed.price) / quantity;
+    } else if (config.pricingModel === "range_per_unit") {
+      const range = config.rangePrices?.find((r: any) => quantity >= Number(r.from) && quantity <= Number(r.to));
+      if (!range) throw new Error("No price configured for this quantity");
+      unitPrice = Number(range.pricePerUnit);
+    }
+  }
+  let flatFee = 0;
   const names: string[] = size ? [String(size.name)] : [];
   for (const group of Array.isArray(config.optionGroups)
     ? config.optionGroups
@@ -54,13 +67,19 @@ export function quotePosProduct(
     const price = Number(override ? override.price : choice.price || 0);
     if (!Number.isFinite(price) || price < 0)
       throw new Error("Invalid option price");
-    unitPrice += price;
+    if (choice.chargeType === "flat") flatFee += price;
+    else if (choice.chargeType === "qty_range") {
+      const range = choice.priceTiers?.find((r: any) => quantity >= Number(r.from) && quantity <= Number(r.to));
+      if (!range || !Number.isFinite(Number(range.pricePerUnit)) || Number(range.pricePerUnit) < 0) throw new Error("No option price configured for this quantity");
+      unitPrice += Number(range.pricePerUnit);
+    } else unitPrice += price;
     names.push(String(choice.name));
   }
   if (!Number.isFinite(unitPrice) || unitPrice < 0)
     throw new Error("Invalid product price");
   return {
-    price: Math.round(unitPrice * 100) / 100,
+    price: unitPrice + flatFee / quantity,
+    lineTotal: Math.round((unitPrice * quantity + flatFee) * 100) / 100,
     minQty,
     step,
     unitLabel: String(size?.unitLabel || "unit"),
