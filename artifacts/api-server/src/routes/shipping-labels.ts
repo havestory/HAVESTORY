@@ -157,7 +157,13 @@ router.put("/settings", requireAdmin, async (req, res) => {
     const body = req.body || {};
     const url = String(body.qrBaseUrl || "").trim().replace(/\/+$/, "");
     if (url && !/^https?:\/\//i.test(url)) return res.status(400).json({ error: "QR website link must start with http:// or https://" });
+    const { rows: stored } = await pool.query("SELECT config FROM shipping_label_settings WHERE id = 1");
+    const previous = typeof stored[0]?.config === 'string' ? JSON.parse(stored[0].config) : stored[0]?.config || {};
+    const logoUrl = body.labelLogoUrl === undefined ? previous.labelLogoUrl : String(body.labelLogoUrl).trim();
+    if (logoUrl && !/^(https?:\/\/|\/[^/])/i.test(logoUrl)) return res.status(400).json({ error: "Invalid logo image URL" });
     const config = {
+      ...previous,
+      labelLogoUrl: logoUrl?.slice(0, 1000),
       qrBaseUrl: url.slice(0, 300),
       labelTitle: String(body.labelTitle ?? "").trim().slice(0, 80),
       senderName: String(body.senderName || "").trim().slice(0, 140),

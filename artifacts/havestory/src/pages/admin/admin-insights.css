@@ -107,16 +107,16 @@
   min-height: 8.25rem;
 }
 
-.finance-stat-card::after {
-  content: '';
-  position: absolute;
-  inset: auto -1.5rem -2.5rem auto;
-  width: 6rem;
-  height: 6rem;
-  border-radius: 999px;
-  background: hsl(var(--secondary) / .1);
-}
-
+/* Keep all summary controls in normal flow, including opening-balance edit. */
+.finance-stat-heading { display:flex; align-items:center; gap:.65rem; min-width:0; }
+.finance-stat-heading p { font-size:.75rem; font-weight:600; color:hsl(var(--foreground)); }
+.finance-stat-icon { display:grid; place-items:center; width:2.5rem; height:2.5rem; flex:none; border-radius:.8rem; color:hsl(var(--primary)); background:hsl(var(--primary) / .09); }
+.finance-stat-icon svg { position:static; width:1.25rem; height:1.25rem; flex:none; }
+.finance-stat-value { margin-top:1rem; font-size:clamp(1.15rem,1.7vw,1.55rem); font-weight:700 !important; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.finance-stat-sub { margin-top:.35rem; font-size:.75rem; color:hsl(var(--muted-foreground)); }
+.finance-edit-balance { display:inline-flex; align-items:center; gap:.25rem; margin-left:auto; padding:.5rem; border:1px solid hsl(var(--border)); border-radius:.6rem; font-size:.7rem; color:hsl(var(--primary)); }
+.finance-edit-balance:hover { background:hsl(var(--muted)); }
+.finance-edit-balance:focus-visible { outline:2px solid hsl(var(--primary)); outline-offset:2px; }
 .finance-surface { overflow: hidden; }
 .finance-table-surface > div { overflow-x: auto; }
 .finance-table-surface table { min-width: 760px; }
