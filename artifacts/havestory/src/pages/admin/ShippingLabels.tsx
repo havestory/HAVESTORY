@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { QRCodeSVG } from 'qrcode.react';
+import { ShippingLabelDocument, Code39Barcode } from '@/components/admin/ShippingLabelDocument';
 
 type LabelSize = 'standard' | 'a5';
 type LabelForm = {
@@ -49,16 +50,6 @@ function VerificationCode({ url, size }: { url: string; size: number }) {
   );
 }
 
-function Barcode({ value }: { value: string }) {
-  const seed = Array.from(value || 'HAVESTORY').reduce((sum, character) => sum + character.charCodeAt(0), 0);
-  const stops = Array.from({ length: 64 }, (_, index) => {
-    const left = index * 1.58;
-    const width = ((seed + index * 13) % 3) * .38 + .32;
-    return `#111 ${left}% ${Math.min(100, left + width)}%,transparent ${Math.min(100, left + width)}% ${Math.min(100, left + 1.2)}%`;
-  }).join(',');
-  return <div style={{ width: '100%' }}><div aria-hidden="true" style={{ height: 38, background: `linear-gradient(90deg,${stops})` }} /><div style={{ marginTop: 3, textAlign: 'center', fontFamily: 'monospace', fontSize: 7, fontWeight: 800, letterSpacing: 1.2 }}>{value}</div></div>;
-}
-
 function deliverySchedule(dateValue: string, timeValue: string) {
   if (!dateValue && !timeValue) return null;
   const date = dateValue ? new Date(`${dateValue}T12:00:00`) : null;
@@ -80,41 +71,17 @@ function LabelPreview({ form, sender, qrUrl, showQr, showBarcode, handlingArtwor
   qrUrl: string; showQr: boolean; showBarcode: boolean;
   handlingArtworkImage: string;
 }) {
-  const isA5 = form.labelSize === 'a5';
-  const width = isA5 ? 559 : 378;
-  const height = isA5 ? 794 : 560;
   const schedule = deliverySchedule(form.deliveryDate, form.deliveryTime);
-  const detailFont = isA5 ? 17 : 14;
-  return (
-    <div className="label-print-target" style={{ width, height, minHeight: height, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid #d9d0dc', background: '#fff', color: '#151019', fontFamily: 'Arial,sans-serif', fontSize: 12, boxShadow: '0 26px 70px rgba(35,20,43,.2)' }}>
-      <div style={{ height: isA5 ? 9 : 7, flex: '0 0 auto', background: 'linear-gradient(90deg,#4c2370 0%,#8c4ba7 55%,#c49a4a 100%)' }} />
-      <header style={{ padding: isA5 ? '18px 20px 15px' : '13px 15px 11px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, flex: '0 0 auto', borderBottom: '1px solid #ddd5df' }}>
-        <div style={{ minWidth: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: isA5 ? 48 : 38, height: isA5 ? 48 : 38, flex: '0 0 auto', display: 'grid', placeItems: 'center', overflow: 'hidden', border: '1px solid #d8c2e1', borderRadius: 12, background: '#f7f0fb', color: '#4c2370', fontFamily: 'Georgia,serif', fontWeight: 900 }}>{sender.logo ? <img crossOrigin="anonymous" src={sender.logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} /> : 'HS'}</div>
-          <div style={{ minWidth: 0 }}><div style={{ overflowWrap: 'anywhere', fontSize: isA5 ? 20 : 15, fontWeight: 900, letterSpacing: .5 }}>{sender.name}</div>{sender.phone && <div style={{ marginTop: 3, fontSize: isA5 ? 11 : 9, fontWeight: 700 }}>☎ {sender.phone}</div>}</div>
-        </div>
-        <div style={{ flex: '0 0 auto', textAlign: 'right' }}><div style={{ color: '#7e6b84', fontSize: 7, fontWeight: 900, letterSpacing: 1.2 }}>INVOICE NUMBER</div><div style={{ marginTop: 4, fontFamily: 'monospace', fontSize: isA5 ? 13 : 10, fontWeight: 900 }}>{form.orderNumber || 'NOT LINKED'}</div></div>
-      </header>
-      {form.urgent && <div style={{ padding: isA5 ? '8px 20px' : '6px 15px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, flex: '0 0 auto', background: '#e21f2f', color: '#fff', fontSize: isA5 ? 15 : 11, fontWeight: 950, letterSpacing: 1.4, textAlign: 'center' }}><span style={{ fontSize: isA5 ? 19 : 14 }}>⚡</span> URGENT DELIVERY</div>}
-      {form.handlingArtwork && handlingArtworkImage && <div style={{ height: isA5 ? 96 : 70, padding: isA5 ? '5px 20px' : '5px 15px', flex: '0 0 auto', overflow: 'hidden', borderBottom: '1px solid #eadff0', background: '#fff' }}><img crossOrigin="anonymous" src={handlingArtworkImage} alt="Handling instructions" style={{ width: '100%', height: '100%', display: 'block', objectFit: 'contain', objectPosition: 'center' }} /></div>}
-      <main style={{ padding: isA5 ? '18px 20px 14px' : '13px 15px 10px', flex: '1 1 auto', minHeight: 0 }}>
-        <div style={{ padding: isA5 ? '13px 14px 16px' : '10px 11px 12px', border: '2px solid #4c2370', borderRadius: 10, background: '#fcf8fd' }}>
-          <div style={{ color: '#8a768f', fontSize: 8, fontWeight: 900, lineHeight: 1.25, letterSpacing: 1.4 }}>DELIVER TO</div>
-          <div style={{ marginTop: 6, overflowWrap: 'anywhere', fontFamily: 'Arial, Helvetica, sans-serif', fontSize: isA5 ? 25 : 18, fontWeight: 800, lineHeight: 1.2 }}>{form.recipientName || 'Recipient name'}</div>
-          {form.phone && <div style={{ marginTop: 9, overflowWrap: 'anywhere', color: '#4c2370', fontFamily: 'Arial, Helvetica, sans-serif', fontSize: isA5 ? 17 : 13, fontWeight: 800, lineHeight: 1.3 }}>☎ {form.phone}{form.alternatePhone ? `  /  ${form.alternatePhone}` : ''}</div>}
-          <div style={{ marginTop: 8, overflowWrap: 'anywhere', fontFamily: 'Arial, Helvetica, sans-serif', fontSize: detailFont, fontWeight: 700, lineHeight: 1.45 }}>{form.address || 'Delivery address'}{(form.city || form.district || form.postalCode) && <><br />{[form.city, form.district, form.postalCode].filter(Boolean).join(', ')}</>}</div>
-        </div>
-        {form.courierService && <div style={{ marginTop: 9, color: '#4c3d52', fontSize: isA5 ? 9 : 7, fontWeight: 800 }}>COURIER · {form.courierService}</div>}
-        {schedule && <div style={{ marginTop: 9, padding: isA5 ? '9px 12px' : '7px 8px', border: '2px solid #171217', background: '#fff', color: '#111', textAlign: 'center', lineHeight: 1.4 }}><div style={{ fontFamily: 'Arial, sans-serif', fontSize: isA5 ? 14 : 10, fontWeight: 700 }}>මෙම පාර්සලය {schedule.sinhalaDate && <b>{schedule.sinhalaDate}</b>}{schedule.time24 && <> දින <b>{schedule.time24}</b> ට පෙර බාර දෙන්න.</>}</div><div style={{ fontSize: isA5 ? 12 : 9, fontWeight: 700 }}>Please deliver this parcel before {schedule.englishDate}{schedule.englishTime ? ` at ${schedule.englishTime}.` : '.'}</div></div>}
-        {form.deliveryNotes && <div style={{ marginTop: 9, padding: '8px 10px', borderLeft: '3px solid #c49a4a', background: '#fff8e7', color: '#5b4216', fontSize: isA5 ? 10 : 8, fontWeight: 700, lineHeight: 1.45, overflowWrap: 'anywhere' }}><b>DELIVERY NOTE:</b> {form.deliveryNotes}</div>}
-      </main>
-      {showBarcode && form.orderNumber && <div style={{ padding: isA5 ? '0 20px 13px' : '0 15px 9px', flex: '0 0 auto' }}><Barcode value={form.orderNumber} /></div>}
-      <footer style={{ padding: isA5 ? '10px 20px 14px' : '7px 15px 10px', display: 'grid', gridTemplateColumns: qrUrl && showQr ? '1fr auto' : '1fr', alignItems: 'center', gap: 13, flex: '0 0 auto', borderTop: '1px solid #1e1722' }}>
-        <div style={{ minWidth: 0, alignSelf: 'start' }}><div style={{ overflowWrap: 'anywhere', fontSize: isA5 ? 13 : 9.5, fontWeight: 700, letterSpacing: .45 }}>{sender.footer}</div>{sender.whatsapp && <div style={{ marginTop: 3, fontSize: isA5 ? 10.5 : 8.2, fontWeight: 700 }}>WhatsApp {sender.whatsapp}</div>}{sender.website && <div style={{ marginTop: 3, color: '#5e3d6c', fontSize: isA5 ? 11 : 8.2, fontWeight: 700 }}>{sender.website}</div>}{sender.address && <div style={{ marginTop: 3, color: '#625866', fontSize: isA5 ? 10 : 7.5, fontWeight: 600, lineHeight: 1.25, overflowWrap: 'anywhere' }}>{sender.address}</div>}</div>
-        {qrUrl && showQr && <div style={{ display: 'grid', justifyItems: 'center', gap: 3 }}><VerificationCode url={qrUrl} size={isA5 ? 88 : 64} /><span style={{ color: '#5f4c64', fontSize: isA5 ? 7 : 6, fontWeight: 800 }}>SECURE VERIFICATION</span></div>}
-      </footer>
-    </div>
-  );
+  return <ShippingLabelDocument size={form.labelSize} logo={sender.logo} owner={sender.name}
+    senderAddress={sender.address} senderPhone={sender.phone} recipient={form.recipientName || 'Recipient name'}
+    address={[form.address.replace(/\s*\n\s*/g, ', ') || 'Delivery address', form.city, form.district, form.postalCode].filter(Boolean).join(', ')}
+    phone={form.phone} alternatePhone={form.alternatePhone} urgent={form.urgent} fragile={form.handlingArtwork}
+    artwork={handlingArtworkImage} footer={sender.footer} whatsapp={sender.whatsapp}
+    deadline={schedule ? `මෙම පාර්සලය ${schedule.sinhalaDate}${schedule.time24 ? ` දින ${schedule.time24} ට` : ''} පෙර බාර දෙන්න.` : ''}
+    deadlineEn={schedule ? `Please deliver this parcel before ${schedule.englishDate}${schedule.englishTime ? ` at ${schedule.englishTime}` : ''}.` : ''}
+    notes={[form.courierService && `COURIER: ${form.courierService}`, form.deliveryNotes].filter(Boolean).join(' · ')}
+    barcode={showBarcode && form.orderNumber ? <Code39Barcode value={form.orderNumber} /> : null}
+    showQr={showQr} qr={qrUrl ? <div style={{ flexShrink: 0, textAlign: 'center' }}><VerificationCode url={qrUrl} size={64} /><div style={{ fontSize: 6, marginTop: 3 }}>SECURE VERIFICATION</div></div> : null} />;
 }
 
 function Field({ label, children, className = '' }: { label: string; children: React.ReactNode; className?: string }) {
@@ -147,9 +114,9 @@ export default function ShippingLabels() {
   const orderList = Array.isArray(orders) ? orders as any[] : [];
   const filteredOrders = useMemo(() => { const query = orderQuery.trim().toLowerCase(); return orderList.filter((order) => !query || [order.orderId, order.customerName, order.customerPhone].some((value) => String(value || '').toLowerCase().includes(query))).slice(0, 8); }, [orderList, orderQuery]);
   const sender = {
-    name: labelSettings.senderName || (siteSettings as any)?.businessName || 'HAVESTORY',
+    name: labelSettings.senderName || (siteSettings as any)?.ownerName || (siteSettings as any)?.businessName || 'HAVESTORY',
     phone: labelSettings.senderPhone || (siteSettings as any)?.phone || '',
-    whatsapp: labelSettings.senderWhatsapp || (siteSettings as any)?.whatsapp || '',
+    whatsapp: labelSettings.senderWhatsapp || (siteSettings as any)?.whatsappNumber || (siteSettings as any)?.whatsapp || '',
     address: labelSettings.senderAddress || (siteSettings as any)?.address || '',
     website: String((siteSettings as any)?.website || window.location.host).replace(/^https?:\/\//, '').replace(/\/$/, ''),
     logo: (siteSettings as any)?.logoUrl || '',
@@ -197,23 +164,28 @@ export default function ShippingLabels() {
   const ensureReady = () => { if (!missingRequired) return true; toast({ title: 'Complete delivery details', description: 'Recipient name, phone number and address are required.', variant: 'destructive' }); return false; };
   function handlePrint() {
     if (!ensureReady()) return;
-    if (clientId !== null) saveDetailsMut.mutate(clientId);
     const label = document.querySelector('.label-print-target');
     if (!label) return;
     const isA5 = form.labelSize === 'a5';
     const pageWidth = isA5 ? '148mm' : '100mm'; const pageHeight = isA5 ? '210mm' : '148mm';
     const win = window.open('', '_blank', 'width=820,height=720');
     if (!win) { toast({ title: 'Pop-up blocked', description: 'Allow pop-ups to print the shipping label.', variant: 'destructive' }); return; }
-    win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>HAVESTORY Shipping Label</title><style>*{box-sizing:border-box;margin:0;padding:0}body{background:#fff;font-family:Arial,sans-serif}@page{size:${pageWidth} ${pageHeight};margin:0}@media print{html,body{width:${pageWidth};height:${pageHeight}}.label-print-target{width:100%!important;min-height:100%!important;box-shadow:none!important;border:0!important}</style></head><body>${label.outerHTML}</body></html>`);
-    win.document.close(); let printed = false;
-    const printOnce = () => { if (printed) return; printed = true; win.focus(); win.print(); window.setTimeout(() => win.close(), 400); };
-    win.onload = printOnce; window.setTimeout(printOnce, 1000);
+    win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>HAVESTORY Shipping Label</title><style>*{box-sizing:border-box;margin:0;padding:0}body{background:#fff;font-family:Arial,sans-serif}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}@page{size:${pageWidth} ${pageHeight};margin:0}@media print{html,body{width:${pageWidth};height:${pageHeight}}.label-print-target{width:${pageWidth}!important;height:${pageHeight}!important;min-height:0!important;box-shadow:none!important;border:0!important}</style></head><body>${label.outerHTML}</body></html>`);
+    win.document.close();
+    void (async () => {
+      await Promise.all(Array.from(win.document.images).map(image => image.decode().catch(() => undefined)));
+      await win.document.fonts.ready;
+      if (!win.closed) { win.focus(); win.print(); }
+    })();
   }
   async function handleDownload() {
     if (!ensureReady()) return;
     const label = document.querySelector<HTMLElement>('.label-print-target');
     if (!label) return;
     try {
+      await Promise.all(Array.from(label.querySelectorAll('img')).map(image => image.decode().catch(() => undefined)));
+      await document.fonts.ready;
+      await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
       const isA5 = form.labelSize === 'a5';
       const width = isA5 ? 559 : 378;
       const height = isA5 ? 794 : 560;
@@ -223,6 +195,7 @@ export default function ShippingLabels() {
         scale: 2,
         backgroundColor: '#ffffff',
         overflowVisible: false,
+        isolateDocumentStyles: true,
       });
       const link = document.createElement('a');
       link.download = `HAVESTORY-${form.orderNumber || form.recipientName || 'shipping-label'}.jpg`.replace(/[^a-zA-Z0-9._-]/g, '-');
@@ -239,6 +212,7 @@ export default function ShippingLabels() {
       toast({ title: 'PNG or JPG required', description: 'Please choose a PNG, JPG or JPEG image.', variant: 'destructive' });
       return;
     }
+    if (file.size > 2 * 1024 * 1024) { toast({ title: 'Image is too large', description: 'Choose a PNG/JPG up to 2 MB.', variant: 'destructive' }); return; }
     setUploadingMark('handlingArtworkImageUrl');
     try {
       const body = new FormData(); body.append('file', file);
@@ -254,8 +228,8 @@ export default function ShippingLabels() {
 
   const inputClass = 'h-11 rounded-xl border-slate-200 bg-white px-3 text-sm font-semibold text-slate-800 shadow-sm focus-visible:border-violet-300 focus-visible:ring-violet-100';
   const handling = [
-    { key: 'urgent', label: 'Urgent', Icon: Zap, disabled: false },
-    { key: 'handlingArtwork', label: 'Handling artwork', Icon: FileImage, disabled: !labelSettings.handlingArtworkImageUrl },
+    { key: 'urgent', label: 'Urgent delivery', Icon: Zap, disabled: false },
+    { key: 'handlingArtwork', label: 'Fragile', Icon: FileImage, disabled: false },
   ] as const;
 
   return (
@@ -282,11 +256,18 @@ export default function ShippingLabels() {
             <div className="mb-5 flex items-center gap-3"><div className="grid h-10 w-10 place-items-center rounded-2xl bg-emerald-50 text-emerald-700"><Package2 className="h-4 w-4" /></div><div><h2 className="font-black text-slate-900">Label and handling</h2><p className="text-xs text-slate-500">Choose paper size, courier marks and delivery schedule.</p></div></div>
             <div className="grid grid-cols-2 gap-2 rounded-2xl bg-slate-50 p-1.5"><button type="button" onClick={() => setForm((current) => ({ ...current, labelSize: 'standard' }))} className={`rounded-xl px-3 py-3 text-xs font-black ${form.labelSize === 'standard' ? 'bg-white text-violet-700 shadow-sm ring-1 ring-violet-100' : 'text-slate-500'}`}>Standard · 10×14.8 cm</button><button type="button" onClick={() => setForm((current) => ({ ...current, labelSize: 'a5' }))} className={`rounded-xl px-3 py-3 text-xs font-black ${form.labelSize === 'a5' ? 'bg-white text-violet-700 shadow-sm ring-1 ring-violet-100' : 'text-slate-500'}`}>Large · A5</button></div>
             <div className="mt-4 grid gap-4 sm:grid-cols-2"><Field label="Invoice number"><Input value={form.orderNumber} onChange={(event) => setForm((current) => ({ ...current, orderNumber: event.target.value }))} placeholder="HS-INV-..." className={inputClass} /></Field><div className="flex items-end"><Button type="button" variant="outline" onClick={() => { const linked = orderList.find(order => Number(order.id) === selectedOrderId); if (linked?.orderId) tokenMut.mutate(String(linked.orderId)); }} disabled={!selectedOrderId || tokenMut.isPending} className="h-11 w-full rounded-xl border-violet-200 bg-violet-50 text-violet-700"><ShieldCheck className="mr-2 h-4 w-4" /> {qrUrl ? 'Refresh verification QR' : 'Create secure verification QR'}</Button></div></div>
-            <div className="mt-5 grid gap-2 sm:grid-cols-2">{handling.map(({ key, label, Icon, disabled }) => <button key={key} type="button" disabled={disabled} onClick={() => setForm((current) => ({ ...current, [key]: !current[key] }))} aria-pressed={form[key]} className={`flex min-h-12 items-center gap-2 rounded-2xl border px-3 text-left text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-45 ${form[key] ? 'border-violet-200 bg-violet-50 text-violet-700 shadow-sm' : 'border-slate-200 bg-white text-slate-500 hover:border-violet-200'}`}><Icon className="h-4 w-4" /> <span>{label}{disabled && <small className="mt-0.5 block text-[9px] font-semibold">Upload and save artwork first</small>}</span><span className={`ml-auto h-4 w-4 rounded-full border ${form[key] ? 'border-violet-600 bg-violet-600 shadow-[inset_0_0_0_3px_white]' : 'border-slate-300'}`} /></button>)}</div>
-            <div className="mt-5 rounded-2xl border border-violet-100 bg-violet-50/35 p-4">
-              <div className="flex flex-wrap items-start justify-between gap-3"><div><div className="flex items-center gap-2 text-sm font-black text-slate-800"><FileImage className="h-4 w-4 text-violet-600" /> Combined handling artwork</div><p className="mt-1 text-xs text-slate-500">Upload one image containing Fragile, Handle with Care, This Side Up and Keep Dry. Urgent keeps its current red design.</p><p className="mt-2 rounded-xl border border-violet-100 bg-white px-3 py-2 text-[11px] font-semibold leading-5 text-violet-700"><b>Recommended size:</b> 1500 × 250 px (6:1 ratio) · PNG/JPG · white or transparent background · keep a small safe margin around the artwork.</p></div><Button type="button" size="sm" onClick={() => saveLabelSettingsMut.mutate(labelSettings)} disabled={saveLabelSettingsMut.isPending || !!uploadingMark} className="rounded-xl bg-violet-700 text-white"><Save className="mr-1.5 h-3.5 w-3.5" /> Save artwork</Button></div>
-              <div className="mt-4 rounded-2xl border border-violet-100 bg-white p-3"><div className="mb-2 flex items-center justify-between gap-2"><span><span className="block text-xs font-black text-slate-700">Fragile & handling marks</span><span className="mt-0.5 block text-[9px] font-bold text-slate-400">1500 × 250 px</span></span>{labelSettings.handlingArtworkImageUrl && <button type="button" aria-label="Remove handling artwork" onClick={() => { setLabelSettings((current) => ({ ...current, handlingArtworkImageUrl: '' })); setForm((current) => ({ ...current, handlingArtwork: false })); }} className="grid h-7 w-7 place-items-center rounded-full text-slate-400 hover:bg-red-50 hover:text-red-500"><X className="h-3.5 w-3.5" /></button>}</div><label className="grid min-h-28 cursor-pointer place-items-center overflow-hidden rounded-xl border border-dashed border-violet-200 bg-violet-50/40 text-center transition hover:border-violet-400">{labelSettings.handlingArtworkImageUrl ? <img crossOrigin="anonymous" src={labelSettings.handlingArtworkImageUrl} alt="Combined handling artwork" className="h-28 w-full object-contain p-2" /> : <span className="grid justify-items-center gap-1 p-3 text-[10px] font-bold text-violet-600"><Upload className="h-5 w-5" />{uploadingMark ? 'Uploading…' : 'Upload combined PNG / JPG'}<small className="font-semibold text-slate-400">1500 × 250 px</small></span>}<input type="file" accept="image/png,image/jpeg" className="hidden" disabled={!!uploadingMark} onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadHandlingImage(file); event.currentTarget.value = ''; }} /></label></div>
-            </div>
+            <div className="mt-5 grid gap-2 sm:grid-cols-2">{handling.map(({ key, label, Icon, disabled }) => <button key={key} type="button" disabled={disabled} onClick={() => setForm((current) => ({ ...current, [key]: !current[key] }))} role="checkbox" aria-checked={form[key]} className={`flex min-h-12 items-center gap-2 rounded-2xl border px-3 text-left text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-45 ${form[key] ? 'border-violet-200 bg-violet-50 text-violet-700 shadow-sm' : 'border-slate-200 bg-white text-slate-500 hover:border-violet-200'}`}><Icon className="h-4 w-4" /> <span>{label}{disabled && <small className="mt-0.5 block text-[9px] font-semibold">Upload and save artwork first</small>}</span><span className={`ml-auto h-4 w-4 rounded-full border ${form[key] ? 'border-violet-600 bg-violet-600 text-white' : 'border-slate-300'}`}>{form[key] && '✓'}</span></button>)}</div>
+            <section aria-label="Fragile artwork" className="mt-5 space-y-4 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+              <div><h3 className="flex items-center gap-2 font-bold text-slate-900"><FileImage className="h-5 w-5 text-violet-700" /> Fragile artwork</h3><p className="mt-2 text-sm leading-6 text-slate-600">Upload the complete FRAGILE panel with its heading and handling icons. Urgent delivery is controlled separately.</p></div>
+              <p className="rounded-xl bg-slate-50 p-3 text-sm leading-6 text-slate-600"><b>Recommended size:</b> 1500 × 580 px (approximately 2.6:1) · PNG/JPG · up to 2 MB. Keep a small safe margin around the artwork.</p>
+              {labelSettings.handlingArtworkImageUrl && <img crossOrigin="anonymous" src={labelSettings.handlingArtworkImageUrl} alt="Fragile artwork preview" className="h-40 w-full rounded-xl border border-slate-200 bg-slate-50 object-contain p-3" />}
+              <div className="flex flex-wrap gap-3">
+                <label className={`relative inline-flex min-h-11 items-center gap-2 rounded-xl border border-violet-300 bg-white px-4 text-sm font-bold text-violet-800 focus-within:ring-2 focus-within:ring-violet-500 ${uploadingMark ? 'opacity-50' : 'cursor-pointer hover:bg-violet-50'}`}><Upload className="h-4 w-4" />{uploadingMark ? 'Uploading…' : labelSettings.handlingArtworkImageUrl ? 'Replace image' : 'Choose image'}<input aria-label="Choose fragile artwork" type="file" accept="image/png,image/jpeg" className="absolute inset-0 w-full cursor-pointer opacity-0" disabled={!!uploadingMark || saveLabelSettingsMut.isPending} onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadHandlingImage(file); event.currentTarget.value = ''; }} /></label>
+                <Button type="button" onClick={() => saveLabelSettingsMut.mutate(labelSettings)} disabled={saveLabelSettingsMut.isPending || !!uploadingMark} className="min-h-11 rounded-xl bg-violet-700 px-4 font-bold text-white hover:bg-violet-800"><Save className="mr-2 h-4 w-4" />{saveLabelSettingsMut.isPending ? 'Saving…' : 'Save artwork'}</Button>
+                {labelSettings.handlingArtworkImageUrl && <Button type="button" variant="outline" disabled={!!uploadingMark || saveLabelSettingsMut.isPending} onClick={() => setLabelSettings(current => ({ ...current, handlingArtworkImageUrl: '' }))} className="min-h-11 rounded-xl border-red-200 px-4 text-red-700 hover:bg-red-50"><X className="mr-2 h-4 w-4" /> Remove image</Button>}
+              </div>
+              <p className="text-xs leading-5 text-slate-500">Click Save artwork after uploading, replacing or removing. The saved image is shared across labels and appears once when Fragile is ticked. Without an image, standard handling icons are shown.</p>
+            </section>
             <div className="mt-5 rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/80 to-violet-50/50 p-4"><div className="mb-3 flex items-center gap-2 text-sm font-black text-slate-800"><CalendarDays className="h-4 w-4 text-blue-600" /> Delivery schedule</div><div className="grid gap-3 sm:grid-cols-2"><Field label="Delivery date"><Input type="date" value={form.deliveryDate} onChange={(event) => setForm((current) => ({ ...current, deliveryDate: event.target.value }))} className={inputClass} /></Field><Field label="Delivery time"><Input type="time" value={form.deliveryTime} onChange={(event) => setForm((current) => ({ ...current, deliveryTime: event.target.value }))} className={inputClass} /></Field></div></div>
             <Field label="Other delivery notes" className="mt-4"><textarea value={form.deliveryNotes} onChange={(event) => setForm((current) => ({ ...current, deliveryNotes: event.target.value }))} rows={3} placeholder="Gate, landmark or courier instruction" className="resize-none rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold outline-none focus:border-violet-300 focus:ring-2 focus:ring-violet-100" /></Field>
           </section>
