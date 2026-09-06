@@ -1,7 +1,10 @@
+import { POSItemOptions, emptyPOSConfig, type POSItemConfig } from "@/components/admin/POSItemOptions";
 import { posConfig, quotePosProduct } from "@workspace/api-zod";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Banknote,
+  Pencil,
+  Percent,
   CalendarDays,
   CheckCircle2,
   FileDown,
@@ -29,6 +32,7 @@ type Product = {
   price: number;
   imageUrl?: string;
   customConfig?: string;
+  posOnly?: boolean;
 };
 type CartItem = Product & { qty: number; cartKey: string; sizeId: string; choices: Record<string, string>; basePrice: number; unitLabel: string };
 type Invoice = {
@@ -46,6 +50,7 @@ type Sale = {
   customer_name: string;
   items: CartItem[];
   total: string;
+  subtotal?: string;
   amount_tendered: string;
   change_due: string;
   payment_method: string;
@@ -115,13 +120,14 @@ function printReceipt(sale: Sale, width: "58" | "80", brand: ReceiptBrand) {
   }
   const mm = width === "58" ? 58 : 80;
   const items = Array.isArray(sale.items) ? sale.items : [];
+  const discount = Math.max(0, Number(sale.subtotal ?? sale.total) - Number(sale.total));
   const businessName = brand.businessName || "HAVESTORY";
   const contactLines = [brand.address, brand.phone, brand.email, brand.website]
     .filter(Boolean)
     .map(esc)
     .join("<br>");
   win.document.write(
-    `<!doctype html><html><head><meta charset="utf-8"><title>${esc(sale.receipt_number)}</title><style>@page{size:${mm}mm auto;margin:0}*{box-sizing:border-box}html,body{width:${mm}mm;min-width:${mm}mm;margin:0;padding:0;background:#fff;color:#000}body{font-family:Arial,Helvetica,sans-serif;font-size:${width === "58" ? 10 : 11}px;line-height:1.35;font-variant-numeric:tabular-nums}.r{width:${mm}mm;padding:${width === "58" ? 3 : 4}mm;overflow:hidden}.c,.center{text-align:center}.brand{font-size:${width === "58" ? 16 : 19}px;font-weight:900;letter-spacing:.5px;overflow-wrap:anywhere}.tagline{margin-top:1mm;font-size:.92em}.meta{margin-top:2mm;overflow-wrap:anywhere}.rule{border-top:1px dashed #000;margin:2.5mm 0}.row{display:flex;justify-content:space-between;gap:2mm;padding:1mm 0}.item{border-bottom:1px dotted #aaa}.item span:first-child{max-width:68%;overflow-wrap:anywhere}.total{font-size:1.2em;font-weight:900;border-top:1px solid #000;margin-top:1mm;padding-top:1.5mm}.change{border:1.5px solid #000;padding:1.5mm;font-size:1.15em}.small{font-size:.88em}.bold{font-weight:800}.footer{margin-top:3mm;font-size:.9em}@media print{html,body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style></head><body><main class="r"><header class="center"><div class="brand">${esc(businessName)}</div><div class="tagline">THE COLOUR &amp; FRAME STUDIO</div><div class="meta small">${contactLines}</div></header><div class="rule"></div><div class="center bold">POS RECEIPT</div><div class="center">${esc(sale.receipt_number)}</div>${sale.invoice_number ? `<div class="center small">Invoice: ${esc(sale.invoice_number)}</div>` : ""}<div class="center small">${esc(new Date(sale.sold_at).toLocaleString("en-LK", { timeZone: "Asia/Colombo" }))}</div><div class="rule"></div><div class="bold">${esc(sale.customer_name || "Walk-in customer")}</div><div class="rule"></div>${items.map((i) => `<div class="row item"><span><b>${esc(i.name)}</b><br><span class="small">${i.qty}${i.unitLabel ? ` ${esc(i.unitLabel)}` : ""} × ${rs(Number(i.price))}${i.code ? ` · ${esc(i.code)}` : ""}</span></span><b>${rs(Number(i.price) * Number(i.qty))}</b></div>`).join("")}<div class="row total"><span>Total</span><span>${rs(Number(sale.total))}</span></div><div class="row"><span>Received</span><b>${rs(Number(sale.amount_tendered))}</b></div><div class="row change"><span>Balance / Change</span><b>${rs(Number(sale.change_due))}</b></div><div class="row small"><span>Payment</span><b>${esc(sale.payment_method.toUpperCase())}</b></div><footer class="footer center"><div class="rule"></div>Issued by Mr. ${esc(sale.sold_by)}<br>Thank you for choosing ${esc(businessName)}.</footer></main></body></html>`,
+    `<!doctype html><html><head><meta charset="utf-8"><title>${esc(sale.receipt_number)}</title><style>@page{size:${mm}mm auto;margin:0}*{box-sizing:border-box}html,body{width:${mm}mm;min-width:${mm}mm;margin:0;padding:0;background:#fff;color:#000}body{font-family:Arial,Helvetica,sans-serif;font-size:${width === "58" ? 10 : 11}px;line-height:1.35;font-variant-numeric:tabular-nums}.r{width:${mm}mm;padding:${width === "58" ? 3 : 4}mm;overflow:hidden}.c,.center{text-align:center}.brand{font-size:${width === "58" ? 16 : 19}px;font-weight:900;letter-spacing:.5px;overflow-wrap:anywhere}.tagline{margin-top:1mm;font-size:.92em}.meta{margin-top:2mm;overflow-wrap:anywhere}.rule{border-top:1px dashed #000;margin:2.5mm 0}.row{display:flex;justify-content:space-between;gap:2mm;padding:1mm 0}.item{border-bottom:1px dotted #aaa}.item span:first-child{max-width:68%;overflow-wrap:anywhere}.total{font-size:1.2em;font-weight:900;border-top:1px solid #000;margin-top:1mm;padding-top:1.5mm}.change{border:1.5px solid #000;padding:1.5mm;font-size:1.15em}.small{font-size:.88em}.bold{font-weight:800}.footer{margin-top:3mm;font-size:.9em}@media print{html,body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style></head><body><main class="r"><header class="center"><div class="brand">${esc(businessName)}</div><div class="tagline">THE COLOUR &amp; FRAME STUDIO</div><div class="meta small">${contactLines}</div></header><div class="rule"></div><div class="center bold">POS RECEIPT</div><div class="center">${esc(sale.receipt_number)}</div>${sale.invoice_number ? `<div class="center small">Invoice: ${esc(sale.invoice_number)}</div>` : ""}<div class="center small">${esc(new Date(sale.sold_at).toLocaleString("en-LK", { timeZone: "Asia/Colombo" }))}</div><div class="rule"></div><div class="bold">${esc(sale.customer_name || "Walk-in customer")}</div><div class="rule"></div>${items.map((i) => `<div class="row item"><span><b>${esc(i.name)}</b><br><span class="small">${i.qty}${i.unitLabel ? ` ${esc(i.unitLabel)}` : ""} × ${rs(Number(i.price))}${i.code ? ` · ${esc(i.code)}` : ""}</span></span><b>${rs(Number(i.price) * Number(i.qty))}</b></div>`).join("")}${discount > 0 ? `<div class="row"><span>Subtotal</span><span>${rs(Number(sale.subtotal))}</span></div><div class="row"><span>Discount</span><span>−${rs(discount)}</span></div>` : ""}<div class="row total"><span>Total</span><span>${rs(Number(sale.total))}</span></div><div class="row"><span>Received</span><b>${rs(Number(sale.amount_tendered))}</b></div><div class="row change"><span>Balance / Change</span><b>${rs(Number(sale.change_due))}</b></div><div class="row small"><span>Payment</span><b>${esc(sale.payment_method.toUpperCase())}</b></div><footer class="footer center"><div class="rule"></div>Issued by Mr. ${esc(sale.sold_by)}<br>Thank you for choosing ${esc(businessName)}.</footer></main></body></html>`,
   );
   win.document.close();
   win.focus();
@@ -172,6 +178,11 @@ export default function POS() {
   const [reportMonth, setReportMonth] = useState(today().slice(0, 7));
   const [monthData, setMonthData] = useState<MonthData | null>(null);
   const [showNewItem, setShowNewItem] = useState(false);
+  const [newConfig, setNewConfig] = useState<POSItemConfig>(emptyPOSConfig);
+  const [editingItem, setEditingItem] = useState<string | null>(null);
+  const [itemSaving, setItemSaving] = useState(false);
+  const [discountType, setDiscountType] = useState<"amount" | "percent">("amount");
+  const [discountValue, setDiscountValue] = useState("");
   const [newItem, setNewItem] = useState({ code: "", name: "", price: "" });
   const load = async () => {
     try {
@@ -213,9 +224,13 @@ export default function POS() {
       .then(setMonthData)
       .catch(() => setMonthData(null));
   }, [reportMonth]);
-  const total = selectedInvoice
+  const subtotal = selectedInvoice
     ? selectedInvoice.balance
-    : cart.reduce((sum, item) => sum + Math.round(item.price * 100) * item.qty, 0) / 100;
+    : cart.reduce((sum, item) => sum + Math.round(item.price * item.qty * 100), 0) / 100;
+  const rawDiscount = Number(discountValue || 0);
+  const invalidDiscount = !selectedInvoice && (!Number.isFinite(rawDiscount) || rawDiscount < 0 || (discountType === "percent" ? rawDiscount > 100 : rawDiscount > subtotal));
+  const discount = selectedInvoice || invalidDiscount ? 0 : Math.round((discountType === "percent" ? subtotal * rawDiscount / 100 : rawDiscount) * 100) / 100;
+  const total = Math.round((subtotal - discount) * 100) / 100;
   const received = Number(tendered) || 0;
   const change = Math.max(0, received - total);
   const filtered = useMemo(() => {
@@ -239,7 +254,7 @@ export default function POS() {
   const add = (product: Product) => {
     if (selectedInvoice) return;
     const config = posConfig(product.customConfig);
-    if (config.sizes?.length || config.optionGroups?.length || config.minQuantity > 1 || config.quantityStep > 1) {
+    if (config.productType === "custom_print" || config.sizes?.length || config.optionGroups?.length || config.minQuantity > 1 || config.quantityStep > 1) {
       setConfiguring(product); setSizeId(''); setChoices({}); setQuantity(Math.max(1, Number(config.minQuantity) || 1));
     } else addConfigured(product, 1);
   };
@@ -265,10 +280,12 @@ export default function POS() {
       });
   };
   const savePosItem = async () => {
+    if (itemSaving) return;
+    setItemSaving(true);
     try {
-      await request("/api/pos/items", {
-        method: "POST",
-        body: JSON.stringify(newItem),
+      await request(editingItem ? `/api/pos/items/${editingItem.replace("pos-", "")}` : "/api/pos/items", {
+        method: editingItem ? "PUT" : "POST",
+        body: JSON.stringify({ ...newItem, customConfig: newConfig }),
       });
       toast({
         title: "POS item saved",
@@ -276,6 +293,8 @@ export default function POS() {
       });
       setNewItem({ code: "", name: "", price: "" });
       setShowNewItem(false);
+      setNewConfig(emptyPOSConfig());
+      setEditingItem(null);
       await load();
     } catch (e: any) {
       toast({
@@ -284,6 +303,7 @@ export default function POS() {
         variant: "destructive",
       });
     }
+    finally { setItemSaving(false); }
   };
   const startDay = async () => {
     try {
@@ -305,7 +325,7 @@ export default function POS() {
     }
   };
   const complete = async () => {
-    if (received < total) return;
+    if (saving || invalidDiscount || total <= 0 || !Number.isFinite(received) || received < total) return;
     setSaving(true);
     try {
       const sale = await request("/api/pos/sales", {
@@ -316,6 +336,8 @@ export default function POS() {
           customerName: customer,
           amountTendered: received,
           paymentMethod: method,
+          discountType,
+          discountValue: selectedInvoice ? 0 : rawDiscount,
         }),
       });
       printReceipt(sale, width, receiptBrand);
@@ -324,7 +346,7 @@ export default function POS() {
         description: `${sale.receipt_number} · Change ${rs(Number(sale.change_due))}`,
       });
       setCart([]);
-      setSelectedInvoice(null);
+      setSelectedInvoice(null); setDiscountValue("");
       setCustomer("");
       setTendered("");
       setInvoiceQuery("");
@@ -486,7 +508,7 @@ export default function POS() {
         <p className="mt-1 text-sm text-slate-600">Choose the size, options and number of units. Quantity uses the product’s configured unit and quantity step.</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           {!!posConfig(configuring.customConfig).sizes?.length && <label className="grid gap-2 text-sm font-semibold">Size<select className={input} value={sizeId} onChange={e => { setSizeId(e.target.value); const config = posConfig(configuring.customConfig); const size = config.sizes.find((s: any) => s.id === e.target.value); setQuantity(Math.max(1, Number(size?.minQty) || Number(config.minQuantity) || 1)); }}><option value="">Choose size</option>{posConfig(configuring.customConfig).sizes.map((size: any) => <option key={size.id} value={size.id}>{size.name} · {size.unitLabel || 'unit'}</option>)}</select></label>}
-          {(posConfig(configuring.customConfig).optionGroups || []).filter((g: any) => g.choices?.length).map((group: any) => <label key={group.id} className="grid gap-2 text-sm font-semibold">{group.title}<select className={input} value={choices[group.id] || ''} onChange={e => setChoices(old => ({ ...old, [group.id]: e.target.value }))}><option value="">Choose {group.title}</option>{group.choices.map((choice: any) => <option key={choice.id} value={choice.id}>{choice.name}</option>)}</select></label>)}
+          {(posConfig(configuring.customConfig).optionGroups || []).filter((g: any) => g.choices?.length).map((group: any) => <label key={group.id} className="grid gap-2 text-sm font-semibold">{group.title}<select aria-label={group.title} className={input} value={choices[group.id] || ''} onChange={e => setChoices(old => ({ ...old, [group.id]: e.target.value }))}><option value="">Choose {group.title}</option>{group.choices.map((choice: any) => <option key={choice.id} value={choice.id}>{choice.name}</option>)}</select></label>)}
           <label className="grid gap-2 text-sm font-semibold">Quantity (units)<input className={input} type="number" min="1" value={quantity} onChange={e => setQuantity(Number(e.target.value))} /></label>
         </div>
         {(() => { try { const quote = quotePosProduct(configuring.price, configuring.customConfig, quantity, sizeId, choices); return <p className="mt-4 font-bold">{rs(quote.price)} / {quote.unitLabel} × {quantity} = {rs(quote.price * quantity)}<small className="block font-normal">Minimum {quote.minQty} · quantity step {quote.step}</small></p>; } catch (e: any) { return <p className="mt-4 text-sm text-amber-800">{e.message}</p>; } })()}
@@ -603,6 +625,8 @@ export default function POS() {
                 "Opening float",
                 rs(Number(day.session.opening_float)),
                 Banknote,
+  Pencil,
+  Percent,
               ],
               ["Bills issued", String(day.summary.count), Receipt],
               ["Counter sales", rs(day.summary.sales), ShoppingBag],
@@ -656,7 +680,8 @@ export default function POS() {
               </div>
               <div className="mt-3 flex justify-end">
                 <button
-                  onClick={() => setShowNewItem((value) => !value)}
+                  disabled={itemSaving}
+                  onClick={() => { setShowNewItem(value => !value); setEditingItem(null); setNewItem({ code: "", name: "", price: "" }); setNewConfig(emptyPOSConfig()); }}
                   className="flex items-center gap-1.5 rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-[11px] font-black text-violet-900"
                 >
                   <Plus size={14} />{" "}
@@ -664,12 +689,13 @@ export default function POS() {
                 </button>
               </div>
               {showNewItem && (
-                <div className="mt-3 grid gap-2 rounded-2xl border border-violet-200 bg-violet-50 p-3 sm:grid-cols-[120px_minmax(0,1fr)_130px_auto]">
+                <fieldset disabled={itemSaving} className="mt-3 grid min-w-0 gap-3 rounded-2xl border border-violet-200 bg-violet-50 p-4 sm:grid-cols-3"><legend className="px-2 font-semibold">{editingItem ? "Edit POS item" : "New POS item"}</legend>
                   <input
                     value={newItem.code}
                     onChange={(e) =>
                       setNewItem({ ...newItem, code: e.target.value })
                     }
+                    aria-label="Item code"
                     placeholder="Code"
                     className={input}
                   />
@@ -678,6 +704,7 @@ export default function POS() {
                     onChange={(e) =>
                       setNewItem({ ...newItem, name: e.target.value })
                     }
+                    aria-label="Item name"
                     placeholder="Item name"
                     className={input}
                   />
@@ -688,29 +715,32 @@ export default function POS() {
                     onChange={(e) =>
                       setNewItem({ ...newItem, price: e.target.value })
                     }
-                    placeholder="Price"
+                    aria-label="Base unit price"
+                    placeholder="Base unit price"
                     className={input}
                   />
+                  <POSItemOptions config={newConfig} onChange={setNewConfig} />
                   <button
+                    style={{ gridColumn: "1 / -1" }}
                     onClick={savePosItem}
                     disabled={
-                      !newItem.code.trim() ||
+                      itemSaving || !newItem.code.trim() ||
                       !newItem.name.trim() ||
                       newItem.price === ""
                     }
-                    className="rounded-xl bg-violet-950 px-4 text-xs font-black text-white disabled:opacity-40"
+                    className="min-h-11 rounded-xl bg-violet-950 px-4 py-3 text-sm font-semibold text-white disabled:opacity-40"
                   >
-                    Save
+                    {itemSaving ? "Saving…" : editingItem ? "Save item changes" : "Save POS item"}
                   </button>
-                </div>
+                </fieldset>
               )}
               <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {filtered.map((p) => (
+                  <div key={p.id} className="min-w-0 rounded-2xl border border-slate-200">
                   <button
-                    key={p.id}
                     onClick={() => add(p)}
                     disabled={!!selectedInvoice}
-                    className="rounded-2xl border border-slate-200 p-4 text-left hover:border-violet-300 disabled:opacity-40"
+                    className="w-full rounded-2xl p-4 text-left hover:bg-violet-50 disabled:opacity-40"
                   >
                     <span className="text-[10px] font-black text-violet-700">
                       {p.code}
@@ -722,6 +752,8 @@ export default function POS() {
                       {posConfig(p.customConfig).sizes?.length ? "Choose size & unit price" : rs(p.price)}
                     </span>
                   </button>
+                  {p.posOnly && <button type="button" disabled={itemSaving} onClick={() => { setEditingItem(p.id); setNewItem({ code: p.code, name: p.name, price: String(p.price) }); setNewConfig({ ...emptyPOSConfig(), ...posConfig(p.customConfig) }); setShowNewItem(true); }} className="flex min-h-10 w-full items-center justify-center gap-2 border-t px-3 text-sm font-semibold text-violet-900"><Pencil size={14} /> Edit item</button>}
+                  </div>
                 ))}
               </div>
             </section>
@@ -732,7 +764,7 @@ export default function POS() {
                   <button
                     onClick={() => {
                       setCart([]);
-                      setSelectedInvoice(null);
+                      setSelectedInvoice(null); setDiscountValue("");
                     }}
                   >
                     <X size={18} />
@@ -755,7 +787,7 @@ export default function POS() {
                       <button
                         key={inv.id}
                         onClick={() => {
-                          setSelectedInvoice(inv);
+                          setSelectedInvoice(inv); setDiscountValue("");
                           setCart([]);
                           setCustomer(inv.clientName);
                           setInvoiceQuery(inv.invoiceNumber);
@@ -827,6 +859,15 @@ export default function POS() {
                   className={`${input} mt-1.5`}
                 />
               </label>
+              {!selectedInvoice && <div className="mt-4 space-y-3 rounded-xl border border-violet-200 bg-violet-50 p-3">
+                <div className="flex justify-between text-sm"><span>Subtotal</span><b>{rs(subtotal)}</b></div>
+                <div className="flex items-center gap-2 text-sm font-semibold"><Percent size={16} /> Bill discount</div>
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="text-xs font-semibold">Discount type<select aria-label="Discount type" className={`${input} mt-1`} value={discountType} onChange={e => { setDiscountType(e.target.value as "amount" | "percent"); setDiscountValue(""); }}><option value="amount">Amount (Rs.)</option><option value="percent">Percentage (%)</option></select></label>
+                  <label className="text-xs font-semibold">{discountType === "percent" ? "Percentage" : "Amount (Rs.)"}<input aria-label="Discount value" type="number" min="0" step="0.01" max={discountType === "percent" ? 100 : subtotal} className={`${input} mt-1`} value={discountValue} onChange={e => setDiscountValue(e.target.value)} placeholder="0" /></label>
+                </div>
+                {invalidDiscount ? <p role="alert" className="text-sm text-red-700">Enter a valid discount within the bill amount (up to 100%).</p> : <div className="flex justify-between text-sm"><span>Discount</span><b>−{rs(discount)}</b></div>}
+              </div>}
               <div className="mt-4 flex justify-between border-t pt-4 text-xl font-black">
                 <span>Total</span>
                 <span>{rs(total)}</span>
@@ -861,7 +902,7 @@ export default function POS() {
               </div>
               <button
                 onClick={complete}
-                disabled={saving || !!day.session.closed_at || total <= 0 || received < total}
+                disabled={saving || invalidDiscount || !Number.isFinite(received) || !!day.session.closed_at || total <= 0 || received < total}
                 className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-violet-950 font-black text-white disabled:opacity-40"
               >
                 {saving ? (
