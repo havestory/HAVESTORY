@@ -1,3 +1,4 @@
+import { SiteNotices } from "@/components/public/SiteNotices";
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { AnimatePresence, motion } from "framer-motion";
@@ -15,7 +16,6 @@ import {
   ShoppingCart,
   Sparkles,
   Truck,
-  X,
 } from "lucide-react";
 import {
   useGetNotices,
@@ -84,7 +84,6 @@ export default function Home() {
   const { data: notices } = useGetNotices();
   const { data: portfolio } = useListPortfolio();
   const { data: reviews } = useListReviews();
-  const [dismissedNotices, setDismissedNotices] = useState<number[]>([]);
   const [heroIndex, setHeroIndex] = useState(0);
   const [favouriteIndex, setFavouriteIndex] = useState(0);
 
@@ -94,7 +93,6 @@ export default function Home() {
   const portfolioList = (Array.isArray(portfolio) ? portfolio : []).slice(0, 6);
   const serviceList = (Array.isArray(services) ? services : []).slice(0, 4);
   const reviewList = (Array.isArray(reviews) ? reviews : []).filter((item) => item.approved).slice(0, 3);
-  const activeNotices = (Array.isArray(notices) ? notices : []).filter((item) => item.enabled && !dismissedNotices.includes(item.id));
   const cfg = settings as any;
   const benefits = readHomeBenefits(cfg?.homeBenefits).filter((item) => item.enabled);
   const benefitsVisible = cfg?.homeBenefitsEnabled !== 0 && benefits.length > 0;
@@ -153,14 +151,7 @@ export default function Home() {
 
   return (
     <main className="hs-new-home">
-      <AnimatePresence>
-        {activeNotices.map((notice) => (
-          <motion.div key={notice.id} className="hs-new-notice" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
-            <span>{notice.message}</span>
-            <button type="button" onClick={() => setDismissedNotices((items) => [...items, notice.id])} aria-label="Dismiss notice"><X size={15} /></button>
-          </motion.div>
-        ))}
-      </AnimatePresence>
+      <SiteNotices notices={Array.isArray(notices) ? notices : []} />
 
       <section className="hs-new-hero">
         <div className="hs-new-hero-photo">
