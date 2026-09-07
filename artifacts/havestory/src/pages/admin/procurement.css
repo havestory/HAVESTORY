@@ -1,0 +1,64 @@
+/* Scope the editor and white paper independently from the global admin theme. */
+.procurement-page.procurement-page { color: #243047; max-width: 1440px; margin: auto; min-width: 0; font-family: Arial, Helvetica, sans-serif; }
+.procurement-page .procurement-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 24px; padding: 24px; background: #fff !important; border: 1px solid #dce2e9; border-radius: 16px; }
+.procurement-page .procurement-title { color: #172337 !important; font: 700 26px/1.2 Arial, sans-serif !important; letter-spacing: -.5px; }
+.procurement-page .procurement-toolbar p { color: #58677b !important; }
+.procurement-toolbar-actions, .procurement-formats { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.procurement-page .procurement-formats { padding: 4px; border: 1px solid #dce2e9; border-radius: 10px; background: #f5f7fa; }
+.procurement-page .procurement-formats button { height: 36px; border-radius: 7px !important; color: #4a596d !important; background: transparent !important; box-shadow: none !important; letter-spacing: 0; text-transform: none; font-size: 13px; }
+.procurement-page .procurement-formats button[aria-pressed="true"] { background: #fff !important; color: #603677 !important; box-shadow: 0 1px 4px #17233720 !important; }
+.procurement-page .procurement-layout { display: grid; gap: 24px; min-width: 0; }
+.procurement-page .procurement-editor { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.procurement-page .procurement-card { min-width: 0; border: 1px solid #dce2e9 !important; border-radius: 14px !important; background: #fff !important; color: #243047 !important; box-shadow: none !important; }
+.procurement-page .procurement-card h3 { color: #243047 !important; font-size: 14px; letter-spacing: 0; text-transform: none; }
+.procurement-page .procurement-card h3 svg { color: #6d3f86 !important; }
+.procurement-page .procurement-label { font-size: 12px; letter-spacing: 0; text-transform: none; color: #4a596d !important; }
+.procurement-page .procurement-input { min-width: 0; min-height: 40px !important; border: 1px solid #cbd5e1 !important; border-radius: 8px !important; background: #fff !important; color: #172337 !important; box-shadow: none !important; padding: 8px 10px !important; }
+.procurement-page .procurement-input:focus-visible { outline: 2px solid #9469ac !important; outline-offset: 2px; }
+.procurement-page .procurement-preview { min-width: 0; }
+.procurement-page .procurement-preview-scroll { overflow-x: auto; padding: 24px; background: #edf1f5 !important; border: 1px solid #dce2e9; border-radius: 14px; }
+.procurement-document.procurement-document { flex-shrink: 0; margin-inline: auto; max-width: none !important; border-radius: 0 !important; background: #fff !important; color: #172337 !important; --procurement-ink: #172337; }
+.procurement-document.procurement-document h2 { color: #172337 !important; font-family: Arial, sans-serif !important; }
+.procurement-document.procurement-document table { background: #fff !important; border-radius: 0 !important; overflow: visible !important; box-shadow: none !important; }
+.procurement-document.procurement-document table tr { background: #fff !important; }
+.procurement-document.procurement-document table thead tr { background: #f1f4f8 !important; }
+.procurement-document.procurement-document table th { vertical-align: top; }
+.procurement-document.procurement-document table td { vertical-align: top; }
+/* Admin form rules use !important; the paper must retain its spreadsheet cells. */
+.procurement-document.procurement-document.procurement-document table input,
+.procurement-document.procurement-document.procurement-document table textarea { min-width: 0 !important; max-width: 100% !important; min-height: 32px !important; height: auto; padding: 6px 2px !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; color: #172337 !important; -webkit-text-fill-color: #172337 !important; box-shadow: none !important; font-weight: 400 !important; line-height: 1.5; }
+.procurement-document.procurement-document table input:focus,
+.procurement-document.procurement-document table textarea:focus,
+.procurement-document.procurement-document [contenteditable]:focus { outline: 2px solid #9469ac !important; outline-offset: -2px; background: #faf7fc !important; }
+.procurement-page .procurement-column-heading { display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
+.procurement-page .procurement-column-actions { display: flex; justify-content: flex-end; gap: 4px; }
+.procurement-page .procurement-row-actions { display: flex; justify-content: center; align-items: center; gap: 4px; padding: 3px; }
+.procurement-page .procurement-icon-action { display: inline-flex; align-items: center; justify-content: center; width: 25px; height: 28px; border: 1px solid #d5dde6 !important; border-radius: 5px !important; background: #fff !important; color: #4a596d !important; box-shadow: none !important; }
+.procurement-page .procurement-icon-action svg { width: 12px; height: 12px; }
+.procurement-page .procurement-remove { color: #b42338 !important; }
+.procurement-page button:disabled { opacity: .45; cursor: not-allowed !important; }
+.procurement-page .procurement-table-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 16px; }
+.procurement-page.procurement-page .procurement-primary,
+.procurement-page.procurement-page .procurement-secondary { display: inline-flex; justify-content: center; align-items: center; gap: 8px; min-height: 40px; padding: 10px 16px; border: 1px solid #603677 !important; border-radius: 8px !important; background: #603677 !important; color: #fff !important; font-size: 12px; font-weight: 600; line-height: 1.25; letter-spacing: 0; text-transform: none; box-shadow: none !important; transform: none !important; }
+.procurement-page.procurement-page .procurement-secondary { border-color: #cbd5e1 !important; background: #fff !important; color: #344359 !important; }
+.procurement-page .procurement-primary svg { color: #fff !important; }
+.procurement-page button:focus-visible { outline: 2px solid #9469ac !important; outline-offset: 3px; }
+.procurement-document.procurement-document.is-capturing table input,
+.procurement-document.procurement-document.is-capturing table textarea { display: none !important; }
+.procurement-document.procurement-document.is-capturing .no-print-capture { display: none !important; }
+.procurement-document.procurement-document.is-capturing .procurement-capture-value { display: block !important; font-weight: 400; padding: 6px 2px; }
+.procurement-document.procurement-document.is-capturing .procurement-capture-value--numeric { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 700px) {
+  .procurement-page .procurement-editor { grid-template-columns: minmax(0, 1fr); }
+  .procurement-page .procurement-toolbar { padding: 18px; }
+  .procurement-page .procurement-toolbar-actions { width: 100%; }
+  .procurement-page .procurement-preview-scroll { padding: 12px; }
+}
+
+/* Export clones are detached from the page, so paper rules above are standalone. */
+.procurement-document.procurement-document .procurement-supplier-card { border-left-color: #cbd5e1 !important; }
+.procurement-document.procurement-document--a5 .procurement-document__header { margin-bottom: 16px; }
+.procurement-document.procurement-document--a5 .procurement-supplier-card { padding: 12px 16px !important; margin-bottom: 16px !important; }
+.procurement-document.procurement-document--a5 .procurement-supplier-fields { gap: 6px; }
+.procurement-document.procurement-document--a5 .procurement-document__footer { margin-top: 18px !important; padding-top: 14px !important; }
+.procurement-document.procurement-document--a5 .procurement-handwriting-panel { margin-top: 12px !important; padding: 12px !important; }

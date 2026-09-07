@@ -1,3 +1,4 @@
+import './procurement.css';
 import { useState, useEffect, useRef } from 'react';
 import {
   Plus,
@@ -42,15 +43,16 @@ interface ProcurementTypography {
 
 const PROCUREMENT_TYPOGRAPHY_KEY = 'havestory.procurement.typography';
 const DEFAULT_PROCUREMENT_TYPOGRAPHY: ProcurementTypography = {
-  headerSize: 8,
-  valueSize: 10,
-  footerSize: 9,
+  headerSize: 10,
+  valueSize: 12,
+  footerSize: 10,
 };
 
 export default function Procurement() {
   const { toast } = useToast();
   const { data: settings } = useGetSettings();
   const printRef = useRef<HTMLDivElement>(null);
+  const [exporting, setExporting] = useState(false);
   const [format, setFormat] = useState<'A4' | 'A5'>('A4');
   const [typography, setTypography] = useState<ProcurementTypography>(() => {
     if (typeof window === 'undefined') return DEFAULT_PROCUREMENT_TYPOGRAPHY;
@@ -214,7 +216,8 @@ export default function Procurement() {
 
   const downloadJPG = async () => {
     const documentElement = printRef.current;
-    if (!documentElement) return;
+    if (!documentElement || exporting) return;
+    setExporting(true);
 
     // Collect every .no-print-capture element so we can zero them out before
     // capture. CSS display:none is unreliable on <col> elements and leaves a
@@ -331,11 +334,12 @@ export default function Procurement() {
     } finally {
       documentElement.classList.remove('is-capturing');
       restoreNoPrint();
+      setExporting(false);
     }
   };
 
-  const labelClass = "text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block";
-  const inputClass = "rounded-none border-border h-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-secondary";
+  const labelClass = "procurement-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block";
+  const inputClass = "procurement-input rounded-none border-border h-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-secondary";
   const isFilled = (value?: string) => Boolean(value?.trim());
   const supplierAddressLineCount = isFilled(supplier.address)
     ? supplier.address.split(/\r?\n/).length
@@ -349,18 +353,18 @@ export default function Procurement() {
   const businessHasDetails = Object.values(business).some(isFilled);
 
   return (
-    <div className="p-6 lg:p-10 space-y-8 max-w-7xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="procurement-page">
+      <div className="procurement-toolbar">
         <div>
-          <h1 className="font-serif text-3xl font-bold text-foreground">Procurement Order</h1>
+          <h1 className="procurement-title">Procurement Order</h1>
           <p className="text-muted-foreground text-sm mt-1">Generate and download order requests for your suppliers.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex bg-muted p-1 rounded-none border border-border">
+        <div className="procurement-toolbar-actions">
+          <div className="procurement-formats" role="group" aria-label="Paper size">
             <Button
               variant={format === 'A4' ? 'secondary' : 'ghost'}
               size="sm"
-              onClick={() => setFormat('A4')}
+              aria-pressed={format === 'A4'} disabled={exporting} onClick={() => setFormat('A4')}
               className="rounded-none h-8 text-[10px] font-bold uppercase tracking-widest px-4"
             >
               A4 Format
@@ -368,22 +372,22 @@ export default function Procurement() {
             <Button
               variant={format === 'A5' ? 'secondary' : 'ghost'}
               size="sm"
-              onClick={() => setFormat('A5')}
+              aria-pressed={format === 'A5'} disabled={exporting} onClick={() => setFormat('A5')}
               className="rounded-none h-8 text-[10px] font-bold uppercase tracking-widest px-4"
             >
               A5 Format
             </Button>
           </div>
-          <Button onClick={downloadJPG} className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90 h-10 font-bold uppercase tracking-widest text-xs px-6 gap-2">
-            <Download className="w-4 h-4" /> Download JPG
+          <Button disabled={exporting} onClick={downloadJPG} className="procurement-primary rounded-none bg-primary text-primary-foreground hover:bg-primary/90 h-10 font-bold uppercase tracking-widest text-xs px-6 gap-2">
+            <Download className="w-4 h-4" /> {exporting ? "Preparing JPG…" : "Download JPG"}
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+      <div className="procurement-layout">
         {/* Editor Side */}
-        <div className="xl:col-span-5 space-y-6">
-          <Card className="rounded-none border-border shadow-sm">
+        <div className="procurement-editor">
+          <Card className="procurement-card">
             <CardHeader className="pb-4">
               <CardTitle className="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-secondary" /> Supplier Details
@@ -411,7 +415,7 @@ export default function Procurement() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-none border-border shadow-sm">
+          <Card className="procurement-card">
             <CardHeader className="pb-4">
               <CardTitle className="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
                 <FileText className="w-4 h-4 text-secondary" /> Order Info
@@ -435,7 +439,7 @@ export default function Procurement() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-none border-border shadow-sm">
+          <Card className="procurement-card">
             <CardHeader className="pb-4">
               <CardTitle className="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
                 <User className="w-4 h-4 text-secondary" /> Your Business Info
@@ -457,7 +461,7 @@ export default function Procurement() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-none border-border shadow-sm">
+          <Card className="procurement-card">
             <CardHeader className="pb-4">
               <CardTitle className="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
                 <Calculator className="w-4 h-4 text-secondary" /> Table Typography
@@ -506,8 +510,8 @@ export default function Procurement() {
                 </div>
               </div>
               <div className="flex items-center justify-between gap-3 border-t border-border pt-4">
-                <p className="text-[10px] text-muted-foreground leading-relaxed">Recommended: 8px headings, 10px entries, and 9px footer text.</p>
-                <Button type="button" onClick={saveTypography} className="rounded-none h-9 px-4 text-[10px] font-bold uppercase tracking-widest">
+                <p className="text-[10px] text-muted-foreground leading-relaxed">Recommended: 10px headings, 12px entries, and 10px footer text.</p>
+                <Button type="button" onClick={saveTypography} className="procurement-primary rounded-none h-9 px-4 text-[10px] font-bold uppercase tracking-widest">
                   Save Font Sizes
                 </Button>
               </div>
@@ -516,18 +520,19 @@ export default function Procurement() {
         </div>
 
         {/* Preview Side */}
-        <div className="xl:col-span-7 space-y-4">
+        <div className="procurement-preview">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Document Preview</h3>
-            <span className="text-[10px] text-muted-foreground font-medium">Auto-calculating totals</span>
+            <span className="text-xs text-muted-foreground">Edit cells directly · totals calculate automatically</span>
           </div>
 
-          <div className="bg-muted p-4 md:p-8 flex justify-center overflow-x-auto min-h-[800px]">
+          <div className="procurement-preview-scroll" tabIndex={0} role="region" aria-label="Order document preview, scroll horizontally on small screens">
             {/* The Document to Capture */}
             <div
               ref={printRef}
               style={{
                 width: format === 'A4' ? '794px' : '559px',
+                flexShrink: 0,
                 minHeight: format === 'A4' ? '1123px' : '794px',
                 padding: '0',
                 backgroundColor: 'white',
@@ -542,7 +547,7 @@ export default function Procurement() {
               className={`procurement-document procurement-document--${format.toLowerCase()} text-black`}
             >
               {/* Gold top accent bar */}
-              <div style={{ height: '4px', backgroundColor: '#C9A84C', width: '100%', flexShrink: 0 }} />
+              <div style={{ height: '4px', backgroundColor: '#6D3F86', width: '100%', flexShrink: 0 }} />
 
               {/* Inner padded area */}
               <div style={{ padding: format === 'A4' ? '40px 44px 36px' : '28px 30px 24px', display: 'flex', flexDirection: 'column', flex: 1 }}>
@@ -572,7 +577,7 @@ export default function Procurement() {
                 <div className="procurement-order-meta" style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                   {/* ORDER REQUEST badge */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '28px', backgroundColor: '#0F1B2D', padding: '6px 14px', marginBottom: '14px', lineHeight: 1 }}>
-                    <span style={{ fontSize: '11px', lineHeight: 1, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#C9A84C' }}>Order Request</span>
+                    <span style={{ fontSize: '11px', lineHeight: 1, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#FFFFFF' }}>Order Request</span>
                   </div>
                   <div style={{ fontSize: '10.5px', lineHeight: 1.8, color: '#64748B' }}>
                     <p><span style={{ fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: '6px', fontSize: '9px' }}>No:</span><span style={{ color: '#0F1B2D', fontWeight: 600 }}>{orderInfo.orderNo || '—'}</span></p>
@@ -616,10 +621,10 @@ export default function Procurement() {
                     {/* # column */}
                     <col style={{ width: '26px' }} />
                     {columns.map(col => (
-                      <col key={col.id} style={{ width: col.id === 'desc' ? '42%' : undefined }} />
+                      <col key={col.id} style={{ width: col.id === 'desc' ? `${Math.max(22, 100 - (columns.length - 1) * 18)}%` : undefined }} />
                     ))}
                     {/* actions column — NO width set so display:none fully collapses it */}
-                    <col className="no-print-capture" />
+                    <col className="no-print-capture" style={{ width: '64px' }} />
                   </colgroup>
                   <thead>
                     {/* Clean light header — no dark background */}
@@ -631,7 +636,7 @@ export default function Procurement() {
                           style={{ padding: '6px 6px', fontSize: `${typography.headerSize}px`, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#475569', textAlign: col.isNumeric ? 'right' : 'left', border: '1px solid #CBD5E1' }}
                           className="group/col relative"
                         >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '3px', justifyContent: col.isNumeric ? 'flex-end' : 'flex-start' }}>
+                          <div className="procurement-column-heading">
                             <div
                               role="textbox"
                               aria-label={`${col.label || 'Column'} header`}
@@ -639,22 +644,22 @@ export default function Procurement() {
                               suppressContentEditableWarning
                               onBlur={e => updateColumnLabel(col.id, e.currentTarget.textContent?.trim() ?? '')}
                               onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); (e.target as HTMLElement).blur(); } }}
-                              style={{ color: '#0F1B2D', fontSize: `${typography.headerSize}px`, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', textAlign: col.isNumeric ? 'right' : 'left', outline: 'none', cursor: 'text', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden' }}
+                              style={{ color: '#0F1B2D', fontSize: `${typography.headerSize}px`, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', textAlign: col.isNumeric ? 'right' : 'left', outline: 'none', cursor: 'text', flex: 1, whiteSpace: 'normal', overflowWrap: 'anywhere', minWidth: 0 }}
                             >
                               {col.label}
                             </div>
-                            <div className="flex shrink-0 items-center gap-1 opacity-0 group-hover/col:opacity-100 no-print-capture transition-opacity">
-                              <button type="button" aria-label={`Duplicate ${col.label || 'column'}`} onClick={() => duplicateColumn(col.id)} style={{ color: '#0F1B2D', opacity: 0.4 }}>
+                            <div className="procurement-column-actions no-print-capture">
+                              <button type="button" aria-label={`Duplicate ${col.label || 'column'}`} onClick={() => duplicateColumn(col.id)} className="procurement-icon-action">
                                 <Copy className="w-2 h-2" />
                               </button>
-                              <button type="button" aria-label={`Remove ${col.label || 'column'}`} onClick={() => removeColumn(col.id)} style={{ color: '#ef4444' }}>
+                              <button type="button" aria-label={`Remove ${col.label || 'column'}`} onClick={() => removeColumn(col.id)} className="procurement-icon-action procurement-remove" disabled={columns.length <= 1}>
                                 <Trash2 className="w-2 h-2" />
                               </button>
                             </div>
                           </div>
                         </th>
                       ))}
-                      <th className="no-print-capture" style={{ width: '40px', border: '1px solid #CBD5E1' }} />
+                      <th className="no-print-capture" style={{ width: '64px', border: '1px solid #CBD5E1' }} />
                     </tr>
                   </thead>
                   <tbody>
@@ -723,11 +728,11 @@ export default function Procurement() {
                           );
                         })}
                         <td className="no-print-capture" style={{ border: '1px solid #E2E8F0', verticalAlign: 'middle', textAlign: 'center' }}>
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity justify-center">
-                            <button type="button" aria-label="Duplicate row" onClick={() => duplicateRow(item.id)} className="text-gray-400 hover:text-primary">
+                          <div className="procurement-row-actions">
+                            <button type="button" aria-label="Duplicate row" onClick={() => duplicateRow(item.id)} className="procurement-icon-action">
                               <Copy className="w-3 h-3" />
                             </button>
-                            <button type="button" aria-label="Remove row" onClick={() => removeItem(item.id)} className="text-red-400 hover:text-red-600">
+                            <button type="button" aria-label="Remove row" onClick={() => removeItem(item.id)} className="procurement-icon-action procurement-remove" disabled={items.length <= 1}>
                               <Trash2 className="w-3 h-3" />
                             </button>
                           </div>
@@ -737,12 +742,12 @@ export default function Procurement() {
                   </tbody>
                 </table>
 
-                <div className="flex items-center gap-4 mt-4 no-print-capture">
+                <div className="procurement-table-actions no-print-capture">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={addItem}
-                    className="rounded-none h-8 text-[9px] font-bold uppercase tracking-widest text-primary hover:text-primary/80 hover:bg-primary/5"
+                    className="procurement-primary"
                   >
                     <Plus className="w-3 h-3 mr-1" /> Add Line Item
                   </Button>
@@ -750,7 +755,7 @@ export default function Procurement() {
                     variant="ghost"
                     size="sm"
                     onClick={addColumn}
-                    className="rounded-none h-8 text-[9px] font-bold uppercase tracking-widest text-secondary hover:text-secondary/80 hover:bg-secondary/5"
+                    className="procurement-secondary"
                   >
                     <Copy className="w-3 h-3 mr-1" /> Add Column
                   </Button>
