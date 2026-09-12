@@ -17,6 +17,9 @@ import './design-refresh.css';
 // Final public cleanup override: keep backgrounds flat and remove decorative
 // circle/glow elements without changing cards, buttons, or layout geometry.
 import './clean-background.css';
+// POS-only cleanup/history enhancer. It removes legacy management/report controls
+// from the counter screen and injects a secure From/To bill-history view.
+import './pos-cleanup';
 
 // Seed the public Liquid Glass palette before settings arrive so the first paint
 // never flashes the legacy darkroom or brown editorial theme.
