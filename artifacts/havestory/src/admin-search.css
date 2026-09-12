@@ -1,19 +1,19 @@
 /*
- * HAVESTORY admin search system
- * One source of truth for every admin search field.
- *
- * Any admin input whose placeholder contains “search” automatically gets the
- * same single-shell treatment. Legacy lucide Search icons beside those inputs
- * are hidden so pages cannot accidentally render a duplicate icon/border.
+ * HAVESTORY ADMIN SEARCH SYSTEM
+ * =============================
+ * This is the ONLY stylesheet allowed to define admin search-field geometry.
+ * Existing pages may use different legacy wrappers, but every input whose
+ * placeholder contains "search" is normalized here to one premium pattern.
  */
 
 [data-admin-layout] input[placeholder*="search" i] {
   box-sizing: border-box !important;
+  flex: 1 1 auto !important;
   width: 100% !important;
   min-width: 0 !important;
   height: 52px !important;
   min-height: 52px !important;
-  padding: 0 44px 0 44px !important;
+  padding: 0 44px !important;
   border: 1px solid #6d2d88 !important;
   border-radius: 14px !important;
   color: #2b2430 !important;
@@ -47,34 +47,41 @@
   outline: none !important;
 }
 
-/* Remove the old React/Lucide search glyph when it is a sibling of a search input.
-   The icon now lives inside the canonical input background, so only one icon exists. */
-[data-admin-layout] :is(div,label):has(> input[placeholder*="search" i]) > svg:first-child,
+/* Strip only the immediate legacy icon/input wrapper — never the outer card. */
+[data-admin-layout] :is(div,label):has(> svg:first-child + input[placeholder*="search" i]),
+[data-admin-layout] :is(div,label):has(> svg:first-child ~ input[placeholder*="search" i]) {
+  min-width: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* The canonical input owns the only visible search icon. */
 [data-admin-layout] :is(div,label):has(> svg:first-child + input[placeholder*="search" i]) > svg:first-child,
 [data-admin-layout] :is(div,label):has(> svg:first-child ~ input[placeholder*="search" i]) > svg:first-child {
   display: none !important;
 }
 
-/* Undo legacy left-padding/absolute-icon assumptions around canonical search fields. */
-[data-admin-layout] :is(div,label):has(> input[placeholder*="search" i]) {
-  min-width: 0;
-}
-[data-admin-layout] :is(div,label).relative:has(> input[placeholder*="search" i]) {
-  position: relative;
-}
-
-/* Keep filters beside search controls visually compatible with the reference UI. */
-[data-admin-layout] :is(select,button,[role="combobox"]):not([data-search-ignore]) {
-  --hs-search-control-height: 44px;
-}
-
-[data-admin-layout] :is(.admin-search-bar,.search-bar,.filter-bar,.filters-bar,.toolbar-filters),
-[data-admin-layout] :is(div,section):has(> input[placeholder*="search" i]) {
-  gap: 10px;
+/* Clear-X buttons remain usable and sit inside the field edge. */
+[data-admin-layout] :is(div,label):has(> input[placeholder*="search" i]) > input[placeholder*="search" i] + button:has(svg) {
+  z-index: 2;
+  flex: 0 0 32px !important;
+  width: 32px !important;
+  height: 32px !important;
+  margin-left: -40px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
-/* A parent toolbar must not add a second border around the canonical search box. */
+/* Known toolbar classes must never add a second shell. */
 [data-admin-layout] :is(.admin-search-bar,.search-bar,.filter-bar,.filters-bar,.toolbar-filters) {
+  gap: 10px !important;
   border: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
@@ -85,6 +92,7 @@
     height: 48px !important;
     min-height: 48px !important;
     padding-left: 42px !important;
+    padding-right: 40px !important;
     background-position-x: 14px !important;
     border-radius: 13px !important;
     font-size: 14px !important;
