@@ -1,0 +1,100 @@
+/*
+ * HAVESTORY ADMIN SEARCH SYSTEM
+ * =============================
+ * This is the ONLY stylesheet allowed to define admin search-field geometry.
+ * Existing pages may use different legacy wrappers, but every input whose
+ * placeholder contains "search" is normalized here to one premium pattern.
+ */
+
+[data-admin-layout] input[placeholder*="search" i] {
+  box-sizing: border-box !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 52px !important;
+  min-height: 52px !important;
+  padding: 0 44px !important;
+  border: 1px solid #6d2d88 !important;
+  border-radius: 14px !important;
+  color: #2b2430 !important;
+  background-color: #fff !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%238e8593' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: 15px 50% !important;
+  background-size: 18px 18px !important;
+  box-shadow: none !important;
+  outline: none !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+  transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease !important;
+}
+
+[data-admin-layout] input[placeholder*="search" i]::placeholder {
+  color: #5f5865 !important;
+  opacity: 1 !important;
+  font-weight: 500 !important;
+}
+
+[data-admin-layout] input[placeholder*="search" i]:hover {
+  border-color: #5f2778 !important;
+}
+
+[data-admin-layout] input[placeholder*="search" i]:focus,
+[data-admin-layout] input[placeholder*="search" i]:focus-visible {
+  border-color: #5b2375 !important;
+  box-shadow: 0 0 0 3px rgba(95,45,117,.10) !important;
+  outline: none !important;
+}
+
+/* Strip only the immediate legacy icon/input wrapper — never the outer card. */
+[data-admin-layout] :is(div,label):has(> svg:first-child + input[placeholder*="search" i]),
+[data-admin-layout] :is(div,label):has(> svg:first-child ~ input[placeholder*="search" i]) {
+  min-width: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* The canonical input owns the only visible search icon. */
+[data-admin-layout] :is(div,label):has(> svg:first-child + input[placeholder*="search" i]) > svg:first-child,
+[data-admin-layout] :is(div,label):has(> svg:first-child ~ input[placeholder*="search" i]) > svg:first-child {
+  display: none !important;
+}
+
+/* Clear-X buttons remain usable and sit inside the field edge. */
+[data-admin-layout] :is(div,label):has(> input[placeholder*="search" i]) > input[placeholder*="search" i] + button:has(svg) {
+  z-index: 2;
+  flex: 0 0 32px !important;
+  width: 32px !important;
+  height: 32px !important;
+  margin-left: -40px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Known toolbar classes must never add a second shell. */
+[data-admin-layout] :is(.admin-search-bar,.search-bar,.filter-bar,.filters-bar,.toolbar-filters) {
+  gap: 10px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 760px) {
+  [data-admin-layout] input[placeholder*="search" i] {
+    height: 48px !important;
+    min-height: 48px !important;
+    padding-left: 42px !important;
+    padding-right: 40px !important;
+    background-position-x: 14px !important;
+    border-radius: 13px !important;
+    font-size: 14px !important;
+  }
+}

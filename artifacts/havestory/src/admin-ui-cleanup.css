@@ -1,4 +1,4 @@
-/* Final admin consistency layer — keeps legacy screens visually aligned. */
+/* Final admin consistency layer — search geometry lives only in admin-search.css. */
 [data-admin-layout] input:not([type="checkbox"]):not([type="radio"]),
 [data-admin-layout] select,
 [data-admin-layout] textarea {
@@ -19,55 +19,6 @@
 [data-admin-layout] input::placeholder,
 [data-admin-layout] textarea::placeholder { color: #9a91a1 !important; opacity: 1; }
 
-/* Canonical search field: ONE shell only. Legacy pages already wrap the icon + input,
-   so the nested input must stay borderless or it creates the double-box issue. */
-[data-admin-layout] :is(div,label):has(> svg + input[placeholder^="Search"]),
-[data-admin-layout] :is(div,label):has(> svg ~ input[placeholder^="Search"]) {
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-}
-[data-admin-layout] :is(div,label):has(> svg + input[placeholder^="Search"]) > input[placeholder^="Search"],
-[data-admin-layout] :is(div,label):has(> svg ~ input[placeholder^="Search"]) > input[placeholder^="Search"] {
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
-  height: 44px !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-[data-admin-layout] :is(div,label):has(> svg + input[placeholder^="Search"]) > input[placeholder^="Search"]:focus,
-[data-admin-layout] :is(div,label):has(> svg ~ input[placeholder^="Search"]) > input[placeholder^="Search"]:focus {
-  border: 0 !important;
-  box-shadow: none !important;
-}
-[data-admin-layout] :is(div,label):has(> svg + input[placeholder^="Search"]) > svg,
-[data-admin-layout] :is(div,label):has(> svg ~ input[placeholder^="Search"]) > svg {
-  position: static !important;
-  inset: auto !important;
-  transform: none !important;
-  margin: 0 !important;
-  flex: 0 0 auto !important;
-}
-
-/* Search/filter toolbars: remove double shells and oversized empty bands. */
-[data-admin-layout] :is(.admin-search-bar,.search-bar,.filter-bar,.filters-bar,.toolbar-filters) {
-  min-height: 0 !important;
-  padding: 12px !important;
-  gap: 10px !important;
-  border: 1px solid #e2dce6 !important;
-  border-radius: 16px !important;
-  background: #fff !important;
-  box-shadow: 0 6px 20px rgba(40,25,48,.04) !important;
-}
-[data-admin-layout] :is(.admin-search-bar,.search-bar,.filter-bar,.filters-bar,.toolbar-filters) select {
-  min-height: 46px !important;
-}
-
 /* Generic admin cards/tables should not look like nested cards inside cards. */
 [data-admin-layout] .rounded-\[26px\] > .rounded-\[26px\],
 [data-admin-layout] .rounded-\[24px\] > .rounded-\[24px\] {
@@ -84,7 +35,7 @@
   border-radius: 12px;
 }
 
-/* Legacy coupon/dialog forms used underline-only Material-style controls. */
+/* Legacy coupon/dialog forms use the same modern control geometry. */
 [data-admin-layout] [role="dialog"] {
   overflow: hidden;
   border: 1px solid #e1dae5 !important;
@@ -109,9 +60,5 @@
 }
 
 @media (max-width: 760px) {
-  [data-admin-layout] :is(.admin-search-bar,.search-bar,.filter-bar,.filters-bar,.toolbar-filters) {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-  }
   [data-admin-layout] [role="dialog"] { width: calc(100vw - 24px) !important; max-width: 100% !important; }
 }
