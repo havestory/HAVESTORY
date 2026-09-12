@@ -7,18 +7,54 @@ import { parseIdParam } from "../lib/parse-id";
 
 const router = Router();
 
+function parseLimit(value: unknown, fallback: number, max: number): number {
+  if (value === undefined) return fallback;
+  const parsed = Number.parseInt(String(value), 10);
+  if (!Number.isSafeInteger(parsed) || parsed < 1) return fallback;
+  return Math.min(parsed, max);
+}
+
 router.get("/", async (req, res) => {
   try {
-    const { approved, featured, limit } = req.query;
+    const auth = getAdminAuth(req);
+    const { approved, featured } = req.query;
+    const limit = parseLimit(req.query.limit, auth ? 100 : 30, auth ? 200 : 60);
+
+    if (!auth) {
+      const conditions = [eq(reviewsTable.approved, true)];
+      if (featured !== undefined) conditions.push(eq(reviewsTable.featured, featured === "true"));
+
+      const reviews = await db
+        .select({
+          id: reviewsTable.id,
+          customerName: reviewsTable.customerName,
+          rating: reviewsTable.rating,
+          comment: reviewsTable.comment,
+          photoUrl: reviewsTable.photoUrl,
+          featured: reviewsTable.featured,
+          createdAt: reviewsTable.createdAt,
+        })
+        .from(reviewsTable)
+        .where(and(...conditions))
+        .orderBy(desc(reviewsTable.createdAt))
+        .limit(limit);
+
+      res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
+      return res.json(reviews);
+    }
+
     const conditions: any[] = [];
     if (approved !== undefined) conditions.push(eq(reviewsTable.approved, approved === "true"));
     if (featured !== undefined) conditions.push(eq(reviewsTable.featured, featured === "true"));
-    let query: any = db.select().from(reviewsTable)
+
+    const reviews = await db
+      .select()
+      .from(reviewsTable)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(desc(reviewsTable.createdAt));
-    if (limit) query = query.limit(parseInt(limit as string));
-    const reviews = await query;
-    res.setHeader("Cache-Control", getAdminAuth(req) ? "private, no-store" : "public, s-maxage=60, stale-while-revalidate=300");
+      .orderBy(desc(reviewsTable.createdAt))
+      .limit(limit);
+
+    res.setHeader("Cache-Control", "private, no-store");
     res.json(reviews);
   } catch (err) {
     req.log.error(err);
