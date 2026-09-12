@@ -31,6 +31,7 @@ import clientAgreementsRouter, { publicClientAgreementsRouter } from "./client-a
 import staffProfilesRouter from "./staff-profiles";
 import { orderClientAndDeletionMiddleware } from "./order-client-sync";
 import posRouter from "./pos";
+import posHistoryRouter from "./pos-history";
 
 const router: IRouter = Router();
 
@@ -73,5 +74,6 @@ router.use("/shipping-labels", shippingLabelsRouter);
 router.use("/finance-inventory", financeInventoryRouter);
 router.use("/reports", reportsRouter);
 router.use("/pos", posRouter);
+router.use("/pos-history", posHistoryRouter);
 
 export default router;
