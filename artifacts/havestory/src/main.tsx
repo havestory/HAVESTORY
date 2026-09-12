@@ -14,6 +14,9 @@ import './admin-stability.css';
 // Canonical 2026 design layer. Keep last so every legacy screen inherits the
 // same accessible public and admin visual system.
 import './design-refresh.css';
+// Final public cleanup override: keep backgrounds flat and remove decorative
+// circle/glow elements without changing cards, buttons, or layout geometry.
+import './clean-background.css';
 
 // Seed the public Liquid Glass palette before settings arrive so the first paint
 // never flashes the legacy darkroom or brown editorial theme.
