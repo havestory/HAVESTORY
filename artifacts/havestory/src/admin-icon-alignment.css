@@ -1,0 +1,82 @@
+/* Admin-wide icon alignment fixes. Keeps icons centered with text and inputs. */
+[data-admin-layout] button,
+[data-admin-layout] a,
+[data-admin-layout] [role="button"] {
+  line-height: 1.2;
+}
+
+[data-admin-layout] button > svg,
+[data-admin-layout] a > svg,
+[data-admin-layout] [role="button"] > svg {
+  flex: 0 0 auto;
+  display: block;
+  vertical-align: middle;
+}
+
+[data-admin-layout] button:has(> svg),
+[data-admin-layout] a:has(> svg),
+[data-admin-layout] [role="button"]:has(> svg) {
+  align-items: center !important;
+}
+
+[data-admin-layout] :is(button,a,[role="button"]):has(> svg):not(.icon-only) {
+  column-gap: 8px;
+}
+
+/* Search/input icons: exact optical centering independent of input height. */
+[data-admin-layout] label.relative > svg,
+[data-admin-layout] div.relative > svg,
+[data-admin-layout] .relative > svg.pointer-events-none {
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  margin-top: 0 !important;
+}
+
+[data-admin-layout] label.relative > input[class*="pl-"],
+[data-admin-layout] div.relative > input[class*="pl-"] {
+  min-height: 46px;
+}
+
+/* Common lucide icons in headings/stat cards. */
+[data-admin-layout] h1 > svg,
+[data-admin-layout] h2 > svg,
+[data-admin-layout] h3 > svg,
+[data-admin-layout] [class*="items-center"] > svg {
+  flex-shrink: 0;
+}
+
+/* Table action/icon-only buttons. */
+[data-admin-layout] td button:has(> svg:only-child),
+[data-admin-layout] th button:has(> svg:only-child),
+[data-admin-layout] button[aria-label]:has(> svg:only-child) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  line-height: 0 !important;
+}
+
+[data-admin-layout] td button:has(> svg:only-child) > svg,
+[data-admin-layout] th button:has(> svg:only-child) > svg,
+[data-admin-layout] button[aria-label]:has(> svg:only-child) > svg {
+  margin: 0 !important;
+}
+
+/* Select/dropdown triggers with icons/text should always center vertically. */
+[data-admin-layout] button[role="combobox"],
+[data-admin-layout] [data-radix-collection-item],
+[data-admin-layout] [data-radix-select-trigger] {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Prevent stray icon offsets inherited from legacy absolute positioning. */
+[data-admin-layout] svg[class*="top-3"],
+[data-admin-layout] svg[class*="top-4"] {
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+@media (max-width: 760px) {
+  [data-admin-layout] :is(button,a,[role="button"]):has(> svg):not(.icon-only) { column-gap: 7px; }
+}
