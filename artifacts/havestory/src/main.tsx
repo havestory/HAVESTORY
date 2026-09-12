@@ -25,6 +25,8 @@ import './pos-cleanup';
 import './admin-ui-cleanup.css';
 // Optical alignment for search icons, button icons, table actions and select triggers.
 import './admin-icon-alignment.css';
+// Admin typography must stay clean and sans-serif everywhere; no decorative/serif headings.
+import './admin-typography.css';
 
 // Seed the public Liquid Glass palette before settings arrive so the first paint
 // never flashes the legacy darkroom or brown editorial theme.
