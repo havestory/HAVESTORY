@@ -23,6 +23,8 @@ import './pos-cleanup';
 // Final admin-only consistency layer. Loaded after legacy styles so search/filter
 // bars, form controls, tables and dialogs share one clean visual language.
 import './admin-ui-cleanup.css';
+// Optical alignment for search icons, button icons, table actions and select triggers.
+import './admin-icon-alignment.css';
 
 // Seed the public Liquid Glass palette before settings arrive so the first paint
 // never flashes the legacy darkroom or brown editorial theme.
