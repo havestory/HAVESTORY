@@ -20,6 +20,9 @@ import './clean-background.css';
 // POS-only cleanup/history enhancer. It removes legacy management/report controls
 // from the counter screen and injects a secure From/To bill-history view.
 import './pos-cleanup';
+// Final admin-only consistency layer. Loaded after legacy styles so search/filter
+// bars, form controls, tables and dialogs share one clean visual language.
+import './admin-ui-cleanup.css';
 
 // Seed the public Liquid Glass palette before settings arrive so the first paint
 // never flashes the legacy darkroom or brown editorial theme.
