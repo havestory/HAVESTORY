@@ -1,0 +1,19 @@
+/* Public background cleanup: remove decorative circles/glows while preserving layout and component shapes. */
+[data-public-site] {
+  background: var(--hs-cream) !important;
+}
+
+[data-public-site] .hs-new-process {
+  background: #281432 !important;
+}
+
+[data-public-site] .hs-new-final {
+  background: linear-gradient(135deg, #2a1535, #4f2860 60%, #2c1737) !important;
+}
+
+[data-public-site] .hs-new-final::before,
+[data-public-site] .hs-new-final::after {
+  content: none !important;
+  display: none !important;
+  animation: none !important;
+}
