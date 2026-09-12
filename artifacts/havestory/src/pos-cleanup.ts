@@ -2,6 +2,15 @@ function money(value: unknown) {
   return `Rs. ${Number(value || 0).toLocaleString("en-LK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+function esc(value: unknown) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function todayLK() {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Colombo",
@@ -29,19 +38,12 @@ function removeLegacyPosControls(root: ParentNode = document) {
       text === "Close day"
     ) {
       const wrapper = button.closest("div.flex.gap-2") || button;
-      if (text === "Close day") {
-        wrapper.remove();
-      } else {
-        button.remove();
-      }
+      if (text === "Close day") wrapper.remove();
+      else button.remove();
     }
   });
 
   root.querySelectorAll('input[type="month"][aria-label="POS report month"]').forEach((input) => input.remove());
-
-  root.querySelectorAll("button").forEach((button) => {
-    if (buttonText(button) === "Edit item") button.remove();
-  });
 }
 
 async function loadRange(host: HTMLElement, from: string, to: string) {
@@ -68,11 +70,11 @@ async function loadRange(host: HTMLElement, from: string, to: string) {
         hour: "2-digit",
         minute: "2-digit",
       });
-      return `<tr class="border-b last:border-0"><td class="px-3 py-3 whitespace-nowrap">${when}</td><td class="px-3 py-3 font-bold">${sale.receipt_number || "—"}</td><td class="px-3 py-3">${sale.invoice_number || "—"}</td><td class="px-3 py-3">${sale.customer_name || "Walk-in customer"}</td><td class="px-3 py-3 uppercase">${sale.payment_method || "—"}</td><td class="px-3 py-3 text-right font-black">${money(sale.total)}</td></tr>`;
+      return `<tr class="border-b last:border-0"><td class="px-3 py-3 whitespace-nowrap">${esc(when)}</td><td class="px-3 py-3 font-bold">${esc(sale.receipt_number || "—")}</td><td class="px-3 py-3">${esc(sale.invoice_number || "—")}</td><td class="px-3 py-3">${esc(sale.customer_name || "Walk-in customer")}</td><td class="px-3 py-3 uppercase">${esc(sale.payment_method || "—")}</td><td class="px-3 py-3 text-right font-black">${esc(money(sale.total))}</td></tr>`;
     }).join("");
 
     results.innerHTML = data.sales?.length
-      ? `<div class="grid gap-3 sm:grid-cols-4 mb-4"><div class="rounded-xl border bg-white p-3"><small>Bills</small><b class="block">${data.summary.count}</b></div><div class="rounded-xl border bg-white p-3"><small>Cash</small><b class="block">${money(data.summary.cash)}</b></div><div class="rounded-xl border bg-white p-3"><small>Card</small><b class="block">${money(data.summary.card)}</b></div><div class="rounded-xl border bg-white p-3"><small>Transfer</small><b class="block">${money(data.summary.transfer)}</b></div></div><div class="overflow-x-auto"><table class="w-full min-w-[760px] text-left text-xs"><thead><tr class="border-b text-[10px] uppercase text-slate-400"><th class="px-3 py-3">Date / time</th><th class="px-3 py-3">Receipt</th><th class="px-3 py-3">Invoice</th><th class="px-3 py-3">Customer</th><th class="px-3 py-3">Payment</th><th class="px-3 py-3 text-right">Total</th></tr></thead><tbody>${rows}</tbody></table></div>`
+      ? `<div class="grid gap-3 sm:grid-cols-4 mb-4"><div class="rounded-xl border bg-white p-3"><small>Bills</small><b class="block">${esc(data.summary.count)}</b></div><div class="rounded-xl border bg-white p-3"><small>Cash</small><b class="block">${esc(money(data.summary.cash))}</b></div><div class="rounded-xl border bg-white p-3"><small>Card</small><b class="block">${esc(money(data.summary.card))}</b></div><div class="rounded-xl border bg-white p-3"><small>Transfer</small><b class="block">${esc(money(data.summary.transfer))}</b></div></div><div class="overflow-x-auto"><table class="w-full min-w-[760px] text-left text-xs"><thead><tr class="border-b text-[10px] uppercase text-slate-400"><th class="px-3 py-3">Date / time</th><th class="px-3 py-3">Receipt</th><th class="px-3 py-3">Invoice</th><th class="px-3 py-3">Customer</th><th class="px-3 py-3">Payment</th><th class="px-3 py-3 text-right">Total</th></tr></thead><tbody>${rows}</tbody></table></div>`
       : `<div class="py-8 text-center text-sm text-slate-400">No POS bills found for this date range.</div>`;
   } catch (error: any) {
     status.textContent = error.message || "Could not load bill history";
