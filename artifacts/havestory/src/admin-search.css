@@ -1,18 +1,13 @@
 /*
  * HAVESTORY ADMIN SEARCH SYSTEM
  * =============================
- * This is the ONLY stylesheet allowed to define admin search-field geometry.
- * Existing pages may use different legacy wrappers, but every input whose
- * placeholder contains "search" is normalized here to one premium pattern.
- *
- * IMPORTANT: the current AdminLayout root uses data-admin-panel. Keep
- * data-admin-layout as a compatibility alias for older/alternate shells.
+ * One premium search pattern for every admin screen.
  */
 
 :is([data-admin-panel],[data-admin-layout]) input[placeholder*="search" i] {
   box-sizing: border-box !important;
-  flex: 1 1 auto !important;
-  width: 100% !important;
+  flex: 1 1 280px !important;
+  width: auto !important;
   min-width: 0 !important;
   height: 52px !important;
   min-height: 52px !important;
@@ -50,9 +45,13 @@
   outline: none !important;
 }
 
-/* Strip only the immediate legacy icon/input wrapper — never the outer card. */
+/* Immediate legacy icon/input wrappers become a transparent single-row shell. */
 :is([data-admin-panel],[data-admin-layout]) :is(div,label):has(> svg:first-child + input[placeholder*="search" i]),
 :is([data-admin-panel],[data-admin-layout]) :is(div,label):has(> svg:first-child ~ input[placeholder*="search" i]) {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 10px !important;
   min-width: 0 !important;
   padding: 0 !important;
   border: 0 !important;
@@ -61,19 +60,23 @@
   box-shadow: none !important;
 }
 
-/* The canonical input owns the only visible search icon. */
+/* The canonical input owns the visible search icon. */
 :is([data-admin-panel],[data-admin-layout]) :is(div,label):has(> svg:first-child + input[placeholder*="search" i]) > svg:first-child,
 :is([data-admin-panel],[data-admin-layout]) :is(div,label):has(> svg:first-child ~ input[placeholder*="search" i]) > svg:first-child {
   display: none !important;
 }
 
-/* Clear-X buttons remain usable and sit inside the field edge. */
+/* Keep result-count/filter siblings on the same row instead of wrapping below. */
+:is([data-admin-panel],[data-admin-layout]) :is(div,label):has(> input[placeholder*="search" i]) > :not(input):not(svg) {
+  flex: 0 0 auto;
+}
+
 :is([data-admin-panel],[data-admin-layout]) :is(div,label):has(> input[placeholder*="search" i]) > input[placeholder*="search" i] + button:has(svg) {
   z-index: 2;
   flex: 0 0 32px !important;
   width: 32px !important;
   height: 32px !important;
-  margin-left: -40px !important;
+  margin-left: -42px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -82,7 +85,6 @@
   box-shadow: none !important;
 }
 
-/* Known toolbar classes must never add a second shell. */
 :is([data-admin-panel],[data-admin-layout]) :is(.admin-search-bar,.search-bar,.filter-bar,.filters-bar,.toolbar-filters) {
   gap: 10px !important;
   border: 0 !important;
