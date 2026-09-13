@@ -4,9 +4,12 @@
  * This is the ONLY stylesheet allowed to define admin search-field geometry.
  * Existing pages may use different legacy wrappers, but every input whose
  * placeholder contains "search" is normalized here to one premium pattern.
+ *
+ * IMPORTANT: the current AdminLayout root uses data-admin-panel. Keep
+ * data-admin-layout as a compatibility alias for older/alternate shells.
  */
 
-[data-admin-layout] input[placeholder*="search" i] {
+:is([data-admin-panel],[data-admin-layout]) input[placeholder*="search" i] {
   box-sizing: border-box !important;
   flex: 1 1 auto !important;
   width: 100% !important;
@@ -30,26 +33,26 @@
   transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease !important;
 }
 
-[data-admin-layout] input[placeholder*="search" i]::placeholder {
+:is([data-admin-panel],[data-admin-layout]) input[placeholder*="search" i]::placeholder {
   color: #5f5865 !important;
   opacity: 1 !important;
   font-weight: 500 !important;
 }
 
-[data-admin-layout] input[placeholder*="search" i]:hover {
+:is([data-admin-panel],[data-admin-layout]) input[placeholder*="search" i]:hover {
   border-color: #5f2778 !important;
 }
 
-[data-admin-layout] input[placeholder*="search" i]:focus,
-[data-admin-layout] input[placeholder*="search" i]:focus-visible {
+:is([data-admin-panel],[data-admin-layout]) input[placeholder*="search" i]:focus,
+:is([data-admin-panel],[data-admin-layout]) input[placeholder*="search" i]:focus-visible {
   border-color: #5b2375 !important;
   box-shadow: 0 0 0 3px rgba(95,45,117,.10) !important;
   outline: none !important;
 }
 
 /* Strip only the immediate legacy icon/input wrapper — never the outer card. */
-[data-admin-layout] :is(div,label):has(> svg:first-child + input[placeholder*="search" i]),
-[data-admin-layout] :is(div,label):has(> svg:first-child ~ input[placeholder*="search" i]) {
+:is([data-admin-panel],[data-admin-layout]) :is(div,label):has(> svg:first-child + input[placeholder*="search" i]),
+:is([data-admin-panel],[data-admin-layout]) :is(div,label):has(> svg:first-child ~ input[placeholder*="search" i]) {
   min-width: 0 !important;
   padding: 0 !important;
   border: 0 !important;
@@ -59,13 +62,13 @@
 }
 
 /* The canonical input owns the only visible search icon. */
-[data-admin-layout] :is(div,label):has(> svg:first-child + input[placeholder*="search" i]) > svg:first-child,
-[data-admin-layout] :is(div,label):has(> svg:first-child ~ input[placeholder*="search" i]) > svg:first-child {
+:is([data-admin-panel],[data-admin-layout]) :is(div,label):has(> svg:first-child + input[placeholder*="search" i]) > svg:first-child,
+:is([data-admin-panel],[data-admin-layout]) :is(div,label):has(> svg:first-child ~ input[placeholder*="search" i]) > svg:first-child {
   display: none !important;
 }
 
 /* Clear-X buttons remain usable and sit inside the field edge. */
-[data-admin-layout] :is(div,label):has(> input[placeholder*="search" i]) > input[placeholder*="search" i] + button:has(svg) {
+:is([data-admin-panel],[data-admin-layout]) :is(div,label):has(> input[placeholder*="search" i]) > input[placeholder*="search" i] + button:has(svg) {
   z-index: 2;
   flex: 0 0 32px !important;
   width: 32px !important;
@@ -80,7 +83,7 @@
 }
 
 /* Known toolbar classes must never add a second shell. */
-[data-admin-layout] :is(.admin-search-bar,.search-bar,.filter-bar,.filters-bar,.toolbar-filters) {
+:is([data-admin-panel],[data-admin-layout]) :is(.admin-search-bar,.search-bar,.filter-bar,.filters-bar,.toolbar-filters) {
   gap: 10px !important;
   border: 0 !important;
   background: transparent !important;
@@ -88,7 +91,7 @@
 }
 
 @media (max-width: 760px) {
-  [data-admin-layout] input[placeholder*="search" i] {
+  :is([data-admin-panel],[data-admin-layout]) input[placeholder*="search" i] {
     height: 48px !important;
     min-height: 48px !important;
     padding-left: 42px !important;
