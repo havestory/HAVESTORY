@@ -368,7 +368,7 @@ export default function PriceLists() {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-foreground">Price Lists</h1>
+          <h1 className="text-3xl font-sans font-bold text-foreground">Price Lists</h1>
           <p className="text-muted-foreground mt-1">Create private shareable price lists for B2B clients.</p>
         </div>
         <Button onClick={openCreate} className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90 btn-glow uppercase text-xs tracking-widest px-5 h-9 font-semibold gap-2">
@@ -415,7 +415,7 @@ export default function PriceLists() {
                         : '—'}
                     </TableCell>
                     <TableCell>
-                      <span className={`px-2 py-1 text-[9px] uppercase font-bold tracking-widest ${pl.active && !isExpired ? 'bg-green-100 text-green-700' : 'bg-muted text-muted-foreground'}`}>
+                      <span className={`px-2 py-1 text-[9px] uppercase font-bold tracking-widest ${pl.active && !isExpired ? 'bg-admin-success-soft text-admin-success' : 'bg-muted text-muted-foreground'}`}>
                         {isExpired ? 'Expired' : pl.active ? 'Active' : 'Inactive'}
                       </span>
                     </TableCell>
@@ -463,7 +463,7 @@ export default function PriceLists() {
         <DialogContent className="rounded-none border-border p-0 overflow-hidden bg-background max-w-4xl max-h-[90vh] flex flex-col">
           <div className="p-6 bg-primary text-primary-foreground shrink-0">
             <DialogHeader>
-              <DialogTitle className="font-serif text-2xl font-bold text-white">
+              <DialogTitle className="font-sans text-2xl font-bold text-white">
                 {editing ? 'Edit Price List' : 'New Price List'}
               </DialogTitle>
             </DialogHeader>

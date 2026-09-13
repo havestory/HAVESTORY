@@ -390,7 +390,7 @@ export default function Procurement() {
           <Card className="procurement-card">
             <CardHeader className="pb-4">
               <CardTitle className="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-secondary" /> Supplier Details
+                <Building2 className="w-4 h-4 text-admin-brand-ink" /> Supplier Details
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -418,7 +418,7 @@ export default function Procurement() {
           <Card className="procurement-card">
             <CardHeader className="pb-4">
               <CardTitle className="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
-                <FileText className="w-4 h-4 text-secondary" /> Order Info
+                <FileText className="w-4 h-4 text-admin-brand-ink" /> Order Info
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -442,7 +442,7 @@ export default function Procurement() {
           <Card className="procurement-card">
             <CardHeader className="pb-4">
               <CardTitle className="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
-                <User className="w-4 h-4 text-secondary" /> Your Business Info
+                <User className="w-4 h-4 text-admin-brand-ink" /> Your Business Info
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -464,7 +464,7 @@ export default function Procurement() {
           <Card className="procurement-card">
             <CardHeader className="pb-4">
               <CardTitle className="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
-                <Calculator className="w-4 h-4 text-secondary" /> Table Typography
+                <Calculator className="w-4 h-4 text-admin-brand-ink" /> Table Typography
               </CardTitle>
               <CardDescription className="text-xs leading-relaxed">
                 Adjust the table headings, typed entries, and footer text. Save to keep these sizes for future orders and JPG exports.

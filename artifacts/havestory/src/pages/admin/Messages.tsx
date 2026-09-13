@@ -34,7 +34,7 @@ export default function Messages() {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
       <div>
-        <h1 className="text-3xl font-serif font-bold text-foreground">Inquiries & Messages</h1>
+        <h1 className="text-3xl font-sans font-bold text-foreground">Inquiries & Messages</h1>
         <p className="text-muted-foreground mt-1">Contact form submissions from the public website.</p>
       </div>
 
@@ -75,7 +75,7 @@ export default function Messages() {
                     <TableCell className="text-sm font-mono">{format(new Date(msg.createdAt), 'MMM d, yyyy')}</TableCell>
                     <TableCell>
                       {!msg.isRead ? (
-                        <span className="px-2 py-1 bg-amber-100 text-amber-800 text-[9px] uppercase font-bold tracking-widest">Unread</span>
+                        <span className="px-2 py-1 bg-admin-warning-soft text-admin-warning text-[9px] uppercase font-bold tracking-widest">Unread</span>
                       ) : (
                         <span className="px-2 py-1 bg-muted text-muted-foreground text-[9px] uppercase font-bold tracking-widest">Read</span>
                       )}
@@ -90,7 +90,7 @@ export default function Messages() {
                           </DialogTrigger>
                           <DialogContent className="rounded-none border-border">
                             <DialogHeader>
-                              <DialogTitle className="font-serif text-2xl text-primary">{msg.subject}</DialogTitle>
+                              <DialogTitle className="font-sans text-2xl text-admin-brand-ink">{msg.subject}</DialogTitle>
                             </DialogHeader>
                             <div className="py-4 space-y-4">
                               <div className="flex justify-between items-start text-sm pb-4 border-b border-border">
@@ -111,7 +111,7 @@ export default function Messages() {
                         </Dialog>
 
                         {!msg.isRead && (
-                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none text-green-600 hover:bg-green-50" onClick={() => handleMarkRead(msg.id, true)} title="Mark Read">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none text-admin-success hover:bg-admin-success-soft" onClick={() => handleMarkRead(msg.id, true)} title="Mark Read">
                             <CheckCircle className="w-4 h-4" />
                           </Button>
                         )}

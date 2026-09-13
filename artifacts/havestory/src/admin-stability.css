@@ -1,216 +1,311 @@
-/* Final admin cascade guard.
-   Legacy utility classes remain supported, but the selected theme owns the
-   workspace surfaces and text instead of late hard-coded light colours. */
-[data-admin-panel][data-admin-theme="light"] {
-  background: hsl(var(--background)) !important;
-  color: hsl(var(--foreground)) !important;
+/* Admin theme: single source for palette and typography.
+   Component layout belongs to its component; Tailwind utilities consume these tokens. */
+@theme inline {
+  --color-admin-canvas: hsl(var(--admin-canvas));
+  --color-admin-surface: hsl(var(--admin-surface));
+  --color-admin-subtle: hsl(var(--admin-subtle));
+  --color-admin-ink: hsl(var(--admin-ink));
+  --color-admin-muted: hsl(var(--admin-muted));
+  --color-admin-border: hsl(var(--admin-border));
+  --color-admin-inverse: hsl(var(--admin-inverse));
+  --color-admin-brand-ink: hsl(var(--admin-brand-ink));
+  --color-admin-success-solid: hsl(var(--admin-success-solid));
+  --color-admin-warning-solid: hsl(var(--admin-warning-solid));
+  --color-admin-danger-solid: hsl(var(--admin-danger-solid));
+  --color-admin-brand: hsl(var(--admin-brand));
+  --color-admin-brand-soft: hsl(var(--admin-brand-soft));
+  --color-admin-brand-line: hsl(var(--admin-brand-line));
+  --color-admin-success: hsl(var(--admin-success));
+  --color-admin-success-soft: hsl(var(--admin-success-soft));
+  --color-admin-success-line: hsl(var(--admin-success-line));
+  --color-admin-warning: hsl(var(--admin-warning));
+  --color-admin-warning-soft: hsl(var(--admin-warning-soft));
+  --color-admin-warning-line: hsl(var(--admin-warning-line));
+  --color-admin-danger: hsl(var(--admin-danger));
+  --color-admin-danger-soft: hsl(var(--admin-danger-soft));
+  --color-admin-danger-line: hsl(var(--admin-danger-line));
+  --color-admin-shadow: hsl(var(--admin-ink) / .07);
 }
-[data-admin-panel][data-admin-theme="light"] main {
-  background: hsl(var(--background)) !important;
+html[data-hs-admin-theme] {
+  --admin-on-solid: 0 0% 100%;
+  --admin-brand-ink: 276 37% 35%;
+  --admin-success-solid: 158 62% 26%;
+  --admin-warning-solid: 32 85% 29%;
+  --admin-danger-solid: 350 62% 38%;
+  --admin-font: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --admin-canvas: 270 14% 97%;
+  --admin-surface: 0 0% 100%;
+  --admin-subtle: 270 16% 95%;
+  --admin-ink: 270 18% 16%;
+  --admin-muted: 270 9% 40%;
+  --admin-border: 270 14% 86%;
+  --admin-inverse: 270 22% 19%;
+  --admin-brand: 276 37% 35%;
+  --admin-brand-soft: 276 38% 95%;
+  --admin-brand-line: 276 24% 78%;
+  --admin-success: 158 62% 26%;
+  --admin-success-soft: 152 44% 95%;
+  --admin-success-line: 156 31% 75%;
+  --admin-warning: 32 85% 29%;
+  --admin-warning-soft: 40 80% 95%;
+  --admin-warning-line: 37 51% 73%;
+  --admin-danger: 350 62% 38%;
+  --admin-danger-soft: 350 65% 96%;
+  --admin-danger-line: 350 43% 79%;
+  --admin-chart-info: 211 54% 38%;
 }
-[data-admin-panel][data-admin-theme="light"] main > header {
-  border-bottom-color: hsl(var(--border) / .72) !important;
-  background: hsl(var(--card) / .82) !important;
-  box-shadow: 0 10px 30px hsl(var(--foreground) / .045) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(1.15) !important;
-  backdrop-filter: blur(20px) saturate(1.15) !important;
+html[data-hs-admin-theme='dark'] {
+  --admin-brand-ink: 276 50% 78%;
+  --admin-canvas: 270 16% 9%;
+  --admin-surface: 270 15% 13%;
+  --admin-subtle: 270 13% 18%;
+  --admin-ink: 270 15% 94%;
+  --admin-muted: 270 10% 73%;
+  --admin-border: 270 12% 29%;
+  --admin-brand: 276 37% 42%;
+  --admin-brand-soft: 276 22% 22%;
+  --admin-brand-line: 276 22% 47%;
+  --admin-success: 158 42% 62%;
+  --admin-success-soft: 158 29% 17%;
+  --admin-success-line: 158 30% 36%;
+  --admin-warning: 37 70% 66%;
+  --admin-warning-soft: 32 35% 18%;
+  --admin-warning-line: 37 35% 39%;
+  --admin-danger: 350 65% 73%;
+  --admin-danger-soft: 350 30% 20%;
+  --admin-danger-line: 350 35% 42%;
+  --admin-chart-info: 211 65% 72%;
 }
+/* Shared UI components and portalled menus inherit the same theme as pages. */
+:where([data-admin-panel], html[data-hs-admin-theme] [role='dialog'], html[data-hs-admin-theme] [role='alertdialog'], html[data-hs-admin-theme] [data-radix-popper-content-wrapper]) {
+  --background: var(--admin-canvas);
+  --foreground: var(--admin-ink);
+  --card: var(--admin-surface);
+  --card-foreground: var(--admin-ink);
+  --card-border: var(--admin-border);
+  --popover: var(--admin-surface);
+  --popover-foreground: var(--admin-ink);
+  --popover-border: var(--admin-border);
+  --border: var(--admin-border);
+  --input: var(--admin-border);
+  --primary: var(--admin-brand);
+  --primary-foreground: 0 0% 100%;
+  --secondary: var(--admin-brand);
+  --secondary-foreground: 0 0% 100%;
+  --accent: var(--admin-brand-soft);
+  --accent-foreground: var(--admin-ink);
+  --muted: var(--admin-subtle);
+  --muted-foreground: var(--admin-muted);
+  --ring: var(--admin-brand-line);
+  --destructive: var(--admin-danger);
+  --destructive-foreground: 0 0% 100%;
+  --sidebar: var(--admin-inverse);
+  --sidebar-foreground: 270 18% 88%;
+  --sidebar-primary: 276 48% 76%;
+  --sidebar-primary-foreground: var(--admin-inverse);
+  --sidebar-border: 270 17% 29%;
+  --sidebar-accent: 270 19% 25%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-ring: var(--admin-brand-line);
+  --app-font-sans: var(--admin-font);
+  --app-font-serif: var(--admin-font);
+  font-family: var(--admin-font);
+}
+@layer base {
+  :where([data-admin-panel]) { background:hsl(var(--admin-canvas)); color:hsl(var(--admin-ink)); font-size:14px; line-height:1.6; font-weight:400; }
+  :where([data-admin-panel], html[data-hs-admin-theme] [role='dialog']) :where(h1,h2,h3,h4,h5,h6) { font-family:inherit; font-weight:700; letter-spacing:-.025em; }
+  :where([data-admin-panel], html[data-hs-admin-theme] [role='dialog']) :where(input,select,textarea,button) { font-family:inherit; }
+  :where([data-admin-panel]) :where(button,a,[role='button'],select) { cursor:pointer; }
+  :where([data-admin-panel]) :where(input,textarea) { cursor:text; }
+  :where([data-admin-panel]) :where(button:disabled,input:disabled,select:disabled) { cursor:not-allowed; }
+  :where([data-admin-panel], html[data-hs-admin-theme] [role='dialog']) :where(input,textarea)::placeholder { color:hsl(var(--admin-muted)); opacity:1; }
+  :where([data-admin-panel]) :where(th) { font-weight:600; color:hsl(var(--admin-muted)); }
+  :where([data-admin-panel]) :where(button,a):focus-visible { outline:2px solid hsl(var(--admin-brand-line)); outline-offset:3px; }
+  :where([data-admin-panel]) :where(button,a) > svg { flex-shrink:0; }
+}
+.admin-record-id { color:hsl(var(--admin-ink)); font-weight:700; }
 
-[data-admin-panel][data-admin-theme="dark"] {
-  background: hsl(var(--background)) !important;
-  color: hsl(var(--foreground)) !important;
-}
-[data-admin-panel][data-admin-theme="dark"] main {
-  background: hsl(var(--background)) !important;
-  color: hsl(var(--foreground)) !important;
-}
-[data-admin-panel][data-admin-theme="dark"] main > header {
-  border-bottom-color: hsl(var(--border) / .78) !important;
-  background: hsl(var(--card) / .86) !important;
-  box-shadow: 0 10px 30px rgb(0 0 0 / .16) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(1.1) !important;
-  backdrop-filter: blur(20px) saturate(1.1) !important;
-}
-[data-admin-panel][data-admin-theme="dark"] main > header .bg-card,
-[data-admin-panel][data-admin-theme="dark"] main > header .bg-background {
-  background: hsl(var(--card) / .9) !important;
-}
-[data-admin-panel][data-admin-theme="dark"] main :where(.bg-white,.bg-gray-50,.bg-gray-100,.bg-slate-50,.bg-slate-100) {
-  background-color: hsl(var(--card)) !important;
-}
-[data-admin-panel][data-admin-theme="dark"] main :where(.border-gray-100,.border-gray-200,.border-slate-100,.border-slate-200) {
-  border-color: hsl(var(--border)) !important;
-}
-[data-admin-panel][data-admin-theme="dark"] main :where(input,textarea,select) {
-  border-color: hsl(var(--input)) !important;
-  background: hsl(var(--card)) !important;
-  color: hsl(var(--foreground)) !important;
-}
-[data-admin-panel][data-admin-theme="dark"] main :where(input,textarea)::placeholder {
-  color: hsl(var(--muted-foreground)) !important;
-}
-[data-admin-panel][data-admin-theme="dark"] main :where(.text-gray-900,.text-gray-800,.text-slate-950,.text-slate-900,.text-slate-800) {
-  color: hsl(var(--foreground)) !important;
-}
-[data-admin-panel][data-admin-theme="dark"] main :where(.text-gray-700,.text-gray-600,.text-slate-700,.text-slate-600) {
-  color: hsl(var(--foreground) / .84) !important;
-}
-[data-admin-panel][data-admin-theme="dark"] main :where(.text-gray-500,.text-gray-400,.text-gray-300,.text-slate-500,.text-slate-400,.text-slate-300) {
-  color: hsl(var(--muted-foreground)) !important;
-}
+/* Invoice editor geometry, moved from the global stylesheet. */
 
-/* Surface-aware contrast guard. Dark operational controls and panels must not
-   inherit charcoal text from a light page or from legacy utility classes. */
-[data-admin-panel] main :is(.bg-black,.bg-gray-950,.bg-gray-900,.bg-slate-950,.bg-slate-900,.bg-zinc-950,.bg-zinc-900,.bg-neutral-950,.bg-neutral-900,.bg-stone-950,.bg-stone-900) {
-  color: #fff !important;
+[data-admin-panel] .invoice-manual-modal {
+  --invoice-surface: hsl(var(--card));
+  --invoice-surface-soft: hsl(var(--muted) / 0.48);
+  --invoice-border: hsl(var(--border));
+  --invoice-ink: hsl(var(--foreground));
+  --invoice-muted: hsl(var(--muted-foreground));
+  --invoice-accent: hsl(var(--secondary));
+  --invoice-accent-bright: hsl(var(--accent));
+  color: var(--invoice-ink);
+  font-family: var(--admin-font);
 }
-[data-admin-panel] main :is(.bg-black,.bg-gray-950,.bg-gray-900,.bg-slate-950,.bg-slate-900,.bg-zinc-950,.bg-zinc-900,.bg-neutral-950,.bg-neutral-900,.bg-stone-950,.bg-stone-900)
-  :is(h1,h2,h3,h4,strong,b,.text-foreground,.text-card-foreground,.text-gray-900,.text-gray-800,.text-slate-950,.text-slate-900,.text-slate-800) {
-  color: #fff !important;
+[data-admin-panel] .invoice-modal-shell {
+  min-width: 0;
+  border: 1px solid hsl(var(--card-border));
+  background: linear-gradient(145deg, hsl(var(--card) / 0.98), hsl(var(--background) / 0.96));
+  box-shadow: 0 30px 90px rgba(15, 23, 42, 0.24), 0 0 0 1px hsl(var(--secondary) / 0.08);
+  backdrop-filter: blur(22px) saturate(1.16);
+  -webkit-backdrop-filter: blur(22px) saturate(1.16);
 }
-[data-admin-panel] main :is(.bg-black,.bg-gray-950,.bg-gray-900,.bg-slate-950,.bg-slate-900,.bg-zinc-950,.bg-zinc-900,.bg-neutral-950,.bg-neutral-900,.bg-stone-950,.bg-stone-900)
-  :is(p,small,.text-muted-foreground,.text-gray-700,.text-gray-600,.text-gray-500,.text-gray-400,.text-slate-700,.text-slate-600,.text-slate-500,.text-slate-400) {
-  color: rgb(226 232 240 / .82) !important;
+[data-admin-panel] .invoice-modal-header {
+  border-bottom-color: hsl(var(--secondary) / 0.2);
+  background: linear-gradient(135deg, hsl(var(--secondary) / 0.17), hsl(var(--card) / 0.92) 52%, hsl(var(--accent) / 0.1));
 }
-[data-admin-panel] aside :is(h1,h2,h3,h4,strong,b,a,button,span,p,small,svg) {
-  text-shadow: none;
+[data-admin-panel] .invoice-modal-header .text-admin-warning,
+[data-admin-panel] .invoice-modal-header .text-admin-warning { color: var(--invoice-accent); }
+[data-admin-panel] .invoice-modal-body {
+  min-height: 0;
+  background: radial-gradient(circle at 100% 0%, hsl(var(--secondary) / 0.08), transparent 34%), hsl(var(--background) / 0.72);
 }
-[data-admin-panel] aside :is(input,textarea,select) {
-  color: hsl(var(--foreground)) !important;
-  background: hsl(var(--card)) !important;
+[data-admin-panel] .invoice-modal-content {
+  min-width: 0;
 }
-
-/* POS bill card needs explicit surface-aware contrast in both admin themes. */
-[data-admin-panel] main .pos-bill-panel {
-  background: hsl(var(--card)) !important;
-  color: hsl(var(--foreground)) !important;
+[data-admin-panel] .invoice-modal-section {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid hsl(var(--border) / 0.82);
+  border-radius: 1.1rem;
+  background: hsl(var(--card) / 0.72);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.045), inset 0 1px 0 hsl(var(--card) / 0.72);
 }
-[data-admin-panel] main .pos-bill-panel :is(h2,b,strong) {
-  color: inherit;
+[data-admin-panel] .invoice-modal-section > div:first-child .text-sm {
+  color: var(--invoice-ink);
+  letter-spacing: -0.01em;
 }
-[data-admin-panel] main .pos-bill-panel :is(label,p,.text-slate-500,.text-slate-400) {
-  color: hsl(var(--muted-foreground)) !important;
+[data-admin-panel] .invoice-modal-section .input-field {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 2.75rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.8rem;
+  background: hsl(var(--input) / 0.92);
+  color: var(--invoice-ink);
+  -webkit-text-fill-color: var(--invoice-ink);
+  padding-block: 0.62rem;
+  padding-inline: 0.85rem;
+  font-size: 0.8125rem;
+  line-height: 1.2;
+  outline: none;
+  box-shadow: inset 0 1px 0 hsl(var(--card) / 0.55);
 }
-[data-admin-panel] main .pos-bill-panel input,
-[data-admin-panel] main .pos-bill-panel select {
-  background: hsl(var(--background)) !important;
-  color: hsl(var(--foreground)) !important;
+[data-admin-panel] .invoice-modal-section .input-field.pl-9 { padding-left: 2.25rem; }
+[data-admin-panel] .invoice-modal-section .input-field.pl-11 { padding-left: 2.75rem; }
+[data-admin-panel] .invoice-modal-section .input-field.pr-10 { padding-right: 2.75rem; }
+[data-admin-panel] .invoice-modal-section textarea.input-field {
+  min-height: 5rem;
+  line-height: 1.45;
 }
-[data-admin-panel] main .pos-bill-panel .bg-emerald-50,
-[data-admin-panel] main .pos-bill-panel .bg-violet-50 {
-  color: hsl(var(--foreground)) !important;
+[data-admin-panel] .invoice-modal-section .input-field:focus {
+  border-color: hsl(var(--secondary) / 0.72);
+  box-shadow: 0 0 0 3px hsl(var(--secondary) / 0.14), inset 0 1px 0 hsl(var(--card) / 0.6);
 }
-
-/* Sidebar contrast is explicit because the sidebar is always a dark studio
-   surface, independent of the selected workspace theme. */
-[data-admin-panel] .admin-sidebar {
-  color: #f8f3fb !important;
+[data-admin-panel] .invoice-modal-section .input-field::placeholder {
+  color: var(--invoice-muted);
+  -webkit-text-fill-color: var(--invoice-muted);
+  opacity: 0.9;
 }
-[data-admin-panel] .admin-sidebar-wordmark {
-  color: #f4d58d !important;
+[data-admin-panel] .invoice-catalog-panel {
+  border-color: hsl(var(--secondary) / 0.18);
+  background: linear-gradient(135deg, hsl(var(--secondary) / 0.08), hsl(var(--muted) / 0.4));
 }
-[data-admin-panel] .admin-sidebar-subtitle {
-  color: rgb(255 255 255 / .72) !important;
+[data-admin-panel] .invoice-catalog-panel .input-field {
+  background: hsl(var(--card) / 0.88);
 }
-[data-admin-panel] .admin-sidebar-monogram {
-  border: 1px solid rgb(255 255 255 / .22);
-  background: #f4d58d !important;
-  color: #2b1738 !important;
+[data-admin-panel] .invoice-line-items-grid {
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(64px, 84px) minmax(112px, 1.1fr) minmax(98px, 112px) 28px;
 }
-[data-admin-panel] .admin-sidebar :is(.text-sidebar-foreground,.text-sidebar-foreground\/60,.text-sidebar-foreground\/70,.text-sidebar-foreground\/75) {
-  color: rgb(255 255 255 / .78) !important;
+[data-admin-panel] .invoice-line-items-grid > * {
+  min-width: 0;
 }
-[data-admin-panel] .admin-sidebar :is(a,button):hover,
-[data-admin-panel] .admin-sidebar a > div:hover {
-  color: #fff !important;
+[data-admin-panel] .invoice-line-item {
+  min-width: 0;
+  border: 1px solid hsl(var(--border) / 0.86);
+  background: linear-gradient(135deg, hsl(var(--muted) / 0.56), hsl(var(--card) / 0.9));
+  box-shadow: inset 0 1px 0 hsl(var(--card) / 0.65);
 }
-[data-admin-panel] .admin-sidebar svg {
-  color: rgb(255 255 255 / .78) !important;
-  opacity: 1 !important;
+[data-admin-panel] .invoice-line-total {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--invoice-accent);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
-[data-admin-panel] .admin-sidebar :is(.text-sidebar-primary,[class*="text-sidebar-primary"]) {
-  color: #f4d58d !important;
+[data-admin-panel] .invoice-line-note {
+  min-height: 2.35rem;
+  background: hsl(var(--card) / 0.9);
 }
-[data-admin-panel] .admin-sidebar a > div[class*="bg-sidebar-primary"] svg,
-[data-admin-panel] .admin-sidebar a > div[class*="bg-sidebar-primary"] span {
-  color: #fff !important;
+[data-admin-panel] .invoice-shipping-option {
+  display: flex;
+  min-width: 0;
+  min-height: 3rem;
+  align-items: center;
+  line-height: 1.3;
+  border-color: hsl(var(--border));
+  background: hsl(var(--card) / 0.72);
+  color: var(--invoice-ink);
 }
-[data-admin-panel] .admin-mobile-topbar {
-  background: #2b1738 !important;
-  color: #fff !important;
+[data-admin-panel] .invoice-shipping-option:hover,
+[data-admin-panel] .invoice-shipping-option:focus-visible {
+  border-color: hsl(var(--secondary) / 0.62);
+  background: hsl(var(--secondary) / 0.08);
 }
-[data-admin-panel] .admin-mobile-topbar :is(button,span,svg) {
-  color: #fff !important;
-  opacity: 1 !important;
+[data-admin-panel] .invoice-shipping-option.border-admin-warning-line {
+  border-color: var(--invoice-accent-bright);
+  background: hsl(var(--secondary) / 0.13);
+  color: var(--invoice-accent);
+  box-shadow: 0 8px 20px hsl(var(--secondary) / 0.1);
 }
-
-/* Final admin visual policy: solid surfaces only. Legacy Tailwind gradient
-   utilities remain in old screens, but are deliberately flattened here. */
-[data-admin-panel] [class*="bg-gradient"] {
-  background-image: none !important;
+[data-admin-panel] .invoice-totals {
+  border-color: hsl(var(--secondary) / 0.24);
+  background: linear-gradient(135deg, hsl(var(--secondary) / 0.11), hsl(var(--muted) / 0.48));
 }
-[data-admin-panel] :is(button,a,[role="button"])[class*="bg-gradient"],
-[data-admin-panel] [class*="bg-gradient"][class~="text-white"] {
-  background-color: hsl(var(--primary)) !important;
-  color: hsl(var(--primary-foreground)) !important;
+[data-admin-panel] .invoice-totals .tabular-nums {
+  flex: 0 0 auto;
+  min-width: max-content;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
-[data-admin-panel] [class*="bg-gradient"][class*="bg-clip-text"] {
-  background: none !important;
-  color: hsl(var(--foreground)) !important;
-  -webkit-text-fill-color: hsl(var(--foreground)) !important;
+[data-admin-panel] .invoice-totals .text-admin-warning {
+  color: var(--invoice-accent);
 }
-[data-admin-panel] main > div {
-  background-image: none !important;
+[data-admin-panel] .invoice-modal-footer {
+  border-top-color: hsl(var(--secondary) / 0.2);
+  background: hsl(var(--muted) / 0.5);
 }
-
-/* One elevation system only. This replaces stacked page, utility and legacy
-   shadows that previously produced dark halos and apparent overlaps. */
-[data-admin-panel] {
-  --admin-shadow-card: 0 7px 20px rgb(43 23 56 / .07);
-  --admin-shadow-float: 0 16px 42px rgb(27 15 36 / .16);
+[data-admin-panel] .invoice-modal-footer > button {
+  min-width: 0;
+  min-height: 3rem;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
 }
-[data-admin-panel] main :is(.shadow-sm,.shadow,.shadow-md,.shadow-lg,.shadow-xl,[class*="shadow-["]):not(button):not(a):not(input):not(textarea):not(select) {
-  box-shadow: var(--admin-shadow-card) !important;
+[data-admin-panel] .invoice-secondary-action {
+  border-color: hsl(var(--secondary) / 0.45);
+  background: hsl(var(--card) / 0.72);
+  color: var(--invoice-accent);
 }
-[data-admin-panel] main :is(.rounded-lg,.rounded-xl,.rounded-2xl,.rounded-3xl).border {
-  box-shadow: var(--admin-shadow-card) !important;
+[data-admin-panel] .invoice-secondary-action:hover { background: hsl(var(--secondary) / 0.1); }
+[data-admin-panel] .invoice-primary-action {
+  background: linear-gradient(110deg, hsl(var(--secondary)), hsl(var(--primary)) 155%);
+  box-shadow: 0 12px 24px hsl(var(--secondary) / 0.22);
 }
-[data-admin-panel] main :is(button,a,input,textarea,select)[class*="shadow"] {
-  box-shadow: none !important;
+@media (max-width: 639px) {
+  [data-admin-panel] .invoice-modal-shell { max-height: calc(100svh - 16px); border-radius: 1.25rem; }
 }
-[data-admin-panel] main :is(button,a):hover {
-  filter: none;
+@media (max-width: 639px) {
+  [data-admin-panel] .invoice-modal-content { padding: 0.8rem; }
 }
-[data-admin-panel] main > header {
-  box-shadow: 0 5px 16px rgb(43 23 56 / .055) !important;
+@media (max-width: 639px) {
+  [data-admin-panel] .invoice-modal-section { padding: 0.8rem; border-radius: 1rem; }
 }
-[data-admin-panel] :is([role="dialog"],.invoice-modal-shell) {
-  box-shadow: var(--admin-shadow-float) !important;
+@media (max-width: 639px) {
+  [data-admin-panel] .invoice-modal-footer { flex-direction: column-reverse; align-items: stretch; }
 }
-[data-admin-panel] main :is(.shadow-sm,.shadow,.shadow-md,.shadow-lg,.shadow-xl,[class*="shadow-"])::before,
-[data-admin-panel] main :is(.shadow-sm,.shadow,.shadow-md,.shadow-lg,.shadow-xl,[class*="shadow-"])::after {
-  box-shadow: none !important;
+@media (max-width: 639px) {
+  [data-admin-panel] .invoice-modal-footer > button { width: 100%; flex: none; }
 }
-
-/* Operational identifiers need stronger contrast than decorative accent copy. */
-[data-admin-panel] main .admin-record-id {
-  color: #4d2c63 !important;
-  -webkit-text-fill-color: #4d2c63 !important;
-  font-weight: 800 !important;
-}
-[data-admin-panel][data-admin-theme="light"] main :is(.text-amber-400,.text-amber-500,.text-yellow-400,.text-yellow-500) {
-  color: #80510b !important;
-}
-[data-admin-panel][data-admin-theme="light"] main :is(.text-blue-400,.text-violet-400,.text-purple-400,.text-pink-400) {
-  color: #664078 !important;
-}
-[data-admin-panel][data-admin-theme="dark"] main .admin-record-id {
-  color: #f1d28f !important;
-  -webkit-text-fill-color: #f1d28f !important;
-}
-[data-admin-panel][data-admin-theme="dark"] main :is(.text-amber-400,.text-amber-500,.text-yellow-400,.text-yellow-500) {
-  color: #f1d28f !important;
-}
-[data-admin-panel][data-admin-theme="dark"] main :is(.text-blue-400,.text-violet-400,.text-purple-400,.text-pink-400) {
-  color: #d9b7ea !important;
+@media (max-width: 639px) {
+  [data-admin-panel] .invoice-modal-section .grid.grid-cols-2 { grid-template-columns: 1fr; }
 }

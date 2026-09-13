@@ -61,17 +61,17 @@ function exportCSV(filename: string, headers: string[], rows: string[][]) {
 // ─── status badge ────────────────────────────────────────────────────────────
 
 const STATUS_COLORS: Record<string, string> = {
-  paid: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  partial: 'bg-amber-50 text-amber-700 border-amber-200',
-  pending: 'bg-yellow-50 text-yellow-700 border-yellow-200',
-  draft: 'bg-gray-50 text-gray-600 border-gray-200',
-  issued: 'bg-blue-50 text-blue-700 border-blue-200',
-  overdue: 'bg-red-50 text-red-700 border-red-200',
-  cancelled: 'bg-red-50 text-red-500 border-red-200',
-  completed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  processing: 'bg-blue-50 text-blue-700 border-blue-200',
-  new: 'bg-purple-50 text-purple-700 border-purple-200',
-  returning: 'bg-blue-50 text-blue-700 border-blue-200',
+  paid: 'bg-admin-success-soft text-admin-success border-admin-success-line',
+  partial: 'bg-admin-warning-soft text-admin-warning border-admin-warning-line',
+  pending: 'bg-admin-warning-soft text-admin-warning border-admin-warning-line',
+  draft: 'bg-admin-surface text-admin-muted border-admin-border',
+  issued: 'bg-admin-brand-soft text-admin-brand-ink border-admin-brand-line',
+  overdue: 'bg-admin-danger-soft text-admin-danger border-admin-danger-line',
+  cancelled: 'bg-admin-danger-soft text-admin-danger border-admin-danger-line',
+  completed: 'bg-admin-success-soft text-admin-success border-admin-success-line',
+  processing: 'bg-admin-brand-soft text-admin-brand-ink border-admin-brand-line',
+  new: 'bg-admin-brand-soft text-admin-brand-ink border-admin-brand-line',
+  returning: 'bg-admin-brand-soft text-admin-brand-ink border-admin-brand-line',
 };
 
 function Badge({ label }: { label: string }) {
@@ -266,7 +266,7 @@ export default function Reports() {
         <div className="flex gap-6 text-sm">
           <span className="text-muted-foreground"><span className="font-semibold text-foreground">{s.count}</span> invoices</span>
           <span className="text-muted-foreground">Total: <span className="font-semibold text-foreground">LKR {fmtAmount(s.totalAmount)}</span></span>
-          <span className="text-muted-foreground">Paid: <span className="font-semibold text-emerald-600">LKR {fmtAmount(s.totalPaid)}</span> ({s.paidCount})</span>
+          <span className="text-muted-foreground">Paid: <span className="font-semibold text-admin-success">LKR {fmtAmount(s.totalPaid)}</span> ({s.paidCount})</span>
         </div>
       );
     }
@@ -275,8 +275,8 @@ export default function Reports() {
       return (
         <div className="flex gap-6 text-sm">
           <span className="text-muted-foreground"><span className="font-semibold text-foreground">{s.totalCount}</span> clients</span>
-          <span className="text-muted-foreground">New: <span className="font-semibold text-purple-600">{s.newCount}</span></span>
-          <span className="text-muted-foreground">Returning: <span className="font-semibold text-blue-600">{s.returningCount}</span></span>
+          <span className="text-muted-foreground">New: <span className="font-semibold text-admin-brand-ink">{s.newCount}</span></span>
+          <span className="text-muted-foreground">Returning: <span className="font-semibold text-admin-brand-ink">{s.returningCount}</span></span>
         </div>
       );
     }
@@ -286,7 +286,7 @@ export default function Reports() {
         <div className="flex gap-6 text-sm">
           <span className="text-muted-foreground"><span className="font-semibold text-foreground">{s.itemCount}</span> materials used</span>
           <span className="text-muted-foreground">Total used: <span className="font-semibold text-foreground">{s.totalUsed}</span> units</span>
-          <span className="text-muted-foreground">Total waste: <span className="font-semibold text-red-600">{s.totalWaste}</span> units</span>
+          <span className="text-muted-foreground">Total waste: <span className="font-semibold text-admin-danger">{s.totalWaste}</span> units</span>
         </div>
       );
     }
@@ -301,7 +301,7 @@ export default function Reports() {
         <div className="admin-insights-hero flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <span className="admin-insights-kicker">Business intelligence</span>
-            <h1 className="text-3xl font-black tracking-tight text-foreground">Reports</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Reports</h1>
             <p className="text-muted-foreground mt-1">Generate and export data reports.</p>
           </div>
           <div className="admin-insights-actions flex items-center gap-2">
@@ -450,7 +450,7 @@ export default function Reports() {
         {tab === 'invoices' && <InvoicesTable rows={invoicesRows} isLoading={false} />}
         {tab === 'clients' && <ClientsTable rows={clientsRows} isLoading={false} />}
         {tab === 'inventory' && <InventoryTable rows={inventoryData?.usageRows ?? []} isLoading={false} />}
-        <p className="text-xs text-gray-400 mt-6 text-center">
+        <p className="text-xs text-admin-muted mt-6 text-center">
           Printed {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} · {businessName}
         </p>
       </div>
@@ -610,11 +610,11 @@ function InventoryTable({ rows, isLoading }: { rows: any[]; isLoading: boolean }
           <TableRow key={r.id} className={`hover:bg-muted/40 transition-colors ${Number(r.total_consumed) === 0 ? 'opacity-50' : ''}`}>
             <TableCell className="font-medium text-sm">{r.name}</TableCell>
             <TableCell className="text-sm text-muted-foreground">{r.unit}</TableCell>
-            <TableCell className={`text-right font-mono text-sm ${Number(r.current_stock) <= Number(r.low_stock_threshold) ? 'text-red-600 font-bold' : 'text-foreground'}`}>
+            <TableCell className={`text-right font-mono text-sm ${Number(r.current_stock) <= Number(r.low_stock_threshold) ? 'text-admin-danger font-bold' : 'text-foreground'}`}>
               {r.current_stock}
             </TableCell>
             <TableCell className="text-right font-mono text-sm text-foreground">{r.used_quantity}</TableCell>
-            <TableCell className={`text-right font-mono text-sm ${Number(r.waste_quantity) > 0 ? 'text-red-600' : 'text-muted-foreground'}`}>
+            <TableCell className={`text-right font-mono text-sm ${Number(r.waste_quantity) > 0 ? 'text-admin-danger' : 'text-muted-foreground'}`}>
               {r.waste_quantity}
             </TableCell>
             <TableCell className="text-right font-mono text-sm font-semibold">{r.total_consumed}</TableCell>

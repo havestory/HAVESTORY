@@ -118,9 +118,9 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    pending:  'bg-amber-100 text-amber-800',
-    approved: 'bg-green-100 text-green-800',
-    rejected: 'bg-red-100 text-red-800',
+    pending:  'bg-admin-warning-soft text-admin-warning',
+    approved: 'bg-admin-success-soft text-admin-success',
+    rejected: 'bg-admin-danger-soft text-admin-danger',
   };
   return (
     <span className={`px-2 py-0.5 text-[9px] uppercase font-bold tracking-widest ${styles[status] ?? 'bg-muted text-muted-foreground'}`}>
@@ -168,7 +168,7 @@ function DecisionDialog({ record, open, onClose, onDone }: {
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
       <DialogContent className="rounded-none max-w-sm">
         <DialogHeader>
-          <DialogTitle className="font-serif text-xl">Review Attendance</DialogTitle>
+          <DialogTitle className="font-sans text-xl">Review Attendance</DialogTitle>
           <p className="text-sm text-muted-foreground">
             <span className="font-medium text-foreground">{record.staff_name}</span> — {fmtDate(record.attendance_date)}
           </p>
@@ -246,7 +246,7 @@ function CheckoutDialog({ record, open, onClose, onDone }: {
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
       <DialogContent className="rounded-none max-w-sm">
         <DialogHeader>
-          <DialogTitle className="font-serif text-xl">Check Out</DialogTitle>
+          <DialogTitle className="font-sans text-xl">Check Out</DialogTitle>
         </DialogHeader>
         <div className="py-2 space-y-3">
           <div className="flex items-center gap-3">
@@ -310,9 +310,9 @@ function CalendarView({ records, month, staffList, staffFilter }: {
 
   // Status color mapping
   const statusColor: Record<string, string> = {
-    approved: 'bg-green-500',
-    pending:  'bg-amber-400',
-    rejected: 'bg-red-400',
+    approved: 'bg-admin-success-solid',
+    pending:  'bg-admin-warning-solid',
+    rejected: 'bg-admin-danger-solid',
   };
 
   return (
@@ -365,7 +365,7 @@ function CalendarView({ records, month, staffList, staffFilter }: {
                     </td>
                   );
                 })}
-                <td className="px-3 py-2 border border-border text-right font-medium text-primary">
+                <td className="px-3 py-2 border border-border text-right font-medium text-admin-brand-ink">
                   {minutesToHours(totalMins)}
                 </td>
               </tr>
@@ -374,9 +374,9 @@ function CalendarView({ records, month, staffList, staffFilter }: {
         </tbody>
       </table>
       <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-green-500 inline-block" /> Approved</span>
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-amber-400 inline-block" /> Pending</span>
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-red-400 inline-block" /> Rejected</span>
+        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-admin-success-solid inline-block" /> Approved</span>
+        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-admin-warning-solid inline-block" /> Pending</span>
+        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-admin-danger-solid inline-block" /> Rejected</span>
       </div>
     </div>
   );
@@ -451,7 +451,7 @@ export default function Attendance() {
       {/* Header */}
       <div className="flex justify-between items-center print:hidden">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-foreground">Attendance</h1>
+          <h1 className="text-3xl font-sans font-bold text-foreground">Attendance</h1>
           <p className="text-muted-foreground mt-1">
             {isOwner ? 'Manage staff attendance and approvals.' : 'Your attendance records.'}
           </p>
@@ -466,7 +466,7 @@ export default function Attendance() {
             <Printer className="w-3.5 h-3.5" /> Print
           </Button>
           {isOwner && pending.length > 0 && (
-            <span className="px-2 py-1 text-[9px] bg-amber-100 text-amber-800 font-bold uppercase tracking-widest">
+            <span className="px-2 py-1 text-[9px] bg-admin-warning-soft text-admin-warning font-bold uppercase tracking-widest">
               {pending.length} pending
             </span>
           )}
@@ -566,8 +566,8 @@ export default function Attendance() {
       {isOwner && tab === 'queue' && (
         <Card className="rounded-none border border-border">
           <CardHeader className="pb-3">
-            <CardTitle className="font-serif text-lg flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-500" />
+            <CardTitle className="font-sans text-lg flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-admin-warning" />
               Pending Approvals
             </CardTitle>
           </CardHeader>
@@ -585,7 +585,7 @@ export default function Attendance() {
                 {pending.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center py-8">
-                      <CheckCircle2 className="w-8 h-8 text-green-500/30 mx-auto mb-2" />
+                      <CheckCircle2 className="w-8 h-8 text-admin-success/30 mx-auto mb-2" />
                       <p className="text-muted-foreground text-sm">No pending approvals.</p>
                     </TableCell>
                   </TableRow>
@@ -619,7 +619,7 @@ export default function Attendance() {
       {(!isOwner || tab === 'calendar') && (
         <Card className="rounded-none border border-border">
           <CardHeader className="pb-3">
-            <CardTitle className="font-serif text-lg flex items-center gap-2">
+            <CardTitle className="font-sans text-lg flex items-center gap-2">
               <Calendar className="w-4 h-4" />
               {monthLabel(month)}
             </CardTitle>
@@ -643,7 +643,7 @@ export default function Attendance() {
       {isOwner && tab === 'calendar' && Object.keys(summaryByStaff).length > 0 && (
         <Card className="rounded-none border border-border">
           <CardHeader className="pb-3">
-            <CardTitle className="font-serif text-lg flex items-center gap-2">
+            <CardTitle className="font-sans text-lg flex items-center gap-2">
               <Clock className="w-4 h-4" /> Monthly Hours Summary
             </CardTitle>
           </CardHeader>
@@ -666,7 +666,7 @@ export default function Attendance() {
                       <div className="text-xs text-muted-foreground font-mono">@{v.username}</div>
                     </TableCell>
                     <TableCell className="text-right font-medium">{v.days}</TableCell>
-                    <TableCell className="text-right font-medium text-primary">{minutesToHours(v.total)}</TableCell>
+                    <TableCell className="text-right font-medium text-admin-brand-ink">{minutesToHours(v.total)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -679,7 +679,7 @@ export default function Attendance() {
       {(isOwner ? tab === 'records' : true) && (
         <Card className="rounded-none border border-border">
           <CardHeader className="pb-3">
-            <CardTitle className="font-serif text-lg">Attendance Records — {monthLabel(month)}</CardTitle>
+            <CardTitle className="font-sans text-lg">Attendance Records — {monthLabel(month)}</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <Table className="admin-table">
@@ -716,7 +716,7 @@ export default function Attendance() {
                     <TableCell className="font-mono text-sm">{fmtTime(r.check_in_at)}</TableCell>
                     <TableCell className="font-mono text-sm">
                       {fmtTime(r.check_out_at)}
-                      {r.early_checkout && <span className="ml-1 text-[9px] text-amber-600 font-bold uppercase">Early</span>}
+                      {r.early_checkout && <span className="ml-1 text-[9px] text-admin-warning font-bold uppercase">Early</span>}
                     </TableCell>
                     <TableCell className="text-sm">{minutesToHours(r.duration_minutes)}</TableCell>
                     <TableCell>

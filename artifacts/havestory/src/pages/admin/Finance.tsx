@@ -239,7 +239,7 @@ export default function Finance() {
     URL.revokeObjectURL(url);
   };
 
-  const netColor = (summary?.netProfit ?? 0) >= 0 ? 'text-emerald-600' : 'text-red-600';
+  const netColor = (summary?.netProfit ?? 0) >= 0 ? 'text-admin-success' : 'text-admin-danger';
 
   return (
     <div data-admin-insights="finance" className="admin-insights-page space-y-6 animate-in fade-in slide-in-from-bottom-4">
@@ -250,27 +250,27 @@ export default function Finance() {
             <img src={settings.logoUrl} alt="Logo" className="h-12 mx-auto mb-2" />
           )}
           <h1 className="text-2xl font-bold">{settings?.businessName ?? 'HAVESTORY'}</h1>
-          {settings?.address && <p className="text-sm text-gray-600">{settings.address}</p>}
-          {settings?.phone && <p className="text-sm text-gray-600">{settings.phone}</p>}
+          {settings?.address && <p className="text-sm text-admin-muted">{settings.address}</p>}
+          {settings?.phone && <p className="text-sm text-admin-muted">{settings.phone}</p>}
           <h2 className="text-lg font-semibold mt-3">Monthly Finance Report — {monthLabel}</h2>
         </div>
 
         <div className="grid grid-cols-4 gap-4 mb-6 text-center">
           <div className="border border-black p-3">
-            <div className="text-xs uppercase tracking-wide text-gray-600">Opening Balance</div>
+            <div className="text-xs uppercase tracking-wide text-admin-muted">Opening Balance</div>
             <div className="font-bold text-lg">LKR {fmtAmount(summary?.initialBalance ?? 0)}</div>
           </div>
           <div className="border border-black p-3">
-            <div className="text-xs uppercase tracking-wide text-gray-600">Revenue</div>
-            <div className="font-bold text-lg text-green-700">LKR {fmtAmount(summary?.income ?? 0)}</div>
+            <div className="text-xs uppercase tracking-wide text-admin-muted">Revenue</div>
+            <div className="font-bold text-lg text-admin-success">LKR {fmtAmount(summary?.income ?? 0)}</div>
           </div>
           <div className="border border-black p-3">
-            <div className="text-xs uppercase tracking-wide text-gray-600">Expenses</div>
-            <div className="font-bold text-lg text-red-700">LKR {fmtAmount(summary?.expenses ?? 0)}</div>
+            <div className="text-xs uppercase tracking-wide text-admin-muted">Expenses</div>
+            <div className="font-bold text-lg text-admin-danger">LKR {fmtAmount(summary?.expenses ?? 0)}</div>
           </div>
           <div className="border border-black p-3">
-            <div className="text-xs uppercase tracking-wide text-gray-600">Net Profit</div>
-            <div className={`font-bold text-lg ${(summary?.netProfit ?? 0) >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+            <div className="text-xs uppercase tracking-wide text-admin-muted">Net Profit</div>
+            <div className={`font-bold text-lg ${(summary?.netProfit ?? 0) >= 0 ? 'text-admin-success' : 'text-admin-danger'}`}>
               LKR {fmtAmount(summary?.netProfit ?? 0)}
             </div>
           </div>
@@ -278,7 +278,7 @@ export default function Finance() {
 
         <table className="w-full text-sm border-collapse border border-black">
           <thead>
-            <tr className="bg-gray-100">
+            <tr className="bg-admin-subtle">
               <th className="border border-black px-2 py-1 text-left">Date</th>
               <th className="border border-black px-2 py-1 text-left">Type</th>
               <th className="border border-black px-2 py-1 text-left">Category</th>
@@ -293,14 +293,14 @@ export default function Finance() {
                 <td className="border border-black px-2 py-1 capitalize">{tx.type}</td>
                 <td className="border border-black px-2 py-1">{CATEGORY_LABELS[tx.category] ?? tx.category}</td>
                 <td className="border border-black px-2 py-1">{tx.description}</td>
-                <td className={`border border-black px-2 py-1 text-right font-mono ${tx.type === 'income' ? 'text-green-700' : 'text-red-700'}`}>
+                <td className={`border border-black px-2 py-1 text-right font-mono ${tx.type === 'income' ? 'text-admin-success' : 'text-admin-danger'}`}>
                   {tx.type === 'income' ? '+' : '-'}{fmtAmount(Number(tx.amount))}
                 </td>
               </tr>
             ))}
           </tbody>
           <tfoot>
-            <tr className="font-bold bg-gray-100">
+            <tr className="font-bold bg-admin-subtle">
               <td colSpan={4} className="border border-black px-2 py-1 text-right">Net Profit</td>
               <td className="border border-black px-2 py-1 text-right font-mono">
                 {(summary?.netProfit ?? 0) >= 0 ? '+' : ''}{fmtAmount(summary?.netProfit ?? 0)}
@@ -309,7 +309,7 @@ export default function Finance() {
           </tfoot>
         </table>
 
-        <p className="text-xs text-gray-400 mt-6 text-center">
+        <p className="text-xs text-admin-muted mt-6 text-center">
           Printed {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} · {settings?.businessName ?? 'HAVESTORY'}
         </p>
       </div>
@@ -324,7 +324,7 @@ export default function Finance() {
         <div className="admin-insights-hero flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <span className="admin-insights-kicker">Financial overview</span>
-            <h1 className="text-3xl font-black tracking-tight text-foreground">Finance</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Finance</h1>
             <p className="text-muted-foreground mt-1">Track revenue, expenses and monthly profit.</p>
           </div>
           <div className="admin-insights-actions flex items-center gap-2">
@@ -366,14 +366,14 @@ export default function Finance() {
             label="Revenue"
             value={summaryLoading ? '—' : `LKR ${fmtAmount(summary?.income ?? 0)}`}
             icon={TrendingUp}
-            accent="text-emerald-600"
+            accent="text-admin-success"
             sub={`${monthLabel}`}
           />
           <StatCard
             label="Expenses"
             value={summaryLoading ? '—' : `LKR ${fmtAmount(summary?.expenses ?? 0)}`}
             icon={TrendingDown}
-            accent="text-red-600"
+            accent="text-admin-danger"
             sub={`${monthLabel}`}
           />
           <StatCard
@@ -393,7 +393,7 @@ export default function Finance() {
             <Card className="finance-surface border border-border shadow-sm bg-card">
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 mb-4">
-                  <BarChart2 className="w-4 h-4 text-secondary" />
+                  <BarChart2 className="w-4 h-4 text-admin-brand-ink" />
                   <p className="text-[9px] uppercase tracking-widest font-semibold text-muted-foreground">Revenue by Category</p>
                 </div>
                 {breakdown.categories.length === 0 ? (
@@ -428,6 +428,7 @@ export default function Finance() {
                         cursor={{ fill: 'hsl(var(--muted) / 0.4)' }}
                         contentStyle={{
                           background: 'hsl(var(--card))',
+                          color: 'hsl(var(--foreground))',
                           border: '1px solid hsl(var(--border))',
                           borderRadius: 0,
                           fontSize: 12,
@@ -458,7 +459,7 @@ export default function Finance() {
             <Card className="finance-surface border border-border shadow-sm bg-card">
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 mb-4">
-                  <ShoppingBag className="w-4 h-4 text-secondary" />
+                  <ShoppingBag className="w-4 h-4 text-admin-brand-ink" />
                   <p className="text-[9px] uppercase tracking-widest font-semibold text-muted-foreground">Top Products &amp; Services</p>
                   <span className="ml-auto text-[9px] text-muted-foreground/60 uppercase tracking-widest">from orders</span>
                 </div>
@@ -481,7 +482,7 @@ export default function Finance() {
                               <span className="text-muted-foreground text-[10px]">
                                 ×{p.qty % 1 === 0 ? p.qty : p.qty.toFixed(1)}
                               </span>
-                              <span className="font-mono font-semibold text-emerald-600 text-[11px]">
+                              <span className="font-mono font-semibold text-admin-success text-[11px]">
                                 LKR {fmtAmount(p.revenue)}
                               </span>
                             </div>
@@ -533,7 +534,7 @@ export default function Finance() {
                     <TableRow key={tx.id} className="hover:bg-muted/40 transition-colors">
                       <TableCell className="text-sm text-muted-foreground">{fmtDate(tx.transaction_date)}</TableCell>
                       <TableCell>
-                        <span className={`px-2 py-0.5 text-[9px] uppercase font-bold tracking-widest border ${tx.type === 'income' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                        <span className={`px-2 py-0.5 text-[9px] uppercase font-bold tracking-widest border ${tx.type === 'income' ? 'bg-admin-success-soft text-admin-success border-admin-success-line' : 'bg-admin-danger-soft text-admin-danger border-admin-danger-line'}`}>
                           {tx.type === 'income' ? 'Revenue' : 'Expense'}
                         </span>
                       </TableCell>
@@ -543,12 +544,12 @@ export default function Finance() {
                       <TableCell className="text-sm text-foreground max-w-xs truncate">
                         {tx.description}
                         {tx.source === 'invoice_payment' && (
-                          <span className="ml-2 text-[9px] uppercase tracking-widest px-1.5 py-0.5 bg-blue-50 text-blue-600 border border-blue-200 font-bold">
+                          <span className="ml-2 text-[9px] uppercase tracking-widest px-1.5 py-0.5 bg-admin-brand-soft text-admin-brand-ink border border-admin-brand-line font-bold">
                             Auto
                           </span>
                         )}
                       </TableCell>
-                      <TableCell className={`text-right font-mono font-semibold ${tx.type === 'income' ? 'text-emerald-600' : 'text-red-600'}`}>
+                      <TableCell className={`text-right font-mono font-semibold ${tx.type === 'income' ? 'text-admin-success' : 'text-admin-danger'}`}>
                         {tx.type === 'income' ? '+' : '-'}LKR {fmtAmount(Number(tx.amount))}
                       </TableCell>
                       <TableCell className="text-right">
@@ -580,7 +581,7 @@ export default function Finance() {
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
         <DialogContent className="rounded-none max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-serif text-lg">Add Finance Entry</DialogTitle>
+            <DialogTitle className="font-sans text-lg">Add Finance Entry</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
@@ -669,7 +670,7 @@ export default function Finance() {
       <Dialog open={showBalanceEdit} onOpenChange={setShowBalanceEdit}>
         <DialogContent className="rounded-none max-w-sm">
           <DialogHeader>
-            <DialogTitle className="font-serif text-lg">Set Opening Balance</DialogTitle>
+            <DialogTitle className="font-sans text-lg">Set Opening Balance</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">

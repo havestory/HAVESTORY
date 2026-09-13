@@ -78,17 +78,17 @@ const num = (v: unknown): number => {
   return Number.isFinite(n) ? n : 0;
 };
 const projectStatusStyle: Record<string, string> = {
-  planning: "bg-blue-100 text-blue-600",
-  in_progress: "bg-stone-100 text-stone-600",
-  review: "bg-yellow-100 text-yellow-600",
-  completed: "bg-green-100 text-green-600",
-  on_hold: "bg-gray-100 text-gray-500",
+  planning: "bg-admin-brand-soft text-admin-brand-ink",
+  in_progress: "bg-admin-subtle text-admin-muted",
+  review: "bg-admin-warning-soft text-admin-warning",
+  completed: "bg-admin-success-soft text-admin-success",
+  on_hold: "bg-admin-subtle text-admin-muted",
 };
 const invoiceStatusStyle: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-600",
-  paid: "bg-green-100 text-green-600",
-  overdue: "bg-red-100 text-red-600",
-  draft: "bg-gray-100 text-gray-500",
+  pending: "bg-admin-warning-soft text-admin-warning",
+  paid: "bg-admin-success-soft text-admin-success",
+  overdue: "bg-admin-danger-soft text-admin-danger",
+  draft: "bg-admin-subtle text-admin-muted",
 };
 
 const buildAgreementTemplates = (businessName: string) => {
@@ -170,41 +170,41 @@ function ClientFormModal({
     });
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-admin-inverse/60 backdrop-blur-sm">
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md" style={{ maxHeight: "calc(100vh - 48px)" }}>
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-            <h2 className="font-bold text-gray-900 text-lg">{title}</h2>
-            <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
-              <X size={18} className="text-gray-400" />
+        <div className="bg-admin-surface rounded-2xl shadow-2xl w-full max-w-md" style={{ maxHeight: "calc(100vh - 48px)" }}>
+          <div className="flex items-center justify-between px-6 py-4 border-b border-admin-border">
+            <h2 className="font-bold text-admin-ink text-lg">{title}</h2>
+            <button onClick={onClose} className="inline-flex items-center justify-center p-1.5 hover:bg-admin-subtle rounded-lg transition-colors">
+              <X size={18} className="text-admin-muted" />
             </button>
           </div>
           <div className="p-6 space-y-4 overflow-y-auto" style={{ maxHeight: "calc(100vh - 130px)" }}>
             <div>
-              <label className="text-xs font-semibold text-gray-500 block mb-1">Full Name <span className="text-amber-500">*</span></label>
+              <label className="text-xs font-semibold text-admin-muted block mb-1">Full Name <span className="text-admin-warning">*</span></label>
               <input
                 value={form.name}
                 onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
                 placeholder="Enter full name"
-                className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-amber-400 transition-colors"
+                className="w-full border border-admin-border rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-admin-warning-line transition-colors"
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-500 block mb-1">Business Name</label>
+              <label className="text-xs font-semibold text-admin-muted block mb-1">Business Name</label>
               <input
                 value={form.businessName}
                 onChange={e => setForm(p => ({ ...p, businessName: e.target.value }))}
                 placeholder="Enter business name"
-                className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-amber-400 transition-colors"
+                className="w-full border border-admin-border rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-admin-warning-line transition-colors"
               />
             </div>
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-semibold text-gray-500">Phone Numbers</label>
+                <label className="text-xs font-semibold text-admin-muted">Phone Numbers</label>
                 <button
                   type="button"
                   onClick={addPhone}
-                  className="flex items-center gap-1 text-[11px] font-semibold text-amber-600 hover:text-amber-700"
+                  className="flex items-center gap-1 text-[11px] font-semibold text-admin-warning hover:text-admin-warning"
                 >
                   <Plus size={11} /> Add another
                 </button>
@@ -212,8 +212,8 @@ function ClientFormModal({
               <div className="space-y-2">
                 {form.phones.map((p, i) => (
                   <div key={i} className="flex items-center gap-2">
-                    <div className="flex items-center flex-1 border border-gray-200 rounded-xl pl-3 pr-1 focus-within:border-amber-400 transition-colors">
-                      <Phone size={13} className="text-gray-300 shrink-0" />
+                    <div className="flex items-center flex-1 border border-admin-border rounded-xl pl-3 pr-1 focus-within:border-admin-warning-line transition-colors">
+                      <Phone size={13} className="text-admin-muted shrink-0" />
                       <input
                         value={p}
                         onChange={e => updatePhone(i, e.target.value)}
@@ -226,7 +226,7 @@ function ClientFormModal({
                       <button
                         type="button"
                         onClick={() => removePhone(i)}
-                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        className="inline-flex items-center justify-center p-2 text-admin-muted hover:text-admin-danger hover:bg-admin-danger-soft rounded-lg transition-colors"
                         aria-label="Remove phone"
                       >
                         <X size={14} />
@@ -237,40 +237,40 @@ function ClientFormModal({
               </div>
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-500 block mb-1">Email</label>
+              <label className="text-xs font-semibold text-admin-muted block mb-1">Email</label>
               <input
                 value={form.email}
                 onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
                 placeholder="Enter email address"
                 type="email"
-                className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-amber-400 transition-colors"
+                className="w-full border border-admin-border rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-admin-warning-line transition-colors"
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-500 block mb-1">Address</label>
+              <label className="text-xs font-semibold text-admin-muted block mb-1">Address</label>
               <textarea
                 value={form.address}
                 onChange={e => setForm(p => ({ ...p, address: e.target.value }))}
                 placeholder={"House / Building\nStreet / Area\nCity"}
                 rows={3}
-                className="w-full resize-y border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm leading-relaxed outline-none focus:border-amber-400 transition-colors"
+                className="w-full resize-y border border-admin-border rounded-xl px-3.5 py-2.5 text-sm leading-relaxed outline-none focus:border-admin-warning-line transition-colors"
               />
-              <p className="mt-1 text-[10px] leading-relaxed text-gray-400">Use a new line for each address part. Line breaks will be kept on customer cards and shipping labels.</p>
+              <p className="mt-1 text-[10px] leading-relaxed text-admin-muted">Use a new line for each address part. Line breaks will be kept on customer cards and shipping labels.</p>
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-500 block mb-1">Notes</label>
+              <label className="text-xs font-semibold text-admin-muted block mb-1">Notes</label>
               <textarea
                 value={form.notes}
                 onChange={e => setForm(p => ({ ...p, notes: e.target.value }))}
                 placeholder="Add notes about this client"
                 rows={3}
-                className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-amber-400 transition-colors resize-none"
+                className="w-full border border-admin-border rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-admin-warning-line transition-colors resize-none"
               />
             </div>
             <button
               onClick={onSubmit}
               disabled={isSaving || !form.name.trim()}
-              className="w-full py-3 bg-gradient-to-r from-amber-500 to-stone-600 text-white text-sm font-bold rounded-xl hover:opacity-90 disabled:opacity-60 transition-all"
+              className="w-full py-3 bg-admin-brand text-white text-sm font-bold rounded-xl hover:opacity-90 disabled:opacity-60 transition-all"
             >
               {isSaving ? "Saving..." : title}
             </button>
@@ -295,21 +295,21 @@ function CardMenu({ onEdit, onDelete, canDelete }: { onEdit: () => void; onDelet
     <div ref={ref} className="relative">
       <button
         onClick={e => { e.stopPropagation(); setOpen(o => !o); }}
-        className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+        className="inline-flex items-center justify-center p-1.5 rounded-lg text-admin-muted hover:bg-admin-subtle hover:text-admin-muted transition-colors"
       >
         <MoreVertical size={16} />
       </button>
       {open && (
-        <div className="absolute right-0 top-8 z-20 bg-white border border-gray-100 rounded-xl shadow-lg py-1 w-32 text-sm">
+        <div className="absolute right-0 top-8 z-20 bg-admin-surface border border-admin-border rounded-xl shadow-lg py-1 w-32 text-sm">
           <button
             onClick={() => { setOpen(false); onEdit(); }}
-            className="flex items-center gap-2 w-full px-3 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-2 w-full px-3 py-2 text-admin-ink hover:bg-admin-surface transition-colors"
           >
-            <Pencil size={13} className="text-blue-500" /> Edit
+            <Pencil size={13} className="text-admin-brand-ink" /> Edit
           </button>
           {canDelete&&<button
             onClick={() => { setOpen(false); onDelete(); }}
-            className="flex items-center gap-2 w-full px-3 py-2 text-red-500 hover:bg-red-50 transition-colors"
+            className="flex items-center gap-2 w-full px-3 py-2 text-admin-danger hover:bg-admin-danger-soft transition-colors"
           >
             <Trash2 size={13} /> Delete
           </button>}
@@ -565,25 +565,25 @@ export default function AdminClients() {
       <div className="flex items-start sm:items-center justify-between gap-3 flex-wrap">
         <div>
           <div className="flex items-center gap-2">
-            <Users size={22} className="text-amber-500" />
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Clients</h1>
+            <Users size={22} className="text-admin-warning" />
+            <h1 className="text-xl sm:text-2xl font-bold text-admin-ink">Clients</h1>
           </div>
-          <p className="text-xs sm:text-sm text-gray-400 mt-0.5">Manage your client database</p>
+          <p className="text-xs sm:text-sm text-admin-muted mt-0.5">Manage your client database</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={handleRefresh}
             disabled={isSpinning}
             aria-label="Refresh clients"
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-60"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-lg border border-admin-border text-sm text-admin-muted hover:bg-admin-surface transition-colors disabled:opacity-60"
           >
             <RefreshCw size={14} className={isSpinning ? "animate-spin" : ""} />
             <span className="hidden sm:inline">Refresh</span>
           </button>
-          <button onClick={exportCsv} className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+          <button onClick={exportCsv} className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-admin-border text-sm text-admin-muted hover:bg-admin-surface transition-colors">
             <Download size={13} /><span className="hidden sm:inline">Export CSV</span><span className="sm:hidden">CSV</span>
           </button>
-          <button onClick={openAdd} className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-stone-600 text-white text-sm font-semibold shadow-sm hover:opacity-90 transition-all whitespace-nowrap">
+          <button onClick={openAdd} className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-admin-brand text-white text-sm font-semibold shadow-sm hover:opacity-90 transition-all whitespace-nowrap">
             <Plus size={14} /> New Client
           </button>
         </div>
@@ -592,43 +592,43 @@ export default function AdminClients() {
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
-          { label: "Total Clients", val: clientPage?.stats.total || 0, color: "from-amber-500 to-stone-600" },
-          { label: "With Business", val: withBusiness, color: "from-stone-500 to-blue-500" },
-          { label: "With Email", val: withEmail, color: "from-blue-500 to-cyan-500" },
-          { label: "With Phone", val: withPhone, color: "from-orange-400 to-amber-500" },
+          { label: "Total Clients", val: clientPage?.stats.total || 0 },
+          { label: "With Business", val: withBusiness },
+          { label: "With Email", val: withEmail },
+          { label: "With Phone", val: withPhone },
         ].map(c => (
-          <div key={c.label} className="bg-white border border-gray-100 rounded-xl px-3 sm:px-5 py-3 sm:py-4 shadow-sm">
-            <div className={`text-lg sm:text-2xl font-bold bg-gradient-to-r ${c.color} bg-clip-text text-transparent`}>{c.val}</div>
-            <div className="text-xs sm:text-sm text-gray-400 mt-0.5">{c.label}</div>
+          <div key={c.label} className="bg-admin-surface border border-admin-border rounded-xl px-3 sm:px-5 py-3 sm:py-4 shadow-sm">
+            <div className={`text-lg sm:text-2xl font-bold text-admin-brand-ink`}>{c.val}</div>
+            <div className="text-xs sm:text-sm text-admin-muted mt-0.5">{c.label}</div>
           </div>
         ))}
       </div>
 
       {/* Search */}
-      <div className="bg-white border border-gray-100 rounded-xl shadow-sm">
+      <div className="bg-admin-surface border border-admin-border rounded-xl shadow-sm">
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3">
-          <Search size={15} className="text-gray-400 shrink-0" />
+          <Search size={15} className="text-admin-muted shrink-0" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search clients..."
-            className="flex-1 min-w-0 text-sm outline-none placeholder:text-gray-400"
+            className="flex-1 min-w-0 text-sm outline-none placeholder:text-admin-muted"
           />
           {search && (
-            <button onClick={() => setSearch("")} className="text-gray-400 hover:text-gray-600">
+            <button onClick={() => setSearch("")} className="text-admin-muted hover:text-admin-muted">
               <X size={14} />
             </button>
           )}
-          <span className="text-[10px] sm:text-xs text-gray-400 shrink-0">{clientPage?.total || 0} found</span>
+          <span className="text-[10px] sm:text-xs text-admin-muted shrink-0">{clientPage?.total || 0} found</span>
         </div>
       </div>
 
       {/* Client Cards Grid */}
       {filtered.length === 0 ? (
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm py-20 text-center">
-          <Users size={40} className="mx-auto mb-3 text-gray-200" />
-          <p className="font-medium text-gray-400">{search ? "No clients match your search" : "No clients yet"}</p>
-          {!search && <p className="text-xs text-gray-300 mt-1">Click "New Client" to add your first client</p>}
+        <div className="bg-admin-surface border border-admin-border rounded-2xl shadow-sm py-20 text-center">
+          <Users size={40} className="mx-auto mb-3 text-admin-muted" />
+          <p className="font-medium text-admin-muted">{search ? "No clients match your search" : "No clients yet"}</p>
+          {!search && <p className="text-xs text-admin-muted mt-1">Click "New Client" to add your first client</p>}
         </div>
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
@@ -647,18 +647,18 @@ export default function AdminClients() {
               <div
                 key={client.id}
                 onClick={() => setViewingClient(client)}
-                className="h-full min-h-[245px] bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md hover:border-stone-100 transition-all p-3 sm:p-5 flex flex-col gap-2 sm:gap-3 cursor-pointer"
+                className="h-full min-h-[245px] bg-admin-surface border border-admin-border rounded-2xl shadow-sm hover:shadow-md hover:border-admin-border transition-all p-3 sm:p-5 flex flex-col gap-2 sm:gap-3 cursor-pointer"
               >
                 {/* Top row: avatar + name + menu */}
                 <div className="flex items-start justify-between gap-2 sm:gap-3">
                   <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                    <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-stone-100 to-amber-100 flex items-center justify-center shrink-0">
-                      <UserCircle2 size={20} className="text-stone-400 sm:hidden" />
-                      <UserCircle2 size={24} className="text-stone-400 hidden sm:block" />
+                    <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-admin-brand flex items-center justify-center shrink-0">
+                      <UserCircle2 size={20} className="text-admin-muted sm:hidden" />
+                      <UserCircle2 size={24} className="text-admin-muted hidden sm:block" />
                     </div>
                     <div className="min-w-0">
-                      <div className="font-semibold text-gray-900 text-[13px] sm:text-sm leading-snug truncate">{client.name}</div>
-                      <div className="text-[10px] sm:text-xs text-gray-400 font-medium mt-0.5">{code}</div>
+                      <div className="font-semibold text-admin-ink text-[13px] sm:text-sm leading-snug truncate">{client.name}</div>
+                      <div className="text-[10px] sm:text-xs text-admin-muted font-medium mt-0.5">{code}</div>
                     </div>
                   </div>
                   <div onClick={e => e.stopPropagation()}>
@@ -667,7 +667,7 @@ export default function AdminClients() {
                 </div>
 
                 {/* Consistent identity row keeps every card aligned */}
-                <div className={`min-h-5 font-bold text-[13px] sm:text-[15px] leading-snug truncate ${client.businessName ? "text-gray-900" : "text-gray-300"}`}>
+                <div className={`min-h-5 font-bold text-[13px] sm:text-[15px] leading-snug truncate ${client.businessName ? "text-admin-ink" : "text-admin-muted"}`}>
                   {client.businessName || "Individual customer"}
                 </div>
 
@@ -679,9 +679,9 @@ export default function AdminClients() {
                         key={i}
                         href={`tel:${ph.replace(/\s+/g, "")}`}
                         onClick={e => e.stopPropagation()}
-                        className="flex items-center gap-1.5 sm:gap-2 text-[12px] sm:text-sm text-gray-700 hover:text-amber-600 transition-colors"
+                        className="flex items-center gap-1.5 sm:gap-2 text-[12px] sm:text-sm text-admin-ink hover:text-admin-warning transition-colors"
                       >
-                        <Phone size={12} className="text-red-400 shrink-0" />
+                        <Phone size={12} className="text-admin-danger shrink-0" />
                         <span className="truncate">{ph}</span>
                       </a>
                     ))}
@@ -690,15 +690,15 @@ export default function AdminClients() {
 
                 {/* Address */}
                 {client.address && (
-                  <div className="flex items-start gap-1.5 sm:gap-2 text-[12px] sm:text-sm text-gray-600 leading-snug">
-                    <MapPin size={12} className="text-red-400 shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-1.5 sm:gap-2 text-[12px] sm:text-sm text-admin-muted leading-snug">
+                    <MapPin size={12} className="text-admin-danger shrink-0 mt-0.5" />
                     <span className="line-clamp-3 whitespace-pre-line break-words">{client.address}</span>
                   </div>
                 )}
 
                 {/* Email (if no phone/address) */}
                 {phones.length === 0 && !client.address && client.email && (
-                  <div className="text-[12px] sm:text-sm text-gray-500 truncate">{client.email}</div>
+                  <div className="text-[12px] sm:text-sm text-admin-muted truncate">{client.email}</div>
                 )}
 
                 {/* Activity stats — projects · invoiced row, paid row right
@@ -706,20 +706,20 @@ export default function AdminClients() {
                     stays on the far right. Stacking the paid amount avoids
                     the mobile overflow we used to see on grid-cols-2 cards. */}
                 {(stats.projectCount > 0 || stats.invoiceCount > 0) && (
-                  <div className="pt-2 mt-auto border-t border-gray-100">
+                  <div className="pt-2 mt-auto border-t border-admin-border">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex flex-col gap-1 min-w-0 flex-1">
                         <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-[11px] sm:text-xs">
                           {stats.projectCount > 0 && (
-                            <div className="flex items-center gap-1 text-stone-600 font-semibold">
+                            <div className="flex items-center gap-1 text-admin-muted font-semibold">
                               <Briefcase size={11} className="shrink-0" />
                               <span>{stats.projectCount} {stats.projectCount === 1 ? "project" : "projects"}</span>
                             </div>
                           )}
                           {stats.invoiceCount > 0 && (
                             <>
-                              {stats.projectCount > 0 && <span className="text-gray-300">·</span>}
-                              <div className="flex items-center gap-1 text-amber-600 font-semibold min-w-0">
+                              {stats.projectCount > 0 && <span className="text-admin-muted">·</span>}
+                              <div className="flex items-center gap-1 text-admin-warning font-semibold min-w-0">
                                 <Receipt size={11} className="shrink-0" />
                                 <span className="truncate">{rs(stats.invoiced)}</span>
                               </div>
@@ -727,26 +727,26 @@ export default function AdminClients() {
                           )}
                         </div>
                         {stats.paid > 0 && (
-                          <div className="flex items-center gap-1 text-[11px] sm:text-xs text-green-600 font-semibold min-w-0">
+                          <div className="flex items-center gap-1 text-[11px] sm:text-xs text-admin-success font-semibold min-w-0">
                             <CheckCircle2 size={11} className="shrink-0" />
                             <span className="truncate">{rs(stats.paid)} paid</span>
                           </div>
                         )}
                       </div>
-                      <ChevronRight size={12} className="text-gray-300 shrink-0" />
+                      <ChevronRight size={12} className="text-admin-muted shrink-0" />
                     </div>
                   </div>
                 )}
 
                 {/* Empty stats — keep the original simple footer */}
                 {stats.projectCount === 0 && stats.invoiceCount === 0 && (
-                  <div className="flex items-center justify-between gap-1 pt-2 mt-auto border-t border-gray-100">
-                    <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs text-gray-400 min-w-0">
-                      <FileText size={11} className="text-gray-300 shrink-0" />
+                  <div className="flex items-center justify-between gap-1 pt-2 mt-auto border-t border-admin-border">
+                    <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs text-admin-muted min-w-0">
+                      <FileText size={11} className="text-admin-muted shrink-0" />
                       <span className="truncate">No activity yet</span>
                     </div>
                     {dateLabel && (
-                      <div className={`text-[10px] sm:text-xs shrink-0 truncate ${wasEdited ? "text-amber-500 font-semibold" : "text-gray-400"}`}>{dateLabel}</div>
+                      <div className={`text-[10px] sm:text-xs shrink-0 truncate ${wasEdited ? "text-admin-warning font-semibold" : "text-admin-muted"}`}>{dateLabel}</div>
                     )}
                   </div>
                 )}
@@ -757,10 +757,10 @@ export default function AdminClients() {
       )}
 
       {(clientPage?.totalPages || 1) > 1 && (
-        <div className="flex items-center justify-center gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3 shadow-sm">
-          <button type="button" disabled={page <= 1 || isFetching} onClick={() => setPage(value => Math.max(1, value - 1))} className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-bold text-gray-600 disabled:opacity-40">Previous</button>
-          <span className="text-xs font-semibold text-gray-500">Page {clientPage?.page || page} of {clientPage?.totalPages || 1}</span>
-          <button type="button" disabled={page >= (clientPage?.totalPages || 1) || isFetching} onClick={() => setPage(value => value + 1)} className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-bold text-gray-600 disabled:opacity-40">Next</button>
+        <div className="flex items-center justify-center gap-3 rounded-xl border border-admin-border bg-admin-surface px-4 py-3 shadow-sm">
+          <button type="button" disabled={page <= 1 || isFetching} onClick={() => setPage(value => Math.max(1, value - 1))} className="rounded-lg border border-admin-border px-3 py-2 text-xs font-bold text-admin-muted disabled:opacity-40">Previous</button>
+          <span className="text-xs font-semibold text-admin-muted">Page {clientPage?.page || page} of {clientPage?.totalPages || 1}</span>
+          <button type="button" disabled={page >= (clientPage?.totalPages || 1) || isFetching} onClick={() => setPage(value => value + 1)} className="rounded-lg border border-admin-border px-3 py-2 text-xs font-bold text-admin-muted disabled:opacity-40">Next</button>
         </div>
       )}
 
@@ -782,148 +782,148 @@ export default function AdminClients() {
           return bd - ad;
         });
         return (
-          <div className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setViewingClient(null)}>
+          <div className="fixed inset-0 bg-admin-inverse/40 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setViewingClient(null)}>
             <div
-              className="bg-white w-full sm:max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-xl max-h-[92vh] sm:max-h-[85vh] flex flex-col"
+              className="bg-admin-surface w-full sm:max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-xl max-h-[92vh] sm:max-h-[85vh] flex flex-col"
               onClick={e => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="flex items-start justify-between gap-3 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-100 sticky top-0 bg-white rounded-t-2xl">
+              <div className="flex items-start justify-between gap-3 px-4 sm:px-5 py-3 sm:py-4 border-b border-admin-border sticky top-0 bg-admin-surface rounded-t-2xl">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-stone-100 to-amber-100 flex items-center justify-center shrink-0">
-                    <UserCircle2 size={22} className="text-stone-400" />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-admin-brand flex items-center justify-center shrink-0">
+                    <UserCircle2 size={22} className="text-admin-muted" />
                   </div>
                   <div className="min-w-0">
-                    <div className="font-semibold text-gray-900 text-[15px] sm:text-base leading-snug truncate">{c.name}</div>
-                    <div className="text-[11px] sm:text-xs text-gray-400 font-medium mt-0.5">{code}{c.businessName ? ` · ${c.businessName}` : ""}</div>
+                    <div className="font-semibold text-admin-ink text-[15px] sm:text-base leading-snug truncate">{c.name}</div>
+                    <div className="text-[11px] sm:text-xs text-admin-muted font-medium mt-0.5">{code}{c.businessName ? ` · ${c.businessName}` : ""}</div>
                   </div>
                 </div>
-                <button onClick={() => setViewingClient(null)} aria-label="Close" className="text-gray-400 hover:text-gray-600 shrink-0 p-1 -mr-1">
+                <button onClick={() => setViewingClient(null)} aria-label="Close" className="text-admin-muted hover:text-admin-muted shrink-0 p-1 -mr-1">
                   <X size={20} />
                 </button>
               </div>
 
               {/* Summary stats */}
-              <div className="grid grid-cols-3 gap-2 sm:gap-3 px-4 sm:px-5 py-3 border-b border-gray-100 bg-gray-50/50">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3 px-4 sm:px-5 py-3 border-b border-admin-border bg-admin-surface/50">
                 <div className="text-center">
-                  <div className="text-lg sm:text-xl font-bold text-stone-600">{stats.projectCount}</div>
-                  <div className="text-[10px] sm:text-xs text-gray-500 mt-0.5">Projects</div>
+                  <div className="text-lg sm:text-xl font-bold text-admin-muted">{stats.projectCount}</div>
+                  <div className="text-[10px] sm:text-xs text-admin-muted mt-0.5">Projects</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-sm sm:text-lg font-bold text-amber-600 truncate">{rs(stats.invoiced)}</div>
-                  <div className="text-[10px] sm:text-xs text-gray-500 mt-0.5">Invoiced</div>
+                  <div className="text-sm sm:text-lg font-bold text-admin-warning truncate">{rs(stats.invoiced)}</div>
+                  <div className="text-[10px] sm:text-xs text-admin-muted mt-0.5">Invoiced</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-sm sm:text-lg font-bold text-green-600 truncate">{rs(stats.paid)}</div>
-                  <div className="text-[10px] sm:text-xs text-gray-500 mt-0.5">Paid</div>
+                  <div className="text-sm sm:text-lg font-bold text-admin-success truncate">{rs(stats.paid)}</div>
+                  <div className="text-[10px] sm:text-xs text-admin-muted mt-0.5">Paid</div>
                 </div>
               </div>
 
               {/* Scrollable content */}
               <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-5">
                 {activityLoading && !activityData && (
-                  <div className="rounded-2xl border border-amber-100 bg-amber-50/60 px-4 py-3 text-xs font-semibold text-amber-700">Loading client activity…</div>
+                  <div className="rounded-2xl border border-admin-warning-line bg-admin-warning-soft/60 px-4 py-3 text-xs font-semibold text-admin-warning">Loading client activity…</div>
                 )}
                 {/* Full customer profile */}
                 <div>
                   <div className="mb-2 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                      <UserCircle2 size={13} className="text-stone-500" /> Customer Details
+                    <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-admin-muted">
+                      <UserCircle2 size={13} className="text-admin-muted" /> Customer Details
                     </div>
-                    <button onClick={() => { setViewingClient(null); setShippingClient(c); }} className="flex items-center gap-1 rounded-lg bg-blue-50 px-2.5 py-1.5 text-[11px] font-bold text-blue-700 hover:bg-blue-100">
+                    <button onClick={() => { setViewingClient(null); setShippingClient(c); }} className="flex items-center gap-1 rounded-lg bg-admin-brand-soft px-2.5 py-1.5 text-[11px] font-bold text-admin-brand-ink hover:bg-admin-brand-soft">
                       <PackageCheck size={12}/> Shipping Details
                     </button>
                   </div>
-                  <div className="grid gap-2 rounded-2xl border border-gray-100 bg-gray-50/70 p-3 sm:grid-cols-2">
-                    <div className="rounded-xl bg-white p-3">
-                      <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Customer</div>
-                      <div className="mt-1 text-sm font-bold text-gray-900">{c.name}</div>
-                      <div className="text-xs text-gray-500">{c.businessName || "Individual customer"}</div>
+                  <div className="grid gap-2 rounded-2xl border border-admin-border bg-admin-surface/70 p-3 sm:grid-cols-2">
+                    <div className="rounded-xl bg-admin-surface p-3">
+                      <div className="text-[10px] font-bold uppercase tracking-wide text-admin-muted">Customer</div>
+                      <div className="mt-1 text-sm font-bold text-admin-ink">{c.name}</div>
+                      <div className="text-xs text-admin-muted">{c.businessName || "Individual customer"}</div>
                     </div>
-                    <div className="rounded-xl bg-white p-3">
-                      <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Phone Numbers</div>
-                      <div className="mt-1 space-y-1">{splitPhones(c.phone).filter(Boolean).map((phone,index)=><a key={index} href={`tel:${phone.replace(/\s+/g,"")}`} className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 hover:text-amber-600"><Phone size={12} className="text-amber-500"/>{phone}</a>)}
-                      {!c.phone&&<div className="text-xs text-gray-400">Not added</div>}</div>
+                    <div className="rounded-xl bg-admin-surface p-3">
+                      <div className="text-[10px] font-bold uppercase tracking-wide text-admin-muted">Phone Numbers</div>
+                      <div className="mt-1 space-y-1">{splitPhones(c.phone).filter(Boolean).map((phone,index)=><a key={index} href={`tel:${phone.replace(/\s+/g,"")}`} className="flex items-center gap-1.5 text-xs font-semibold text-admin-ink hover:text-admin-warning"><Phone size={12} className="text-admin-warning"/>{phone}</a>)}
+                      {!c.phone&&<div className="text-xs text-admin-muted">Not added</div>}</div>
                     </div>
-                    <div className="rounded-xl bg-white p-3">
-                      <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Email</div>
-                      <div className="mt-1 flex items-start gap-1.5 break-all text-xs text-gray-700"><Mail size={12} className="mt-0.5 shrink-0 text-blue-500"/>{c.email||"Not added"}</div>
+                    <div className="rounded-xl bg-admin-surface p-3">
+                      <div className="text-[10px] font-bold uppercase tracking-wide text-admin-muted">Email</div>
+                      <div className="mt-1 flex items-start gap-1.5 break-all text-xs text-admin-ink"><Mail size={12} className="mt-0.5 shrink-0 text-admin-brand-ink"/>{c.email||"Not added"}</div>
                     </div>
-                    <div className="rounded-xl bg-white p-3">
-                      <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Main Address</div>
-                      <div className="mt-1 flex items-start gap-1.5 text-xs leading-relaxed text-gray-700"><MapPin size={12} className="mt-0.5 shrink-0 text-red-400"/><span className="whitespace-pre-line break-words">{c.address||"Not added"}</span></div>
+                    <div className="rounded-xl bg-admin-surface p-3">
+                      <div className="text-[10px] font-bold uppercase tracking-wide text-admin-muted">Main Address</div>
+                      <div className="mt-1 flex items-start gap-1.5 text-xs leading-relaxed text-admin-ink"><MapPin size={12} className="mt-0.5 shrink-0 text-admin-danger"/><span className="whitespace-pre-line break-words">{c.address||"Not added"}</span></div>
                     </div>
-                    {c.notes&&<div className="rounded-xl bg-white p-3 sm:col-span-2"><div className="text-[10px] font-bold uppercase tracking-wide text-gray-400">Notes</div><div className="mt-1 whitespace-pre-wrap text-xs leading-relaxed text-gray-700">{c.notes}</div></div>}
+                    {c.notes&&<div className="rounded-xl bg-admin-surface p-3 sm:col-span-2"><div className="text-[10px] font-bold uppercase tracking-wide text-admin-muted">Notes</div><div className="mt-1 whitespace-pre-wrap text-xs leading-relaxed text-admin-ink">{c.notes}</div></div>}
                   </div>
                 </div>
-                {isOwner && <div className="rounded-2xl border border-violet-100 bg-violet-50/60 p-3 sm:p-4">
+                {isOwner && <div className="rounded-2xl border border-admin-brand-line bg-admin-brand-soft/60 p-3 sm:p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-violet-700"><ShieldCheck size={14}/> Identity Verification</div>
-                      <div className="mt-1 text-xs text-gray-500">Owner only · encrypted live selfie + ID front/back</div>
+                      <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-admin-brand-ink"><ShieldCheck size={14}/> Identity Verification</div>
+                      <div className="mt-1 text-xs text-admin-muted">Owner only · encrypted live selfie + ID front/back</div>
                     </div>
-                    <span className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase ${verification?.status === "approved" ? "bg-emerald-100 text-emerald-700" : verification?.status === "submitted" ? "bg-amber-100 text-amber-700" : verification?.status === "rejected" ? "bg-red-100 text-red-700" : "bg-white text-gray-500"}`}>{verification?.status || "not started"}</span>
+                    <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase ${verification?.status === "approved" ? "bg-admin-success-soft text-admin-success" : verification?.status === "submitted" ? "bg-admin-warning-soft text-admin-warning" : verification?.status === "rejected" ? "bg-admin-danger-soft text-admin-danger" : "bg-admin-surface text-admin-muted"}`}>{verification?.status || "not started"}</span>
                   </div>
-                  {verificationError && <div className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-600">{verificationError}</div>}
+                  {verificationError && <div className="mt-2 rounded-lg bg-admin-danger-soft px-3 py-2 text-xs font-semibold text-admin-danger">{verificationError}</div>}
                   {verificationUrl && <div className="mt-3 flex items-center gap-2">
-                    <input readOnly value={verificationUrl} className="min-w-0 flex-1 rounded-lg border border-violet-100 bg-white px-3 py-2 text-[11px] text-gray-600" />
-                    <button onClick={() => void copyVerificationLink()} className="rounded-lg bg-white p-2 text-violet-700" title="Copy secure verification link"><Copy size={15}/></button>
+                    <input readOnly value={verificationUrl} className="min-w-0 flex-1 rounded-lg border border-admin-brand-line bg-admin-surface px-3 py-2 text-[11px] text-admin-muted" />
+                    <button onClick={() => void copyVerificationLink()} className="rounded-lg bg-admin-surface p-2 text-admin-brand-ink" title="Copy secure verification link"><Copy size={15}/></button>
                   </div>}
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {!["submitted","approved"].includes(verification?.status) && <button disabled={verificationBusy} onClick={() => void generateVerificationLink(c.id)} className="rounded-lg bg-violet-600 px-3 py-2 text-xs font-bold text-white disabled:opacity-60">{verificationBusy ? "Creating…" : verification?.status === "rejected" ? "Create new verification link" : "Generate secure link"}</button>}
-                    {verification?.exists && <button onClick={() => setLocation(`/admin/client-verification/${c.id}`)} className="rounded-lg border border-violet-200 bg-white px-3 py-2 text-xs font-bold text-violet-700">Open A4 report / review</button>}
+                    {!["submitted","approved"].includes(verification?.status) && <button disabled={verificationBusy} onClick={() => void generateVerificationLink(c.id)} className="rounded-lg bg-admin-brand px-3 py-2 text-xs font-bold text-white disabled:opacity-60">{verificationBusy ? "Creating…" : verification?.status === "rejected" ? "Create new verification link" : "Generate secure link"}</button>}
+                    {verification?.exists && <button onClick={() => setLocation(`/admin/client-verification/${c.id}`)} className="rounded-lg border border-admin-brand-line bg-admin-surface px-3 py-2 text-xs font-bold text-admin-brand-ink">Open A4 report / review</button>}
                   </div>
-                  <p className="mt-2 text-[10px] leading-4 text-gray-400">The share token is shown only when generated. The customer link never exposes saved Client data.</p>
+                  <p className="mt-2 text-[10px] leading-4 text-admin-muted">The share token is shown only when generated. The customer link never exposes saved Client data.</p>
                 </div>}
-                {isOwner && <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3 sm:p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-2"><div><div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-800"><FileSignature size={14}/> Client Agreements</div><div className="mt-1 text-xs text-gray-500">Owner only · immutable agreement snapshot + secure online e-sign</div></div><button onClick={()=>setShowAgreementForm(v=>!v)} className="rounded-lg bg-slate-950 px-3 py-2 text-xs font-bold text-white">{showAgreementForm?"Cancel":"New agreement"}</button></div>
-                  {showAgreementForm&&<div className="mt-3 space-y-3 rounded-xl border bg-white p-3"><label className="text-[10px] font-black uppercase tracking-wide text-gray-500">Agreement template<select value={agreementTemplate} onChange={e=>applyAgreementTemplate(e.target.value)} className="mt-1 w-full rounded-lg border px-3 py-2 text-xs normal-case">{agreementTemplates.map(t=><option key={t.id} value={t.id}>{t.label}</option>)}</select></label><div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800">Agreement issuer: {businessName || "Set the business name in General Settings"}</div><input value={agreementTitle} onChange={e=>setAgreementTitle(e.target.value)} className="w-full rounded-lg border px-3 py-2 text-sm font-bold" placeholder="Agreement title"/><textarea rows={14} value={agreementText} onChange={e=>setAgreementText(e.target.value)} className="w-full rounded-lg border px-3 py-2 text-xs leading-5" placeholder="Agreement terms"/><div className="rounded-lg bg-amber-50 p-2 text-[10px] leading-4 text-amber-700">These are editable operational templates, not a substitute for legal advice. Review the final wording for your exact service. Once the secure signing link is created, that agreement snapshot is locked into its audit record.</div><button disabled={agreementBusy||agreementText.trim().length<20||!agreementTitle.trim()||!businessName} onClick={()=>void createAgreement(c.id)} className="rounded-lg bg-amber-600 px-4 py-2 text-xs font-bold text-white disabled:opacity-40">{agreementBusy?"Creating…":"Create secure signing link"}</button></div>}
-                  {agreementUrl&&<div className="mt-3 flex gap-2"><input readOnly value={agreementUrl} className="min-w-0 flex-1 rounded-lg border bg-white px-3 py-2 text-[11px]"/><button onClick={()=>navigator.clipboard.writeText(agreementUrl).catch(()=>{})} className="rounded-lg border bg-white p-2"><Copy size={14}/></button></div>}
-                  {agreements.length>0&&<div className="mt-3 space-y-2">{agreements.slice(0,5).map(a=><div key={a.id} className="flex items-center justify-between gap-2 rounded-lg bg-white px-3 py-2"><div className="min-w-0"><div className="truncate text-xs font-bold">{a.title}</div><div className="text-[10px] uppercase text-gray-400">{a.status} · {a.brand_name||businessName||"Business name not set"} · {new Date(a.created_at||a.createdAt).toLocaleDateString("en-LK")}</div></div><button onClick={()=>setLocation(`/admin/client-agreement/${a.id}`)} className="shrink-0 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold">Audit / A4</button></div>)}</div>}
-                  <p className="mt-2 text-[10px] leading-4 text-gray-400">Signing records consent, the exact document SHA-256, signed time and encrypted audit evidence. Agreement identity and issuer come from General Settings.</p>
+                {isOwner && <div className="rounded-2xl border border-admin-border bg-admin-surface/70 p-3 sm:p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2"><div><div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-admin-ink"><FileSignature size={14}/> Client Agreements</div><div className="mt-1 text-xs text-admin-muted">Owner only · immutable agreement snapshot + secure online e-sign</div></div><button onClick={()=>setShowAgreementForm(v=>!v)} className="rounded-lg bg-admin-inverse px-3 py-2 text-xs font-bold text-white">{showAgreementForm?"Cancel":"New agreement"}</button></div>
+                  {showAgreementForm&&<div className="mt-3 space-y-3 rounded-xl border bg-admin-surface p-3"><label className="text-[10px] font-bold uppercase tracking-wide text-admin-muted">Agreement template<select value={agreementTemplate} onChange={e=>applyAgreementTemplate(e.target.value)} className="mt-1 w-full rounded-lg border px-3 py-2 text-xs normal-case">{agreementTemplates.map(t=><option key={t.id} value={t.id}>{t.label}</option>)}</select></label><div className="rounded-lg border border-admin-warning-line bg-admin-warning-soft px-3 py-2 text-xs font-bold text-admin-warning">Agreement issuer: {businessName || "Set the business name in General Settings"}</div><input value={agreementTitle} onChange={e=>setAgreementTitle(e.target.value)} className="w-full rounded-lg border px-3 py-2 text-sm font-bold" placeholder="Agreement title"/><textarea rows={14} value={agreementText} onChange={e=>setAgreementText(e.target.value)} className="w-full rounded-lg border px-3 py-2 text-xs leading-5" placeholder="Agreement terms"/><div className="rounded-lg bg-admin-warning-soft p-2 text-[10px] leading-4 text-admin-warning">These are editable operational templates, not a substitute for legal advice. Review the final wording for your exact service. Once the secure signing link is created, that agreement snapshot is locked into its audit record.</div><button disabled={agreementBusy||agreementText.trim().length<20||!agreementTitle.trim()||!businessName} onClick={()=>void createAgreement(c.id)} className="rounded-lg bg-admin-warning-solid px-4 py-2 text-xs font-bold text-white disabled:opacity-40">{agreementBusy?"Creating…":"Create secure signing link"}</button></div>}
+                  {agreementUrl&&<div className="mt-3 flex gap-2"><input readOnly value={agreementUrl} className="min-w-0 flex-1 rounded-lg border bg-admin-surface px-3 py-2 text-[11px]"/><button onClick={()=>navigator.clipboard.writeText(agreementUrl).catch(()=>{})} className="rounded-lg border bg-admin-surface p-2"><Copy size={14}/></button></div>}
+                  {agreements.length>0&&<div className="mt-3 space-y-2">{agreements.slice(0,5).map(a=><div key={a.id} className="flex items-center justify-between gap-2 rounded-lg bg-admin-surface px-3 py-2"><div className="min-w-0"><div className="truncate text-xs font-bold">{a.title}</div><div className="text-[10px] uppercase text-admin-muted">{a.status} · {a.brand_name||businessName||"Business name not set"} · {new Date(a.created_at||a.createdAt).toLocaleDateString("en-LK")}</div></div><button onClick={()=>setLocation(`/admin/client-agreement/${a.id}`)} className="shrink-0 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold">Audit / A4</button></div>)}</div>}
+                  <p className="mt-2 text-[10px] leading-4 text-admin-muted">Signing records consent, the exact document SHA-256, signed time and encrypted audit evidence. Agreement identity and issuer come from General Settings.</p>
                 </div>}
                                 {/* Projects */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      <Briefcase size={13} className="text-stone-500" />
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-admin-muted uppercase tracking-wide">
+                      <Briefcase size={13} className="text-admin-muted" />
                       Projects ({sortedProjects.length})
                     </div>
                     {sortedProjects.length > 0 && (
                       <button
                         onClick={() => setLocation("/admin/crm-projects")}
-                        className="text-[11px] text-stone-600 font-semibold hover:underline flex items-center gap-0.5"
+                        className="text-[11px] text-admin-muted font-semibold hover:underline flex items-center gap-0.5"
                       >
                         View all <ChevronRight size={12} />
                       </button>
                     )}
                   </div>
                   {sortedProjects.length === 0 ? (
-                    <div className="text-center py-6 text-xs text-gray-400 bg-gray-50 rounded-xl">No projects linked yet</div>
+                    <div className="text-center py-6 text-xs text-admin-muted bg-admin-surface rounded-xl">No projects linked yet</div>
                   ) : (
                     <div className="space-y-1.5">
                       {sortedProjects.map(p => {
                         const due = p.dueDate ? new Date(p.dueDate) : null;
                         return (
-                          <div key={p.id} className="flex items-center gap-2 sm:gap-3 px-3 py-2.5 bg-gray-50 hover:bg-stone-50 border border-gray-100 rounded-xl transition-colors">
+                          <div key={p.id} className="flex items-center gap-2 sm:gap-3 px-3 py-2.5 bg-admin-surface hover:bg-admin-surface border border-admin-border rounded-xl transition-colors">
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-[11px] font-mono text-gray-400 shrink-0">{p.projectId}</span>
-                                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold capitalize ${projectStatusStyle[p.status] || "bg-gray-100 text-gray-600"}`}>
+                                <span className="text-[11px] font-mono text-admin-muted shrink-0">{p.projectId}</span>
+                                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold capitalize ${projectStatusStyle[p.status] || "bg-admin-subtle text-admin-muted"}`}>
                                   {p.status.replace("_", " ")}
                                 </span>
                               </div>
-                              <div className="text-[13px] font-semibold text-gray-800 truncate mt-0.5">{p.title}</div>
-                              <div className="flex items-center gap-2 text-[11px] text-gray-500 mt-0.5 flex-wrap">
-                                <span className="font-medium text-amber-600">{rs(num(p.totalValue))}</span>
-                                {num(p.amountPaid) > 0 && <span className="text-green-600">· {rs(num(p.amountPaid))} paid</span>}
+                              <div className="text-[13px] font-semibold text-admin-ink truncate mt-0.5">{p.title}</div>
+                              <div className="flex items-center gap-2 text-[11px] text-admin-muted mt-0.5 flex-wrap">
+                                <span className="font-medium text-admin-warning">{rs(num(p.totalValue))}</span>
+                                {num(p.amountPaid) > 0 && <span className="text-admin-success">· {rs(num(p.amountPaid))} paid</span>}
                                 {due && <span>· due {format(due, "dd MMM")}</span>}
                               </div>
                             </div>
                             <button
                               onClick={() => { setViewingClient(null); setLocation(`/admin/crm-projects?edit=${p.id}`); }}
                               aria-label={`Open project ${p.projectId}`}
-                              className="shrink-0 w-8 h-8 rounded-lg bg-white border border-gray-200 hover:bg-stone-100 hover:border-stone-300 text-stone-600 flex items-center justify-center transition-colors"
+                              className="shrink-0 w-8 h-8 rounded-lg bg-admin-surface border border-admin-border hover:bg-admin-subtle hover:border-admin-border text-admin-muted flex items-center justify-center transition-colors"
                             >
                               <ExternalLink size={14} />
                             </button>
@@ -937,45 +937,45 @@ export default function AdminClients() {
                 {/* Invoices */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      <Receipt size={13} className="text-amber-500" />
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-admin-muted uppercase tracking-wide">
+                      <Receipt size={13} className="text-admin-warning" />
                       Invoices ({sortedInvoices.length})
                     </div>
                     {sortedInvoices.length > 0 && (
                       <button
                         onClick={() => setLocation("/admin/invoices")}
-                        className="text-[11px] text-amber-600 font-semibold hover:underline flex items-center gap-0.5"
+                        className="text-[11px] text-admin-warning font-semibold hover:underline flex items-center gap-0.5"
                       >
                         View all <ChevronRight size={12} />
                       </button>
                     )}
                   </div>
                   {sortedInvoices.length === 0 ? (
-                    <div className="text-center py-6 text-xs text-gray-400 bg-gray-50 rounded-xl">No invoices linked yet</div>
+                    <div className="text-center py-6 text-xs text-admin-muted bg-admin-surface rounded-xl">No invoices linked yet</div>
                   ) : (
                     <div className="space-y-1.5">
                       {sortedInvoices.map(inv => {
                         const due = inv.dueDate ? new Date(inv.dueDate) : null;
                         const created = inv.createdAt ? new Date(inv.createdAt) : null;
                         return (
-                          <div key={inv.id} className="flex items-center gap-2 sm:gap-3 px-3 py-2.5 bg-gray-50 hover:bg-amber-50 border border-gray-100 rounded-xl transition-colors">
+                          <div key={inv.id} className="flex items-center gap-2 sm:gap-3 px-3 py-2.5 bg-admin-surface hover:bg-admin-warning-soft border border-admin-border rounded-xl transition-colors">
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="admin-record-id text-[11px] font-mono truncate">{inv.invoiceNumber}</span>
-                                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold capitalize ${invoiceStatusStyle[inv.status] || "bg-gray-100 text-gray-600"}`}>
+                                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold capitalize ${invoiceStatusStyle[inv.status] || "bg-admin-subtle text-admin-muted"}`}>
                                   {inv.status}
                                 </span>
                               </div>
-                              <div className="flex items-center gap-2 text-[12px] text-gray-700 mt-0.5 flex-wrap">
-                                <span className="font-bold text-amber-600">{rs(num(inv.amount))}</span>
-                                {due && <span className="text-[11px] text-gray-500">· due {format(due, "dd MMM")}</span>}
-                                {!due && created && <span className="text-[11px] text-gray-400">· {format(created, "dd MMM yyyy")}</span>}
+                              <div className="flex items-center gap-2 text-[12px] text-admin-ink mt-0.5 flex-wrap">
+                                <span className="font-bold text-admin-warning">{rs(num(inv.amount))}</span>
+                                {due && <span className="text-[11px] text-admin-muted">· due {format(due, "dd MMM")}</span>}
+                                {!due && created && <span className="text-[11px] text-admin-muted">· {format(created, "dd MMM yyyy")}</span>}
                               </div>
                             </div>
                             <button
                               onClick={() => { setViewingClient(null); setLocation(`/admin/invoices?edit=${inv.id}`); }}
                               aria-label={`Open invoice ${inv.invoiceNumber}`}
-                              className="shrink-0 w-8 h-8 rounded-lg bg-white border border-gray-200 hover:bg-amber-100 hover:border-amber-300 text-amber-600 flex items-center justify-center transition-colors"
+                              className="shrink-0 w-8 h-8 rounded-lg bg-admin-surface border border-admin-border hover:bg-admin-warning-soft hover:border-admin-warning-line text-admin-warning flex items-center justify-center transition-colors"
                             >
                               <ExternalLink size={14} />
                             </button>
@@ -988,19 +988,19 @@ export default function AdminClients() {
               </div>
 
               {/* Footer actions */}
-              <div className="flex gap-2 px-4 sm:px-5 py-3 border-t border-gray-100 bg-white">
-                <button onClick={() => { setViewingClient(null); setShippingClient(c); }} className="flex-1 px-3 py-2.5 rounded-xl border border-blue-100 bg-blue-50 text-blue-700 text-xs sm:text-sm font-semibold hover:bg-blue-100 transition-colors flex items-center justify-center gap-1.5">
+              <div className="flex gap-2 px-4 sm:px-5 py-3 border-t border-admin-border bg-admin-surface">
+                <button onClick={() => { setViewingClient(null); setShippingClient(c); }} className="flex-1 px-3 py-2.5 rounded-xl border border-admin-brand-line bg-admin-brand-soft text-admin-brand-ink text-xs sm:text-sm font-semibold hover:bg-admin-brand-soft transition-colors flex items-center justify-center gap-1.5">
                   <PackageCheck size={13}/> Shipping
                 </button>
                 <button
                   onClick={() => { const cc = c; setViewingClient(null); openEdit(cc); }}
-                  className="flex-1 px-3 py-2.5 rounded-xl bg-gray-100 text-gray-700 text-xs sm:text-sm font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-1.5"
+                  className="flex-1 px-3 py-2.5 rounded-xl bg-admin-subtle text-admin-ink text-xs sm:text-sm font-semibold hover:bg-admin-subtle transition-colors flex items-center justify-center gap-1.5"
                 >
                   <Pencil size={13} /> Edit Client
                 </button>
                 <button
                   onClick={() => setViewingClient(null)}
-                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-stone-600 text-white text-sm font-semibold hover:opacity-90 transition-all"
+                  className="px-4 py-2.5 rounded-xl bg-admin-brand text-white text-sm font-semibold hover:opacity-90 transition-all"
                 >
                   Close
                 </button>

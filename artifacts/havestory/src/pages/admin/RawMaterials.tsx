@@ -87,16 +87,16 @@ export default function RawMaterials() {
       <div className="flex items-start sm:items-center justify-between gap-3 flex-wrap">
         <div>
           <div className="flex items-center gap-2">
-            <FlaskConical size={22} className="text-amber-500" />
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Raw Materials</h1>
+            <FlaskConical size={22} className="text-admin-warning" />
+            <h1 className="text-xl sm:text-2xl font-bold text-admin-ink">Raw Materials</h1>
           </div>
-          <p className="text-xs sm:text-sm text-gray-400">Track paper, ink, lamination rolls, and other consumables</p>
+          <p className="text-xs sm:text-sm text-admin-muted">Track paper, ink, lamination rolls, and other consumables</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <button onClick={() => refetch()} className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50">
+          <button onClick={() => refetch()} className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg border border-admin-border text-sm text-admin-muted hover:bg-admin-surface">
             <RefreshCw size={14} /> Refresh
           </button>
-          <button onClick={() => { setEditing(null); setForm(EMPTY); setShowForm(true); }} className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-stone-600 text-white text-sm font-semibold shadow-sm">
+          <button onClick={() => { setEditing(null); setForm(EMPTY); setShowForm(true); }} className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-admin-brand text-white text-sm font-semibold shadow-sm">
             <Plus size={14} /> <span className="hidden sm:inline">Add Material</span><span className="sm:hidden">Add</span>
           </button>
         </div>
@@ -110,10 +110,10 @@ export default function RawMaterials() {
           { label: "Categories", val: uniqueCategories.length },
           { label: "Total Stock Value", val: rs(totalValue) },
         ].map(c => (
-          <div key={c.label} className={`bg-white border rounded-xl px-3 sm:px-5 py-3 sm:py-4 shadow-sm ${c.warn ? "border-orange-200 bg-orange-50/30" : "border-gray-100"}`}>
-            <div className={`text-lg sm:text-2xl font-bold ${c.warn ? "text-orange-500" : "text-gray-900"} truncate`}>{c.val}</div>
-            <div className="text-xs sm:text-sm text-gray-400 mt-0.5 flex items-center gap-1">
-              {c.warn && <AlertTriangle size={12} className="text-orange-400" />}
+          <div key={c.label} className={`bg-admin-surface border rounded-xl px-3 sm:px-5 py-3 sm:py-4 shadow-sm ${c.warn ? "border-admin-warning-line bg-admin-warning-soft/30" : "border-admin-border"}`}>
+            <div className={`text-lg sm:text-2xl font-bold ${c.warn ? "text-admin-warning" : "text-admin-ink"} truncate`}>{c.val}</div>
+            <div className="text-xs sm:text-sm text-admin-muted mt-0.5 flex items-center gap-1">
+              {c.warn && <AlertTriangle size={12} className="text-admin-warning" />}
               {c.label}
             </div>
           </div>
@@ -121,31 +121,31 @@ export default function RawMaterials() {
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 sm:py-3 border-b border-gray-100">
+      <div className="bg-admin-surface border border-admin-border rounded-2xl shadow-sm overflow-hidden">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 sm:py-3 border-b border-admin-border">
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <Search size={16} className="text-gray-400 shrink-0" />
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search materials..." className="flex-1 min-w-0 text-sm outline-none placeholder:text-gray-400" />
+            <Search size={16} className="text-admin-muted shrink-0" />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search materials..." className="flex-1 min-w-0 text-sm outline-none placeholder:text-admin-muted" />
           </div>
-          <select value={catFilter} onChange={e => setCatFilter(e.target.value)} className="text-xs sm:text-sm border border-gray-200 rounded-lg px-2 sm:px-3 py-1.5 bg-white outline-none shrink-0">
+          <select value={catFilter} onChange={e => setCatFilter(e.target.value)} className="text-xs sm:text-sm border border-admin-border rounded-lg px-2 sm:px-3 py-1.5 bg-admin-surface outline-none shrink-0">
             <option>All Categories</option>
             {CATEGORIES_LIST.map(c => <option key={c}>{c}</option>)}
           </select>
         </div>
 
         {filtered.length === 0 ? (
-          <div className="py-20 text-center text-gray-300">
+          <div className="py-20 text-center text-admin-muted">
             <FlaskConical size={48} className="mx-auto mb-4 opacity-30" />
-            <p className="text-base font-medium text-gray-400">No Materials Found</p>
-            <p className="text-sm text-gray-300 mt-1">Add your first raw material to start tracking stock.</p>
-            <button onClick={() => { setEditing(null); setForm(EMPTY); setShowForm(true); }} className="mt-5 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-stone-600 text-white text-sm font-semibold mx-auto">
+            <p className="text-base font-medium text-admin-muted">No Materials Found</p>
+            <p className="text-sm text-admin-muted mt-1">Add your first raw material to start tracking stock.</p>
+            <button onClick={() => { setEditing(null); setForm(EMPTY); setShowForm(true); }} className="mt-5 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-admin-brand text-white text-sm font-semibold mx-auto">
               <Plus size={14} /> Add First Material
             </button>
           </div>
         ) : (
           <div className="overflow-x-auto">
           <table className="w-full text-sm min-w-[640px]">
-            <thead className="bg-gray-50 text-gray-400 text-[10px] sm:text-xs uppercase tracking-wide">
+            <thead className="bg-admin-surface text-admin-muted text-[10px] sm:text-xs uppercase tracking-wide">
               <tr>
                 <th className="px-3 sm:px-5 py-2.5 sm:py-3 text-left">MATERIAL</th>
                 <th className="px-3 sm:px-5 py-2.5 sm:py-3 text-left">QUANTITY</th>
@@ -157,22 +157,22 @@ export default function RawMaterials() {
                 <th className="px-3 sm:px-5 py-2.5 sm:py-3 text-right">ACTIONS</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-admin-border">
               {filtered.map(item => {
                 const isLow = item.quantity <= item.lowStockThreshold;
                 return (
-                  <tr key={item.id} className="hover:bg-gray-50/50">
+                  <tr key={item.id} className="hover:bg-admin-surface/50">
                     <td className="px-3 sm:px-5 py-3">
-                      <div className="font-semibold text-gray-900 text-xs sm:text-sm">{item.name}</div>
-                      {item.description && <div className="text-[10px] sm:text-xs text-gray-400">{item.description}</div>}
+                      <div className="font-semibold text-admin-ink text-xs sm:text-sm">{item.name}</div>
+                      {item.description && <div className="text-[10px] sm:text-xs text-admin-muted">{item.description}</div>}
                     </td>
-                    <td className="px-3 sm:px-5 py-3 font-bold text-gray-900 text-xs sm:text-sm">{item.quantity}</td>
-                    <td className="px-3 sm:px-5 py-3 text-gray-500 text-xs sm:text-sm">{item.unit}</td>
-                    <td className="px-3 sm:px-5 py-3 text-gray-500 text-xs sm:text-sm">{item.lowStockThreshold}</td>
-                    <td className="px-3 sm:px-5 py-3 font-medium text-gray-700 text-xs sm:text-sm whitespace-nowrap">{item.cost ? rs(item.cost) : "—"}</td>
-                    <td className="px-3 sm:px-5 py-3 text-gray-500 text-xs sm:text-sm">{item.supplier || "—"}</td>
+                    <td className="px-3 sm:px-5 py-3 font-bold text-admin-ink text-xs sm:text-sm">{item.quantity}</td>
+                    <td className="px-3 sm:px-5 py-3 text-admin-muted text-xs sm:text-sm">{item.unit}</td>
+                    <td className="px-3 sm:px-5 py-3 text-admin-muted text-xs sm:text-sm">{item.lowStockThreshold}</td>
+                    <td className="px-3 sm:px-5 py-3 font-medium text-admin-ink text-xs sm:text-sm whitespace-nowrap">{item.cost ? rs(item.cost) : "—"}</td>
+                    <td className="px-3 sm:px-5 py-3 text-admin-muted text-xs sm:text-sm">{item.supplier || "—"}</td>
                     <td className="px-3 sm:px-5 py-3">
-                      <span className={`px-1.5 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold ${isLow ? "bg-red-100 text-red-600" : "bg-green-100 text-green-700"}`}>
+                      <span className={`px-1.5 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold ${isLow ? "bg-admin-danger-soft text-admin-danger" : "bg-admin-success-soft text-admin-success"}`}>
                         {isLow ? "Low Stock" : "In Stock"}
                       </span>
                     </td>
@@ -181,19 +181,19 @@ export default function RawMaterials() {
                         <button
                           onClick={() => openAdjust(item, "add")}
                           title="Add Stock"
-                          className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg"
+                          className="inline-flex items-center justify-center p-1.5 text-admin-muted hover:text-admin-success hover:bg-admin-success-soft rounded-lg"
                         >
                           <PlusCircle size={15} />
                         </button>
                         <button
                           onClick={() => openAdjust(item, "deduct")}
                           title="Deduct Stock"
-                          className="p-1.5 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg"
+                          className="inline-flex items-center justify-center p-1.5 text-admin-muted hover:text-admin-warning hover:bg-admin-warning-soft rounded-lg"
                         >
                           <MinusCircle size={15} />
                         </button>
-                        <button onClick={() => openEdit(item)} className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg"><Edit2 size={14} /></button>
-                        <button onClick={() => setDeleteConfirm({ id: item.id, name: item.name })} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg"><Trash2 size={14} /></button>
+                        <button onClick={() => openEdit(item)} className="inline-flex items-center justify-center p-1.5 text-admin-muted hover:text-admin-brand-ink hover:bg-admin-brand-soft rounded-lg"><Edit2 size={14} /></button>
+                        <button onClick={() => setDeleteConfirm({ id: item.id, name: item.name })} className="inline-flex items-center justify-center p-1.5 text-admin-muted hover:text-admin-danger hover:bg-admin-danger-soft rounded-lg"><Trash2 size={14} /></button>
                       </div>
                     </td>
                   </tr>
@@ -207,21 +207,21 @@ export default function RawMaterials() {
 
       {/* Add/Deduct Stock Modal */}
       {adjustItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={closeAdjust}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-5 border-b border-gray-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-admin-inverse/50 backdrop-blur-sm p-4" onClick={closeAdjust}>
+          <div className="bg-admin-surface rounded-2xl shadow-2xl w-full max-w-sm" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-admin-border">
               <div className="flex items-center gap-3">
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${adjustMode === "add" ? "bg-green-50" : "bg-orange-50"}`}>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${adjustMode === "add" ? "bg-admin-success-soft" : "bg-admin-warning-soft"}`}>
                   {adjustMode === "add"
-                    ? <PlusCircle size={18} className="text-green-500" />
-                    : <MinusCircle size={18} className="text-orange-500" />}
+                    ? <PlusCircle size={18} className="text-admin-success" />
+                    : <MinusCircle size={18} className="text-admin-warning" />}
                 </div>
                 <div>
-                  <h2 className="font-bold text-gray-900">{adjustMode === "add" ? "Add Stock" : "Deduct Stock"}</h2>
-                  <p className="text-xs text-gray-400">{adjustItem.name} · current: {adjustItem.quantity} {adjustItem.unit}</p>
+                  <h2 className="font-bold text-admin-ink">{adjustMode === "add" ? "Add Stock" : "Deduct Stock"}</h2>
+                  <p className="text-xs text-admin-muted">{adjustItem.name} · current: {adjustItem.quantity} {adjustItem.unit}</p>
                 </div>
               </div>
-              <button onClick={closeAdjust} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400"><X size={16} /></button>
+              <button onClick={closeAdjust} className="inline-flex items-center justify-center p-1.5 rounded-lg hover:bg-admin-subtle text-admin-muted"><X size={16} /></button>
             </div>
 
             <form onSubmit={handleAdjust} className="p-5 space-y-4">
@@ -234,9 +234,9 @@ export default function RawMaterials() {
                     className={`flex-1 py-2 rounded-xl text-sm font-semibold border transition-colors ${
                       adjustMode === m
                         ? m === "add"
-                          ? "bg-green-500 text-white border-green-500"
-                          : "bg-orange-500 text-white border-orange-500"
-                        : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
+                          ? "bg-admin-success-solid text-white border-admin-success-line"
+                          : "bg-admin-warning-solid text-white border-admin-warning-line"
+                        : "bg-admin-surface text-admin-muted border-admin-border hover:bg-admin-surface"
                     }`}
                   >
                     {m === "add" ? "Add Stock" : "Deduct Stock"}
@@ -245,31 +245,31 @@ export default function RawMaterials() {
               </div>
 
               <div>
-                <label className="text-xs text-gray-400 block mb-1">Amount ({adjustItem.unit})</label>
+                <label className="text-xs text-admin-muted block mb-1">Amount ({adjustItem.unit})</label>
                 <input
                   type="number"
                   min="1"
                   required
                   value={adjustAmount}
                   onChange={e => { setAdjustAmount(e.target.value); setAdjustError(""); }}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200"
+                  className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning"
                   placeholder={`How many ${adjustItem.unit}?`}
                   autoFocus
                 />
               </div>
 
               <div>
-                <label className="text-xs text-gray-400 block mb-1">Reason <span className="text-gray-300">(optional)</span></label>
+                <label className="text-xs text-admin-muted block mb-1">Reason <span className="text-admin-muted">(optional)</span></label>
                 <input
                   value={adjustReason}
                   onChange={e => setAdjustReason(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200"
+                  className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning"
                   placeholder={adjustMode === "add" ? "e.g. New delivery from supplier" : "e.g. Used in production"}
                 />
               </div>
 
               {adjustAmount && !adjustError && (
-                <div className={`rounded-xl px-4 py-3 text-sm ${adjustMode === "add" ? "bg-green-50 text-green-700" : "bg-orange-50 text-orange-700"}`}>
+                <div className={`rounded-xl px-4 py-3 text-sm ${adjustMode === "add" ? "bg-admin-success-soft text-admin-success" : "bg-admin-warning-soft text-admin-warning"}`}>
                   New quantity will be: <strong>
                     {adjustMode === "add"
                       ? adjustItem.quantity + Number(adjustAmount)
@@ -280,7 +280,7 @@ export default function RawMaterials() {
               )}
 
               {adjustError && (
-                <div className="bg-red-50 text-red-600 text-sm rounded-xl px-4 py-3">{adjustError}</div>
+                <div className="bg-admin-danger-soft text-admin-danger text-sm rounded-xl px-4 py-3">{adjustError}</div>
               )}
 
               <button
@@ -288,8 +288,8 @@ export default function RawMaterials() {
                 disabled={adjusting}
                 className={`w-full py-2.5 text-white text-sm font-bold rounded-xl disabled:opacity-60 ${
                   adjustMode === "add"
-                    ? "bg-gradient-to-r from-green-500 to-emerald-600"
-                    : "bg-gradient-to-r from-orange-500 to-amber-600"
+                    ? "bg-admin-brand"
+                    : "bg-admin-brand"
                 }`}
               >
                 {adjusting ? "Saving..." : adjustMode === "add" ? "Add Stock" : "Deduct Stock"}
@@ -301,44 +301,44 @@ export default function RawMaterials() {
 
       {/* Add/Edit Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setShowForm(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-5 border-b border-gray-100">
-              <h2 className="font-bold text-gray-900">{editing ? "Edit Material" : "Add Material"}</h2>
-              <button onClick={() => setShowForm(false)}><X size={18} className="text-gray-400" /></button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-admin-inverse/50 backdrop-blur-sm p-4" onClick={() => setShowForm(false)}>
+          <div className="bg-admin-surface rounded-2xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-admin-border">
+              <h2 className="font-bold text-admin-ink">{editing ? "Edit Material" : "Add Material"}</h2>
+              <button onClick={() => setShowForm(false)}><X size={18} className="text-admin-muted" /></button>
             </div>
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
               <div>
-                <label className="text-xs text-gray-400 block mb-1">Material Name *</label>
-                <input required value={form.name} onChange={e => setForm((f: any) => ({ ...f, name: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" placeholder="A4 Bond Paper 80gsm" />
+                <label className="text-xs text-admin-muted block mb-1">Material Name *</label>
+                <input required value={form.name} onChange={e => setForm((f: any) => ({ ...f, name: e.target.value }))} className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning" placeholder="A4 Bond Paper 80gsm" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-gray-400 block mb-1">Quantity</label>
-                  <input type="number" value={form.quantity} onChange={e => setForm((f: any) => ({ ...f, quantity: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" />
+                  <label className="text-xs text-admin-muted block mb-1">Quantity</label>
+                  <input type="number" value={form.quantity} onChange={e => setForm((f: any) => ({ ...f, quantity: e.target.value }))} className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning" />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-400 block mb-1">Unit</label>
-                  <input value={form.unit} onChange={e => setForm((f: any) => ({ ...f, unit: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" placeholder="reams, rolls, liters" />
+                  <label className="text-xs text-admin-muted block mb-1">Unit</label>
+                  <input value={form.unit} onChange={e => setForm((f: any) => ({ ...f, unit: e.target.value }))} className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning" placeholder="reams, rolls, liters" />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-400 block mb-1">Low Stock Alert At</label>
-                  <input type="number" value={form.lowStockThreshold} onChange={e => setForm((f: any) => ({ ...f, lowStockThreshold: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" />
+                  <label className="text-xs text-admin-muted block mb-1">Low Stock Alert At</label>
+                  <input type="number" value={form.lowStockThreshold} onChange={e => setForm((f: any) => ({ ...f, lowStockThreshold: e.target.value }))} className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning" />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-400 block mb-1">Cost per Unit (Rs.)</label>
-                  <input type="number" value={form.cost} onChange={e => setForm((f: any) => ({ ...f, cost: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" placeholder="0" />
+                  <label className="text-xs text-admin-muted block mb-1">Cost per Unit (Rs.)</label>
+                  <input type="number" value={form.cost} onChange={e => setForm((f: any) => ({ ...f, cost: e.target.value }))} className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning" placeholder="0" />
                 </div>
               </div>
               <div>
-                <label className="text-xs text-gray-400 block mb-1">Supplier</label>
-                <input value={form.supplier} onChange={e => setForm((f: any) => ({ ...f, supplier: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" placeholder="Supplier name" />
+                <label className="text-xs text-admin-muted block mb-1">Supplier</label>
+                <input value={form.supplier} onChange={e => setForm((f: any) => ({ ...f, supplier: e.target.value }))} className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning" placeholder="Supplier name" />
               </div>
               <div>
-                <label className="text-xs text-gray-400 block mb-1">Description</label>
-                <textarea value={form.description} onChange={e => setForm((f: any) => ({ ...f, description: e.target.value }))} rows={2} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none resize-none" placeholder="Optional description..." />
+                <label className="text-xs text-admin-muted block mb-1">Description</label>
+                <textarea value={form.description} onChange={e => setForm((f: any) => ({ ...f, description: e.target.value }))} rows={2} className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none resize-none" placeholder="Optional description..." />
               </div>
-              <button type="submit" disabled={creating || updating} className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-stone-600 text-white text-sm font-bold rounded-xl disabled:opacity-60">
+              <button type="submit" disabled={creating || updating} className="w-full py-2.5 bg-admin-brand text-white text-sm font-bold rounded-xl disabled:opacity-60">
                 {(creating || updating) ? "Saving..." : editing ? "Update Material" : "Add Material"}
               </button>
             </form>

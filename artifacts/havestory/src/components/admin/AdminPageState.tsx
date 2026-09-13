@@ -23,9 +23,9 @@ export function AdminPageSkeleton({ cards = 4, rows = 5 }: { cards?: number; row
 export function AdminErrorState({ message, onRetry }: { message?: string; onRetry: () => void }) {
   return (
     <div className="flex min-h-[45vh] items-center justify-center">
-      <div className="max-w-md rounded-2xl border border-red-200 bg-card p-8 text-center shadow-sm">
-        <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-red-50 text-red-600"><AlertTriangle size={20} /></div>
-        <h2 className="mt-4 font-serif text-2xl font-bold text-foreground">Could not load this section</h2>
+      <div className="max-w-md rounded-2xl border border-admin-danger-line bg-card p-8 text-center shadow-sm">
+        <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-admin-danger-soft text-admin-danger"><AlertTriangle size={20} /></div>
+        <h2 className="mt-4 font-sans text-2xl font-bold text-foreground">Could not load this section</h2>
         <p className="mt-2 text-sm text-muted-foreground">{message || "The server did not return the expected data. Please try again."}</p>
         <button onClick={onRetry} className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground">
           <RefreshCw size={15} /> Try again
@@ -56,7 +56,7 @@ export function AdminTableError({ columns, onRetry }: { columns: number; onRetry
   return (
     <tr>
       <td colSpan={columns} className="px-5 py-12 text-center">
-        <AlertTriangle className="mx-auto h-7 w-7 text-red-500" />
+        <AlertTriangle className="mx-auto h-7 w-7 text-admin-danger" />
         <p className="mt-3 text-sm font-bold text-foreground">This data could not be loaded</p>
         <p className="mt-1 text-xs text-muted-foreground">Check the connection and try the request again.</p>
         <button onClick={onRetry} className="mt-4 inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-bold text-foreground hover:bg-muted">

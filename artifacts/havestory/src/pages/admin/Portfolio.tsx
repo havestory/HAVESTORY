@@ -21,7 +21,7 @@ export default function Portfolio() {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-foreground">Portfolio</h1>
+          <h1 className="text-3xl font-sans font-bold text-foreground">Portfolio</h1>
           <p className="text-muted-foreground mt-1">Manage your design and print showcase.</p>
         </div>
         <Button className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90 btn-glow uppercase text-xs tracking-widest px-5 h-9 font-semibold">Add Work</Button>

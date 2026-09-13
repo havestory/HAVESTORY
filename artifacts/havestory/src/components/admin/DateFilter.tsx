@@ -69,11 +69,11 @@ interface Props {
 export function DateFilterSelect({ value, onChange, className = "" }: Props) {
   return (
     <div className={`relative inline-flex items-center shrink-0 ${className}`}>
-      <Calendar size={14} className="absolute left-2.5 text-gray-400 pointer-events-none" />
+      <Calendar size={14} className="absolute left-2.5 text-admin-muted pointer-events-none" />
       <select
         value={value}
         onChange={e => onChange(e.target.value as DateFilterValue)}
-        className="appearance-none pl-7 pr-6 py-1.5 sm:py-2 border border-gray-200 rounded-lg sm:rounded-xl text-xs sm:text-sm bg-white outline-none focus:border-pink-400 transition-colors cursor-pointer"
+        className="appearance-none pl-7 pr-6 py-1.5 sm:py-2 border border-admin-border rounded-lg sm:rounded-xl text-xs sm:text-sm bg-admin-surface outline-none focus:border-admin-brand-line transition-colors cursor-pointer"
         aria-label="Filter by date"
       >
         {DATE_FILTER_OPTIONS.map(o => (
@@ -81,7 +81,7 @@ export function DateFilterSelect({ value, onChange, className = "" }: Props) {
         ))}
       </select>
       <svg
-        className="absolute right-1.5 sm:right-2 w-3 h-3 text-gray-400 pointer-events-none"
+        className="absolute right-1.5 sm:right-2 w-3 h-3 text-admin-muted pointer-events-none"
         fill="none" stroke="currentColor" viewBox="0 0 24 24"
         aria-hidden="true"
       >

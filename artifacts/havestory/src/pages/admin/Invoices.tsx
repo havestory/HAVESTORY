@@ -534,12 +534,12 @@ export default function AdminInvoices() {
     });
 
   const statusColors: Record<string, string> = {
-    pending: "bg-yellow-100 text-yellow-700",
-    issued: "bg-blue-100 text-blue-700",
-    partial: "bg-amber-100 text-amber-700",
-    paid: "bg-green-100 text-green-700",
-    overdue: "bg-red-100 text-red-700",
-    cancelled: "bg-gray-100 text-gray-500",
+    pending: "bg-admin-warning-soft text-admin-warning",
+    issued: "bg-admin-brand-soft text-admin-brand-ink",
+    partial: "bg-admin-warning-soft text-admin-warning",
+    paid: "bg-admin-success-soft text-admin-success",
+    overdue: "bg-admin-danger-soft text-admin-danger",
+    cancelled: "bg-admin-subtle text-admin-muted",
   };
 
   type StringFormKey = Exclude<keyof typeof form, "clientId">;
@@ -569,42 +569,42 @@ export default function AdminInvoices() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <Receipt size={22} className="text-amber-500" />
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Invoices</h1>
+            <Receipt size={22} className="text-admin-warning" />
+            <h1 className="text-xl sm:text-2xl font-bold text-admin-ink">Invoices</h1>
           </div>
-          <p className="text-xs sm:text-sm text-gray-400 mt-0.5">Generate from a saved client or fill details manually</p>
+          <p className="text-xs sm:text-sm text-admin-muted mt-0.5">Generate from a saved client or fill details manually</p>
         </div>
         <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-2 shrink-0">
           <button
             onClick={() => { resetForm(); setEntryMode("existing"); setShowManual(true); }}
-            className="flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-stone-600 text-white text-xs sm:text-sm font-semibold shadow-md shadow-amber-500/25"
+            className="flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-admin-brand text-white text-xs sm:text-sm font-semibold shadow-md shadow-admin-shadow/25"
           >
             <User size={13} /> <span className="whitespace-nowrap">From Client</span>
           </button>
           <button
             onClick={() => { resetForm(); setEntryMode("manual"); setShowManual(true); }}
-            className="flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl border-2 border-amber-300 text-amber-600 bg-white text-xs sm:text-sm font-semibold hover:bg-amber-50 transition-colors"
+            className="flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl border-2 border-admin-warning-line text-admin-warning bg-admin-surface text-xs sm:text-sm font-semibold hover:bg-admin-warning-soft transition-colors"
           >
             <Plus size={13} /> <span className="whitespace-nowrap">Manual Entry</span>
           </button>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-gray-100 bg-white px-4 py-3 shadow-sm">
+      <div className="rounded-2xl border border-admin-border bg-admin-surface px-4 py-3 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <div className="text-xs font-bold uppercase tracking-wide text-gray-500">Invoice Dashboard Period</div>
-            <div className="mt-0.5 text-[11px] text-gray-400">Cards and invoice list use the same date range.</div>
+            <div className="text-xs font-bold uppercase tracking-wide text-admin-muted">Invoice Dashboard Period</div>
+            <div className="mt-0.5 text-[11px] text-admin-muted">Cards and invoice list use the same date range.</div>
           </div>
-          <select value={dateFilter} onChange={e => setDateFilter(e.target.value as InvoiceDateRange)} className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs sm:text-sm font-bold text-gray-700 outline-none focus:border-amber-400">
+          <select value={dateFilter} onChange={e => setDateFilter(e.target.value as InvoiceDateRange)} className="rounded-xl border border-admin-border bg-admin-surface px-3 py-2 text-xs sm:text-sm font-bold text-admin-ink outline-none focus:border-admin-warning-line">
             {INVOICE_RANGE_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
         </div>
-        {dateFilter === "custom" && <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-gray-100 pt-3">
-          <span className="text-[11px] font-bold text-gray-400">FROM</span>
-          <input type="date" value={customFrom} max={customTo || undefined} onChange={e => setCustomFrom(e.target.value)} className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs outline-none focus:border-amber-400" />
-          <span className="text-[11px] font-bold text-gray-400">TO</span>
-          <input type="date" value={customTo} min={customFrom || undefined} onChange={e => setCustomTo(e.target.value)} className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs outline-none focus:border-amber-400" />
+        {dateFilter === "custom" && <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-admin-border pt-3">
+          <span className="text-[11px] font-bold text-admin-muted">FROM</span>
+          <input type="date" value={customFrom} max={customTo || undefined} onChange={e => setCustomFrom(e.target.value)} className="rounded-lg border border-admin-border px-2.5 py-1.5 text-xs outline-none focus:border-admin-warning-line" />
+          <span className="text-[11px] font-bold text-admin-muted">TO</span>
+          <input type="date" value={customTo} min={customFrom || undefined} onChange={e => setCustomTo(e.target.value)} className="rounded-lg border border-admin-border px-2.5 py-1.5 text-xs outline-none focus:border-admin-warning-line" />
         </div>}
       </div>
 
@@ -620,7 +620,7 @@ export default function AdminInvoices() {
           { icon: TrendingUp,        color: "blue",   n: rs(totalBilled),   label: `${rangeLabel} Billed`,   isMoney: true  },
           { icon: DollarSign,        color: "amber",  n: rs(totalReceived), label: `${rangeLabel} Received`, isMoney: true  },
         ].map(({ icon: Icon, color, n, label, isMoney }) => (
-          <div key={label} className="bg-white border border-gray-100 rounded-xl px-3 py-3 sm:px-5 sm:py-4 shadow-sm flex items-center gap-2 sm:gap-4">
+          <div key={label} className="bg-admin-surface border border-admin-border rounded-xl px-3 py-3 sm:px-5 sm:py-4 shadow-sm flex items-center gap-2 sm:gap-4">
             <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-${color}-50 flex items-center justify-center shrink-0`}>
               <Icon size={18} className={`text-${color}-500`} />
             </div>
@@ -628,70 +628,70 @@ export default function AdminInvoices() {
               <div
                 className={
                   isMoney
-                    ? "font-bold text-gray-900 text-[clamp(0.65rem,3vw,0.95rem)] sm:text-xl tabular-nums whitespace-nowrap"
-                    : "font-bold text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis text-[clamp(0.875rem,4vw,1.5rem)] sm:text-2xl"
+                    ? "font-bold text-admin-ink text-[clamp(0.65rem,3vw,0.95rem)] sm:text-xl tabular-nums whitespace-nowrap"
+                    : "font-bold text-admin-ink whitespace-nowrap overflow-hidden text-ellipsis text-[clamp(0.875rem,4vw,1.5rem)] sm:text-2xl"
                 }
               >
                 {n}
               </div>
-              <div className="text-[10px] sm:text-sm text-gray-400 truncate">{label}</div>
+              <div className="text-[10px] sm:text-sm text-admin-muted truncate">{label}</div>
             </div>
           </div>
         ))}
       </div>
 
       {/* ─── INVOICES TABLE ─── */}
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 sm:py-3 border-b border-gray-100">
+      <div className="bg-admin-surface border border-admin-border rounded-2xl shadow-sm overflow-hidden">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 sm:py-3 border-b border-admin-border">
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <Search size={16} className="text-gray-400 shrink-0" />
+            <Search size={16} className="text-admin-muted shrink-0" />
             <input value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Search invoices..."
-              className="flex-1 min-w-0 text-sm outline-none placeholder:text-gray-400" />
-            {search && <button onClick={() => setSearch("")} className="text-gray-300 hover:text-gray-500 shrink-0"><X size={14} /></button>}
+              className="flex-1 min-w-0 text-sm outline-none placeholder:text-admin-muted" />
+            {search && <button onClick={() => setSearch("")} className="text-admin-muted hover:text-admin-muted shrink-0"><X size={14} /></button>}
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <select
               value={dateFilter}
               onChange={e => setDateFilter(e.target.value as InvoiceDateRange)}
-              className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-gray-700 outline-none focus:border-amber-400"
+              className="rounded-xl border border-admin-border bg-admin-surface px-3 py-2 text-xs sm:text-sm font-semibold text-admin-ink outline-none focus:border-admin-warning-line"
               aria-label="Invoice date range"
             >
               {INVOICE_RANGE_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
-            <div className="inline-flex rounded-xl border border-gray-200 bg-gray-50 p-1">
-              <button type="button" onClick={() => setPaymentView("all")} className={`rounded-lg px-2.5 py-1 text-[11px] sm:text-xs font-bold transition ${paymentView === "all" ? "bg-white text-gray-900 shadow-sm" : "text-gray-400"}`}>All</button>
-              <button type="button" onClick={() => setPaymentView("unpaid")} className={`rounded-lg px-2.5 py-1 text-[11px] sm:text-xs font-bold transition ${paymentView === "unpaid" ? "bg-orange-500 text-white shadow-sm" : "text-gray-400"}`}>Unpaid</button>
-              <button type="button" onClick={() => setPaymentView("partial")} className={`rounded-lg px-2.5 py-1 text-[11px] sm:text-xs font-bold transition ${paymentView === "partial" ? "bg-amber-500 text-white shadow-sm" : "text-gray-400"}`}>Partial</button>
+            <div className="inline-flex rounded-xl border border-admin-border bg-admin-surface p-1">
+              <button type="button" onClick={() => setPaymentView("all")} className={`rounded-lg px-2.5 py-1 text-[11px] sm:text-xs font-bold transition ${paymentView === "all" ? "bg-admin-surface text-admin-ink shadow-sm" : "text-admin-muted"}`}>All</button>
+              <button type="button" onClick={() => setPaymentView("unpaid")} className={`rounded-lg px-2.5 py-1 text-[11px] sm:text-xs font-bold transition ${paymentView === "unpaid" ? "bg-admin-warning-solid text-white shadow-sm" : "text-admin-muted"}`}>Unpaid</button>
+              <button type="button" onClick={() => setPaymentView("partial")} className={`rounded-lg px-2.5 py-1 text-[11px] sm:text-xs font-bold transition ${paymentView === "partial" ? "bg-admin-warning-solid text-white shadow-sm" : "text-admin-muted"}`}>Partial</button>
             </div>
           </div>
           {dateFilter === "custom" && <div className="flex w-full flex-wrap items-center gap-2 pt-1">
-            <span className="text-[11px] font-bold uppercase tracking-wide text-gray-400">Custom range</span>
-            <input type="date" value={customFrom} max={customTo || undefined} onChange={e => setCustomFrom(e.target.value)} className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs outline-none focus:border-amber-400" />
-            <span className="text-xs text-gray-400">to</span>
-            <input type="date" value={customTo} min={customFrom || undefined} onChange={e => setCustomTo(e.target.value)} className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs outline-none focus:border-amber-400" />
+            <span className="text-[11px] font-bold uppercase tracking-wide text-admin-muted">Custom range</span>
+            <input type="date" value={customFrom} max={customTo || undefined} onChange={e => setCustomFrom(e.target.value)} className="rounded-lg border border-admin-border px-2.5 py-1.5 text-xs outline-none focus:border-admin-warning-line" />
+            <span className="text-xs text-admin-muted">to</span>
+            <input type="date" value={customTo} min={customFrom || undefined} onChange={e => setCustomTo(e.target.value)} className="rounded-lg border border-admin-border px-2.5 py-1.5 text-xs outline-none focus:border-admin-warning-line" />
           </div>}
         </div>
-        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between gap-2">
-          <h3 className="font-semibold text-gray-800 text-sm">{paymentView === "unpaid" ? `Unpaid · ${rangeLabel}` : paymentView === "partial" ? `Partial · ${rangeLabel}` : `${rangeLabel} Invoices`}</h3>
-          <span className="text-xs text-gray-400">{filteredInvoices.length} invoice{filteredInvoices.length !== 1 ? "s" : ""}</span>
+        <div className="px-5 py-3 border-b border-admin-border bg-admin-surface/50 flex items-center justify-between gap-2">
+          <h3 className="font-semibold text-admin-ink text-sm">{paymentView === "unpaid" ? `Unpaid · ${rangeLabel}` : paymentView === "partial" ? `Partial · ${rangeLabel}` : `${rangeLabel} Invoices`}</h3>
+          <span className="text-xs text-admin-muted">{filteredInvoices.length} invoice{filteredInvoices.length !== 1 ? "s" : ""}</span>
         </div>
         {selectedIds.size > 0 && (
-          <div className="px-4 sm:px-5 py-2.5 border-b border-amber-100 bg-amber-50 flex items-center justify-between gap-2">
+          <div className="px-4 sm:px-5 py-2.5 border-b border-admin-warning-line bg-admin-warning-soft flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-500 text-white text-[11px] font-bold shrink-0">{selectedIds.size}</span>
-              <span className="text-xs sm:text-sm font-semibold text-amber-700 truncate">selected</span>
+              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-admin-warning-solid text-white text-[11px] font-bold shrink-0">{selectedIds.size}</span>
+              <span className="text-xs sm:text-sm font-semibold text-admin-warning truncate">selected</span>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
               <button
                 onClick={clearSelection}
-                className="text-xs font-semibold text-gray-500 hover:text-gray-700 px-2 sm:px-3 py-1.5 rounded-lg hover:bg-white/70 transition-colors"
+                className="text-xs font-semibold text-admin-muted hover:text-admin-ink px-2 sm:px-3 py-1.5 rounded-lg hover:bg-admin-surface/70 transition-colors"
               >
                 Clear
               </button>
               <button
                 onClick={() => setBulkDeleteConfirm(true)}
-                className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-white bg-red-500 hover:bg-red-600 px-2.5 sm:px-3.5 py-1.5 rounded-lg transition-colors shadow-sm"
+                className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-white bg-admin-danger-solid hover:bg-admin-danger-solid px-2.5 sm:px-3.5 py-1.5 rounded-lg transition-colors shadow-sm"
               >
                 <Trash2 size={13} /> Delete{" "}
                 <span className="hidden sm:inline">selected</span>
@@ -702,7 +702,7 @@ export default function AdminInvoices() {
         {/* Desktop table */}
         <div className="hidden md:block">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-gray-400 text-xs uppercase tracking-wide">
+            <thead className="bg-admin-surface text-admin-muted text-xs uppercase tracking-wide">
               <tr>
                 <th className="pl-4 pr-2 py-3 text-left w-10">
                   <input
@@ -722,7 +722,7 @@ export default function AdminInvoices() {
                         clearSelection();
                       }
                     }}
-                    className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-300 cursor-pointer"
+                    className="w-4 h-4 rounded border-admin-border text-admin-warning focus:ring-admin-warning cursor-pointer"
                     aria-label="Select all invoices"
                   />
                 </th>
@@ -731,66 +731,66 @@ export default function AdminInvoices() {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-admin-border">
               {filteredInvoices.map(inv => {
                 const isEditing = editingInvId === inv.id;
                 const isSelected = selectedIds.has(inv.id);
                 return (
-                  <tr key={inv.id} className={`hover:bg-gray-50/50 ${isSelected ? "bg-amber-50/40" : ""}`}>
+                  <tr key={inv.id} className={`hover:bg-admin-surface/50 ${isSelected ? "bg-admin-warning-soft/40" : ""}`}>
                     <td className="pl-4 pr-2 py-3 w-10">
                       <input
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => toggleSelect(inv.id)}
-                        className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-300 cursor-pointer"
+                        className="w-4 h-4 rounded border-admin-border text-admin-warning focus:ring-admin-warning cursor-pointer"
                         aria-label={`Select invoice ${inv.invoiceNumber}`}
                       />
                     </td>
                     <td className="admin-record-id px-4 py-3 font-mono text-xs font-bold whitespace-nowrap">{inv.invoiceNumber}</td>
-                    <td className="px-4 py-3 font-medium text-gray-800">{inv.clientName}</td>
-                    <td className="px-4 py-3 text-gray-400 text-xs">
+                    <td className="px-4 py-3 font-medium text-admin-ink">{inv.clientName}</td>
+                    <td className="px-4 py-3 text-admin-muted text-xs">
                       {inv.orderId ? (
-                        <span className="font-mono bg-gray-50 px-1.5 py-0.5 rounded text-gray-600">{inv.orderId}</span>
+                        <span className="font-mono bg-admin-surface px-1.5 py-0.5 rounded text-admin-muted">{inv.orderId}</span>
                       ) : "—"}
                     </td>
-                    <td className="px-4 py-3 font-bold text-gray-900 whitespace-nowrap">{rs(inv.amount)}</td>
+                    <td className="px-4 py-3 font-bold text-admin-ink whitespace-nowrap">{rs(inv.amount)}</td>
                     <td className="px-4 py-3">
                       {isEditing ? (
                         <div className="flex items-center gap-1.5">
                           <select value={editInvStatus} onChange={e => setEditInvStatus(e.target.value)}
-                            className="text-xs border border-gray-200 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-amber-300">
+                            className="text-xs border border-admin-border rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-admin-warning">
                             {["pending","issued","partial","paid","overdue","cancelled"].map(s => (
                               <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
                             ))}
                           </select>
-                          <button onClick={() => saveInlineStatus(inv)} className="text-xs px-2 py-1 bg-green-500 text-white rounded-lg font-bold">Save</button>
-                          <button onClick={() => setEditingInvId(null)} className="text-xs px-2 py-1 bg-gray-200 text-gray-600 rounded-lg">✕</button>
+                          <button onClick={() => saveInlineStatus(inv)} className="text-xs px-2 py-1 bg-admin-success-solid text-white rounded-lg font-bold">Save</button>
+                          <button onClick={() => setEditingInvId(null)} className="text-xs px-2 py-1 bg-admin-subtle text-admin-muted rounded-lg">✕</button>
                         </div>
                       ) : (
                         <button
                           onClick={() => { setEditingInvId(inv.id); setEditInvStatus(inv.status); }}
-                          className={`px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize cursor-pointer border border-transparent hover:border-current transition-colors ${statusColors[inv.status] ?? "bg-gray-100 text-gray-500"}`}
+                          className={`px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize cursor-pointer border border-transparent hover:border-current transition-colors ${statusColors[inv.status] ?? "bg-admin-subtle text-admin-muted"}`}
                         >
                           {inv.status}
                         </button>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">{format(new Date(inv.createdAt), "MMM dd, yyyy")}</td>
+                    <td className="px-4 py-3 text-admin-muted text-xs whitespace-nowrap">{format(new Date(inv.createdAt), "MMM dd, yyyy")}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 justify-end">
                         {/* View */}
                         <button onClick={() => openView(inv)} title="View Invoice"
-                          className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors">
+                          className="w-7 h-7 flex items-center justify-center rounded-lg text-admin-muted hover:text-admin-brand-ink hover:bg-admin-brand-soft transition-colors">
                           <Eye size={14} />
                         </button>
                         {/* Edit */}
                         <button onClick={() => openEdit(inv)} title="Edit Invoice"
-                          className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-amber-500 hover:bg-amber-50 transition-colors">
+                          className="w-7 h-7 flex items-center justify-center rounded-lg text-admin-muted hover:text-admin-warning hover:bg-admin-warning-soft transition-colors">
                           <Pencil size={14} />
                         </button>
                         {/* Delete */}
                         <button onClick={() => setDeleteConfirm({ id: inv.id, number: inv.invoiceNumber })} title="Delete invoice"
-                          className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                          className="w-7 h-7 flex items-center justify-center rounded-lg text-admin-muted hover:text-admin-danger hover:bg-admin-danger-soft transition-colors">
                           <Trash2 size={14} />
                         </button>
                       </div>
@@ -800,7 +800,7 @@ export default function AdminInvoices() {
               })}
               {filteredInvoices.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="py-16 text-center text-gray-400">
+                  <td colSpan={8} className="py-16 text-center text-admin-muted">
                     {search ? `No invoices matching "${search}"` : "No invoices yet — orders will auto-generate invoices"}
                   </td>
                 </tr>
@@ -810,65 +810,65 @@ export default function AdminInvoices() {
         </div>
 
         {/* Mobile card list */}
-        <div className="md:hidden divide-y divide-gray-50">
+        <div className="md:hidden divide-y divide-admin-border">
           {filteredInvoices.map(inv => {
             const isEditing = editingInvId === inv.id;
             const isSelected = selectedIds.has(inv.id);
             return (
-              <div key={inv.id} className={`p-4 space-y-2.5 ${isSelected ? "bg-amber-50/40" : ""}`}>
+              <div key={inv.id} className={`p-4 space-y-2.5 ${isSelected ? "bg-admin-warning-soft/40" : ""}`}>
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-start gap-2.5 min-w-0 flex-1">
                     <input
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => toggleSelect(inv.id)}
-                      className="w-4 h-4 mt-0.5 rounded border-gray-300 text-amber-500 focus:ring-amber-300 cursor-pointer shrink-0"
+                      className="w-4 h-4 mt-0.5 rounded border-admin-border text-admin-warning focus:ring-admin-warning cursor-pointer shrink-0"
                       aria-label={`Select invoice ${inv.invoiceNumber}`}
                     />
                     <div className="min-w-0 flex-1">
                       <div className="admin-record-id font-mono text-[11px] font-bold truncate">{inv.invoiceNumber}</div>
-                      <div className="font-semibold text-gray-900 text-sm mt-0.5 truncate">{inv.clientName}</div>
+                      <div className="font-semibold text-admin-ink text-sm mt-0.5 truncate">{inv.clientName}</div>
                       {inv.orderId && (
-                        <div className="font-mono text-[10px] text-gray-500 bg-gray-50 inline-block px-1.5 py-0.5 rounded mt-1">{inv.orderId}</div>
+                        <div className="font-mono text-[10px] text-admin-muted bg-admin-surface inline-block px-1.5 py-0.5 rounded mt-1">{inv.orderId}</div>
                       )}
                     </div>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className="font-bold text-gray-900 text-sm whitespace-nowrap">{rs(inv.amount)}</div>
-                    <div className="text-[10px] text-gray-400 mt-0.5">{format(new Date(inv.createdAt), "MMM dd")}</div>
+                    <div className="font-bold text-admin-ink text-sm whitespace-nowrap">{rs(inv.amount)}</div>
+                    <div className="text-[10px] text-admin-muted mt-0.5">{format(new Date(inv.createdAt), "MMM dd")}</div>
                   </div>
                 </div>
                 <div className="flex items-center justify-between gap-2">
                   {isEditing ? (
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <select value={editInvStatus} onChange={e => setEditInvStatus(e.target.value)}
-                        className="text-xs border border-gray-200 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-amber-300">
+                        className="text-xs border border-admin-border rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-admin-warning">
                         {["pending","issued","paid","overdue","cancelled"].map(s => (
                           <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
                         ))}
                       </select>
-                      <button onClick={() => saveInlineStatus(inv)} className="text-xs px-2 py-1 bg-green-500 text-white rounded-lg font-bold">Save</button>
-                      <button onClick={() => setEditingInvId(null)} className="text-xs px-2 py-1 bg-gray-200 text-gray-600 rounded-lg">✕</button>
+                      <button onClick={() => saveInlineStatus(inv)} className="text-xs px-2 py-1 bg-admin-success-solid text-white rounded-lg font-bold">Save</button>
+                      <button onClick={() => setEditingInvId(null)} className="text-xs px-2 py-1 bg-admin-subtle text-admin-muted rounded-lg">✕</button>
                     </div>
                   ) : (
                     <button
                       onClick={() => { setEditingInvId(inv.id); setEditInvStatus(inv.status); }}
-                      className={`px-2.5 py-1 rounded-full text-[11px] font-semibold capitalize ${statusColors[inv.status] ?? "bg-gray-100 text-gray-500"}`}
+                      className={`px-2.5 py-1 rounded-full text-[11px] font-semibold capitalize ${statusColors[inv.status] ?? "bg-admin-subtle text-admin-muted"}`}
                     >
                       {inv.status}
                     </button>
                   )}
                   <div className="flex items-center gap-1">
                     <button onClick={() => openView(inv)} aria-label="View"
-                      className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 bg-blue-50 hover:bg-blue-100 hover:text-blue-600 transition-colors">
+                      className="w-8 h-8 flex items-center justify-center rounded-lg text-admin-muted bg-admin-brand-soft hover:bg-admin-brand-soft hover:text-admin-brand-ink transition-colors">
                       <Eye size={15} />
                     </button>
                     <button onClick={() => openEdit(inv)} aria-label="Edit"
-                      className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 bg-amber-50 hover:bg-amber-100 hover:text-amber-600 transition-colors">
+                      className="w-8 h-8 flex items-center justify-center rounded-lg text-admin-muted bg-admin-warning-soft hover:bg-admin-warning-soft hover:text-admin-warning transition-colors">
                       <Pencil size={15} />
                     </button>
                     <button onClick={() => setDeleteConfirm({ id: inv.id, number: inv.invoiceNumber })} aria-label="Delete"
-                      className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 bg-red-50 hover:bg-red-100 hover:text-red-600 transition-colors">
+                      className="w-8 h-8 flex items-center justify-center rounded-lg text-admin-muted bg-admin-danger-soft hover:bg-admin-danger-soft hover:text-admin-danger transition-colors">
                       <Trash2 size={15} />
                     </button>
                   </div>
@@ -877,7 +877,7 @@ export default function AdminInvoices() {
             );
           })}
           {filteredInvoices.length === 0 && (
-            <div className="py-16 text-center text-gray-400 text-sm">
+            <div className="py-16 text-center text-admin-muted text-sm">
               {search ? `No invoices matching "${search}"` : "No invoices yet — orders will auto-generate invoices"}
             </div>
           )}
@@ -907,31 +907,31 @@ export default function AdminInvoices() {
 
       {/* ─── CREATE / EDIT MANUAL INVOICE POPUP ─── */}
       {showManual && (
-        <div className="invoice-manual-modal fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm" onClick={() => { setShowManual(false); resetForm(); }}>
+        <div className="invoice-manual-modal fixed inset-0 z-50 overflow-y-auto bg-admin-inverse/60 backdrop-blur-sm" onClick={() => { setShowManual(false); resetForm(); }}>
           <div className="flex min-h-full items-center justify-center p-4">
-          <div className="invoice-modal-shell bg-white w-full max-w-lg sm:max-w-2xl lg:max-w-4xl flex flex-col rounded-2xl shadow-2xl overflow-hidden" style={{ maxHeight: "calc(100vh - 48px)" }} onClick={e => e.stopPropagation()}>
+          <div className="invoice-modal-shell bg-admin-surface w-full max-w-lg sm:max-w-2xl lg:max-w-4xl flex flex-col rounded-2xl shadow-2xl overflow-hidden" style={{ maxHeight: "calc(100vh - 48px)" }} onClick={e => e.stopPropagation()}>
             {/* Header */}
-            <div className="invoice-modal-header flex items-start justify-between px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-amber-50 to-stone-50 shrink-0">
+            <div className="invoice-modal-header flex items-start justify-between px-5 py-4 border-b border-admin-border bg-admin-brand shrink-0">
               <div>
                 <div className="flex items-center gap-2">
-                  <FileText size={16} className="text-amber-500" />
-                  <span className="font-bold text-gray-900 text-base">
+                  <FileText size={16} className="text-admin-warning" />
+                  <span className="font-bold text-admin-ink text-base">
                     {editingFullId !== null ? "Edit Invoice" : "Create Manual Invoice"}
                   </span>
                 </div>
-                <p className="text-xs text-gray-400 mt-0.5">
+                <p className="text-xs text-admin-muted mt-0.5">
                   {(() => {
                     const editing = editingFullId !== null
                       ? (invoices ?? []).find(i => i.id === editingFullId)
                       : null;
                     return editing?.orderId
-                      ? <>Linked to order: <span className="font-mono font-semibold text-gray-600">{editing.orderId}</span></>
+                      ? <>Linked to order: <span className="font-mono font-semibold text-admin-muted">{editing.orderId}</span></>
                       : "Multi-item invoice with shipping & advance payment";
                   })()}
                 </p>
               </div>
-              <button onClick={() => { setShowManual(false); resetForm(); }} className="p-1.5 hover:bg-white/80 rounded-lg transition-colors mt-0.5">
-                <X size={18} className="text-gray-400" />
+              <button onClick={() => { setShowManual(false); resetForm(); }} className="inline-flex items-center justify-center p-1.5 hover:bg-admin-surface/80 rounded-lg transition-colors mt-0.5">
+                <X size={18} className="text-admin-muted" />
               </button>
             </div>
 
@@ -943,20 +943,20 @@ export default function AdminInvoices() {
                 <section className="invoice-modal-section">
                   <div className="flex items-center justify-between gap-2 mb-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-lg bg-amber-100 flex items-center justify-center"><User size={13} className="text-amber-600" /></div>
-                      <span className="text-sm font-bold text-gray-800">Client Information</span>
+                      <div className="w-6 h-6 rounded-lg bg-admin-warning-soft flex items-center justify-center"><User size={13} className="text-admin-warning" /></div>
+                      <span className="text-sm font-bold text-admin-ink">Client Information</span>
                     </div>
                     {/* Mode toggle — available in both create and edit so client can always be changed */}
-                    <div className="flex bg-gray-100 rounded-lg p-0.5 text-[11px] font-semibold">
+                    <div className="flex bg-admin-subtle rounded-lg p-0.5 text-[11px] font-semibold">
                       <button
                         type="button"
                         onClick={() => { setEntryMode("existing"); }}
-                        className={`px-2.5 py-1 rounded-md transition-colors ${entryMode === "existing" ? "bg-white text-amber-600 shadow-sm" : "text-gray-500"}`}
+                        className={`px-2.5 py-1 rounded-md transition-colors ${entryMode === "existing" ? "bg-admin-surface text-admin-warning shadow-sm" : "text-admin-muted"}`}
                       >Existing</button>
                       <button
                         type="button"
                         onClick={() => { setEntryMode("manual"); clearClient(); }}
-                        className={`px-2.5 py-1 rounded-md transition-colors ${entryMode === "manual" ? "bg-white text-amber-600 shadow-sm" : "text-gray-500"}`}
+                        className={`px-2.5 py-1 rounded-md transition-colors ${entryMode === "manual" ? "bg-admin-surface text-admin-warning shadow-sm" : "text-admin-muted"}`}
                       >Manual</button>
                     </div>
                   </div>
@@ -964,36 +964,36 @@ export default function AdminInvoices() {
                   {/* Searchable dropdown — only in 'existing' mode */}
                   {entryMode === "existing" && (
                     <div className="relative mb-3">
-                      <label className="text-[10px] font-semibold text-amber-500 mb-1.5 flex items-center gap-1"><User size={10} /> Select Client from Database *</label>
+                      <label className="text-[10px] font-semibold text-admin-warning mb-1.5 flex items-center gap-1"><User size={10} /> Select Client from Database *</label>
                       <div className="relative">
-                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-admin-muted" />
                         <input
                           value={clientSearch}
                           onChange={e => { setClientSearch(e.target.value); setShowClientDropdown(true); }}
                           onFocus={() => setShowClientDropdown(true)}
                           placeholder={form.clientName ? `Selected: ${form.clientName}` : "Search clients by name or phone…"}
-                          className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200 placeholder:text-gray-400"
+                          className="w-full pl-9 pr-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning placeholder:text-admin-muted"
                         />
                       </div>
                       {showClientDropdown && (
-                        <div className="absolute top-full mt-1 left-0 right-0 bg-white border border-gray-100 rounded-xl shadow-lg z-10 max-h-56 overflow-y-auto">
+                        <div className="absolute top-full mt-1 left-0 right-0 bg-admin-surface border border-admin-border rounded-xl shadow-lg z-10 max-h-56 overflow-y-auto">
                           {filteredClients.length > 0 ? (
                             filteredClients.map((c: any) => (
-                              <button key={c.id} type="button" onClick={() => selectClient(c)} className="w-full text-left px-4 py-2.5 hover:bg-amber-50 text-sm border-b border-gray-50 last:border-0">
-                                <div className="font-semibold text-gray-800">{c.name}</div>
-                                {c.phone && <div className="text-xs text-gray-400">{c.phone}{c.businessName ? ` · ${c.businessName}` : ""}</div>}
+                              <button key={c.id} type="button" onClick={() => selectClient(c)} className="w-full text-left px-4 py-2.5 hover:bg-admin-warning-soft text-sm border-b border-admin-border last:border-0">
+                                <div className="font-semibold text-admin-ink">{c.name}</div>
+                                {c.phone && <div className="text-xs text-admin-muted">{c.phone}{c.businessName ? ` · ${c.businessName}` : ""}</div>}
                               </button>
                             ))
                           ) : (
                             !showAddNewClient && (
-                              <div className="px-4 py-3 text-sm text-gray-400 italic">No clients found. Type a name to add a new one, or switch to Manual.</div>
+                              <div className="px-4 py-3 text-sm text-admin-muted italic">No clients found. Type a name to add a new one, or switch to Manual.</div>
                             )
                           )}
                           {showAddNewClient && (
                             <button
                               type="button"
                               onClick={startManualEntry}
-                              className="w-full text-left px-4 py-2.5 hover:bg-amber-50 text-sm border-t border-gray-100 flex items-center gap-2 text-amber-600 font-semibold"
+                              className="w-full text-left px-4 py-2.5 hover:bg-admin-warning-soft text-sm border-t border-admin-border flex items-center gap-2 text-admin-warning font-semibold"
                             >
                               <UserPlus size={13} />
                               Add &ldquo;{clientSearch.trim()}&rdquo; as new client
@@ -1007,7 +1007,7 @@ export default function AdminInvoices() {
                   {/* Manual entry: full-name input always shown in manual mode */}
                   {entryMode === "manual" && (
                     <div className="mb-3">
-                      <label className="text-[10px] font-semibold text-amber-500 mb-1.5 flex items-center gap-1"><User size={10} /> Client Full Name *</label>
+                      <label className="text-[10px] font-semibold text-admin-warning mb-1.5 flex items-center gap-1"><User size={10} /> Client Full Name *</label>
                       <input
                         value={form.clientName}
                         onChange={e => setF("clientName", e.target.value)}
@@ -1021,30 +1021,30 @@ export default function AdminInvoices() {
                   {(entryMode === "manual" || form.clientName) ? (
                     <div className="space-y-2.5" onClick={() => setShowClientDropdown(false)}>
                       {entryMode === "existing" && form.clientName && (
-                        <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${form.clientId ? "bg-amber-50 border-amber-100" : "bg-amber-50 border-amber-100"}`}>
-                          <User size={13} className={`${form.clientId ? "text-amber-500" : "text-amber-500"} shrink-0`} />
-                          <span className={`text-sm font-semibold flex-1 truncate ${form.clientId ? "text-amber-700" : "text-amber-700"}`}>{form.clientName}</span>
+                        <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${form.clientId ? "bg-admin-warning-soft border-admin-warning-line" : "bg-admin-warning-soft border-admin-warning-line"}`}>
+                          <User size={13} className={`${form.clientId ? "text-admin-warning" : "text-admin-warning"} shrink-0`} />
+                          <span className={`text-sm font-semibold flex-1 truncate ${form.clientId ? "text-admin-warning" : "text-admin-warning"}`}>{form.clientName}</span>
                           {form.clientId ? (
-                            <span className="text-[10px] font-bold uppercase tracking-wide text-amber-500 bg-white/60 px-1.5 py-0.5 rounded flex items-center gap-1">
+                            <span className="text-[10px] font-bold uppercase tracking-wide text-admin-warning bg-admin-surface/60 px-1.5 py-0.5 rounded flex items-center gap-1">
                               <Check size={10} /> Linked
                             </span>
                           ) : (
-                            <span className="text-[10px] font-bold uppercase tracking-wide text-amber-600 bg-white/70 px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] font-bold uppercase tracking-wide text-admin-warning bg-admin-surface/70 px-1.5 py-0.5 rounded">
                               Unlinked
                             </span>
                           )}
-                          <button type="button" onClick={clearClient} className="text-gray-400 hover:text-gray-600 transition-colors">
+                          <button type="button" onClick={clearClient} className="text-admin-muted hover:text-admin-muted transition-colors">
                             <X size={12} />
                           </button>
                         </div>
                       )}
                       {entryMode === "manual" && form.clientName && editingFullId === null && !form.clientId && (
-                        <label className="flex items-start gap-2 text-xs text-amber-700 bg-amber-50/60 border border-amber-100 rounded-lg px-3 py-2 cursor-pointer">
+                        <label className="flex items-start gap-2 text-xs text-admin-warning bg-admin-warning-soft/60 border border-admin-warning-line rounded-lg px-3 py-2 cursor-pointer">
                           <input
                             type="checkbox"
                             checked={saveManualAsClient}
                             onChange={e => setSaveManualAsClient(e.target.checked)}
-                            className="mt-0.5 accent-amber-500"
+                            className="mt-0.5 accent-admin-warning"
                           />
                           <span>
                             Also save <strong>{form.clientName || "this client"}</strong> to the Clients database and link this invoice.
@@ -1052,71 +1052,71 @@ export default function AdminInvoices() {
                         </label>
                       )}
                       {clientCreateError && (
-                        <p className="text-xs text-red-600 px-1">{clientCreateError}</p>
+                        <p className="text-xs text-admin-danger px-1">{clientCreateError}</p>
                       )}
                       {duplicatePhoneClient && saveManualAsClient && (
-                        <div className="space-y-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs">
-                          <div className="flex items-start gap-2 text-amber-800">
-                            <AlertTriangle size={15} className="mt-0.5 shrink-0 text-amber-500" />
+                        <div className="space-y-2 rounded-xl border border-admin-warning-line bg-admin-warning-soft p-3 text-xs">
+                          <div className="flex items-start gap-2 text-admin-warning">
+                            <AlertTriangle size={15} className="mt-0.5 shrink-0 text-admin-warning" />
                             <div className="flex-1">
                               <div className="font-bold">Existing customer found</div>
                               <div className="mt-0.5">
                                 {duplicatePhoneClient.name} (PB{String(duplicatePhoneClient.id).padStart(4, "0")}) already uses this phone number.
                               </div>
                             </div>
-                            <button type="button" onClick={() => selectClient(duplicatePhoneClient)} className="rounded-lg bg-amber-500 px-2.5 py-1 font-bold text-white">
+                            <button type="button" onClick={() => selectClient(duplicatePhoneClient)} className="rounded-lg bg-admin-warning-solid px-2.5 py-1 font-bold text-white">
                               Use existing
                             </button>
                           </div>
-                          <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-2 text-red-700">
-                            <input type="checkbox" checked={allowDuplicateCustomer} onChange={e => setAllowDuplicateCustomer(e.target.checked)} className="mt-0.5 accent-red-600" />
+                          <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-admin-danger-line bg-admin-danger-soft p-2 text-admin-danger">
+                            <input type="checkbox" checked={allowDuplicateCustomer} onChange={e => setAllowDuplicateCustomer(e.target.checked)} className="mt-0.5 accent-admin-danger" />
                             <span><strong>Create as a separate customer anyway.</strong> Use only when a different customer genuinely shares this phone number.</span>
                           </label>
                         </div>
                       )}
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <label className="text-xs text-gray-500 block mb-1">📞 Phone</label>
+                          <label className="text-xs text-admin-muted block mb-1">📞 Phone</label>
                           <input value={form.phone} onChange={e => { setF("phone", e.target.value); setAllowDuplicateCustomer(false); }} placeholder="077 123 4567" className="input-field" />
                         </div>
                         <div>
-                          <label className="text-xs text-gray-500 block mb-1">✉ Email</label>
+                          <label className="text-xs text-admin-muted block mb-1">✉ Email</label>
                           <input value={form.email} onChange={e => setF("email", e.target.value)} placeholder="client@email.com" className="input-field" />
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <label className="text-xs text-gray-500 block mb-1">🏢 Business Name</label>
+                          <label className="text-xs text-admin-muted block mb-1">🏢 Business Name</label>
                           <input value={form.businessName} onChange={e => setF("businessName", e.target.value)} placeholder="ABC Pvt Ltd" className="input-field" />
                         </div>
                         <div>
-                          <label className="text-xs text-gray-500 block mb-1">📍 Address</label>
+                          <label className="text-xs text-admin-muted block mb-1">📍 Address</label>
                           <input value={form.address} onChange={e => setF("address", e.target.value)} placeholder="Colombo, Sri Lanka" className="input-field" />
                         </div>
                       </div>
                     </div>
                   ) : (
-                    <p className="text-xs text-gray-400 italic">Search and select a client above to fill in their details, or switch to <button type="button" onClick={() => setEntryMode("manual")} className="text-amber-500 font-semibold underline">Manual</button>.</p>
+                    <p className="text-xs text-admin-muted italic">Search and select a client above to fill in their details, or switch to <button type="button" onClick={() => setEntryMode("manual")} className="text-admin-warning font-semibold underline">Manual</button>.</p>
                   )}
                 </section>
 
                 {/* Line Items */}
                 <section className="invoice-modal-section">
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 rounded-lg bg-stone-100 flex items-center justify-center"><ListOrdered size={13} className="text-stone-600" /></div>
-                    <span className="text-sm font-bold text-gray-800">Line Items</span>
+                    <div className="w-6 h-6 rounded-lg bg-admin-subtle flex items-center justify-center"><ListOrdered size={13} className="text-admin-muted" /></div>
+                    <span className="text-sm font-bold text-admin-ink">Line Items</span>
                   </div>
-                  <div className="invoice-catalog-panel relative mb-3 rounded-2xl border border-stone-100 bg-stone-50/60 p-3">
-                    <div className="mb-2 flex items-center justify-between"><div><div className="text-xs font-bold text-stone-700">Add from Products & Services</div><div className="text-[10px] text-gray-400">Search the catalog, or continue with manual line items below.</div></div><span className="rounded-full bg-white px-2 py-1 text-[10px] font-bold text-stone-600">{catalogItems.length} items</span></div>
+                  <div className="invoice-catalog-panel relative mb-3 rounded-2xl border border-admin-border bg-admin-surface/60 p-3">
+                    <div className="mb-2 flex items-center justify-between"><div><div className="text-xs font-bold text-admin-ink">Add from Products & Services</div><div className="text-[10px] text-admin-muted">Search the catalog, or continue with manual line items below.</div></div><span className="rounded-full bg-admin-surface px-2 py-1 text-[10px] font-bold text-admin-muted">{catalogItems.length} items</span></div>
                     <div className="relative">
-                      <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"/>
+                      <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-admin-muted"/>
                       <input value={catalogSearch} onFocus={()=>setShowCatalogDropdown(true)} onChange={e=>{setCatalogSearch(e.target.value);setShowCatalogDropdown(true);}} onBlur={()=>window.setTimeout(()=>setShowCatalogDropdown(false),150)} placeholder="Search sticker print, business cards, design service..." className="input-field w-full pl-9"/>
-                      {showCatalogDropdown&&<div className="absolute left-0 right-0 top-full z-30 mt-1 max-h-64 overflow-y-auto rounded-xl border border-gray-200 bg-white p-1 shadow-xl">{filteredCatalogItems.length===0?<div className="px-3 py-6 text-center text-xs text-gray-400">No matching product or service</div>:filteredCatalogItems.map(item=><button key={item.key} type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>addCatalogItem(item)} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left hover:bg-stone-50"><span className={`rounded-md px-2 py-1 text-[9px] font-black ${item.kind==="Product"?"bg-amber-50 text-amber-600":"bg-blue-50 text-blue-600"}`}>{item.kind}</span><span className="min-w-0 flex-1"><span className="block truncate text-xs font-bold text-gray-800">{item.name}</span>{item.category&&<span className="block text-[10px] text-gray-400">{item.category}</span>}</span><span className="text-xs font-black text-stone-600">{num(item.price)>0?rs(item.price):"Manual price"}</span></button>)}</div>}
+                      {showCatalogDropdown&&<div className="absolute left-0 right-0 top-full z-30 mt-1 max-h-64 overflow-y-auto rounded-xl border border-admin-border bg-admin-surface p-1 shadow-xl">{filteredCatalogItems.length===0?<div className="px-3 py-6 text-center text-xs text-admin-muted">No matching product or service</div>:filteredCatalogItems.map(item=><button key={item.key} type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>addCatalogItem(item)} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left hover:bg-admin-surface"><span className={`rounded-md px-2 py-1 text-[9px] font-bold ${item.kind==="Product"?"bg-admin-warning-soft text-admin-warning":"bg-admin-brand-soft text-admin-brand-ink"}`}>{item.kind}</span><span className="min-w-0 flex-1"><span className="block truncate text-xs font-bold text-admin-ink">{item.name}</span>{item.category&&<span className="block text-[10px] text-admin-muted">{item.category}</span>}</span><span className="text-xs font-bold text-admin-muted">{num(item.price)>0?rs(item.price):"Manual price"}</span></button>)}</div>}
                     </div>
                   </div>
                   <div className="space-y-2">
                     <div
-                      className="invoice-line-items-grid hidden sm:grid text-[10px] text-gray-400 font-semibold uppercase tracking-wide px-1 gap-2"
+                      className="invoice-line-items-grid hidden sm:grid text-[10px] text-admin-muted font-semibold uppercase tracking-wide px-1 gap-2"
                       style={{ gridTemplateColumns: "minmax(0,1fr) 90px 120px 110px 24px" }}
                     >
                       <span>Description *</span>
@@ -1128,7 +1128,7 @@ export default function AdminInvoices() {
                     {items.map((it, idx) => {
                       const lineTotal = it.qty * num(it.unitPrice);
                       return (
-                        <div key={it.id} className="invoice-line-item bg-gray-50 rounded-xl p-2.5 sm:p-3 space-y-2">
+                        <div key={it.id} className="invoice-line-item bg-admin-surface rounded-xl p-2.5 sm:p-3 space-y-2">
                           {/* Mobile: stacked (description on its own row, then qty/price/total). */}
                           <div className="block sm:hidden space-y-2">
                             <div className="flex items-center gap-2">
@@ -1141,7 +1141,7 @@ export default function AdminInvoices() {
                               {items.length > 1 && (
                                 <button
                                   onClick={() => removeItem(it.id)}
-                                  className="text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg p-2 transition-colors flex items-center justify-center shrink-0"
+                                  className="text-admin-muted hover:text-admin-danger hover:bg-admin-danger-soft rounded-lg p-2 transition-colors flex items-center justify-center shrink-0"
                                   title="Remove item"
                                   aria-label="Remove item"
                                 >
@@ -1164,7 +1164,7 @@ export default function AdminInvoices() {
                                 className="input-field text-center text-sm font-semibold"
                               />
                               <div className="relative min-w-0">
-                                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-gray-400 pointer-events-none select-none">Rs.</span>
+                                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-admin-muted pointer-events-none select-none">Rs.</span>
                                 <input
                                   type="text"
                                   inputMode="decimal"
@@ -1178,7 +1178,7 @@ export default function AdminInvoices() {
                                   className="input-field text-right text-sm font-semibold pl-9 w-full"
                                 />
                               </div>
-                              <span className="invoice-line-total text-sm font-bold text-amber-600 text-right whitespace-nowrap pl-1 pr-0.5">
+                              <span className="invoice-line-total text-sm font-bold text-admin-warning text-right whitespace-nowrap pl-1 pr-0.5">
                                 Rs. {lineTotal.toLocaleString("en-IN")}
                               </span>
                             </div>
@@ -1203,7 +1203,7 @@ export default function AdminInvoices() {
                               className="input-field text-center text-base font-semibold"
                             />
                             <div className="relative">
-                              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400 pointer-events-none select-none">Rs.</span>
+                              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-admin-muted pointer-events-none select-none">Rs.</span>
                               <input
                                 type="text"
                                 inputMode="decimal"
@@ -1216,13 +1216,13 @@ export default function AdminInvoices() {
                                 className="input-field text-right text-base font-semibold pl-9"
                               />
                             </div>
-                            <span className="invoice-line-total text-sm font-bold text-amber-600 text-right truncate">
+                            <span className="invoice-line-total text-sm font-bold text-admin-warning text-right truncate">
                               Rs. {lineTotal.toLocaleString("en-IN")}
                             </span>
                             {items.length > 1 ? (
                               <button
                                 onClick={() => removeItem(it.id)}
-                                className="text-gray-300 hover:text-red-500 hover:bg-red-50 rounded p-1 transition-colors flex items-center justify-center"
+                                className="text-admin-muted hover:text-admin-danger hover:bg-admin-danger-soft rounded p-1 transition-colors flex items-center justify-center"
                                 title="Remove item"
                               >
                                 <Trash2 size={14} />
@@ -1231,7 +1231,7 @@ export default function AdminInvoices() {
                           </div>
 
                           <input value={it.notes} onChange={e => updateItem(it.id, "notes", e.target.value)} placeholder="Notes / specifications (optional)"
-                            className="invoice-line-note w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-amber-200 placeholder:text-gray-300 text-gray-600" />
+                            className="invoice-line-note w-full px-3 py-2 text-xs bg-admin-surface border border-admin-border rounded-lg outline-none focus:ring-1 focus:ring-admin-warning placeholder:text-admin-muted text-admin-muted" />
                         </div>
                       );
                     })}
@@ -1241,7 +1241,7 @@ export default function AdminInvoices() {
                     <button
                       type="button"
                       onClick={addItem}
-                      className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl border-2 border-dashed border-amber-200 text-amber-600 text-xs font-bold hover:border-amber-400 hover:bg-amber-50/60 transition-colors"
+                      className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl border-2 border-dashed border-admin-warning-line text-admin-warning text-xs font-bold hover:border-admin-warning-line hover:bg-admin-warning-soft/60 transition-colors"
                     >
                       <Plus size={14} /> Add another item
                     </button>
@@ -1251,13 +1251,13 @@ export default function AdminInvoices() {
                 {/* Shipping */}
                 <section className="invoice-modal-section">
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 rounded-lg bg-blue-100 flex items-center justify-center"><Truck size={13} className="text-blue-600" /></div>
-                    <span className="text-sm font-bold text-gray-800">Shipping Charges</span>
+                    <div className="w-6 h-6 rounded-lg bg-admin-brand-soft flex items-center justify-center"><Truck size={13} className="text-admin-brand-ink" /></div>
+                    <span className="text-sm font-bold text-admin-ink">Shipping Charges</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {SHIPPING_OPTIONS.map(opt => (
                       <button key={opt.key} onClick={() => setShipping(opt.key)}
-                        className={`invoice-shipping-option px-3 py-2.5 rounded-xl text-xs font-semibold text-left border-2 transition-all ${shipping === opt.key ? "border-amber-400 bg-amber-50 text-amber-700" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}>
+                        className={`invoice-shipping-option px-3 py-2.5 rounded-xl text-xs font-semibold text-left border-2 transition-all ${shipping === opt.key ? "border-admin-warning-line bg-admin-warning-soft text-admin-warning" : "border-admin-border text-admin-muted hover:border-admin-border"}`}>
                         {opt.key === "standard" ? `🚚 Standard — Rs. ${cfgStandard.toLocaleString("en-IN")}` :
                          opt.key === "express"  ? `⚡ Express — Rs. ${cfgExpress.toLocaleString("en-IN")}` :
                          opt.key === "weight"   ? "⚖️ Weight-based" :
@@ -1270,46 +1270,46 @@ export default function AdminInvoices() {
                       <div className="flex items-center gap-2">
                         <div className="relative flex-1">
                           <input type="number" min={0} step="0.1" value={weightKg} onChange={e => setWeightKg(e.target.value)} placeholder="0.0" className="input-field pr-10" />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-semibold">kg</span>
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-admin-muted font-semibold">kg</span>
                         </div>
                         {num(weightKg) > 0 && (
-                          <span className="text-sm font-bold text-amber-600 bg-amber-50 border border-amber-100 px-3 py-2 rounded-xl whitespace-nowrap">
+                          <span className="text-sm font-bold text-admin-warning bg-admin-warning-soft border border-admin-warning-line px-3 py-2 rounded-xl whitespace-nowrap">
                             Rs. {weightShippingAmt.toLocaleString("en-IN")}
                           </span>
                         )}
                       </div>
-                      <div className="bg-blue-50/70 border border-blue-100 rounded-xl p-3 space-y-2">
-                        <div className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Weight Rates (editable)</div>
+                      <div className="bg-admin-brand-soft/70 border border-admin-brand-line rounded-xl p-3 space-y-2">
+                        <div className="text-[10px] font-bold text-admin-brand-ink uppercase tracking-wider">Weight Rates (editable)</div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           <div>
-                            <label className="text-[10px] text-gray-500 block mb-1">First kg rate (Rs.)</label>
+                            <label className="text-[10px] text-admin-muted block mb-1">First kg rate (Rs.)</label>
                             <div className="relative">
-                              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-gray-500 pointer-events-none select-none">Rs.</span>
+                              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-admin-muted pointer-events-none select-none">Rs.</span>
                               <input
                                 type="text"
                                 inputMode="decimal"
                                 value={firstKgRate}
                                 onChange={e => setFirstKgRate(e.target.value.replace(/[^\d.]/g, ""))}
-                                className="w-full pl-9 pr-2.5 py-1.5 border border-blue-200 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-300 bg-white text-right font-semibold"
+                                className="w-full pl-9 pr-2.5 py-1.5 border border-admin-brand-line rounded-lg text-xs outline-none focus:ring-1 focus:ring-admin-brand bg-admin-surface text-right font-semibold"
                               />
                             </div>
                           </div>
                           <div>
-                            <label className="text-[10px] text-gray-500 block mb-1">Each extra kg (Rs.)</label>
+                            <label className="text-[10px] text-admin-muted block mb-1">Each extra kg (Rs.)</label>
                             <div className="relative">
-                              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-gray-500 pointer-events-none select-none">Rs.</span>
+                              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-admin-muted pointer-events-none select-none">Rs.</span>
                               <input
                                 type="text"
                                 inputMode="decimal"
                                 value={addKgRate}
                                 onChange={e => setAddKgRate(e.target.value.replace(/[^\d.]/g, ""))}
-                                className="w-full pl-9 pr-2.5 py-1.5 border border-blue-200 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-300 bg-white text-right font-semibold"
+                                className="w-full pl-9 pr-2.5 py-1.5 border border-admin-brand-line rounded-lg text-xs outline-none focus:ring-1 focus:ring-admin-brand bg-admin-surface text-right font-semibold"
                               />
                             </div>
                           </div>
                         </div>
                         {num(weightKg) > 0 && (
-                          <div className="text-xs text-blue-700 bg-blue-100/60 rounded-lg px-3 py-1.5 font-medium">
+                          <div className="text-xs text-admin-brand-ink bg-admin-brand-soft/60 rounded-lg px-3 py-1.5 font-medium">
                             {num(weightKg) <= 1
                               ? `${num(weightKg)}kg = Rs. ${weightShippingAmt.toLocaleString("en-IN")}`
                               : `1st kg Rs.${num(firstKgRate)} + ${Math.ceil(num(weightKg) - 1)}kg × Rs.${num(addKgRate)} = Rs. ${weightShippingAmt.toLocaleString("en-IN")}`
@@ -1321,7 +1321,7 @@ export default function AdminInvoices() {
                   )}
                   {shipping === "custom" && (
                     <div className="mt-3 relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-500 pointer-events-none select-none">Rs.</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-admin-muted pointer-events-none select-none">Rs.</span>
                       <input
                         type="text"
                         inputMode="decimal"
@@ -1337,11 +1337,11 @@ export default function AdminInvoices() {
                 {/* Advance & Totals */}
                 <section className="invoice-modal-section">
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 rounded-lg bg-green-100 flex items-center justify-center"><DollarSign size={13} className="text-green-600" /></div>
-                    <span className="text-sm font-bold text-gray-800">Advance Payment</span>
+                    <div className="w-6 h-6 rounded-lg bg-admin-success-soft flex items-center justify-center"><DollarSign size={13} className="text-admin-success" /></div>
+                    <span className="text-sm font-bold text-admin-ink">Advance Payment</span>
                   </div>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-500 pointer-events-none select-none">Rs.</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-admin-muted pointer-events-none select-none">Rs.</span>
                     <input
                       type="text"
                       inputMode="decimal"
@@ -1351,25 +1351,25 @@ export default function AdminInvoices() {
                       className="input-field pl-11 pr-3 text-right font-semibold"
                     />
                   </div>
-                  <div className="invoice-totals mt-3 bg-gradient-to-r from-amber-50 to-stone-50 rounded-xl p-3 space-y-1.5 border border-amber-100">
-                    <div className="flex items-start justify-between gap-3 text-xs text-gray-500">
+                  <div className="invoice-totals mt-3 bg-admin-brand rounded-xl p-3 space-y-1.5 border border-admin-warning-line">
+                    <div className="flex items-start justify-between gap-3 text-xs text-admin-muted">
                       <span className="min-w-0">Subtotal</span><span className="shrink-0 text-right font-semibold tabular-nums">Rs. {subtotal.toLocaleString("en-IN")}</span>
                     </div>
                     {shippingAmt > 0 && (
-                      <div className="flex items-start justify-between gap-3 text-xs text-gray-500">
+                      <div className="flex items-start justify-between gap-3 text-xs text-admin-muted">
                         <span className="min-w-0">Shipping</span><span className="shrink-0 text-right tabular-nums">Rs. {shippingAmt.toLocaleString("en-IN")}</span>
                       </div>
                     )}
                     {num(advance) > 0 && (
-                      <div className="flex items-start justify-between gap-3 text-xs text-green-600">
+                      <div className="flex items-start justify-between gap-3 text-xs text-admin-success">
                         <span className="min-w-0">Advance paid</span><span className="shrink-0 text-right tabular-nums">−Rs. {num(advance).toLocaleString("en-IN")}</span>
                       </div>
                     )}
-                    <div className="border-t border-amber-200 pt-1.5 flex items-start justify-between gap-3 text-sm font-bold">
-                      <span className="min-w-0">Grand Total</span><span className="shrink-0 text-right text-amber-600 tabular-nums">Rs. {grandTotal.toLocaleString("en-IN")}</span>
+                    <div className="border-t border-admin-warning-line pt-1.5 flex items-start justify-between gap-3 text-sm font-bold">
+                      <span className="min-w-0">Grand Total</span><span className="shrink-0 text-right text-admin-warning tabular-nums">Rs. {grandTotal.toLocaleString("en-IN")}</span>
                     </div>
                     {num(advance) > 0 && (
-                      <div className="flex items-start justify-between gap-3 text-sm font-bold text-stone-700">
+                      <div className="flex items-start justify-between gap-3 text-sm font-bold text-admin-ink">
                         <span className="min-w-0">Balance Due</span><span className="shrink-0 text-right tabular-nums">Rs. {(grandTotal - num(advance)).toLocaleString("en-IN")}</span>
                       </div>
                     )}
@@ -1380,10 +1380,10 @@ export default function AdminInvoices() {
                 {canViewFinance && <section className="invoice-modal-section">
                   <div className="flex items-center justify-between gap-2 mb-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center"><TrendingUp size={13} className="text-emerald-600" /></div>
-                      <span className="text-sm font-bold text-gray-800">Profit Tracking</span>
+                      <div className="w-6 h-6 rounded-lg bg-admin-success-soft flex items-center justify-center"><TrendingUp size={13} className="text-admin-success" /></div>
+                      <span className="text-sm font-bold text-admin-ink">Profit Tracking</span>
                     </div>
-                    <span className="text-[10px] bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold px-2 py-0.5 rounded-full uppercase tracking-wide flex items-center gap-1"><Lock size={9}/>Private</span>
+                    <span className="text-[10px] bg-admin-success-soft border border-admin-success-line text-admin-success font-bold px-2 py-0.5 rounded-full uppercase tracking-wide flex items-center gap-1"><Lock size={9}/>Private</span>
                   </div>
                   <div className="space-y-2">
                     {items.filter(it => it.description.trim()).map((it, idx) => {
@@ -1392,35 +1392,35 @@ export default function AdminInvoices() {
                       const profit = revenue - cost;
                       const hasCost = num(it.costPrice || "0") > 0;
                       return (
-                        <div key={it.id} className="bg-emerald-50/50 rounded-xl p-2.5 border border-emerald-100">
-                          <div className="text-xs font-semibold text-gray-600 mb-1.5 truncate">{it.description}</div>
+                        <div key={it.id} className="bg-admin-success-soft/50 rounded-xl p-2.5 border border-admin-success-line">
+                          <div className="text-xs font-semibold text-admin-muted mb-1.5 truncate">{it.description}</div>
                           <div className="flex items-center gap-2">
                             <div className="flex-1">
-                              <label className="text-[10px] text-gray-400 block mb-0.5">Cost Price (Rs.)</label>
+                              <label className="text-[10px] text-admin-muted block mb-0.5">Cost Price (Rs.)</label>
                               <div className="relative">
-                                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-gray-400 pointer-events-none select-none">Rs.</span>
+                                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-admin-muted pointer-events-none select-none">Rs.</span>
                                 <input
                                   type="text"
                                   inputMode="decimal"
                                   value={it.costPrice || ""}
                                   onChange={e => updateItem(it.id, "costPrice", e.target.value.replace(/[^\d.]/g, ""))}
                                   placeholder="0.00"
-                                  className="w-full pl-9 pr-2 py-1.5 border border-emerald-200 rounded-lg text-xs outline-none focus:ring-1 focus:ring-emerald-300 bg-white text-right font-semibold"
+                                  className="w-full pl-9 pr-2 py-1.5 border border-admin-success-line rounded-lg text-xs outline-none focus:ring-1 focus:ring-admin-success bg-admin-surface text-right font-semibold"
                                 />
                               </div>
                             </div>
                             <div className="text-right shrink-0 min-w-[80px]">
-                              <div className="text-[10px] text-gray-400">Profit</div>
-                              <div className={`text-sm font-bold ${!hasCost ? "text-gray-300" : profit >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+                              <div className="text-[10px] text-admin-muted">Profit</div>
+                              <div className={`text-sm font-bold ${!hasCost ? "text-admin-muted" : profit >= 0 ? "text-admin-success" : "text-admin-danger"}`}>
                                 {hasCost ? `Rs. ${profit.toLocaleString("en-IN", { maximumFractionDigits: 2 })}` : "—"}
                               </div>
                             </div>
                           </div>
-                          <div className="mt-3 border-t border-emerald-100 pt-3 space-y-2">
-                            <div className="flex items-center gap-2"><div className="relative min-w-0 flex-1"><input list={`cost-source-${it.id}`} value={costSearchByItem[it.id]||""} onChange={e=>setCostSearchByItem(current=>({...current,[it.id]:e.target.value}))} placeholder="Search paper, print cost, cut..." className="w-full rounded-lg border border-emerald-200 bg-white px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-emerald-300"/><datalist id={`cost-source-${it.id}`}>{invoiceCostSources.map(source=><option key={source.key} value={source.name}>{source.type==="inventory"?"Material":"Production"} · {rs(source.unitCost)} / {source.unit}</option>)}</datalist></div><button type="button" onClick={()=>{const q=(costSearchByItem[it.id]||"").toLowerCase();const source=invoiceCostSources.find(entry=>entry.name.toLowerCase()===q||entry.key===q);if(source)addCostComponent(it.id,source.key);}} className="rounded-lg bg-emerald-600 px-3 py-2 text-[10px] font-black text-white">Add Cost</button></div>
-                            {(it.costComponents||[]).map(component=><div key={component.id} className="rounded-xl border border-emerald-100 bg-white p-2"><div className="flex items-center gap-2"><span className={`rounded-md px-1.5 py-1 text-[9px] font-black ${component.type==="inventory"?"bg-blue-50 text-blue-600":"bg-stone-50 text-stone-600"}`}>{component.type==="inventory"?"MATERIAL":"COST"}</span><span className="min-w-0 flex-1 truncate text-xs font-bold text-gray-700">{component.name}</span><span className="text-[10px] font-semibold text-gray-400">{rs(component.unitCost)}/{component.unit}</span><button type="button" onClick={()=>removeCostComponent(it.id,component.id)} className="p-1 text-gray-300 hover:text-red-500"><X size={12}/></button></div><div className={`mt-2 grid gap-2 ${component.type==="inventory"?"grid-cols-3":"grid-cols-2"}`}><label className="text-[9px] font-bold text-gray-400">USED / QTY<input type="number" min="0" value={component.quantity} onChange={e=>updateCostComponent(it.id,component.id,"quantity",e.target.value)} className="mt-1 w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs"/></label>{component.type==="inventory"&&<label className="text-[9px] font-bold text-orange-500">EXTRA WASTE<input type="number" min="0" value={component.wasteQuantity||""} onChange={e=>updateCostComponent(it.id,component.id,"wasteQuantity",e.target.value)} className="mt-1 w-full rounded-md border border-orange-200 px-2 py-1.5 text-xs"/></label>}<div className="self-end pb-1 text-right"><div className="text-[9px] text-gray-400">Component Total</div><div className="text-xs font-black text-emerald-700">{rs(componentTotal(component))}</div></div></div></div>)}
-                            {(it.costComponents||[]).some(component=>component.type==="inventory")&&<label className="flex items-start gap-2 rounded-lg bg-blue-50 p-2 text-[10px] text-blue-700"><input type="checkbox" checked={!!it.deductStock} onChange={e=>updateItem(it.id,"deductStock",e.target.checked)} className="mt-0.5"/><span><b>Deduct used + waste from inventory when invoice is saved</b><br/>Editing the invoice recalculates the same usage; deleting restores stock.</span></label>}
-                            {(it.costComponents||[]).length>0&&<div className="flex justify-between rounded-lg bg-emerald-100/60 px-3 py-2 text-xs font-black text-emerald-800"><span>Total line cost</span><span>{rs((it.costComponents||[]).reduce((sum,component)=>sum+componentTotal(component),0))}</span></div>}
+                          <div className="mt-3 border-t border-admin-success-line pt-3 space-y-2">
+                            <div className="flex items-center gap-2"><div className="relative min-w-0 flex-1"><input list={`cost-source-${it.id}`} value={costSearchByItem[it.id]||""} onChange={e=>setCostSearchByItem(current=>({...current,[it.id]:e.target.value}))} placeholder="Search paper, print cost, cut..." className="w-full rounded-lg border border-admin-success-line bg-admin-surface px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-admin-success"/><datalist id={`cost-source-${it.id}`}>{invoiceCostSources.map(source=><option key={source.key} value={source.name}>{source.type==="inventory"?"Material":"Production"} · {rs(source.unitCost)} / {source.unit}</option>)}</datalist></div><button type="button" onClick={()=>{const q=(costSearchByItem[it.id]||"").toLowerCase();const source=invoiceCostSources.find(entry=>entry.name.toLowerCase()===q||entry.key===q);if(source)addCostComponent(it.id,source.key);}} className="rounded-lg bg-admin-success-solid px-3 py-2 text-[10px] font-bold text-white">Add Cost</button></div>
+                            {(it.costComponents||[]).map(component=><div key={component.id} className="rounded-xl border border-admin-success-line bg-admin-surface p-2"><div className="flex items-center gap-2"><span className={`rounded-md px-1.5 py-1 text-[9px] font-bold ${component.type==="inventory"?"bg-admin-brand-soft text-admin-brand-ink":"bg-admin-surface text-admin-muted"}`}>{component.type==="inventory"?"MATERIAL":"COST"}</span><span className="min-w-0 flex-1 truncate text-xs font-bold text-admin-ink">{component.name}</span><span className="text-[10px] font-semibold text-admin-muted">{rs(component.unitCost)}/{component.unit}</span><button type="button" onClick={()=>removeCostComponent(it.id,component.id)} className="p-1 text-admin-muted hover:text-admin-danger"><X size={12}/></button></div><div className={`mt-2 grid gap-2 ${component.type==="inventory"?"grid-cols-3":"grid-cols-2"}`}><label className="text-[9px] font-bold text-admin-muted">USED / QTY<input type="number" min="0" value={component.quantity} onChange={e=>updateCostComponent(it.id,component.id,"quantity",e.target.value)} className="mt-1 w-full rounded-md border border-admin-border px-2 py-1.5 text-xs"/></label>{component.type==="inventory"&&<label className="text-[9px] font-bold text-admin-warning">EXTRA WASTE<input type="number" min="0" value={component.wasteQuantity||""} onChange={e=>updateCostComponent(it.id,component.id,"wasteQuantity",e.target.value)} className="mt-1 w-full rounded-md border border-admin-warning-line px-2 py-1.5 text-xs"/></label>}<div className="self-end pb-1 text-right"><div className="text-[9px] text-admin-muted">Component Total</div><div className="text-xs font-bold text-admin-success">{rs(componentTotal(component))}</div></div></div></div>)}
+                            {(it.costComponents||[]).some(component=>component.type==="inventory")&&<label className="flex items-start gap-2 rounded-lg bg-admin-brand-soft p-2 text-[10px] text-admin-brand-ink"><input type="checkbox" checked={!!it.deductStock} onChange={e=>updateItem(it.id,"deductStock",e.target.checked)} className="mt-0.5"/><span><b>Deduct used + waste from inventory when invoice is saved</b><br/>Editing the invoice recalculates the same usage; deleting restores stock.</span></label>}
+                            {(it.costComponents||[]).length>0&&<div className="flex justify-between rounded-lg bg-admin-success-soft/60 px-3 py-2 text-xs font-bold text-admin-success"><span>Total line cost</span><span>{rs((it.costComponents||[]).reduce((sum,component)=>sum+componentTotal(component),0))}</span></div>}
                           </div>
                         </div>
                       );
@@ -1430,33 +1430,33 @@ export default function AdminInvoices() {
                     const validItems = items.filter(it => it.description.trim());
                     const hasCost = validItems.some(it => num(it.costPrice || "0") > 0);
                     if (!hasCost) return (
-                      <p className="text-xs text-gray-400 italic mt-2 px-1">Enter cost prices above to see profit calculations. Private — not shown on invoice.</p>
+                      <p className="text-xs text-admin-muted italic mt-2 px-1">Enter cost prices above to see profit calculations. Private — not shown on invoice.</p>
                     );
                     const totalCost = validItems.reduce((s, it) => s + it.qty * num(it.costPrice || "0"), 0);
                     const totalProfit = subtotal - totalCost;
                     const margin = subtotal > 0 ? (totalProfit / subtotal) * 100 : 0;
                     return (
-                      <div className="mt-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-3 space-y-1.5 border border-emerald-100">
-                        <div className="flex justify-between text-xs text-gray-500">
-                          <span>Total Cost</span><span className="font-semibold text-red-500">Rs. {totalCost.toLocaleString("en-IN", { maximumFractionDigits: 2 })}</span>
+                      <div className="mt-3 bg-admin-brand rounded-xl p-3 space-y-1.5 border border-admin-success-line">
+                        <div className="flex justify-between text-xs text-admin-muted">
+                          <span>Total Cost</span><span className="font-semibold text-admin-danger">Rs. {totalCost.toLocaleString("en-IN", { maximumFractionDigits: 2 })}</span>
                         </div>
-                        <div className="flex justify-between text-xs text-gray-500">
+                        <div className="flex justify-between text-xs text-admin-muted">
                           <span>Revenue (items only)</span><span className="font-semibold">Rs. {subtotal.toLocaleString("en-IN", { maximumFractionDigits: 2 })}</span>
                         </div>
                         {shippingAmt > 0 && (
-                          <div className="flex justify-between text-xs text-gray-500">
+                          <div className="flex justify-between text-xs text-admin-muted">
                             <span>+ Shipping</span><span className="font-semibold">Rs. {shippingAmt.toLocaleString("en-IN", { maximumFractionDigits: 2 })}</span>
                           </div>
                         )}
-                        <div className="border-t border-emerald-200 pt-1.5 flex justify-between text-sm font-bold">
+                        <div className="border-t border-admin-success-line pt-1.5 flex justify-between text-sm font-bold">
                           <span>Net Profit</span>
-                          <span className={totalProfit >= 0 ? "text-emerald-600" : "text-red-500"}>
+                          <span className={totalProfit >= 0 ? "text-admin-success" : "text-admin-danger"}>
                             Rs. {totalProfit.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
                           </span>
                         </div>
                         <div className="flex justify-between items-center text-xs font-semibold">
-                          <span className="text-gray-500">Margin</span>
-                          <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${margin >= 30 ? "bg-emerald-100 text-emerald-700" : margin >= 10 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-600"}`}>
+                          <span className="text-admin-muted">Margin</span>
+                          <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${margin >= 30 ? "bg-admin-success-soft text-admin-success" : margin >= 10 ? "bg-admin-warning-soft text-admin-warning" : "bg-admin-danger-soft text-admin-danger"}`}>
                             {margin.toFixed(1)}%
                           </span>
                         </div>
@@ -1469,11 +1469,11 @@ export default function AdminInvoices() {
                 <section className="invoice-modal-section">
                   <div className="space-y-2.5">
                     <div>
-                      <label className="text-xs text-gray-500 block mb-1">Additional Notes (shown on invoice)</label>
+                      <label className="text-xs text-admin-muted block mb-1">Additional Notes (shown on invoice)</label>
                       <textarea value={form.additionalNotes} onChange={e => setF("additionalNotes", e.target.value)} rows={2} placeholder="Payment instructions, thank you message, etc." className="input-field resize-none" />
                     </div>
                     <div>
-                      <label className="text-xs text-gray-500 block mb-1">Internal Notes (not on invoice)</label>
+                      <label className="text-xs text-admin-muted block mb-1">Internal Notes (not on invoice)</label>
                       <textarea value={form.internalNotes} onChange={e => setF("internalNotes", e.target.value)} rows={2} placeholder="Staff-only notes..." className="input-field resize-none" />
                     </div>
                   </div>
@@ -1482,13 +1482,13 @@ export default function AdminInvoices() {
             </div>
 
             {/* Footer */}
-            <div className="invoice-modal-footer flex items-center gap-2 px-5 py-4 border-t border-gray-100 bg-gray-50/50 shrink-0">
+            <div className="invoice-modal-footer flex items-center gap-2 px-5 py-4 border-t border-admin-border bg-admin-surface/50 shrink-0">
               <button onClick={() => setShowPreview(true)} disabled={!form.clientName.trim()}
-                className="invoice-secondary-action flex-1 py-2.5 border-2 border-amber-200 text-amber-600 text-sm font-bold rounded-xl hover:bg-amber-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
+                className="invoice-secondary-action flex-1 py-2.5 border-2 border-admin-warning-line text-admin-warning text-sm font-bold rounded-xl hover:bg-admin-warning-soft transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
                 <Eye size={14} /> Preview
               </button>
               <button onClick={handleSave} disabled={isPending || isUpdating || !form.clientName.trim()}
-                className="invoice-primary-action flex-1 py-2.5 bg-gradient-to-r from-amber-500 to-stone-600 text-white text-sm font-bold rounded-xl disabled:opacity-60 flex items-center justify-center gap-2">
+                className="invoice-primary-action flex-1 py-2.5 bg-admin-brand text-white text-sm font-bold rounded-xl disabled:opacity-60 flex items-center justify-center gap-2">
                 {isPending || isUpdating ? "Saving…" : editingFullId !== null ? "Update Invoice" : "Save & Continue"}
               </button>
             </div>
@@ -1509,26 +1509,26 @@ export default function AdminInvoices() {
       )}
 
       {paymentConfirm && (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-gray-950/55 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md overflow-hidden rounded-3xl border border-white/70 bg-white shadow-2xl">
-            <div className="border-b border-gray-100 px-6 py-5">
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-admin-inverse/55 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md overflow-hidden rounded-3xl border border-white/70 bg-admin-surface shadow-2xl">
+            <div className="border-b border-admin-border px-6 py-5">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600"><CheckCircle size={21}/></div>
-                <div><h2 className="font-black text-gray-900">Confirm Payment Received</h2><p className="text-xs text-gray-500">{paymentConfirm.invoice.invoiceNumber} · {paymentConfirm.invoice.clientName}</p></div>
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-admin-success-soft text-admin-success"><CheckCircle size={21}/></div>
+                <div><h2 className="font-bold text-admin-ink">Confirm Payment Received</h2><p className="text-xs text-admin-muted">{paymentConfirm.invoice.invoiceNumber} · {paymentConfirm.invoice.clientName}</p></div>
               </div>
             </div>
             <div className="space-y-4 px-6 py-5">
-              <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-3 text-sm text-emerald-800">
+              <div className="rounded-2xl border border-admin-success-line bg-admin-success-soft/70 p-3 text-sm text-admin-success">
                 This invoice will be marked Paid and <b>{rs(paymentConfirm.invoice.amount)}</b> will be recorded in Cash Flow for the selected month.
               </div>
-              <label className="block text-xs font-bold text-gray-600">Payment Received Date
+              <label className="block text-xs font-bold text-admin-muted">Payment Received Date
                 <input type="date" value={paymentReceivedDate} max="9999-12-31" onChange={e => setPaymentReceivedDate(e.target.value)} className="input-field mt-1.5"/>
               </label>
-              <p className="text-[11px] leading-relaxed text-gray-400">If this invoice was paid in July but updated later, select the actual July payment date. Re-saving will update the same finance entry—not create a duplicate.</p>
+              <p className="text-[11px] leading-relaxed text-admin-muted">If this invoice was paid in July but updated later, select the actual July payment date. Re-saving will update the same finance entry—not create a duplicate.</p>
             </div>
-            <div className="flex gap-2 border-t border-gray-100 bg-gray-50/60 px-6 py-4">
-              <button type="button" onClick={() => setPaymentConfirm(null)} className="flex-1 rounded-xl border border-gray-200 bg-white py-2.5 text-sm font-bold text-gray-600">Cancel</button>
-              <button type="button" onClick={confirmPaidInvoice} disabled={!paymentReceivedDate || isUpdating} className="flex-1 rounded-xl bg-emerald-600 py-2.5 text-sm font-black text-white disabled:opacity-50">{isUpdating ? "Confirming…" : "Confirm Paid"}</button>
+            <div className="flex gap-2 border-t border-admin-border bg-admin-surface/60 px-6 py-4">
+              <button type="button" onClick={() => setPaymentConfirm(null)} className="flex-1 rounded-xl border border-admin-border bg-admin-surface py-2.5 text-sm font-bold text-admin-muted">Cancel</button>
+              <button type="button" onClick={confirmPaidInvoice} disabled={!paymentReceivedDate || isUpdating} className="flex-1 rounded-xl bg-admin-success-solid py-2.5 text-sm font-bold text-white disabled:opacity-50">{isUpdating ? "Confirming…" : "Confirm Paid"}</button>
             </div>
           </div>
         </div>

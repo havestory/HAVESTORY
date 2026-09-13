@@ -147,7 +147,7 @@ const THEME_PRESETS = [
 ];
 
 const inp =
-  "w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-100 transition-colors placeholder:text-gray-400";
+  "w-full border border-admin-border rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-admin-warning-line focus:ring-1 focus:ring-admin-warning transition-colors placeholder:text-admin-muted";
 const ta = `${inp} resize-none`;
 
 function FlatIconLogo({ size = 14 }: { size?: number }) {
@@ -229,31 +229,31 @@ function SiteImageUpload({
 
   return (
     <div>
-      <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+      <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
         {label}
       </label>
-      {hint && <p className="text-xs text-gray-400 mb-3">{hint}</p>}
+      {hint && <p className="text-xs text-admin-muted mb-3">{hint}</p>}
 
       {/* Mode toggle */}
-      <div className="flex gap-1 mb-3 bg-gray-100 p-1 rounded-xl w-fit">
+      <div className="flex gap-1 mb-3 bg-admin-subtle p-1 rounded-xl w-fit">
         <button
           type="button"
           onClick={() => setMode("upload")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${mode === "upload" ? "bg-white text-amber-600 shadow-sm" : "text-gray-500 hover:text-gray-800"}`}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${mode === "upload" ? "bg-admin-surface text-admin-warning shadow-sm" : "text-admin-muted hover:text-admin-ink"}`}
         >
           <Upload size={11} /> Upload File
         </button>
         <button
           type="button"
           onClick={() => setMode("url")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${mode === "url" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-800"}`}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${mode === "url" ? "bg-admin-surface text-admin-brand-ink shadow-sm" : "text-admin-muted hover:text-admin-ink"}`}
         >
           <FlatIconLogo size={11} /> Import from URL
         </button>
       </div>
 
       {mode === "upload" && (
-        <div className="border-2 border-dashed border-gray-200 rounded-2xl overflow-hidden bg-gray-50/50">
+        <div className="border-2 border-dashed border-admin-border rounded-2xl overflow-hidden bg-admin-surface/50">
           {value ? (
             <div className="relative group">
               <img
@@ -261,18 +261,18 @@ function SiteImageUpload({
                 alt="preview"
                 className="w-full max-h-48 object-cover"
               />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100">
+              <div className="absolute inset-0 bg-admin-inverse/0 group-hover:bg-admin-inverse/30 transition-all flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100">
                 <button
                   type="button"
                   onClick={() => ref.current?.click()}
-                  className="px-3 py-1.5 bg-white rounded-lg text-xs font-bold text-gray-800 hover:bg-gray-100 flex items-center gap-1.5"
+                  className="px-3 py-1.5 bg-admin-surface rounded-lg text-xs font-bold text-admin-ink hover:bg-admin-subtle flex items-center gap-1.5"
                 >
                   <Upload size={12} /> Replace
                 </button>
                 <button
                   type="button"
                   onClick={() => onChange("")}
-                  className="px-3 py-1.5 bg-red-50 rounded-lg text-xs font-bold text-red-600 hover:bg-red-100 flex items-center gap-1.5"
+                  className="px-3 py-1.5 bg-admin-danger-soft rounded-lg text-xs font-bold text-admin-danger hover:bg-admin-danger-soft flex items-center gap-1.5"
                 >
                   <X size={12} /> Remove
                 </button>
@@ -282,15 +282,15 @@ function SiteImageUpload({
             <button
               type="button"
               onClick={() => ref.current?.click()}
-              className="w-full py-10 flex flex-col items-center gap-2 hover:bg-amber-50/50 transition-colors"
+              className="w-full py-10 flex flex-col items-center gap-2 hover:bg-admin-warning-soft/50 transition-colors"
             >
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-100 to-stone-100 flex items-center justify-center">
-                <ImageIcon size={22} className="text-amber-500" />
+              <div className="w-12 h-12 rounded-2xl bg-admin-brand flex items-center justify-center">
+                <ImageIcon size={22} className="text-admin-warning" />
               </div>
-              <div className="text-sm font-bold text-gray-700">
+              <div className="text-sm font-bold text-admin-ink">
                 {uploading ? "Uploading..." : "Click to upload image"}
               </div>
-              <div className="text-xs text-gray-400">
+              <div className="text-xs text-admin-muted">
                 PNG, JPG, WEBP · Max 10MB
               </div>
             </button>
@@ -299,15 +299,15 @@ function SiteImageUpload({
       )}
 
       {mode === "url" && (
-        <div className="border-2 border-dashed border-blue-200 rounded-2xl p-4 bg-blue-50/40 space-y-3">
+        <div className="border-2 border-dashed border-admin-brand-line rounded-2xl p-4 bg-admin-brand-soft/40 space-y-3">
           {/* Flaticon shortcut */}
-          <div className="flex items-center gap-3 px-3 py-2.5 bg-white border border-blue-100 rounded-xl">
+          <div className="flex items-center gap-3 px-3 py-2.5 bg-admin-surface border border-admin-brand-line rounded-xl">
             <FlatIconLogo size={20} />
             <div className="flex-1 min-w-0">
-              <div className="text-xs font-bold text-gray-800">
+              <div className="text-xs font-bold text-admin-ink">
                 Browse Flaticon
               </div>
-              <div className="text-[10px] text-gray-400">
+              <div className="text-[10px] text-admin-muted">
                 Search for icons &amp; illustrations, then copy the image URL
                 and paste below
               </div>
@@ -323,7 +323,7 @@ function SiteImageUpload({
           </div>
 
           {/* How-to hint */}
-          <div className="flex items-start gap-2 text-[10px] text-blue-600">
+          <div className="flex items-start gap-2 text-[10px] text-admin-brand-ink">
             <span className="font-bold shrink-0">How to:</span>
             <span>
               Find your icon on Flaticon → right-click the icon image → "Copy
@@ -343,24 +343,24 @@ function SiteImageUpload({
               }}
               onKeyDown={(e) => e.key === "Enter" && previewUrl()}
               placeholder="https://cdn-icons-png.flaticon.com/512/..."
-              className="flex-1 px-3 py-2 border border-blue-200 rounded-xl text-xs outline-none focus:border-blue-400 bg-white placeholder:text-gray-300"
+              className="flex-1 px-3 py-2 border border-admin-brand-line rounded-xl text-xs outline-none focus:border-admin-brand-line bg-admin-surface placeholder:text-admin-muted"
             />
             <button
               type="button"
               onClick={previewUrl}
               disabled={!urlDraft.trim()}
-              className="px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-bold rounded-xl transition-colors disabled:opacity-50"
+              className="px-3 py-2 bg-admin-brand-soft hover:bg-admin-brand-soft text-admin-brand-ink text-xs font-bold rounded-xl transition-colors disabled:opacity-50"
             >
               Preview
             </button>
           </div>
 
-          {urlError && <p className="text-[10px] text-red-500">{urlError}</p>}
+          {urlError && <p className="text-[10px] text-admin-danger">{urlError}</p>}
 
           {/* URL preview */}
           {urlPreview && (
             <div className="space-y-2">
-              <div className="bg-white border border-blue-100 rounded-xl overflow-hidden flex items-center justify-center p-3 min-h-[80px]">
+              <div className="bg-admin-surface border border-admin-brand-line rounded-xl overflow-hidden flex items-center justify-center p-3 min-h-[80px]">
                 <img
                   src={urlPreview}
                   alt="preview"
@@ -375,7 +375,7 @@ function SiteImageUpload({
               <button
                 type="button"
                 onClick={applyUrl}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-admin-brand hover:bg-admin-brand text-white text-xs font-bold rounded-xl transition-colors"
               >
                 <Check size={13} /> Use This Image
               </button>
@@ -383,12 +383,12 @@ function SiteImageUpload({
           )}
 
           {value && (
-            <div className="flex items-center justify-between text-[10px] text-gray-400 pt-1 border-t border-blue-100">
+            <div className="flex items-center justify-between text-[10px] text-admin-muted pt-1 border-t border-admin-brand-line">
               <span>Current image is set</span>
               <button
                 type="button"
                 onClick={() => onChange("")}
-                className="text-red-400 hover:text-red-600 flex items-center gap-1"
+                className="text-admin-danger hover:text-admin-danger flex items-center gap-1"
               >
                 <X size={10} /> Remove current
               </button>
@@ -399,7 +399,7 @@ function SiteImageUpload({
 
       {/* Size hint badge */}
       <div className="flex items-center gap-1.5 mt-2">
-        <div className="px-2.5 py-1 bg-stone-50 border border-stone-100 rounded-full text-[10px] font-bold text-stone-600">
+        <div className="px-2.5 py-1 bg-admin-surface border border-admin-border rounded-full text-[10px] font-bold text-admin-muted">
           Recommended: {sizeHint}
         </div>
         {value && (
@@ -407,14 +407,14 @@ function SiteImageUpload({
             href={value}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[10px] text-blue-500 hover:underline flex items-center gap-1"
+            className="text-[10px] text-admin-brand-ink hover:underline flex items-center gap-1"
           >
             <ExternalLink size={10} /> View full
           </a>
         )}
       </div>
 
-      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+      {error && <p className="text-xs text-admin-danger mt-1">{error}</p>}
       <input
         ref={ref}
         type="file"
@@ -441,12 +441,12 @@ function SectionHeader({
 }) {
   return (
     <div className="flex items-start gap-3 mb-6">
-      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-100 to-stone-100 flex items-center justify-center shrink-0">
-        <Icon size={18} className="text-amber-600" />
+      <div className="w-10 h-10 rounded-2xl bg-admin-brand flex items-center justify-center shrink-0">
+        <Icon size={18} className="text-admin-warning" />
       </div>
       <div>
-        <h2 className="text-base font-bold text-gray-900">{title}</h2>
-        <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+        <h2 className="text-base font-bold text-admin-ink">{title}</h2>
+        <p className="text-xs text-admin-muted mt-0.5">{desc}</p>
       </div>
     </div>
   );
@@ -462,12 +462,12 @@ function SaveBar({
   saved: boolean;
 }) {
   return (
-    <div className="flex justify-end mt-6 pt-5 border-t border-gray-100">
+    <div className="flex justify-end mt-6 pt-5 border-t border-admin-border">
       <button
         type="button"
         onClick={onSave}
         disabled={saving || saved}
-        className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${saved ? "bg-green-500 text-white" : "bg-gradient-to-r from-amber-500 to-stone-600 text-white hover:opacity-90 disabled:opacity-70"}`}
+        className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${saved ? "bg-admin-success-solid text-white" : "bg-admin-brand text-white hover:opacity-90 disabled:opacity-70"}`}
       >
         {saved ? (
           <>
@@ -628,18 +628,18 @@ function AvatarSlot({
   return (
     <div className="flex flex-col items-center gap-1.5">
       <div className="relative group w-16 h-16">
-        <div className="w-16 h-16 rounded-full border-2 border-dashed border-gray-200 bg-gray-50 overflow-hidden flex items-center justify-center">
+        <div className="w-16 h-16 rounded-full border-2 border-dashed border-admin-border bg-admin-surface overflow-hidden flex items-center justify-center">
           {url ? (
             <img src={url} alt={label} className="w-full h-full object-cover" />
           ) : (
-            <User size={22} className="text-gray-300" />
+            <User size={22} className="text-admin-muted" />
           )}
         </div>
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
           disabled={uploading}
-          className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100"
+          className="absolute inset-0 rounded-full bg-admin-inverse/0 group-hover:bg-admin-inverse/40 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100"
         >
           {uploading ? (
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -651,7 +651,7 @@ function AvatarSlot({
           <button
             type="button"
             onClick={() => onChange("")}
-            className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+            className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-admin-danger-solid text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
           >
             <X size={9} />
           </button>
@@ -667,7 +667,7 @@ function AvatarSlot({
           }}
         />
       </div>
-      <span className="text-[10px] text-gray-400 font-medium">{label}</span>
+      <span className="text-[10px] text-admin-muted font-medium">{label}</span>
     </div>
   );
 }
@@ -1090,21 +1090,21 @@ export default function WebsiteEditor() {
     <div>
       {/* Page header */}
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-gray-900">Website Editor</h1>
-        <p className="text-sm text-gray-400 mt-0.5">
+        <h1 className="text-xl font-bold text-admin-ink">Website Editor</h1>
+        <p className="text-sm text-admin-muted mt-0.5">
           Manage your public website content, SEO, and appearance
         </p>
       </div>
 
       {/* Tab bar */}
-      <div className="flex gap-1.5 mb-6 bg-gray-100/80 p-1.5 rounded-2xl overflow-x-auto">
+      <div className="flex gap-1.5 mb-6 bg-admin-subtle/80 p-1.5 rounded-2xl overflow-x-auto">
         {TABS.map((t) => {
           const active = tab === t.id;
           return (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ${active ? "bg-white text-amber-600 shadow-sm" : "text-gray-500 hover:text-gray-800"}`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ${active ? "bg-admin-surface text-admin-warning shadow-sm" : "text-admin-muted hover:text-admin-ink"}`}
             >
               <t.icon size={14} /> {t.label}
             </button>
@@ -1113,7 +1113,7 @@ export default function WebsiteEditor() {
       </div>
 
       {/* Tab content card */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+      <div className="bg-admin-surface rounded-2xl border border-admin-border shadow-sm p-6">
         {/* ═══════════════════════════ HOME PAGE ═══════════════════════════ */}
         {tab === "home" && (
           <div>
@@ -1133,7 +1133,7 @@ export default function WebsiteEditor() {
               />
 
               <div>
-                <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                   BADGE / ANNOUNCEMENT PILL
                 </label>
                 <input
@@ -1142,13 +1142,13 @@ export default function WebsiteEditor() {
                   placeholder="Premium Photo Frames · Made in Sri Lanka"
                   className={inp}
                 />
-                <p className="text-[10px] text-gray-400 mt-1">
+                <p className="text-[10px] text-admin-muted mt-1">
                   Short studio label shown above the main heading
                 </p>
               </div>
 
               <div>
-                <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                   MAIN HERO TITLE
                 </label>
                 <input
@@ -1157,13 +1157,13 @@ export default function WebsiteEditor() {
                   placeholder="Frame the Moments That Stay"
                   className={inp}
                 />
-                <p className="text-[10px] text-gray-400 mt-1">
+                <p className="text-[10px] text-admin-muted mt-1">
                   The large heading shown in the hero section
                 </p>
               </div>
 
               <div>
-                <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                   HIGHLIGHTED WORD (gradient)
                 </label>
                 <input
@@ -1172,14 +1172,14 @@ export default function WebsiteEditor() {
                   placeholder="Vision"
                   className={inp}
                 />
-                <p className="text-[10px] text-gray-400 mt-1">
+                <p className="text-[10px] text-admin-muted mt-1">
                   One word in the title to highlight with a gradient color
                   effect
                 </p>
               </div>
 
               <div>
-                <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                   HERO SUBTITLE / DESCRIPTION
                 </label>
                 <textarea
@@ -1193,7 +1193,7 @@ export default function WebsiteEditor() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                  <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                     CTA BUTTON TEXT
                   </label>
                   <input
@@ -1204,7 +1204,7 @@ export default function WebsiteEditor() {
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                  <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                     CTA BUTTON LINK
                   </label>
                   <input
@@ -1217,10 +1217,10 @@ export default function WebsiteEditor() {
               </div>
 
               <div>
-                <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-1">
+                <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-1">
                   HOMEPAGE FEATURE CARDS
                 </label>
-                <p className="text-[10px] text-gray-400 mb-3">
+                <p className="text-[10px] text-admin-muted mb-3">
                   Edit the four cards directly below the hero. Titles,
                   descriptions and links are shown exactly as configured here.
                 </p>
@@ -1228,9 +1228,9 @@ export default function WebsiteEditor() {
                   {homeFeatureCards.map((card, index) => (
                     <div
                       key={index}
-                      className="rounded-2xl border border-gray-100 bg-gray-50/60 p-3 space-y-2"
+                      className="rounded-2xl border border-admin-border bg-admin-surface/60 p-3 space-y-2"
                     >
-                      <div className="text-[10px] font-black uppercase tracking-wide text-amber-500">
+                      <div className="text-[10px] font-bold uppercase tracking-wide text-admin-warning">
                         Card {index + 1}
                       </div>
                       <input
@@ -1296,13 +1296,13 @@ export default function WebsiteEditor() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-violet-100 bg-gradient-to-br from-white to-violet-50/50 p-4 space-y-4">
+              <div className="rounded-2xl border border-admin-brand-line bg-admin-brand p-4 space-y-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <label className="text-[10px] text-violet-600 font-black tracking-widest block">
+                    <label className="text-[10px] text-admin-brand-ink font-bold tracking-widest block">
                       HOME GLASS BENEFITS STRIP
                     </label>
-                    <p className="mt-1 max-w-2xl text-[10px] leading-relaxed text-gray-500">
+                    <p className="mt-1 max-w-2xl text-[10px] leading-relaxed text-admin-muted">
                       Edit the four fixed sections shown in the clean glass
                       panel below the Home hero. Mobile uses a compact 2 × 2
                       layout.
@@ -1311,7 +1311,7 @@ export default function WebsiteEditor() {
                   <button
                     type="button"
                     onClick={() => setHomeBenefitsEnabled((value) => !value)}
-                    className={`inline-flex min-w-[100px] items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-[10px] font-black transition-colors ${homeBenefitsEnabled ? "bg-emerald-100 text-emerald-700" : "bg-gray-200 text-gray-600"}`}
+                    className={`inline-flex min-w-[100px] items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-[10px] font-bold transition-colors ${homeBenefitsEnabled ? "bg-admin-success-soft text-admin-success" : "bg-admin-subtle text-admin-muted"}`}
                     aria-pressed={homeBenefitsEnabled}
                   >
                     <Eye size={13} />{" "}
@@ -1323,10 +1323,10 @@ export default function WebsiteEditor() {
                   {homeBenefits.map((benefit, index) => (
                     <div
                       key={index}
-                      className="space-y-2 rounded-2xl border border-white bg-white/80 p-3 shadow-sm"
+                      className="space-y-2 rounded-2xl border border-white bg-admin-surface/80 p-3 shadow-sm"
                     >
                       <div className="flex items-center justify-between gap-3">
-                        <span className="text-[10px] font-black uppercase tracking-wide text-violet-500">
+                        <span className="text-[10px] font-bold uppercase tracking-wide text-admin-brand-ink">
                           Benefit {index + 1}
                         </span>
                         <button
@@ -1340,7 +1340,7 @@ export default function WebsiteEditor() {
                               ),
                             )
                           }
-                          className={`rounded-lg px-2.5 py-1.5 text-[9px] font-black ${benefit.enabled ? "bg-emerald-50 text-emerald-700" : "bg-gray-100 text-gray-500"}`}
+                          className={`rounded-lg px-2.5 py-1.5 text-[9px] font-bold ${benefit.enabled ? "bg-admin-success-soft text-admin-success" : "bg-admin-subtle text-admin-muted"}`}
                         >
                           {benefit.enabled ? "Visible" : "Hidden"}
                         </button>
@@ -1421,10 +1421,10 @@ export default function WebsiteEditor() {
 
               {/* Hero Slideshow Images */}
               <div>
-                <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-1">
+                <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-1">
                   HERO SLIDESHOW IMAGES
                 </label>
-                <p className="text-[10px] text-gray-400 mb-3">
+                <p className="text-[10px] text-admin-muted mb-3">
                   Add up to 10 images. The homepage pins this story and
                   transitions between each frame as visitors scroll; after the
                   final frame, the page continues naturally into the store
@@ -1452,14 +1452,14 @@ export default function WebsiteEditor() {
                   ].map(([label, value, onChange, hint], index) => (
                     <div
                       key={label as string}
-                      className="rounded-2xl border border-gray-100 bg-gray-50/60 p-3"
+                      className="rounded-2xl border border-admin-border bg-admin-surface/60 p-3"
                     >
-                      <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-gray-100 bg-white px-3 py-2">
+                      <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-admin-border bg-admin-surface px-3 py-2">
                         <div>
-                          <div className="text-[10px] font-black uppercase tracking-wider text-gray-700">
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-admin-ink">
                             Website visibility
                           </div>
-                          <div className="text-[10px] text-gray-400">
+                          <div className="text-[10px] text-admin-muted">
                             Only published images appear in the homepage
                             carousel.
                           </div>
@@ -1475,7 +1475,7 @@ export default function WebsiteEditor() {
                               ),
                             )
                           }
-                          className={`inline-flex min-w-[92px] items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-[10px] font-black transition-colors ${!value ? "cursor-not-allowed bg-gray-100 text-gray-400" : heroSlideEnabled[index] ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200" : "bg-gray-200 text-gray-600 hover:bg-gray-300"}`}
+                          className={`inline-flex min-w-[92px] items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-[10px] font-bold transition-colors ${!value ? "cursor-not-allowed bg-admin-subtle text-admin-muted" : heroSlideEnabled[index] ? "bg-admin-success-soft text-admin-success hover:bg-admin-success-soft" : "bg-admin-subtle text-admin-muted hover:bg-admin-subtle"}`}
                         >
                           {heroSlideEnabled[index] ? (
                             <Check size={12} />
@@ -1499,10 +1499,10 @@ export default function WebsiteEditor() {
 
               {/* Happy Clients Avatars */}
               <div>
-                <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-1">
+                <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-1">
                   HAPPY CLIENTS PROFILE PHOTOS
                 </label>
-                <p className="text-[10px] text-gray-400 mb-3">
+                <p className="text-[10px] text-admin-muted mb-3">
                   The 4 small circular profile photos shown next to the star
                   rating on the homepage. Ideal size: 100 × 100 px, square crop.
                 </p>
@@ -1532,10 +1532,10 @@ export default function WebsiteEditor() {
 
               {/* Footer Designer Credit */}
               <div>
-                <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-1">
+                <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-1">
                   FOOTER DESIGNER CREDIT
                 </label>
-                <p className="text-[10px] text-gray-400 mb-2">
+                <p className="text-[10px] text-admin-muted mb-2">
                   Shown in the website footer as "Designed with 💜 by [name]".
                   Leave blank to hide it entirely.
                 </p>
@@ -1548,13 +1548,13 @@ export default function WebsiteEditor() {
               </div>
 
               {/* Live preview hint */}
-              <div className="flex items-center gap-3 px-4 py-3 bg-blue-50 border border-blue-100 rounded-xl">
-                <Eye size={16} className="text-blue-500 shrink-0" />
+              <div className="flex items-center gap-3 px-4 py-3 bg-admin-brand-soft border border-admin-brand-line rounded-xl">
+                <Eye size={16} className="text-admin-brand-ink shrink-0" />
                 <div>
-                  <div className="text-xs font-bold text-blue-800">
+                  <div className="text-xs font-bold text-admin-brand-ink">
                     Preview your changes
                   </div>
-                  <div className="text-[10px] text-blue-600 mt-0.5">
+                  <div className="text-[10px] text-admin-brand-ink mt-0.5">
                     After saving, open the{" "}
                     <a href="/" target="_blank" className="underline">
                       homepage
@@ -1589,7 +1589,7 @@ export default function WebsiteEditor() {
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                  <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                     FOUNDED YEAR
                   </label>
                   <input
@@ -1600,7 +1600,7 @@ export default function WebsiteEditor() {
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                  <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                     TEAM SIZE
                   </label>
                   <input
@@ -1611,7 +1611,7 @@ export default function WebsiteEditor() {
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                  <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                     LOCATION
                   </label>
                   <input
@@ -1624,7 +1624,7 @@ export default function WebsiteEditor() {
               </div>
 
               <div>
-                <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                   OUR STORY
                 </label>
                 <textarea
@@ -1634,13 +1634,13 @@ export default function WebsiteEditor() {
                   placeholder="Tell your brand story..."
                   className={ta}
                 />
-                <p className="text-[10px] text-gray-400 mt-1">
+                <p className="text-[10px] text-admin-muted mt-1">
                   Main story paragraph shown on the About page
                 </p>
               </div>
 
               <div>
-                <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                   OUR MISSION
                 </label>
                 <textarea
@@ -1653,7 +1653,7 @@ export default function WebsiteEditor() {
               </div>
 
               <div>
-                <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                   OUR VISION
                 </label>
                 <textarea
@@ -1689,7 +1689,7 @@ export default function WebsiteEditor() {
                     closePForm();
                     setShowPForm(true);
                   }}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-amber-500 to-stone-600 text-white text-sm font-bold rounded-xl shadow-md shrink-0"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-admin-brand text-white text-sm font-bold rounded-xl shadow-md shrink-0"
                 >
                   <Plus size={14} /> Add Project
                 </button>
@@ -1698,14 +1698,14 @@ export default function WebsiteEditor() {
 
             {/* Add / Edit Form */}
             {showPForm && (
-              <div className="mb-6 border border-amber-100 rounded-2xl bg-amber-50/30 p-5 space-y-5">
+              <div className="mb-6 border border-admin-warning-line rounded-2xl bg-admin-warning-soft/30 p-5 space-y-5">
                 <div className="flex items-center justify-between mb-1">
-                  <div className="text-sm font-bold text-gray-800">
+                  <div className="text-sm font-bold text-admin-ink">
                     {editingPId ? "Edit Project" : "New Portfolio Project"}
                   </div>
                   <button
                     onClick={closePForm}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-admin-muted hover:text-admin-muted"
                   >
                     <X size={16} />
                   </button>
@@ -1713,10 +1713,10 @@ export default function WebsiteEditor() {
 
                 {/* Cover Image */}
                 <div>
-                  <div className="text-[10px] text-gray-400 font-bold tracking-widest mb-2">
+                  <div className="text-[10px] text-admin-muted font-bold tracking-widest mb-2">
                     COVER IMAGE
                   </div>
-                  <div className="border-2 border-dashed border-gray-200 rounded-xl overflow-hidden bg-white">
+                  <div className="border-2 border-dashed border-admin-border rounded-xl overflow-hidden bg-admin-surface">
                     {pCoverUrl ? (
                       <div className="relative group">
                         <img
@@ -1724,16 +1724,16 @@ export default function WebsiteEditor() {
                           alt="cover"
                           className="w-full h-40 object-cover"
                         />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100">
+                        <div className="absolute inset-0 bg-admin-inverse/0 group-hover:bg-admin-inverse/30 transition-all flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100">
                           <button
                             onClick={() => pCoverRef.current?.click()}
-                            className="px-3 py-1.5 bg-white rounded-lg text-xs font-bold text-gray-800 flex items-center gap-1"
+                            className="px-3 py-1.5 bg-admin-surface rounded-lg text-xs font-bold text-admin-ink flex items-center gap-1"
                           >
                             <Upload size={11} /> Replace
                           </button>
                           <button
                             onClick={() => setPCoverUrl("")}
-                            className="px-3 py-1.5 bg-red-50 rounded-lg text-xs font-bold text-red-600 flex items-center gap-1"
+                            className="px-3 py-1.5 bg-admin-danger-soft rounded-lg text-xs font-bold text-admin-danger flex items-center gap-1"
                           >
                             <X size={11} /> Remove
                           </button>
@@ -1742,13 +1742,13 @@ export default function WebsiteEditor() {
                     ) : (
                       <button
                         onClick={() => pCoverRef.current?.click()}
-                        className="w-full py-8 flex flex-col items-center gap-2 hover:bg-amber-50/50"
+                        className="w-full py-8 flex flex-col items-center gap-2 hover:bg-admin-warning-soft/50"
                       >
-                        <ImageIcon size={24} className="text-amber-400" />
-                        <span className="text-sm font-bold text-gray-600">
+                        <ImageIcon size={24} className="text-admin-warning" />
+                        <span className="text-sm font-bold text-admin-muted">
                           Click to upload cover image
                         </span>
-                        <span className="text-xs text-gray-400">
+                        <span className="text-xs text-admin-muted">
                           PNG, JPG, WEBP
                         </span>
                       </button>
@@ -1772,10 +1772,10 @@ export default function WebsiteEditor() {
 
                 {/* Gallery Images — drag to reorder */}
                 <div>
-                  <div className="text-[10px] text-gray-400 font-bold tracking-widest mb-2">
+                  <div className="text-[10px] text-admin-muted font-bold tracking-widest mb-2">
                     GALLERY IMAGES
                     {pGallery.length > 1 && (
-                      <span className="ml-2 text-amber-400 normal-case font-normal tracking-normal">
+                      <span className="ml-2 text-admin-warning normal-case font-normal tracking-normal">
                         drag to reorder
                       </span>
                     )}
@@ -1794,7 +1794,7 @@ export default function WebsiteEditor() {
                           key={url}
                           value={url}
                           as="div"
-                          className="relative group rounded-xl overflow-hidden border border-gray-200 cursor-grab active:cursor-grabbing"
+                          className="relative group rounded-xl overflow-hidden border border-admin-border cursor-grab active:cursor-grabbing"
                           style={{ width: 80, height: 80, flexShrink: 0 }}
                           initial={{ opacity: 0, scale: 0.7 }}
                           animate={{ opacity: 1, scale: 1 }}
@@ -1818,7 +1818,7 @@ export default function WebsiteEditor() {
                             draggable={false}
                           />
                           {/* Order badge */}
-                          <div className="absolute bottom-1 left-1 w-5 h-5 rounded-full bg-black/50 text-white text-[9px] font-bold flex items-center justify-center select-none">
+                          <div className="absolute bottom-1 left-1 w-5 h-5 rounded-full bg-admin-inverse/50 text-white text-[9px] font-bold flex items-center justify-center select-none">
                             {i + 1}
                           </div>
                           {/* Remove button */}
@@ -1828,7 +1828,7 @@ export default function WebsiteEditor() {
                               e.stopPropagation();
                               setPGallery((g) => g.filter((_, j) => j !== i));
                             }}
-                            className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                            className="absolute top-1 right-1 w-5 h-5 rounded-full bg-admin-inverse/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
                           >
                             <X size={10} />
                           </button>
@@ -1841,10 +1841,10 @@ export default function WebsiteEditor() {
                       layout
                       onClick={() => pGalleryRef.current?.click()}
                       disabled={pUploading}
-                      className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-1 hover:border-amber-400 hover:bg-amber-50/50 transition-all text-gray-400 flex-shrink-0"
+                      className="w-20 h-20 rounded-xl border-2 border-dashed border-admin-border flex flex-col items-center justify-center gap-1 hover:border-admin-warning-line hover:bg-admin-warning-soft/50 transition-all text-admin-muted flex-shrink-0"
                     >
                       {pUploading ? (
-                        <div className="animate-spin w-5 h-5 border-2 border-amber-400 border-t-transparent rounded-full" />
+                        <div className="animate-spin w-5 h-5 border-2 border-admin-warning-line border-t-transparent rounded-full" />
                       ) : (
                         <>
                           <Plus size={18} />
@@ -1854,7 +1854,7 @@ export default function WebsiteEditor() {
                     </motion.button>
                   </Reorder.Group>
 
-                  <p className="text-[10px] text-gray-400">
+                  <p className="text-[10px] text-admin-muted">
                     Select multiple images at once · Drag thumbnails to set the
                     display order · Appears as a gallery slider on the portfolio
                     page
@@ -1874,7 +1874,7 @@ export default function WebsiteEditor() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                    <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                       PROJECT TITLE *
                     </label>
                     <input
@@ -1885,7 +1885,7 @@ export default function WebsiteEditor() {
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                    <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                       CATEGORY
                     </label>
                     <select
@@ -1904,7 +1904,7 @@ export default function WebsiteEditor() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                    <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                       CLIENT NAME
                     </label>
                     <input
@@ -1915,7 +1915,7 @@ export default function WebsiteEditor() {
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                    <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                       COMPLETED DATE
                     </label>
                     <input
@@ -1928,7 +1928,7 @@ export default function WebsiteEditor() {
                 </div>
 
                 <div>
-                  <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                  <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                     DESCRIPTION
                   </label>
                   <textarea
@@ -1941,9 +1941,9 @@ export default function WebsiteEditor() {
                 </div>
 
                 <div>
-                  <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                  <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                     TAGS{" "}
-                    <span className="text-gray-300 font-normal normal-case">
+                    <span className="text-admin-muted font-normal normal-case">
                       (comma separated)
                     </span>
                   </label>
@@ -1959,30 +1959,30 @@ export default function WebsiteEditor() {
                   <label className="flex items-center gap-2 cursor-pointer">
                     <div
                       onClick={() => setF("featured", !pForm.featured)}
-                      className={`w-10 h-5.5 rounded-full transition-colors relative cursor-pointer ${pForm.featured ? "bg-gradient-to-r from-amber-500 to-stone-600" : "bg-gray-200"}`}
+                      className={`w-10 h-5.5 rounded-full transition-colors relative cursor-pointer ${pForm.featured ? "bg-admin-brand" : "bg-admin-subtle"}`}
                       style={{ height: "22px", minWidth: "40px" }}
                     >
                       <div
-                        className={`absolute top-0.5 w-4.5 h-4.5 bg-white rounded-full shadow transition-transform ${pForm.featured ? "translate-x-5" : "translate-x-0.5"}`}
+                        className={`absolute top-0.5 w-4.5 h-4.5 bg-admin-surface rounded-full shadow transition-transform ${pForm.featured ? "translate-x-5" : "translate-x-0.5"}`}
                         style={{ width: "18px", height: "18px" }}
                       />
                     </div>
-                    <span className="text-sm font-semibold text-gray-700 flex items-center gap-1">
-                      <Star size={13} className="text-yellow-400" /> Featured
+                    <span className="text-sm font-semibold text-admin-ink flex items-center gap-1">
+                      <Star size={13} className="text-admin-warning" /> Featured
                       project
                     </span>
                   </label>
                   <div className="flex gap-2">
                     <button
                       onClick={closePForm}
-                      className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-100"
+                      className="px-4 py-2 rounded-xl text-sm font-semibold text-admin-muted hover:bg-admin-subtle"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={submitPForm}
                       disabled={!pForm.title || creatingP || updatingP}
-                      className="px-5 py-2 bg-gradient-to-r from-amber-500 to-stone-600 text-white text-sm font-bold rounded-xl disabled:opacity-50"
+                      className="px-5 py-2 bg-admin-brand text-white text-sm font-bold rounded-xl disabled:opacity-50"
                     >
                       {creatingP || updatingP
                         ? "Saving..."
@@ -1997,8 +1997,8 @@ export default function WebsiteEditor() {
 
             {/* Projects List */}
             {(portfolioItems ?? []).length === 0 && !showPForm ? (
-              <div className="text-center py-16 text-gray-400">
-                <Images size={40} className="mx-auto mb-3 text-gray-200" />
+              <div className="text-center py-16 text-admin-muted">
+                <Images size={40} className="mx-auto mb-3 text-admin-muted" />
                 <p className="text-sm">
                   No portfolio projects yet. Click "Add Project" to create your
                   first.
@@ -2014,10 +2014,10 @@ export default function WebsiteEditor() {
                   return (
                     <div
                       key={item.id}
-                      className="border border-gray-100 rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow"
+                      className="border border-admin-border rounded-2xl overflow-hidden bg-admin-surface shadow-sm hover:shadow-md transition-shadow"
                     >
                       {/* Thumbnail strip */}
-                      <div className="relative h-36 bg-gray-100">
+                      <div className="relative h-36 bg-admin-subtle">
                         {allImages[0] ? (
                           <img
                             src={allImages[0]}
@@ -2025,17 +2025,17 @@ export default function WebsiteEditor() {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-300">
+                          <div className="w-full h-full flex items-center justify-center text-admin-muted">
                             <ImageIcon size={32} />
                           </div>
                         )}
                         {item.featured && (
-                          <div className="absolute top-2 left-2 bg-gradient-to-r from-amber-500 to-stone-600 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <div className="absolute top-2 left-2 bg-admin-brand text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1">
                             <Star size={9} fill="currentColor" /> Featured
                           </div>
                         )}
                         {allImages.length > 1 && (
-                          <div className="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                          <div className="absolute bottom-2 right-2 bg-admin-inverse/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                             {allImages.length} photos
                           </div>
                         )}
@@ -2043,15 +2043,15 @@ export default function WebsiteEditor() {
                       <div className="p-3">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
-                            <div className="font-bold text-gray-900 text-sm truncate">
+                            <div className="font-bold text-admin-ink text-sm truncate">
                               {item.title}
                             </div>
                             <div className="flex items-center gap-1.5 mt-0.5">
-                              <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">
+                              <span className="text-[10px] font-semibold text-admin-warning bg-admin-warning-soft px-1.5 py-0.5 rounded">
                                 {item.category}
                               </span>
                               {item.clientName && (
-                                <span className="text-[10px] text-gray-400 truncate">
+                                <span className="text-[10px] text-admin-muted truncate">
                                   {item.clientName}
                                 </span>
                               )}
@@ -2060,7 +2060,7 @@ export default function WebsiteEditor() {
                           <div className="flex gap-1 shrink-0">
                             <button
                               onClick={() => openEditP(item)}
-                              className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                              className="inline-flex items-center justify-center p-1.5 text-admin-muted hover:text-admin-brand-ink hover:bg-admin-brand-soft rounded-lg transition-colors"
                               title="Edit"
                             >
                               <PenLine size={14} />
@@ -2072,7 +2072,7 @@ export default function WebsiteEditor() {
                                   name: item.title,
                                 })
                               }
-                              className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                              className="inline-flex items-center justify-center p-1.5 text-admin-muted hover:text-admin-danger hover:bg-admin-danger-soft rounded-lg transition-colors"
                               title="Delete"
                             >
                               <Trash2 size={14} />
@@ -2084,7 +2084,7 @@ export default function WebsiteEditor() {
                             {(item.tags || []).slice(0, 3).map((t: string) => (
                               <span
                                 key={t}
-                                className="text-[10px] text-stone-600 bg-stone-50 px-1.5 py-0.5 rounded-full"
+                                className="text-[10px] text-admin-muted bg-admin-surface px-1.5 py-0.5 rounded-full"
                               >
                                 {t}
                               </span>
@@ -2110,7 +2110,7 @@ export default function WebsiteEditor() {
             />
 
             <div className="space-y-4">
-              <div className="px-3 py-2.5 bg-amber-50 border border-amber-100 rounded-xl text-xs text-amber-800">
+              <div className="px-3 py-2.5 bg-admin-warning-soft border border-admin-warning-line rounded-xl text-xs text-admin-warning">
                 <strong>Tip:</strong> Write your privacy policy in plain text or
                 use line breaks to separate sections. You can use headings by
                 starting a line with a title in ALL CAPS.
@@ -2133,9 +2133,9 @@ CONTACT US
 If you have questions about this Privacy Policy, contact us at ${(settings as any)?.email || "the email configured in General Settings"}`}
                 className={`${ta} font-mono text-xs leading-relaxed`}
               />
-              <div className="text-[10px] text-gray-400">
+              <div className="text-[10px] text-admin-muted">
                 Public URL:{" "}
-                <code className="bg-gray-100 px-1.5 py-0.5 rounded">
+                <code className="bg-admin-subtle px-1.5 py-0.5 rounded">
                   /privacy
                 </code>
               </div>
@@ -2159,7 +2159,7 @@ If you have questions about this Privacy Policy, contact us at ${(settings as an
             />
 
             <div className="space-y-4">
-              <div className="px-3 py-2.5 bg-amber-50 border border-amber-100 rounded-xl text-xs text-amber-800">
+              <div className="px-3 py-2.5 bg-admin-warning-soft border border-admin-warning-line rounded-xl text-xs text-admin-warning">
                 <strong>Tip:</strong> Write your terms in plain text using line
                 breaks to separate sections.
               </div>
@@ -2184,9 +2184,9 @@ CONTACT
 For questions about these terms, email us at ${(settings as any)?.email || "the email configured in General Settings"}`}
                 className={`${ta} font-mono text-xs leading-relaxed`}
               />
-              <div className="text-[10px] text-gray-400">
+              <div className="text-[10px] text-admin-muted">
                 Public URL:{" "}
-                <code className="bg-gray-100 px-1.5 py-0.5 rounded">
+                <code className="bg-admin-subtle px-1.5 py-0.5 rounded">
                   /terms
                 </code>
               </div>
@@ -2211,7 +2211,7 @@ For questions about these terms, email us at ${(settings as any)?.email || "the 
 
             <div className="space-y-6">
               <div>
-                <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                   PAGE TITLE (shown in browser tab & Google)
                 </label>
                 <input
@@ -2221,11 +2221,11 @@ For questions about these terms, email us at ${(settings as any)?.email || "the 
                   className={inp}
                 />
                 <div className="flex items-center justify-between mt-1">
-                  <p className="text-[10px] text-gray-400">
+                  <p className="text-[10px] text-admin-muted">
                     Ideal length: 50–60 characters
                   </p>
                   <span
-                    className={`text-[10px] font-bold ${seoTitle.length > 60 ? "text-red-500" : "text-green-500"}`}
+                    className={`text-[10px] font-bold ${seoTitle.length > 60 ? "text-admin-danger" : "text-admin-success"}`}
                   >
                     {seoTitle.length}/60
                   </span>
@@ -2233,7 +2233,7 @@ For questions about these terms, email us at ${(settings as any)?.email || "the 
               </div>
 
               <div>
-                <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                   META DESCRIPTION (shown in Google results)
                 </label>
                 <textarea
@@ -2244,11 +2244,11 @@ For questions about these terms, email us at ${(settings as any)?.email || "the 
                   className={ta}
                 />
                 <div className="flex items-center justify-between mt-1">
-                  <p className="text-[10px] text-gray-400">
+                  <p className="text-[10px] text-admin-muted">
                     Ideal length: 150–160 characters
                   </p>
                   <span
-                    className={`text-[10px] font-bold ${seoDescription.length > 160 ? "text-red-500" : "text-green-500"}`}
+                    className={`text-[10px] font-bold ${seoDescription.length > 160 ? "text-admin-danger" : "text-admin-success"}`}
                   >
                     {seoDescription.length}/160
                   </span>
@@ -2256,7 +2256,7 @@ For questions about these terms, email us at ${(settings as any)?.email || "the 
               </div>
 
               <div>
-                <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                   KEYWORDS (comma-separated)
                 </label>
                 <input
@@ -2265,7 +2265,7 @@ For questions about these terms, email us at ${(settings as any)?.email || "the 
                   placeholder="photo frames sri lanka, custom frames, studio photography, archival prints"
                   className={inp}
                 />
-                <p className="text-[10px] text-gray-400 mt-1">
+                <p className="text-[10px] text-admin-muted mt-1">
                   Keywords help search engines understand your site topic
                 </p>
               </div>
@@ -2280,19 +2280,19 @@ For questions about these terms, email us at ${(settings as any)?.email || "the 
 
               {/* Live preview of how Google listing looks */}
               <div>
-                <label className="text-[10px] text-gray-400 font-bold tracking-widest block mb-2">
+                <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                   GOOGLE PREVIEW
                 </label>
-                <div className="border border-gray-200 rounded-xl p-4 bg-white">
-                  <div className="text-xs text-green-700 mb-0.5">
+                <div className="border border-admin-border rounded-xl p-4 bg-admin-surface">
+                  <div className="text-xs text-admin-success mb-0.5">
                     {(settings as any)?.website || "Your configured website"}
                   </div>
-                  <div className="text-blue-700 font-semibold text-base mb-1 truncate">
+                  <div className="text-admin-brand-ink font-semibold text-base mb-1 truncate">
                     {seoTitle ||
                       (settings as any)?.businessName ||
                       "Your website title"}
                   </div>
-                  <div className="text-gray-600 text-xs leading-relaxed line-clamp-2">
+                  <div className="text-admin-muted text-xs leading-relaxed line-clamp-2">
                     {seoDescription ||
                       `Add the SEO description for ${(settings as any)?.businessName || "your business"}.`}
                   </div>
@@ -2315,45 +2315,45 @@ For questions about these terms, email us at ${(settings as any)?.email || "the 
 
             <div className="space-y-6">
               {/* Upload area */}
-              <div className="border-2 border-dashed border-gray-200 rounded-2xl p-8 bg-gray-50/50 flex flex-col items-center gap-4">
+              <div className="border-2 border-dashed border-admin-border rounded-2xl p-8 bg-admin-surface/50 flex flex-col items-center gap-4">
                 {faviconUrl ? (
                   <div className="flex flex-col items-center gap-4">
                     {/* Browser tab preview */}
                     <div>
-                      <p className="text-[10px] text-gray-400 font-bold tracking-widest text-center mb-3">
+                      <p className="text-[10px] text-admin-muted font-bold tracking-widest text-center mb-3">
                         BROWSER TAB PREVIEW
                       </p>
                       <div className="flex items-center gap-0 mx-auto w-fit">
-                        <div className="flex items-center gap-1.5 px-3 py-2 bg-white border border-gray-200 rounded-t-lg shadow-sm min-w-[160px] max-w-[200px]">
+                        <div className="flex items-center gap-1.5 px-3 py-2 bg-admin-surface border border-admin-border rounded-t-lg shadow-sm min-w-[160px] max-w-[200px]">
                           <img
                             src={faviconUrl}
                             alt="favicon"
                             className="w-4 h-4 object-contain shrink-0"
                           />
-                          <span className="text-xs text-gray-700 truncate font-medium">
+                          <span className="text-xs text-admin-ink truncate font-medium">
                             {(settings as any)?.seoTitle ||
                               (settings as any)?.businessName ||
                               "Website"}
                           </span>
-                          <span className="ml-auto text-gray-400 text-xs shrink-0">
+                          <span className="ml-auto text-admin-muted text-xs shrink-0">
                             ×
                           </span>
                         </div>
                       </div>
-                      <div className="h-0.5 bg-gray-200 w-full" />
+                      <div className="h-0.5 bg-admin-subtle w-full" />
                     </div>
                     {/* Current icon */}
-                    <div className="flex items-center gap-4 p-4 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                    <div className="flex items-center gap-4 p-4 bg-admin-surface border border-admin-border rounded-2xl shadow-sm">
                       <img
                         src={faviconUrl}
                         alt="favicon"
                         className="w-16 h-16 object-contain"
                       />
                       <div>
-                        <p className="text-sm font-bold text-gray-800">
+                        <p className="text-sm font-bold text-admin-ink">
                           Current icon is set
                         </p>
-                        <p className="text-xs text-gray-400 mt-0.5">
+                        <p className="text-xs text-admin-muted mt-0.5">
                           Showing in browser tabs and bookmarks
                         </p>
                         <div className="flex gap-2 mt-3">
@@ -2361,14 +2361,14 @@ For questions about these terms, email us at ${(settings as any)?.email || "the 
                             type="button"
                             onClick={() => faviconInputRef.current?.click()}
                             disabled={faviconUploading}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-lg transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-admin-subtle hover:bg-admin-subtle text-admin-ink text-xs font-bold rounded-lg transition-colors"
                           >
                             <Upload size={11} /> Replace
                           </button>
                           <button
                             type="button"
                             onClick={() => setFaviconUrl("")}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-500 text-xs font-bold rounded-lg transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-admin-danger-soft hover:bg-admin-danger-soft text-admin-danger text-xs font-bold rounded-lg transition-colors"
                           >
                             <X size={11} /> Remove
                           </button>
@@ -2383,19 +2383,19 @@ For questions about these terms, email us at ${(settings as any)?.email || "the 
                     disabled={faviconUploading}
                     className="flex flex-col items-center gap-3 hover:opacity-80 transition-opacity"
                   >
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-100 to-stone-100 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-2xl bg-admin-brand flex items-center justify-center">
                       {faviconUploading ? (
-                        <div className="w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+                        <div className="w-6 h-6 border-2 border-admin-warning-line border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <Upload size={24} className="text-amber-500" />
+                        <Upload size={24} className="text-admin-warning" />
                       )}
                     </div>
-                    <div className="text-sm font-bold text-gray-700">
+                    <div className="text-sm font-bold text-admin-ink">
                       {faviconUploading
                         ? "Uploading..."
                         : "Click to upload icon"}
                     </div>
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-admin-muted">
                       .ICO format recommended · Also supports PNG, SVG · 32×32
                       or 64×64 px
                     </div>
@@ -2414,9 +2414,9 @@ For questions about these terms, email us at ${(settings as any)?.email || "the 
               </div>
 
               {/* Info box */}
-              <div className="flex items-start gap-3 px-4 py-3 bg-blue-50 border border-blue-100 rounded-xl">
-                <Eye size={16} className="text-blue-500 shrink-0 mt-0.5" />
-                <div className="text-xs text-blue-700">
+              <div className="flex items-start gap-3 px-4 py-3 bg-admin-brand-soft border border-admin-brand-line rounded-xl">
+                <Eye size={16} className="text-admin-brand-ink shrink-0 mt-0.5" />
+                <div className="text-xs text-admin-brand-ink">
                   <strong className="font-bold">How it works:</strong> Upload
                   your icon and click "Save Changes". The icon will immediately
                   appear in the browser tab for all visitors. For best results,
@@ -2453,7 +2453,7 @@ For questions about these terms, email us at ${(settings as any)?.email || "the 
                       setThemePreset(preset.id);
                       applyThemeVars(preset.id);
                     }}
-                    className={`relative flex items-start gap-4 p-4 rounded-2xl border-2 text-left transition-all ${active ? "border-transparent shadow-lg" : "border-gray-200 hover:border-gray-300"}`}
+                    className={`relative flex items-start gap-4 p-4 rounded-2xl border-2 text-left transition-all ${active ? "border-transparent shadow-lg" : "border-admin-border hover:border-admin-border"}`}
                     style={
                       active
                         ? {
@@ -2471,10 +2471,10 @@ For questions about these terms, email us at ${(settings as any)?.email || "the 
                       }}
                     />
                     <div className="flex-1 min-w-0">
-                      <div className="font-bold text-gray-900 text-sm">
+                      <div className="font-bold text-admin-ink text-sm">
                         {preset.label}
                       </div>
-                      <div className="text-xs text-gray-500 mt-0.5">
+                      <div className="text-xs text-admin-muted mt-0.5">
                         {preset.desc}
                       </div>
                       {/* Color dots */}
@@ -2515,8 +2515,8 @@ For questions about these terms, email us at ${(settings as any)?.email || "the 
                 THEME_PRESETS.find((p) => p.id === themePreset) ||
                 THEME_PRESETS[0];
               return (
-                <div className="mt-6 p-5 rounded-2xl border border-gray-100 bg-gray-50">
-                  <div className="text-xs font-bold text-gray-400 mb-3">
+                <div className="mt-6 p-5 rounded-2xl border border-admin-border bg-admin-surface">
+                  <div className="text-xs font-bold text-admin-muted mb-3">
                     PREVIEW
                   </div>
                   <div className="flex items-center gap-3 flex-wrap">
@@ -2552,16 +2552,16 @@ For questions about these terms, email us at ${(settings as any)?.email || "the 
               );
             })()}
 
-            <div className="mt-6 p-5 rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-white">
+            <div className="mt-6 p-5 rounded-2xl border border-admin-warning-line bg-admin-brand">
               <div className="flex items-start gap-3 mb-4">
-                <div className="w-10 h-10 rounded-2xl bg-amber-100 flex items-center justify-center shrink-0">
-                  <Sparkles size={18} className="text-amber-700" />
+                <div className="w-10 h-10 rounded-2xl bg-admin-warning-soft flex items-center justify-center shrink-0">
+                  <Sparkles size={18} className="text-admin-warning" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-gray-900">
+                  <h3 className="text-sm font-bold text-admin-ink">
                     Special Event Animations
                   </h3>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-xs text-admin-muted mt-0.5">
                     Turn on a seasonal animation for special days and campaigns.
                     It updates the public website after saving.
                   </p>
@@ -2572,21 +2572,21 @@ For questions about these terms, email us at ${(settings as any)?.email || "the 
                 type="button"
                 onClick={() => setSpecialEventEnabled((value) => !value)}
                 aria-pressed={specialEventEnabled}
-                className={`w-full flex items-center justify-between gap-4 rounded-xl border px-4 py-3 text-left transition-colors ${specialEventEnabled ? "border-amber-300 bg-white" : "border-gray-200 bg-white/70"}`}
+                className={`w-full flex items-center justify-between gap-4 rounded-xl border px-4 py-3 text-left transition-colors ${specialEventEnabled ? "border-admin-warning-line bg-admin-surface" : "border-admin-border bg-admin-surface/70"}`}
               >
                 <div>
-                  <div className="text-sm font-bold text-gray-900">
+                  <div className="text-sm font-bold text-admin-ink">
                     Enable event animation
                   </div>
-                  <div className="text-xs text-gray-500 mt-0.5">
+                  <div className="text-xs text-admin-muted mt-0.5">
                     Keep this off when you do not want seasonal effects.
                   </div>
                 </div>
                 <span
-                  className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${specialEventEnabled ? "bg-amber-600" : "bg-gray-300"}`}
+                  className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${specialEventEnabled ? "bg-admin-warning-solid" : "bg-admin-subtle"}`}
                 >
                   <span
-                    className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${specialEventEnabled ? "translate-x-6" : "translate-x-1"}`}
+                    className={`absolute top-1 h-4 w-4 rounded-full bg-admin-surface shadow-sm transition-transform ${specialEventEnabled ? "translate-x-6" : "translate-x-1"}`}
                   />
                 </span>
               </button>
@@ -2595,7 +2595,7 @@ For questions about these terms, email us at ${(settings as any)?.email || "the 
                 className={`grid gap-4 sm:grid-cols-2 mt-4 ${specialEventEnabled ? "" : "opacity-50"}`}
               >
                 <div>
-                  <label className="text-[10px] text-gray-500 font-bold tracking-widest block mb-2">
+                  <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                     EVENT STYLE
                   </label>
                   <select
@@ -2604,7 +2604,7 @@ For questions about these terms, email us at ${(settings as any)?.email || "the 
                       setSpecialEventType(event.target.value)
                     }
                     disabled={!specialEventEnabled}
-                    className={`${inp} bg-white disabled:cursor-not-allowed`}
+                    className={`${inp} bg-admin-surface disabled:cursor-not-allowed`}
                   >
                     <option value="new-year">New Year — Fireworks</option>
                     <option value="valentine">Valentine's Day — Hearts</option>
@@ -2614,7 +2614,7 @@ For questions about these terms, email us at ${(settings as any)?.email || "the 
                   </select>
                 </div>
                 <div>
-                  <label className="text-[10px] text-gray-500 font-bold tracking-widest block mb-2">
+                  <label className="text-[10px] text-admin-muted font-bold tracking-widest block mb-2">
                     OPTIONAL MESSAGE
                   </label>
                   <input
@@ -2624,18 +2624,18 @@ For questions about these terms, email us at ${(settings as any)?.email || "the 
                     }
                     disabled={!specialEventEnabled}
                     placeholder="Seasonal greeting or campaign message"
-                    className={`${inp} bg-white disabled:cursor-not-allowed`}
+                    className={`${inp} bg-admin-surface disabled:cursor-not-allowed`}
                   />
                 </div>
               </div>
-              <p className="text-[11px] text-gray-500 mt-3">
+              <p className="text-[11px] text-admin-muted mt-3">
                 The selected animation stays subtle and does not block buttons,
                 forms, or scrolling. Disable it after the event to return to the
                 clean site.
               </p>
             </div>
 
-            <div className="mt-4 px-4 py-3 bg-emerald-50 border border-emerald-100 rounded-xl text-xs text-emerald-800">
+            <div className="mt-4 px-4 py-3 bg-admin-success-soft border border-admin-success-line rounded-xl text-xs text-admin-success">
               <strong>Live preview:</strong> Theme changes apply instantly
               across the site as you click. Save to make it permanent.
             </div>

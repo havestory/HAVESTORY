@@ -11,7 +11,7 @@ export type ProductSize = { id: string; name: string; packSize: number; unitLabe
 export function FixedPriceTable({ rows, onChange }: { rows: FixedPrice[]; onChange: (r: FixedPrice[]) => void }) {
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-3 gap-2 text-xs font-semibold text-gray-400 uppercase tracking-wide px-1">
+      <div className="grid grid-cols-3 gap-2 text-xs font-semibold text-admin-muted uppercase tracking-wide px-1">
         <span>Quantity</span><span className="col-span-2">Price (Rs.)</span>
       </div>
       {rows.map((row, i) => (
@@ -21,7 +21,7 @@ export function FixedPriceTable({ rows, onChange }: { rows: FixedPrice[]; onChan
               type="number"
               value={row.qty}
               onChange={e => { const n = [...rows]; n[i] = { ...n[i], qty: Number(e.target.value) }; onChange(n); }}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-200"
+              className="w-full px-3 py-2 border border-admin-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-admin-warning"
               placeholder="100"
             />
           </div>
@@ -30,13 +30,13 @@ export function FixedPriceTable({ rows, onChange }: { rows: FixedPrice[]; onChan
               type="number"
               value={row.price}
               onChange={e => { const n = [...rows]; n[i] = { ...n[i], price: e.target.value }; onChange(n); }}
-              className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-200"
+              className="flex-1 px-3 py-2 border border-admin-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-admin-warning"
               placeholder="e.g. 1500"
             />
             <button
               type="button"
               onClick={() => onChange(rows.filter((_, j) => j !== i))}
-              className="p-2 text-gray-300 hover:text-red-400 transition-colors"
+              className="inline-flex items-center justify-center p-2 text-admin-muted hover:text-admin-danger transition-colors"
             >
               <X size={14} />
             </button>
@@ -46,7 +46,7 @@ export function FixedPriceTable({ rows, onChange }: { rows: FixedPrice[]; onChan
       <button
         type="button"
         onClick={() => onChange([...rows, { qty: 0, price: "" }])}
-        className="text-xs text-amber-500 font-semibold hover:text-amber-700 flex items-center gap-1 mt-1"
+        className="text-xs text-admin-warning font-semibold hover:text-admin-warning flex items-center gap-1 mt-1"
       >
         <Plus size={12} /> Add Quantity Tier
       </button>
@@ -57,18 +57,18 @@ export function FixedPriceTable({ rows, onChange }: { rows: FixedPrice[]; onChan
 export function RangePriceTable({ rows, onChange }: { rows: RangePrice[]; onChange: (r: RangePrice[]) => void }) {
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-4 gap-2 text-xs font-semibold text-gray-400 uppercase tracking-wide px-1">
+      <div className="grid grid-cols-4 gap-2 text-xs font-semibold text-admin-muted uppercase tracking-wide px-1">
         <span>From</span><span>To</span><span className="col-span-2">Price / Unit (Rs.)</span>
       </div>
       {rows.map((row, i) => (
         <div key={i} className="grid grid-cols-4 gap-2 items-center">
-          <input type="number" value={row.from} onChange={e => { const n = [...rows]; n[i] = { ...n[i], from: Number(e.target.value) }; onChange(n); }} className="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-200" placeholder="1" />
-          <input type="number" value={row.to} onChange={e => { const n = [...rows]; n[i] = { ...n[i], to: Number(e.target.value) }; onChange(n); }} className="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-200" placeholder="5" />
-          <input type="number" value={row.pricePerUnit} onChange={e => { const n = [...rows]; n[i] = { ...n[i], pricePerUnit: e.target.value }; onChange(n); }} className="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-200" placeholder="350" />
-          <button type="button" onClick={() => onChange(rows.filter((_, j) => j !== i))} className="p-2 text-gray-300 hover:text-red-400 transition-colors"><X size={14} /></button>
+          <input type="number" value={row.from} onChange={e => { const n = [...rows]; n[i] = { ...n[i], from: Number(e.target.value) }; onChange(n); }} className="px-3 py-2 border border-admin-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-admin-warning" placeholder="1" />
+          <input type="number" value={row.to} onChange={e => { const n = [...rows]; n[i] = { ...n[i], to: Number(e.target.value) }; onChange(n); }} className="px-3 py-2 border border-admin-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-admin-warning" placeholder="5" />
+          <input type="number" value={row.pricePerUnit} onChange={e => { const n = [...rows]; n[i] = { ...n[i], pricePerUnit: e.target.value }; onChange(n); }} className="px-3 py-2 border border-admin-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-admin-warning" placeholder="350" />
+          <button type="button" onClick={() => onChange(rows.filter((_, j) => j !== i))} className="inline-flex items-center justify-center p-2 text-admin-muted hover:text-admin-danger transition-colors"><X size={14} /></button>
         </div>
       ))}
-      <button type="button" onClick={() => onChange([...rows, { from: 0, to: 0, pricePerUnit: "" }])} className="text-xs text-amber-500 font-semibold hover:text-amber-700 flex items-center gap-1 mt-1">
+      <button type="button" onClick={() => onChange([...rows, { from: 0, to: 0, pricePerUnit: "" }])} className="text-xs text-admin-warning font-semibold hover:text-admin-warning flex items-center gap-1 mt-1">
         <Plus size={12} /> Add Range
       </button>
     </div>
@@ -98,27 +98,27 @@ export function SizeTierBuilder({ sizes, onChange, productImages = [] }: { sizes
   return (
     <div className="space-y-4">
       {sizes.map((size, sIdx) => (
-        <div key={size.id} className="border border-gray-200 rounded-2xl overflow-hidden bg-white">
-          <div className="flex items-center gap-2 px-3 sm:px-4 py-3 bg-gray-50 border-b border-gray-100">
-            <Ruler size={14} className="text-amber-400 shrink-0" />
+        <div key={size.id} className="border border-admin-border rounded-2xl overflow-hidden bg-admin-surface">
+          <div className="flex items-center gap-2 px-3 sm:px-4 py-3 bg-admin-surface border-b border-admin-border">
+            <Ruler size={14} className="text-admin-warning shrink-0" />
             <input
               value={size.name}
               onChange={e => updateSize(sIdx, { name: e.target.value })}
-              className="min-w-0 flex-1 text-sm font-semibold bg-transparent outline-none placeholder:text-gray-300"
+              className="min-w-0 flex-1 text-sm font-semibold bg-transparent outline-none placeholder:text-admin-muted"
               placeholder="Size name (e.g. 3cm sticker sheet)"
             />
-            <button type="button" onClick={() => removeSize(sIdx)} className="p-1.5 text-gray-300 hover:text-red-400 transition-colors"><X size={14} /></button>
+            <button type="button" onClick={() => removeSize(sIdx)} className="inline-flex items-center justify-center p-1.5 text-admin-muted hover:text-admin-danger transition-colors"><X size={14} /></button>
           </div>
           <div className="p-3 sm:p-4 space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className="text-[11px] text-gray-500 font-medium block mb-1">Unit Label</label>
+                <label className="text-[11px] text-admin-muted font-medium block mb-1">Unit Label</label>
                 <div className="relative">
                   <input
                     list={`unit-label-${size.id}`}
                     value={size.unitLabel || ""}
                     onChange={e => updateSize(sIdx, { unitLabel: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-200"
+                    className="w-full px-3 py-2.5 border border-admin-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-admin-warning"
                     placeholder="Pack, Sheets, etc."
                   />
                   <datalist id={`unit-label-${size.id}`}>
@@ -131,49 +131,49 @@ export function SizeTierBuilder({ sizes, onChange, productImages = [] }: { sizes
                 </div>
               </div>
               <div>
-                <label className="text-[11px] text-gray-500 font-medium block mb-1">Pack Size (multiples of)</label>
+                <label className="text-[11px] text-admin-muted font-medium block mb-1">Pack Size (multiples of)</label>
                 <input
                   type="number"
                   min={1}
                   value={size.packSize}
                   onChange={e => updateSize(sIdx, { packSize: Math.max(1, parseInt(e.target.value) || 1) })}
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-200"
+                  className="w-full px-3 py-2.5 border border-admin-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-admin-warning"
                   placeholder="20"
                 />
-                <p className="text-[10px] text-gray-400 mt-1">Multiples of {size.packSize || 1}</p>
+                <p className="text-[10px] text-admin-muted mt-1">Multiples of {size.packSize || 1}</p>
               </div>
               <div>
-                <label className="text-[11px] text-gray-500 font-medium block mb-1">Minimum Quantity</label>
+                <label className="text-[11px] text-admin-muted font-medium block mb-1">Minimum Quantity</label>
                 <input
                   type="number"
                   min={1}
                   value={size.minQty || 1}
                   onChange={e => updateSize(sIdx, { minQty: Math.max(1, parseInt(e.target.value) || 1) })}
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-200"
+                  className="w-full px-3 py-2.5 border border-admin-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-admin-warning"
                   placeholder="1"
                 />
-                <p className="text-[10px] text-gray-400 mt-1">Min order qty</p>
+                <p className="text-[10px] text-admin-muted mt-1">Min order qty</p>
               </div>
             </div>
 
-            <div className="rounded-xl border border-violet-100 bg-violet-50/45 p-3">
+            <div className="rounded-xl border border-admin-brand-line bg-admin-brand-soft/45 p-3">
               <div className="flex items-start gap-3">
-                {size.imageUrl ? <img src={size.imageUrl} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover ring-2 ring-white shadow-sm" /> : <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-gray-300 ring-1 ring-gray-200"><Image size={16} /></div>}
+                {size.imageUrl ? <img src={size.imageUrl} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover ring-2 ring-white shadow-sm" /> : <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-admin-surface text-admin-muted ring-1 ring-admin-border"><Image size={16} /></div>}
                 <div className="min-w-0 flex-1">
-                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-violet-500">Photo shown for this size</label>
-                  <select value={size.imageUrl || ""} onChange={e => updateSize(sIdx, { imageUrl: e.target.value || undefined })} className="w-full rounded-lg border border-violet-100 bg-white px-2.5 py-2 text-xs text-gray-700 outline-none focus:ring-2 focus:ring-violet-200">
+                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-admin-brand-ink">Photo shown for this size</label>
+                  <select value={size.imageUrl || ""} onChange={e => updateSize(sIdx, { imageUrl: e.target.value || undefined })} className="w-full rounded-lg border border-admin-brand-line bg-admin-surface px-2.5 py-2 text-xs text-admin-ink outline-none focus:ring-2 focus:ring-admin-brand">
                     <option value="">Use the main product image</option>
                     {productImages.map((image, index) => <option key={image} value={image}>Product photo {index + 1}{index === 0 ? " (cover)" : ""}</option>)}
                   </select>
-                  <p className="mt-1 text-[10px] leading-relaxed text-gray-400">This photo appears when a customer selects {size.name || "this size"}.</p>
+                  <p className="mt-1 text-[10px] leading-relaxed text-admin-muted">This photo appears when a customer selects {size.name || "this size"}.</p>
                 </div>
               </div>
               {productImages.length > 0 && (
                 <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">
                   {productImages.map((image, index) => (
-                    <button type="button" key={image} onClick={() => updateSize(sIdx, { imageUrl: size.imageUrl === image ? undefined : image })} className={`group relative aspect-square overflow-hidden rounded-lg border-2 bg-white transition ${size.imageUrl === image ? "border-violet-500 ring-2 ring-violet-100" : "border-white hover:border-violet-200"}`} title={`Use product photo ${index + 1}`}>
+                    <button type="button" key={image} onClick={() => updateSize(sIdx, { imageUrl: size.imageUrl === image ? undefined : image })} className={`group relative aspect-square overflow-hidden rounded-lg border-2 bg-admin-surface transition ${size.imageUrl === image ? "border-admin-brand-line ring-2 ring-admin-brand" : "border-white hover:border-admin-brand-line"}`} title={`Use product photo ${index + 1}`}>
                       <img src={image} alt={`Product photo ${index + 1}`} className="h-full w-full object-cover" />
-                      <span className="absolute bottom-0 left-0 right-0 bg-black/55 px-1 py-0.5 text-center text-[9px] font-bold text-white">{index + 1}</span>
+                      <span className="absolute bottom-0 left-0 right-0 bg-admin-inverse/55 px-1 py-0.5 text-center text-[9px] font-bold text-white">{index + 1}</span>
                     </button>
                   ))}
                 </div>
@@ -182,31 +182,31 @@ export function SizeTierBuilder({ sizes, onChange, productImages = [] }: { sizes
 
             {/* Tiers */}
             <div className="space-y-2">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">Price Tiers</span>
+              <span className="text-xs font-bold text-admin-muted uppercase tracking-wide">Price Tiers</span>
               {/* Desktop header */}
-              <div className="hidden sm:grid grid-cols-[1fr_1fr_1fr_auto] gap-2 text-[10px] font-semibold text-gray-400 uppercase tracking-wide px-1">
+              <div className="hidden sm:grid grid-cols-[1fr_1fr_1fr_auto] gap-2 text-[10px] font-semibold text-admin-muted uppercase tracking-wide px-1">
                 <span>From</span><span>To</span><span>Rs. / unit</span><span className="w-8"></span>
               </div>
               {size.tiers.map((tier, tIdx) => (
-                <div key={tIdx} className="relative border border-gray-100 sm:border-0 rounded-xl sm:rounded-none p-3 sm:p-0">
+                <div key={tIdx} className="relative border border-admin-border sm:border-0 rounded-xl sm:rounded-none p-3 sm:p-0">
                   <div className="grid grid-cols-3 sm:grid-cols-[1fr_1fr_1fr_auto] gap-2 items-center">
                     <div>
-                      <span className="text-[10px] text-gray-400 uppercase font-medium sm:hidden block mb-1">From</span>
-                      <input type="number" value={tier.from} onChange={e => updateTier(sIdx, tIdx, { from: Number(e.target.value) })} className="w-full px-2 py-2 sm:py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-200" placeholder="20" />
+                      <span className="text-[10px] text-admin-muted uppercase font-medium sm:hidden block mb-1">From</span>
+                      <input type="number" value={tier.from} onChange={e => updateTier(sIdx, tIdx, { from: Number(e.target.value) })} className="w-full px-2 py-2 sm:py-1.5 border border-admin-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-admin-warning" placeholder="20" />
                     </div>
                     <div>
-                      <span className="text-[10px] text-gray-400 uppercase font-medium sm:hidden block mb-1">To</span>
-                      <input type="number" value={tier.to} onChange={e => updateTier(sIdx, tIdx, { to: Number(e.target.value) })} className="w-full px-2 py-2 sm:py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-200" placeholder="80" />
+                      <span className="text-[10px] text-admin-muted uppercase font-medium sm:hidden block mb-1">To</span>
+                      <input type="number" value={tier.to} onChange={e => updateTier(sIdx, tIdx, { to: Number(e.target.value) })} className="w-full px-2 py-2 sm:py-1.5 border border-admin-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-admin-warning" placeholder="80" />
                     </div>
                     <div>
-                      <span className="text-[10px] text-gray-400 uppercase font-medium sm:hidden block mb-1">Rs./unit</span>
-                      <input type="number" value={tier.pricePerUnit} onChange={e => updateTier(sIdx, tIdx, { pricePerUnit: e.target.value })} className="w-full px-2 py-2 sm:py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-200" placeholder="8.00" />
+                      <span className="text-[10px] text-admin-muted uppercase font-medium sm:hidden block mb-1">Rs./unit</span>
+                      <input type="number" value={tier.pricePerUnit} onChange={e => updateTier(sIdx, tIdx, { pricePerUnit: e.target.value })} className="w-full px-2 py-2 sm:py-1.5 border border-admin-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-admin-warning" placeholder="8.00" />
                     </div>
-                    <button type="button" onClick={() => removeTier(sIdx, tIdx)} className="absolute top-2 right-2 sm:static p-1.5 text-gray-300 hover:text-red-400 transition-colors"><X size={14} /></button>
+                    <button type="button" onClick={() => removeTier(sIdx, tIdx)} className="absolute top-2 right-2 sm:static p-1.5 text-admin-muted hover:text-admin-danger transition-colors"><X size={14} /></button>
                   </div>
                 </div>
               ))}
-              <button type="button" onClick={() => addTier(sIdx)} className="text-xs text-amber-500 font-semibold hover:text-amber-700 flex items-center gap-1 py-1">
+              <button type="button" onClick={() => addTier(sIdx)} className="text-xs text-admin-warning font-semibold hover:text-admin-warning flex items-center gap-1 py-1">
                 <Plus size={12} /> Add tier
               </button>
             </div>
@@ -216,7 +216,7 @@ export function SizeTierBuilder({ sizes, onChange, productImages = [] }: { sizes
       <button
         type="button"
         onClick={addSize}
-        className="w-full py-3 border-2 border-dashed border-amber-200 text-amber-500 text-sm font-semibold rounded-2xl hover:bg-amber-50 transition-colors flex items-center justify-center gap-2"
+        className="w-full py-3 border-2 border-dashed border-admin-warning-line text-admin-warning text-sm font-semibold rounded-2xl hover:bg-admin-warning-soft transition-colors flex items-center justify-center gap-2"
       >
         <Plus size={16} /> Add another size
       </button>
@@ -268,22 +268,22 @@ function ChoiceRow({ allowRange = false, choice, onChange, onRemove, sizes, prod
   };
 
   return (
-    <div className="bg-gray-50 p-2 rounded-xl space-y-2">
+    <div className="bg-admin-surface p-2 rounded-xl space-y-2">
       <div className="flex flex-wrap gap-2 items-center">
-        <input value={choice.name} onChange={e => onChange({ ...choice, name: e.target.value })} className="flex-1 px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-200" placeholder="e.g. Matte" />
-        <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg px-2">
-          <span className="text-xs text-gray-400">Rs.</span>
+        <input value={choice.name} onChange={e => onChange({ ...choice, name: e.target.value })} className="flex-1 px-3 py-1.5 border border-admin-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-admin-warning" placeholder="e.g. Matte" />
+        <div className="flex items-center gap-1 bg-admin-surface border border-admin-border rounded-lg px-2">
+          <span className="text-xs text-admin-muted">Rs.</span>
           <input type="number" min="0" value={choice.price} onChange={e => onChange({ ...choice, price: e.target.value })} className="w-16 py-1.5 text-sm outline-none" placeholder="0" aria-label={`${choice.name || "Choice"} price`} />
         </div>
         <button
           type="button"
           onClick={() => onChange({ ...choice, price: "0" })}
-          className={`shrink-0 rounded-lg border px-2 py-1.5 text-[10px] font-bold transition-colors ${choice.price === "0" ? "border-emerald-200 bg-emerald-50 text-emerald-600" : "border-gray-200 bg-white text-gray-400 hover:border-emerald-200 hover:text-emerald-600"}`}
+          className={`shrink-0 rounded-lg border px-2 py-1.5 text-[10px] font-bold transition-colors ${choice.price === "0" ? "border-admin-success-line bg-admin-success-soft text-admin-success" : "border-admin-border bg-admin-surface text-admin-muted hover:border-admin-success-line hover:text-admin-success"}`}
           title="Set this choice to no extra charge"
         >
           No extra charge
         </button>
-        <select value={choice.chargeType} onChange={e => onChange({ ...choice, chargeType: e.target.value as any })} className="px-2 py-1.5 border border-gray-200 rounded-lg text-xs bg-white outline-none">
+        <select value={choice.chargeType} onChange={e => onChange({ ...choice, chargeType: e.target.value as any })} className="px-2 py-1.5 border border-admin-border rounded-lg text-xs bg-admin-surface outline-none">
           <option value="flat">Flat Fee</option>
           <option value="per_unit">Per Unit</option>{allowRange && <option value="qty_range">Quantity Range</option>}
         </select>
@@ -291,47 +291,47 @@ function ChoiceRow({ allowRange = false, choice, onChange, onRemove, sizes, prod
           <button
             type="button"
             onClick={() => setShowSizePrices(!showSizePrices)}
-            className={`p-1.5 rounded-lg transition-colors ${showSizePrices ? "bg-blue-100 text-blue-600" : "text-gray-400 hover:text-blue-500 hover:bg-blue-50"}`}
+            className={`p-1.5 rounded-lg transition-colors ${showSizePrices ? "bg-admin-brand-soft text-admin-brand-ink" : "text-admin-muted hover:text-admin-brand-ink hover:bg-admin-brand-soft"}`}
             title="Set different prices per size"
           >
             <Ruler size={14} />
           </button>
         )}
-        <button type="button" onClick={onRemove} className="p-1.5 text-gray-300 hover:text-red-400 transition-colors"><X size={14} /></button>
+        <button type="button" onClick={onRemove} className="inline-flex items-center justify-center p-1.5 text-admin-muted hover:text-admin-danger transition-colors"><X size={14} /></button>
       </div>
-      <p className="px-1 text-[10px] leading-relaxed text-gray-400">Price is optional. Leave it blank or choose <span className="font-semibold text-emerald-600">No extra charge</span> for a zero-cost choice.</p>
+      <p className="px-1 text-[10px] leading-relaxed text-admin-muted">Price is optional. Leave it blank or choose <span className="font-semibold text-admin-success">No extra charge</span> for a zero-cost choice.</p>
 
-      <div className="rounded-xl border border-violet-100 bg-violet-50/45 p-3">
+      <div className="rounded-xl border border-admin-brand-line bg-admin-brand-soft/45 p-3">
         <div className="flex items-start gap-3">
-          {choice.imageUrl ? <img src={choice.imageUrl} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover ring-2 ring-white shadow-sm" /> : <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-white text-gray-300 ring-1 ring-gray-200"><Image size={16} /></div>}
+          {choice.imageUrl ? <img src={choice.imageUrl} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover ring-2 ring-white shadow-sm" /> : <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-admin-surface text-admin-muted ring-1 ring-admin-border"><Image size={16} /></div>}
           <div className="min-w-0 flex-1">
-            <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-violet-500">Photo shown for this price / choice</label>
-            <select value={choice.imageUrl || ""} onChange={e => onChange({ ...choice, imageUrl: e.target.value || undefined })} className="w-full rounded-lg border border-violet-100 bg-white px-2.5 py-2 text-xs text-gray-700 outline-none focus:ring-2 focus:ring-violet-200">
+            <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-admin-brand-ink">Photo shown for this price / choice</label>
+            <select value={choice.imageUrl || ""} onChange={e => onChange({ ...choice, imageUrl: e.target.value || undefined })} className="w-full rounded-lg border border-admin-brand-line bg-admin-surface px-2.5 py-2 text-xs text-admin-ink outline-none focus:ring-2 focus:ring-admin-brand">
               <option value="">Use the main product image</option>
               {productImages.map((image, index) => <option key={image} value={image}>Product photo {index + 1}{index === 0 ? " (cover)" : ""}</option>)}
             </select>
-            <p className="mt-1 text-[10px] leading-relaxed text-gray-400">When a customer selects this choice, this photo becomes the product preview and is saved with the cart item.</p>
+            <p className="mt-1 text-[10px] leading-relaxed text-admin-muted">When a customer selects this choice, this photo becomes the product preview and is saved with the cart item.</p>
           </div>
         </div>
         {productImages.length > 0 && (
           <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">
             {productImages.map((image, index) => (
-              <button type="button" key={image} onClick={() => onChange({ ...choice, imageUrl: choice.imageUrl === image ? undefined : image })} className={`group relative aspect-square overflow-hidden rounded-lg border-2 bg-white transition ${choice.imageUrl === image ? "border-violet-500 ring-2 ring-violet-100" : "border-white hover:border-violet-200"}`} title={`Use product photo ${index + 1}`}>
+              <button type="button" key={image} onClick={() => onChange({ ...choice, imageUrl: choice.imageUrl === image ? undefined : image })} className={`group relative aspect-square overflow-hidden rounded-lg border-2 bg-admin-surface transition ${choice.imageUrl === image ? "border-admin-brand-line ring-2 ring-admin-brand" : "border-white hover:border-admin-brand-line"}`} title={`Use product photo ${index + 1}`}>
                 <img src={image} alt={`Product photo ${index + 1}`} className="h-full w-full object-cover" />
-                <span className="absolute bottom-0 left-0 right-0 bg-black/55 px-1 py-0.5 text-center text-[9px] font-bold text-white">{index + 1}</span>
+                <span className="absolute bottom-0 left-0 right-0 bg-admin-inverse/55 px-1 py-0.5 text-center text-[9px] font-bold text-white">{index + 1}</span>
               </button>
             ))}
           </div>
         )}
       </div>
 
-      <div className="rounded-xl border border-emerald-100 bg-emerald-50/45 p-3">
+      <div className="rounded-xl border border-admin-success-line bg-admin-success-soft/45 p-3">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-600">Item-specific photos</p>
-            <p className="mt-1 text-[10px] leading-relaxed text-gray-500">Upload photos only for <span className="font-semibold text-gray-700">{choice.name || "this choice"}</span>. These stay linked to this item and never enter the default product photo list.</p>
+            <p className="text-[10px] font-bold uppercase tracking-wide text-admin-success">Item-specific photos</p>
+            <p className="mt-1 text-[10px] leading-relaxed text-admin-muted">Upload photos only for <span className="font-semibold text-admin-ink">{choice.name || "this choice"}</span>. These stay linked to this item and never enter the default product photo list.</p>
           </div>
-          <button type="button" onClick={() => itemPhotoInputRef.current?.click()} disabled={itemUploading || !onUploadImages} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-emerald-600 px-2.5 py-2 text-[10px] font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-wait disabled:opacity-60">
+          <button type="button" onClick={() => itemPhotoInputRef.current?.click()} disabled={itemUploading || !onUploadImages} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-admin-success-solid px-2.5 py-2 text-[10px] font-bold text-white shadow-sm transition hover:bg-admin-success-solid disabled:cursor-wait disabled:opacity-60">
             {itemUploading ? <Loader2 size={13} className="animate-spin" /> : <ImagePlus size={13} />}
             {itemUploading ? "Uploading…" : "Upload item photos"}
           </button>
@@ -340,28 +340,28 @@ function ChoiceRow({ allowRange = false, choice, onChange, onRemove, sizes, prod
         {(choice.imageUrls || []).length > 0 ? (
           <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">
             {(choice.imageUrls || []).map((url, index) => (
-              <div key={url} className="group relative aspect-square overflow-hidden rounded-lg border border-white bg-white shadow-sm">
+              <div key={url} className="group relative aspect-square overflow-hidden rounded-lg border border-white bg-admin-surface shadow-sm">
                 <img src={url} alt={`${choice.name || "Item"} photo ${index + 1}`} className="h-full w-full object-cover" />
-                <button type="button" onClick={() => removeItemPhoto(url)} title="Remove item photo" className="absolute right-1 top-1 rounded-full bg-black/65 p-1 text-white opacity-0 transition group-hover:opacity-100 focus:opacity-100"><X size={11} /></button>
-                <span className="absolute bottom-0 left-0 right-0 bg-black/55 px-1 py-0.5 text-center text-[9px] font-bold text-white">Item photo {index + 1}</span>
+                <button type="button" onClick={() => removeItemPhoto(url)} title="Remove item photo" className="absolute right-1 top-1 rounded-full bg-admin-inverse/65 p-1 text-white opacity-0 transition group-hover:opacity-100 focus:opacity-100"><X size={11} /></button>
+                <span className="absolute bottom-0 left-0 right-0 bg-admin-inverse/55 px-1 py-0.5 text-center text-[9px] font-bold text-white">Item photo {index + 1}</span>
               </div>
             ))}
           </div>
         ) : (
-          <div className="mt-3 rounded-lg border border-dashed border-emerald-200 bg-white/60 px-3 py-2 text-[10px] text-emerald-700/65">No item-specific photos uploaded yet.</div>
+          <div className="mt-3 rounded-lg border border-dashed border-admin-success-line bg-admin-surface/60 px-3 py-2 text-[10px] text-admin-success/65">No item-specific photos uploaded yet.</div>
         )}
       </div>
 
       {choice.chargeType === "qty_range" && <RangePriceTable rows={choice.priceTiers || []} onChange={priceTiers => onChange({ ...choice, priceTiers })} />}
       {/* Size-dependent pricing */}
       {hasSizes && showSizePrices && (
-        <div className="ml-2 pl-3 border-l-2 border-blue-200 space-y-1.5">
-          <p className="text-[10px] text-blue-600 font-semibold uppercase tracking-wide">Price per size (overrides base price)</p>
+        <div className="ml-2 pl-3 border-l-2 border-admin-brand-line space-y-1.5">
+          <p className="text-[10px] text-admin-brand-ink font-semibold uppercase tracking-wide">Price per size (overrides base price)</p>
           {sizes.map(size => (
             <div key={size.id} className="flex items-center gap-2">
-              <span className="text-xs text-gray-500 w-32 truncate" title={size.name}>{size.name || "Unnamed"}</span>
-              <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg px-2">
-                <span className="text-[10px] text-gray-400">Rs.</span>
+              <span className="text-xs text-admin-muted w-32 truncate" title={size.name}>{size.name || "Unnamed"}</span>
+              <div className="flex items-center gap-1 bg-admin-surface border border-admin-border rounded-lg px-2">
+                <span className="text-[10px] text-admin-muted">Rs.</span>
                 <input
                   type="number"
                   value={getSizePrice(size.id)}
@@ -370,7 +370,7 @@ function ChoiceRow({ allowRange = false, choice, onChange, onRemove, sizes, prod
                   placeholder={choice.price || "0"}
                 />
               </div>
-              <span className="text-[10px] text-gray-400">{choice.chargeType === "per_unit" ? "/unit" : "flat"}</span>
+              <span className="text-[10px] text-admin-muted">{choice.chargeType === "per_unit" ? "/unit" : "flat"}</span>
             </div>
           ))}
         </div>
@@ -400,29 +400,29 @@ export function OptionGroupCard({
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="border border-gray-200 rounded-2xl overflow-hidden bg-white" {...dragHandleProps}>
-      <div className="flex items-center gap-2 px-4 py-3 bg-gray-50 cursor-grab active:cursor-grabbing">
-        <GripVertical size={16} className="text-gray-300 shrink-0" />
+    <div className="border border-admin-border rounded-2xl overflow-hidden bg-admin-surface" {...dragHandleProps}>
+      <div className="flex items-center gap-2 px-4 py-3 bg-admin-surface cursor-grab active:cursor-grabbing">
+        <GripVertical size={16} className="text-admin-muted shrink-0" />
         <input
           value={group.title}
           onChange={e => onChange({ ...group, title: e.target.value })}
-          className="min-w-0 flex-1 text-sm font-semibold bg-transparent outline-none placeholder:text-gray-300"
+          className="min-w-0 flex-1 text-sm font-semibold bg-transparent outline-none placeholder:text-admin-muted"
           placeholder="Option Group Title (e.g. Frame Colour)"
           onClick={e => e.stopPropagation()}
         />
         <div className="flex items-center gap-1 ml-auto">
-          <button type="button" onClick={onMoveUp} disabled={index === 0} className="p-1 text-gray-300 hover:text-gray-600 disabled:opacity-30 transition-colors"><ChevronUp size={14} /></button>
-          <button type="button" onClick={onMoveDown} disabled={index === total - 1} className="p-1 text-gray-300 hover:text-gray-600 disabled:opacity-30 transition-colors"><ChevronDown size={14} /></button>
-          <button type="button" onClick={() => setCollapsed(c => !c)} className="p-1 text-gray-400 hover:text-gray-700 transition-colors">
+          <button type="button" onClick={onMoveUp} disabled={index === 0} className="p-1 text-admin-muted hover:text-admin-muted disabled:opacity-30 transition-colors"><ChevronUp size={14} /></button>
+          <button type="button" onClick={onMoveDown} disabled={index === total - 1} className="p-1 text-admin-muted hover:text-admin-muted disabled:opacity-30 transition-colors"><ChevronDown size={14} /></button>
+          <button type="button" onClick={() => setCollapsed(c => !c)} className="p-1 text-admin-muted hover:text-admin-ink transition-colors">
             {collapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
           </button>
-          <button type="button" onClick={onRemove} className="p-1 text-gray-300 hover:text-red-400 transition-colors"><X size={14} /></button>
+          <button type="button" onClick={onRemove} className="p-1 text-admin-muted hover:text-admin-danger transition-colors"><X size={14} /></button>
         </div>
       </div>
 
       {!collapsed && (
         <div className="p-4 space-y-2">
-          <div className="flex gap-2 text-xs font-semibold text-gray-400 uppercase tracking-wide px-1">
+          <div className="flex gap-2 text-xs font-semibold text-admin-muted uppercase tracking-wide px-1">
             <span className="flex-1">Choice / item name</span>
             <span className="w-28 text-center">Price</span>
             <span className="w-24 text-center">Price basis</span>
@@ -443,7 +443,7 @@ export function OptionGroupCard({
           <button
             type="button"
             onClick={() => onChange({ ...group, choices: [...group.choices, { id: uid(), name: "", price: "", chargeType: "flat" }] })}
-            className="text-xs text-amber-500 font-semibold hover:text-amber-700 flex items-center gap-1 mt-2"
+            className="text-xs text-admin-warning font-semibold hover:text-admin-warning flex items-center gap-1 mt-2"
           >
             <Plus size={12} /> Add Choice
           </button>

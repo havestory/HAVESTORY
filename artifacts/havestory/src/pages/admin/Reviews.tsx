@@ -33,7 +33,7 @@ export default function Reviews() {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
       <div>
-        <h1 className="text-3xl font-serif font-bold text-foreground">Client Reviews</h1>
+        <h1 className="text-3xl font-sans font-bold text-foreground">Client Reviews</h1>
         <p className="text-muted-foreground mt-1">Manage public testimonials.</p>
       </div>
 
@@ -69,7 +69,7 @@ export default function Reviews() {
                       <p className="text-xs text-muted-foreground font-mono mt-0.5">{format(new Date(review.createdAt), 'MMM d, yyyy')}</p>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center text-secondary">
+                      <div className="flex items-center text-admin-brand-ink">
                         {Array.from({ length: 5 }).map((_, i) => (
                           <Star key={i} className={`w-3.5 h-3.5 ${i < review.rating ? 'fill-current' : 'text-muted-foreground/30'}`} />
                         ))}
@@ -79,27 +79,27 @@ export default function Reviews() {
                     <TableCell>
                       <div className="flex flex-col gap-1 items-start">
                         {review.approved ? (
-                          <span className="px-2 py-0.5 bg-green-100 text-green-800 text-[9px] uppercase font-bold tracking-widest border border-green-200">Approved</span>
+                          <span className="px-2 py-0.5 bg-admin-success-soft text-admin-success text-[9px] uppercase font-bold tracking-widest border border-admin-success-line">Approved</span>
                         ) : (
-                          <span className="px-2 py-0.5 bg-amber-100 text-amber-800 text-[9px] uppercase font-bold tracking-widest border border-amber-200">Pending</span>
+                          <span className="px-2 py-0.5 bg-admin-warning-soft text-admin-warning text-[9px] uppercase font-bold tracking-widest border border-admin-warning-line">Pending</span>
                         )}
                         {review.featured && (
-                          <span className="px-2 py-0.5 bg-secondary/10 text-secondary text-[9px] uppercase font-bold tracking-widest border border-secondary/20">Featured</span>
+                          <span className="px-2 py-0.5 bg-secondary/10 text-admin-brand-ink text-[9px] uppercase font-bold tracking-widest border border-secondary/20">Featured</span>
                         )}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         {!review.approved ? (
-                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none text-green-600 hover:bg-green-50" onClick={() => handleUpdate(review.id, { approved: true })} title="Approve">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none text-admin-success hover:bg-admin-success-soft" onClick={() => handleUpdate(review.id, { approved: true })} title="Approve">
                             <CheckCircle className="w-4 h-4" />
                           </Button>
                         ) : (
-                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none text-amber-600 hover:bg-amber-50" onClick={() => handleUpdate(review.id, { approved: false })} title="Revoke Approval">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none text-admin-warning hover:bg-admin-warning-soft" onClick={() => handleUpdate(review.id, { approved: false })} title="Revoke Approval">
                             <XCircle className="w-4 h-4" />
                           </Button>
                         )}
-                        <Button variant="ghost" size="icon" className={`h-8 w-8 rounded-none ${review.featured ? 'text-secondary hover:bg-secondary/10' : 'text-muted-foreground hover:bg-muted'}`} onClick={() => handleUpdate(review.id, { featured: !review.featured })} title="Toggle Featured">
+                        <Button variant="ghost" size="icon" className={`h-8 w-8 rounded-none ${review.featured ? 'text-admin-brand-ink hover:bg-secondary/10' : 'text-muted-foreground hover:bg-muted'}`} onClick={() => handleUpdate(review.id, { featured: !review.featured })} title="Toggle Featured">
                           <Star className={`w-4 h-4 ${review.featured ? 'fill-current' : ''}`} />
                         </Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none text-destructive hover:bg-destructive/10" onClick={() => handleDelete(review.id)} title="Delete">

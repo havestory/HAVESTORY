@@ -56,23 +56,23 @@ function CourierServicesManager({ couriers, onChange }: {
 
   const cancelEdit = () => setEditIdx(null);
 
-  const inp = "flex-1 px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-amber-400 transition-colors placeholder:text-gray-400";
-  const editInp = "flex-1 px-3 py-2 border border-orange-300 rounded-lg text-sm outline-none focus:border-orange-500 transition-colors bg-white";
-  const rateInp = "w-full pl-9 pr-2.5 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-amber-400 text-right font-semibold transition-colors";
-  const rateEditInp = "w-full pl-9 pr-2.5 py-1.5 border border-orange-300 rounded-lg text-sm outline-none focus:border-orange-500 bg-white text-right font-semibold transition-colors";
+  const inp = "flex-1 px-3 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:border-admin-warning-line transition-colors placeholder:text-admin-muted";
+  const editInp = "flex-1 px-3 py-2 border border-admin-warning-line rounded-lg text-sm outline-none focus:border-admin-warning-line transition-colors bg-admin-surface";
+  const rateInp = "w-full pl-9 pr-2.5 py-2 border border-admin-border rounded-lg text-sm outline-none focus:border-admin-warning-line text-right font-semibold transition-colors";
+  const rateEditInp = "w-full pl-9 pr-2.5 py-1.5 border border-admin-warning-line rounded-lg text-sm outline-none focus:border-admin-warning-line bg-admin-surface text-right font-semibold transition-colors";
 
-  const rsPrefix = <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-gray-400 pointer-events-none select-none">Rs.</span>;
+  const rsPrefix = <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-admin-muted pointer-events-none select-none">Rs.</span>;
 
   return (
     <div>
       <div className="flex items-center gap-2 mb-4">
-        <Truck size={18} className="text-orange-400" />
-        <h2 className="font-bold text-gray-900">Courier Services</h2>
+        <Truck size={18} className="text-admin-warning" />
+        <h2 className="font-bold text-admin-ink">Courier Services</h2>
       </div>
-      <p className="text-xs text-gray-400 mb-4">Add courier services with weight-based charges. Use <code className="rounded bg-gray-100 px-1 py-0.5 text-[11px] text-gray-600">{'{trackingNumber}'}</code> in the tracking URL to automatically open the courier page for each saved tracking number.</p>
+      <p className="text-xs text-admin-muted mb-4">Add courier services with weight-based charges. Use <code className="rounded bg-admin-subtle px-1 py-0.5 text-[11px] text-admin-muted">{'{trackingNumber}'}</code> in the tracking URL to automatically open the courier page for each saved tracking number.</p>
 
       {couriers.length === 0 && (
-        <div className="border border-dashed border-gray-200 rounded-xl py-5 text-center text-xs text-gray-400 mb-4">
+        <div className="border border-dashed border-admin-border rounded-xl py-5 text-center text-xs text-admin-muted mb-4">
           No courier services yet. Add one below.
         </div>
       )}
@@ -81,56 +81,56 @@ function CourierServicesManager({ couriers, onChange }: {
         <div className="space-y-2 mb-4">
           {couriers.map((c, i) =>
             editIdx === i ? (
-              <div key={i} className="border border-orange-300 bg-orange-50/40 rounded-xl px-4 py-3 space-y-2">
-                <div className="text-[10px] font-semibold text-orange-500 uppercase tracking-wide mb-1">Editing Courier</div>
+              <div key={i} className="border border-admin-warning-line bg-admin-warning-soft/40 rounded-xl px-4 py-3 space-y-2">
+                <div className="text-[10px] font-semibold text-admin-warning uppercase tracking-wide mb-1">Editing Courier</div>
                 <input value={editName} onChange={e => setEditName(e.target.value)} placeholder="Courier name" className={editInp} />
                 <input value={editUrl} onChange={e => setEditUrl(e.target.value)} placeholder="Tracking URL (use {trackingNumber})" className={editInp} />
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="text-[10px] text-gray-500 block mb-1">First kg (Rs.)</label>
+                    <label className="text-[10px] text-admin-muted block mb-1">First kg (Rs.)</label>
                     <div className="relative">{rsPrefix}<input value={editFirstKg} onChange={e => setEditFirstKg(e.target.value.replace(/[^\d.]/g, ""))} placeholder="450" className={rateEditInp} /></div>
                   </div>
                   <div>
-                    <label className="text-[10px] text-gray-500 block mb-1">Each extra kg (Rs.)</label>
+                    <label className="text-[10px] text-admin-muted block mb-1">Each extra kg (Rs.)</label>
                     <div className="relative">{rsPrefix}<input value={editAddKg} onChange={e => setEditAddKg(e.target.value.replace(/[^\d.]/g, ""))} placeholder="200" className={rateEditInp} /></div>
                   </div>
                 </div>
                 <div className="flex gap-2 pt-1">
                   <button type="button" onClick={saveEdit} disabled={!editName.trim() || !editUrl.trim()}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-500 text-white text-xs font-bold hover:bg-orange-600 disabled:opacity-50 transition-colors">
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-admin-warning-solid text-white text-xs font-bold hover:bg-admin-warning-solid disabled:opacity-50 transition-colors">
                     <Check size={12} /> Save
                   </button>
                   <button type="button" onClick={cancelEdit}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-semibold text-gray-500 hover:bg-gray-100 transition-colors">
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-admin-border text-xs font-semibold text-admin-muted hover:bg-admin-subtle transition-colors">
                     <X size={12} /> Cancel
                   </button>
                 </div>
               </div>
             ) : (
-              <div key={i} className="bg-orange-50/60 border border-orange-100 rounded-xl px-4 py-3">
+              <div key={i} className="bg-admin-warning-soft/60 border border-admin-warning-line rounded-xl px-4 py-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-orange-100 flex items-center justify-center shrink-0">
-                    <Truck size={13} className="text-orange-500" />
+                  <div className="w-7 h-7 rounded-lg bg-admin-warning-soft flex items-center justify-center shrink-0">
+                    <Truck size={13} className="text-admin-warning" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-bold text-gray-800">{c.name}</div>
-                    <div className="text-xs text-gray-400 truncate">{c.trackingUrl}</div>
+                    <div className="text-sm font-bold text-admin-ink">{c.name}</div>
+                    <div className="text-xs text-admin-muted truncate">{c.trackingUrl}</div>
                   </div>
                   <div className="flex gap-1.5 shrink-0">
-                    <a href={c.trackingUrl + "TEST123"} target="_blank" rel="noopener noreferrer" title="Test link" className="p-1.5 hover:bg-orange-100 rounded-lg text-orange-500">
+                    <a href={c.trackingUrl + "TEST123"} target="_blank" rel="noopener noreferrer" title="Test link" className="inline-flex items-center justify-center p-1.5 hover:bg-admin-warning-soft rounded-lg text-admin-warning">
                       <ExternalLink size={13} />
                     </a>
-                    <button type="button" onClick={() => startEdit(i)} title="Edit" className="p-1.5 hover:bg-blue-100 rounded-lg text-blue-400">
+                    <button type="button" onClick={() => startEdit(i)} title="Edit" className="inline-flex items-center justify-center p-1.5 hover:bg-admin-brand-soft rounded-lg text-admin-brand-ink">
                       <Pencil size={13} />
                     </button>
-                    <button type="button" onClick={() => remove(i)} title="Delete" className="p-1.5 hover:bg-red-100 rounded-lg text-red-400">
+                    <button type="button" onClick={() => remove(i)} title="Delete" className="inline-flex items-center justify-center p-1.5 hover:bg-admin-danger-soft rounded-lg text-admin-danger">
                       <Trash2 size={13} />
                     </button>
                   </div>
                 </div>
-                <div className="mt-2 flex gap-3 text-[11px] text-gray-500">
-                  <span>1st kg: <strong className="text-gray-700">Rs. {c.firstKgRate || "450"}</strong></span>
-                  <span>Extra kg: <strong className="text-gray-700">Rs. {c.addKgRate || "200"}</strong></span>
+                <div className="mt-2 flex gap-3 text-[11px] text-admin-muted">
+                  <span>1st kg: <strong className="text-admin-ink">Rs. {c.firstKgRate || "450"}</strong></span>
+                  <span>Extra kg: <strong className="text-admin-ink">Rs. {c.addKgRate || "200"}</strong></span>
                 </div>
               </div>
             )
@@ -138,8 +138,8 @@ function CourierServicesManager({ couriers, onChange }: {
         </div>
       )}
 
-      <div className="border border-gray-100 rounded-xl p-4 space-y-2">
-        <div className="text-xs text-gray-400 font-semibold mb-2">ADD NEW COURIER SERVICE</div>
+      <div className="border border-admin-border rounded-xl p-4 space-y-2">
+        <div className="text-xs text-admin-muted font-semibold mb-2">ADD NEW COURIER SERVICE</div>
         <div className="flex gap-2">
           <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Courier name (e.g. Pronto Lanka)" className={inp} />
         </div>
@@ -148,17 +148,17 @@ function CourierServicesManager({ couriers, onChange }: {
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <label className="text-[10px] text-gray-500 block mb-1">First kg rate (Rs.)</label>
+            <label className="text-[10px] text-admin-muted block mb-1">First kg rate (Rs.)</label>
             <div className="relative">{rsPrefix}<input value={newFirstKg} onChange={e => setNewFirstKg(e.target.value.replace(/[^\d.]/g, ""))} placeholder="450" className={rateInp} /></div>
           </div>
           <div>
-            <label className="text-[10px] text-gray-500 block mb-1">Each extra kg (Rs.)</label>
+            <label className="text-[10px] text-admin-muted block mb-1">Each extra kg (Rs.)</label>
             <div className="relative">{rsPrefix}<input value={newAddKg} onChange={e => setNewAddKg(e.target.value.replace(/[^\d.]/g, ""))} placeholder="200" className={rateInp} /></div>
           </div>
         </div>
-        <p className="text-[10px] text-gray-400">Example: <span className="font-mono">https://courier.example/track/{'{trackingNumber}'}</span> — the saved tracking number is inserted automatically. Direct URLs without the placeholder are also supported.</p>
+        <p className="text-[10px] text-admin-muted">Example: <span className="font-mono">https://courier.example/track/{'{trackingNumber}'}</span> — the saved tracking number is inserted automatically. Direct URLs without the placeholder are also supported.</p>
         <button type="button" onClick={add} disabled={!newName.trim() || !newUrl.trim()}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500 text-white text-sm font-bold hover:bg-orange-600 disabled:opacity-50 transition-colors">
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-admin-warning-solid text-white text-sm font-bold hover:bg-admin-warning-solid disabled:opacity-50 transition-colors">
           <Plus size={14} /> Add Courier
         </button>
       </div>
@@ -173,7 +173,7 @@ function BankDetailsManager({ banks, onChange }: { banks: BankEntry[]; onChange:
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
   const [showForm, setShowForm] = useState(false);
 
-  const inp = "w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-400 bg-white transition-colors placeholder:text-gray-400";
+  const inp = "w-full px-3 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:border-admin-brand-line bg-admin-surface transition-colors placeholder:text-admin-muted";
   const f = (key: keyof BankEntry, val: string) => setForm(prev => ({ ...prev, [key]: val }));
 
   const startAdd = () => { setForm({ ...EMPTY_BANK }); setEditingIdx(null); setShowForm(true); };
@@ -200,27 +200,27 @@ function BankDetailsManager({ banks, onChange }: { banks: BankEntry[]; onChange:
           the title never wraps mid-word into 3 lines on narrow screens. */}
       <div className="flex items-center justify-between gap-2 mb-2">
         <div className="flex items-center gap-2 min-w-0">
-          <Landmark size={18} className="text-blue-400 shrink-0" />
-          <h2 className="font-bold text-gray-900 text-sm sm:text-base truncate">Bank / Payment Details</h2>
+          <Landmark size={18} className="text-admin-brand-ink shrink-0" />
+          <h2 className="font-bold text-admin-ink text-sm sm:text-base truncate">Bank / Payment Details</h2>
         </div>
         {!showForm && (
           <button type="button" onClick={startAdd}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold transition-colors shrink-0">
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-admin-brand-soft hover:bg-admin-brand-soft text-admin-brand-ink text-xs font-semibold transition-colors shrink-0">
             <Plus size={13} /> <span className="hidden sm:inline">Add Account</span><span className="sm:hidden">Add</span>
           </button>
         )}
       </div>
-      <p className="text-xs text-gray-400 mb-4">
+      <p className="text-xs text-admin-muted mb-4">
         Choose where each account appears. Select one POS default for printed bills and deposit receipts, then save all changes.
       </p>
 
       {/* Empty state */}
       {banks.length === 0 && !showForm && (
-        <div className="border-2 border-dashed border-gray-200 rounded-xl py-8 text-center mb-4">
-          <Landmark size={28} className="mx-auto mb-2 text-gray-200" />
-          <p className="text-sm text-gray-400 mb-3">No bank accounts yet.</p>
+        <div className="border-2 border-dashed border-admin-border rounded-xl py-8 text-center mb-4">
+          <Landmark size={28} className="mx-auto mb-2 text-admin-muted" />
+          <p className="text-sm text-admin-muted mb-3">No bank accounts yet.</p>
           <button type="button" onClick={startAdd}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors">
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-admin-brand text-white text-sm font-semibold hover:bg-admin-brand transition-colors">
             <Plus size={14} /> Add Bank Account
           </button>
         </div>
@@ -230,35 +230,35 @@ function BankDetailsManager({ banks, onChange }: { banks: BankEntry[]; onChange:
       {banks.length > 0 && (
         <div className="space-y-2 mb-4">
           {banks.map((b, i) => (
-            <div key={i} className={`flex items-start gap-3 rounded-xl px-4 py-3 border transition-all ${editingIdx === i ? "bg-blue-50 border-blue-300 ring-1 ring-blue-200" : "bg-gray-50 border-gray-100"}`}>
+            <div key={i} className={`flex items-start gap-3 rounded-xl px-4 py-3 border transition-all ${editingIdx === i ? "bg-admin-brand-soft border-admin-brand-line ring-1 ring-admin-brand" : "bg-admin-surface border-admin-border"}`}>
               <div className="flex-1 min-w-0 pt-0.5">
                 <div className="flex items-center gap-2 mb-0.5">
                   {b.posDefault && b.pos !== false && (
-                    <span className="text-[10px] font-bold bg-blue-500 text-white rounded-md px-1.5 py-0.5 leading-none">POS DEFAULT</span>
+                    <span className="text-[10px] font-bold bg-admin-brand text-white rounded-md px-1.5 py-0.5 leading-none">POS DEFAULT</span>
                   )}
-                  <span className="text-sm font-bold text-gray-800">{b.bankName}</span>
+                  <span className="text-sm font-bold text-admin-ink">{b.bankName}</span>
                 </div>
                 <div className="bank-channel-options mt-3 flex flex-wrap gap-3">
                   <label><input type="checkbox" checked={b.website !== false} onChange={e => onChange(banks.map((bank, index) => index === i ? { ...bank, website: e.target.checked } : bank))} /> Website</label>
                   <label><input type="checkbox" checked={b.pos !== false} onChange={e => onChange(banks.map((bank, index) => index === i ? { ...bank, pos: e.target.checked, posDefault: e.target.checked && !!bank.posDefault } : bank))} /> POS</label>
                   <label><input type="radio" name="default-pos-bank" disabled={b.pos === false} checked={b.pos !== false && (banks.some(bank => bank.posDefault && bank.pos !== false) ? !!b.posDefault : i === banks.findIndex(bank => bank.pos !== false))} onChange={() => onChange(banks.map((bank, index) => ({ ...bank, posDefault: index === i })))} /> Default POS print</label>
                 </div>
-                {b.accountHolder && <div className="text-xs text-gray-500">{b.accountHolder}</div>}
-                <div className="text-xs text-gray-500 font-mono">{b.accountNumber}</div>
+                {b.accountHolder && <div className="text-xs text-admin-muted">{b.accountHolder}</div>}
+                <div className="text-xs text-admin-muted font-mono">{b.accountNumber}</div>
                 {(b.branch || b.swiftBic) && (
-                  <div className="text-xs text-gray-400 mt-0.5">
+                  <div className="text-xs text-admin-muted mt-0.5">
                     {[b.branch, b.swiftBic].filter(Boolean).join(" · ")}
                   </div>
                 )}
               </div>
               <div className="flex items-center gap-1 shrink-0 mt-0.5">
                 <button type="button" onClick={() => editingIdx === i ? cancel() : startEdit(i)}
-                  className={`p-1.5 rounded-lg transition-colors ${editingIdx === i ? "bg-blue-200 text-blue-700" : "hover:bg-blue-100 text-blue-400"}`}
+                  className={`p-1.5 rounded-lg transition-colors ${editingIdx === i ? "bg-admin-brand-soft text-admin-brand-ink" : "hover:bg-admin-brand-soft text-admin-brand-ink"}`}
                   title={editingIdx === i ? "Cancel edit" : "Edit"}>
                   <Pencil size={13} />
                 </button>
                 <button type="button" onClick={() => remove(i)}
-                  className="p-1.5 hover:bg-red-100 rounded-lg text-red-400 transition-colors" title="Delete">
+                  className="inline-flex items-center justify-center p-1.5 hover:bg-admin-danger-soft rounded-lg text-admin-danger transition-colors" title="Delete">
                   <Trash2 size={13} />
                 </button>
               </div>
@@ -271,29 +271,29 @@ function BankDetailsManager({ banks, onChange }: { banks: BankEntry[]; onChange:
           (the parent settings card is itself ~half-width on desktop, so going
           2-col any earlier squeezes inputs and clips placeholder text). */}
       {showForm && (
-        <div className="border border-blue-200 bg-blue-50/40 rounded-2xl p-4 sm:p-5 space-y-4">
-          <div className="text-xs font-bold text-blue-600 uppercase tracking-wider">
+        <div className="border border-admin-brand-line bg-admin-brand-soft/40 rounded-2xl p-4 sm:p-5 space-y-4">
+          <div className="text-xs font-bold text-admin-brand-ink uppercase tracking-wider">
             {editingIdx !== null ? `Editing Account ${editingIdx + 1}` : "New Bank Account"}
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-3">
             <div className="min-w-0">
-              <label className="text-[11px] text-gray-500 font-semibold block mb-1 whitespace-nowrap">Bank Name *</label>
+              <label className="text-[11px] text-admin-muted font-semibold block mb-1 whitespace-nowrap">Bank Name *</label>
               <input value={form.bankName} onChange={e => f("bankName", e.target.value)} placeholder="Bank of Ceylon" className={inp} />
             </div>
             <div className="min-w-0">
-              <label className="text-[11px] text-gray-500 font-semibold block mb-1 whitespace-nowrap">Account Holder</label>
+              <label className="text-[11px] text-admin-muted font-semibold block mb-1 whitespace-nowrap">Account Holder</label>
               <input value={form.accountHolder} onChange={e => f("accountHolder", e.target.value)} placeholder="Account holder name" className={inp} />
             </div>
             <div className="min-w-0">
-              <label className="text-[11px] text-gray-500 font-semibold block mb-1 whitespace-nowrap">Account Number *</label>
+              <label className="text-[11px] text-admin-muted font-semibold block mb-1 whitespace-nowrap">Account Number *</label>
               <input value={form.accountNumber} onChange={e => f("accountNumber", e.target.value)} placeholder="1234567890" className={inp} />
             </div>
             <div className="min-w-0">
-              <label className="text-[11px] text-gray-500 font-semibold block mb-1 whitespace-nowrap">Branch</label>
+              <label className="text-[11px] text-admin-muted font-semibold block mb-1 whitespace-nowrap">Branch</label>
               <input value={form.branch} onChange={e => f("branch", e.target.value)} placeholder="Colombo" className={inp} />
             </div>
             <div className="min-w-0 lg:col-span-2">
-              <label className="text-[11px] text-gray-500 font-semibold block mb-1 whitespace-nowrap">SWIFT / BIC Code</label>
+              <label className="text-[11px] text-admin-muted font-semibold block mb-1 whitespace-nowrap">SWIFT / BIC Code</label>
               <input value={form.swiftBic} onChange={e => f("swiftBic", e.target.value)} placeholder="BCEYLKLX" className={inp} />
             </div>
           </div>
@@ -304,11 +304,11 @@ function BankDetailsManager({ banks, onChange }: { banks: BankEntry[]; onChange:
           </div>
           <div className="flex flex-wrap gap-2 pt-1">
             <button type="button" onClick={save} disabled={!form.bankName.trim() || !form.accountNumber.trim()}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-500 text-white text-sm font-bold hover:bg-blue-600 disabled:opacity-50 transition-colors">
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-admin-brand text-white text-sm font-bold hover:bg-admin-brand disabled:opacity-50 transition-colors">
               {editingIdx !== null ? <><Check size={14} /> Save Changes</> : <><Plus size={14} /> Add Account</>}
             </button>
             <button type="button" onClick={cancel}
-              className="px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors">
+              className="px-4 py-2.5 rounded-xl bg-admin-surface border border-admin-border text-admin-muted text-sm font-medium hover:bg-admin-surface transition-colors">
               Cancel
             </button>
           </div>
@@ -854,36 +854,36 @@ export default function AdminSettings() {
       <div className="flex items-start sm:items-center justify-between gap-3 flex-wrap">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <SettingsIcon size={22} className="text-amber-500" />
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Settings</h1>
+            <SettingsIcon size={22} className="text-admin-warning" />
+            <h1 className="text-xl sm:text-2xl font-bold text-admin-ink">Settings</h1>
           </div>
-          <p className="text-xs sm:text-sm text-gray-400">Configure your website content, contact info, and social links</p>
+          <p className="text-xs sm:text-sm text-admin-muted">Configure your website content, contact info, and social links</p>
         </div>
-        <button disabled={isPending} onClick={handleSave} className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-stone-600 text-white text-xs sm:text-sm font-bold shadow-sm disabled:opacity-60 shrink-0">
+        <button disabled={isPending} onClick={handleSave} className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg bg-admin-brand text-white text-xs sm:text-sm font-bold shadow-sm disabled:opacity-60 shrink-0">
           <Save size={14} /> {isPending ? "Saving..." : "Save All"}
         </button>
       </div>
 
       {isSuccess && (
-        <div className="bg-green-50 border border-green-100 text-green-700 text-sm rounded-xl px-5 py-3">
+        <div className="bg-admin-success-soft border border-admin-success-line text-admin-success text-sm rounded-xl px-5 py-3">
           Settings saved successfully!
         </div>
       )}
 
       {/* Site Closed Toggle */}
-      <div className={`border rounded-2xl shadow-sm p-4 sm:p-6 ${form.siteClosedEnabled ? "bg-amber-50 border-amber-200" : "bg-white border-gray-100"}`}>
+      <div className={`border rounded-2xl shadow-sm p-4 sm:p-6 ${form.siteClosedEnabled ? "bg-admin-warning-soft border-admin-warning-line" : "bg-admin-surface border-admin-border"}`}>
         <div className="flex items-start justify-between gap-3 sm:gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1 flex-wrap">
               <span className="text-base sm:text-lg">🔒</span>
-              <h2 className="font-bold text-gray-900 text-sm sm:text-base">Site Closed / Maintenance Mode</h2>
+              <h2 className="font-bold text-admin-ink text-sm sm:text-base">Site Closed / Maintenance Mode</h2>
               {form.siteClosedEnabled && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold border border-amber-200">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> ACTIVE
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-admin-warning-soft text-admin-warning text-xs font-semibold border border-admin-warning-line">
+                  <span className="w-1.5 h-1.5 rounded-full bg-admin-warning-solid animate-pulse" /> ACTIVE
                 </span>
               )}
             </div>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-admin-muted mb-4">
               When enabled, all public pages show a "site closed" message. The admin panel stays fully accessible.
             </p>
             <div className="flex items-center gap-3 mb-4">
@@ -913,44 +913,44 @@ export default function AdminSettings() {
                     alert(`Failed to ${next ? "enable" : "disable"} maintenance mode. Please try again or re-login. (${(err as Error)?.message ?? "network error"})`);
                   }
                 }}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shadow-inner ${form.siteClosedEnabled ? "bg-amber-500" : "bg-gray-200"}`}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shadow-inner ${form.siteClosedEnabled ? "bg-admin-warning-solid" : "bg-admin-subtle"}`}
               >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${form.siteClosedEnabled ? "translate-x-6" : "translate-x-1"}`} />
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-admin-surface shadow transition-transform ${form.siteClosedEnabled ? "translate-x-6" : "translate-x-1"}`} />
               </button>
-              <span className={`text-sm font-semibold ${form.siteClosedEnabled ? "text-amber-700" : "text-gray-500"}`}>
+              <span className={`text-sm font-semibold ${form.siteClosedEnabled ? "text-admin-warning" : "text-admin-muted"}`}>
                 {form.siteClosedEnabled ? "Site is CLOSED to visitors" : "Site is open to visitors"}
               </span>
             </div>
             <div>
-              <label className="text-xs text-gray-400 font-semibold block mb-1.5">Closed Page Message</label>
+              <label className="text-xs text-admin-muted font-semibold block mb-1.5">Closed Page Message</label>
               <textarea
                 value={form.siteClosedMessage || ""}
                 onChange={e => setForm((f: any) => ({ ...f, siteClosedMessage: e.target.value }))}
                 onBlur={() => autoSaveField("siteClosedMessage", form.siteClosedMessage || "")}
                 rows={2}
                 placeholder="We are currently closed for maintenance. We will be back soon!"
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200 resize-none"
+                className="w-full px-3 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning resize-none"
               />
-              <p className="text-[11px] text-gray-400 mt-1">Saved automatically when you leave this field.</p>
+              <p className="text-[11px] text-admin-muted mt-1">Saved automatically when you leave this field.</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Order Email Notifications */}
-      <div className={`border rounded-2xl shadow-sm p-4 sm:p-6 ${form.orderEmailNotificationsEnabled ? "bg-white border-gray-100" : "bg-gray-50 border-gray-200"}`}>
+      <div className={`border rounded-2xl shadow-sm p-4 sm:p-6 ${form.orderEmailNotificationsEnabled ? "bg-admin-surface border-admin-border" : "bg-admin-surface border-admin-border"}`}>
         <div className="flex items-start justify-between gap-3 sm:gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <Mail size={18} className="text-amber-400 shrink-0" />
-              <h2 className="font-bold text-gray-900 text-sm sm:text-base">New-Order Email Notifications</h2>
+              <Mail size={18} className="text-admin-warning shrink-0" />
+              <h2 className="font-bold text-admin-ink text-sm sm:text-base">New-Order Email Notifications</h2>
               {form.orderEmailNotificationsEnabled && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-semibold border border-green-200">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500" /> ON
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-admin-success-soft text-admin-success text-xs font-semibold border border-admin-success-line">
+                  <span className="w-1.5 h-1.5 rounded-full bg-admin-success-solid" /> ON
                 </span>
               )}
             </div>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-admin-muted mb-4">
               Get an email the moment any new order is created (customer checkout or admin "New Order"). Fully free — uses Gmail SMTP under the hood.
             </p>
 
@@ -975,39 +975,39 @@ export default function AdminSettings() {
                     alert(`Failed to ${next ? "enable" : "disable"} email notifications. (${(err as Error)?.message ?? "network error"})`);
                   }
                 }}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shadow-inner ${form.orderEmailNotificationsEnabled ? "bg-green-500" : "bg-gray-200"}`}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shadow-inner ${form.orderEmailNotificationsEnabled ? "bg-admin-success-solid" : "bg-admin-subtle"}`}
               >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${form.orderEmailNotificationsEnabled ? "translate-x-6" : "translate-x-1"}`} />
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-admin-surface shadow transition-transform ${form.orderEmailNotificationsEnabled ? "translate-x-6" : "translate-x-1"}`} />
               </button>
-              <span className={`text-sm font-semibold ${form.orderEmailNotificationsEnabled ? "text-green-700" : "text-gray-500"}`}>
+              <span className={`text-sm font-semibold ${form.orderEmailNotificationsEnabled ? "text-admin-success" : "text-admin-muted"}`}>
                 {form.orderEmailNotificationsEnabled ? "Notifications enabled" : "Notifications disabled"}
               </span>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs text-gray-400 font-semibold block">Recipient Email Address(es)</label>
+              <label className="text-xs text-admin-muted font-semibold block">Recipient Email Address(es)</label>
               <input
                 type="text"
                 value={form.orderEmailRecipients || ""}
                 onChange={e => setForm((f: any) => ({ ...f, orderEmailRecipients: e.target.value }))}
                 onBlur={() => autoSaveField("orderEmailRecipients", form.orderEmailRecipients || "")}
                 placeholder="orders@yourbusiness.com, manager@yourbusiness.com"
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200"
+                className="w-full px-3 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning"
               />
-              <p className="text-[11px] text-gray-400">Multiple addresses can be comma- or space-separated. Saved automatically when you leave the field.</p>
+              <p className="text-[11px] text-admin-muted">Multiple addresses can be comma- or space-separated. Saved automatically when you leave the field.</p>
             </div>
 
-            <div className="mt-5 pt-4 border-t border-gray-100">
+            <div className="mt-5 pt-4 border-t border-admin-border">
               <div className="flex items-center gap-2 mb-2">
-                <CreditCard size={14} className="text-gray-400" />
-                <h3 className="text-xs font-bold text-gray-600 uppercase tracking-wide">Gmail Sender Credentials</h3>
+                <CreditCard size={14} className="text-admin-muted" />
+                <h3 className="text-xs font-bold text-admin-muted uppercase tracking-wide">Gmail Sender Credentials</h3>
               </div>
-              <p className="text-[11px] text-gray-400 mb-3">
-                One-time setup. Generate an App Password at <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noreferrer" className="text-amber-500 underline">myaccount.google.com/apppasswords</a> (2-Step Verification must be ON). The password is 16 characters and only shown once on Google's side.
+              <p className="text-[11px] text-admin-muted mb-3">
+                One-time setup. Generate an App Password at <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noreferrer" className="text-admin-warning underline">myaccount.google.com/apppasswords</a> (2-Step Verification must be ON). The password is 16 characters and only shown once on Google's side.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5 min-w-0">
-                  <label className="text-xs text-gray-400 font-semibold block">Gmail Address (sender)</label>
+                  <label className="text-xs text-admin-muted font-semibold block">Gmail Address (sender)</label>
                   <input
                     type="email"
                     autoComplete="username"
@@ -1015,11 +1015,11 @@ export default function AdminSettings() {
                     onChange={e => setForm((f: any) => ({ ...f, gmailUser: e.target.value }))}
                     onBlur={() => autoSaveField("gmailUser", (form.gmailUser || "").trim())}
                     placeholder="yourbusiness@gmail.com"
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200"
+                    className="w-full px-3 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning"
                   />
                 </div>
                 <div className="space-y-1.5 min-w-0">
-                  <label className="text-xs text-gray-400 font-semibold block">App Password (16 characters)</label>
+                  <label className="text-xs text-admin-muted font-semibold block">App Password (16 characters)</label>
                   <div className="relative">
                     <input
                       type={showGmailPassword ? "text" : "password"}
@@ -1028,18 +1028,18 @@ export default function AdminSettings() {
                       onChange={e => setForm((f: any) => ({ ...f, gmailAppPassword: e.target.value }))}
                       onBlur={() => autoSaveField("gmailAppPassword", form.gmailAppPassword || "")}
                       placeholder="abcd efgh ijkl mnop"
-                      className="w-full px-3 py-2.5 pr-10 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200 font-mono tracking-wider"
+                      className="w-full px-3 py-2.5 pr-10 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning font-mono tracking-wider"
                     />
                     <button
                       type="button"
                       onClick={() => setShowGmailPassword(v => !v)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 rounded-lg"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-admin-muted hover:text-admin-muted rounded-lg"
                       aria-label={showGmailPassword ? "Hide password" : "Show password"}
                     >
                       {showGmailPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
-                  <p className="text-[11px] text-gray-400">Spaces are okay — we strip them. Saved automatically when you leave the field.</p>
+                  <p className="text-[11px] text-admin-muted">Spaces are okay — we strip them. Saved automatically when you leave the field.</p>
                 </div>
               </div>
             </div>
@@ -1074,13 +1074,13 @@ export default function AdminSettings() {
                     setEmailTesting(false);
                   }
                 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-admin-warning-soft text-admin-warning border border-admin-warning-line hover:bg-admin-warning-soft disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {emailTesting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
                 {emailTesting ? "Sending…" : "Send test email"}
               </button>
               {emailTestResult && (
-                <span className={`text-xs font-medium ${emailTestResult.ok ? "text-green-600" : "text-red-600"}`}>
+                <span className={`text-xs font-medium ${emailTestResult.ok ? "text-admin-success" : "text-admin-danger"}`}>
                   {emailTestResult.ok ? "✓ " : "✗ "}{emailTestResult.msg}
                 </span>
               )}
@@ -1090,12 +1090,12 @@ export default function AdminSettings() {
       </div>
 
       {/* Automated Monthly Finance Report */}
-      <div className="border rounded-2xl shadow-sm p-4 sm:p-6 bg-white border-gray-100">
+      <div className="border rounded-2xl shadow-sm p-4 sm:p-6 bg-admin-surface border-admin-border">
         <div className="flex items-center gap-2 mb-1">
-          <Mail size={18} className="text-amber-500" />
-          <h2 className="font-bold text-gray-900 text-sm sm:text-base">Automated Monthly Finance Report</h2>
+          <Mail size={18} className="text-admin-warning" />
+          <h2 className="font-bold text-admin-ink text-sm sm:text-base">Automated Monthly Finance Report</h2>
         </div>
-        <p className="text-sm text-gray-500 mb-4">Email the previous month's income, expenses, profit and inventory summary on the 1st of each month.</p>
+        <p className="text-sm text-admin-muted mb-4">Email the previous month's income, expenses, profit and inventory summary on the 1st of each month.</p>
         <div className="flex items-center gap-3 mb-4">
           <button
             type="button"
@@ -1113,20 +1113,20 @@ export default function AdminSettings() {
                 alert("Could not update the monthly report schedule.");
               }
             }}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.financeReportEmailEnabled ? "bg-amber-600" : "bg-gray-200"}`}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.financeReportEmailEnabled ? "bg-admin-warning-solid" : "bg-admin-subtle"}`}
           >
-            <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${form.financeReportEmailEnabled ? "translate-x-6" : "translate-x-1"}`} />
+            <span className={`inline-block h-4 w-4 rounded-full bg-admin-surface shadow transition-transform ${form.financeReportEmailEnabled ? "translate-x-6" : "translate-x-1"}`} />
           </button>
-          <span className="text-sm font-semibold text-gray-700">{form.financeReportEmailEnabled ? "Scheduled" : "Disabled"}</span>
+          <span className="text-sm font-semibold text-admin-ink">{form.financeReportEmailEnabled ? "Scheduled" : "Disabled"}</span>
         </div>
-        <label className="text-xs text-gray-400 font-semibold block mb-1.5">Report recipient</label>
+        <label className="text-xs text-admin-muted font-semibold block mb-1.5">Report recipient</label>
         <input
           type="email"
           value={form.financeReportEmailRecipient || ""}
           onChange={event => setForm((current: any) => ({ ...current, financeReportEmailRecipient: event.target.value }))}
           onBlur={() => autoSaveField("financeReportEmailRecipient", form.financeReportEmailRecipient || "")}
           placeholder="owner@example.com"
-          className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200"
+          className="w-full px-3 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning"
         />
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <button
@@ -1148,55 +1148,55 @@ export default function AdminSettings() {
                 setReportSending(false);
               }
             }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-admin-warning-soft text-admin-warning border border-admin-warning-line hover:bg-admin-warning-soft disabled:opacity-50"
           >
             {reportSending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
             {reportSending ? "Sending…" : "Send prior-month report now"}
           </button>
-          {reportResult && <span className={`text-xs font-medium ${reportResult.ok ? "text-green-600" : "text-red-600"}`}>{reportResult.msg}</span>}
+          {reportResult && <span className={`text-xs font-medium ${reportResult.ok ? "text-admin-success" : "text-admin-danger"}`}>{reportResult.msg}</span>}
         </div>
       </div>
 
       {/* Business Logo */}
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-4 sm:p-6">
+      <div className="bg-admin-surface border border-admin-border rounded-2xl shadow-sm p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-4 sm:mb-5">
-          <ImageIcon size={18} className="text-amber-400" />
-          <h2 className="font-bold text-gray-900 text-sm sm:text-base">Business Logo</h2>
+          <ImageIcon size={18} className="text-admin-warning" />
+          <h2 className="font-bold text-admin-ink text-sm sm:text-base">Business Logo</h2>
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
           {/* Preview */}
-          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50 shrink-0 mx-auto sm:mx-0">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-2 border-dashed border-admin-border flex items-center justify-center overflow-hidden bg-admin-surface shrink-0 mx-auto sm:mx-0">
             {form.logoUrl
               ? <img src={form.logoUrl} alt="Logo" className="w-full h-full object-contain p-2" />
-              : <ImageIcon size={28} className="text-gray-300" />
+              : <ImageIcon size={28} className="text-admin-muted" />
             }
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs sm:text-sm text-gray-600 mb-3">Upload your logo. Recommended: PNG, transparent background, 200×200px+.</p>
+            <p className="text-xs sm:text-sm text-admin-muted mb-3">Upload your logo. Recommended: PNG, transparent background, 200×200px+.</p>
             <div className="flex gap-3 flex-wrap items-center">
               <button type="button" onClick={() => logoInputRef.current?.click()} disabled={logoUploading}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-dashed border-gray-200 hover:border-amber-300 text-sm text-gray-500 hover:text-amber-500 transition-all">
+                className="flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-dashed border-admin-border hover:border-admin-warning-line text-sm text-admin-muted hover:text-admin-warning transition-all">
                 {logoUploading ? <><Loader2 size={14} className="animate-spin" /> Saving…</> : <><Upload size={14} /> {form.logoUrl ? "Replace Logo" : "Upload Logo"}</>}
               </button>
               {form.logoUrl && (
                 <>
-                  <div className="flex items-center gap-1 text-[11px] text-emerald-600 font-medium">
-                    <CheckCircle2 size={12} className="text-emerald-500" /> Auto-saved
+                  <div className="flex items-center gap-1 text-[11px] text-admin-success font-medium">
+                    <CheckCircle2 size={12} className="text-admin-success" /> Auto-saved
                   </div>
                   <button type="button" onClick={() => { setForm((f: any) => ({ ...f, logoUrl: "" })); autoSaveField("logoUrl", ""); }}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-red-400 hover:bg-red-50 transition-colors">
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-admin-danger hover:bg-admin-danger-soft transition-colors">
                     <X size={13} /> Remove
                   </button>
                 </>
               )}
             </div>
             <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
-            <div className="flex items-center gap-3 mt-4 pt-3 border-t border-gray-100">
+            <div className="flex items-center gap-3 mt-4 pt-3 border-t border-admin-border">
               <button type="button" onClick={() => setForm((f: any) => ({ ...f, showNameWithLogo: !f.showNameWithLogo }))}
-                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${form.showNameWithLogo ? "bg-green-500" : "bg-gray-200"}`}>
-                <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${form.showNameWithLogo ? "translate-x-4" : "translate-x-1"}`} />
+                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${form.showNameWithLogo ? "bg-admin-success-solid" : "bg-admin-subtle"}`}>
+                <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-admin-surface shadow transition-transform ${form.showNameWithLogo ? "translate-x-4" : "translate-x-1"}`} />
               </button>
-              <span className="text-xs sm:text-sm text-gray-600">Show business name alongside logo</span>
+              <span className="text-xs sm:text-sm text-admin-muted">Show business name alongside logo</span>
             </div>
           </div>
         </div>
@@ -1204,37 +1204,37 @@ export default function AdminSettings() {
 
       <div className="space-y-5">
         {sections.map(section => (
-          <div key={section.title} className="bg-white border border-gray-100 rounded-2xl shadow-sm p-4 sm:p-6">
+          <div key={section.title} className="bg-admin-surface border border-admin-border rounded-2xl shadow-sm p-4 sm:p-6">
             <div className="flex items-center gap-2 mb-4 sm:mb-5">
-              <section.icon size={18} className="text-amber-400" />
-              <h2 className="font-bold text-gray-900 text-sm sm:text-base">{section.title}</h2>
+              <section.icon size={18} className="text-admin-warning" />
+              <h2 className="font-bold text-admin-ink text-sm sm:text-base">{section.title}</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {section.fields.map(f => {
                 const isTextarea = ["aboutStory","aboutMission","heroSubtitle","whatsappMessage","termsConditions","whatsappOrderTemplate"].includes(f.key);
                 return (
                   <div key={f.key} className={isTextarea ? "sm:col-span-2" : ""}>
-                    <label className="text-xs text-gray-400 block mb-1.5">{f.label}</label>
+                    <label className="text-xs text-admin-muted block mb-1.5">{f.label}</label>
                     {isTextarea ? (
                       <>
-                        <textarea value={form[f.key] || ""} onChange={e => set(f.key, e.target.value)} rows={f.key === "whatsappOrderTemplate" ? 6 : 3} placeholder={f.placeholder} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200 resize-none" />
+                        <textarea value={form[f.key] || ""} onChange={e => set(f.key, e.target.value)} rows={f.key === "whatsappOrderTemplate" ? 6 : 3} placeholder={f.placeholder} className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning resize-none" />
                         {f.key === "whatsappOrderTemplate" && (
-                          <p className="text-[10px] text-gray-400 mt-1.5">Available placeholders: <span className="font-mono text-amber-500">{"{customerName}"}</span> · <span className="font-mono text-amber-500">{"{orderNumber}"}</span> · <span className="font-mono text-amber-500">{"{trackingLink}"}</span></p>
+                          <p className="text-[10px] text-admin-muted mt-1.5">Available placeholders: <span className="font-mono text-admin-warning">{"{customerName}"}</span> · <span className="font-mono text-admin-warning">{"{orderNumber}"}</span> · <span className="font-mono text-admin-warning">{"{trackingLink}"}</span></p>
                         )}
                       </>
                     ) : (
-                      <input value={form[f.key] || ""} onChange={e => set(f.key, e.target.value)} placeholder={f.placeholder} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" />
+                      <input value={form[f.key] || ""} onChange={e => set(f.key, e.target.value)} placeholder={f.placeholder} className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning" />
                     )}
                   </div>
                 );
               })}
               {section.title === "Business Identity" && (
-                <div className="sm:col-span-2 flex items-center gap-3 pt-1 border-t border-gray-100">
+                <div className="sm:col-span-2 flex items-center gap-3 pt-1 border-t border-admin-border">
                   <button type="button" onClick={() => setForm((f: any) => ({ ...f, taglineEnabled: !f.taglineEnabled }))}
-                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors shrink-0 ${form.taglineEnabled ? "bg-green-500" : "bg-gray-200"}`}>
-                    <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${form.taglineEnabled ? "translate-x-4" : "translate-x-1"}`} />
+                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors shrink-0 ${form.taglineEnabled ? "bg-admin-success-solid" : "bg-admin-subtle"}`}>
+                    <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-admin-surface shadow transition-transform ${form.taglineEnabled ? "translate-x-4" : "translate-x-1"}`} />
                   </button>
-                  <span className="text-xs sm:text-sm text-gray-600">Show tagline in navigation bar</span>
+                  <span className="text-xs sm:text-sm text-admin-muted">Show tagline in navigation bar</span>
                 </div>
               )}
             </div>
@@ -1242,46 +1242,46 @@ export default function AdminSettings() {
         ))}
 
         {/* Bank Details */}
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+        <div className="bg-admin-surface border border-admin-border rounded-2xl shadow-sm p-6">
           <BankDetailsManager banks={banks} onChange={setBanks} />
         </div>
 
         {/* Payment Options — QR & Button */}
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+        <div className="bg-admin-surface border border-admin-border rounded-2xl shadow-sm p-6">
           <div className="flex items-center gap-2 mb-1">
-            <QrCode size={18} className="text-emerald-500" />
-            <h2 className="font-bold text-gray-900">Payment Options</h2>
+            <QrCode size={18} className="text-admin-success" />
+            <h2 className="font-bold text-admin-ink">Payment Options</h2>
           </div>
-          <p className="text-xs text-gray-400 mb-5">
+          <p className="text-xs text-admin-muted mb-5">
             Add a QR code for quick scanning (e.g. FriMo, mCash) and/or a payment button that links to an online payment page. Both appear in the homepage payment section.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {/* QR Code */}
             <div>
-              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">QR Code Image</div>
+              <div className="text-xs font-semibold text-admin-muted uppercase tracking-wide mb-3">QR Code Image</div>
               <div className="flex items-start gap-4">
-                <div className="w-24 h-24 rounded-2xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50 shrink-0">
+                <div className="w-24 h-24 rounded-2xl border-2 border-dashed border-admin-border flex items-center justify-center overflow-hidden bg-admin-surface shrink-0">
                   {form.paymentQrUrl
                     ? <img src={form.paymentQrUrl} alt="QR" className="w-full h-full object-contain p-1" />
-                    : <QrCode size={28} className="text-gray-300" />
+                    : <QrCode size={28} className="text-admin-muted" />
                   }
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs text-gray-500 mb-3 leading-relaxed">Upload your payment QR code (FriMo, mCash, Dialog Pay, etc). Customers can scan this on the homepage to pay instantly.</p>
+                  <p className="text-xs text-admin-muted mb-3 leading-relaxed">Upload your payment QR code (FriMo, mCash, Dialog Pay, etc). Customers can scan this on the homepage to pay instantly.</p>
                   <div className="flex flex-col gap-2">
                     <button type="button" onClick={() => qrInputRef.current?.click()} disabled={qrUploading}
-                      className="flex items-center gap-2 px-3 py-2 rounded-xl border-2 border-dashed border-gray-200 hover:border-emerald-300 text-sm text-gray-500 hover:text-emerald-600 transition-all w-fit">
+                      className="flex items-center gap-2 px-3 py-2 rounded-xl border-2 border-dashed border-admin-border hover:border-admin-success-line text-sm text-admin-muted hover:text-admin-success transition-all w-fit">
                       {qrUploading ? <><Loader2 size={13} className="animate-spin" /> Saving…</> : <><Upload size={13} /> {form.paymentQrUrl ? "Replace QR" : "Upload QR"}</>}
                     </button>
                     {form.paymentQrUrl && (
-                      <div className="flex items-center gap-1.5 text-[11px] text-emerald-600 font-medium">
-                        <CheckCircle2 size={12} className="text-emerald-500" /> Auto-saved — visible on website
+                      <div className="flex items-center gap-1.5 text-[11px] text-admin-success font-medium">
+                        <CheckCircle2 size={12} className="text-admin-success" /> Auto-saved — visible on website
                       </div>
                     )}
                     {form.paymentQrUrl && (
                       <button type="button" onClick={() => { setForm((f: any) => ({ ...f, paymentQrUrl: "" })); autoSaveField("paymentQrUrl", ""); }}
-                        className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-red-400 hover:bg-red-50 transition-colors w-fit">
+                        className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-admin-danger hover:bg-admin-danger-soft transition-colors w-fit">
                         <X size={11} /> Remove QR
                       </button>
                     )}
@@ -1293,21 +1293,21 @@ export default function AdminSettings() {
 
             {/* Payment Button */}
             <div>
-              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Payment Button</div>
-              <p className="text-xs text-gray-500 mb-3 leading-relaxed">Add a button that links customers to an online payment portal, checkout, or external payment page.</p>
+              <div className="text-xs font-semibold text-admin-muted uppercase tracking-wide mb-3">Payment Button</div>
+              <p className="text-xs text-admin-muted mb-3 leading-relaxed">Add a button that links customers to an online payment portal, checkout, or external payment page.</p>
               <div className="space-y-3">
                 <div>
-                  <label className="text-[10px] text-gray-400 font-semibold block mb-1">Button Label</label>
+                  <label className="text-[10px] text-admin-muted font-semibold block mb-1">Button Label</label>
                   <input
                     value={form.paymentButtonLabel || ""}
                     onChange={e => set("paymentButtonLabel", e.target.value)}
                     onBlur={() => autoSaveField("paymentButtonLabel", form.paymentButtonLabel || "")}
                     placeholder="Pay Online"
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-200"
+                    className="w-full px-3 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-success"
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] text-gray-400 font-semibold block mb-1 flex items-center gap-1">
+                  <label className="text-[10px] text-admin-muted font-semibold block mb-1 flex items-center gap-1">
                     <Link size={10} /> Payment Link URL
                   </label>
                   <input
@@ -1315,12 +1315,12 @@ export default function AdminSettings() {
                     onChange={e => set("paymentButtonUrl", e.target.value)}
                     onBlur={() => autoSaveField("paymentButtonUrl", form.paymentButtonUrl || "")}
                     placeholder="https://pay.example.com/your-business"
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-200"
+                    className="w-full px-3 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-success"
                   />
                 </div>
                 {form.paymentButtonUrl && (
                   <a href={form.paymentButtonUrl} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs text-emerald-600 hover:underline">
+                    className="inline-flex items-center gap-1.5 text-xs text-admin-success hover:underline">
                     <ExternalLink size={11} /> Test link
                   </a>
                 )}
@@ -1329,10 +1329,10 @@ export default function AdminSettings() {
           </div>
 
           {/* Pay Now Button Visibility Toggle */}
-          <div className="mt-6 p-4 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between gap-4">
+          <div className="mt-6 p-4 rounded-2xl bg-admin-surface border border-admin-border flex items-center justify-between gap-4">
             <div>
-              <div className="text-sm font-semibold text-gray-800">Show Pay Now button on homepage</div>
-              <div className="text-xs text-gray-400 mt-0.5">When turned off, the Pay Now button is hidden from the homepage payment section. Bank details and QR code remain visible.</div>
+              <div className="text-sm font-semibold text-admin-ink">Show Pay Now button on homepage</div>
+              <div className="text-xs text-admin-muted mt-0.5">When turned off, the Pay Now button is hidden from the homepage payment section. Bank details and QR code remain visible.</div>
             </div>
             <button
               type="button"
@@ -1341,25 +1341,25 @@ export default function AdminSettings() {
                 setForm((f: any) => ({ ...f, payButtonVisible: next }));
                 await autoSaveField("payButtonVisible", next as any);
               }}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${form.payButtonVisible ? "bg-emerald-500" : "bg-gray-300"}`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${form.payButtonVisible ? "bg-admin-success-solid" : "bg-admin-subtle"}`}
             >
-              <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${form.payButtonVisible ? "translate-x-6" : "translate-x-1"}`} />
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-admin-surface shadow transition-transform ${form.payButtonVisible ? "translate-x-6" : "translate-x-1"}`} />
             </button>
           </div>
 
           {/* Save Payment Settings button */}
-          <div className="mt-4 flex items-center gap-3 pt-4 border-t border-gray-100">
+          <div className="mt-4 flex items-center gap-3 pt-4 border-t border-admin-border">
             <button
               type="button"
               onClick={savePaymentSettings}
               disabled={paymentSaving}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold hover:bg-emerald-100 transition-colors disabled:opacity-60"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-admin-success-soft border border-admin-success-line text-admin-success text-sm font-semibold hover:bg-admin-success-soft transition-colors disabled:opacity-60"
             >
               {paymentSaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
               {paymentSaving ? "Saving…" : "Save Payment Settings"}
             </button>
             {paymentSaved && (
-              <div className="flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
+              <div className="flex items-center gap-1.5 text-xs text-admin-success font-medium">
                 <CheckCircle2 size={12} /> Saved — now visible on website
               </div>
             )}
@@ -1367,62 +1367,62 @@ export default function AdminSettings() {
         </div>
 
         {/* Customer Checkout Payment Rules */}
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+        <div className="bg-admin-surface border border-admin-border rounded-2xl shadow-sm p-6">
           <div className="flex items-center gap-2 mb-1">
-            <CreditCard size={18} className="text-violet-500" />
-            <h2 className="font-bold text-gray-900">Store Checkout Payment Rules</h2>
+            <CreditCard size={18} className="text-admin-brand-ink" />
+            <h2 className="font-bold text-admin-ink">Store Checkout Payment Rules</h2>
           </div>
-          <p className="text-xs text-gray-400 mb-5">
+          <p className="text-xs text-admin-muted mb-5">
             Bank-transfer and delivery defaults are managed here. Cash on Delivery and full-payment offers are configured per product in the Products editor.
           </p>
 
           <div className="space-y-4">
-            <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+            <div className="rounded-2xl border border-admin-border bg-admin-surface p-4">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <div className="text-sm font-semibold text-slate-800">Direct Bank Transfer</div>
-                  <div className="text-xs text-slate-500 mt-0.5">Show bank details and require a deposit before the order is confirmed.</div>
+                  <div className="text-sm font-semibold text-admin-ink">Direct Bank Transfer</div>
+                  <div className="text-xs text-admin-muted mt-0.5">Show bank details and require a deposit before the order is confirmed.</div>
                 </div>
-                <button type="button" onClick={() => setForm((f: any) => ({ ...f, checkoutBankTransferEnabled: !f.checkoutBankTransferEnabled }))} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${form.checkoutBankTransferEnabled ? "bg-violet-500" : "bg-slate-300"}`}>
-                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${form.checkoutBankTransferEnabled ? "translate-x-6" : "translate-x-1"}`} />
+                <button type="button" onClick={() => setForm((f: any) => ({ ...f, checkoutBankTransferEnabled: !f.checkoutBankTransferEnabled }))} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${form.checkoutBankTransferEnabled ? "bg-admin-brand" : "bg-admin-subtle"}`}>
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-admin-surface shadow transition-transform ${form.checkoutBankTransferEnabled ? "translate-x-6" : "translate-x-1"}`} />
                 </button>
               </div>
               {form.checkoutBankTransferEnabled && (
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-[180px_1fr] gap-3">
                   <div>
-                    <label className="text-[10px] text-slate-500 font-semibold block mb-1">Deposit amount (LKR)</label>
-                    <input type="number" min="0" value={form.checkoutDepositAmount || ""} onChange={e => setForm((f: any) => ({ ...f, checkoutDepositAmount: e.target.value }))} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-violet-200" />
+                    <label className="text-[10px] text-admin-muted font-semibold block mb-1">Deposit amount (LKR)</label>
+                    <input type="number" min="0" value={form.checkoutDepositAmount || ""} onChange={e => setForm((f: any) => ({ ...f, checkoutDepositAmount: e.target.value }))} className="w-full px-3 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-brand" />
                   </div>
                   <div>
-                    <label className="text-[10px] text-slate-500 font-semibold block mb-1">Customer deposit message</label>
-                    <input value={form.checkoutDepositMessage || ""} onChange={e => setForm((f: any) => ({ ...f, checkoutDepositMessage: e.target.value }))} placeholder="A Rs. 500 deposit is required..." className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-violet-200" />
+                    <label className="text-[10px] text-admin-muted font-semibold block mb-1">Customer deposit message</label>
+                    <input value={form.checkoutDepositMessage || ""} onChange={e => setForm((f: any) => ({ ...f, checkoutDepositMessage: e.target.value }))} placeholder="A Rs. 500 deposit is required..." className="w-full px-3 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-brand" />
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="rounded-2xl border border-violet-100 bg-violet-50/60 p-4">
-              <div className="text-sm font-semibold text-slate-800">Product-level payment controls</div>
-              <p className="mt-1 text-xs leading-relaxed text-slate-500">Full-payment offers and Cash on Delivery are now configured individually inside <strong>Admin → Products → Edit product → Checkout Payment Options</strong>. This keeps payment availability accurate when customers have different products in the same cart.</p>
+            <div className="rounded-2xl border border-admin-brand-line bg-admin-brand-soft/60 p-4">
+              <div className="text-sm font-semibold text-admin-ink">Product-level payment controls</div>
+              <p className="mt-1 text-xs leading-relaxed text-admin-muted">Full-payment offers and Cash on Delivery are now configured individually inside <strong>Admin → Products → Edit product → Checkout Payment Options</strong>. This keeps payment availability accurate when customers have different products in the same cart.</p>
             </div>
           </div>
 
-          <div className="mt-5 flex items-center gap-3 pt-4 border-t border-gray-100">
-            <button type="button" onClick={saveCheckoutSettings} disabled={paymentSaving} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-50 border border-violet-200 text-violet-700 text-sm font-semibold hover:bg-violet-100 transition-colors disabled:opacity-60">
+          <div className="mt-5 flex items-center gap-3 pt-4 border-t border-admin-border">
+            <button type="button" onClick={saveCheckoutSettings} disabled={paymentSaving} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-admin-brand-soft border border-admin-brand-line text-admin-brand-ink text-sm font-semibold hover:bg-admin-brand-soft transition-colors disabled:opacity-60">
               {paymentSaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
               {paymentSaving ? "Saving…" : "Save Checkout Rules"}
             </button>
-            {paymentSaved && <div className="flex items-center gap-1.5 text-xs text-emerald-600 font-medium"><CheckCircle2 size={12} /> Saved — checkout updated</div>}
+            {paymentSaved && <div className="flex items-center gap-1.5 text-xs text-admin-success font-medium"><CheckCircle2 size={12} /> Saved — checkout updated</div>}
           </div>
         </div>
 
         {/* Checkout Delivery Options */}
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+        <div className="bg-admin-surface border border-admin-border rounded-2xl shadow-sm p-6">
           <div className="flex items-center gap-2 mb-1">
-            <Truck size={18} className="text-amber-500" />
-            <h2 className="font-bold text-gray-900">Store Checkout Delivery Options</h2>
+            <Truck size={18} className="text-admin-warning" />
+            <h2 className="font-bold text-admin-ink">Store Checkout Delivery Options</h2>
           </div>
-          <p className="text-xs text-gray-400 mb-5">
+          <p className="text-xs text-admin-muted mb-5">
             Choose which delivery methods customers can select at checkout and set the customer-facing copy and charge.
           </p>
 
@@ -1447,30 +1447,30 @@ export default function AdminSettings() {
                 fallbackDesc: "A considered island-wide delivery route.",
               },
             ].map((option: any) => (
-              <div key={option.key} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+              <div key={option.key} className="rounded-2xl border border-admin-border bg-admin-surface p-4">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <div className="text-sm font-semibold text-slate-800">{option.title}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">Show this delivery method during checkout.</div>
+                    <div className="text-sm font-semibold text-admin-ink">{option.title}</div>
+                    <div className="text-xs text-admin-muted mt-0.5">Show this delivery method during checkout.</div>
                   </div>
-                  <button type="button" onClick={() => setForm((f: any) => ({ ...f, [option.key]: !f[option.key] }))} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${form[option.key] ? "bg-amber-500" : "bg-slate-300"}`}>
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${form[option.key] ? "translate-x-6" : "translate-x-1"}`} />
+                  <button type="button" onClick={() => setForm((f: any) => ({ ...f, [option.key]: !f[option.key] }))} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${form[option.key] ? "bg-admin-warning-solid" : "bg-admin-subtle"}`}>
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-admin-surface shadow transition-transform ${form[option.key] ? "translate-x-6" : "translate-x-1"}`} />
                   </button>
                 </div>
                 {form[option.key] && (
                   <div className="mt-4 grid grid-cols-1 md:grid-cols-[180px_1fr] gap-3">
                     <div>
-                      <label className="text-[10px] text-slate-500 font-semibold block mb-1">Charge (LKR)</label>
-                      <input type="number" min="0" value={form[option.chargeKey] || ""} onChange={e => setForm((f: any) => ({ ...f, [option.chargeKey]: e.target.value }))} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" />
+                      <label className="text-[10px] text-admin-muted font-semibold block mb-1">Charge (LKR)</label>
+                      <input type="number" min="0" value={form[option.chargeKey] || ""} onChange={e => setForm((f: any) => ({ ...f, [option.chargeKey]: e.target.value }))} className="w-full px-3 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning" />
                     </div>
                     <div className="space-y-3">
                       <div>
-                        <label className="text-[10px] text-slate-500 font-semibold block mb-1">Customer-facing name</label>
-                        <input value={form[option.labelKey] || option.fallbackLabel} onChange={e => setForm((f: any) => ({ ...f, [option.labelKey]: e.target.value }))} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" />
+                        <label className="text-[10px] text-admin-muted font-semibold block mb-1">Customer-facing name</label>
+                        <input value={form[option.labelKey] || option.fallbackLabel} onChange={e => setForm((f: any) => ({ ...f, [option.labelKey]: e.target.value }))} className="w-full px-3 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning" />
                       </div>
                       <div>
-                        <label className="text-[10px] text-slate-500 font-semibold block mb-1">Description</label>
-                        <input value={form[option.descKey] || option.fallbackDesc} onChange={e => setForm((f: any) => ({ ...f, [option.descKey]: e.target.value }))} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" />
+                        <label className="text-[10px] text-admin-muted font-semibold block mb-1">Description</label>
+                        <input value={form[option.descKey] || option.fallbackDesc} onChange={e => setForm((f: any) => ({ ...f, [option.descKey]: e.target.value }))} className="w-full px-3 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning" />
                       </div>
                     </div>
                   </div>
@@ -1478,50 +1478,50 @@ export default function AdminSettings() {
               </div>
             ))}
 
-            <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+            <div className="rounded-2xl border border-admin-border bg-admin-surface p-4">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <div className="text-sm font-semibold text-slate-800">Studio Pickup</div>
-                  <div className="text-xs text-slate-500 mt-0.5">Offer collection from your studio without a delivery charge.</div>
+                  <div className="text-sm font-semibold text-admin-ink">Studio Pickup</div>
+                  <div className="text-xs text-admin-muted mt-0.5">Offer collection from your studio without a delivery charge.</div>
                 </div>
-                <button type="button" onClick={() => setForm((f: any) => ({ ...f, checkoutPickupEnabled: !f.checkoutPickupEnabled }))} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${form.checkoutPickupEnabled ? "bg-amber-500" : "bg-slate-300"}`}>
-                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${form.checkoutPickupEnabled ? "translate-x-6" : "translate-x-1"}`} />
+                <button type="button" onClick={() => setForm((f: any) => ({ ...f, checkoutPickupEnabled: !f.checkoutPickupEnabled }))} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${form.checkoutPickupEnabled ? "bg-admin-warning-solid" : "bg-admin-subtle"}`}>
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-admin-surface shadow transition-transform ${form.checkoutPickupEnabled ? "translate-x-6" : "translate-x-1"}`} />
                 </button>
               </div>
               {form.checkoutPickupEnabled && (
                 <div className="mt-4 grid grid-cols-1 gap-3">
-                  <input value={form.checkoutPickupLabel || "Studio pickup"} onChange={e => setForm((f: any) => ({ ...f, checkoutPickupLabel: e.target.value }))} placeholder="Customer-facing name" className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" />
-                  <input value={form.checkoutPickupDescription || "Collect your order from the HAVESTORY studio."} onChange={e => setForm((f: any) => ({ ...f, checkoutPickupDescription: e.target.value }))} placeholder="Short description" className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" />
-                  <input value={form.checkoutPickupAddress || "Contact us for pickup details."} onChange={e => setForm((f: any) => ({ ...f, checkoutPickupAddress: e.target.value }))} placeholder="Pickup address or instructions" className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" />
+                  <input value={form.checkoutPickupLabel || "Studio pickup"} onChange={e => setForm((f: any) => ({ ...f, checkoutPickupLabel: e.target.value }))} placeholder="Customer-facing name" className="w-full px-3 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning" />
+                  <input value={form.checkoutPickupDescription || "Collect your order from the HAVESTORY studio."} onChange={e => setForm((f: any) => ({ ...f, checkoutPickupDescription: e.target.value }))} placeholder="Short description" className="w-full px-3 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning" />
+                  <input value={form.checkoutPickupAddress || "Contact us for pickup details."} onChange={e => setForm((f: any) => ({ ...f, checkoutPickupAddress: e.target.value }))} placeholder="Pickup address or instructions" className="w-full px-3 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning" />
                 </div>
               )}
             </div>
           </div>
 
-          <div className="mt-5 flex items-center gap-3 pt-4 border-t border-gray-100">
-            <button type="button" onClick={saveCheckoutSettings} disabled={paymentSaving} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm font-semibold hover:bg-amber-100 transition-colors disabled:opacity-60">
+          <div className="mt-5 flex items-center gap-3 pt-4 border-t border-admin-border">
+            <button type="button" onClick={saveCheckoutSettings} disabled={paymentSaving} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-admin-warning-soft border border-admin-warning-line text-admin-warning text-sm font-semibold hover:bg-admin-warning-soft transition-colors disabled:opacity-60">
               {paymentSaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
               {paymentSaving ? "Saving…" : "Save Delivery Options"}
             </button>
-            {paymentSaved && <div className="flex items-center gap-1.5 text-xs text-emerald-600 font-medium"><CheckCircle2 size={12} /> Saved — checkout updated</div>}
+            {paymentSaved && <div className="flex items-center gap-1.5 text-xs text-admin-success font-medium"><CheckCircle2 size={12} /> Saved — checkout updated</div>}
           </div>
         </div>
 
         {/* iPay Online Payment Gateway */}
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+        <div className="bg-admin-surface border border-admin-border rounded-2xl shadow-sm p-6">
           <div className="flex items-center gap-2 mb-1">
-            <CreditCard size={18} className="text-amber-500" />
-            <h2 className="font-bold text-gray-900">iPay Online Payment Gateway</h2>
+            <CreditCard size={18} className="text-admin-warning" />
+            <h2 className="font-bold text-admin-ink">iPay Online Payment Gateway</h2>
           </div>
-          <p className="text-xs text-gray-400 mb-5">
+          <p className="text-xs text-admin-muted mb-5">
             Connect iPay to accept card payments, Lanka QR, and iPay wallet. Customers can pay invoices online — invoices auto-update to "Paid" when payment is confirmed.
           </p>
 
           {/* Enable toggle */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl mb-5">
+          <div className="flex items-center justify-between p-4 bg-admin-surface rounded-xl mb-5">
             <div>
-              <div className="text-sm font-semibold text-gray-800">Enable iPay Payments</div>
-              <div className="text-xs text-gray-400 mt-0.5">Show "Pay Online" button on invoices</div>
+              <div className="text-sm font-semibold text-admin-ink">Enable iPay Payments</div>
+              <div className="text-xs text-admin-muted mt-0.5">Show "Pay Online" button on invoices</div>
             </div>
             <button
               type="button"
@@ -1529,37 +1529,37 @@ export default function AdminSettings() {
               className="flex items-center gap-2 transition-colors"
             >
               {form.ipayEnabled
-                ? <ToggleRight size={36} className="text-amber-500" />
-                : <ToggleLeft size={36} className="text-gray-300" />}
+                ? <ToggleRight size={36} className="text-admin-warning" />
+                : <ToggleLeft size={36} className="text-admin-muted" />}
             </button>
           </div>
 
           {/* Mode toggle */}
           <div className="mb-5">
-            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Mode</div>
-            <div className="flex rounded-xl overflow-hidden border border-gray-200 w-fit">
+            <div className="text-xs font-semibold text-admin-muted uppercase tracking-wide mb-2">Mode</div>
+            <div className="flex rounded-xl overflow-hidden border border-admin-border w-fit">
               <button
                 type="button"
                 onClick={() => setForm((f: any) => ({ ...f, ipaySandbox: true }))}
-                className={`px-4 py-2 text-sm font-semibold transition-colors ${form.ipaySandbox ? "bg-amber-100 text-amber-700" : "bg-white text-gray-500 hover:bg-gray-50"}`}
+                className={`px-4 py-2 text-sm font-semibold transition-colors ${form.ipaySandbox ? "bg-admin-warning-soft text-admin-warning" : "bg-admin-surface text-admin-muted hover:bg-admin-surface"}`}
               >
                 🧪 Sandbox (Testing)
               </button>
               <button
                 type="button"
                 onClick={() => setForm((f: any) => ({ ...f, ipaySandbox: false }))}
-                className={`px-4 py-2 text-sm font-semibold border-l border-gray-200 transition-colors ${!form.ipaySandbox ? "bg-green-100 text-green-700" : "bg-white text-gray-500 hover:bg-gray-50"}`}
+                className={`px-4 py-2 text-sm font-semibold border-l border-admin-border transition-colors ${!form.ipaySandbox ? "bg-admin-success-soft text-admin-success" : "bg-admin-surface text-admin-muted hover:bg-admin-surface"}`}
               >
                 ✅ Live
               </button>
             </div>
             {form.ipaySandbox && (
-              <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
+              <p className="text-xs text-admin-warning mt-2 flex items-center gap-1">
                 <AlertTriangle size={11} /> Sandbox mode — no real payments processed. Switch to Live when ready.
               </p>
             )}
             {!form.ipaySandbox && (
-              <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
+              <p className="text-xs text-admin-success mt-2 flex items-center gap-1">
                 <Check size={11} /> Live mode — real payments will be processed.
               </p>
             )}
@@ -1568,46 +1568,46 @@ export default function AdminSettings() {
           {/* Token & Secret inputs */}
           <div className="space-y-4">
             <div>
-              <label className="text-[10px] text-gray-400 font-semibold block mb-1">Merchant Web Token</label>
+              <label className="text-[10px] text-admin-muted font-semibold block mb-1">Merchant Web Token</label>
               <div className="relative">
                 <input
                   type={showIpayToken ? "text" : "password"}
                   value={form.ipayToken || ""}
                   onChange={e => setForm((f: any) => ({ ...f, ipayToken: e.target.value }))}
                   placeholder="Paste your iPay merchantWebToken here"
-                  className="w-full px-3 py-2.5 pr-10 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200 font-mono"
+                  className="w-full px-3 py-2.5 pr-10 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning font-mono"
                 />
                 <button type="button" onClick={() => setShowIpayToken(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-admin-muted hover:text-admin-muted">
                   {showIpayToken ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
               </div>
-              <p className="text-[11px] text-gray-400 mt-1">Get this from iPay portal → Developer Portal → Payment Integration → IPG Payments → Generate Token</p>
+              <p className="text-[11px] text-admin-muted mt-1">Get this from iPay portal → Developer Portal → Payment Integration → IPG Payments → Generate Token</p>
             </div>
 
             <div>
-              <label className="text-[10px] text-gray-400 font-semibold block mb-1">Secret Key</label>
+              <label className="text-[10px] text-admin-muted font-semibold block mb-1">Secret Key</label>
               <div className="relative">
                 <input
                   type={showIpaySecret ? "text" : "password"}
                   value={form.ipaySecret || ""}
                   onChange={e => setForm((f: any) => ({ ...f, ipaySecret: e.target.value }))}
                   placeholder="Enter your iPay secret (the one you set in the portal)"
-                  className="w-full px-3 py-2.5 pr-10 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200 font-mono"
+                  className="w-full px-3 py-2.5 pr-10 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning font-mono"
                 />
                 <button type="button" onClick={() => setShowIpaySecret(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-admin-muted hover:text-admin-muted">
                   {showIpaySecret ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
               </div>
-              <p className="text-[11px] text-gray-400 mt-1">This is the secret you chose when setting up iPay — used to verify payments are genuine.</p>
+              <p className="text-[11px] text-admin-muted mt-1">This is the secret you chose when setting up iPay — used to verify payments are genuine.</p>
             </div>
           </div>
 
           {/* Status indicator */}
           {form.ipayToken && form.ipaySecret && (
-            <div className={`flex items-center gap-2 mt-4 px-3 py-2 rounded-xl text-xs font-medium ${form.ipayEnabled ? "bg-green-50 border border-green-200 text-green-700" : "bg-gray-50 border border-gray-200 text-gray-500"}`}>
-              <div className={`w-2 h-2 rounded-full ${form.ipayEnabled ? "bg-green-500" : "bg-gray-400"}`} />
+            <div className={`flex items-center gap-2 mt-4 px-3 py-2 rounded-xl text-xs font-medium ${form.ipayEnabled ? "bg-admin-success-soft border border-admin-success-line text-admin-success" : "bg-admin-surface border border-admin-border text-admin-muted"}`}>
+              <div className={`w-2 h-2 rounded-full ${form.ipayEnabled ? "bg-admin-success-solid" : "bg-admin-subtle"}`} />
               {form.ipayEnabled
                 ? `iPay is active in ${form.ipaySandbox ? "sandbox (testing)" : "live"} mode`
                 : "iPay is configured but currently disabled"}
@@ -1615,18 +1615,18 @@ export default function AdminSettings() {
           )}
 
           {/* Save button */}
-          <div className="mt-5 flex items-center gap-3 pt-4 border-t border-gray-100">
+          <div className="mt-5 flex items-center gap-3 pt-4 border-t border-admin-border">
             <button
               type="button"
               onClick={saveIpaySettings}
               disabled={ipaySaving}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm font-semibold hover:bg-amber-100 transition-colors disabled:opacity-60"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-admin-warning-soft border border-admin-warning-line text-admin-warning text-sm font-semibold hover:bg-admin-warning-soft transition-colors disabled:opacity-60"
             >
               {ipaySaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
               {ipaySaving ? "Saving…" : "Save iPay Settings"}
             </button>
             {ipaySaved && (
-              <div className="flex items-center gap-1.5 text-xs text-green-600 font-medium">
+              <div className="flex items-center gap-1.5 text-xs text-admin-success font-medium">
                 <CheckCircle2 size={12} /> Saved successfully
               </div>
             )}
@@ -1634,23 +1634,23 @@ export default function AdminSettings() {
         </div>
 
         {/* Google Pay (manual confirmation) */}
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+        <div className="bg-admin-surface border border-admin-border rounded-2xl shadow-sm p-6">
           <div className="flex items-center gap-2 mb-1">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 via-green-500 to-yellow-400 flex items-center justify-center text-white font-black text-xs shadow-sm">G</div>
-            <h2 className="font-bold text-gray-900">Google Pay</h2>
-            <span className="px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-full text-[10px] font-semibold uppercase tracking-wider">Manual confirmation</span>
+            <div className="w-7 h-7 rounded-lg bg-admin-brand flex items-center justify-center text-white font-bold text-xs shadow-sm">G</div>
+            <h2 className="font-bold text-admin-ink">Google Pay</h2>
+            <span className="px-2 py-0.5 bg-admin-warning-soft border border-admin-warning-line text-admin-warning rounded-full text-[10px] font-semibold uppercase tracking-wider">Manual confirmation</span>
           </div>
-          <p className="text-xs text-gray-500 mb-5 leading-relaxed">
+          <p className="text-xs text-admin-muted mb-5 leading-relaxed">
             Show <strong>Google Pay</strong> as a checkout option. Customers see your Google Pay number (and optional QR), pay from their app, then send you the payment screenshot for confirmation. No gateway/API fees — money goes straight to your bank-linked Google Pay account.
             <br />
-            <span className="text-amber-600">Note: Google Pay is not officially launched in Sri Lanka — enable this only if your customers can use Google Pay (e.g. Indian/international customers, or any wallet that scans the same QR).</span>
+            <span className="text-admin-warning">Note: Google Pay is not officially launched in Sri Lanka — enable this only if your customers can use Google Pay (e.g. Indian/international customers, or any wallet that scans the same QR).</span>
           </p>
 
           {/* Enable toggle */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl mb-5">
+          <div className="flex items-center justify-between p-4 bg-admin-surface rounded-xl mb-5">
             <div>
-              <div className="text-sm font-semibold text-gray-800">Enable Google Pay option at checkout</div>
-              <div className="text-xs text-gray-400 mt-0.5">Adds a "Google Pay" choice in the cart payment-method list</div>
+              <div className="text-sm font-semibold text-admin-ink">Enable Google Pay option at checkout</div>
+              <div className="text-xs text-admin-muted mt-0.5">Adds a "Google Pay" choice in the cart payment-method list</div>
             </div>
             <button
               type="button"
@@ -1658,15 +1658,15 @@ export default function AdminSettings() {
               className="flex items-center gap-2 transition-colors"
             >
               {form.googlePayEnabled
-                ? <ToggleRight size={36} className="text-amber-500" />
-                : <ToggleLeft size={36} className="text-gray-300" />}
+                ? <ToggleRight size={36} className="text-admin-warning" />
+                : <ToggleLeft size={36} className="text-admin-muted" />}
             </button>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-5">
             <div className="space-y-4">
               <div>
-                <label className="text-[10px] text-gray-400 font-semibold block mb-1 flex items-center gap-1">
+                <label className="text-[10px] text-admin-muted font-semibold block mb-1 flex items-center gap-1">
                   <Phone size={10} /> Google Pay Number / UPI ID
                 </label>
                 <input
@@ -1674,79 +1674,79 @@ export default function AdminSettings() {
                   onChange={e => setForm((f: any) => ({ ...f, googlePayNumber: e.target.value }))}
                   onBlur={() => autoSaveField("googlePayNumber", form.googlePayNumber || "")}
                   placeholder="+94 77 123 4567  or  yourname@okhdfcbank"
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200"
+                  className="w-full px-3 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning"
                 />
-                <p className="text-[11px] text-gray-400 mt-1">Shown to customers so they can send the payment to you.</p>
+                <p className="text-[11px] text-admin-muted mt-1">Shown to customers so they can send the payment to you.</p>
               </div>
               <div>
-                <label className="text-[10px] text-gray-400 font-semibold block mb-1">Instructions for customer (optional)</label>
+                <label className="text-[10px] text-admin-muted font-semibold block mb-1">Instructions for customer (optional)</label>
                 <textarea
                   rows={4}
                   value={form.googlePayInstructions || ""}
                   onChange={e => setForm((f: any) => ({ ...f, googlePayInstructions: e.target.value }))}
                   onBlur={() => autoSaveField("googlePayInstructions", form.googlePayInstructions || "")}
                   placeholder="e.g. After paying, please WhatsApp us the screenshot to confirm your order."
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200 resize-none"
+                  className="w-full px-3 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning resize-none"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-[10px] text-gray-400 font-semibold block mb-1 flex items-center gap-1">
+              <label className="text-[10px] text-admin-muted font-semibold block mb-1 flex items-center gap-1">
                 <QrCode size={10} /> Google Pay QR Code (optional)
               </label>
               <div className="flex items-start gap-3">
-                <div className="w-28 h-28 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden shrink-0">
+                <div className="w-28 h-28 rounded-xl border-2 border-dashed border-admin-border bg-admin-surface flex items-center justify-center overflow-hidden shrink-0">
                   {form.googlePayQrUrl
                     ? <img src={form.googlePayQrUrl} alt="Google Pay QR" className="w-full h-full object-contain p-1" />
-                    : <QrCode size={28} className="text-gray-300" />}
+                    : <QrCode size={28} className="text-admin-muted" />}
                 </div>
                 <div className="flex-1 flex flex-col gap-2">
                   <button
                     type="button"
                     onClick={() => gpayQrInputRef.current?.click()}
                     disabled={gpayQrUploading}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold hover:bg-blue-100 transition-colors disabled:opacity-60 w-fit"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-admin-brand-soft border border-admin-brand-line text-admin-brand-ink text-xs font-semibold hover:bg-admin-brand-soft transition-colors disabled:opacity-60 w-fit"
                   >
                     {gpayQrUploading ? <><Loader2 size={13} className="animate-spin" /> Uploading…</> : <><Upload size={13} /> {form.googlePayQrUrl ? "Replace QR" : "Upload QR"}</>}
                   </button>
                   {form.googlePayQrUrl && (
                     <a href={form.googlePayQrUrl} target="_blank" rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-[11px] text-blue-600 hover:underline w-fit">
+                      className="inline-flex items-center gap-1 text-[11px] text-admin-brand-ink hover:underline w-fit">
                       <ExternalLink size={10} /> Open QR
                     </a>
                   )}
                   {form.googlePayQrUrl && (
                     <button type="button" onClick={() => { setForm((f: any) => ({ ...f, googlePayQrUrl: "" })); autoSaveField("googlePayQrUrl", ""); }}
-                      className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-red-400 hover:bg-red-50 transition-colors w-fit">
+                      className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-admin-danger hover:bg-admin-danger-soft transition-colors w-fit">
                       <X size={11} /> Remove QR
                     </button>
                   )}
                 </div>
                 <input ref={gpayQrInputRef} type="file" accept="image/*" className="hidden" onChange={handleGpayQrUpload} />
               </div>
-              <p className="text-[11px] text-gray-400 mt-2">Tip: take a screenshot of your Google Pay "Receive Money" QR and upload it here so customers can scan it.</p>
+              <p className="text-[11px] text-admin-muted mt-2">Tip: take a screenshot of your Google Pay "Receive Money" QR and upload it here so customers can scan it.</p>
             </div>
           </div>
 
           {/* Save button */}
-          <div className="mt-6 flex items-center gap-3 pt-4 border-t border-gray-100">
+          <div className="mt-6 flex items-center gap-3 pt-4 border-t border-admin-border">
             <button
               type="button"
               onClick={saveGooglePaySettings}
               disabled={gpaySaving}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 via-green-500 to-yellow-400 text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-60 shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-admin-brand text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-60 shadow-sm"
             >
               {gpaySaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
               {gpaySaving ? "Saving…" : "Save Google Pay Settings"}
             </button>
             {gpaySaved && (
-              <div className="flex items-center gap-1.5 text-xs text-green-600 font-medium">
+              <div className="flex items-center gap-1.5 text-xs text-admin-success font-medium">
                 <CheckCircle2 size={12} /> Saved — visible at checkout
               </div>
             )}
             {form.googlePayEnabled && !form.googlePayNumber && !form.googlePayQrUrl && (
-              <div className="flex items-center gap-1.5 text-xs text-amber-600 font-medium">
+              <div className="flex items-center gap-1.5 text-xs text-admin-warning font-medium">
                 <AlertTriangle size={12} /> Add a number or QR before customers can pay
               </div>
             )}
@@ -1754,20 +1754,20 @@ export default function AdminSettings() {
         </div>
 
         {/* Courier Services */}
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+        <div className="bg-admin-surface border border-admin-border rounded-2xl shadow-sm p-6">
           <CourierServicesManager couriers={couriers} onChange={setCouriers} />
         </div>
 
         {/* Data Management — Soft-delete / Trash */}        {/* Data Management — Soft-delete / Trash */}
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+        <div className="bg-admin-surface border border-admin-border rounded-2xl shadow-sm p-6">
           <div className="flex items-center gap-2 mb-2">
-            <Archive size={18} className="text-red-400" />
-            <h2 className="font-bold text-gray-900">Data Management</h2>
+            <Archive size={18} className="text-admin-danger" />
+            <h2 className="font-bold text-admin-ink">Data Management</h2>
           </div>
-          <p className="text-xs text-gray-400 mb-5">Clear data by section. Items are moved to trash and remain recoverable; this action does not permanently delete production records.</p>
+          <p className="text-xs text-admin-muted mb-5">Clear data by section. Items are moved to trash and remain recoverable; this action does not permanently delete production records.</p>
 
           {trashResult && (
-            <div className={`flex items-start gap-2 px-4 py-3 rounded-xl text-sm font-medium mb-4 border ${trashResult.success ? "bg-green-50 border-green-200 text-green-700" : "bg-red-50 border-red-200 text-red-600"}`}>
+            <div className={`flex items-start gap-2 px-4 py-3 rounded-xl text-sm font-medium mb-4 border ${trashResult.success ? "bg-admin-success-soft border-admin-success-line text-admin-success" : "bg-admin-danger-soft border-admin-danger-line text-admin-danger"}`}>
               {trashResult.success ? <Check size={15} className="mt-0.5 shrink-0" /> : <AlertTriangle size={15} className="mt-0.5 shrink-0" />}
               <span>{trashResult.message}</span>
             </div>
@@ -1775,14 +1775,14 @@ export default function AdminSettings() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
             {TRASH_SECTIONS.map(({ key, label, icon: SectionIcon }) => (
-              <div key={key} className="border border-gray-100 rounded-xl p-4">
+              <div key={key} className="border border-admin-border rounded-xl p-4">
                 <div className="flex items-center justify-between mb-2 gap-2">
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <SectionIcon size={13} className="text-gray-400 shrink-0" />
-                    <span className="text-sm font-bold text-gray-800 truncate">{label}</span>
+                    <SectionIcon size={13} className="text-admin-muted shrink-0" />
+                    <span className="text-sm font-bold text-admin-ink truncate">{label}</span>
                   </div>
                   {(trashCounts[key] ?? 0) > 0 && (
-                    <span className="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full shrink-0">
+                    <span className="text-[10px] font-bold bg-admin-danger-soft text-admin-danger px-2 py-0.5 rounded-full shrink-0">
                       {trashCounts[key]} in trash
                     </span>
                   )}
@@ -1791,7 +1791,7 @@ export default function AdminSettings() {
                   type="button"
                   onClick={() => handleTrashSection(key)}
                   disabled={trashLoading === key}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-red-700 text-xs font-semibold hover:bg-red-100 disabled:opacity-60 transition-colors w-full justify-center"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-admin-danger-line bg-admin-danger-soft text-admin-danger text-xs font-semibold hover:bg-admin-danger-soft disabled:opacity-60 transition-colors w-full justify-center"
                 >
                   {trashLoading === key ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
                   {trashLoading === key ? "Clearing..." : `Clear All ${label}`}
@@ -1801,22 +1801,22 @@ export default function AdminSettings() {
           </div>
 
           {/* Trash Recovery */}
-          <div className="border-t border-gray-100 pt-5">
+          <div className="border-t border-admin-border pt-5">
             <div className="flex items-center gap-2 mb-2">
-              <ArchiveRestore size={16} className="text-green-500" />
-              <h3 className="font-bold text-gray-800 text-sm">Trash Recovery</h3>
+              <ArchiveRestore size={16} className="text-admin-success" />
+              <h3 className="font-bold text-admin-ink text-sm">Trash Recovery</h3>
             </div>
-            <p className="text-xs text-gray-400 mb-4">Restore trashed items back to their original state at any time.</p>
+            <p className="text-xs text-admin-muted mb-4">Restore trashed items back to their original state at any time.</p>
 
             {restoreResult && (
-              <div className={`flex items-start gap-2 px-4 py-3 rounded-xl text-sm font-medium mb-4 border ${restoreResult.success ? "bg-green-50 border-green-200 text-green-700" : "bg-red-50 border-red-200 text-red-600"}`}>
+              <div className={`flex items-start gap-2 px-4 py-3 rounded-xl text-sm font-medium mb-4 border ${restoreResult.success ? "bg-admin-success-soft border-admin-success-line text-admin-success" : "bg-admin-danger-soft border-admin-danger-line text-admin-danger"}`}>
                 {restoreResult.success ? <Check size={15} className="mt-0.5 shrink-0" /> : <AlertTriangle size={15} className="mt-0.5 shrink-0" />}
                 <span>{restoreResult.message}</span>
               </div>
             )}
 
             {Object.values(trashCounts).every(c => c === 0) ? (
-              <div className="border border-dashed border-gray-200 rounded-xl py-5 text-center text-xs text-gray-400">
+              <div className="border border-dashed border-admin-border rounded-xl py-5 text-center text-xs text-admin-muted">
                 Trash is empty. No items to restore.
               </div>
             ) : (
@@ -1827,7 +1827,7 @@ export default function AdminSettings() {
                     type="button"
                     onClick={() => handleRestoreSection(key)}
                     disabled={restoreLoading === key}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-green-200 bg-green-50 text-green-700 text-sm font-semibold hover:bg-green-100 disabled:opacity-60 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-admin-success-line bg-admin-success-soft text-admin-success text-sm font-semibold hover:bg-admin-success-soft disabled:opacity-60 transition-colors"
                   >
                     {restoreLoading === key ? <Loader2 size={13} className="animate-spin" /> : <ArchiveRestore size={13} />}
                     {restoreLoading === key ? "Restoring..." : `Restore ${trashCounts[key]} ${label}`}
@@ -1837,22 +1837,22 @@ export default function AdminSettings() {
             )}
           </div>
 
-          <div className="flex items-start gap-2 mt-4 p-3 bg-amber-50 border border-amber-100 rounded-xl">
-            <AlertTriangle size={13} className="text-amber-500 shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-700">Items in trash are retained for recovery and are never automatically purged.</p>
+          <div className="flex items-start gap-2 mt-4 p-3 bg-admin-warning-soft border border-admin-warning-line rounded-xl">
+            <AlertTriangle size={13} className="text-admin-warning shrink-0 mt-0.5" />
+            <p className="text-xs text-admin-warning">Items in trash are retained for recovery and are never automatically purged.</p>
           </div>
         </div>
 
         {/* Backup & Restore */}
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+        <div className="bg-admin-surface border border-admin-border rounded-2xl shadow-sm p-6">
           <div className="flex items-center gap-2 mb-3">
-            <Download size={18} className="text-indigo-400" />
-            <h2 className="font-bold text-gray-900">Backup & Restore</h2>
+            <Download size={18} className="text-admin-brand-ink" />
+            <h2 className="font-bold text-admin-ink">Backup & Restore</h2>
           </div>
-          <p className="text-xs text-gray-400 mb-5">Export all your settings as a JSON file for safekeeping. Use the same file to restore everything in an emergency.</p>
+          <p className="text-xs text-admin-muted mb-5">Export all your settings as a JSON file for safekeeping. Use the same file to restore everything in an emergency.</p>
 
           {restoreSuccess && (
-            <div className="flex items-center gap-2 px-4 py-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm font-medium mb-4">
+            <div className="flex items-center gap-2 px-4 py-3 bg-admin-success-soft border border-admin-success-line rounded-xl text-admin-success text-sm font-medium mb-4">
               <Check size={15} /> Settings restored successfully! The page will reflect the updated values shortly.
             </div>
           )}
@@ -1862,7 +1862,7 @@ export default function AdminSettings() {
               type="button"
               onClick={handleExportBackup}
               disabled={backupExporting}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700 text-sm font-semibold hover:bg-indigo-100 disabled:opacity-60 transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-admin-brand-line bg-admin-brand-soft text-admin-brand-ink text-sm font-semibold hover:bg-admin-brand-soft disabled:opacity-60 transition-colors"
             >
               {backupExporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
               {backupExporting ? "Exporting..." : "Export Settings Backup"}
@@ -1879,22 +1879,22 @@ export default function AdminSettings() {
               type="button"
               onClick={() => restoreInputRef.current?.click()}
               disabled={backupRestoring}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-orange-200 bg-orange-50 text-orange-700 text-sm font-semibold hover:bg-orange-100 disabled:opacity-60 transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-admin-warning-line bg-admin-warning-soft text-admin-warning text-sm font-semibold hover:bg-admin-warning-soft disabled:opacity-60 transition-colors"
             >
               {backupRestoring ? <Loader2 size={14} className="animate-spin" /> : <RotateCcw size={14} />}
               {backupRestoring ? "Restoring..." : "Restore from Backup"}
             </button>
           </div>
 
-          <div className="flex items-start gap-2 mt-4 p-3 bg-amber-50 border border-amber-100 rounded-xl">
-            <AlertTriangle size={13} className="text-amber-500 shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-700">Restoring from a backup will overwrite all current settings. This cannot be undone. Always keep a recent backup before making major changes.</p>
+          <div className="flex items-start gap-2 mt-4 p-3 bg-admin-warning-soft border border-admin-warning-line rounded-xl">
+            <AlertTriangle size={13} className="text-admin-warning shrink-0 mt-0.5" />
+            <p className="text-xs text-admin-warning">Restoring from a backup will overwrite all current settings. This cannot be undone. Always keep a recent backup before making major changes.</p>
           </div>
         </div>
       </div>
 
       <div className="flex justify-end">
-        <button disabled={isPending} onClick={handleSave} className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-stone-600 text-white text-sm font-bold shadow-sm disabled:opacity-60">
+        <button disabled={isPending} onClick={handleSave} className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl bg-admin-brand text-white text-sm font-bold shadow-sm disabled:opacity-60">
           <Save size={14} /> {isPending ? "Saving..." : "Save All Changes"}
         </button>
       </div>
