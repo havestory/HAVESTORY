@@ -1,3 +1,4 @@
+import { type BankEntry } from "@workspace/api-zod";
 import { useState, useRef, useEffect } from "react";
 import { useGetSettings, useUpdateSettings, updateSettings as apiUpdateSettings } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -6,7 +7,7 @@ import { AdminErrorState, AdminPageSkeleton } from "@/components/admin/AdminPage
 import { Settings as SettingsIcon, Save, Globe, Phone, Users, Landmark, Truck, Plus, Trash2, ExternalLink, Upload, Loader2, Image as ImageIcon, X, Pencil, Check, CheckCircle2, Download, RotateCcw, AlertTriangle, QrCode, Link, CreditCard, Eye, EyeOff, ToggleLeft, ToggleRight, Archive, ArchiveRestore, Sparkles, Mail, Send } from "lucide-react";
 
 
-const EMPTY_BANK = { bankName: "", accountHolder: "", accountNumber: "", branch: "", swiftBic: "" };
+const EMPTY_BANK = { bankName: "", accountHolder: "", accountNumber: "", branch: "", swiftBic: "", website: true, pos: true, posDefault: false };
 
 export type CourierEntry = { name: string; trackingUrl: string; firstKgRate?: string; addKgRate?: string };
 
@@ -165,7 +166,7 @@ function CourierServicesManager({ couriers, onChange }: {
   );
 }
 
-type BankEntry = { bankName: string; accountHolder: string; accountNumber: string; branch: string; swiftBic: string };
+
 
 function BankDetailsManager({ banks, onChange }: { banks: BankEntry[]; onChange: (b: BankEntry[]) => void }) {
   const [form, setForm] = useState<BankEntry>({ ...EMPTY_BANK });
@@ -181,16 +182,14 @@ function BankDetailsManager({ banks, onChange }: { banks: BankEntry[]; onChange:
 
   const save = () => {
     if (!form.bankName.trim() || !form.accountNumber.trim()) return;
-    if (editingIdx !== null) {
-      onChange(banks.map((b, i) => (i === editingIdx ? { ...form } : b)));
-    } else {
-      onChange([...banks, { ...form }]);
-    }
+    const next = editingIdx !== null ? banks.map((b, i) => i === editingIdx ? { ...form } : b) : [...banks, { ...form }];
+    const selected = editingIdx ?? banks.length;
+    onChange(next.map((b, i) => ({ ...b, posDefault: b.pos === false ? false : form.posDefault ? i === selected : !!b.posDefault })));
     cancel();
   };
 
   const remove = (i: number) => {
-    if (editingIdx === i) cancel();
+    if (editingIdx !== null) cancel();
     onChange(banks.filter((_, idx) => idx !== i));
   };
 
@@ -212,7 +211,7 @@ function BankDetailsManager({ banks, onChange }: { banks: BankEntry[]; onChange:
         )}
       </div>
       <p className="text-xs text-gray-400 mb-4">
-        Add all your bank accounts (shown on invoices &amp; the homepage payment section). The first account is the primary.
+        Choose where each account appears. Select one POS default for printed bills and deposit receipts, then save all changes.
       </p>
 
       {/* Empty state */}
@@ -234,10 +233,15 @@ function BankDetailsManager({ banks, onChange }: { banks: BankEntry[]; onChange:
             <div key={i} className={`flex items-start gap-3 rounded-xl px-4 py-3 border transition-all ${editingIdx === i ? "bg-blue-50 border-blue-300 ring-1 ring-blue-200" : "bg-gray-50 border-gray-100"}`}>
               <div className="flex-1 min-w-0 pt-0.5">
                 <div className="flex items-center gap-2 mb-0.5">
-                  {i === 0 && (
-                    <span className="text-[10px] font-bold bg-blue-500 text-white rounded-md px-1.5 py-0.5 leading-none">PRIMARY</span>
+                  {b.posDefault && b.pos !== false && (
+                    <span className="text-[10px] font-bold bg-blue-500 text-white rounded-md px-1.5 py-0.5 leading-none">POS DEFAULT</span>
                   )}
                   <span className="text-sm font-bold text-gray-800">{b.bankName}</span>
+                </div>
+                <div className="bank-channel-options mt-3 flex flex-wrap gap-3">
+                  <label><input type="checkbox" checked={b.website !== false} onChange={e => onChange(banks.map((bank, index) => index === i ? { ...bank, website: e.target.checked } : bank))} /> Website</label>
+                  <label><input type="checkbox" checked={b.pos !== false} onChange={e => onChange(banks.map((bank, index) => index === i ? { ...bank, pos: e.target.checked, posDefault: e.target.checked && !!bank.posDefault } : bank))} /> POS</label>
+                  <label><input type="radio" name="default-pos-bank" disabled={b.pos === false} checked={b.pos !== false && (banks.some(bank => bank.posDefault && bank.pos !== false) ? !!b.posDefault : i === banks.findIndex(bank => bank.pos !== false))} onChange={() => onChange(banks.map((bank, index) => ({ ...bank, posDefault: index === i })))} /> Default POS print</label>
                 </div>
                 {b.accountHolder && <div className="text-xs text-gray-500">{b.accountHolder}</div>}
                 <div className="text-xs text-gray-500 font-mono">{b.accountNumber}</div>
@@ -292,6 +296,11 @@ function BankDetailsManager({ banks, onChange }: { banks: BankEntry[]; onChange:
               <label className="text-[11px] text-gray-500 font-semibold block mb-1 whitespace-nowrap">SWIFT / BIC Code</label>
               <input value={form.swiftBic} onChange={e => f("swiftBic", e.target.value)} placeholder="BCEYLKLX" className={inp} />
             </div>
+          </div>
+          <div className="bank-channel-options flex flex-wrap gap-3">
+            <label><input type="checkbox" checked={form.website !== false} onChange={e => setForm(old => ({ ...old, website: e.target.checked }))} /> Website</label>
+            <label><input type="checkbox" checked={form.pos !== false} onChange={e => setForm(old => ({ ...old, pos: e.target.checked, posDefault: e.target.checked && !!old.posDefault }))} /> POS</label>
+            <label><input type="checkbox" disabled={form.pos === false} checked={!!form.posDefault} onChange={e => setForm(old => ({ ...old, posDefault: e.target.checked }))} /> Default POS print</label>
           </div>
           <div className="flex flex-wrap gap-2 pt-1">
             <button type="button" onClick={save} disabled={!form.bankName.trim() || !form.accountNumber.trim()}

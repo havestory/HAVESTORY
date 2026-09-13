@@ -26,9 +26,6 @@ const depositRemarkFor = (date: string) => {
   return `P${day}${month}${year.slice(-2)}`;
 };
 
-const money = (value: unknown) =>
-  Math.max(0, Number(String(value ?? 0).replace(/[^0-9.-]/g, "")) || 0);
-
 const clean = (value: unknown, max = 300) =>
   String(value ?? "").trim().slice(0, max);
 
@@ -62,8 +59,8 @@ router.post("/close", async (req, res) => {
     await ensureDayEndColumns();
     const date = lkDate();
     const depositRemark = depositRemarkFor(date);
-    const countedCash = money(req.body?.closingCash);
-    const depositAmount = money(req.body?.depositAmount);
+    const countedCash = Number(req.body?.closingCash);
+    const depositAmount = Number(req.body?.depositAmount);
     const bankSlipReference = clean(req.body?.bankSlipReference, 160);
     const depositProofUrl = clean(req.body?.depositProofUrl, 500);
     const depositTomorrow = Boolean(req.body?.depositTomorrow);
@@ -73,6 +70,9 @@ router.post("/close", async (req, res) => {
     }
     if (req.body?.depositAmount === "" || req.body?.depositAmount == null) {
       return res.status(400).json({ error: "Bank deposit amount is required" });
+    }
+    if (![countedCash, depositAmount].every(value => Number.isFinite(value) && value >= 0 && value <= 999999999999.99)) {
+      return res.status(400).json({ error: "Cash and deposit amounts must be valid non-negative amounts." });
     }
     if (depositProofUrl && !/^https?:\/\//i.test(depositProofUrl)) {
       return res.status(400).json({ error: "Deposit proof URL must start with http:// or https://" });

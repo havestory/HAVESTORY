@@ -1,40 +1,40 @@
 /* Admin-wide icon alignment. Search icons are owned only by admin-search.css. */
-[data-admin-layout] button,
-[data-admin-layout] a,
-[data-admin-layout] [role="button"] {
+:is([data-admin-panel],[data-admin-layout]) button,
+:is([data-admin-panel],[data-admin-layout]) a,
+:is([data-admin-panel],[data-admin-layout]) [role="button"] {
   line-height: 1.2;
 }
 
-[data-admin-layout] button > svg,
-[data-admin-layout] a > svg,
-[data-admin-layout] [role="button"] > svg {
+:is([data-admin-panel],[data-admin-layout]) button > svg,
+:is([data-admin-panel],[data-admin-layout]) a > svg,
+:is([data-admin-panel],[data-admin-layout]) [role="button"] > svg {
   flex: 0 0 auto;
   display: block;
   vertical-align: middle;
 }
 
-[data-admin-layout] button:has(> svg),
-[data-admin-layout] a:has(> svg),
-[data-admin-layout] [role="button"]:has(> svg) {
+:is([data-admin-panel],[data-admin-layout]) button:has(> svg),
+:is([data-admin-panel],[data-admin-layout]) a:has(> svg),
+:is([data-admin-panel],[data-admin-layout]) [role="button"]:has(> svg) {
   align-items: center !important;
 }
 
-[data-admin-layout] :is(button,a,[role="button"]):has(> svg):not(.icon-only) {
+:is([data-admin-panel],[data-admin-layout]) :is(button,a,[role="button"]):has(> svg):not(.icon-only) {
   column-gap: 8px;
 }
 
 /* Common lucide icons in headings/stat cards. */
-[data-admin-layout] h1 > svg,
-[data-admin-layout] h2 > svg,
-[data-admin-layout] h3 > svg,
-[data-admin-layout] [class*="items-center"] > svg {
+:is([data-admin-panel],[data-admin-layout]) h1 > svg,
+:is([data-admin-panel],[data-admin-layout]) h2 > svg,
+:is([data-admin-panel],[data-admin-layout]) h3 > svg,
+:is([data-admin-panel],[data-admin-layout]) [class*="items-center"] > svg {
   flex-shrink: 0;
 }
 
 /* Table action/icon-only buttons. */
-[data-admin-layout] td button:has(> svg:only-child),
-[data-admin-layout] th button:has(> svg:only-child),
-[data-admin-layout] button[aria-label]:has(> svg:only-child) {
+:is([data-admin-panel],[data-admin-layout]) td button:has(> svg:only-child),
+:is([data-admin-panel],[data-admin-layout]) th button:has(> svg:only-child),
+:is([data-admin-panel],[data-admin-layout]) button[aria-label]:has(> svg:only-child) {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -42,20 +42,20 @@
   line-height: 0 !important;
 }
 
-[data-admin-layout] td button:has(> svg:only-child) > svg,
-[data-admin-layout] th button:has(> svg:only-child) > svg,
-[data-admin-layout] button[aria-label]:has(> svg:only-child) > svg {
+:is([data-admin-panel],[data-admin-layout]) td button:has(> svg:only-child) > svg,
+:is([data-admin-panel],[data-admin-layout]) th button:has(> svg:only-child) > svg,
+:is([data-admin-panel],[data-admin-layout]) button[aria-label]:has(> svg:only-child) > svg {
   margin: 0 !important;
 }
 
 /* Select/dropdown triggers with icons/text should always center vertically. */
-[data-admin-layout] button[role="combobox"],
-[data-admin-layout] [data-radix-collection-item],
-[data-admin-layout] [data-radix-select-trigger] {
+:is([data-admin-panel],[data-admin-layout]) button[role="combobox"],
+:is([data-admin-panel],[data-admin-layout]) [data-radix-collection-item],
+:is([data-admin-panel],[data-admin-layout]) [data-radix-select-trigger] {
   display: inline-flex;
   align-items: center;
 }
 
 @media (max-width: 760px) {
-  [data-admin-layout] :is(button,a,[role="button"]):has(> svg):not(.icon-only) { column-gap: 7px; }
+  :is([data-admin-panel],[data-admin-layout]) :is(button,a,[role="button"]):has(> svg):not(.icon-only) { column-gap: 7px; }
 }

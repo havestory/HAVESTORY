@@ -11,14 +11,12 @@ import './premium-footer.css';
 import './admin-stability.css';
 import './design-refresh.css';
 import './clean-background.css';
-// One POS enhancement layer only. Native POS.tsx owns checkout/report controls;
-// this module owns date-range history + enriched day-end deposit close/print.
-import './pos-unified';
 import './admin-ui-cleanup.css';
 import './admin-icon-alignment.css';
 import './admin-typography.css';
 import './admin-search.css';
 import './pos-unified.css';
+import './pos-interface.css';
 
 applyThemeVars('havestory-gallery');
 

@@ -1,3 +1,4 @@
+import { visibleBanks } from "@workspace/api-zod";
 import { useEffect, useMemo, useState } from "react";
 import { listProducts, useCreateOrder, useGetSettings } from "@workspace/api-client-react";
 import { ArrowLeft, ArrowRight, Banknote, Check, CheckCircle2, ChevronRight, ClipboardCheck, CreditCard, Loader2, MapPin, Package, ShieldCheck, Sparkles, Trash2, Truck, Wallet } from "lucide-react";
@@ -45,15 +46,6 @@ function money(value: number) {
 function settingEnabled(value: unknown, fallback = false) {
   if (value === undefined || value === null || value === "") return fallback;
   return value === true || value === 1 || value === "1" || value === "true";
-}
-
-function parseBankDetails(value: unknown) {
-  try {
-    const parsed = typeof value === "string" ? JSON.parse(value) : value;
-    return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
-  } catch {
-    return [];
-  }
 }
 
 function cartLineUnitPrice(item: any) {
@@ -168,7 +160,7 @@ export default function Checkout() {
     const hasNumericPrice = cartLineUnitPrice(item) > 0;
     return !hasNumericPrice && (item.product?.isCustomInquiry || item.product?.priceType === "custom_quote");
   });
-  const bankDetails = parseBankDetails(settings.bankDetails);
+  const bankDetails = visibleBanks(settings, "website");
 
   const paymentOptions = useMemo(() => [
     bankTransferEnabled ? {

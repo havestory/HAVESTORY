@@ -1,3 +1,8 @@
+import { POSHistory, POSDayEnd } from "@/components/admin/POSDayTools";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { BankDepositDialog } from '@/components/admin/BankDepositDialog';
+import { defaultPOSBank, type BankEntry } from '@workspace/api-zod';
+import { bankPrintHTML } from '@/lib/bank-print';
 import { POSItemOptions, emptyPOSConfig, type POSItemConfig } from "@/components/admin/POSItemOptions";
 import { posConfig, quotePosProduct } from "@workspace/api-zod";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -110,10 +115,11 @@ type ReceiptBrand = {
   phone: string;
   email: string;
   website: string;
+  bank?: BankEntry;
 };
 
-function printReceipt(sale: Sale, width: "58" | "80", brand: ReceiptBrand) {
-  const win = window.open("", "_blank", "popup=yes,width=500,height=760");
+function printReceipt(sale: Sale, width: "58" | "80", brand: ReceiptBrand, prepared?: Window | null) {
+  const win = prepared === undefined ? window.open("", "_blank", "popup=yes,width=500,height=760") : prepared;
   if (!win) {
     window.alert("Please allow pop-ups to print the POS bill.");
     return;
@@ -127,14 +133,13 @@ function printReceipt(sale: Sale, width: "58" | "80", brand: ReceiptBrand) {
     .map(esc)
     .join("<br>");
   win.document.write(
-    `<!doctype html><html><head><meta charset="utf-8"><title>${esc(sale.receipt_number)}</title><style>@page{size:${mm}mm auto;margin:0}*{box-sizing:border-box}html,body{width:${mm}mm;min-width:${mm}mm;margin:0;padding:0;background:#fff;color:#000}body{font-family:Arial,Helvetica,sans-serif;font-size:${width === "58" ? 10 : 11}px;line-height:1.35;font-variant-numeric:tabular-nums}.r{width:${mm}mm;padding:${width === "58" ? 3 : 4}mm;overflow:hidden}.c,.center{text-align:center}.brand{font-size:${width === "58" ? 16 : 19}px;font-weight:900;letter-spacing:.5px;overflow-wrap:anywhere}.tagline{margin-top:1mm;font-size:.92em}.meta{margin-top:2mm;overflow-wrap:anywhere}.rule{border-top:1px dashed #000;margin:2.5mm 0}.row{display:flex;justify-content:space-between;gap:2mm;padding:1mm 0}.item{border-bottom:1px dotted #aaa}.item span:first-child{max-width:68%;overflow-wrap:anywhere}.total{font-size:1.2em;font-weight:900;border-top:1px solid #000;margin-top:1mm;padding-top:1.5mm}.change{border:1.5px solid #000;padding:1.5mm;font-size:1.15em}.small{font-size:.88em}.bold{font-weight:800}.footer{margin-top:3mm;font-size:.9em}@media print{html,body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style></head><body><main class="r"><header class="center"><div class="brand">${esc(businessName)}</div><div class="tagline">THE COLOUR &amp; FRAME STUDIO</div><div class="meta small">${contactLines}</div></header><div class="rule"></div><div class="center bold">POS RECEIPT</div><div class="center">${esc(sale.receipt_number)}</div>${sale.invoice_number ? `<div class="center small">Invoice: ${esc(sale.invoice_number)}</div>` : ""}<div class="center small">${esc(new Date(sale.sold_at).toLocaleString("en-LK", { timeZone: "Asia/Colombo" }))}</div><div class="rule"></div><div class="bold">${esc(sale.customer_name || "Walk-in customer")}</div><div class="rule"></div>${items.map((i) => `<div class="row item"><span><b>${esc(i.name)}</b><br><span class="small">${i.qty}${i.unitLabel ? ` ${esc(i.unitLabel)}` : ""} × ${rs(Number(i.price))}${i.code ? ` · ${esc(i.code)}` : ""}</span></span><b>${rs(Number(i.price) * Number(i.qty))}</b></div>`).join("")}${discount > 0 ? `<div class="row"><span>Subtotal</span><span>${rs(Number(sale.subtotal))}</span></div><div class="row"><span>Discount</span><span>−${rs(discount)}</span></div>` : ""}<div class="row total"><span>Total</span><span>${rs(Number(sale.total))}</span></div><div class="row"><span>Received</span><b>${rs(Number(sale.amount_tendered))}</b></div><div class="row change"><span>Balance / Change</span><b>${rs(Number(sale.change_due))}</b></div><div class="row small"><span>Payment</span><b>${esc(sale.payment_method.toUpperCase())}</b></div><footer class="footer center"><div class="rule"></div>Issued by Mr. ${esc(sale.sold_by)}<br>Thank you for choosing ${esc(businessName)}.</footer></main></body></html>`,
+    `<!doctype html><html><head><meta charset="utf-8"><title>${esc(sale.receipt_number)}</title><style>@page{size:${mm}mm auto;margin:0}*{box-sizing:border-box}html,body{width:${mm}mm;min-width:${mm}mm;margin:0;padding:0;background:#fff;color:#000}body{font-family:Arial,Helvetica,sans-serif;font-size:${width === "58" ? 10 : 11}px;line-height:1.35;font-variant-numeric:tabular-nums}.r{width:${mm}mm;padding:${width === "58" ? 3 : 4}mm;overflow:hidden}.c,.center{text-align:center}.brand{font-size:${width === "58" ? 16 : 19}px;font-weight:900;letter-spacing:.5px;overflow-wrap:anywhere}.tagline{margin-top:1mm;font-size:.92em}.meta{margin-top:2mm;overflow-wrap:anywhere}.rule{border-top:1px dashed #000;margin:2.5mm 0}.row{display:flex;justify-content:space-between;gap:2mm;padding:1mm 0}.item{border-bottom:1px dotted #aaa}.item span:first-child{max-width:68%;overflow-wrap:anywhere}.total{font-size:1.2em;font-weight:900;border-top:1px solid #000;margin-top:1mm;padding-top:1.5mm}.change{border:1.5px solid #000;padding:1.5mm;font-size:1.15em}.small{font-size:.88em}.bold{font-weight:800}.footer{margin-top:3mm;font-size:.9em}@media print{html,body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style></head><body><main class="r"><header class="center"><div class="brand">${esc(businessName)}</div><div class="tagline">THE COLOUR &amp; FRAME STUDIO</div><div class="meta small">${contactLines}</div></header><div class="rule"></div><div class="center bold">POS RECEIPT</div><div class="center">${esc(sale.receipt_number)}</div>${sale.invoice_number ? `<div class="center small">Invoice: ${esc(sale.invoice_number)}</div>` : ""}<div class="center small">${esc(new Date(sale.sold_at).toLocaleString("en-LK", { timeZone: "Asia/Colombo" }))}</div><div class="rule"></div><div class="bold">${esc(sale.customer_name || "Walk-in customer")}</div><div class="rule"></div>${items.map((i) => `<div class="row item"><span><b>${esc(i.name)}</b><br><span class="small">${i.qty}${i.unitLabel ? ` ${esc(i.unitLabel)}` : ""} × ${rs(Number(i.price))}${i.code ? ` · ${esc(i.code)}` : ""}</span></span><b>${rs(Number(i.price) * Number(i.qty))}</b></div>`).join("")}${discount > 0 ? `<div class="row"><span>Subtotal</span><span>${rs(Number(sale.subtotal))}</span></div><div class="row"><span>Discount</span><span>−${rs(discount)}</span></div>` : ""}<div class="row total"><span>Total</span><span>${rs(Number(sale.total))}</span></div><div class="row"><span>Received</span><b>${rs(Number(sale.amount_tendered))}</b></div><div class="row change"><span>Balance / Change</span><b>${rs(Number(sale.change_due))}</b></div><div class="row small"><span>Payment</span><b>${esc(sale.payment_method.toUpperCase())}</b></div>${bankPrintHTML(brand.bank)}<footer class="footer center"><div class="rule"></div>Issued by Mr. ${esc(sale.sold_by)}<br>Thank you for choosing ${esc(businessName)}.</footer></main></body></html>`,
   );
   win.document.close();
   win.focus();
   window.setTimeout(() => {
     if (!win.closed) {
       win.print();
-      win.close();
     }
   }, 250);
 }
@@ -150,11 +155,12 @@ export default function POS() {
     phone: receiptSettings?.phone || "",
     email: receiptSettings?.email || "",
     website: receiptSettings?.website || "",
+    bank: defaultPOSBank(receiptSettings),
   };
   const codeRef = useRef<HTMLInputElement>(null);
-  const configurationRef = useRef<HTMLElement>(null);
+  const [showDeposit, setShowDeposit] = useState(false);
   const [configuring, setConfiguring] = useState<Product | null>(null);
-  useEffect(() => { if (configuring) { configurationRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' }); configurationRef.current?.focus({ preventScroll: true }); } }, [configuring]);
+
   const [sizeId, setSizeId] = useState("");
   const [choices, setChoices] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
@@ -169,10 +175,10 @@ export default function POS() {
   const [method, setMethod] = useState("cash");
   const [width, setWidth] = useState<"58" | "80">("80");
   const [saving, setSaving] = useState(false);
+  const saleLock = useRef(false);
   const [invoiceQuery, setInvoiceQuery] = useState("");
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-  const [closing, setClosing] = useState("");
   const [reopenReason, setReopenReason] = useState("");
   const [dayActionBusy, setDayActionBusy] = useState(false);
   const [reportMonth, setReportMonth] = useState(today().slice(0, 7));
@@ -210,14 +216,13 @@ export default function POS() {
       setInvoices([]);
       return;
     }
-    const timer = setTimeout(
-      () =>
-        request(`/api/pos/invoices?q=${encodeURIComponent(invoiceQuery)}`)
-          .then(setInvoices)
-          .catch(() => setInvoices([])),
-      250,
-    );
-    return () => clearTimeout(timer);
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      request(`/api/pos/invoices?q=${encodeURIComponent(invoiceQuery)}`, { signal: controller.signal })
+        .then(result => { if (!controller.signal.aborted) setInvoices(result); })
+        .catch(() => { if (!controller.signal.aborted) setInvoices([]); });
+    }, 250);
+    return () => { clearTimeout(timer); controller.abort(); };
   }, [invoiceQuery]);
   useEffect(() => {
     request(`/api/pos/month?month=${encodeURIComponent(reportMonth)}`)
@@ -325,8 +330,10 @@ export default function POS() {
     }
   };
   const complete = async () => {
-    if (saving || invalidDiscount || total <= 0 || !Number.isFinite(received) || received < total) return;
+    if (saleLock.current || saving || day?.session?.closed_at || invalidDiscount || total <= 0 || !Number.isFinite(received) || received < total) return;
+    saleLock.current = true;
     setSaving(true);
+    const printWindow = window.open("", "_blank", "popup=yes,width=500,height=760");
     try {
       const sale = await request("/api/pos/sales", {
         method: "POST",
@@ -340,10 +347,15 @@ export default function POS() {
           discountValue: selectedInvoice ? 0 : rawDiscount,
         }),
       });
-      printReceipt(sale, width, receiptBrand);
+      // The sale is already recorded. A print failure must never invite another charge.
+      let printMessage = 'Print window opened.';
+      try {
+        if (printWindow && !printWindow.closed) printReceipt(sale, width, receiptBrand, printWindow);
+        else printMessage = 'Use the print button in today’s issued bills to print your receipt.';
+      } catch { printMessage = 'Use the print button in today’s issued bills to retry printing.'; }
       toast({
-        title: "Payment collected & bill printed",
-        description: `${sale.receipt_number} · Change ${rs(Number(sale.change_due))}`,
+        title: "Payment collected",
+        description: `${sale.receipt_number} · ${printMessage}`,
       });
       setCart([]);
       setSelectedInvoice(null); setDiscountValue("");
@@ -352,12 +364,14 @@ export default function POS() {
       setInvoiceQuery("");
       await load();
     } catch (e: any) {
+      printWindow?.close();
       toast({
         title: "Sale could not be completed",
         description: e.message,
         variant: "destructive",
       });
     } finally {
+      saleLock.current = false;
       setSaving(false);
     }
   };
@@ -452,25 +466,6 @@ export default function POS() {
     }
     pdf.save(`HAVESTORY-POS-MONTH-${monthData.month}.pdf`);
   };
-  const closeDay = async () => {
-    try {
-      await request("/api/pos/close-day", {
-        method: "POST",
-        body: JSON.stringify({ closingCash: closing }),
-      });
-      toast({
-        title: "POS day closed",
-        description: `Counted cash ${rs(Number(closing))}`,
-      });
-      await load();
-    } catch (e: any) {
-      toast({
-        title: "Could not close day",
-        description: e.message,
-        variant: "destructive",
-      });
-    }
-  };
   const requestReopen = async () => {
     setDayActionBusy(true);
     try {
@@ -502,18 +497,36 @@ export default function POS() {
       </div>
     );
   return (
-    <div className="space-y-5 pb-10">
-      {configuring && <section ref={configurationRef} tabIndex={-1} className="rounded-2xl border border-violet-200 bg-white p-5 shadow-sm" aria-label="Configure POS item">
-        <div className="flex items-center justify-between"><h2 className="text-lg font-bold">{configuring.name}</h2><button onClick={() => setConfiguring(null)} aria-label="Cancel product selection"><X /></button></div>
-        <p className="mt-1 text-sm text-slate-600">Choose the size, options and number of units. Quantity uses the product’s configured unit and quantity step.</p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          {!!posConfig(configuring.customConfig).sizes?.length && <label className="grid gap-2 text-sm font-semibold">Size<select className={input} value={sizeId} onChange={e => { setSizeId(e.target.value); const config = posConfig(configuring.customConfig); const size = config.sizes.find((s: any) => s.id === e.target.value); setQuantity(Math.max(1, Number(size?.minQty) || Number(config.minQuantity) || 1)); }}><option value="">Choose size</option>{posConfig(configuring.customConfig).sizes.map((size: any) => <option key={size.id} value={size.id}>{size.name} · {size.unitLabel || 'unit'}</option>)}</select></label>}
-          {(posConfig(configuring.customConfig).optionGroups || []).filter((g: any) => g.choices?.length).map((group: any) => <label key={group.id} className="grid gap-2 text-sm font-semibold">{group.title}<select aria-label={group.title} className={input} value={choices[group.id] || ''} onChange={e => setChoices(old => ({ ...old, [group.id]: e.target.value }))}><option value="">Choose {group.title}</option>{group.choices.map((choice: any) => <option key={choice.id} value={choice.id}>{choice.name}</option>)}</select></label>)}
-          <label className="grid gap-2 text-sm font-semibold">Quantity (units)<input className={input} type="number" min="1" value={quantity} onChange={e => setQuantity(Number(e.target.value))} /></label>
-        </div>
-        {(() => { try { const quote = quotePosProduct(configuring.price, configuring.customConfig, quantity, sizeId, choices); return <p className="mt-4 font-bold">{rs(quote.price)} / {quote.unitLabel} × {quantity} = {rs(quote.price * quantity)}<small className="block font-normal">Minimum {quote.minQty} · quantity step {quote.step}</small></p>; } catch (e: any) { return <p className="mt-4 text-sm text-amber-800">{e.message}</p>; } })()}
-        <button className="mt-4 inline-flex h-11 items-center gap-2 rounded-xl bg-violet-950 px-5 font-bold text-white" onClick={() => addConfigured(configuring, quantity, sizeId, choices)}><Plus size={16} /> Add to bill</button>
-      </section>}
+    <div className="pos-workspace space-y-5 pb-10">
+      {showDeposit && <BankDepositDialog settings={receiptSettings} width={width} date={day?.date || today()} amount={day?.session?.deposit_amount ? String(day.session.deposit_amount) : ''} remark={day?.session?.deposit_remark} onClose={() => setShowDeposit(false)} />}
+      <Dialog open={!!configuring} onOpenChange={open => { if (!open) setConfiguring(null); }}>
+        <DialogContent className="pos-dialog pos-config-dialog" onCloseAutoFocus={e => { e.preventDefault(); codeRef.current?.focus(); }}>
+          <DialogTitle>{configuring?.name || 'Configure POS item'}</DialogTitle>
+          <DialogDescription>Select the customer’s size, options and quantity before adding to the bill.</DialogDescription>
+          {configuring && (() => {
+            const config = posConfig(configuring.customConfig);
+            const selectedSize = config.sizes?.find((s: any) => s.id === sizeId);
+            const min = Math.max(1, Number(selectedSize?.minQty) || Number(config.minQuantity) || 1);
+            const step = Math.max(1, Number(selectedSize?.packSize) || Number(config.quantityStep) || 1);
+            let quote: ReturnType<typeof quotePosProduct> | undefined;
+            let error = '';
+            try { quote = quotePosProduct(configuring.price, configuring.customConfig, quantity, sizeId, choices); } catch (e) { error = e instanceof Error ? e.message : 'Check your selections'; }
+            return <form onSubmit={e => { e.preventDefault(); if (quote) addConfigured(configuring, quantity, sizeId, choices); }}>
+              <div className="pos-fields">
+                {!!config.sizes?.length && <label className="pos-field">Size<select value={sizeId} onChange={e => { setSizeId(e.target.value); const size = config.sizes.find((s: any) => s.id === e.target.value); setQuantity(Math.max(1, Number(size?.minQty) || Number(config.minQuantity) || 1)); }}><option value="">Choose size</option>{config.sizes.map((size: any) => <option key={size.id} value={size.id}>{size.name} · {size.unitLabel || 'unit'}</option>)}</select></label>}
+                <label className="pos-field">Quantity ({selectedSize?.unitLabel || 'units'})<input type="number" required min={min} step={step} value={quantity || ''} onChange={e => setQuantity(Number(e.target.value))} /><span className="pos-helper">Minimum {min} · increments of {step}</span></label>
+              </div>
+              {(config.optionGroups || []).filter((g: any) => g.choices?.length).map((group: any) => <fieldset className="pos-option-group" key={group.id}><legend>{group.title}</legend><div className="pos-option-list">{group.choices.map((choice: any) => {
+                const override = choice.sizePrices?.find((p: any) => p.sizeId === sizeId);
+                const price = Number(override ? override.price : choice.price || 0);
+                return <label key={choice.id} className="pos-option"><input type="radio" name={`option-${group.id}`} checked={choices[group.id] === choice.id} onChange={() => setChoices(old => ({ ...old, [group.id]: choice.id }))} /><span>{choice.name}</span><small>{choice.chargeType === 'qty_range' ? 'Quantity pricing' : `${rs(price)} / ${choice.chargeType === 'flat' ? 'order' : 'unit'}`}</small></label>;
+              })}</div></fieldset>)}
+              <div className="pos-quote" aria-live="polite">{quote ? <><span>Estimated unit price<strong>{rs(quote.price)}</strong></span><span>Bill total<strong>{rs(quote.lineTotal)}</strong></span></> : <p>{error}</p>}</div>
+              <div className="pos-dialog-actions"><button type="button" className="pos-secondary" onClick={() => setConfiguring(null)}>Cancel</button><button type="submit" className="pos-primary" disabled={!quote}><Plus size={16} /> Add to bill{quote ? ` · ${rs(quote.lineTotal)}` : ''}</button></div>
+            </form>;
+          })()}
+        </DialogContent>
+      </Dialog>
       <header className="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex gap-4">
@@ -533,6 +546,7 @@ export default function POS() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
+            <button data-deposit-trigger type="button" onClick={() => setShowDeposit(true)} className="pos-secondary"><Printer size={16} /> Bank deposit receipt</button>
             <select
               value={width}
               onChange={(e) => setWidth(e.target.value as any)}
@@ -646,7 +660,7 @@ export default function POS() {
               </div>
             ))}
           </section>
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_430px]">
+          <div className="pos-sales-grid grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_430px]">
             <section className="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex flex-col gap-3 sm:flex-row">
                 <label className="relative flex-1">
@@ -761,7 +775,7 @@ export default function POS() {
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-black">Current bill</h2>
                 {(cart.length > 0 || selectedInvoice) && (
-                  <button
+                  <button className="pos-quantity-button" aria-label="Clear current bill"
                     onClick={() => {
                       setCart([]);
                       setSelectedInvoice(null); setDiscountValue("");
@@ -823,18 +837,18 @@ export default function POS() {
                   cart.map((item) => (
                     <div
                       key={item.cartKey}
-                      className="flex items-center gap-2 rounded-xl bg-slate-50 p-3"
+                      className="pos-cart-row"
                     >
                       <div className="min-w-0 flex-1">
-                        <b className="block truncate text-xs">{item.name}</b>
+                        <b className="block text-xs break-words">{item.name}</b>
                         <span className="text-[10px] text-slate-500">
                           {item.code} · {rs(item.price)} / {item.unitLabel}
                         </span>
                       </div>
-                      <button aria-label={`Decrease ${item.name}`} onClick={() => changeQuantity(item, -1)} className="h-9 w-9 rounded-lg border"><Minus size={14} /></button>
+                      <button aria-label={`Decrease ${item.name}`} onClick={() => changeQuantity(item, -1)} className="pos-quantity-button"><Minus size={14} /></button>
                       <b className="min-w-6 text-center text-xs">{item.qty}</b>
-                      <button aria-label={`Increase ${item.name}`} onClick={() => changeQuantity(item, 1)} className="h-9 w-9 rounded-lg border"><Plus size={14} /></button>
-                      <button
+                      <button aria-label={`Increase ${item.name}`} onClick={() => changeQuantity(item, 1)} className="pos-quantity-button"><Plus size={14} /></button>
+                      <button className="pos-quantity-button" aria-label={`Remove ${item.name}`}
                         onClick={() =>
                           setCart((c) => c.filter((i) => i.cartKey !== item.cartKey))
                         }
@@ -917,6 +931,7 @@ export default function POS() {
               </p>
             </aside>
           </div>
+          <POSHistory date={day.date} revision={`${day.sales.length}:${day.session?.closed_at || ''}`} />
           <section className="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -925,25 +940,8 @@ export default function POS() {
                   Counter income is separate from online/website sales.
                 </p>
               </div>
-              {!day.session.closed_at && (me?.role === "owner" || (me?.permissions || []).includes("pos_day_close")) && (
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    value={closing}
-                    onChange={(e) => setClosing(e.target.value)}
-                    placeholder="Counted cash"
-                    className={`${input} w-40`}
-                  />
-                  <button
-                    onClick={closeDay}
-                    disabled={!closing}
-                    className="rounded-xl border border-slate-300 px-4 text-xs font-black disabled:opacity-40"
-                  >
-                    Close day
-                  </button>
-                </div>
-              )}
             </div>
+            <POSDayEnd day={day} settings={receiptSettings} width={width} canClose={me?.role === 'owner' || (me?.permissions || []).includes('pos_day_close')} onClosed={load} />
             <div className="mt-4 overflow-x-auto">
               <table className="w-full min-w-[700px] text-left text-xs">
                 <thead>

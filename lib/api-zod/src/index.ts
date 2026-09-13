@@ -10,3 +10,4 @@ export * from "./generated/api";
 export * as Types from "./generated/types";
 
 export { posConfig, quotePosProduct } from "./pos-pricing";
+export { bankAccounts, visibleBanks, defaultPOSBank, validateBankDetails, type BankEntry } from './bank-details';
