@@ -7,39 +7,22 @@ import { applyThemeVars } from '@/lib/theme-utils';
 import './index.css';
 import './public-spacing.css';
 import './home-benefits.css';
-// Loaded last on purpose: protects the final footer/drawer art direction from
-// legacy responsive rules bundled in the older public stylesheets.
 import './premium-footer.css';
 import './admin-stability.css';
-// Canonical 2026 design layer. Keep last so every legacy screen inherits the
-// same accessible public and admin visual system.
 import './design-refresh.css';
-// Final public cleanup override: keep backgrounds flat and remove decorative
-// circle/glow elements without changing cards, buttons, or layout geometry.
 import './clean-background.css';
-// POS cleanup/history plus day/month reports and day-end closing workflow.
-import './pos-cleanup';
-// Keeps async POS enhancement mounts single even while React is still mutating the page.
-import './pos-day-end-dedupe';
-// Shows the short ATM/CDM deposit reference (PDDMMYY) in the day-end panel.
-import './pos-deposit-remark';
-// General admin controls, tables and dialogs. Search geometry is intentionally excluded.
+// One POS enhancement layer only. Native POS.tsx owns checkout/report controls;
+// this module owns date-range history + enriched day-end deposit close/print.
+import './pos-unified';
 import './admin-ui-cleanup.css';
-// General icon alignment only; search icons are controlled by admin-search.css.
 import './admin-icon-alignment.css';
-// Admin typography must stay clean and sans-serif everywhere; no decorative/serif headings.
 import './admin-typography.css';
-// ONE source of truth for every admin search field. Keep this final among admin styles.
 import './admin-search.css';
-// POS bill panel and day-end controls use one aligned compact visual system.
-import './pos-panel-clean.css';
+import './pos-unified.css';
 
-// Seed the public Liquid Glass palette before settings arrive so the first paint
-// never flashes the legacy darkroom or brown editorial theme.
 applyThemeVars('havestory-gallery');
 
 createRoot(document.getElementById('root')!, {
-  // Keeps caught errors off reportError(), which would raise the dev overlay.
   onCaughtError: (error, errorInfo) => {
     console.error(error, errorInfo.componentStack);
   },
