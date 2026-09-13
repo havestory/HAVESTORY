@@ -21,6 +21,11 @@ const lkDate = () =>
     day: "2-digit",
   }).format(new Date());
 
+const depositRemarkFor = (date: string) => {
+  const [year, month, day] = date.split("-");
+  return `P${day}${month}${year.slice(-2)}`;
+};
+
 const money = (value: unknown) =>
   Math.max(0, Number(String(value ?? 0).replace(/[^0-9.-]/g, "")) || 0);
 
@@ -38,6 +43,7 @@ async function ensureDayEndColumns() {
     ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS bank_slip_reference TEXT;
     ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS deposit_proof_url TEXT;
     ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS deposit_tomorrow BOOLEAN NOT NULL DEFAULT FALSE;
+    ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS deposit_remark TEXT;
     ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS closing_remark TEXT;
     ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS closing_expected_cash NUMERIC(14,2);
     ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS closing_difference NUMERIC(14,2);
@@ -53,6 +59,8 @@ router.post("/close", async (req, res) => {
     }
 
     await ensureDayEndColumns();
+    const date = lkDate();
+    const depositRemark = depositRemarkFor(date);
     const countedCash = money(req.body?.closingCash);
     const bankSlipReference = clean(req.body?.bankSlipReference, 160);
     const depositProofUrl = clean(req.body?.depositProofUrl, 500);
@@ -71,7 +79,7 @@ router.post("/close", async (req, res) => {
       `SELECT * FROM pos_sessions
        WHERE business_date=$1 AND closed_at IS NULL
        FOR UPDATE`,
-      [lkDate()],
+      [date],
     );
     const session = sessionResult.rows[0];
     if (!session) {
@@ -112,18 +120,20 @@ router.post("/close", async (req, res) => {
            bank_slip_reference=$2,
            deposit_proof_url=$3,
            deposit_tomorrow=$4,
-           closing_remark=$5,
-           closing_expected_cash=$6,
-           closing_difference=$7,
+           deposit_remark=$5,
+           closing_remark=$6,
+           closing_expected_cash=$7,
+           closing_difference=$8,
            closed_at=NOW(),
-           closed_by=$8
-       WHERE id=$9 AND closed_at IS NULL
+           closed_by=$9
+       WHERE id=$10 AND closed_at IS NULL
        RETURNING *`,
       [
         countedCash,
         bankSlipReference || null,
         depositProofUrl || null,
         depositTomorrow,
+        depositRemark,
         remark,
         expectedCash,
         difference,
@@ -139,7 +149,8 @@ router.post("/close", async (req, res) => {
 
     await client.query("COMMIT");
     res.json({
-      date: lkDate(),
+      date,
+      depositRemark,
       session: closed.rows[0],
       summary: {
         bills: Number(totals.bill_count || 0),
