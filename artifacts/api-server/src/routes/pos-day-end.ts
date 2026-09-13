@@ -104,15 +104,16 @@ router.post("/close", async (req, res) => {
     const expectedCash = Math.round((openingFloat + cashSales) * 100) / 100;
     const difference = Math.round((countedCash - expectedCash) * 100) / 100;
 
-    let remark = "Cash count matches the expected cash exactly. Day closed successfully.";
+    let reconciliationRemark = "Cash count matches the expected cash exactly. Day closed successfully.";
     if (difference < -0.009) {
-      remark = `Cash shortage of ${rs(Math.abs(difference))} against expected cash.`;
+      reconciliationRemark = `Cash shortage of ${rs(Math.abs(difference))} against expected cash.`;
     } else if (difference > 0.009) {
-      remark = `Cash overage of ${rs(difference)} against expected cash.`;
+      reconciliationRemark = `Cash overage of ${rs(difference)} against expected cash.`;
     }
-    if (bankSlipReference) remark += " Bank slip / transaction reference recorded.";
-    if (depositProofUrl) remark += " Deposit proof link recorded.";
-    if (depositTomorrow) remark += " Deposit marked for tomorrow.";
+    if (bankSlipReference) reconciliationRemark += " Bank slip / transaction reference recorded.";
+    if (depositProofUrl) reconciliationRemark += " Deposit proof link recorded.";
+    if (depositTomorrow) reconciliationRemark += " Deposit marked for tomorrow.";
+    const remark = `ATM/CDM remark: ${depositRemark}. ${reconciliationRemark}`;
 
     const closed = await client.query(
       `UPDATE pos_sessions
