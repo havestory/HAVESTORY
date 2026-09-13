@@ -21,6 +21,8 @@ import './clean-background.css';
 import './pos-cleanup';
 // Keeps async POS enhancement mounts single even while React is still mutating the page.
 import './pos-day-end-dedupe';
+// Shows the short ATM/CDM deposit reference (PDDMMYY) in the day-end panel.
+import './pos-deposit-remark';
 // General admin controls, tables and dialogs. Search geometry is intentionally excluded.
 import './admin-ui-cleanup.css';
 // General icon alignment only; search icons are controlled by admin-search.css.
