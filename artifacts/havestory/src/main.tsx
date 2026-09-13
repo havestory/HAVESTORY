@@ -17,9 +17,10 @@ import './design-refresh.css';
 // Final public cleanup override: keep backgrounds flat and remove decorative
 // circle/glow elements without changing cards, buttons, or layout geometry.
 import './clean-background.css';
-// POS-only cleanup/history enhancer. It removes legacy management/report controls
-// from the counter screen and injects a secure From/To bill-history view.
+// POS cleanup/history plus day/month reports and day-end closing workflow.
 import './pos-cleanup';
+// Keeps async POS enhancement mounts single even while React is still mutating the page.
+import './pos-day-end-dedupe';
 // General admin controls, tables and dialogs. Search geometry is intentionally excluded.
 import './admin-ui-cleanup.css';
 // General icon alignment only; search icons are controlled by admin-search.css.
