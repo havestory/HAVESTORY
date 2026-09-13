@@ -21,6 +21,8 @@ import './clean-background.css';
 import './pos-cleanup';
 // Keeps async POS enhancement mounts single even while React is still mutating the page.
 import './pos-day-end-dedupe';
+// Shows the short ATM/CDM deposit reference (PDDMMYY) in the day-end panel.
+import './pos-deposit-remark';
 // General admin controls, tables and dialogs. Search geometry is intentionally excluded.
 import './admin-ui-cleanup.css';
 // General icon alignment only; search icons are controlled by admin-search.css.
@@ -29,6 +31,8 @@ import './admin-icon-alignment.css';
 import './admin-typography.css';
 // ONE source of truth for every admin search field. Keep this final among admin styles.
 import './admin-search.css';
+// POS bill panel and day-end controls use one aligned compact visual system.
+import './pos-panel-clean.css';
 
 // Seed the public Liquid Glass palette before settings arrive so the first paint
 // never flashes the legacy darkroom or brown editorial theme.
