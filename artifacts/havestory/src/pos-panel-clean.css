@@ -1,0 +1,139 @@
+/* POS current-bill visual system: align controls and remove legacy spacing drift. */
+:is([data-admin-panel],[data-admin-layout]) .pos-bill-panel {
+  border-radius: 24px !important;
+  padding: 22px !important;
+  border-color: #e1dbe5 !important;
+  box-shadow: 0 14px 38px rgba(35, 24, 42, .06) !important;
+}
+
+:is([data-admin-panel],[data-admin-layout]) .pos-bill-panel h2 {
+  line-height: 1.2 !important;
+  letter-spacing: -.02em !important;
+}
+
+:is([data-admin-panel],[data-admin-layout]) .pos-bill-panel label {
+  display: block;
+  color: #655c6d !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: .035em !important;
+}
+
+:is([data-admin-panel],[data-admin-layout]) .pos-bill-panel input,
+:is([data-admin-panel],[data-admin-layout]) .pos-bill-panel select {
+  height: 44px !important;
+  min-height: 44px !important;
+  border: 1px solid #ddd6e2 !important;
+  border-radius: 11px !important;
+  background: #fff !important;
+  padding: 0 12px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #2a2330 !important;
+  box-shadow: none !important;
+}
+
+:is([data-admin-panel],[data-admin-layout]) .pos-bill-panel input:focus,
+:is([data-admin-panel],[data-admin-layout]) .pos-bill-panel select:focus {
+  border-color: #7a3a92 !important;
+  box-shadow: 0 0 0 3px rgba(95,45,117,.08) !important;
+  outline: none !important;
+}
+
+/* Invoice search and customer fields get a clean separation without heavy lines. */
+:is([data-admin-panel],[data-admin-layout]) .pos-bill-panel > div:nth-of-type(2) {
+  padding-bottom: 16px !important;
+  border-bottom-color: #eee9f0 !important;
+}
+
+/* Cart rows: name/price left, quantity controls aligned as one compact group. */
+:is([data-admin-panel],[data-admin-layout]) .pos-bill-panel .bg-slate-50.p-3 {
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr) 36px 28px 36px 28px !important;
+  align-items: center !important;
+  gap: 6px !important;
+  border: 1px solid #ece7ef !important;
+  border-radius: 13px !important;
+  background: #fbfafc !important;
+  padding: 12px !important;
+}
+
+:is([data-admin-panel],[data-admin-layout]) .pos-bill-panel .bg-slate-50.p-3 > button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+}
+
+:is([data-admin-panel],[data-admin-layout]) .pos-bill-panel .bg-slate-50.p-3 > button.h-9 {
+  width: 36px !important;
+  height: 36px !important;
+  border: 1px solid #ded7e2 !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+}
+
+/* Discount box */
+:is([data-admin-panel],[data-admin-layout]) .pos-bill-panel .border-violet-200.bg-violet-50 {
+  border-color: #e3d8e9 !important;
+  border-radius: 13px !important;
+  background: #faf7fc !important;
+  padding: 14px !important;
+}
+
+:is([data-admin-panel],[data-admin-layout]) .pos-bill-panel .border-violet-200.bg-violet-50 .grid-cols-2 {
+  align-items: end !important;
+  gap: 10px !important;
+}
+
+/* Total area should read as one clear hierarchy. */
+:is([data-admin-panel],[data-admin-layout]) .pos-bill-panel .border-t.pt-4.text-xl {
+  align-items: center !important;
+  margin-top: 16px !important;
+  padding-top: 16px !important;
+  border-top: 1px solid #302635 !important;
+  font-size: 20px !important;
+}
+
+:is([data-admin-panel],[data-admin-layout]) .pos-bill-panel > .mt-4.grid.grid-cols-2 {
+  gap: 10px !important;
+  align-items: end !important;
+}
+
+:is([data-admin-panel],[data-admin-layout]) .pos-bill-panel .border-emerald-200.bg-emerald-50 {
+  min-height: 46px !important;
+  display: flex !important;
+  align-items: center !important;
+  border-color: #c9ddd7 !important;
+  border-radius: 11px !important;
+  background: #eef7f4 !important;
+  padding: 0 13px !important;
+}
+
+:is([data-admin-panel],[data-admin-layout]) .pos-bill-panel > button.mt-4 {
+  height: 48px !important;
+  border-radius: 11px !important;
+  font-size: 14px !important;
+  box-shadow: none !important;
+}
+
+/* Day-end injected controls share the same clean geometry. */
+:is([data-admin-panel],[data-admin-layout]) [data-pos-day-close] input,
+:is([data-admin-panel],[data-admin-layout]) [data-pos-day-close] select,
+:is([data-admin-panel],[data-admin-layout]) [data-pos-report-tools] input,
+:is([data-admin-panel],[data-admin-layout]) [data-pos-report-tools] select {
+  border-color: #ddd6e2 !important;
+  border-radius: 11px !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 520px) {
+  :is([data-admin-panel],[data-admin-layout]) .pos-bill-panel {
+    padding: 16px !important;
+    border-radius: 18px !important;
+  }
+  :is([data-admin-panel],[data-admin-layout]) .pos-bill-panel .bg-slate-50.p-3 {
+    grid-template-columns: minmax(0,1fr) 34px 24px 34px 24px !important;
+    gap: 4px !important;
+  }
+}
