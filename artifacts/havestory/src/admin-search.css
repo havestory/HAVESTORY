@@ -6,8 +6,8 @@
 
 :is([data-admin-panel],[data-admin-layout]) input[placeholder*="search" i] {
   box-sizing: border-box !important;
-  flex: 1 1 280px !important;
-  width: auto !important;
+  flex: 1 1 0% !important;
+  width: 100% !important;
   min-width: 0 !important;
   height: 52px !important;
   min-height: 52px !important;
@@ -53,7 +53,6 @@
   align-items: center !important;
   gap: 10px !important;
   min-width: 0 !important;
-  padding: 0 !important;
   border: 0 !important;
   border-radius: 0 !important;
   background: transparent !important;

@@ -1,3 +1,4 @@
+import { visibleBanks, validateBankDetails } from "@workspace/api-zod";
 import { Router } from "express";
 import { db, pool } from "@workspace/db";
 import { settingsTable, noticeTable, noticesTable } from "@workspace/db/schema";
@@ -88,7 +89,9 @@ router.get("/", async (req, res) => {
       ...publicSettings
     } = settings;
     res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
-    return res.json(publicSettings);
+    const banks = visibleBanks(settings, 'website');
+    const primary = banks[0];
+    return res.json({ ...publicSettings, bankDetails: JSON.stringify(banks), bankName: primary?.bankName || '', bankAccountHolder: primary?.accountHolder || '', bankAccountNumber: primary?.accountNumber || '', bankBranch: primary?.branch || '', bankSwiftBic: primary?.swiftBic || '' });
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to fetch settings" });
@@ -214,6 +217,10 @@ router.put("/", requireAdmin, async (req, res) => {
     ];
     for (const f of fields) {
       if (req.body[f] !== undefined) updateData[f] = req.body[f];
+    }
+    if (req.body.bankDetails !== undefined) {
+      try { updateData.bankDetails = validateBankDetails(req.body.bankDetails); }
+      catch (error) { return res.status(400).json({ error: error instanceof Error ? error.message : 'Invalid bank details' }); }
     }
     // Boolean-like integer fields (stored as 0/1)
     if (req.body.orderEmailNotificationsEnabled !== undefined) {
@@ -529,6 +536,10 @@ router.post("/restore", requireAdmin, async (req, res) => {
     ];
     for (const f of fields) {
       if (incoming[f] !== undefined) updateData[f] = incoming[f];
+    }
+    if (incoming.bankDetails !== undefined) {
+      try { updateData.bankDetails = validateBankDetails(incoming.bankDetails); }
+      catch (error) { return res.status(400).json({ error: error instanceof Error ? error.message : 'Invalid bank details' }); }
     }
     if (incoming.homeBenefitsEnabled !== undefined) {
       updateData.homeBenefitsEnabled = incoming.homeBenefitsEnabled ? 1 : 0;
