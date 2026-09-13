@@ -44,6 +44,7 @@ async function ensureDayEndColumns() {
     ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS deposit_proof_url TEXT;
     ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS deposit_tomorrow BOOLEAN NOT NULL DEFAULT FALSE;
     ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS deposit_remark TEXT;
+    ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS deposit_amount NUMERIC(14,2);
     ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS closing_remark TEXT;
     ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS closing_expected_cash NUMERIC(14,2);
     ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS closing_difference NUMERIC(14,2);
@@ -62,6 +63,7 @@ router.post("/close", async (req, res) => {
     const date = lkDate();
     const depositRemark = depositRemarkFor(date);
     const countedCash = money(req.body?.closingCash);
+    const depositAmount = money(req.body?.depositAmount);
     const bankSlipReference = clean(req.body?.bankSlipReference, 160);
     const depositProofUrl = clean(req.body?.depositProofUrl, 500);
     const depositTomorrow = Boolean(req.body?.depositTomorrow);
@@ -69,7 +71,9 @@ router.post("/close", async (req, res) => {
     if (req.body?.closingCash === "" || req.body?.closingCash == null) {
       return res.status(400).json({ error: "Counted cash is required" });
     }
-
+    if (req.body?.depositAmount === "" || req.body?.depositAmount == null) {
+      return res.status(400).json({ error: "Bank deposit amount is required" });
+    }
     if (depositProofUrl && !/^https?:\/\//i.test(depositProofUrl)) {
       return res.status(400).json({ error: "Deposit proof URL must start with http:// or https://" });
     }
@@ -113,7 +117,7 @@ router.post("/close", async (req, res) => {
     if (bankSlipReference) reconciliationRemark += " Bank slip / transaction reference recorded.";
     if (depositProofUrl) reconciliationRemark += " Deposit proof link recorded.";
     if (depositTomorrow) reconciliationRemark += " Deposit marked for tomorrow.";
-    const remark = `ATM/CDM remark: ${depositRemark}. ${reconciliationRemark}`;
+    const remark = `ATM/CDM remark: ${depositRemark}. Bank deposit: ${rs(depositAmount)}. ${reconciliationRemark}`;
 
     const closed = await client.query(
       `UPDATE pos_sessions
@@ -122,12 +126,13 @@ router.post("/close", async (req, res) => {
            deposit_proof_url=$3,
            deposit_tomorrow=$4,
            deposit_remark=$5,
-           closing_remark=$6,
-           closing_expected_cash=$7,
-           closing_difference=$8,
+           deposit_amount=$6,
+           closing_remark=$7,
+           closing_expected_cash=$8,
+           closing_difference=$9,
            closed_at=NOW(),
-           closed_by=$9
-       WHERE id=$10 AND closed_at IS NULL
+           closed_by=$10
+       WHERE id=$11 AND closed_at IS NULL
        RETURNING *`,
       [
         countedCash,
@@ -135,6 +140,7 @@ router.post("/close", async (req, res) => {
         depositProofUrl || null,
         depositTomorrow,
         depositRemark,
+        depositAmount,
         remark,
         expectedCash,
         difference,
@@ -152,6 +158,7 @@ router.post("/close", async (req, res) => {
     res.json({
       date,
       depositRemark,
+      depositAmount,
       session: closed.rows[0],
       summary: {
         bills: Number(totals.bill_count || 0),
