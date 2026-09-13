@@ -32,6 +32,7 @@ import staffProfilesRouter from "./staff-profiles";
 import { orderClientAndDeletionMiddleware } from "./order-client-sync";
 import posRouter from "./pos";
 import posHistoryRouter from "./pos-history";
+import posDayEndRouter from "./pos-day-end";
 
 const router: IRouter = Router();
 
@@ -75,5 +76,6 @@ router.use("/finance-inventory", financeInventoryRouter);
 router.use("/reports", reportsRouter);
 router.use("/pos", posRouter);
 router.use("/pos-history", posHistoryRouter);
+router.use("/pos-day-end", posDayEndRouter);
 
 export default router;
