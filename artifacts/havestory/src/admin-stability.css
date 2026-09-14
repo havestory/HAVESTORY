@@ -97,7 +97,7 @@ html[data-hs-admin-theme='dark'] {
   --muted: var(--admin-subtle);
   --muted-foreground: var(--admin-muted);
   --ring: var(--admin-brand-line);
-  --destructive: var(--admin-danger);
+  --destructive: var(--admin-danger-solid);
   --destructive-foreground: 0 0% 100%;
   --sidebar: var(--admin-inverse);
   --sidebar-foreground: 270 18% 88%;
@@ -150,7 +150,6 @@ html[data-hs-admin-theme='dark'] {
   border-bottom-color: hsl(var(--secondary) / 0.2);
   background: linear-gradient(135deg, hsl(var(--secondary) / 0.17), hsl(var(--card) / 0.92) 52%, hsl(var(--accent) / 0.1));
 }
-[data-admin-panel] .invoice-modal-header .text-admin-warning,
 [data-admin-panel] .invoice-modal-header .text-admin-warning { color: var(--invoice-accent); }
 [data-admin-panel] .invoice-modal-body {
   min-height: 0;
