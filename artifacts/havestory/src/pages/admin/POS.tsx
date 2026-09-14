@@ -489,11 +489,11 @@ export default function POS() {
     } finally { setDayActionBusy(false); }
   };
   const input =
-    "h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-900 outline-none focus:border-violet-400 focus:ring-4 focus:ring-violet-100";
+    "h-11 w-full rounded-xl border border-admin-border bg-admin-surface px-3 text-sm font-bold text-admin-ink outline-none focus:border-admin-brand-line focus:ring-4 focus:ring-admin-brand";
   if (!day)
     return (
       <div className="grid min-h-[50vh] place-items-center">
-        <Loader2 className="animate-spin text-violet-700" />
+        <Loader2 className="animate-spin text-admin-brand-ink" />
       </div>
     );
   return (
@@ -527,20 +527,20 @@ export default function POS() {
           })()}
         </DialogContent>
       </Dialog>
-      <header className="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+      <header className="rounded-[26px] border border-admin-border bg-admin-surface p-5 shadow-sm sm:p-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex gap-4">
-            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-violet-950 text-white">
+            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-admin-brand text-white">
               <Store />
             </div>
             <div>
-              <div className="text-[10px] font-black uppercase tracking-[.2em] text-violet-700">
+              <div className="text-[10px] font-bold uppercase tracking-[.2em] text-admin-brand-ink">
                 In-store checkout
               </div>
-              <h1 className="text-2xl font-black text-slate-950">
+              <h1 className="text-2xl font-bold text-admin-ink">
                 POS / Counter Sales
               </h1>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-admin-muted">
                 Collect payment first, then issue a 58 mm or 80 mm thermal bill.
               </p>
             </div>
@@ -557,42 +557,42 @@ export default function POS() {
             </select>
             <button
               onClick={downloadReport}
-              className="flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-black"
+              className="flex h-11 items-center gap-2 rounded-xl border border-admin-border bg-admin-surface px-4 text-xs font-bold"
             >
               <FileDown size={16} /> Day PDF
             </button>
             <input type="month" value={reportMonth} onChange={e => setReportMonth(e.target.value)} className={`${input} w-36`} aria-label="POS report month" />
-            <button onClick={downloadMonthReport} disabled={!monthData} className="flex h-11 items-center gap-2 rounded-xl bg-violet-950 px-4 text-xs font-black text-white disabled:opacity-40">
+            <button onClick={downloadMonthReport} disabled={!monthData} className="flex h-11 items-center gap-2 rounded-xl bg-admin-brand px-4 text-xs font-bold text-white disabled:opacity-40">
               <CalendarDays size={16} /> Month PDF
             </button>
           </div>
         </div>
       </header>
       {day.session?.closed_at && (
-        <section className="rounded-[22px] border-2 border-amber-400 bg-amber-50 p-5 text-amber-950 shadow-sm">
+        <section className="rounded-[22px] border-2 border-admin-warning-line bg-admin-warning-soft p-5 text-admin-warning shadow-sm">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 shrink-0 text-amber-700" />
+            <AlertTriangle className="mt-0.5 shrink-0 text-admin-warning" />
             <div className="min-w-0 flex-1">
-              <h2 className="font-black">This POS day is closed</h2>
-              <p className="mt-1 text-sm text-amber-900">Closed by {day.session.closed_by || "an administrator"}. Sales stay locked until the owner reopens the day.</p>
+              <h2 className="font-bold">This POS day is closed</h2>
+              <p className="mt-1 text-sm text-admin-warning">Closed by {day.session.closed_by || "an administrator"}. Sales stay locked until the owner reopens the day.</p>
               {me?.role === "owner" ? (
                 <div className="mt-4">
                   {day.reopenRequest && (
-                    <div className="mb-3 rounded-xl border border-amber-300 bg-white/80 p-3 text-sm">
+                    <div className="mb-3 rounded-xl border border-admin-warning-line bg-admin-surface/80 p-3 text-sm">
                       <b>Reopen request from @{day.reopenRequest.requested_by_username}</b>
-                      <p className="mt-1 text-amber-900">{day.reopenRequest.reason}</p>
+                      <p className="mt-1 text-admin-warning">{day.reopenRequest.reason}</p>
                     </div>
                   )}
-                  <button onClick={reopenDay} disabled={dayActionBusy} className="inline-flex h-11 items-center gap-2 rounded-xl bg-amber-900 px-5 text-xs font-black text-white disabled:opacity-50">
+                  <button onClick={reopenDay} disabled={dayActionBusy} className="inline-flex h-11 items-center gap-2 rounded-xl bg-admin-warning-solid px-5 text-xs font-bold text-white disabled:opacity-50">
                     <RotateCcw size={16} /> Reopen today’s POS day
                   </button>
                 </div>
               ) : day.reopenRequest?.status === "pending" ? (
-                <p className="mt-3 inline-flex rounded-lg bg-amber-200 px-3 py-2 text-xs font-black">Reopen request pending owner approval</p>
+                <p className="mt-3 inline-flex rounded-lg bg-admin-warning-soft px-3 py-2 text-xs font-bold">Reopen request pending owner approval</p>
               ) : (
                 <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                   <input value={reopenReason} onChange={e => setReopenReason(e.target.value)} placeholder="Why should this day be reopened?" className={`${input} sm:max-w-md`} />
-                  <button onClick={requestReopen} disabled={dayActionBusy || !reopenReason.trim()} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-amber-900 px-5 text-xs font-black text-white disabled:opacity-50">
+                  <button onClick={requestReopen} disabled={dayActionBusy || !reopenReason.trim()} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-admin-warning-solid px-5 text-xs font-bold text-white disabled:opacity-50">
                     <Send size={15} /> Request owner to reopen
                   </button>
                 </div>
@@ -602,15 +602,15 @@ export default function POS() {
         </section>
       )}
       {!day.session ? (
-        <section className="mx-auto max-w-xl rounded-[26px] border border-amber-200 bg-amber-50 p-6">
-          <Banknote className="text-amber-700" />
-          <h2 className="mt-3 text-xl font-black text-slate-950">
+        <section className="mx-auto max-w-xl rounded-[26px] border border-admin-warning-line bg-admin-warning-soft p-6">
+          <Banknote className="text-admin-warning" />
+          <h2 className="mt-3 text-xl font-bold text-admin-ink">
             Start today’s counter
           </h2>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-admin-muted">
             Enter the cash placed in the drawer before the first sale.
           </p>
-          <label className="mt-5 block text-xs font-black uppercase text-slate-600">
+          <label className="mt-5 block text-xs font-bold uppercase text-admin-muted">
             Day-start fund
             <input
               type="number"
@@ -623,12 +623,12 @@ export default function POS() {
           <button
             onClick={startDay}
             disabled={me?.role !== "owner" && !(me?.permissions || []).includes("pos_day_start")}
-            className="mt-4 h-12 w-full rounded-xl bg-violet-950 font-black text-white disabled:cursor-not-allowed disabled:opacity-40"
+            className="mt-4 h-12 w-full rounded-xl bg-admin-brand font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
           >
             Open counter with {rs(Number(opening))}
           </button>
           {me?.role !== "owner" && !(me?.permissions || []).includes("pos_day_start") && (
-            <p className="mt-2 text-center text-xs font-bold text-amber-800">Your account can use POS after an owner starts the day.</p>
+            <p className="mt-2 text-center text-xs font-bold text-admin-warning">Your account can use POS after an owner starts the day.</p>
           )}
         </section>
       ) : (
@@ -648,25 +648,25 @@ export default function POS() {
             ].map(([label, value, Icon]: any) => (
               <div
                 key={label}
-                className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                className="rounded-2xl border border-admin-border bg-admin-surface p-4 shadow-sm"
               >
-                <div className="flex justify-between text-[10px] font-black uppercase tracking-wider text-slate-400">
+                <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider text-admin-muted">
                   <span>{label}</span>
                   <Icon size={16} />
                 </div>
-                <div className="mt-3 text-xl font-black text-slate-950">
+                <div className="mt-3 text-xl font-bold text-admin-ink">
                   {value}
                 </div>
               </div>
             ))}
           </section>
           <div className="pos-sales-grid grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_430px]">
-            <section className="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm">
+            <section className="rounded-[26px] border border-admin-border bg-admin-surface p-5 shadow-sm">
               <div className="flex flex-col gap-3 sm:flex-row">
                 <label className="relative flex-1">
                   <Search
                     size={16}
-                    className="absolute left-3 top-3.5 text-slate-400"
+                    className="absolute left-3 top-3.5 text-admin-muted"
                   />
                   <input
                     value={query}
@@ -686,7 +686,7 @@ export default function POS() {
                   />
                   <button
                     onClick={addByCode}
-                    className="h-11 rounded-xl bg-violet-950 px-4 text-xs font-black text-white"
+                    className="h-11 rounded-xl bg-admin-brand px-4 text-xs font-bold text-white"
                   >
                     Add
                   </button>
@@ -696,14 +696,14 @@ export default function POS() {
                 <button
                   disabled={itemSaving}
                   onClick={() => { setShowNewItem(value => !value); setEditingItem(null); setNewItem({ code: "", name: "", price: "" }); setNewConfig(emptyPOSConfig()); }}
-                  className="flex items-center gap-1.5 rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-[11px] font-black text-violet-900"
+                  className="flex items-center gap-1.5 rounded-lg border border-admin-brand-line bg-admin-brand-soft px-3 py-2 text-[11px] font-bold text-admin-brand-ink"
                 >
                   <Plus size={14} />{" "}
                   {showNewItem ? "Close item form" : "Add POS-only item"}
                 </button>
               </div>
               {showNewItem && (
-                <fieldset disabled={itemSaving} className="mt-3 grid min-w-0 gap-3 rounded-2xl border border-violet-200 bg-violet-50 p-4 sm:grid-cols-3"><legend className="px-2 font-semibold">{editingItem ? "Edit POS item" : "New POS item"}</legend>
+                <fieldset disabled={itemSaving} className="mt-3 grid min-w-0 gap-3 rounded-2xl border border-admin-brand-line bg-admin-brand-soft p-4 sm:grid-cols-3"><legend className="px-2 font-semibold">{editingItem ? "Edit POS item" : "New POS item"}</legend>
                   <input
                     value={newItem.code}
                     onChange={(e) =>
@@ -742,7 +742,7 @@ export default function POS() {
                       !newItem.name.trim() ||
                       newItem.price === ""
                     }
-                    className="min-h-11 rounded-xl bg-violet-950 px-4 py-3 text-sm font-semibold text-white disabled:opacity-40"
+                    className="min-h-11 rounded-xl bg-admin-brand px-4 py-3 text-sm font-semibold text-white disabled:opacity-40"
                   >
                     {itemSaving ? "Saving…" : editingItem ? "Save item changes" : "Save POS item"}
                   </button>
@@ -750,30 +750,30 @@ export default function POS() {
               )}
               <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {filtered.map((p) => (
-                  <div key={p.id} className="min-w-0 rounded-2xl border border-slate-200">
+                  <div key={p.id} className="min-w-0 rounded-2xl border border-admin-border">
                   <button
                     onClick={() => add(p)}
                     disabled={!!selectedInvoice}
-                    className="w-full rounded-2xl p-4 text-left hover:bg-violet-50 disabled:opacity-40"
+                    className="w-full rounded-2xl p-4 text-left hover:bg-admin-brand-soft disabled:opacity-40"
                   >
-                    <span className="text-[10px] font-black text-violet-700">
+                    <span className="text-[10px] font-bold text-admin-brand-ink">
                       {p.code}
                     </span>
-                    <b className="mt-1 block text-sm text-slate-950">
+                    <b className="mt-1 block text-sm text-admin-ink">
                       {p.name}
                     </b>
-                    <span className="mt-2 block text-sm font-black">
+                    <span className="mt-2 block text-sm font-bold">
                       {posConfig(p.customConfig).sizes?.length ? "Choose size & unit price" : rs(p.price)}
                     </span>
                   </button>
-                  {p.posOnly && <button type="button" disabled={itemSaving} onClick={() => { setEditingItem(p.id); setNewItem({ code: p.code, name: p.name, price: String(p.price) }); setNewConfig({ ...emptyPOSConfig(), ...posConfig(p.customConfig) }); setShowNewItem(true); }} className="flex min-h-10 w-full items-center justify-center gap-2 border-t px-3 text-sm font-semibold text-violet-900"><Pencil size={14} /> Edit item</button>}
+                  {p.posOnly && <button type="button" disabled={itemSaving} onClick={() => { setEditingItem(p.id); setNewItem({ code: p.code, name: p.name, price: String(p.price) }); setNewConfig({ ...emptyPOSConfig(), ...posConfig(p.customConfig) }); setShowNewItem(true); }} className="flex min-h-10 w-full items-center justify-center gap-2 border-t px-3 text-sm font-semibold text-admin-brand-ink"><Pencil size={14} /> Edit item</button>}
                   </div>
                 ))}
               </div>
             </section>
-            <aside className="pos-bill-panel h-fit rounded-[26px] border border-slate-200 bg-white p-5 text-slate-950 shadow-sm xl:sticky xl:top-24">
+            <aside className="pos-bill-panel h-fit rounded-[26px] border border-admin-border bg-admin-surface p-5 text-admin-ink shadow-sm xl:sticky xl:top-24">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-black">Current bill</h2>
+                <h2 className="text-lg font-bold">Current bill</h2>
                 {(cart.length > 0 || selectedInvoice) && (
                   <button className="pos-quantity-button" aria-label="Clear current bill"
                     onClick={() => {
@@ -785,8 +785,8 @@ export default function POS() {
                   </button>
                 )}
               </div>
-              <div className="mt-4 border-b border-slate-100 pb-4">
-                <label className="text-[10px] font-black uppercase text-slate-500">
+              <div className="mt-4 border-b border-admin-border pb-4">
+                <label className="text-[10px] font-bold uppercase text-admin-muted">
                   Settle an existing invoice
                   <input
                     value={invoiceQuery}
@@ -822,14 +822,14 @@ export default function POS() {
               </div>
               <div className="mt-4 space-y-2">
                 {selectedInvoice ? (
-                  <div className="rounded-xl border border-violet-200 bg-violet-50 p-4">
-                    <b className="text-violet-950">
+                  <div className="rounded-xl border border-admin-brand-line bg-admin-brand-soft p-4">
+                    <b className="text-admin-brand-ink">
                       {selectedInvoice.invoiceNumber}
                     </b>
-                    <p className="text-xs text-violet-800">
+                    <p className="text-xs text-admin-brand-ink">
                       {selectedInvoice.clientName}
                     </p>
-                    <p className="mt-2 text-lg font-black">
+                    <p className="mt-2 text-lg font-bold">
                       Balance {rs(selectedInvoice.balance)}
                     </p>
                   </div>
@@ -841,7 +841,7 @@ export default function POS() {
                     >
                       <div className="min-w-0 flex-1">
                         <b className="block text-xs break-words">{item.name}</b>
-                        <span className="text-[10px] text-slate-500">
+                        <span className="text-[10px] text-admin-muted">
                           {item.code} · {rs(item.price)} / {item.unitLabel}
                         </span>
                       </div>
@@ -858,12 +858,12 @@ export default function POS() {
                     </div>
                   ))
                 ) : (
-                  <div className="py-8 text-center text-sm text-slate-400">
+                  <div className="py-8 text-center text-sm text-admin-muted">
                     Add items by code or select an invoice.
                   </div>
                 )}
               </div>
-              <label className="mt-4 block text-[10px] font-black uppercase text-slate-500">
+              <label className="mt-4 block text-[10px] font-bold uppercase text-admin-muted">
                 Customer (optional)
                 <input
                   value={customer}
@@ -873,21 +873,21 @@ export default function POS() {
                   className={`${input} mt-1.5`}
                 />
               </label>
-              {!selectedInvoice && <div className="mt-4 space-y-3 rounded-xl border border-violet-200 bg-violet-50 p-3">
+              {!selectedInvoice && <div className="mt-4 space-y-3 rounded-xl border border-admin-brand-line bg-admin-brand-soft p-3">
                 <div className="flex justify-between text-sm"><span>Subtotal</span><b>{rs(subtotal)}</b></div>
                 <div className="flex items-center gap-2 text-sm font-semibold"><Percent size={16} /> Bill discount</div>
                 <div className="grid grid-cols-2 gap-2">
                   <label className="text-xs font-semibold">Discount type<select aria-label="Discount type" className={`${input} mt-1`} value={discountType} onChange={e => { setDiscountType(e.target.value as "amount" | "percent"); setDiscountValue(""); }}><option value="amount">Amount (Rs.)</option><option value="percent">Percentage (%)</option></select></label>
                   <label className="text-xs font-semibold">{discountType === "percent" ? "Percentage" : "Amount (Rs.)"}<input aria-label="Discount value" type="number" min="0" step="0.01" max={discountType === "percent" ? 100 : subtotal} className={`${input} mt-1`} value={discountValue} onChange={e => setDiscountValue(e.target.value)} placeholder="0" /></label>
                 </div>
-                {invalidDiscount ? <p role="alert" className="text-sm text-red-700">Enter a valid discount within the bill amount (up to 100%).</p> : <div className="flex justify-between text-sm"><span>Discount</span><b>−{rs(discount)}</b></div>}
+                {invalidDiscount ? <p role="alert" className="text-sm text-admin-danger">Enter a valid discount within the bill amount (up to 100%).</p> : <div className="flex justify-between text-sm"><span>Discount</span><b>−{rs(discount)}</b></div>}
               </div>}
-              <div className="mt-4 flex justify-between border-t pt-4 text-xl font-black">
+              <div className="mt-4 flex justify-between border-t pt-4 text-xl font-bold">
                 <span>Total</span>
                 <span>{rs(total)}</span>
               </div>
               <div className="mt-4 grid grid-cols-2 gap-2">
-                <label className="text-[10px] font-black uppercase text-slate-500">
+                <label className="text-[10px] font-bold uppercase text-admin-muted">
                   Payment
                   <select
                     value={method}
@@ -899,7 +899,7 @@ export default function POS() {
                     <option value="transfer">Transfer</option>
                   </select>
                 </label>
-                <label className="text-[10px] font-black uppercase text-slate-500">
+                <label className="text-[10px] font-bold uppercase text-admin-muted">
                   Customer gave
                   <input
                     type="number"
@@ -910,14 +910,14 @@ export default function POS() {
                   />
                 </label>
               </div>
-              <div className="mt-3 flex justify-between rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-black text-emerald-900">
+              <div className="mt-3 flex justify-between rounded-xl border border-admin-success-line bg-admin-success-soft p-3 text-sm font-bold text-admin-success">
                 <span>Balance / Change</span>
                 <span>{rs(change)}</span>
               </div>
               <button
                 onClick={complete}
                 disabled={saving || invalidDiscount || !Number.isFinite(received) || !!day.session.closed_at || total <= 0 || received < total}
-                className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-violet-950 font-black text-white disabled:opacity-40"
+                className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-admin-brand font-bold text-white disabled:opacity-40"
               >
                 {saving ? (
                   <Loader2 className="animate-spin" size={17} />
@@ -926,17 +926,17 @@ export default function POS() {
                 )}{" "}
                 Collect payment &amp; print bill
               </button>
-              <p className="mt-2 text-center text-[10px] text-slate-400">
+              <p className="mt-2 text-center text-[10px] text-admin-muted">
                 The sale is recorded only after payment is confirmed here.
               </p>
             </aside>
           </div>
           <POSHistory date={day.date} revision={`${day.sales.length}:${day.session?.closed_at || ''}`} />
-          <section className="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm">
+          <section className="rounded-[26px] border border-admin-border bg-admin-surface p-5 shadow-sm">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="text-lg font-black">Today’s issued bills</h2>
-                <p className="text-xs text-slate-500">
+                <h2 className="text-lg font-bold">Today’s issued bills</h2>
+                <p className="text-xs text-admin-muted">
                   Counter income is separate from online/website sales.
                 </p>
               </div>
@@ -945,7 +945,7 @@ export default function POS() {
             <div className="mt-4 overflow-x-auto">
               <table className="w-full min-w-[700px] text-left text-xs">
                 <thead>
-                  <tr className="border-b text-[10px] uppercase text-slate-400">
+                  <tr className="border-b text-[10px] uppercase text-admin-muted">
                     {[
                       "Time",
                       "Receipt",
@@ -975,11 +975,11 @@ export default function POS() {
                       <td className="px-3">{s.invoice_number || "—"}</td>
                       <td className="px-3">{s.customer_name}</td>
                       <td className="px-3 uppercase">{s.payment_method}</td>
-                      <td className="px-3 font-black">{rs(Number(s.total))}</td>
+                      <td className="px-3 font-bold">{rs(Number(s.total))}</td>
                       <td className="px-3">
                         <button
                           onClick={() => printReceipt(s, width, receiptBrand)}
-                          className="rounded-lg bg-slate-100 p-2"
+                          className="rounded-lg bg-admin-subtle p-2"
                         >
                           <Printer size={14} />
                         </button>
@@ -989,7 +989,7 @@ export default function POS() {
                 </tbody>
               </table>
               {day.sales.length === 0 && (
-                <div className="py-12 text-center text-sm text-slate-400">
+                <div className="py-12 text-center text-sm text-admin-muted">
                   No bills issued today.
                 </div>
               )}

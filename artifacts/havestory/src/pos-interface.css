@@ -1,12 +1,12 @@
 /* Component-owned POS geometry; portals deliberately do not depend on admin ancestry. */
 .pos-dialog {
-  background: #fff;
-  color: #241d2e;
-  border: 1px solid #e6e0ed;
+  background: hsl(var(--admin-surface));
+  color: hsl(var(--admin-ink));
+  border: 1px solid hsl(var(--admin-border));
   border-radius: 26px;
   padding: 28px;
-  box-shadow: 0 24px 90px #24133330;
-  font-family: inherit;
+  box-shadow: 0 24px 90px hsl(var(--admin-ink) / 0.188);
+  font-family: var(--admin-font);
 }
 .pos-config-dialog {
   max-width: 700px;
@@ -15,10 +15,10 @@
   padding-right: 36px;
   line-height: 1.35;
   font-size: 21px;
-  font-weight: 800;
+  font-weight: 700;
 }
 .pos-dialog > p {
-  color: #716b7d;
+  color: hsl(var(--admin-muted));
   line-height: 1.6;
 }
 .pos-dialog-heading {
@@ -41,8 +41,8 @@
   height: 46px;
   flex-shrink: 0;
   border-radius: 15px;
-  background: #f2ecfa;
-  color: #572778;
+  background: hsl(var(--admin-subtle));
+  color: hsl(var(--admin-brand-ink));
 }
 .pos-fields {
   display: grid;
@@ -56,32 +56,32 @@
   min-width: 0;
   font-size: 12px;
   font-weight: 650;
-  color: #62566e;
+  color: hsl(var(--admin-muted));
 }
 .pos-field input,
 .pos-field select {
   width: 100%;
   min-width: 0;
   height: 46px;
-  border: 1px solid #dfd8e8;
+  border: 1px solid hsl(var(--admin-border));
   border-radius: 13px;
   padding: 0 13px;
-  background: #fff;
-  color: #241d2e;
+  background: hsl(var(--admin-surface));
+  color: hsl(var(--admin-ink));
   font-size: 14px;
   font-weight: 500;
 }
 .pos-field :is(input, select):focus-visible {
-  outline: 3px solid #dcc9ed;
+  outline: 3px solid hsl(var(--admin-border));
   outline-offset: 2px;
 }
 .pos-option-group {
   min-width: 0;
   margin-top: 18px;
-  border: 1px solid #e6e0ed;
+  border: 1px solid hsl(var(--admin-border));
   border-radius: 18px;
   padding: 14px;
-  background: #fcfbfd;
+  background: hsl(var(--admin-surface));
 }
 .pos-option-group legend {
   padding: 0 5px;
@@ -99,28 +99,28 @@
   align-items: center;
   gap: 9px;
   padding: 13px;
-  border: 1px solid #e2dce9;
+  border: 1px solid hsl(var(--admin-border));
   border-radius: 14px;
-  background: #fff;
+  background: hsl(var(--admin-surface));
   cursor: pointer;
   font-size: 12px;
   line-height: 1.5;
 }
 .pos-option:has(input:checked) {
-  border-color: #8454a2;
-  background: #f6f0fc;
-  box-shadow: 0 0 0 1px #8454a2;
+  border-color: hsl(var(--admin-border));
+  background: hsl(var(--admin-subtle));
+  box-shadow: 0 0 0 1px hsl(var(--admin-ink));
 }
 .pos-option input,
 .bank-channel-options input {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
-  accent-color: #653285;
+  accent-color: hsl(var(--admin-brand));
 }
 .pos-option small {
   margin-left: auto;
-  color: #704490;
+  color: hsl(var(--admin-brand-ink));
   text-align: right;
   font-size: 11px;
 }
@@ -128,11 +128,11 @@
   margin-top: 20px;
   display: grid;
   gap: 12px;
-  border: 1px solid #dfd0ec;
+  border: 1px solid hsl(var(--admin-border));
   border-radius: 18px;
   padding: 17px;
-  background: #f7f2fd;
-  color: #4d226c;
+  background: hsl(var(--admin-subtle));
+  color: hsl(var(--admin-brand-ink));
   font-size: 13px;
 }
 .pos-quote > span {
@@ -166,14 +166,14 @@
   line-height: 1.4;
 }
 .pos-primary {
-  background: #542779;
-  color: #fff;
-  border: 1px solid #542779;
+  background: hsl(var(--admin-brand));
+  color: hsl(var(--admin-on-solid));
+  border: 1px solid hsl(var(--admin-border));
 }
 .pos-secondary {
-  background: #fff;
-  color: #493453;
-  border: 1px solid #e1d8e9;
+  background: hsl(var(--admin-surface));
+  color: hsl(var(--admin-ink));
+  border: 1px solid hsl(var(--admin-border));
 }
 .pos-primary:disabled,
 .pos-secondary:disabled {
@@ -183,19 +183,19 @@
 .pos-primary:focus-visible,
 .pos-secondary:focus-visible,
 .pos-quantity-button:focus-visible {
-  outline: 3px solid #b995d1;
+  outline: 3px solid hsl(var(--admin-border));
   outline-offset: 3px;
 }
 .pos-helper {
   font-size: 11px;
   font-weight: 400;
-  color: #7b7385;
+  color: hsl(var(--admin-muted));
   line-height: 1.5;
   margin-top: 8px;
 }
 .pos-form-error {
-  color: #a03127;
-  background: #fff4f1;
+  color: hsl(var(--admin-danger));
+  background: hsl(var(--admin-subtle));
   border-radius: 12px;
   padding: 12px;
   font-size: 13px;
@@ -207,9 +207,9 @@
   gap: 4px;
   margin: 16px 0;
   padding: 16px;
-  border: 1px solid #e6dfed;
+  border: 1px solid hsl(var(--admin-border));
   border-radius: 16px;
-  background: #faf8fc;
+  background: hsl(var(--admin-subtle));
   font-size: 13px;
   overflow-wrap: anywhere;
 }
@@ -229,8 +229,8 @@
   align-items: center;
   gap: 6px;
   padding: 12px;
-  background: #f8f6fb;
-  border: 1px solid #eee8f3;
+  background: hsl(var(--admin-subtle));
+  border: 1px solid hsl(var(--admin-border));
   border-radius: 15px;
 }
 .pos-quantity-button {
@@ -241,11 +241,11 @@
   width: 34px;
   height: 34px;
   min-width: 34px;
-  padding: 0 !important;
-  border: 1px solid #ded5e8;
+  padding: 0;
+  border: 1px solid hsl(var(--admin-border));
   border-radius: 10px;
-  color: #573d6a;
-  background: #fff;
+  color: hsl(var(--admin-muted));
+  background: hsl(var(--admin-surface));
 }
 .pos-quantity-button svg {
   display: block;
@@ -273,7 +273,7 @@
 .pos-sales-grid .pos-bill-panel {
   position: static;
 }
-.pos-workspace .pos-bill-panel :is(input, select) {
+.pos-workspace .pos-bill-panel :is(input:not([type="checkbox"]):not([type="radio"]), select) {
   min-width: 0;
   width: 100%;
 }
@@ -281,7 +281,7 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .pos-workspace .pos-bill-panel {
-  box-shadow: 0 4px 22px #39284d08;
+  box-shadow: 0 4px 22px hsl(var(--admin-ink) / 0.031);
 }
 @media (max-width: 560px) {
   .pos-dialog {

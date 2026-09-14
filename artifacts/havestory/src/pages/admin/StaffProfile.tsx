@@ -177,9 +177,9 @@ function Section({ title, icon: Icon, children, defaultOpen = true }: {
         className="pb-3 cursor-pointer select-none print:cursor-default"
         onClick={() => setOpen(v => !v)}
       >
-        <CardTitle className="font-serif text-base flex items-center justify-between">
+        <CardTitle className="font-sans text-base flex items-center justify-between">
           <span className="flex items-center gap-2">
-            <Icon className="w-4 h-4 text-primary" />
+            <Icon className="w-4 h-4 text-admin-brand-ink" />
             {title}
           </span>
           {open ? <ChevronDown className="w-4 h-4 text-muted-foreground print:hidden" /> : <ChevronRight className="w-4 h-4 text-muted-foreground print:hidden" />}
@@ -200,14 +200,14 @@ function PrintView({ staff, profile, bizName }: { staff: StaffInfo; profile: Pro
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-2xl font-bold">{profile.personal.displayName || staff.name}</h1>
-            {profile.cv.headline && <p className="text-sm text-gray-600 mt-0.5">{profile.cv.headline}</p>}
+            {profile.cv.headline && <p className="text-sm text-admin-muted mt-0.5">{profile.cv.headline}</p>}
           </div>
-          <div className="text-right text-xs text-gray-500">
+          <div className="text-right text-xs text-admin-muted">
             <div>{bizName}</div>
             <div>Employee ID: {profile.employment.employeeId || '—'}</div>
           </div>
         </div>
-        <div className="flex flex-wrap gap-4 mt-2 text-xs text-gray-600">
+        <div className="flex flex-wrap gap-4 mt-2 text-xs text-admin-muted">
           {profile.personal.phone && <span>📞 {profile.personal.phone}</span>}
           {profile.personal.personalEmail && <span>✉ {profile.personal.personalEmail}</span>}
           {profile.cv.links.linkedin && <span>in {profile.cv.links.linkedin}</span>}
@@ -218,28 +218,28 @@ function PrintView({ staff, profile, bizName }: { staff: StaffInfo; profile: Pro
       {/* Summary */}
       {profile.cv.professionalSummary && (
         <div className="mb-4">
-          <h2 className="font-bold text-sm uppercase tracking-wider border-b border-gray-300 mb-1">Professional Summary</h2>
-          <p className="text-gray-700">{profile.cv.professionalSummary}</p>
+          <h2 className="font-bold text-sm uppercase tracking-wider border-b border-admin-border mb-1">Professional Summary</h2>
+          <p className="text-admin-ink">{profile.cv.professionalSummary}</p>
         </div>
       )}
 
       {/* Employment */}
       <div className="mb-4">
-        <h2 className="font-bold text-sm uppercase tracking-wider border-b border-gray-300 mb-1">Employment Details</h2>
+        <h2 className="font-bold text-sm uppercase tracking-wider border-b border-admin-border mb-1">Employment Details</h2>
         <div className="grid grid-cols-3 gap-2">
-          <div><span className="text-gray-500">Job Title: </span>{profile.employment.jobTitle}</div>
-          <div><span className="text-gray-500">Department: </span>{profile.employment.department}</div>
-          <div><span className="text-gray-500">Type: </span>{profile.employment.employmentType}</div>
-          <div><span className="text-gray-500">Joined: </span>{profile.employment.joinedDate}</div>
-          <div><span className="text-gray-500">Status: </span>{profile.employment.employmentStatus}</div>
-          <div><span className="text-gray-500">Reports To: </span>{profile.employment.reportingTo}</div>
+          <div><span className="text-admin-muted">Job Title: </span>{profile.employment.jobTitle}</div>
+          <div><span className="text-admin-muted">Department: </span>{profile.employment.department}</div>
+          <div><span className="text-admin-muted">Type: </span>{profile.employment.employmentType}</div>
+          <div><span className="text-admin-muted">Joined: </span>{profile.employment.joinedDate}</div>
+          <div><span className="text-admin-muted">Status: </span>{profile.employment.employmentStatus}</div>
+          <div><span className="text-admin-muted">Reports To: </span>{profile.employment.reportingTo}</div>
         </div>
       </div>
 
       {/* Skills */}
       {profile.cv.skills.length > 0 && (
         <div className="mb-4">
-          <h2 className="font-bold text-sm uppercase tracking-wider border-b border-gray-300 mb-1">Skills</h2>
+          <h2 className="font-bold text-sm uppercase tracking-wider border-b border-admin-border mb-1">Skills</h2>
           <p>{profile.cv.skills.join(' · ')}</p>
         </div>
       )}
@@ -247,15 +247,15 @@ function PrintView({ staff, profile, bizName }: { staff: StaffInfo; profile: Pro
       {/* Experience */}
       {profile.cv.experience.length > 0 && (
         <div className="mb-4">
-          <h2 className="font-bold text-sm uppercase tracking-wider border-b border-gray-300 mb-1">Work Experience</h2>
+          <h2 className="font-bold text-sm uppercase tracking-wider border-b border-admin-border mb-1">Work Experience</h2>
           {profile.cv.experience.map((e, i) => (
             <div key={i} className="mb-2">
               <div className="flex justify-between">
                 <span className="font-semibold">{e.jobTitle}</span>
-                <span className="text-gray-500">{e.startDate} – {e.current ? 'Present' : e.endDate}</span>
+                <span className="text-admin-muted">{e.startDate} – {e.current ? 'Present' : e.endDate}</span>
               </div>
-              <div className="text-gray-600">{e.company}{e.location ? `, ${e.location}` : ''}</div>
-              {e.description && <p className="text-gray-700 mt-0.5">{e.description}</p>}
+              <div className="text-admin-muted">{e.company}{e.location ? `, ${e.location}` : ''}</div>
+              {e.description && <p className="text-admin-ink mt-0.5">{e.description}</p>}
             </div>
           ))}
         </div>
@@ -264,14 +264,14 @@ function PrintView({ staff, profile, bizName }: { staff: StaffInfo; profile: Pro
       {/* Education */}
       {profile.cv.education.length > 0 && (
         <div className="mb-4">
-          <h2 className="font-bold text-sm uppercase tracking-wider border-b border-gray-300 mb-1">Education</h2>
+          <h2 className="font-bold text-sm uppercase tracking-wider border-b border-admin-border mb-1">Education</h2>
           {profile.cv.education.map((e, i) => (
             <div key={i} className="mb-2">
               <div className="flex justify-between">
                 <span className="font-semibold">{e.qualification} in {e.field}</span>
-                <span className="text-gray-500">{e.startDate} – {e.endDate}</span>
+                <span className="text-admin-muted">{e.startDate} – {e.endDate}</span>
               </div>
-              <div className="text-gray-600">{e.institution}{e.grade ? ` · ${e.grade}` : ''}</div>
+              <div className="text-admin-muted">{e.institution}{e.grade ? ` · ${e.grade}` : ''}</div>
             </div>
           ))}
         </div>
@@ -280,11 +280,11 @@ function PrintView({ staff, profile, bizName }: { staff: StaffInfo; profile: Pro
       {/* Certifications */}
       {profile.cv.certifications.length > 0 && (
         <div className="mb-4">
-          <h2 className="font-bold text-sm uppercase tracking-wider border-b border-gray-300 mb-1">Certifications</h2>
+          <h2 className="font-bold text-sm uppercase tracking-wider border-b border-admin-border mb-1">Certifications</h2>
           {profile.cv.certifications.map((c, i) => (
             <div key={i} className="flex justify-between">
               <span className="font-medium">{c.name} — {c.issuer}</span>
-              <span className="text-gray-500">{c.date}</span>
+              <span className="text-admin-muted">{c.date}</span>
             </div>
           ))}
         </div>
@@ -293,7 +293,7 @@ function PrintView({ staff, profile, bizName }: { staff: StaffInfo; profile: Pro
       {/* Languages */}
       {profile.cv.languages.length > 0 && (
         <div className="mb-4">
-          <h2 className="font-bold text-sm uppercase tracking-wider border-b border-gray-300 mb-1">Languages</h2>
+          <h2 className="font-bold text-sm uppercase tracking-wider border-b border-admin-border mb-1">Languages</h2>
           <p>{profile.cv.languages.map(l => `${l.language} (${l.level})`).join(' · ')}</p>
         </div>
       )}
@@ -301,12 +301,12 @@ function PrintView({ staff, profile, bizName }: { staff: StaffInfo; profile: Pro
       {/* References */}
       {profile.cv.references.length > 0 && (
         <div className="mb-4">
-          <h2 className="font-bold text-sm uppercase tracking-wider border-b border-gray-300 mb-1">References</h2>
+          <h2 className="font-bold text-sm uppercase tracking-wider border-b border-admin-border mb-1">References</h2>
           <div className="grid grid-cols-2 gap-3">
             {profile.cv.references.map((r, i) => (
               <div key={i}>
                 <div className="font-semibold">{r.name}</div>
-                <div className="text-gray-600">{r.position}{r.company ? `, ${r.company}` : ''}</div>
+                <div className="text-admin-muted">{r.position}{r.company ? `, ${r.company}` : ''}</div>
                 {r.phone && <div>{r.phone}</div>}
                 {r.email && <div>{r.email}</div>}
               </div>
@@ -315,7 +315,7 @@ function PrintView({ staff, profile, bizName }: { staff: StaffInfo; profile: Pro
         </div>
       )}
 
-      <div className="mt-6 pt-3 border-t border-gray-300 text-center text-xs text-gray-400">
+      <div className="mt-6 pt-3 border-t border-admin-border text-center text-xs text-admin-muted">
         Generated by {bizName} — Confidential
       </div>
     </div>
@@ -455,7 +455,7 @@ export default function StaffProfile() {
       {/* Page Header */}
       <div className="flex justify-between items-start print:hidden">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-foreground">
+          <h1 className="text-3xl font-sans font-bold text-foreground">
             {staff.name} — Profile
           </h1>
           <p className="text-muted-foreground mt-1 text-sm font-mono">@{staff.username}</p>

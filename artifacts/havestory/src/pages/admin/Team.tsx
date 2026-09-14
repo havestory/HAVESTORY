@@ -84,7 +84,7 @@ function PermissionBadges({ perms }: { perms: string[] }) {
   return (
     <div className="flex flex-wrap gap-1">
       {labels.map(l => (
-        <span key={l} className="px-1.5 py-0.5 text-[9px] uppercase tracking-widest font-bold bg-primary/10 text-primary border border-primary/20">
+        <span key={l} className="px-1.5 py-0.5 text-[9px] uppercase tracking-widest font-bold bg-primary/10 text-admin-brand-ink border border-primary/20">
           {l}
         </span>
       ))}
@@ -167,7 +167,7 @@ function StaffDialog({
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
       <DialogContent className="rounded-none max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-serif text-xl">
+          <DialogTitle className="font-sans text-xl">
             {isEdit ? 'Edit Staff Account' : 'Create Staff Account'}
           </DialogTitle>
         </DialogHeader>
@@ -315,7 +315,7 @@ function ResetPasswordDialog({ staffId, name, open, onClose }: {
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
       <DialogContent className="rounded-none max-w-sm">
         <DialogHeader>
-          <DialogTitle className="font-serif text-xl">Reset Password</DialogTitle>
+          <DialogTitle className="font-sans text-xl">Reset Password</DialogTitle>
           <p className="text-sm text-muted-foreground">Setting new password for <span className="font-medium text-foreground">{name}</span></p>
         </DialogHeader>
         <div className="space-y-3 py-2">
@@ -440,7 +440,7 @@ export default function Team() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-foreground">Team Access</h1>
+          <h1 className="text-3xl font-sans font-bold text-foreground">Team Access</h1>
           <p className="text-muted-foreground mt-1">Manage staff accounts and permissions.</p>
         </div>
         <Button
@@ -488,7 +488,7 @@ export default function Team() {
                           </span>
                           <button
                             onClick={() => copyLink(member.id, verifyLinks[member.id])}
-                            className="shrink-0 text-primary hover:text-primary/80"
+                            className="shrink-0 text-admin-brand-ink hover:text-admin-brand-ink/80"
                           >
                             {copiedId === member.id ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                           </button>
@@ -497,7 +497,7 @@ export default function Team() {
                     </TableCell>
                     <TableCell><PermissionBadges perms={member.permissions} /></TableCell>
                     <TableCell>
-                      <span className={`px-2 py-1 text-[9px] uppercase font-bold tracking-widest ${member.active ? 'bg-green-100 text-green-800' : 'bg-zinc-100 text-zinc-500'}`}>
+                      <span className={`px-2 py-1 text-[9px] uppercase font-bold tracking-widest ${member.active ? 'bg-admin-success-soft text-admin-success' : 'bg-admin-subtle text-admin-muted'}`}>
                         {member.active ? 'Active' : 'Paused'}
                       </span>
                     </TableCell>

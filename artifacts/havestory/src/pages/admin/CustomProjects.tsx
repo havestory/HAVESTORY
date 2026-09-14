@@ -45,11 +45,11 @@ export default function CustomProjects() {
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'pending': return 'bg-amber-100 text-amber-800 hover:bg-amber-100';
-      case 'processing': return 'bg-blue-100 text-blue-800 hover:bg-blue-100';
-      case 'completed': return 'bg-green-100 text-green-800 hover:bg-green-100';
-      case 'cancelled': return 'bg-red-100 text-red-800 hover:bg-red-100';
-      default: return 'bg-gray-100 text-gray-800 hover:bg-gray-100';
+      case 'pending': return 'bg-admin-warning-soft text-admin-warning hover:bg-admin-warning-soft';
+      case 'processing': return 'bg-admin-brand-soft text-admin-brand-ink hover:bg-admin-brand-soft';
+      case 'completed': return 'bg-admin-success-soft text-admin-success hover:bg-admin-success-soft';
+      case 'cancelled': return 'bg-admin-danger-soft text-admin-danger hover:bg-admin-danger-soft';
+      default: return 'bg-admin-subtle text-admin-ink hover:bg-admin-subtle';
     }
   };
 
@@ -57,7 +57,7 @@ export default function CustomProjects() {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-foreground">Custom Projects</h1>
+          <h1 className="text-3xl font-sans font-bold text-foreground">Custom Projects</h1>
           <p className="text-muted-foreground mt-1">Manage bespoke and graphic design orders.</p>
         </div>
         <div className="flex items-center gap-3">
@@ -126,7 +126,7 @@ export default function CustomProjects() {
                           <SelectItem value="pending" className="text-[10px] font-bold uppercase tracking-widest">PENDING</SelectItem>
                           <SelectItem value="processing" className="text-[10px] font-bold uppercase tracking-widest">PROCESSING</SelectItem>
                           <SelectItem value="completed" className="text-[10px] font-bold uppercase tracking-widest">COMPLETED</SelectItem>
-                          <SelectItem value="cancelled" className="text-[10px] font-bold uppercase tracking-widest text-red-600">CANCELLED</SelectItem>
+                          <SelectItem value="cancelled" className="text-[10px] font-bold uppercase tracking-widest text-admin-danger">CANCELLED</SelectItem>
                         </SelectContent>
                       </Select>
                     </TableCell>
@@ -146,7 +146,7 @@ export default function CustomProjects() {
                             const num = order.customerPhone.replace(/[^0-9]/g, '');
                             window.open(`https://wa.me/${num}`, '_blank');
                           }}>
-                            <MessageCircle className="mr-2 h-4 w-4 text-green-600" /> WhatsApp
+                            <MessageCircle className="mr-2 h-4 w-4 text-admin-success" /> WhatsApp
                           </DropdownMenuItem>
                           <DropdownMenuItem className="cursor-pointer text-xs uppercase tracking-widest font-medium text-destructive focus:bg-destructive/10 focus:text-destructive" onClick={() => handleDelete(order.id)}>
                             <Trash2 className="mr-2 h-4 w-4" /> Delete

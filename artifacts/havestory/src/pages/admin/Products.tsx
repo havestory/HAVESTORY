@@ -91,9 +91,9 @@ function emptyMPBoard(): MPBoardType { return { id: mpUid(), name: "", gsm: 300,
 /* ── Reusable MP pricing mode pill toggle ── */
 function MPModeToggle({ value, onChange }: { value: MPPricingMode; onChange: (m: MPPricingMode) => void }) {
   return (
-    <span className="inline-flex rounded-lg overflow-hidden border border-gray-300 text-xs font-semibold">
-      <button type="button" onClick={() => onChange("unit")} className={`px-3 py-1 transition ${value === "unit" ? "bg-indigo-600 text-white" : "bg-white text-gray-500 hover:bg-gray-50"}`}>Unit Price</button>
-      <button type="button" onClick={() => onChange("qty-range")} className={`px-3 py-1 border-l border-gray-300 transition ${value === "qty-range" ? "bg-indigo-600 text-white" : "bg-white text-gray-500 hover:bg-gray-50"}`}>Qty Range</button>
+    <span className="inline-flex rounded-lg overflow-hidden border border-admin-border text-xs font-semibold">
+      <button type="button" onClick={() => onChange("unit")} className={`px-3 py-1 transition ${value === "unit" ? "bg-admin-brand text-white" : "bg-admin-surface text-admin-muted hover:bg-admin-surface"}`}>Unit Price</button>
+      <button type="button" onClick={() => onChange("qty-range")} className={`px-3 py-1 border-l border-admin-border transition ${value === "qty-range" ? "bg-admin-brand text-white" : "bg-admin-surface text-admin-muted hover:bg-admin-surface"}`}>Qty Range</button>
     </span>
   );
 }
@@ -104,7 +104,7 @@ function MPTierEditor({ tiers, onChange }: { tiers: MPTier[]; onChange: (t: MPTi
   return (
     <div className="mt-2 space-y-1">
       {tiers.length > 0 && (
-        <div className="grid grid-cols-[80px_80px_1fr_24px] gap-1 text-[10px] text-gray-400 uppercase font-semibold px-1">
+        <div className="grid grid-cols-[80px_80px_1fr_24px] gap-1 text-[10px] text-admin-muted uppercase font-semibold px-1">
           <span>Min Qty</span><span>Max Qty</span><span>Price (Rs.)</span><span />
         </div>
       )}
@@ -113,10 +113,10 @@ function MPTierEditor({ tiers, onChange }: { tiers: MPTier[]; onChange: (t: MPTi
           <input type="number" min={1} value={t.minQty} onChange={e => up(i, { minQty: parseInt(e.target.value) || 1 })} className="px-2 py-1 border rounded text-xs" placeholder="Min" />
           <input type="number" value={t.maxQty ?? ""} onChange={e => up(i, { maxQty: e.target.value ? parseInt(e.target.value) : null })} className="px-2 py-1 border rounded text-xs" placeholder="Max(∞)" />
           <input type="number" value={t.price} onChange={e => up(i, { price: e.target.value })} className="px-2 py-1 border rounded text-xs" placeholder="Price" />
-          <button type="button" onClick={() => onChange(tiers.filter((_, j) => j !== i))} className="text-gray-300 hover:text-red-400"><X size={13} /></button>
+          <button type="button" onClick={() => onChange(tiers.filter((_, j) => j !== i))} className="text-admin-muted hover:text-admin-danger"><X size={13} /></button>
         </div>
       ))}
-      <button type="button" onClick={() => onChange([...tiers, emptyMPTier()])} className="text-xs text-indigo-500 font-semibold hover:text-indigo-700 flex items-center gap-1 mt-1"><Plus size={11} /> Add Tier</button>
+      <button type="button" onClick={() => onChange([...tiers, emptyMPTier()])} className="text-xs text-admin-brand-ink font-semibold hover:text-admin-brand-ink flex items-center gap-1 mt-1"><Plus size={11} /> Add Tier</button>
     </div>
   );
 }
@@ -126,11 +126,11 @@ function MPPriceBlock({ mode, unitPrice, tiers, onMode, onUnit, onTiers }: { mod
   return (
     <div className="mt-2">
       <div className="flex items-center gap-2 mb-1">
-        <span className="text-[11px] text-gray-500 font-medium">Mode</span>
+        <span className="text-[11px] text-admin-muted font-medium">Mode</span>
         <MPModeToggle value={mode} onChange={onMode} />
       </div>
       {mode === "unit"
-        ? <div className="flex items-center gap-2"><span className="text-xs text-gray-400">Rs.</span><input type="number" value={unitPrice} onChange={e => onUnit(e.target.value)} className="w-32 px-2 py-1 border rounded text-sm" placeholder="Price per unit" /></div>
+        ? <div className="flex items-center gap-2"><span className="text-xs text-admin-muted">Rs.</span><input type="number" value={unitPrice} onChange={e => onUnit(e.target.value)} className="w-32 px-2 py-1 border rounded text-sm" placeholder="Price per unit" /></div>
         : <MPTierEditor tiers={tiers} onChange={onTiers} />}
     </div>
   );
@@ -139,21 +139,21 @@ function MPPriceBlock({ mode, unitPrice, tiers, onMode, onUnit, onTiers }: { mod
 /* ── MP Print Side card ── */
 function MPPrintSideCard({ ps, onChange, onRemove }: { ps: MPPrintSide; onChange: (p: MPPrintSide) => void; onRemove: () => void }) {
   return (
-    <div className="mb-2 p-3 bg-white rounded-xl border border-blue-200">
+    <div className="mb-2 p-3 bg-admin-surface rounded-xl border border-admin-brand-line">
       <div className="flex justify-between mb-2">
-        <span className="text-xs font-bold text-blue-700">Print Side Option</span>
-        <button type="button" onClick={onRemove} className="text-xs text-red-400 hover:text-red-600">Remove</button>
+        <span className="text-xs font-bold text-admin-brand-ink">Print Side Option</span>
+        <button type="button" onClick={onRemove} className="text-xs text-admin-danger hover:text-admin-danger">Remove</button>
       </div>
       <div className="grid grid-cols-2 gap-2 mb-1">
         <div>
-          <label className="text-[10px] text-gray-500 mb-0.5 block">Type</label>
+          <label className="text-[10px] text-admin-muted mb-0.5 block">Type</label>
           <select value={ps.name} onChange={e => onChange({ ...ps, name: e.target.value as MPPrintSide["name"] })} className="w-full px-2 py-1.5 border rounded text-xs">
             <option value="one-side">One Side Print</option>
             <option value="double-side">Double Side Print</option>
           </select>
         </div>
         <div>
-          <label className="text-[10px] text-gray-500 mb-0.5 block">Label</label>
+          <label className="text-[10px] text-admin-muted mb-0.5 block">Label</label>
           <input value={ps.label} onChange={e => onChange({ ...ps, label: e.target.value })} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="Display label" />
         </div>
       </div>
@@ -165,14 +165,14 @@ function MPPrintSideCard({ ps, onChange, onRemove }: { ps: MPPrintSide; onChange
 /* ── MP Lamination card ── */
 function MPLaminationCard({ lam, onChange, onRemove }: { lam: MPLamination; onChange: (l: MPLamination) => void; onRemove: () => void }) {
   return (
-    <div className="mb-2 p-3 bg-white rounded-xl border border-stone-200">
+    <div className="mb-2 p-3 bg-admin-surface rounded-xl border border-admin-border">
       <div className="flex justify-between mb-2">
-        <span className="text-xs font-bold text-stone-700">Lamination Option</span>
-        <button type="button" onClick={onRemove} className="text-xs text-red-400 hover:text-red-600">Remove</button>
+        <span className="text-xs font-bold text-admin-ink">Lamination Option</span>
+        <button type="button" onClick={onRemove} className="text-xs text-admin-danger hover:text-admin-danger">Remove</button>
       </div>
       <div className="grid grid-cols-2 gap-2 mb-1">
         <div>
-          <label className="text-[10px] text-gray-500 mb-0.5 block">Type</label>
+          <label className="text-[10px] text-admin-muted mb-0.5 block">Type</label>
           <select value={lam.name} onChange={e => onChange({ ...lam, name: e.target.value as MPLamination["name"] })} className="w-full px-2 py-1.5 border rounded text-xs">
             <option value="none">No Lamination</option>
             <option value="one-side-gloss">One Side Gloss</option>
@@ -182,7 +182,7 @@ function MPLaminationCard({ lam, onChange, onRemove }: { lam: MPLamination; onCh
           </select>
         </div>
         <div>
-          <label className="text-[10px] text-gray-500 mb-0.5 block">Label</label>
+          <label className="text-[10px] text-admin-muted mb-0.5 block">Label</label>
           <input value={lam.label} onChange={e => onChange({ ...lam, label: e.target.value })} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="Display label" />
         </div>
       </div>
@@ -199,87 +199,87 @@ function MPBoardCard({ board, index, total, onChange, onRemove, onMoveUp, onMove
   const setLamination = (i: number, l: MPLamination) => { const arr = [...board.laminations]; arr[i] = l; onChange({ ...board, laminations: arr }); };
   const removeLamination = (i: number) => onChange({ ...board, laminations: board.laminations.filter((_, idx) => idx !== i) });
   return (
-    <div className="border-2 border-gray-200 rounded-2xl overflow-hidden mb-4 bg-white">
+    <div className="border-2 border-admin-border rounded-2xl overflow-hidden mb-4 bg-admin-surface">
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 bg-gray-50 border-b border-gray-200 cursor-pointer" onClick={() => setOpen(o => !o)}>
-        <GripVertical size={14} className="text-gray-300 shrink-0" />
-        <span className="flex-1 font-bold text-gray-800 text-sm">{board.name || `Board Type ${index + 1}`} {board.gsm ? `(${board.gsm}gsm)` : ""}</span>
-        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${board.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>{board.isActive ? "Active" : "Inactive"}</span>
+      <div className="flex items-center gap-2 px-4 py-3 bg-admin-surface border-b border-admin-border cursor-pointer" onClick={() => setOpen(o => !o)}>
+        <GripVertical size={14} className="text-admin-muted shrink-0" />
+        <span className="flex-1 font-bold text-admin-ink text-sm">{board.name || `Board Type ${index + 1}`} {board.gsm ? `(${board.gsm}gsm)` : ""}</span>
+        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${board.isActive ? "bg-admin-success-soft text-admin-success" : "bg-admin-subtle text-admin-muted"}`}>{board.isActive ? "Active" : "Inactive"}</span>
         <div className="flex items-center gap-0.5 ml-2" onClick={e => e.stopPropagation()}>
-          <button type="button" onClick={onMoveUp} disabled={index === 0} className="p-1 text-gray-300 hover:text-gray-600 disabled:opacity-30"><ChevronUp size={13} /></button>
-          <button type="button" onClick={onMoveDown} disabled={index === total - 1} className="p-1 text-gray-300 hover:text-gray-600 disabled:opacity-30"><ChevronDown size={13} /></button>
-          <button type="button" onClick={onRemove} className="p-1 text-gray-300 hover:text-red-400 ml-1"><X size={14} /></button>
+          <button type="button" onClick={onMoveUp} disabled={index === 0} className="p-1 text-admin-muted hover:text-admin-muted disabled:opacity-30"><ChevronUp size={13} /></button>
+          <button type="button" onClick={onMoveDown} disabled={index === total - 1} className="p-1 text-admin-muted hover:text-admin-muted disabled:opacity-30"><ChevronDown size={13} /></button>
+          <button type="button" onClick={onRemove} className="p-1 text-admin-muted hover:text-admin-danger ml-1"><X size={14} /></button>
         </div>
-        {open ? <ChevronUp size={14} className="text-gray-400 ml-1" /> : <ChevronDown size={14} className="text-gray-400 ml-1" />}
+        {open ? <ChevronUp size={14} className="text-admin-muted ml-1" /> : <ChevronDown size={14} className="text-admin-muted ml-1" />}
       </div>
 
       {open && (
         <div className="p-4 space-y-4">
           {/* ① Details */}
-          <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
-            <p className="text-xs font-bold text-gray-600 mb-2">① Board Type Details</p>
+          <div className="p-3 bg-admin-surface rounded-xl border border-admin-border">
+            <p className="text-xs font-bold text-admin-muted mb-2">① Board Type Details</p>
             <div className="grid grid-cols-2 gap-2 mb-2">
               <div>
-                <label className="text-[10px] text-gray-500 mb-0.5 block">Name</label>
+                <label className="text-[10px] text-admin-muted mb-0.5 block">Name</label>
                 <input value={board.name} onChange={e => onChange({ ...board, name: e.target.value })} className="w-full px-2 py-1.5 border rounded text-sm" placeholder="e.g. 300gsm Art Board" />
               </div>
               <div>
-                <label className="text-[10px] text-gray-500 mb-0.5 block">GSM</label>
+                <label className="text-[10px] text-admin-muted mb-0.5 block">GSM</label>
                 <input type="number" value={board.gsm} onChange={e => onChange({ ...board, gsm: parseInt(e.target.value) || 0 })} className="w-full px-2 py-1.5 border rounded text-sm" />
               </div>
             </div>
             <div className="mb-2">
-              <label className="text-[10px] text-gray-500 mb-0.5 block">Description</label>
+              <label className="text-[10px] text-admin-muted mb-0.5 block">Description</label>
               <input value={board.description} onChange={e => onChange({ ...board, description: e.target.value })} className="w-full px-2 py-1.5 border rounded text-sm" placeholder="Brief description" />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] text-gray-500 font-medium">Status</span>
-              <button type="button" onClick={() => onChange({ ...board, isActive: !board.isActive })} className={`px-3 py-1 rounded-full text-[10px] font-bold border transition ${board.isActive ? "bg-green-500 text-white border-green-500" : "bg-white text-gray-500 border-gray-300"}`}>{board.isActive ? "Active" : "Inactive"}</button>
+              <span className="text-[10px] text-admin-muted font-medium">Status</span>
+              <button type="button" onClick={() => onChange({ ...board, isActive: !board.isActive })} className={`px-3 py-1 rounded-full text-[10px] font-bold border transition ${board.isActive ? "bg-admin-success-solid text-white border-admin-success-line" : "bg-admin-surface text-admin-muted border-admin-border"}`}>{board.isActive ? "Active" : "Inactive"}</button>
             </div>
           </div>
 
           {/* ② Print Sides */}
-          <div className="p-3 bg-blue-50 rounded-xl border border-blue-200">
+          <div className="p-3 bg-admin-brand-soft rounded-xl border border-admin-brand-line">
             <div className="flex justify-between items-center mb-2">
-              <p className="text-xs font-bold text-blue-800">② Print Sides</p>
-              <button type="button" onClick={() => onChange({ ...board, printSides: [...board.printSides, emptyMPPrintSide()] })} className="text-[10px] font-bold px-2 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700">+ Add Option</button>
+              <p className="text-xs font-bold text-admin-brand-ink">② Print Sides</p>
+              <button type="button" onClick={() => onChange({ ...board, printSides: [...board.printSides, emptyMPPrintSide()] })} className="text-[10px] font-bold px-2 py-1 bg-admin-brand text-white rounded-lg hover:bg-admin-brand">+ Add Option</button>
             </div>
-            {board.printSides.length === 0 && <p className="text-[11px] text-blue-400 text-center py-2">No print side options. Click "+ Add Option".</p>}
+            {board.printSides.length === 0 && <p className="text-[11px] text-admin-brand-ink text-center py-2">No print side options. Click "+ Add Option".</p>}
             {board.printSides.map((ps, i) => <MPPrintSideCard key={ps.id} ps={ps} onChange={u => setPrintSide(i, u)} onRemove={() => removePrintSide(i)} />)}
           </div>
 
           {/* ③ Laminations */}
-          <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+          <div className="p-3 bg-admin-surface rounded-xl border border-admin-border">
             <div className="flex justify-between items-center mb-2">
-              <p className="text-xs font-bold text-stone-800">③ Laminations</p>
-              <button type="button" onClick={() => onChange({ ...board, laminations: [...board.laminations, emptyMPLamination()] })} className="text-[10px] font-bold px-2 py-1 bg-stone-600 text-white rounded-lg hover:bg-stone-700">+ Add Option</button>
+              <p className="text-xs font-bold text-admin-ink">③ Laminations</p>
+              <button type="button" onClick={() => onChange({ ...board, laminations: [...board.laminations, emptyMPLamination()] })} className="text-[10px] font-bold px-2 py-1 bg-admin-subtle text-white rounded-lg hover:bg-admin-inverse">+ Add Option</button>
             </div>
-            {board.laminations.length === 0 && <p className="text-[11px] text-stone-400 text-center py-2">No lamination options. Click "+ Add Option".</p>}
+            {board.laminations.length === 0 && <p className="text-[11px] text-admin-muted text-center py-2">No lamination options. Click "+ Add Option".</p>}
             {board.laminations.map((lam, i) => <MPLaminationCard key={lam.id} lam={lam} onChange={u => setLamination(i, u)} onRemove={() => removeLamination(i)} />)}
           </div>
 
           {/* ④ Base Price */}
-          <div className="p-3 bg-green-50 rounded-xl border border-green-200">
-            <p className="text-xs font-bold text-green-800 mb-1">④ Base Price (Board Material)</p>
-            <p className="text-[10px] text-green-600 mb-2">Cost of the board itself, before options are added.</p>
+          <div className="p-3 bg-admin-success-soft rounded-xl border border-admin-success-line">
+            <p className="text-xs font-bold text-admin-success mb-1">④ Base Price (Board Material)</p>
+            <p className="text-[10px] text-admin-success mb-2">Cost of the board itself, before options are added.</p>
             <MPPriceBlock mode={board.basePricingMode} unitPrice={board.baseUnitPrice} tiers={board.baseTiers} onMode={m => onChange({ ...board, basePricingMode: m })} onUnit={v => onChange({ ...board, baseUnitPrice: v })} onTiers={t => onChange({ ...board, baseTiers: t })} />
           </div>
 
           {/* ⑤ Round Corner Cut */}
-          <div className="p-3 bg-orange-50 rounded-xl border border-orange-200">
+          <div className="p-3 bg-admin-warning-soft rounded-xl border border-admin-warning-line">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-bold text-orange-800">⑤ Round Corner Cut (Optional)</p>
+              <p className="text-xs font-bold text-admin-warning">⑤ Round Corner Cut (Optional)</p>
               <button
                 type="button"
                 onClick={() => onChange({ ...board, roundCornerCut: { enabled: !(board.roundCornerCut?.enabled), pricingMode: board.roundCornerCut?.pricingMode ?? "unit", unitPrice: board.roundCornerCut?.unitPrice ?? "", tiers: board.roundCornerCut?.tiers ?? [] } })}
-                className={`px-3 py-1 rounded-full text-[10px] font-bold border transition ${board.roundCornerCut?.enabled ? "bg-orange-500 text-white border-orange-500" : "bg-white text-gray-500 border-gray-300 hover:border-orange-300"}`}
+                className={`px-3 py-1 rounded-full text-[10px] font-bold border transition ${board.roundCornerCut?.enabled ? "bg-admin-warning-solid text-white border-admin-warning-line" : "bg-admin-surface text-admin-muted border-admin-border hover:border-admin-warning-line"}`}
               >
                 {board.roundCornerCut?.enabled ? "Enabled" : "Disabled"}
               </button>
             </div>
             {board.roundCornerCut?.enabled && (
               <>
-                <p className="text-[10px] text-orange-600 mb-2">Extra charge for rounded corner cutting per unit.</p>
+                <p className="text-[10px] text-admin-warning mb-2">Extra charge for rounded corner cutting per unit.</p>
                 <MPPriceBlock
                   mode={board.roundCornerCut.pricingMode}
                   unitPrice={board.roundCornerCut.unitPrice}
@@ -404,45 +404,45 @@ function CategoryCombobox({
 
   return (
     <div className="relative">
-      <div className="flex items-center gap-2 w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-white focus-within:ring-2 focus-within:ring-amber-200">
+      <div className="flex items-center gap-2 w-full px-4 py-2.5 border border-admin-border rounded-xl bg-admin-surface focus-within:ring-2 focus-within:ring-admin-warning">
         <input
           value={query}
           onChange={e => { setQuery(e.target.value); onChange({ id: null, name: e.target.value }); setOpen(true); }}
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 160)}
-          className="flex-1 text-sm outline-none bg-transparent placeholder:text-gray-400"
+          className="flex-1 text-sm outline-none bg-transparent placeholder:text-admin-muted"
           placeholder="Select existing or type a new category…"
         />
         {query && (
-          <button type="button" onMouseDown={e => { e.preventDefault(); clear(); }} className="text-gray-300 hover:text-red-400 transition-colors">
+          <button type="button" onMouseDown={e => { e.preventDefault(); clear(); }} className="text-admin-muted hover:text-admin-danger transition-colors">
             <X size={14} />
           </button>
         )}
-        <ChevronDown size={14} className="text-gray-400 shrink-0" />
+        <ChevronDown size={14} className="text-admin-muted shrink-0" />
       </div>
 
       {open && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden max-h-52 overflow-y-auto">
+        <div className="absolute z-50 w-full mt-1 bg-admin-surface border border-admin-border rounded-xl shadow-xl overflow-hidden max-h-52 overflow-y-auto">
           {filtered.length === 0 && !query.trim() && (
-            <div className="px-4 py-3 text-xs text-gray-400 text-center">No categories yet — type to create one</div>
+            <div className="px-4 py-3 text-xs text-admin-muted text-center">No categories yet — type to create one</div>
           )}
           {filtered.map(c => (
             <button
               key={c.id}
               type="button"
               onMouseDown={e => { e.preventDefault(); select(c); }}
-              className={`w-full text-left px-4 py-2.5 text-sm hover:bg-amber-50 hover:text-amber-700 transition-colors flex items-center gap-2 ${value.id === c.id ? "bg-amber-50 text-amber-700 font-semibold" : "text-gray-700"}`}
+              className={`w-full text-left px-4 py-2.5 text-sm hover:bg-admin-warning-soft hover:text-admin-warning transition-colors flex items-center gap-2 ${value.id === c.id ? "bg-admin-warning-soft text-admin-warning font-semibold" : "text-admin-ink"}`}
             >
               <Tag size={12} className="shrink-0 opacity-50" />
               {c.name}
-              {value.id === c.id && <span className="ml-auto text-[10px] text-amber-400 font-bold">Selected</span>}
+              {value.id === c.id && <span className="ml-auto text-[10px] text-admin-warning font-bold">Selected</span>}
             </button>
           ))}
           {query.trim() && !exactMatch && (
             <button
               type="button"
               onMouseDown={e => { e.preventDefault(); createNew(); }}
-              className="w-full text-left px-4 py-2.5 text-sm text-stone-600 hover:bg-stone-50 transition-colors flex items-center gap-2 border-t border-gray-100 font-semibold"
+              className="w-full text-left px-4 py-2.5 text-sm text-admin-muted hover:bg-admin-surface transition-colors flex items-center gap-2 border-t border-admin-border font-semibold"
             >
               <Plus size={12} className="shrink-0" />
               Create new: &ldquo;{query.trim()}&rdquo;
@@ -452,7 +452,7 @@ function CategoryCombobox({
       )}
 
       {value.id === null && value.name && (
-        <p className="mt-1 text-[11px] text-stone-600 flex items-center gap-1">
+        <p className="mt-1 text-[11px] text-admin-muted flex items-center gap-1">
           <Plus size={10} /> New category &ldquo;{value.name}&rdquo; will be created when you save
         </p>
       )}
@@ -767,13 +767,13 @@ export default function AdminProducts() {
       {/* Header */}
       <div className="flex items-start sm:items-center justify-between gap-3 flex-wrap">
         <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Products</h1>
-          <p className="text-xs sm:text-sm text-gray-400">{products?.length ?? 0} products · {categories?.length ?? 0} categories {readOnly&&"· View only"}</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-admin-ink">Products</h1>
+          <p className="text-xs sm:text-sm text-admin-muted">{products?.length ?? 0} products · {categories?.length ?? 0} categories {readOnly&&"· View only"}</p>
         </div>
         {!readOnly&&<div className="flex items-center gap-2 shrink-0 flex-wrap">
           <button
             onClick={openCatModal}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 text-sm font-semibold hover:bg-amber-100 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-admin-warning-line bg-admin-warning-soft text-admin-warning text-sm font-semibold hover:bg-admin-warning-soft transition-colors"
             title="Add, edit or delete product categories"
           >
             <Tag size={13} /> Manage Categories
@@ -781,7 +781,7 @@ export default function AdminProducts() {
           <button
             onClick={seedDefaultCategories}
             disabled={seedingCats}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-stone-200 bg-stone-50 text-stone-700 text-sm font-semibold hover:bg-stone-100 transition-colors disabled:opacity-60"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-admin-border bg-admin-surface text-admin-ink text-sm font-semibold hover:bg-admin-subtle transition-colors disabled:opacity-60"
             title="Seed 10 default printing categories"
           >
             {seedingCats ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
@@ -789,7 +789,7 @@ export default function AdminProducts() {
           </button>
           <button
             onClick={openAdd}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-stone-600 text-white text-sm font-semibold shadow-md shadow-amber-500/20 hover:opacity-90 transition-opacity"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-admin-brand text-white text-sm font-semibold shadow-md shadow-admin-shadow/20 hover:opacity-90 transition-opacity"
           >
             <Plus size={15} /> Add Product
           </button>
@@ -797,37 +797,37 @@ export default function AdminProducts() {
       </div>
 
       {/* Search */}
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm px-3 sm:px-5 py-2.5 sm:py-3 flex items-center gap-2 sm:gap-3">
-        <Search size={16} className="text-gray-400 shrink-0" />
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search products by name or category..." className="flex-1 text-sm outline-none placeholder:text-gray-400" />
-        {search && <button onClick={() => setSearch("")}><X size={14} className="text-gray-300" /></button>}
+      <div className="bg-admin-surface border border-admin-border rounded-2xl shadow-sm px-3 sm:px-5 py-2.5 sm:py-3 flex items-center gap-2 sm:gap-3">
+        <Search size={16} className="text-admin-muted shrink-0" />
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search products by name or category..." className="flex-1 text-sm outline-none placeholder:text-admin-muted" />
+        {search && <button onClick={() => setSearch("")}><X size={14} className="text-admin-muted" /></button>}
       </div>
 
       {/* Product Cards Grid */}
       {productsLoading ? (
-        <div className="bg-white border border-gray-100 rounded-2xl py-20 text-center">
-          <Loader2 size={30} className="mx-auto text-amber-500 mb-3 animate-spin" />
-          <p className="font-semibold text-gray-600">Loading products…</p>
-          <p className="text-sm text-gray-400 mt-1">Fetching the latest catalog</p>
+        <div className="bg-admin-surface border border-admin-border rounded-2xl py-20 text-center">
+          <Loader2 size={30} className="mx-auto text-admin-warning mb-3 animate-spin" />
+          <p className="font-semibold text-admin-muted">Loading products…</p>
+          <p className="text-sm text-admin-muted mt-1">Fetching the latest catalog</p>
         </div>
       ) : productsError ? (
-        <div className="bg-white border border-rose-100 rounded-2xl py-16 px-6 text-center">
-          <Package size={42} className="mx-auto text-rose-300 mb-3" />
-          <p className="font-semibold text-rose-700">Products could not be loaded</p>
-          <p className="text-sm text-gray-500 mt-1">The catalog request failed. Your existing products have not been deleted.</p>
+        <div className="bg-admin-surface border border-admin-danger-line rounded-2xl py-16 px-6 text-center">
+          <Package size={42} className="mx-auto text-admin-danger mb-3" />
+          <p className="font-semibold text-admin-danger">Products could not be loaded</p>
+          <p className="text-sm text-admin-muted mt-1">The catalog request failed. Your existing products have not been deleted.</p>
           <button
             type="button"
             onClick={() => void refetchProducts()}
-            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-stone-900 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-800"
+            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-admin-inverse px-4 py-2 text-sm font-semibold text-white hover:bg-admin-inverse"
           >
             <Loader2 size={14} /> Try again
           </button>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="bg-white border border-dashed border-gray-200 rounded-2xl py-20 text-center">
-          <Package size={44} className="mx-auto text-gray-200 mb-3" />
-          <p className="font-semibold text-gray-400">No products yet</p>
-          <p className="text-sm text-gray-300 mt-1">Click "Add Product" to create your first one</p>
+        <div className="bg-admin-surface border border-dashed border-admin-border rounded-2xl py-20 text-center">
+          <Package size={44} className="mx-auto text-admin-muted mb-3" />
+          <p className="font-semibold text-admin-muted">No products yet</p>
+          <p className="text-sm text-admin-muted mt-1">Click "Add Product" to create your first one</p>
         </div>
       ) : (
         <div className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
@@ -852,43 +852,43 @@ export default function AdminProducts() {
               ? (_rangeCount + " range tier" + (_rangeCount > 1 ? "s" : ""))
               : "Custom";
             return (
-              <div key={p.id} className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+              <div key={p.id} className="bg-admin-surface border border-admin-border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
                 {/* ── MOBILE: horizontal list row ── */}
                 <div className="flex sm:hidden items-center gap-3 p-3">
                   {/* Thumbnail */}
-                  <div className="relative w-[72px] h-[72px] shrink-0 rounded-xl bg-gray-50 overflow-hidden">
+                  <div className="relative w-[72px] h-[72px] shrink-0 rounded-xl bg-admin-surface overflow-hidden">
                     {p.imageUrl
                       ? <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                      : <div className="w-full h-full flex items-center justify-center"><Image size={24} className="text-gray-200" /></div>
+                      : <div className="w-full h-full flex items-center justify-center"><Image size={24} className="text-admin-muted" /></div>
                     }
-                    <span className={`absolute bottom-1 right-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold ${p.active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-500"}`}>
+                    <span className={`absolute bottom-1 right-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold ${p.active ? "bg-admin-success-soft text-admin-success" : "bg-admin-danger-soft text-admin-danger"}`}>
                       {p.active ? "On" : "Off"}
                     </span>
                   </div>
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
-                      {p.category && <span className="text-[9px] font-bold text-amber-500 uppercase tracking-widest">{p.category.name}</span>}
-                      {p.featured && <span className="text-[9px] font-bold text-amber-500 uppercase">⭐ Featured</span>}
-                      {isCustom && <span className="text-[9px] font-bold text-stone-500 uppercase">Custom</span>}
-                      {isMultiSize && <span className="text-[9px] font-bold text-blue-500 uppercase">Multi-Size</span>}
-                      {isMultiPrints && <span className="text-[9px] font-bold text-indigo-500 uppercase">Multi Prints</span>}
+                      {p.category && <span className="text-[9px] font-bold text-admin-warning uppercase tracking-widest">{p.category.name}</span>}
+                      {p.featured && <span className="text-[9px] font-bold text-admin-warning uppercase">⭐ Featured</span>}
+                      {isCustom && <span className="text-[9px] font-bold text-admin-muted uppercase">Custom</span>}
+                      {isMultiSize && <span className="text-[9px] font-bold text-admin-brand-ink uppercase">Multi-Size</span>}
+                      {isMultiPrints && <span className="text-[9px] font-bold text-admin-brand-ink uppercase">Multi Prints</span>}
                     </div>
-                    <h3 className="font-bold text-gray-900 text-sm leading-tight truncate">{p.name}</h3>
-                    <div className="text-xs font-semibold text-amber-600 mt-0.5">{priceLabel}{!isCustom && !isMultiSize && <span className="text-gray-400 font-normal ml-1">/ item</span>}</div>
-                    <p className="text-[11px] text-gray-400 mt-0.5 truncate">{parseDescriptionLines(p.description).join(" • ")}</p>
+                    <h3 className="font-bold text-admin-ink text-sm leading-tight truncate">{p.name}</h3>
+                    <div className="text-xs font-semibold text-admin-warning mt-0.5">{priceLabel}{!isCustom && !isMultiSize && <span className="text-admin-muted font-normal ml-1">/ item</span>}</div>
+                    <p className="text-[11px] text-admin-muted mt-0.5 truncate">{parseDescriptionLines(p.description).join(" • ")}</p>
                   </div>
                   {/* Actions */}
                   {!readOnly&&<div className="flex flex-col gap-1.5 shrink-0">
                     <button
                       onClick={() => openEdit(p)}
-                      className="w-8 h-8 flex items-center justify-center rounded-xl text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors"
+                      className="w-8 h-8 flex items-center justify-center rounded-xl text-admin-brand-ink bg-admin-brand-soft hover:bg-admin-brand-soft transition-colors"
                     >
                       <Edit2 size={13} />
                     </button>
                     <button
                       onClick={() => setDeleteConfirm({ id: p.id, name: p.name })}
-                      className="w-8 h-8 flex items-center justify-center rounded-xl text-red-500 bg-red-50 hover:bg-red-100 transition-colors"
+                      className="w-8 h-8 flex items-center justify-center rounded-xl text-admin-danger bg-admin-danger-soft hover:bg-admin-danger-soft transition-colors"
                     >
                       <Trash2 size={13} />
                     </button>
@@ -898,41 +898,41 @@ export default function AdminProducts() {
                 {/* ── DESKTOP sm+: vertical card ── */}
                 <div className="hidden sm:flex flex-col h-full">
                   {/* Image */}
-                  <div className="relative aspect-[4/3] bg-gray-50 overflow-hidden">
+                  <div className="relative aspect-[4/3] bg-admin-surface overflow-hidden">
                     {p.imageUrl ? (
                       <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center"><Image size={32} className="text-gray-200" /></div>
+                      <div className="w-full h-full flex items-center justify-center"><Image size={32} className="text-admin-muted" /></div>
                     )}
                     <div className="absolute top-2 left-2 flex gap-1.5">
-                      {p.featured && <span className="px-2 py-0.5 bg-amber-400 text-white text-[10px] font-bold rounded-full">⭐ Featured</span>}
-                      {isCustom && <span className="px-2 py-0.5 bg-stone-500 text-white text-[10px] font-bold rounded-full">Custom Print</span>}
-                      {isMultiSize && <span className="px-2 py-0.5 bg-blue-500 text-white text-[10px] font-bold rounded-full">Multi-Size</span>}
-                      {isMultiPrints && <span className="px-2 py-0.5 bg-indigo-500 text-white text-[10px] font-bold rounded-full">Multi Prints</span>}
+                      {p.featured && <span className="px-2 py-0.5 bg-admin-warning-solid text-white text-[10px] font-bold rounded-full">⭐ Featured</span>}
+                      {isCustom && <span className="px-2 py-0.5 bg-admin-subtle text-white text-[10px] font-bold rounded-full">Custom Print</span>}
+                      {isMultiSize && <span className="px-2 py-0.5 bg-admin-brand text-white text-[10px] font-bold rounded-full">Multi-Size</span>}
+                      {isMultiPrints && <span className="px-2 py-0.5 bg-admin-brand text-white text-[10px] font-bold rounded-full">Multi Prints</span>}
                     </div>
                     <div className="absolute top-2 right-2">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${p.active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-500"}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${p.active ? "bg-admin-success-soft text-admin-success" : "bg-admin-danger-soft text-admin-danger"}`}>
                         {p.active ? "Active" : "Inactive"}
                       </span>
                     </div>
                   </div>
                   {/* Info */}
                   <div className="p-4 flex flex-col flex-1">
-                    {p.category && <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-1">{p.category.name}</span>}
-                    <h3 className="font-bold text-gray-900 text-sm leading-tight mb-1 truncate">{p.name}</h3>
-                    <p className="text-xs text-gray-400 line-clamp-2 mb-3 flex-1">{parseDescriptionLines(p.description).join(" • ")}</p>
+                    {p.category && <span className="text-[10px] font-bold text-admin-warning uppercase tracking-widest mb-1">{p.category.name}</span>}
+                    <h3 className="font-bold text-admin-ink text-sm leading-tight mb-1 truncate">{p.name}</h3>
+                    <p className="text-xs text-admin-muted line-clamp-2 mb-3 flex-1">{parseDescriptionLines(p.description).join(" • ")}</p>
                     {isMultiPrints ? (
                       <div className="space-y-1">
                         {(cfg.multiPrintsBoardTypes || []).length > 0 ? (
                           <div className="flex gap-1 flex-wrap">
                             {(cfg.multiPrintsBoardTypes || []).map((b: MPBoardType) => (
-                              <span key={b.id} className="px-2 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] font-semibold rounded-lg">
+                              <span key={b.id} className="px-2 py-0.5 bg-admin-brand-soft text-admin-brand-ink text-[10px] font-semibold rounded-lg">
                                 {b.name || "Unnamed"} · {b.gsm}gsm · {b.printSides.length}PS · {b.laminations.length}Lam
                               </span>
                             ))}
                           </div>
                         ) : (
-                          <span className="text-xs text-gray-300 italic">No board types set</span>
+                          <span className="text-xs text-admin-muted italic">No board types set</span>
                         )}
                       </div>
                     ) : isMultiSize ? (
@@ -940,13 +940,13 @@ export default function AdminProducts() {
                         {(cfg.sizes || []).length > 0 ? (
                           <div className="flex gap-1 flex-wrap">
                             {(cfg.sizes || []).map((sz: ProductSize) => (
-                              <span key={sz.id} className="px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-semibold rounded-lg">
+                              <span key={sz.id} className="px-2 py-0.5 bg-admin-brand-soft text-admin-brand-ink text-[10px] font-semibold rounded-lg">
                                 {sz.name || "Unnamed"} · ×{sz.packSize} · {sz.tiers.length} tier{sz.tiers.length !== 1 ? "s" : ""}
                               </span>
                             ))}
                           </div>
                         ) : (
-                          <span className="text-xs text-gray-300 italic">No sizes set</span>
+                          <span className="text-xs text-admin-muted italic">No sizes set</span>
                         )}
                       </div>
                     ) : isCustom ? (
@@ -954,39 +954,39 @@ export default function AdminProducts() {
                         {cfg.pricingModel === "fixed_quantities" && cfg.fixedPrices.filter(x => x.price).length > 0 ? (
                           <div className="flex gap-1 flex-wrap">
                             {cfg.fixedPrices.filter(x => x.price).map((fp, i) => (
-                              <span key={i} className="px-2 py-0.5 bg-amber-50 text-amber-700 text-[10px] font-semibold rounded-lg">{fp.qty} pcs · {rs(fp.price)}</span>
+                              <span key={i} className="px-2 py-0.5 bg-admin-warning-soft text-admin-warning text-[10px] font-semibold rounded-lg">{fp.qty} pcs · {rs(fp.price)}</span>
                             ))}
                           </div>
                         ) : cfg.pricingModel === "range_per_unit" && cfg.rangePrices.filter(x => x.pricePerUnit).length > 0 ? (
                           <div className="flex gap-1 flex-wrap">
                             {cfg.rangePrices.filter(x => x.pricePerUnit).map((rp, i) => (
-                              <span key={i} className="px-2 py-0.5 bg-stone-50 text-stone-700 text-[10px] font-semibold rounded-lg">{rp.from}–{rp.to} · {rs(rp.pricePerUnit)}/unit</span>
+                              <span key={i} className="px-2 py-0.5 bg-admin-surface text-admin-ink text-[10px] font-semibold rounded-lg">{rp.from}–{rp.to} · {rs(rp.pricePerUnit)}/unit</span>
                             ))}
                           </div>
                         ) : (
-                          <span className="text-xs text-gray-300 italic">No pricing set</span>
+                          <span className="text-xs text-admin-muted italic">No pricing set</span>
                         )}
                         {cfg.optionGroups.length > 0 && (
                           <div className="flex gap-1 mt-1 flex-wrap">
                             {cfg.optionGroups.map(g => (
-                              <span key={g.id} className="px-1.5 py-0.5 bg-gray-100 text-gray-500 text-[10px] rounded">{g.title}</span>
+                              <span key={g.id} className="px-1.5 py-0.5 bg-admin-subtle text-admin-muted text-[10px] rounded">{g.title}</span>
                             ))}
                           </div>
                         )}
                       </div>
                     ) : (
-                      <div className="font-bold text-amber-600">{rs(p.price)}<span className="text-xs text-gray-400 font-normal ml-1">/ item</span></div>
+                      <div className="font-bold text-admin-warning">{rs(p.price)}<span className="text-xs text-admin-muted font-normal ml-1">/ item</span></div>
                     )}
-                    {!readOnly&&<div className="flex gap-2 mt-3 pt-3 border-t border-gray-50">
+                    {!readOnly&&<div className="flex gap-2 mt-3 pt-3 border-t border-admin-border">
                       <button
                         onClick={() => openEdit(p)}
-                        className="flex-1 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors flex items-center justify-center gap-1"
+                        className="flex-1 py-1.5 text-xs font-semibold text-admin-brand-ink bg-admin-brand-soft hover:bg-admin-brand-soft rounded-lg transition-colors flex items-center justify-center gap-1"
                       >
                         <Edit2 size={12} /> Edit
                       </button>
                       <button
                         onClick={() => setDeleteConfirm({ id: p.id, name: p.name })}
-                        className="flex-1 py-1.5 text-xs font-semibold text-red-500 bg-red-50 hover:bg-red-100 rounded-lg transition-colors flex items-center justify-center gap-1"
+                        className="flex-1 py-1.5 text-xs font-semibold text-admin-danger bg-admin-danger-soft hover:bg-admin-danger-soft rounded-lg transition-colors flex items-center justify-center gap-1"
                       >
                         <Trash2 size={12} /> Delete
                       </button>
@@ -1003,64 +1003,64 @@ export default function AdminProducts() {
       {showForm && (
         <div className="fixed inset-0 z-50 flex" onClick={closeForm}>
           {/* Backdrop */}
-          <div className="flex-1 bg-black/40 backdrop-blur-sm" />
+          <div className="flex-1 bg-admin-inverse/40 backdrop-blur-sm" />
           {/* Panel */}
           <div
-            className="w-full max-w-2xl bg-white shadow-2xl overflow-y-auto flex flex-col"
+            className="w-full max-w-2xl bg-admin-surface shadow-2xl overflow-y-auto flex flex-col"
             onClick={e => e.stopPropagation()}
           >
             {/* Panel Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0 sticky top-0 bg-white z-10">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-admin-border shrink-0 sticky top-0 bg-admin-surface z-10">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-stone-600 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-admin-brand flex items-center justify-center">
                   <Package size={15} className="text-white" />
                 </div>
-                <h2 className="font-bold text-gray-900 text-lg">{editing ? "Edit Product" : "Add New Product"}</h2>
+                <h2 className="font-bold text-admin-ink text-lg">{editing ? "Edit Product" : "Add New Product"}</h2>
               </div>
-              <button onClick={closeForm} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
-                <X size={18} className="text-gray-400" />
+              <button onClick={closeForm} className="inline-flex items-center justify-center p-2 hover:bg-admin-subtle rounded-xl transition-colors">
+                <X size={18} className="text-admin-muted" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col flex-1 p-6 space-y-6">
               {/* ── SECTION 1: Basic Info ── */}
               <section className="space-y-4">
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                <h3 className="text-xs font-bold text-admin-muted uppercase tracking-widest flex items-center gap-2">
                   <Tag size={12} /> Basic Information
                 </h3>
 
                 <div>
-                  <label className="text-xs text-gray-500 font-medium block mb-1">Product Name *</label>
-                  <input required value={form.name} onChange={e => f("name", e.target.value)} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" placeholder="e.g. Gallery Walnut Frame" />
+                  <label className="text-xs text-admin-muted font-medium block mb-1">Product Name *</label>
+                  <input required value={form.name} onChange={e => f("name", e.target.value)} className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning" placeholder="e.g. Gallery Walnut Frame" />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs text-gray-500 font-medium block mb-1">
+                    <label className="text-xs text-admin-muted font-medium block mb-1">
                       Search Keywords
-                      <span className="ml-1.5 text-gray-400 font-normal normal-case">(comma separated)</span>
+                      <span className="ml-1.5 text-admin-muted font-normal normal-case">(comma separated)</span>
                     </label>
-                    <input value={form.keywords || ""} onChange={e => f("keywords", e.target.value)} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" placeholder="frame, wall art, gift" />
+                    <input value={form.keywords || ""} onChange={e => f("keywords", e.target.value)} className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning" placeholder="frame, wall art, gift" />
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500 font-medium block mb-1">Product Link</label>
-                    <div className="px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-xs text-gray-500 truncate" title={`/store/${slugPreview(form.name)}`}>
-                      /store/<span className="font-semibold text-gray-800">{slugPreview(form.name)}</span>
+                    <label className="text-xs text-admin-muted font-medium block mb-1">Product Link</label>
+                    <div className="px-4 py-2.5 rounded-xl border border-admin-border bg-admin-surface text-xs text-admin-muted truncate" title={`/store/${slugPreview(form.name)}`}>
+                      /store/<span className="font-semibold text-admin-ink">{slugPreview(form.name)}</span>
                     </div>
-                    <p className="mt-1 text-[10px] text-gray-400">Uses the item name. Duplicate names receive a safe suffix.</p>
+                    <p className="mt-1 text-[10px] text-admin-muted">Uses the item name. Duplicate names receive a safe suffix.</p>
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs text-gray-500 font-medium block mb-1">
+                  <label className="text-xs text-admin-muted font-medium block mb-1">
                     Invoice Name
-                    <span className="ml-1.5 text-gray-400 font-normal normal-case">(short name for invoices — leave blank to use Product Name)</span>
+                    <span className="ml-1.5 text-admin-muted font-normal normal-case">(short name for invoices — leave blank to use Product Name)</span>
                   </label>
-                  <input value={form.invoiceName || ""} onChange={e => f("invoiceName", e.target.value)} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200" placeholder="e.g. Biz Cards Premium" />
+                  <input value={form.invoiceName || ""} onChange={e => f("invoiceName", e.target.value)} className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning" placeholder="e.g. Biz Cards Premium" />
                 </div>
 
                 <div>
-                  <label className="text-xs text-gray-500 font-medium block mb-1">Description</label>
+                  <label className="text-xs text-admin-muted font-medium block mb-1">Description</label>
                   <DescriptionEditor
                     value={form.description || ""}
                     onChange={v => f("description", v)}
@@ -1069,7 +1069,7 @@ export default function AdminProducts() {
                 </div>
 
                 <div>
-                  <label className="text-xs text-gray-500 font-medium block mb-1">Category</label>
+                  <label className="text-xs text-admin-muted font-medium block mb-1">Category</label>
                   <CategoryCombobox
                     categories={categories ?? []}
                     value={catValue}
@@ -1079,29 +1079,29 @@ export default function AdminProducts() {
 
                 {/* ── Multi-Image Upload ── */}
                 <div>
-                  <label className="text-xs text-gray-500 font-medium block mb-2 flex items-center gap-1.5">
+                  <label className="text-xs text-admin-muted font-medium block mb-2 flex items-center gap-1.5">
                     <ImagePlus size={12} /> Product Images
-                    <span className="text-gray-400 font-normal">(first image = cover)</span>
+                    <span className="text-admin-muted font-normal">(first image = cover)</span>
                   </label>
 
                   {/* Image Grid */}
                   {form.galleryImages.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-3">
                       {form.galleryImages.map((url: string, idx: number) => (
-                        <div key={url} className="relative group w-20 h-20 rounded-xl overflow-hidden border-2 border-gray-100 shrink-0">
+                        <div key={url} className="relative group w-20 h-20 rounded-xl overflow-hidden border-2 border-admin-border shrink-0">
                           <img src={url} alt={`Image ${idx + 1}`} className="w-full h-full object-cover" />
                           {/* Cover badge */}
                           {idx === 0 && (
-                            <div className="absolute bottom-0 left-0 right-0 bg-amber-500 text-white text-[9px] font-bold text-center py-0.5">Cover</div>
+                            <div className="absolute bottom-0 left-0 right-0 bg-admin-warning-solid text-white text-[9px] font-bold text-center py-0.5">Cover</div>
                           )}
                           {/* Actions on hover */}
-                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
+                          <div className="absolute inset-0 bg-admin-inverse/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
                             {idx !== 0 && (
-                              <button type="button" onClick={() => setCover(url)} title="Set as cover" className="p-1 bg-yellow-400 rounded-full text-white hover:bg-yellow-500">
+                              <button type="button" onClick={() => setCover(url)} title="Set as cover" className="p-1 bg-admin-warning-solid rounded-full text-white hover:bg-admin-warning-solid">
                                 <StarIcon size={10} fill="currentColor" />
                               </button>
                             )}
-                            <button type="button" onClick={() => removeImage(url)} className="p-1 bg-red-500 rounded-full text-white hover:bg-red-600">
+                            <button type="button" onClick={() => removeImage(url)} className="p-1 bg-admin-danger-solid rounded-full text-white hover:bg-admin-danger-solid">
                               <X size={10} />
                             </button>
                           </div>
@@ -1115,36 +1115,36 @@ export default function AdminProducts() {
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={imgUploading}
-                    className="flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-gray-200 hover:border-amber-300 rounded-xl text-sm text-gray-400 hover:text-amber-500 transition-all w-full justify-center"
+                    className="flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-admin-border hover:border-admin-warning-line rounded-xl text-sm text-admin-muted hover:text-admin-warning transition-all w-full justify-center"
                   >
                     {imgUploading
                       ? <><Loader2 size={15} className="animate-spin" /> Uploading…</>
                       : <><Upload size={15} /> Add Images (select multiple)</>}
                   </button>
                   <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleAddImages} />
-                  <p className="text-[10px] text-gray-400 mt-1">You can select multiple files at once. Click ⭐ on a thumbnail to set it as cover.</p>
+                  <p className="text-[10px] text-admin-muted mt-1">You can select multiple files at once. Click ⭐ on a thumbnail to set it as cover.</p>
                 </div>
 
                 {/* ── Artwork Guide Upload ── */}
                 <div>
-                  <label className="text-xs text-gray-500 font-medium block mb-2 flex items-center gap-1.5">
+                  <label className="text-xs text-admin-muted font-medium block mb-2 flex items-center gap-1.5">
                     <FileText size={12} /> Artwork Guide / Template
-                    <span className="text-gray-400 font-normal">(PDF, AI, PSD, ZIP…)</span>
+                    <span className="text-admin-muted font-normal">(PDF, AI, PSD, ZIP…)</span>
                   </label>
 
                   {form.artworkGuideUrl ? (
-                    <div className="flex items-center gap-3 px-4 py-3 bg-blue-50 border border-blue-100 rounded-xl">
-                      <FileText size={16} className="text-blue-500 shrink-0" />
+                    <div className="flex items-center gap-3 px-4 py-3 bg-admin-brand-soft border border-admin-brand-line rounded-xl">
+                      <FileText size={16} className="text-admin-brand-ink shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-blue-800 truncate">{form.artworkGuideName || "Artwork Guide"}</div>
-                        <a href={form.artworkGuideUrl} target="_blank" rel="noreferrer" className="text-[11px] text-blue-500 hover:underline flex items-center gap-1">
+                        <div className="text-sm font-semibold text-admin-brand-ink truncate">{form.artworkGuideName || "Artwork Guide"}</div>
+                        <a href={form.artworkGuideUrl} target="_blank" rel="noreferrer" className="text-[11px] text-admin-brand-ink hover:underline flex items-center gap-1">
                           <ExternalLink size={10} /> Preview / Download
                         </a>
                       </div>
                       <button
                         type="button"
                         onClick={() => setForm((prev: any) => ({ ...prev, artworkGuideUrl: "", artworkGuideName: "" }))}
-                        className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="inline-flex items-center justify-center p-1.5 text-admin-danger hover:text-admin-danger hover:bg-admin-danger-soft rounded-lg transition-colors"
                       >
                         <X size={14} />
                       </button>
@@ -1154,7 +1154,7 @@ export default function AdminProducts() {
                       type="button"
                       onClick={() => guideInputRef.current?.click()}
                       disabled={guideUploading}
-                      className="flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-gray-200 hover:border-blue-300 rounded-xl text-sm text-gray-400 hover:text-blue-500 transition-all w-full justify-center"
+                      className="flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-admin-border hover:border-admin-brand-line rounded-xl text-sm text-admin-muted hover:text-admin-brand-ink transition-all w-full justify-center"
                     >
                       {guideUploading
                         ? <><Loader2 size={15} className="animate-spin" /> Uploading…</>
@@ -1167,53 +1167,53 @@ export default function AdminProducts() {
                 {/* Badges */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs text-gray-500 font-medium block mb-1">Production Time (badge)</label>
+                    <label className="text-xs text-admin-muted font-medium block mb-1">Production Time (badge)</label>
                     <input
                       value={config.productionTime || ""}
                       onChange={e => setC({ productionTime: e.target.value })}
-                      className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200 bg-white"
+                      className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning bg-admin-surface"
                       placeholder="e.g. 2-7 working days"
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500 font-medium block mb-1">Size Label (badge)</label>
+                    <label className="text-xs text-admin-muted font-medium block mb-1">Size Label (badge)</label>
                     <input
                       value={config.sizeLabel || ""}
                       onChange={e => setC({ sizeLabel: e.target.value })}
-                      className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200 bg-white"
+                      className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning bg-admin-surface"
                       placeholder="e.g. Standard Size, A4, Custom"
                     />
                   </div>
                 </div>
 
                 <div className="flex gap-6">
-                  <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-                    <input type="checkbox" checked={form.featured} onChange={e => f("featured", e.target.checked)} className="w-4 h-4 rounded accent-amber-500" />
+                  <label className="flex items-center gap-2 text-sm text-admin-muted cursor-pointer">
+                    <input type="checkbox" checked={form.featured} onChange={e => f("featured", e.target.checked)} className="w-4 h-4 rounded accent-admin-warning" />
                     <span>⭐ Featured</span>
                   </label>
-                  <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-                    <input type="checkbox" checked={form.active} onChange={e => f("active", e.target.checked)} className="w-4 h-4 rounded accent-amber-500" />
+                  <label className="flex items-center gap-2 text-sm text-admin-muted cursor-pointer">
+                    <input type="checkbox" checked={form.active} onChange={e => f("active", e.target.checked)} className="w-4 h-4 rounded accent-admin-warning" />
                     <span>Active (visible on site)</span>
                   </label>
                 </div>
               </section>
 
-              <div className="border-t border-gray-100" />
+              <div className="border-t border-admin-border" />
 
               {/* ── SECTION 2: Pricing ── */}
               <section className="space-y-4">
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                  <h3 className="text-xs font-bold text-admin-muted uppercase tracking-widest flex items-center gap-2">
                     <Layers size={12} /> Pricing & Business Format
                   </h3>
 
                 {/* Business-friendly product format */}
-                <div className="rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50/80 via-white to-amber-50/70 p-4 sm:p-5">
+                <div className="rounded-2xl border border-admin-brand-line bg-admin-brand p-4 sm:p-5">
                   <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-violet-500">Product setup</p>
-                      <h4 className="mt-1 text-base font-bold text-gray-900">What are you adding?</h4>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-admin-brand-ink">Product setup</p>
+                      <h4 className="mt-1 text-base font-bold text-admin-ink">What are you adding?</h4>
                     </div>
-                    <p className="text-[11px] text-gray-500">Choose the closest format — you can still add custom options below.</p>
+                    <p className="text-[11px] text-admin-muted">Choose the closest format — you can still add custom options below.</p>
                   </div>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {[
@@ -1228,16 +1228,16 @@ export default function AdminProducts() {
                           key={opt.value}
                           type="button"
                           onClick={() => setC({ productFormat: opt.value, productType: opt.type as CustomConfig["productType"] })}
-                          className={`rounded-2xl border-2 p-4 text-left transition-all ${isSelected ? "border-violet-400 bg-white shadow-md shadow-violet-100" : "border-white/80 bg-white/65 hover:border-violet-200 hover:bg-white"}`}
+                          className={`rounded-2xl border-2 p-4 text-left transition-all ${isSelected ? "border-admin-brand-line bg-admin-surface shadow-md shadow-admin-shadow" : "border-white/80 bg-admin-surface/65 hover:border-admin-brand-line hover:bg-admin-surface"}`}
                         >
                           <div className="flex items-start gap-3">
-                            <span className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border-2 ${isSelected ? "border-violet-500 bg-violet-500" : "border-gray-300"}`}>
-                              {isSelected && <span className="h-2 w-2 rounded-full bg-white" />}
+                            <span className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border-2 ${isSelected ? "border-admin-brand-line bg-admin-brand" : "border-admin-border"}`}>
+                              {isSelected && <span className="h-2 w-2 rounded-full bg-admin-surface" />}
                             </span>
                             <span className="min-w-0">
-                              <span className="block text-sm font-bold text-gray-900">{opt.label}</span>
-                              <span className="mt-1 block text-xs leading-relaxed text-gray-500">{opt.sub}</span>
-                              <span className="mt-2 inline-flex rounded-full bg-gray-100 px-2 py-1 text-[10px] font-semibold text-gray-500">{opt.example}</span>
+                              <span className="block text-sm font-bold text-admin-ink">{opt.label}</span>
+                              <span className="mt-1 block text-xs leading-relaxed text-admin-muted">{opt.sub}</span>
+                              <span className="mt-2 inline-flex rounded-full bg-admin-subtle px-2 py-1 text-[10px] font-semibold text-admin-muted">{opt.example}</span>
                             </span>
                           </div>
                         </button>
@@ -1249,66 +1249,66 @@ export default function AdminProducts() {
                 {/* ── STANDARD: Simple Price ── */}
                 {config.productType === "standard" && (
                   <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-2xl">
+                    <div className="grid grid-cols-2 gap-4 p-4 bg-admin-surface rounded-2xl">
                       <div>
-                        <label className="text-xs text-gray-500 font-medium block mb-1">Regular Price (Rs.) *</label>
+                        <label className="text-xs text-admin-muted font-medium block mb-1">Regular Price (Rs.) *</label>
                         <input
                           required
                           type="number"
                           value={form.price}
                           onChange={e => f("price", e.target.value)}
-                          className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200 bg-white"
+                          className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning bg-admin-surface"
                           placeholder="0"
                         />
                       </div>
                       <div>
-                        <label className="text-xs text-gray-500 font-medium block mb-1">Stock Quantity</label>
+                        <label className="text-xs text-admin-muted font-medium block mb-1">Stock Quantity</label>
                         <input
                           type="number"
                           value={config.stockQty}
                           onChange={e => setC({ stockQty: e.target.value })}
-                          className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200 bg-white"
+                          className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning bg-admin-surface"
                           placeholder="e.g. 50"
                         />
                       </div>
                     </div>
 
                     {/* ── Quantity Settings ── */}
-                    <div className="p-4 bg-stone-50/60 border border-stone-100 rounded-2xl space-y-3">
+                    <div className="p-4 bg-admin-surface/60 border border-admin-border rounded-2xl space-y-3">
                       <div className="flex items-center gap-1.5 mb-1">
-                        <Hash size={12} className="text-stone-500" />
-                        <span className="text-xs font-bold text-stone-700 uppercase tracking-wide">Order Quantity Settings</span>
+                        <Hash size={12} className="text-admin-muted" />
+                        <span className="text-xs font-bold text-admin-ink uppercase tracking-wide">Order Quantity Settings</span>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="text-[11px] text-gray-500 font-medium block mb-1">Minimum Order Qty</label>
+                          <label className="text-[11px] text-admin-muted font-medium block mb-1">Minimum Order Qty</label>
                           <input
                             type="number"
                             min={1}
                             value={config.minQuantity ?? 1}
                             onChange={e => setC({ minQuantity: Math.max(1, parseInt(e.target.value) || 1) })}
-                            className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-stone-200 bg-white"
+                            className="w-full px-3 py-2 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-border bg-admin-surface"
                             placeholder="1"
                           />
-                          <p className="text-[10px] text-gray-400 mt-1">Minimum units customer must order</p>
+                          <p className="text-[10px] text-admin-muted mt-1">Minimum units customer must order</p>
                         </div>
                         <div>
-                          <label className="text-[11px] text-gray-500 font-medium block mb-1">Quantity Step</label>
+                          <label className="text-[11px] text-admin-muted font-medium block mb-1">Quantity Step</label>
                           <input
                             type="number"
                             min={1}
                             value={config.quantityStep ?? 1}
                             onChange={e => setC({ quantityStep: Math.max(1, parseInt(e.target.value) || 1) })}
-                            className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-stone-200 bg-white"
+                            className="w-full px-3 py-2 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-border bg-admin-surface"
                             placeholder="1"
                           />
-                          <p className="text-[10px] text-gray-400 mt-1">
+                          <p className="text-[10px] text-admin-muted mt-1">
                             Step size (1=any, 5 → 100, 105, 110…)
                           </p>
                         </div>
                       </div>
                       {(config.minQuantity > 1 || config.quantityStep > 1) && (
-                        <p className="text-[11px] text-stone-600 bg-stone-100 px-3 py-1.5 rounded-lg">
+                        <p className="text-[11px] text-admin-muted bg-admin-subtle px-3 py-1.5 rounded-lg">
                           Customer will order from <strong>{config.minQuantity || 1}</strong> units, in steps of <strong>{config.quantityStep || 1}</strong>
                           {config.quantityStep > 1 ? ` (e.g. ${config.minQuantity || 1}, ${(config.minQuantity || 1) + (config.quantityStep || 1)}, ${(config.minQuantity || 1) + 2 * (config.quantityStep || 1)}…)` : ""}
                         </p>
@@ -1319,18 +1319,18 @@ export default function AdminProducts() {
 
                 {/* ── CUSTOM PRINT: Base Pricing Builder ── */}
                 {config.productType === "custom_print" && (
-                  <div className="border border-gray-200 rounded-2xl overflow-hidden">
-                    <div className="px-5 py-3 bg-gray-50 border-b border-gray-200">
-                        <span className="text-sm font-semibold text-gray-700">Printing service pricing</span>
+                  <div className="border border-admin-border rounded-2xl overflow-hidden">
+                    <div className="px-5 py-3 bg-admin-surface border-b border-admin-border">
+                        <span className="text-sm font-semibold text-admin-ink">Printing service pricing</span>
                     </div>
 
                     <div className="p-5 space-y-5">
                       <div>
-                        <label className="text-xs text-gray-500 font-medium block mb-2">Pricing Model</label>
+                        <label className="text-xs text-admin-muted font-medium block mb-2">Pricing Model</label>
                         <select
                           value={config.pricingModel}
                           onChange={e => setC({ pricingModel: e.target.value as any })}
-                          className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-200 bg-white"
+                          className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-warning bg-admin-surface"
                         >
                           <option value="fixed_quantities">Fixed Quantities (e.g. 100 pcs = Rs. 1500)</option>
                           <option value="range_per_unit">Range / Per Unit (e.g. 1–5 sheets = Rs. 350/unit)</option>
@@ -1344,44 +1344,44 @@ export default function AdminProducts() {
                       )}
 
                       {/* ── Custom Order Quantity Settings ── */}
-                      <div className="p-4 bg-stone-50/60 border border-stone-100 rounded-2xl space-y-3 mt-3">
+                      <div className="p-4 bg-admin-surface/60 border border-admin-border rounded-2xl space-y-3 mt-3">
                         <div className="flex items-center gap-1.5 mb-1">
-                          <Hash size={12} className="text-stone-500" />
-                          <span className="text-xs font-bold text-stone-700 uppercase tracking-wide">Custom Order Quantity Settings</span>
+                          <Hash size={12} className="text-admin-muted" />
+                          <span className="text-xs font-bold text-admin-ink uppercase tracking-wide">Custom Order Quantity Settings</span>
                         </div>
-                        <p className="text-[11px] text-gray-400 -mt-1">
+                        <p className="text-[11px] text-admin-muted -mt-1">
                           Controls the "Custom Quantity" option customers see in the cart. They can order any amount above the minimum, increasing in the step you set.
                         </p>
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <label className="text-[11px] text-gray-500 font-medium block mb-1">Minimum Custom Order Qty</label>
+                            <label className="text-[11px] text-admin-muted font-medium block mb-1">Minimum Custom Order Qty</label>
                             <input
                               type="number"
                               min={1}
                               value={config.minQuantity ?? 1}
                               onChange={e => setC({ minQuantity: Math.max(1, parseInt(e.target.value) || 1) })}
-                              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-stone-200 bg-white"
+                              className="w-full px-3 py-2 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-border bg-admin-surface"
                               placeholder="e.g. 100"
                             />
-                            <p className="text-[10px] text-gray-400 mt-1">Lowest qty for custom orders</p>
+                            <p className="text-[10px] text-admin-muted mt-1">Lowest qty for custom orders</p>
                           </div>
                           <div>
-                            <label className="text-[11px] text-gray-500 font-medium block mb-1">Quantity Step</label>
+                            <label className="text-[11px] text-admin-muted font-medium block mb-1">Quantity Step</label>
                             <input
                               type="number"
                               min={1}
                               value={config.quantityStep ?? 1}
                               onChange={e => setC({ quantityStep: Math.max(1, parseInt(e.target.value) || 1) })}
-                              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-stone-200 bg-white"
+                              className="w-full px-3 py-2 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-admin-border bg-admin-surface"
                               placeholder="e.g. 5"
                             />
-                            <p className="text-[10px] text-gray-400 mt-1">
+                            <p className="text-[10px] text-admin-muted mt-1">
                               1 = any value · 5 → 100, 105, 110…
                             </p>
                           </div>
                         </div>
                         {(config.minQuantity > 1 || config.quantityStep > 1) && (
-                          <p className="text-[11px] text-stone-600 bg-stone-100 px-3 py-1.5 rounded-lg">
+                          <p className="text-[11px] text-admin-muted bg-admin-subtle px-3 py-1.5 rounded-lg">
                             Customer will order from <strong>{config.minQuantity || 1}</strong> pcs, in steps of <strong>{config.quantityStep || 1}</strong>
                             {config.quantityStep > 1 ? ` → ${config.minQuantity || 1}, ${(config.minQuantity || 1) + (config.quantityStep || 1)}, ${(config.minQuantity || 1) + 2 * (config.quantityStep || 1)}…` : ""}
                           </p>
@@ -1394,12 +1394,12 @@ export default function AdminProducts() {
                 {/* ── MULTI-SIZE TIER: Size builder ── */}
                 {config.productType === "multi_size_tier" && (
                   <div className="space-y-3">
-                    <div className="p-4 bg-blue-50/60 border border-blue-100 rounded-2xl">
+                    <div className="p-4 bg-admin-brand-soft/60 border border-admin-brand-line rounded-2xl">
                       <div className="flex items-center gap-1.5 mb-2">
-                        <Ruler size={12} className="text-blue-500" />
-                        <span className="text-xs font-bold text-blue-700 uppercase tracking-wide">Frame / print sizes & quantity pricing</span>
+                        <Ruler size={12} className="text-admin-brand-ink" />
+                        <span className="text-xs font-bold text-admin-brand-ink uppercase tracking-wide">Frame / print sizes & quantity pricing</span>
                       </div>
-                      <p className="text-[11px] text-gray-500 mb-3">
+                      <p className="text-[11px] text-admin-muted mb-3">
                         Add the sizes you sell for this frame or print. Set pack multiples, minimum quantities, and price tiers that adjust automatically as the customer changes quantity.
                       </p>
                       <SizeTierBuilder sizes={config.sizes || []} onChange={s => setC({ sizes: s })} productImages={form.galleryImages || []} />
@@ -1411,25 +1411,25 @@ export default function AdminProducts() {
                 {/* ── MULTI PRINTS: Board Type Builder ── */}
                 {config.productType === "multi_prints" && (
                   <div className="space-y-3">
-                    <div className="p-4 bg-indigo-50/60 border border-indigo-100 rounded-2xl">
+                    <div className="p-4 bg-admin-brand-soft/60 border border-admin-brand-line rounded-2xl">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-1.5">
-                          <Layers size={13} className="text-indigo-500" />
-                          <span className="text-xs font-bold text-indigo-700 uppercase tracking-wide">Paper & finishing combinations</span>
+                          <Layers size={13} className="text-admin-brand-ink" />
+                          <span className="text-xs font-bold text-admin-brand-ink uppercase tracking-wide">Paper & finishing combinations</span>
                         </div>
                         <button
                           type="button"
                           onClick={() => setC({ multiPrintsBoardTypes: [...(config.multiPrintsBoardTypes || []), emptyMPBoard()] })}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700"
+                          className="flex items-center gap-1 px-3 py-1.5 bg-admin-brand text-white text-xs font-bold rounded-lg hover:bg-admin-brand"
                         >
                           <Plus size={12} /> Add material
                         </button>
                       </div>
-                      <p className="text-[11px] text-gray-500 mb-3">
+                      <p className="text-[11px] text-admin-muted mb-3">
                         Add the papers or boards you offer (for example photo paper, art board, or mounted board). Each material can have its own print sides, lamination, corner cutting, and base price.
                       </p>
                       {(!config.multiPrintsBoardTypes || config.multiPrintsBoardTypes.length === 0) && (
-                        <div className="text-center py-8 text-indigo-300 border-2 border-dashed border-indigo-200 rounded-xl">
+                        <div className="text-center py-8 text-admin-brand-ink border-2 border-dashed border-admin-brand-line rounded-xl">
                           <Layers size={28} className="mx-auto mb-2 opacity-40" />
                           <p className="text-sm font-medium">No materials added yet</p>
                           <p className="text-[11px] mt-0.5">Add paper, board, or finishing materials to start</p>
@@ -1451,23 +1451,23 @@ export default function AdminProducts() {
                   </div>
                 )}
 
-              <div className="border-t border-gray-100" />
+              <div className="border-t border-admin-border" />
 
               {/* ── SECTION 3: Selection Options / Add-ons (All Product Types) ── */}
               <section className="space-y-4">
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                <h3 className="text-xs font-bold text-admin-muted uppercase tracking-widest flex items-center gap-2">
                     <Layers size={12} /> Customer Choices, Prices & Photos
                 </h3>
-                <p className="text-[11px] text-gray-400 -mt-2">
+                <p className="text-[11px] text-admin-muted -mt-2">
                   Add the choices customers can select — such as frame size, paper, finish, print side, or service type. Each choice can have its own price and linked product photo.
-                  <span className="block mt-1 text-emerald-600">For frame colours: add a group named <strong>Frame Colour</strong>, add each colour as a choice, then use <strong>Upload item photos</strong> inside that choice. Those photos stay with the selected colour and do not enter the default product gallery.</span>
+                  <span className="block mt-1 text-admin-success">For frame colours: add a group named <strong>Frame Colour</strong>, add each colour as a choice, then use <strong>Upload item photos</strong> inside that choice. Those photos stay with the selected colour and do not enter the default product gallery.</span>
                   {config.productType === "multi_size_tier" && config.sizes?.length > 0 && (
-                    <span className="text-blue-500 font-medium"> You can set different prices per size using the ruler icon on each choice.</span>
+                    <span className="text-admin-brand-ink font-medium"> You can set different prices per size using the ruler icon on each choice.</span>
                   )}
                 </p>
 
                 {config.optionGroups.length === 0 ? (
-                  <div className="text-center py-8 text-gray-400 border-2 border-dashed border-gray-200 rounded-2xl">
+                  <div className="text-center py-8 text-admin-muted border-2 border-dashed border-admin-border rounded-2xl">
                     <Layers size={32} className="mx-auto mb-2 opacity-30" />
                     <p className="text-sm">No option groups yet</p>
                     <p className="text-xs mt-1">Add options like Print Sides, Lamination, Board Type, Paper Size, etc.</p>
@@ -1495,80 +1495,80 @@ export default function AdminProducts() {
                 <button
                   type="button"
                   onClick={() => setC({ optionGroups: [...config.optionGroups, { id: uid(), title: "", choices: [] }] })}
-                  className="w-full py-3 border-2 border-dashed border-amber-200 text-amber-500 text-sm font-semibold rounded-2xl hover:bg-amber-50 transition-colors flex items-center justify-center gap-2"
+                  className="w-full py-3 border-2 border-dashed border-admin-warning-line text-admin-warning text-sm font-semibold rounded-2xl hover:bg-admin-warning-soft transition-colors flex items-center justify-center gap-2"
                 >
                   <Plus size={16} /> Add choice group
                 </button>
               </section>
 
-              <div className="border-t border-gray-100" />
+              <div className="border-t border-admin-border" />
 
               {/* Customer-facing promotional offer */}
-              <section className="space-y-4 rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50/80 to-stone-50/80 p-4 sm:p-5">
+              <section className="space-y-4 rounded-2xl border border-admin-warning-line bg-admin-brand p-4 sm:p-5">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <h3 className="flex items-center gap-2 text-sm font-bold text-gray-800"><Gift size={16} className="text-amber-500" /> Customer Offer</h3>
-                    <p className="mt-1 text-[11px] text-gray-500">Show a product-specific free gift or promotion in the catalog and product page.</p>
+                    <h3 className="flex items-center gap-2 text-sm font-bold text-admin-ink"><Gift size={16} className="text-admin-warning" /> Customer Offer</h3>
+                    <p className="mt-1 text-[11px] text-admin-muted">Show a product-specific free gift or promotion in the catalog and product page.</p>
                   </div>
-                  <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-semibold text-gray-700">
-                    <input type="checkbox" checked={config.offerEnabled} onChange={e => setC({ offerEnabled: e.target.checked })} className="h-4 w-4 accent-amber-500" /> Enable offer
+                  <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-semibold text-admin-ink">
+                    <input type="checkbox" checked={config.offerEnabled} onChange={e => setC({ offerEnabled: e.target.checked })} className="h-4 w-4 accent-admin-warning" /> Enable offer
                   </label>
                 </div>
                 {config.offerEnabled && (
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-[180px_1fr]">
                     <div>
-                      <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-500">Minimum order value (Rs.)</label>
-                      <input type="number" min={0} step="0.01" value={config.offerMinAmount || ""} onChange={e => setC({ offerMinAmount: Math.max(0, Number(e.target.value) || 0) })} className="w-full rounded-xl border border-amber-200 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-300" placeholder="e.g. 1500" />
+                      <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-admin-muted">Minimum order value (Rs.)</label>
+                      <input type="number" min={0} step="0.01" value={config.offerMinAmount || ""} onChange={e => setC({ offerMinAmount: Math.max(0, Number(e.target.value) || 0) })} className="w-full rounded-xl border border-admin-warning-line bg-admin-surface px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-admin-warning" placeholder="e.g. 1500" />
                     </div>
                     <div>
-                      <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-500">Offer message</label>
-                      <textarea value={config.offerMessage} onChange={e => setC({ offerMessage: e.target.value })} rows={2} className="w-full resize-none rounded-xl border border-amber-200 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-300" placeholder="e.g. Get a FREE cute sticker pack with this order!" />
+                      <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-admin-muted">Offer message</label>
+                      <textarea value={config.offerMessage} onChange={e => setC({ offerMessage: e.target.value })} rows={2} className="w-full resize-none rounded-xl border border-admin-warning-line bg-admin-surface px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-admin-warning" placeholder="e.g. Get a FREE cute sticker pack with this order!" />
                     </div>
                   </div>
                 )}
                             </section>
               {/* Product-level checkout payment rules */}
-              <section className="space-y-4 rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50/75 to-slate-50/80 p-4 sm:p-5">
+              <section className="space-y-4 rounded-2xl border border-admin-brand-line bg-admin-brand p-4 sm:p-5">
                 <div>
-                  <h3 className="flex items-center gap-2 text-sm font-bold text-gray-800"><CreditCard size={16} className="text-violet-600" /> Checkout Payment Options</h3>
-                  <p className="mt-1 text-[11px] leading-relaxed text-gray-500">Control payment methods for this product. These settings override the old global checkout switches and are applied when this product is in the cart.</p>
+                  <h3 className="flex items-center gap-2 text-sm font-bold text-admin-ink"><CreditCard size={16} className="text-admin-brand-ink" /> Checkout Payment Options</h3>
+                  <p className="mt-1 text-[11px] leading-relaxed text-admin-muted">Control payment methods for this product. These settings override the old global checkout switches and are applied when this product is in the cart.</p>
                 </div>
                 <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                  <div className={`rounded-2xl border p-4 transition-colors ${config.codEnabled ? "border-emerald-200 bg-emerald-50/70" : "border-gray-200 bg-white/75"}`}>
+                  <div className={`rounded-2xl border p-4 transition-colors ${config.codEnabled ? "border-admin-success-line bg-admin-success-soft/70" : "border-admin-border bg-admin-surface/75"}`}>
                     <label className="flex cursor-pointer items-start gap-3">
-                      <input type="checkbox" checked={config.codEnabled} onChange={e => setC({ codEnabled: e.target.checked })} className="mt-0.5 h-4 w-4 accent-emerald-600" />
+                      <input type="checkbox" checked={config.codEnabled} onChange={e => setC({ codEnabled: e.target.checked })} className="mt-0.5 h-4 w-4 accent-admin-success" />
                       <span>
-                        <span className="block text-sm font-bold text-gray-800">Cash on delivery</span>
-                        <span className="mt-1 block text-[11px] leading-relaxed text-gray-500">Allow customers to pay cash when this product is delivered.</span>
+                        <span className="block text-sm font-bold text-admin-ink">Cash on delivery</span>
+                        <span className="mt-1 block text-[11px] leading-relaxed text-admin-muted">Allow customers to pay cash when this product is delivered.</span>
                       </span>
                     </label>
                     {config.codEnabled && (
                       <div className="mt-3">
-                        <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-500">COD message</label>
-                        <input value={config.codMessage} onChange={e => setC({ codMessage: e.target.value })} className="w-full rounded-xl border border-emerald-200 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-200" placeholder="Pay cash when your order is delivered." />
+                        <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-admin-muted">COD message</label>
+                        <input value={config.codMessage} onChange={e => setC({ codMessage: e.target.value })} className="w-full rounded-xl border border-admin-success-line bg-admin-surface px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-admin-success" placeholder="Pay cash when your order is delivered." />
                       </div>
                     )}
                   </div>
-                  <div className={`rounded-2xl border p-4 transition-colors ${config.fullPaymentOfferEnabled ? "border-violet-200 bg-violet-50/70" : "border-gray-200 bg-white/75"}`}>
+                  <div className={`rounded-2xl border p-4 transition-colors ${config.fullPaymentOfferEnabled ? "border-admin-brand-line bg-admin-brand-soft/70" : "border-admin-border bg-admin-surface/75"}`}>
                     <label className="flex cursor-pointer items-start gap-3">
-                      <input type="checkbox" checked={config.fullPaymentOfferEnabled} onChange={e => setC({ fullPaymentOfferEnabled: e.target.checked })} className="mt-0.5 h-4 w-4 accent-violet-600" />
+                      <input type="checkbox" checked={config.fullPaymentOfferEnabled} onChange={e => setC({ fullPaymentOfferEnabled: e.target.checked })} className="mt-0.5 h-4 w-4 accent-admin-brand" />
                       <span>
-                        <span className="block text-sm font-bold text-gray-800">Full-payment offer</span>
-                        <span className="mt-1 block text-[11px] leading-relaxed text-gray-500">Offer a discount when the customer pays the full order amount upfront.</span>
+                        <span className="block text-sm font-bold text-admin-ink">Full-payment offer</span>
+                        <span className="mt-1 block text-[11px] leading-relaxed text-admin-muted">Offer a discount when the customer pays the full order amount upfront.</span>
                       </span>
                     </label>
                     {config.fullPaymentOfferEnabled && (
                       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-[120px_1fr]">
                         <div>
-                          <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-500">Discount (%)</label>
+                          <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-admin-muted">Discount (%)</label>
                           <div className="relative">
-                            <input type="number" min={0} max={100} step="0.1" value={config.fullPaymentOfferDiscount || ""} onChange={e => setC({ fullPaymentOfferDiscount: Math.min(100, Math.max(0, Number(e.target.value) || 0)) })} className="w-full rounded-xl border border-violet-200 bg-white px-3 py-2.5 pr-8 text-sm outline-none focus:ring-2 focus:ring-violet-200" placeholder="5" />
-                            <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-bold text-violet-500">%</span>
+                            <input type="number" min={0} max={100} step="0.1" value={config.fullPaymentOfferDiscount || ""} onChange={e => setC({ fullPaymentOfferDiscount: Math.min(100, Math.max(0, Number(e.target.value) || 0)) })} className="w-full rounded-xl border border-admin-brand-line bg-admin-surface px-3 py-2.5 pr-8 text-sm outline-none focus:ring-2 focus:ring-admin-brand" placeholder="5" />
+                            <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-bold text-admin-brand-ink">%</span>
                           </div>
                         </div>
                         <div>
-                          <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-500">Offer message</label>
-                          <input value={config.fullPaymentOfferMessage} onChange={e => setC({ fullPaymentOfferMessage: e.target.value })} className="w-full rounded-xl border border-violet-200 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-violet-200" placeholder="Pay in full and save on this product." />
+                          <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-admin-muted">Offer message</label>
+                          <input value={config.fullPaymentOfferMessage} onChange={e => setC({ fullPaymentOfferMessage: e.target.value })} className="w-full rounded-xl border border-admin-brand-line bg-admin-surface px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-admin-brand" placeholder="Pay in full and save on this product." />
                         </div>
                       </div>
                     )}
@@ -1580,7 +1580,7 @@ export default function AdminProducts() {
                 <button
                   type="submit"
                   disabled={creating || updating}
-                  className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-stone-600 text-white font-bold rounded-2xl disabled:opacity-60 hover:opacity-90 transition-opacity shadow-lg shadow-amber-500/20"
+                  className="w-full py-3.5 bg-admin-brand text-white font-bold rounded-2xl disabled:opacity-60 hover:opacity-90 transition-opacity shadow-lg shadow-admin-shadow/20"
                 >
                   {(creating || updating) ? "Saving..." : editing ? "Update Product" : "Add Product"}
                 </button>
@@ -1601,92 +1601,92 @@ export default function AdminProducts() {
 
       {/* Manage Categories Modal */}
       {showCatModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-admin-inverse/60 backdrop-blur-sm">
           <div className="flex min-h-full items-start sm:items-center justify-center p-3 sm:p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl my-4 sm:my-0" style={{ maxHeight: "calc(100vh - 32px)" }}>
-              <div className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-100 sticky top-0 bg-white rounded-t-2xl">
+            <div className="bg-admin-surface rounded-2xl shadow-2xl w-full max-w-2xl my-4 sm:my-0" style={{ maxHeight: "calc(100vh - 32px)" }}>
+              <div className="flex items-center justify-between p-4 sm:p-5 border-b border-admin-border sticky top-0 bg-admin-surface rounded-t-2xl">
                 <div>
-                  <h2 className="font-bold text-base sm:text-lg text-gray-900 flex items-center gap-2"><Tag size={18} className="text-amber-500" /> Manage Categories</h2>
-                  <p className="text-[11px] sm:text-xs text-gray-400 mt-0.5">Add, edit or remove product categories</p>
+                  <h2 className="font-bold text-base sm:text-lg text-admin-ink flex items-center gap-2"><Tag size={18} className="text-admin-warning" /> Manage Categories</h2>
+                  <p className="text-[11px] sm:text-xs text-admin-muted mt-0.5">Add, edit or remove product categories</p>
                 </div>
-                <button onClick={() => { setShowCatModal(false); cancelCatEdit(); }} className="p-1.5 hover:bg-gray-100 rounded-lg"><X size={18} /></button>
+                <button onClick={() => { setShowCatModal(false); cancelCatEdit(); }} className="inline-flex items-center justify-center p-1.5 hover:bg-admin-subtle rounded-lg"><X size={18} /></button>
               </div>
 
               <div className="p-4 sm:p-5 space-y-4 overflow-y-auto" style={{ maxHeight: "calc(100vh - 130px)" }}>
                 {/* Add / Edit form */}
-                <form onSubmit={saveCat} className="bg-gray-50 border border-gray-100 rounded-xl p-3 sm:p-4">
-                  <div className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">{catEditing ? `Editing: ${catEditing.name}` : "New Category"}</div>
+                <form onSubmit={saveCat} className="bg-admin-surface border border-admin-border rounded-xl p-3 sm:p-4">
+                  <div className="text-xs font-bold text-admin-muted uppercase tracking-wide mb-2">{catEditing ? `Editing: ${catEditing.name}` : "New Category"}</div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                     <div className="sm:col-span-2">
-                      <label className="text-[10px] font-medium text-gray-500 block mb-1">Name *</label>
+                      <label className="text-[10px] font-medium text-admin-muted block mb-1">Name *</label>
                       <input
                         value={catForm.name}
                         onChange={e => setCatForm(f => ({ ...f, name: e.target.value }))}
                         placeholder="e.g. Wedding Cards"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-300"
+                        className="w-full px-3 py-2 border border-admin-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-admin-warning"
                         required
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-medium text-gray-500 block mb-1">Sort Order</label>
+                      <label className="text-[10px] font-medium text-admin-muted block mb-1">Sort Order</label>
                       <input
                         type="number"
                         value={catForm.sortOrder}
                         onChange={e => setCatForm(f => ({ ...f, sortOrder: parseInt(e.target.value) || 0 }))}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-300"
+                        className="w-full px-3 py-2 border border-admin-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-admin-warning"
                       />
                     </div>
                   </div>
                   <div className="mt-2 sm:mt-3">
-                    <label className="text-[10px] font-medium text-gray-500 block mb-1">Description (optional)</label>
+                    <label className="text-[10px] font-medium text-admin-muted block mb-1">Description (optional)</label>
                     <input
                       value={catForm.description}
                       onChange={e => setCatForm(f => ({ ...f, description: e.target.value }))}
                       placeholder="Short description"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-300"
+                      className="w-full px-3 py-2 border border-admin-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-admin-warning"
                     />
                   </div>
-                  {catFormError && <p className="text-xs text-red-500 mt-2">{catFormError}</p>}
+                  {catFormError && <p className="text-xs text-admin-danger mt-2">{catFormError}</p>}
                   <div className="flex gap-2 mt-3">
                     <button
                       type="submit"
                       disabled={catSaving}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-amber-500 to-stone-600 text-white text-xs sm:text-sm font-bold rounded-lg hover:opacity-90 disabled:opacity-60"
+                      className="flex items-center gap-1.5 px-4 py-2 bg-admin-brand text-white text-xs sm:text-sm font-bold rounded-lg hover:opacity-90 disabled:opacity-60"
                     >
                       {catSaving ? <Loader2 size={13} className="animate-spin" /> : catEditing ? <Edit2 size={13} /> : <Plus size={13} />}
                       {catSaving ? "Saving..." : catEditing ? "Update" : "Add Category"}
                     </button>
                     {catEditing && (
-                      <button type="button" onClick={cancelCatEdit} className="px-3 py-2 text-xs sm:text-sm text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-100">Cancel</button>
+                      <button type="button" onClick={cancelCatEdit} className="px-3 py-2 text-xs sm:text-sm text-admin-muted border border-admin-border rounded-lg hover:bg-admin-subtle">Cancel</button>
                     )}
                   </div>
                 </form>
 
                 {/* Category list */}
-                <div className="border border-gray-100 rounded-xl overflow-hidden">
+                <div className="border border-admin-border rounded-xl overflow-hidden">
                   {(categories ?? []).length === 0 ? (
-                    <div className="text-center py-10 text-gray-400">
+                    <div className="text-center py-10 text-admin-muted">
                       <Tag size={32} className="mx-auto mb-2 opacity-30" />
                       <p className="text-sm">No categories yet</p>
                     </div>
                   ) : (
-                    <ul className="divide-y divide-gray-50">
+                    <ul className="divide-y divide-admin-border">
                       {(categories ?? []).map((cat: any) => {
                         const count = (products ?? []).filter((p: any) => p.categoryId === cat.id).length;
                         const isEditing = catEditing?.id === cat.id;
                         return (
-                          <li key={cat.id} className={`flex items-center justify-between gap-2 px-3 sm:px-4 py-2.5 sm:py-3 ${isEditing ? "bg-amber-50" : "hover:bg-gray-50"}`}>
+                          <li key={cat.id} className={`flex items-center justify-between gap-2 px-3 sm:px-4 py-2.5 sm:py-3 ${isEditing ? "bg-admin-warning-soft" : "hover:bg-admin-surface"}`}>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-2">
-                                <span className="font-semibold text-gray-900 text-sm truncate">{cat.name}</span>
-                                <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full border border-amber-100 shrink-0">{count}</span>
+                                <span className="font-semibold text-admin-ink text-sm truncate">{cat.name}</span>
+                                <span className="text-[10px] font-bold px-2 py-0.5 bg-admin-warning-soft text-admin-warning rounded-full border border-admin-warning-line shrink-0">{count}</span>
                               </div>
-                              {cat.description && <p className="text-[11px] text-gray-400 truncate mt-0.5">{cat.description}</p>}
+                              {cat.description && <p className="text-[11px] text-admin-muted truncate mt-0.5">{cat.description}</p>}
                             </div>
                             <div className="flex items-center gap-1 shrink-0">
                               <button
                                 onClick={() => openCatEdit(cat)}
-                                className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                                className="inline-flex items-center justify-center p-1.5 text-admin-muted hover:text-admin-brand-ink hover:bg-admin-brand-soft rounded-lg transition-colors"
                                 title="Edit"
                               >
                                 <Edit2 size={14} />
@@ -1694,7 +1694,7 @@ export default function AdminProducts() {
                               <button
                                 onClick={() => deleteCat(cat)}
                                 disabled={catDeletingId === cat.id}
-                                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                                className="inline-flex items-center justify-center p-1.5 text-admin-muted hover:text-admin-danger hover:bg-admin-danger-soft rounded-lg transition-colors disabled:opacity-50"
                                 title="Delete"
                               >
                                 {catDeletingId === cat.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}

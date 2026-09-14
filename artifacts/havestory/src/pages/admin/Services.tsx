@@ -135,14 +135,14 @@ export default function AdminServices() {
     <div className="space-y-5">
       <div className="flex items-start sm:items-center justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Services & Pricing</h1>
-          <p className="text-xs sm:text-sm text-gray-400">Manage your service offerings grouped by category</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-admin-ink">Services & Pricing</h1>
+          <p className="text-xs sm:text-sm text-admin-muted">Manage your service offerings grouped by category</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {tab === "services" && (
             <button
               onClick={() => { setEditing(null); setForm(EMPTY_FORM); setShowForm(true); }}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-stone-600 text-white text-sm font-semibold shadow-sm hover:opacity-90 whitespace-nowrap"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-admin-brand text-white text-sm font-semibold shadow-sm hover:opacity-90 whitespace-nowrap"
             >
               <Plus size={14} /> Add Service
             </button>
@@ -150,7 +150,7 @@ export default function AdminServices() {
           {tab === "categories" && (
             <button
               onClick={() => { setEditingCat(null); setCatForm({ name: "", sortOrder: cats.length * 10 }); setShowCatForm(true); }}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-stone-600 text-white text-sm font-semibold shadow-sm hover:opacity-90 whitespace-nowrap"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-admin-brand text-white text-sm font-semibold shadow-sm hover:opacity-90 whitespace-nowrap"
             >
               <Plus size={14} /> New Category
             </button>
@@ -159,12 +159,12 @@ export default function AdminServices() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
+      <div className="flex gap-1 bg-admin-subtle rounded-xl p-1 w-fit">
         {(["services", "categories"] as const).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold capitalize transition-all ${tab === t ? "bg-white shadow-sm text-gray-900" : "text-gray-500 hover:text-gray-700"}`}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold capitalize transition-all ${tab === t ? "bg-admin-surface shadow-sm text-admin-ink" : "text-admin-muted hover:text-admin-ink"}`}
           >
             {t === "services" ? <span className="flex items-center gap-1.5"><Wrench size={14} /> Services</span> : <span className="flex items-center gap-1.5"><Tag size={14} /> Categories</span>}
           </button>
@@ -173,17 +173,17 @@ export default function AdminServices() {
 
       {/* CATEGORIES TAB */}
       {(servicesFailed || categoriesError) && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-xl border border-admin-danger-line bg-admin-danger-soft px-4 py-3 text-sm text-admin-danger">
           <div className="font-semibold">Services data could not be loaded.</div>
           <div className="mt-0.5 text-xs">{categoriesError || "The services API returned an error."}</div>
-          <button onClick={() => { void refetchServices(); reloadCats(); }} className="mt-2 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-bold">Try again</button>
+          <button onClick={() => { void refetchServices(); reloadCats(); }} className="mt-2 rounded-lg border border-admin-danger-line bg-admin-surface px-3 py-1.5 text-xs font-bold">Try again</button>
         </div>
       )}
 
       {tab === "categories" && (
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-admin-surface border border-admin-border rounded-2xl shadow-sm overflow-hidden">
           {cats.length === 0 ? (
-            <div className="py-16 text-center text-gray-400">
+            <div className="py-16 text-center text-admin-muted">
               <Tag size={36} className="mx-auto mb-3 opacity-20" />
               <p className="font-medium">No categories yet</p>
               <p className="text-xs mt-1">Create categories to group your services on the website</p>
@@ -191,7 +191,7 @@ export default function AdminServices() {
           ) : (
             <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[420px]">
-              <thead className="bg-gray-50 text-gray-400 text-[10px] sm:text-xs uppercase tracking-wide">
+              <thead className="bg-admin-surface text-admin-muted text-[10px] sm:text-xs uppercase tracking-wide">
                 <tr>
                   <th className="px-3 sm:px-5 py-2.5 sm:py-3 text-left">CATEGORY NAME</th>
                   <th className="px-3 sm:px-5 py-2.5 sm:py-3 text-left">SERVICES</th>
@@ -199,33 +199,33 @@ export default function AdminServices() {
                   <th className="px-3 sm:px-5 py-2.5 sm:py-3 text-right">ACTIONS</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-admin-border">
                 {cats.map(cat => {
                   const count = serviceList.filter(s => (s as any).categoryId === cat.id).length;
                   return (
-                    <tr key={cat.id} className="hover:bg-gray-50/50 transition-colors">
+                    <tr key={cat.id} className="hover:bg-admin-surface/50 transition-colors">
                       <td className="px-3 sm:px-5 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-gradient-to-br from-amber-400 to-stone-500" />
-                          <span className="font-semibold text-gray-900 text-xs sm:text-sm">{cat.name}</span>
+                          <div className="w-2 h-2 rounded-full bg-admin-brand" />
+                          <span className="font-semibold text-admin-ink text-xs sm:text-sm">{cat.name}</span>
                         </div>
                       </td>
                       <td className="px-3 sm:px-5 py-3">
-                        <span className="px-1.5 sm:px-2 py-0.5 bg-amber-50 text-amber-600 text-[10px] sm:text-xs font-bold rounded-full border border-amber-100">{count} service{count !== 1 ? "s" : ""}</span>
+                        <span className="px-1.5 sm:px-2 py-0.5 bg-admin-warning-soft text-admin-warning text-[10px] sm:text-xs font-bold rounded-full border border-admin-warning-line">{count} service{count !== 1 ? "s" : ""}</span>
                       </td>
-                      <td className="px-3 sm:px-5 py-3 text-gray-400 text-xs sm:text-sm">{cat.sortOrder}</td>
+                      <td className="px-3 sm:px-5 py-3 text-admin-muted text-xs sm:text-sm">{cat.sortOrder}</td>
                       <td className="px-3 sm:px-5 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button
                             onClick={() => { setEditingCat(cat); setCatForm({ name: cat.name, sortOrder: cat.sortOrder }); setShowCatForm(true); }}
-                            className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="inline-flex items-center justify-center p-1.5 text-admin-muted hover:text-admin-brand-ink hover:bg-admin-brand-soft rounded-lg transition-colors"
                           >
                             <Edit2 size={14} />
                           </button>
                           <button
                             onClick={() => deleteCat(cat.id)}
                             disabled={deletingCatId === cat.id}
-                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                            className="inline-flex items-center justify-center p-1.5 text-admin-muted hover:text-admin-danger hover:bg-admin-danger-soft rounded-lg transition-colors disabled:opacity-50"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -245,20 +245,20 @@ export default function AdminServices() {
       {tab === "services" && (
         <>
           {Object.keys(allGrouped).length === 0 || Object.values(allGrouped).every(a => a.length === 0) ? (
-            <div className="bg-white border border-gray-100 rounded-2xl shadow-sm py-16 text-center text-gray-400">
+            <div className="bg-admin-surface border border-admin-border rounded-2xl shadow-sm py-16 text-center text-admin-muted">
               <Wrench size={40} className="mx-auto mb-3 opacity-20" />
               <p className="font-medium">No services yet. Add your first service.</p>
             </div>
           ) : (
             Object.entries(allGrouped).filter(([, items]) => items.length > 0).map(([category, items]) => (
-              <div key={category} className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-gradient-to-br from-amber-400 to-stone-500" />
-                  <h2 className="font-bold text-gray-900">{category}</h2>
-                  <span className="px-2 py-0.5 bg-amber-50 text-amber-600 text-xs font-bold rounded-full border border-amber-100">{items.length}</span>
+              <div key={category} className="bg-admin-surface border border-admin-border rounded-2xl shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-admin-border flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-admin-brand" />
+                  <h2 className="font-bold text-admin-ink">{category}</h2>
+                  <span className="px-2 py-0.5 bg-admin-warning-soft text-admin-warning text-xs font-bold rounded-full border border-admin-warning-line">{items.length}</span>
                 </div>
                 <table className="w-full text-sm">
-                  <thead className="bg-gray-50 text-gray-400 text-xs uppercase tracking-wide">
+                  <thead className="bg-admin-surface text-admin-muted text-xs uppercase tracking-wide">
                     <tr>
                       <th className="px-5 py-3 text-left">SERVICE NAME</th>
                       <th className="px-5 py-3 text-left">DESCRIPTION</th>
@@ -268,31 +268,31 @@ export default function AdminServices() {
                       <th className="px-5 py-3 text-right">ACTIONS</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50">
+                  <tbody className="divide-y divide-admin-border">
                     {items.map(s => (
-                      <tr key={s.id} className="hover:bg-gray-50/50 transition-colors">
+                      <tr key={s.id} className="hover:bg-admin-surface/50 transition-colors">
                         <td className="px-5 py-3.5">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-gray-900">{s.name}</span>
+                            <span className="font-semibold text-admin-ink">{s.name}</span>
                             {s.featured && (
-                              <span className="flex items-center gap-0.5 text-[10px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded-full border border-orange-100">
+                              <span className="flex items-center gap-0.5 text-[10px] font-bold text-admin-warning bg-admin-warning-soft px-1.5 py-0.5 rounded-full border border-admin-warning-line">
                                 <Star size={9} fill="currentColor" /> Popular
                               </span>
                             )}
                           </div>
                         </td>
-                        <td className="px-5 py-3.5 text-gray-500 max-w-xs truncate">{parseDescriptionLines(s.description).join(" • ")}</td>
-                        <td className="px-5 py-3.5 font-bold text-amber-600">{rs(s.price)}</td>
-                        <td className="px-5 py-3.5 text-gray-400 capitalize text-xs">{s.priceType?.replace(/_/g, " ")}</td>
+                        <td className="px-5 py-3.5 text-admin-muted max-w-xs truncate">{parseDescriptionLines(s.description).join(" • ")}</td>
+                        <td className="px-5 py-3.5 font-bold text-admin-warning">{rs(s.price)}</td>
+                        <td className="px-5 py-3.5 text-admin-muted capitalize text-xs">{s.priceType?.replace(/_/g, " ")}</td>
                         <td className="px-5 py-3.5">
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${s.active ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400"}`}>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${s.active ? "bg-admin-success-soft text-admin-success" : "bg-admin-subtle text-admin-muted"}`}>
                             {s.active ? "Active" : "Hidden"}
                           </span>
                         </td>
                         <td className="px-5 py-3.5 text-right">
                           <div className="flex items-center justify-end gap-1">
-                            <button onClick={() => openEdit(s)} className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"><Edit2 size={14} /></button>
-                            <button onClick={() => setDeleteConfirm(s)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={14} /></button>
+                            <button onClick={() => openEdit(s)} className="inline-flex items-center justify-center p-1.5 text-admin-muted hover:text-admin-brand-ink hover:bg-admin-brand-soft rounded-lg transition-colors"><Edit2 size={14} /></button>
+                            <button onClick={() => setDeleteConfirm(s)} className="inline-flex items-center justify-center p-1.5 text-admin-muted hover:text-admin-danger hover:bg-admin-danger-soft rounded-lg transition-colors"><Trash2 size={14} /></button>
                           </div>
                         </td>
                       </tr>
@@ -307,39 +307,39 @@ export default function AdminServices() {
 
       {/* Category Add/Edit Modal */}
       {showCatForm && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-admin-inverse/50 backdrop-blur-sm">
           <div className="flex min-h-full items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
-              <div className="flex items-center justify-between p-5 border-b border-gray-100">
-                <h2 className="font-bold text-gray-900">{editingCat ? "Edit Category" : "New Category"}</h2>
-                <button onClick={() => { setShowCatForm(false); setEditingCat(null); }}><X size={18} className="text-gray-400" /></button>
+            <div className="bg-admin-surface rounded-2xl shadow-2xl w-full max-w-sm">
+              <div className="flex items-center justify-between p-5 border-b border-admin-border">
+                <h2 className="font-bold text-admin-ink">{editingCat ? "Edit Category" : "New Category"}</h2>
+                <button onClick={() => { setShowCatForm(false); setEditingCat(null); }}><X size={18} className="text-admin-muted" /></button>
               </div>
               <div className="p-5 space-y-4">
                 <div>
-                  <label className="text-xs text-gray-400 font-semibold block mb-1">Category Name *</label>
+                  <label className="text-xs text-admin-muted font-semibold block mb-1">Category Name *</label>
                   <input
                     value={catForm.name}
                     onChange={e => setCatForm(f => ({ ...f, name: e.target.value }))}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-amber-400 transition-colors"
+                    className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:border-admin-warning-line transition-colors"
                     placeholder="e.g. Print Services, Design Services..."
                     autoFocus
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-400 font-semibold block mb-1">Sort Order</label>
+                  <label className="text-xs text-admin-muted font-semibold block mb-1">Sort Order</label>
                   <input
                     type="number"
                     value={catForm.sortOrder}
                     onChange={e => setCatForm(f => ({ ...f, sortOrder: Number(e.target.value) }))}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-amber-400 transition-colors"
+                    className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:border-admin-warning-line transition-colors"
                     placeholder="0 = first"
                   />
-                  <p className="text-xs text-gray-400 mt-1">Lower numbers appear first on the website</p>
+                  <p className="text-xs text-admin-muted mt-1">Lower numbers appear first on the website</p>
                 </div>
                 <button
                   onClick={saveCat}
                   disabled={savingCat || !catForm.name.trim()}
-                  className="w-full py-3 bg-gradient-to-r from-amber-500 to-stone-600 text-white text-sm font-bold rounded-xl hover:opacity-90 disabled:opacity-60 transition-all"
+                  className="w-full py-3 bg-admin-brand text-white text-sm font-bold rounded-xl hover:opacity-90 disabled:opacity-60 transition-all"
                 >
                   {savingCat ? "Saving..." : editingCat ? "Update Category" : "Create Category"}
                 </button>
@@ -351,43 +351,43 @@ export default function AdminServices() {
 
       {/* Service Add/Edit Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-admin-inverse/50 backdrop-blur-sm">
           <div className="flex min-h-full items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg" style={{ maxHeight: "calc(100vh - 48px)" }}>
-              <div className="flex items-center justify-between p-5 border-b border-gray-100">
-                <h2 className="font-bold text-gray-900">{editing ? "Edit Service" : "Add Service"}</h2>
-                <button onClick={() => setShowForm(false)}><X size={18} className="text-gray-400" /></button>
+            <div className="bg-admin-surface rounded-2xl shadow-2xl w-full max-w-lg" style={{ maxHeight: "calc(100vh - 48px)" }}>
+              <div className="flex items-center justify-between p-5 border-b border-admin-border">
+                <h2 className="font-bold text-admin-ink">{editing ? "Edit Service" : "Add Service"}</h2>
+                <button onClick={() => setShowForm(false)}><X size={18} className="text-admin-muted" /></button>
               </div>
               <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto" style={{ maxHeight: "calc(100vh - 140px)" }}>
                 <div>
-                  <label className="text-xs text-gray-400 font-semibold block mb-1">Main Category *</label>
+                  <label className="text-xs text-admin-muted font-semibold block mb-1">Main Category *</label>
                   <select
                     required
                     value={form.categoryId}
                     onChange={e => setForm((f: any) => ({ ...f, categoryId: e.target.value }))}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none bg-white focus:border-amber-400 transition-colors"
+                    className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none bg-admin-surface focus:border-admin-warning-line transition-colors"
                   >
                     <option value="">— Select a category —</option>
                     {cats.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                   {cats.length === 0 && (
-                    <p className="text-xs text-orange-500 mt-1">No categories yet — go to the Categories tab to create one first.</p>
+                    <p className="text-xs text-admin-warning mt-1">No categories yet — go to the Categories tab to create one first.</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="text-xs text-gray-400 font-semibold block mb-1">Service Name *</label>
+                  <label className="text-xs text-admin-muted font-semibold block mb-1">Service Name *</label>
                   <input
                     required
                     value={form.name}
                     onChange={e => setForm((f: any) => ({ ...f, name: e.target.value }))}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-amber-400 transition-colors"
+                    className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:border-admin-warning-line transition-colors"
                     placeholder="e.g. Business Card Design"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs text-gray-400 font-semibold block mb-1">Description</label>
+                  <label className="text-xs text-admin-muted font-semibold block mb-1">Description</label>
                   <DescriptionEditor
                     value={form.description || ""}
                     onChange={v => setForm((f: any) => ({ ...f, description: v }))}
@@ -397,21 +397,21 @@ export default function AdminServices() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs text-gray-400 font-semibold block mb-1">Price (Rs.)</label>
+                    <label className="text-xs text-admin-muted font-semibold block mb-1">Price (Rs.)</label>
                     <input
                       type="number"
                       value={form.price}
                       onChange={e => setForm((f: any) => ({ ...f, price: e.target.value }))}
-                      className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-amber-400 transition-colors"
+                      className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:border-admin-warning-line transition-colors"
                       placeholder="1000"
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-gray-400 font-semibold block mb-1">Price Unit</label>
+                    <label className="text-xs text-admin-muted font-semibold block mb-1">Price Unit</label>
                     <select
                       value={form.priceType}
                       onChange={e => setForm((f: any) => ({ ...f, priceType: e.target.value }))}
-                      className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none bg-white focus:border-amber-400 transition-colors"
+                      className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none bg-admin-surface focus:border-admin-warning-line transition-colors"
                     >
                       {PRICE_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                     </select>
@@ -419,22 +419,22 @@ export default function AdminServices() {
                 </div>
 
                 <div>
-                  <label className="text-xs text-gray-400 font-semibold block mb-1">What's Included (comma-separated)</label>
+                  <label className="text-xs text-admin-muted font-semibold block mb-1">What's Included (comma-separated)</label>
                   <input
                     value={form.highlights}
                     onChange={e => setForm((f: any) => ({ ...f, highlights: e.target.value }))}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-amber-400 transition-colors"
+                    className="w-full px-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:border-admin-warning-line transition-colors"
                     placeholder="2 revisions, Fast turnaround, High-res files"
                   />
                 </div>
 
                 <div className="flex gap-5">
-                  <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-                    <input type="checkbox" checked={form.featured} onChange={e => setForm((f: any) => ({ ...f, featured: e.target.checked }))} className="rounded accent-amber-500" />
+                  <label className="flex items-center gap-2 text-sm text-admin-muted cursor-pointer">
+                    <input type="checkbox" checked={form.featured} onChange={e => setForm((f: any) => ({ ...f, featured: e.target.checked }))} className="rounded accent-admin-warning" />
                     Mark as Popular
                   </label>
-                  <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-                    <input type="checkbox" checked={form.active} onChange={e => setForm((f: any) => ({ ...f, active: e.target.checked }))} className="rounded accent-amber-500" />
+                  <label className="flex items-center gap-2 text-sm text-admin-muted cursor-pointer">
+                    <input type="checkbox" checked={form.active} onChange={e => setForm((f: any) => ({ ...f, active: e.target.checked }))} className="rounded accent-admin-warning" />
                     Active (visible on website)
                   </label>
                 </div>
@@ -442,7 +442,7 @@ export default function AdminServices() {
                 <button
                   type="submit"
                   disabled={creating || updating}
-                  className="w-full py-3 bg-gradient-to-r from-amber-500 to-stone-600 text-white text-sm font-bold rounded-xl disabled:opacity-60 hover:opacity-90 transition-all"
+                  className="w-full py-3 bg-admin-brand text-white text-sm font-bold rounded-xl disabled:opacity-60 hover:opacity-90 transition-all"
                 >
                   {(creating || updating) ? "Saving..." : editing ? "Update Service" : "Add Service"}
                 </button>
@@ -454,19 +454,19 @@ export default function AdminServices() {
 
       {/* Delete Confirm */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-admin-inverse/60 backdrop-blur-sm">
           <div className="flex min-h-full items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <div className="bg-admin-surface rounded-2xl shadow-2xl w-full max-w-sm p-6">
               <div className="text-center mb-5">
                 <div className="text-4xl mb-3">🗑️</div>
-                <h3 className="font-bold text-gray-900">Delete Service?</h3>
-                <p className="text-sm text-gray-500 mt-1">This will permanently remove <span className="font-semibold text-gray-700">"{deleteConfirm.name}"</span>.</p>
+                <h3 className="font-bold text-admin-ink">Delete Service?</h3>
+                <p className="text-sm text-admin-muted mt-1">This will permanently remove <span className="font-semibold text-admin-ink">"{deleteConfirm.name}"</span>.</p>
               </div>
               <div className="flex gap-3">
-                <button onClick={() => setDeleteConfirm(null)} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors">Cancel</button>
+                <button onClick={() => setDeleteConfirm(null)} className="flex-1 py-2.5 border border-admin-border rounded-xl text-sm font-semibold text-admin-muted hover:bg-admin-surface transition-colors">Cancel</button>
                 <button
                   onClick={() => { deleteService({ id: deleteConfirm.id }); setDeleteConfirm(null); }}
-                  className="flex-1 py-2.5 bg-red-500 text-white rounded-xl text-sm font-bold hover:bg-red-600 transition-colors"
+                  className="flex-1 py-2.5 bg-admin-danger-solid text-white rounded-xl text-sm font-bold hover:bg-admin-danger-solid transition-colors"
                 >
                   Delete
                 </button>

@@ -30,7 +30,7 @@ export const EMPTY_CLIENT_VALUE: ClientPickerValue = {
 };
 
 const inp =
-  "w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-pink-400 transition-colors placeholder:text-gray-400";
+  "w-full px-3.5 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:border-pink-400 transition-colors placeholder:text-admin-muted";
 
 // Format a client's numeric DB id as the user-facing customer code, matching
 // the format used on the admin Clients page (e.g. id 1 → "C0001"). Keeping
@@ -244,7 +244,7 @@ export function ClientPicker({
 
   return (
     <div>
-      <label className="text-xs text-gray-400 font-semibold mb-1.5 flex items-center gap-1">
+      <label className="text-xs text-admin-muted font-semibold mb-1.5 flex items-center gap-1">
         <User size={11} /> {label} *
       </label>
 
@@ -258,7 +258,7 @@ export function ClientPicker({
             <button
               type="button"
               onClick={clearClient}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-admin-muted hover:text-admin-muted transition-colors"
               title="Cancel and pick existing"
             >
               <X size={14} />
@@ -315,11 +315,11 @@ export function ClientPicker({
           {/* Duplicate phone warning — fires when this manual phone matches an
               existing client. Lets the owner one-tap switch to that record. */}
           {phoneDupe && (
-            <div className="flex items-start gap-2.5 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-xl">
-              <AlertTriangle size={14} className="text-amber-500 mt-0.5 shrink-0" />
-              <div className="flex-1 text-xs text-amber-800">
+            <div className="flex items-start gap-2.5 px-3 py-2.5 bg-admin-brand-soft border border-admin-brand-line rounded-xl">
+              <AlertTriangle size={14} className="text-admin-brand-ink mt-0.5 shrink-0" />
+              <div className="flex-1 text-xs text-admin-brand-ink">
                 <div className="font-semibold">Existing customer found</div>
-                <div className="text-amber-700/90 mt-0.5">
+                <div className="text-admin-brand-ink/90 mt-0.5">
                   <span className="font-semibold">{phoneDupe.name}</span> already
                   uses this phone number
                   {phoneDupe.businessName ? ` (${phoneDupe.businessName})` : ""}.
@@ -328,7 +328,7 @@ export function ClientPicker({
               <button
                 type="button"
                 onClick={() => selectClient(phoneDupe)}
-                className="shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-lg bg-amber-500 text-white hover:bg-amber-600 transition-colors"
+                className="shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-lg bg-admin-brand text-white hover:bg-admin-brand transition-colors"
               >
                 Use existing
               </button>
@@ -336,7 +336,7 @@ export function ClientPicker({
           )}
 
           {phoneDupe && saveToClients && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-[11px] font-semibold text-red-700">
+            <div className="rounded-xl border border-admin-danger-line bg-admin-danger-soft px-3 py-2 text-[11px] font-semibold text-admin-danger">
               Duplicate profiles are blocked. Use the existing customer record above.
             </div>
           )}
@@ -368,7 +368,7 @@ export function ClientPicker({
             <div className="relative">
               <Search
                 size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-admin-muted"
               />
               <input
                 value={search}
@@ -385,20 +385,20 @@ export function ClientPicker({
                     ? `Selected: ${value.name}`
                     : "Search by name, phone, email, business, or C0001…"
                 }
-                className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-pink-200 placeholder:text-gray-400"
+                className="w-full pl-9 pr-4 py-2.5 border border-admin-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-pink-200 placeholder:text-admin-muted"
               />
             </div>
             {dropdownOpen && (
-              <div className="absolute top-full mt-1 left-0 right-0 bg-white border border-gray-100 rounded-xl shadow-lg z-20 max-h-72 overflow-y-auto">
+              <div className="absolute top-full mt-1 left-0 right-0 bg-admin-surface border border-admin-border rounded-xl shadow-lg z-20 max-h-72 overflow-y-auto">
                 {/* Phone-match banner — fires the moment the typed search
                     matches an existing client's phone (normalized so
                     "+94 77…" === "077…"). One-tap to select. */}
                 {phoneMatchInDropdown && (
-                  <div className="flex items-start gap-2.5 px-3 py-2.5 bg-amber-50 border-b border-amber-200 sticky top-0 z-10">
-                    <AlertTriangle size={14} className="text-amber-500 mt-0.5 shrink-0" />
-                    <div className="flex-1 text-xs text-amber-800 min-w-0">
+                  <div className="flex items-start gap-2.5 px-3 py-2.5 bg-admin-brand-soft border-b border-admin-brand-line sticky top-0 z-10">
+                    <AlertTriangle size={14} className="text-admin-brand-ink mt-0.5 shrink-0" />
+                    <div className="flex-1 text-xs text-admin-brand-ink min-w-0">
                       <div className="font-semibold">Existing customer found</div>
-                      <div className="text-amber-700/90 mt-0.5 truncate">
+                      <div className="text-admin-brand-ink/90 mt-0.5 truncate">
                         <span className="font-semibold">{phoneMatchInDropdown.name}</span> already
                         uses this phone number
                         {phoneMatchInDropdown.businessName ? ` (${phoneMatchInDropdown.businessName})` : ""}.
@@ -410,18 +410,18 @@ export function ClientPicker({
                         e.preventDefault();
                         selectClient(phoneMatchInDropdown);
                       }}
-                      className="shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-lg bg-amber-500 text-white hover:bg-amber-600 transition-colors"
+                      className="shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-lg bg-admin-brand text-white hover:bg-admin-brand transition-colors"
                     >
                       Use existing
                     </button>
                   </div>
                 )}
                 {!trimmedSearch && (
-                  <div className="px-4 py-3 text-xs text-gray-400 italic flex items-center gap-2">
-                    <Search size={12} className="text-gray-300" />
+                  <div className="px-4 py-3 text-xs text-admin-muted italic flex items-center gap-2">
+                    <Search size={12} className="text-admin-muted" />
                     Type to search by name, phone, email, business, or customer-code.
                     {clients.length > 0 && (
-                      <span className="ml-auto text-[11px] text-gray-300 not-italic tabular-nums">
+                      <span className="ml-auto text-[11px] text-admin-muted not-italic tabular-nums">
                         {clients.length} saved
                       </span>
                     )}
@@ -435,16 +435,16 @@ export function ClientPicker({
                       e.preventDefault();
                       selectClient(c);
                     }}
-                    className="w-full text-left px-4 py-2.5 hover:bg-pink-50 text-sm border-b border-gray-50 last:border-0"
+                    className="w-full text-left px-4 py-2.5 hover:bg-pink-50 text-sm border-b border-admin-border last:border-0"
                   >
                     <div className="flex items-center gap-2">
-                      <div className="font-semibold text-gray-800 truncate flex-1">{c.name}</div>
+                      <div className="font-semibold text-admin-ink truncate flex-1">{c.name}</div>
                       <span className="shrink-0 text-[10px] font-bold text-pink-600 bg-pink-50 border border-pink-100 rounded-full px-1.5 py-0.5 tabular-nums">
                         {formatClientCode(c.id)}
                       </span>
                     </div>
                     {(c.phone || c.businessName || c.email) && (
-                      <div className="text-xs text-gray-400 truncate">
+                      <div className="text-xs text-admin-muted truncate">
                         {c.phone}
                         {c.phone && (c.businessName || c.email) ? " · " : ""}
                         {c.businessName}
@@ -455,7 +455,7 @@ export function ClientPicker({
                   </button>
                 ))}
                 {trimmedSearch && filtered.length === 0 && (
-                  <div className="px-4 py-2.5 text-xs text-gray-400 italic">
+                  <div className="px-4 py-2.5 text-xs text-admin-muted italic">
                     No matching clients.
                   </div>
                 )}
@@ -488,7 +488,7 @@ export function ClientPicker({
                 className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${
                   value.clientId
                     ? "bg-pink-50 border-pink-100"
-                    : "bg-amber-50 border-amber-100"
+                    : "bg-admin-brand-soft border-admin-brand-line"
                 }`}
               >
                 <User
@@ -496,12 +496,12 @@ export function ClientPicker({
                   className={
                     value.clientId
                       ? "text-pink-500 shrink-0"
-                      : "text-amber-500 shrink-0"
+                      : "text-admin-brand-ink shrink-0"
                   }
                 />
                 <span
                   className={`text-sm font-semibold flex-1 truncate ${
-                    value.clientId ? "text-pink-700" : "text-amber-700"
+                    value.clientId ? "text-pink-700" : "text-admin-brand-ink"
                   }`}
                 >
                   {value.name}
@@ -511,14 +511,14 @@ export function ClientPicker({
                     Linked
                   </span>
                 ) : (
-                  <span className="text-[10px] font-bold text-amber-700 bg-amber-100 rounded-full px-2 py-0.5 shrink-0">
+                  <span className="text-[10px] font-bold text-admin-brand-ink bg-admin-brand-soft rounded-full px-2 py-0.5 shrink-0">
                     Not linked
                   </span>
                 )}
                 <button
                   type="button"
                   onClick={clearClient}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-admin-muted hover:text-admin-muted transition-colors"
                   title="Change client"
                 >
                   <X size={14} />
@@ -526,7 +526,7 @@ export function ClientPicker({
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
-                  <label className="text-xs text-gray-500 block mb-1">
+                  <label className="text-xs text-admin-muted block mb-1">
                     📞 Phone{requirePhone ? " *" : ""}
                   </label>
                   <input
@@ -538,7 +538,7 @@ export function ClientPicker({
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500 block mb-1">
+                  <label className="text-xs text-admin-muted block mb-1">
                     ✉ Email
                   </label>
                   <input
@@ -551,7 +551,7 @@ export function ClientPicker({
                 </div>
                 {showBusinessName && (
                   <div>
-                    <label className="text-xs text-gray-500 block mb-1">
+                    <label className="text-xs text-admin-muted block mb-1">
                       🏢 Business
                     </label>
                     <input
@@ -565,7 +565,7 @@ export function ClientPicker({
                   </div>
                 )}
                 <div className={showBusinessName ? "" : "sm:col-span-2"}>
-                  <label className="text-xs text-gray-500 block mb-1">
+                  <label className="text-xs text-admin-muted block mb-1">
                     📍 Address{requireAddress ? " *" : ""}
                   </label>
                   <input

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,6 +23,7 @@ const pinSchema = z.object({
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 export default function AdminLogin() {
+  useEffect(() => { document.documentElement.dataset.hsAdminTheme = 'light'; return () => { delete document.documentElement.dataset.hsAdminTheme; }; }, []);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const loginMutation = useAdminLogin();
