@@ -36,6 +36,11 @@ function normStr(v: unknown): string | null | undefined {
   return typeof v === "string" ? v : String(v);
 }
 
+function moneyNumber(value: unknown): number {
+  const parsed = Number(String(value ?? 0).replace(/[^0-9.-]/g, ""));
+  return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+}
+
 async function resolveInvoiceClientId(clientId: unknown, clientPhone: unknown, orderId: unknown): Promise<number|null> {
   const supplied = normInt(clientId);
   if (supplied != null) return supplied;
@@ -50,6 +55,35 @@ async function resolveInvoiceClientId(clientId: unknown, clientPhone: unknown, o
 function parseMetadata(value: unknown): any {
   try { return typeof value === "string" ? JSON.parse(value) : (value || {}); } catch { return {}; }
 }
+
+/**
+ * A customer may hand over more money than the invoice total. The invoice itself
+ * must never carry a payment greater than its total because finance/status logic
+ * treats `advance` as the amount applied to this invoice. Keep the excess as
+ * customer credit instead of rejecting the invoice.
+ *
+ * Example: invoice 1,000 / customer paid 1,500
+ *   advance            = 1,000 (applied to invoice)
+ *   paymentReceived    = 1,500 (what the customer actually paid)
+ *   customerCredit     =   500 (available customer credit / overpayment)
+ */
+function normalizePaymentMetadata(value: unknown, invoiceAmount: unknown): string | null | undefined {
+  if (value === undefined) return undefined;
+  if (value === null || value === "") return value as null | "";
+  const meta = parseMetadata(value);
+  const total = moneyNumber(invoiceAmount);
+  const supplied = moneyNumber(meta.paymentReceivedTotal ?? meta.paymentReceived ?? meta.advance);
+  const applied = total > 0 ? Math.min(supplied, total) : supplied;
+  const credit = total > 0 ? Math.max(0, supplied - total) : 0;
+  return JSON.stringify({
+    ...meta,
+    advance: String(applied),
+    paymentReceivedTotal: String(supplied),
+    customerCredit: String(credit),
+    overpayment: String(credit),
+  });
+}
+
 function stripPrivateInvoiceFields(invoice: any): any {
   const meta = parseMetadata(invoice?.metadata);
   const clean = {
@@ -109,6 +143,11 @@ router.post("/", async (req, res) => {
     } = req.body;
     const invoiceNumber = await generateInvoiceNumber();
     const resolvedClientId = await resolveInvoiceClientId(clientId, clientPhone, orderId);
+    const normalizedMetadata = normalizePaymentMetadata(metadata, amount);
+    const paymentMeta = parseMetadata(normalizedMetadata);
+    const resolvedStatus = status !== "cancelled" && moneyNumber(amount) > 0 && moneyNumber(paymentMeta.paymentReceivedTotal) >= moneyNumber(amount)
+      ? "paid"
+      : status;
     const [invoice] = await db
       .insert(invoicesTable)
       .values({
@@ -119,10 +158,10 @@ router.post("/", async (req, res) => {
         clientEmail: normStr(clientEmail) ?? null,
         orderId,
         amount,
-        status,
+        status: resolvedStatus,
         dueDate,
         notes,
-        metadata: hasPermission(getAdminAuth(req), "finance") ? metadata : stripPrivateInvoiceFields({ metadata }).metadata,
+        metadata: hasPermission(getAdminAuth(req), "finance") ? normalizedMetadata : stripPrivateInvoiceFields({ metadata: normalizedMetadata }).metadata,
       })
       .returning();
     await syncInvoiceFinance(invoice).catch(syncErr => req.log.error(syncErr));
@@ -174,7 +213,8 @@ router.put("/:id", async (req, res) => {
     if (notes !== undefined) updateData.notes = notes;
     if (metadata !== undefined) {
       const existingMeta = parseMetadata(existingInvoice.metadata);
-      const incomingMeta = parseMetadata(metadata);
+      const normalizedIncoming = normalizePaymentMetadata(metadata, amount ?? existingInvoice.amount);
+      const incomingMeta = parseMetadata(normalizedIncoming);
       // Payment date is an accounting fact. Full invoice edits may send an
       // older metadata snapshot, so retain it unless the caller explicitly
       // supplies a replacement date.
@@ -184,6 +224,11 @@ router.put("/:id", async (req, res) => {
       });
       if (hasPermission(getAdminAuth(req), "finance")) updateData.metadata = withPaymentDate;
       else updateData.metadata = preservePrivateMetadata(existingInvoice.metadata, withPaymentDate);
+
+      const nextAmount = moneyNumber(amount ?? existingInvoice.amount);
+      if (String(updateData.status ?? existingInvoice.status).toLowerCase() !== "cancelled" && nextAmount > 0 && moneyNumber(incomingMeta.paymentReceivedTotal) >= nextAmount) {
+        updateData.status = "paid";
+      }
     }
 
     // Any realised-payment state gets a payment date, even if the caller did
