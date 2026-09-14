@@ -14,6 +14,8 @@ import './clean-background.css';
 import './admin-search.css';
 import './pos-unified.css';
 import './pos-interface.css';
+import './invoice-product-picker.css';
+import './invoice-product-picker';
 
 applyThemeVars('havestory-gallery');
 
