@@ -273,7 +273,7 @@
 .pos-sales-grid .pos-bill-panel {
   position: static;
 }
-.pos-workspace .pos-bill-panel :is(input, select) {
+.pos-workspace .pos-bill-panel :is(input:not([type="checkbox"]):not([type="radio"]), select) {
   min-width: 0;
   width: 100%;
 }

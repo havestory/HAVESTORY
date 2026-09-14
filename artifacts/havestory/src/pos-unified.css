@@ -28,7 +28,7 @@
   align-items: end;
 }
 .u-pos-history-controls label,
-.u-pos-close-grid label {
+.u-pos-close-grid label:not(.u-pos-check) {
   display: grid;
   gap: 6px;
   font-size: 10px;
@@ -37,7 +37,7 @@
   color: hsl(var(--admin-muted));
 }
 .u-pos-history-controls input,
-.u-pos-close-grid input,
+.u-pos-close-grid input:not([type="checkbox"]):not([type="radio"]),
 .u-pos-close-grid select {
   width: 100%;
   height: 44px;
@@ -51,7 +51,7 @@
   outline: none;
 }
 .u-pos-history-controls input:focus,
-.u-pos-close-grid input:focus,
+.u-pos-close-grid input:not([type="checkbox"]):not([type="radio"]):focus,
 .u-pos-close-grid select:focus {
   border-color: hsl(var(--admin-border));
   box-shadow: 0 0 0 3px rgba(109,45,136,.09);
@@ -103,17 +103,17 @@
 .u-pos-deposit-closed strong { display:block; margin-top:3px; font-size:18px; letter-spacing:.06em; color:hsl(var(--admin-brand-ink)); }
 .u-pos-deposit-closed b { display:block; margin-top:4px; font-size:14px; color:hsl(var(--admin-ink)); }
 .u-pos-close-grid { margin-top: 14px; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
-.u-pos-check { display:flex; align-items:center; gap:8px; min-height:44px; padding-top:22px; }
-.u-pos-check input { width:16px; height:16px; box-shadow:none; }
+.u-pos-check { display:flex; align-items:center; align-self:end; gap:8px; min-height:44px; font-size:12px; font-weight:600; color:hsl(var(--admin-muted)); cursor:pointer; }
+.u-pos-check input { width:16px; height:16px; margin:0; flex-shrink:0; accent-color:hsl(var(--admin-brand)); cursor:inherit; }
 .u-pos-close-actions { margin-top: 12px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
 .u-pos-close-actions span { font-size:12px; font-weight:700; color:hsl(var(--admin-muted)); }
 
 /* Keep the native checkout visually compact and aligned. */
 [data-admin-panel] .pos-bill-panel,
 [data-admin-layout] .pos-bill-panel { max-width: 100%; }
-[data-admin-panel] .pos-bill-panel input,
+[data-admin-panel] .pos-bill-panel input:not([type="checkbox"]):not([type="radio"]),
 [data-admin-panel] .pos-bill-panel select,
-[data-admin-layout] .pos-bill-panel input,
+[data-admin-layout] .pos-bill-panel input:not([type="checkbox"]):not([type="radio"]),
 [data-admin-layout] .pos-bill-panel select { min-height: 44px; }
 [data-admin-panel] .pos-bill-panel button,
 [data-admin-layout] .pos-bill-panel button { align-items:center; justify-content:center; }
@@ -128,5 +128,4 @@
   .u-pos-history-controls,.u-pos-close-grid,.u-pos-summary-grid { grid-template-columns:1fr; }
   .u-pos-close-actions { align-items:stretch; flex-direction:column; }
   .u-pos-close-actions button { width:100%; }
-  .u-pos-check { padding-top:0; }
 }
