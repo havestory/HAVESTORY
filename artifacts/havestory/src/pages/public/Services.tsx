@@ -11,7 +11,7 @@ export default function Services() {
     <div className="hsx-page hsx-services-page">
       <header className="hsx-page-hero">
         <div><span>Studio services</span><h1>Frames, prints and<br />personal projects.</h1></div>
-        <div><p>Tell us what you would like to make. We will help choose the size, material and finish.</p><Link href="/custom-project" className="hsx-text-link">Request a quote <ArrowRight /></Link></div>
+        <div><p>Tell us what you would like to make. We will help choose the size, material and finish.</p>{serviceList.length > 0 && <Link href="/custom-project" className="hsx-text-link">Request a quote <ArrowRight /></Link>}</div>
       </header>
       <main className="hsx-page-body">
         {isLoading ? <div className="hsx-loading-grid">{[1,2,3,4].map(i => <div key={i} />)}</div>
