@@ -101,16 +101,16 @@ export default function Store() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         >
-          <span className="editorial-kicker">The collection / 2026</span>
-          <h1 id="store-heading">Find your <em>frame.</em></h1>
-          <p>Search the collection, then choose the finish that feels right.</p>
+          <span className="editorial-kicker">FRAMES & PRINTS</span>
+          <h1 id="store-heading">Frames &amp; <em>prints.</em></h1>
+          <p>Browse available products or search by name, size, and material.</p>
         </motion.div>
         <div className="hs-store-search-line" role="search">
           <label className="hs-store-search" aria-label="Search frames and prints">
             <Search aria-hidden="true" />
             <Input
               aria-label="Search frames and prints"
-              placeholder=""
+              placeholder="Search frames and prints"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="hs-store-search-input"
@@ -123,8 +123,7 @@ export default function Store() {
         <aside className="hs-store-category-panel" aria-label="Browse products by category">
           <div className="hs-store-category-intro">
             <span>Browse by category</span>
-            <h2>Choose your<br /><em>finish.</em></h2>
-            <p>Start with a collection, then let the details make it yours.</p>
+            <h2>Categories</h2>
           </div>
           <button type="button" className="hs-store-sidebar-filter-toggle" onClick={() => setFiltersOpen(value => !value)} aria-expanded={filtersOpen}>
             <span><SlidersHorizontal size={14} /> Filters</span>
@@ -241,9 +240,9 @@ export default function Store() {
                   >
                     <div className="store-product-image aspect-[4/3]">
                       <img
-                        src={product.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&q=85'}
+                        src={product.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&q=75'}
                         alt={product.name || 'HAVESTORY frame'}
-                        loading={i < 3 ? 'eager' : 'lazy'}
+                        loading={i === 0 ? 'eager' : 'lazy'}
                         decoding="async"
                         className="h-full w-full object-cover"
                       />
@@ -251,10 +250,9 @@ export default function Store() {
                     <div className="hs-store-product-body">
                       <div className="hs-store-product-meta">
                         <span className="store-number">{product.category?.name || 'HANDCRAFTED EDIT'}</span>
-                        <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Ready to make</span>
                       </div>
                       <h3 className="editorial-display line-clamp-1 text-2xl font-bold text-foreground">{product.name}</h3>
-                      <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{product.description || 'A considered piece, finished by hand in our studio.'}</p>
+                      <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{product.description || ''}</p>
                       <div className="hs-store-product-footer">
                         <div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">From</p><p className="mt-1 text-lg font-black text-foreground">Rs. {product.price}</p></div>
                         <span className="hs-store-view-details">View details <ArrowUpRight size={13} /></span>

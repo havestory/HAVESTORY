@@ -111,11 +111,11 @@ export default function CustomProject() {
           <motion.div initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.08 } } }}>
             <motion.p variants={fadeUp} className="section-label mb-3">Custom Studio Work</motion.p>
             <motion.h1 variants={fadeUp} className="font-serif text-5xl md:text-7xl font-bold leading-none mb-6">
-              Something<br />
-              <span className="text-gradient italic">Unique.</span>
+              Request a<br />
+              <span className="italic">Custom Frame.</span>
             </motion.h1>
             <motion.p variants={fadeUp} className="text-primary-foreground/75 text-lg max-w-xl leading-relaxed">
-              Tell us about your vision. Whether it's a custom frame size, a multi-panel collage, a special print finish — our studio team will bring it to life.
+              Share your photo, preferred size and finish. We will review the details and prepare a quote.
             </motion.p>
           </motion.div>
         </div>

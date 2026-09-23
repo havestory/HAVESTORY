@@ -369,16 +369,13 @@ export default function Checkout() {
 
   if (items.length === 0) {
     return (
-      <main className="glass-gallery-main min-h-[70vh] px-4 pb-24 pt-8 sm:px-8 lg:px-12">
-        <div className="mx-auto flex min-h-[60vh] max-w-2xl items-center justify-center">
-          <section className="glass-panel-strong w-full p-8 text-center sm:p-12">
-            <Package className="mx-auto text-[var(--glass-clay)]" size={34} />
-            <span className="editorial-kicker mt-6 block">YOUR EDIT</span>
-            <h1 className="editorial-display mt-3 text-5xl text-[var(--glass-ink)]">Nothing here yet.</h1>
-            <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-[rgba(44,33,27,0.64)]">Choose a frame or print from the collection first. Your selected piece will return here, ready for its final details.</p>
-            <Link href="/store" className="mt-8 inline-flex h-12 items-center gap-2 rounded-full bg-[var(--glass-saffron)] px-6 text-xs font-black uppercase tracking-[0.15em] text-[var(--glass-ink)]">Return to collection <ArrowRight size={15} /></Link>
-          </section>
-        </div>
+      <main className="studio-empty-cart-wrap">
+        <section className="studio-empty-cart">
+          <Package aria-hidden="true" size={28} />
+          <h1>Your cart is empty.</h1>
+          <p>Choose a frame or print to continue to checkout.</p>
+          <Link href="/store">Browse frames &amp; prints <ArrowRight size={17} /></Link>
+        </section>
       </main>
     );
   }
