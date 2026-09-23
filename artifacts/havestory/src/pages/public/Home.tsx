@@ -133,13 +133,14 @@ export default function Home() {
     ["03", "Approve the details", "Receive a clear quote before production begins."],
     ["04", "Receive it safely", "We finish, check, pack and deliver your piece."],
   ];
-  const heroTitle = cfg?.heroTitle || "Frame the Moments That Stay";
-  const heroSubtitle = cfg?.heroSubtitle || "Thoughtfully made photo frames that turn everyday moments into a gallery of your own.";
+  const heroTitle = cfg?.heroTitle || "Frame the moments that become your story.";
+  const heroSubtitle = cfg?.heroSubtitle || "Made with care in Sri Lanka. Thoughtful frames, beautiful prints and a studio for the memories you want to keep.";
 
   useEffect(() => setHeroIndex(0), [heroKey]);
   useEffect(() => {
     if (heroSlides.length < 2) return;
-    const timer = window.setInterval(() => setHeroIndex((value) => (value + 1) % heroSlides.length), 4600);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const timer = window.setInterval(() => setHeroIndex((value) => (value + 1) % heroSlides.length), 7500);
     return () => window.clearInterval(timer);
   }, [heroSlides.length, heroKey]);
   useEffect(() => setFavouriteIndex(0), [favouritePool.map((item) => item.id).join("|")]);
@@ -156,19 +157,19 @@ export default function Home() {
       <section className="hs-new-hero">
         <div className="hs-new-hero-photo">
           <AnimatePresence initial={false} mode="wait">
-            <motion.img key={`${safeHeroIndex}-${heroImage}`} src={heroImage} alt="HAVESTORY framed studio collection" initial={{ opacity: 0, scale: 1.06, x: 28 }} animate={{ opacity: 1, scale: 1, x: 0 }} exit={{ opacity: 0, scale: 1.02, x: -28 }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} />
+            <motion.img key={`${safeHeroIndex}-${heroImage}`} src={heroImage} alt="HAVESTORY framed studio collection" fetchPriority="high" decoding="async" initial={{ opacity: 0, scale: 1.02 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.7 }} />
           </AnimatePresence>
           <div className="hs-new-hero-wash" />
           <div className="hs-new-hero-index"><strong>{String(safeHeroIndex + 1).padStart(2, "0")}</strong><span>/ {String(heroSlides.length).padStart(2, "0")}</span></div>
           {heroSlides.length > 1 && <div className="hs-new-hero-dots">{heroSlides.map((_, index) => <button key={index} type="button" aria-label={`Show hero image ${index + 1}`} aria-current={index === safeHeroIndex} onClick={() => setHeroIndex(index)} />)}</div>}
         </div>
         <motion.div className="hs-new-hero-card" initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, delay: 0.12 }}>
-          <span className="hs-new-kicker"><Sparkles size={15} /> {cfg?.heroBadgeText || "Photo studio · Print lab · Frame shop"}</span>
+          <span className="hs-new-kicker"><Sparkles size={15} /> {cfg?.heroBadgeText || "A Sri Lankan frame & creative studio"}</span>
           <h1 className="hs-hero-title-animated">{heroTitle}</h1>
           <p>{heroSubtitle}</p>
           <div className="hs-new-hero-actions">
-            <Link href={safeSiteHref(cfg?.heroCtaLink, "/store")} className="hs-new-button hs-new-button-dark">{cfg?.heroCtaText || "Find your frame"}<ArrowRight size={17} /></Link>
-            <Link href="/custom-project" className="hs-new-button hs-new-button-light">Create something custom</Link>
+            <Link href={safeSiteHref(cfg?.heroCtaLink, "/store")} className="hs-new-button hs-new-button-dark">{cfg?.heroCtaText || "Explore frames"}<ArrowRight size={17} /></Link>
+            <Link href="/custom-project" className="hs-new-button hs-new-button-light">Create your frame</Link>
           </div>
         </motion.div>
       </section>
@@ -180,6 +181,16 @@ export default function Home() {
           </div>
         </div>
       </section>}
+
+      <section className="hs-new-section hs-heritage-story" aria-labelledby="hs-story-title">
+        <div className="hs-heritage-story-copy">
+          <span className="hs-heritage-eyebrow">The HAVESTORY studio</span>
+          <h2 id="hs-story-title">Every memory deserves a place to live.</h2>
+          <p>We bring photographs into the spaces you call home. From the first conversation to the final finish, each piece is considered, crafted and made to feel like yours.</p>
+          <Link href="/about">Our story <ArrowRight size={17} /></Link>
+        </div>
+        <div className="hs-heritage-story-visual" aria-hidden="true"><span>H<span>·</span>S</span><small>STORIES, BEAUTIFULLY KEPT</small></div>
+      </section>
 
       <section className="hs-new-section hs-new-category-section">
         <Heading eyebrow="01 / Choose your story" title="Find the right way to frame it." copy="Start with the feeling. We will help with every material, crop and finish after that." />

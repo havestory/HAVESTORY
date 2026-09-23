@@ -1,150 +1,45 @@
-/* Editable Home benefits — fixed four-part liquid-glass panel. */
+/* Service assurances on the home page. */
 [data-public-site] .hs-benefit-glass {
-  position: relative;
-  isolation: isolate;
-  width: min(calc(100% - 2rem), 1280px);
-  margin: 1rem auto 0;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.82);
-  border-radius: 22px;
-  background:
-    linear-gradient(110deg, rgba(255, 255, 255, 0.82), rgba(248, 247, 252, 0.66)),
-    radial-gradient(circle at 18% 0%, rgba(219, 202, 244, 0.22), transparent 42%);
-  box-shadow:
-    0 20px 55px rgba(47, 37, 67, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.96);
-  -webkit-backdrop-filter: blur(26px) saturate(135%);
-  backdrop-filter: blur(26px) saturate(135%);
+  width: min(1320px,calc(100% - 48px));
+  margin: 0 auto;
+  border-bottom: 1px solid var(--hs-line);
+  background: var(--hs-ivory);
 }
-
-[data-public-site] .hs-benefit-glass::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.36), transparent 36%, rgba(220, 229, 255, 0.16));
-}
-
-[data-public-site] .hs-benefit-glass-track,
-[data-public-site] .hs-benefit-glass-group {
-  width: 100%;
-}
-
 [data-public-site] .hs-benefit-glass-group {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  min-width: 0;
-  padding: 16px 10px;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  gap: 24px;
+  padding: 28px 0;
 }
-
 [data-public-site] .hs-benefit-glass-item {
-  position: relative;
-  display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
+  display: flex;
   align-items: center;
-  gap: 13px;
+  gap: 14px;
   min-width: 0;
-  min-height: 66px;
-  padding: 5px clamp(14px, 2vw, 26px);
-  color: #1f2330;
+  color: var(--hs-espresso);
 }
-
-[data-public-site] .hs-benefit-glass-item + .hs-benefit-glass-item::before {
-  content: "";
-  position: absolute;
-  top: 4px;
-  bottom: 4px;
-  left: 0;
-  width: 1px;
-  background: linear-gradient(transparent, rgba(97, 108, 137, 0.19) 18%, rgba(97, 108, 137, 0.19) 82%, transparent);
-}
-
 [data-public-site] .hs-benefit-glass-icon {
-  width: 42px;
-  height: 42px;
   display: grid;
+  flex: 0 0 40px;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--benefit-accent) 20%, transparent);
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--benefit-accent) 8%, rgba(255, 255, 255, 0.82));
-  color: var(--benefit-accent);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  width: 40px;
+  height: 40px;
+  color: var(--hs-brown);
+  border: 1px solid var(--hs-line);
 }
-
-[data-public-site] .hs-benefit-glass-icon svg {
-  width: 21px;
-  height: 21px;
-  stroke-width: 2;
-}
-
-[data-public-site] .hs-benefit-glass-copy {
-  display: block;
-  min-width: 0;
-}
-
+[data-public-site] .hs-benefit-glass-icon svg { width: 19px; height: 19px; stroke-width: 1.5; }
+[data-public-site] .hs-benefit-glass-copy { min-width: 0; }
 [data-public-site] .hs-benefit-glass-copy strong,
-[data-public-site] .hs-benefit-glass-copy small {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+[data-public-site] .hs-benefit-glass-copy small { display: block; }
+[data-public-site] .hs-benefit-glass-copy strong { font-size: 12px; font-weight: 700; }
+[data-public-site] .hs-benefit-glass-copy small { margin-top: 3px; color: var(--hs-brown); font-size: 11px; line-height: 1.4; }
+@media (max-width: 920px) {
+  [data-public-site] .hs-benefit-glass-group { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
-
-[data-public-site] .hs-benefit-glass-copy strong {
-  color: #1e2230;
-  font-size: clamp(12px, 1vw, 14px);
-  font-weight: 820;
-  letter-spacing: -0.015em;
-  line-height: 1.25;
-}
-
-[data-public-site] .hs-benefit-glass-copy small {
-  margin-top: 6px;
-  color: #778198;
-  font-size: clamp(9px, 0.8vw, 11px);
-  font-weight: 520;
-  line-height: 1.35;
-}
-
-[data-public-site] .hs-benefit-glass-item[data-color="rose"] { --benefit-accent: #f02a8b; }
-[data-public-site] .hs-benefit-glass-item[data-color="blue"] { --benefit-accent: #176bff; }
-[data-public-site] .hs-benefit-glass-item[data-color="violet"] { --benefit-accent: #8750d8; }
-[data-public-site] .hs-benefit-glass-item[data-color="gold"] { --benefit-accent: #b98232; }
-[data-public-site] .hs-benefit-glass-item[data-color="emerald"] { --benefit-accent: #15966c; }
-[data-public-site] .hs-benefit-glass-item:not([data-color]) { --benefit-accent: #6f3d84; }
-
-@media (max-width: 760px) {
-  [data-public-site] .hs-benefit-glass {
-    width: calc(100% - 1rem);
-    border-radius: 18px;
-  }
-
-  [data-public-site] .hs-benefit-glass-group {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    padding: 10px 5px;
-  }
-
-  [data-public-site] .hs-benefit-glass-item {
-    grid-template-columns: 36px minmax(0, 1fr);
-    gap: 9px;
-    min-height: 62px;
-    padding: 8px 10px;
-  }
-
-  [data-public-site] .hs-benefit-glass-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 12px;
-  }
-
-  [data-public-site] .hs-benefit-glass-icon svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  [data-public-site] .hs-benefit-glass-copy strong { font-size: 10.5px; }
-  [data-public-site] .hs-benefit-glass-copy small { margin-top: 3px; font-size: 8.5px; }
-  [data-public-site] .hs-benefit-glass-item:nth-child(odd)::before { display: none; }
-  [data-public-site] .hs-benefit-glass-item:nth-child(n + 3) { border-top: 1px solid rgba(97, 108, 137, 0.13); }
+@media (max-width: 540px) {
+  [data-public-site] .hs-benefit-glass { width: calc(100% - 32px); }
+  [data-public-site] .hs-benefit-glass-group { gap: 18px 12px; }
+  [data-public-site] .hs-benefit-glass-item { align-items: start; gap: 8px; }
+  [data-public-site] .hs-benefit-glass-icon { flex-basis: 30px; width: 30px; height: 30px; }
+  [data-public-site] .hs-benefit-glass-icon svg { width: 15px; height: 15px; }
 }
