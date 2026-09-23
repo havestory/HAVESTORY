@@ -3080,7 +3080,7 @@ h1, h2, h3 { font-weight: 700; }
 .hs-login-orb-one { width: 380px; height: 380px; right: -130px; top: -150px; background: rgba(178,138,80, .18); }
 .hs-login-orb-two { width: 320px; height: 320px; left: -180px; bottom: -150px; background: rgba(247,242,232, .12); }
 .hs-login-story-inner { position: relative; z-index: 1; height: 100%; min-height: calc(100dvh - 28px); padding: clamp(32px, 5vw, 72px); display: flex; flex-direction: column; }
-.hs-login-brand,.hs-login-mobile-brand { display: inline-flex; align-items: center; gap: 12px; width: max-content; color: inherit; }
+.hs-login-brand,.hs-login-mobile-brand { display: inline-flex; align-items: center; gap: 12px; width: max-content; border: 0; background: transparent; color: inherit; }
 .hs-login-brand img { max-width: 145px; max-height: 48px; padding: 7px 9px; border-radius: 11px; background: rgba(255,255,255,.94); object-fit: contain; }
 .hs-login-brand>span,.hs-login-mobile-brand>span { width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.2); border-radius: 13px; background: rgba(255,255,255,.1); color: #f7f2e8; font-size: 11px; font-weight: 700; }
 .hs-login-brand strong,.hs-login-mobile-brand strong { font-size: 17px; font-weight: 700; letter-spacing: .075em; text-transform: uppercase; }
@@ -3111,8 +3111,9 @@ h1, h2, h3 { font-weight: 700; }
 .hs-login-step-back button { display: flex; align-items: center; gap: 6px; color: var(--login-plum); }
 .hs-login-step-back svg { width: 13px; }
 .hs-login-form { display: flex; flex-direction: column; gap: 20px; }
+.hs-login-form .space-y-2 { display: flex; flex-direction: column; gap: 8px; }
 .hs-login-form label { color: hsl(var(--admin-ink)); font-size: 10px; font-weight: 700; letter-spacing: .045em; }
-.hs-login-input { min-height: 50px; padding: 0 14px; border: 1px solid hsl(var(--admin-border)); border-radius: 12px; background: hsl(var(--admin-subtle)); color: var(--login-ink); box-shadow: none; font-size: 14px; font-weight: 650; }
+.hs-login-input { display: block; width: 100%; min-height: 50px; padding: 0 14px; border: 1px solid hsl(var(--admin-border)); border-radius: 12px; background: hsl(var(--admin-subtle)); color: var(--login-ink); box-shadow: none; font-size: 14px; font-weight: 650; }
 .hs-login-input::placeholder { color: hsl(var(--admin-muted)); font-weight: 500; }
 .hs-login-input:focus-visible { border-color: rgba(96,73,54,.58); outline: 0; box-shadow: 0 0 0 4px rgba(96,73,54,.08); }
 .hs-login-pin { text-align: center; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 22px; letter-spacing: .45em; }
