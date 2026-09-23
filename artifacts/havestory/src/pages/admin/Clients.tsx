@@ -583,7 +583,7 @@ export default function AdminClients() {
           <button onClick={exportCsv} className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-admin-border text-sm text-admin-muted hover:bg-admin-surface transition-colors">
             <Download size={13} /><span className="hidden sm:inline">Export CSV</span><span className="sm:hidden">CSV</span>
           </button>
-          <button onClick={openAdd} className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-admin-brand text-white text-sm font-semibold shadow-sm hover:opacity-90 transition-all whitespace-nowrap">
+          <button onClick={openAdd} className="flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-sm font-semibold hover:bg-admin-muted transition-colors whitespace-nowrap">
             <Plus size={14} /> New Client
           </button>
         </div>
@@ -631,7 +631,7 @@ export default function AdminClients() {
           {!search && <p className="text-xs text-admin-muted mt-1">Click "New Client" to add your first client</p>}
         </div>
       ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
           {filtered.map(client => {
             const code = clientCode(client);
             const createdMs = client.createdAt ? new Date(client.createdAt).getTime() : 0;
@@ -782,9 +782,9 @@ export default function AdminClients() {
           return bd - ad;
         });
         return (
-          <div className="fixed inset-0 bg-admin-inverse/40 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setViewingClient(null)}>
+          <div className="fixed inset-0 bg-admin-inverse/70 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setViewingClient(null)}>
             <div
-              className="bg-admin-surface w-full sm:max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-xl max-h-[92vh] sm:max-h-[85vh] flex flex-col"
+              className="bg-admin-surface w-full sm:max-w-2xl rounded-t-xl sm:rounded-sm shadow-xl max-h-[92dvh] sm:max-h-[85dvh] flex flex-col overflow-hidden border border-admin-border"
               onClick={e => e.stopPropagation()}
             >
               {/* Header */}

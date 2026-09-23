@@ -1,17 +1,14 @@
+import "./studio-home.css";
 import { SiteNotices } from "@/components/public/SiteNotices";
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
   BadgeCheck,
-  ChevronLeft,
-  ChevronRight,
   Headphones,
   Image as ImageIcon,
   PackageCheck,
   Palette,
-  Quote,
   Ruler,
   ShoppingCart,
   Sparkles,
@@ -28,9 +25,9 @@ import {
 import { ComingSoon } from "@/components/public/ComingSoon";
 
 const DEFAULT_IMAGES = [
-  "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1800&q=88",
-  "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=format&fit=crop&w=1200&q=86",
-  "https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&w=1200&q=86",
+  "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1600&q=76",
+  "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=format&fit=crop&w=1100&q=76",
+  "https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&w=1100&q=76",
 ];
 
 function safeSiteHref(value: unknown, fallback: string): string {
@@ -66,7 +63,7 @@ function readHomeBenefits(value: unknown): HomeBenefit[] {
 
 function Heading({ eyebrow, title, copy, href, link }: { eyebrow: string; title: string; copy?: string; href?: string; link?: string }) {
   return (
-    <div className="hs-new-heading">
+    <div className="studio-heading">
       <div>
         <span>{eyebrow}</span>
         <h2>{title}</h2>
@@ -85,7 +82,6 @@ export default function Home() {
   const { data: portfolio } = useListPortfolio();
   const { data: reviews } = useListReviews();
   const [heroIndex, setHeroIndex] = useState(0);
-  const [favouriteIndex, setFavouriteIndex] = useState(0);
 
   const allProducts = Array.isArray(products) ? products : [];
   const featuredProducts = allProducts.filter((item) => item.featured);
@@ -126,7 +122,7 @@ export default function Home() {
   ];
   const categories = categoryFallbacks.map((fallback, index) => ({ ...fallback, ...(featureCards[index] || {}), image: featureCards[index]?.image || fallback.image }));
   const favouriteWindow = Math.min(4, favouritePool.length);
-  const favouriteProducts = favouriteWindow ? Array.from({ length: favouriteWindow }, (_, index) => favouritePool[(favouriteIndex * favouriteWindow + index) % favouritePool.length]) : [];
+  const favouriteProducts = favouriteWindow ? Array.from({ length: favouriteWindow }, (_, index) => favouritePool[index]) : [];
   const process = [
     ["01", "Share your idea", "Upload the photo and tell us where it will live."],
     ["02", "Choose together", "We help select size, paper, finish and frame."],
@@ -143,78 +139,56 @@ export default function Home() {
     const timer = window.setInterval(() => setHeroIndex((value) => (value + 1) % heroSlides.length), 7500);
     return () => window.clearInterval(timer);
   }, [heroSlides.length, heroKey]);
-  useEffect(() => setFavouriteIndex(0), [favouritePool.map((item) => item.id).join("|")]);
-  useEffect(() => {
-    if (favouritePool.length <= 1) return;
-    const timer = window.setInterval(() => setFavouriteIndex((value) => value + 1), 5600);
-    return () => window.clearInterval(timer);
-  }, [favouritePool.length, favouritePool.map((item) => item.id).join("|")]);
 
   return (
-    <main className="hs-new-home">
+    <main className="studio-home">
       <SiteNotices notices={Array.isArray(notices) ? notices : []} />
-
-      <section className="hs-new-hero">
-        <div className="hs-new-hero-photo">
-          <AnimatePresence initial={false} mode="wait">
-            <motion.img key={`${safeHeroIndex}-${heroImage}`} src={heroImage} alt="HAVESTORY framed studio collection" fetchPriority="high" decoding="async" initial={{ opacity: 0, scale: 1.02 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.7 }} />
-          </AnimatePresence>
-          <div className="hs-new-hero-wash" />
-          <div className="hs-new-hero-index"><strong>{String(safeHeroIndex + 1).padStart(2, "0")}</strong><span>/ {String(heroSlides.length).padStart(2, "0")}</span></div>
-          {heroSlides.length > 1 && <div className="hs-new-hero-dots">{heroSlides.map((_, index) => <button key={index} type="button" aria-label={`Show hero image ${index + 1}`} aria-current={index === safeHeroIndex} onClick={() => setHeroIndex(index)} />)}</div>}
-        </div>
-        <motion.div className="hs-new-hero-card" initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, delay: 0.12 }}>
-          <span className="hs-new-kicker"><Sparkles size={15} /> {cfg?.heroBadgeText || "A Sri Lankan frame & creative studio"}</span>
-          <h1 className="hs-hero-title-animated">{heroTitle}</h1>
+      <section className="studio-opening" aria-labelledby="studio-title">
+        <div className="studio-opening-copy">
+          <span className="studio-kicker"><span className="studio-kicker-line" /> {cfg?.heroBadgeText || "HAVESTORY · Sri Lankan creative studio"}</span>
+          <h1 id="studio-title">{heroTitle}</h1>
           <p>{heroSubtitle}</p>
-          <div className="hs-new-hero-actions">
-            <Link href={safeSiteHref(cfg?.heroCtaLink, "/store")} className="hs-new-button hs-new-button-dark">{cfg?.heroCtaText || "Explore frames"}<ArrowRight size={17} /></Link>
-            <Link href="/custom-project" className="hs-new-button hs-new-button-light">Create your frame</Link>
+          <div className="studio-actions">
+            <Link href={safeSiteHref(cfg?.heroCtaLink, "/store")} className="studio-action-primary">{cfg?.heroCtaText || "Explore the collection"}<ArrowRight size={18} /></Link>
+            <Link href="/custom-project" className="studio-action-text">Create a custom piece <ArrowRight size={17} /></Link>
           </div>
-        </motion.div>
-      </section>
-
-      {benefitsVisible && <section className="hs-benefit-glass is-static" aria-label="HAVESTORY service benefits">
-        <div className="hs-benefit-glass-track">
-          <div className="hs-benefit-glass-group">
-            {benefits.map((benefit, index) => { const Icon = BENEFIT_ICONS[benefit.icon] || Sparkles; return <article key={`${benefit.title}-${index}`} className="hs-benefit-glass-item" data-color={benefit.color}><span className="hs-benefit-glass-icon"><Icon aria-hidden="true" /></span><span className="hs-benefit-glass-copy"><strong>{benefit.title}</strong><small>{benefit.copy}</small></span></article>; })}
-          </div>
+          <div className="studio-opening-note"><span>01 / 04</span><span>Made thoughtfully. Kept for a lifetime.</span></div>
         </div>
-      </section>}
-
-      <section className="hs-new-section hs-heritage-story" aria-labelledby="hs-story-title">
-        <div className="hs-heritage-story-copy">
-          <span className="hs-heritage-eyebrow">The HAVESTORY studio</span>
-          <h2 id="hs-story-title">Every memory deserves a place to live.</h2>
-          <p>We bring photographs into the spaces you call home. From the first conversation to the final finish, each piece is considered, crafted and made to feel like yours.</p>
-          <Link href="/about">Our story <ArrowRight size={17} /></Link>
-        </div>
-        <div className="hs-heritage-story-visual" aria-hidden="true"><span>H<span>·</span>S</span><small>STORIES, BEAUTIFULLY KEPT</small></div>
-      </section>
-
-      <section className="hs-new-section hs-new-category-section">
-        <Heading eyebrow="01 / Choose your story" title="Find the right way to frame it." copy="Start with the feeling. We will help with every material, crop and finish after that." />
-        <div className="hs-new-category-grid">
-          {categories.map((item, index) => <motion.article key={`${item.title}-${index}`} className={`hs-new-category hs-new-category-${item.tone}`} initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.18 }} transition={{ delay: index * 0.08 }}>
-            <Link href={safeSiteHref(item.href, "/store")}><div className="hs-new-category-copy"><span>0{index + 1}</span><h3>{item.title}</h3><p>{item.copy}</p><b>Explore <ArrowRight size={15} /></b></div><img src={item.image} alt={item.title} loading="lazy" decoding="async" /></Link>
-          </motion.article>)}
+        <div className="studio-opening-art">
+          <img src={heroImage} alt="A framed piece from the HAVESTORY studio" fetchPriority="high" decoding="async" />
+          <div className="studio-opening-caption"><span>The art of keeping moments</span><span>EST. SRI LANKA</span></div>
+          {heroSlides.length > 1 && <div className="studio-slide-controls" aria-label="Hero images">{heroSlides.map((_, index) => <button key={index} type="button" aria-label={`Show image ${index + 1}`} aria-current={index === safeHeroIndex} onClick={() => setHeroIndex(index)} />)}</div>}
         </div>
       </section>
 
-      <section className="hs-new-section hs-new-favourites">
-        <Heading eyebrow="02 / Studio favourites" title="Pieces people keep coming back to." copy="A rotating edit of ready-to-order editions for gifting, home and everyday memories." href="/store" link="Shop the collection" />
-        {favouriteProducts.length ? <div className="hs-new-favourite-stage"><button type="button" className="hs-new-carousel-button" onClick={() => setFavouriteIndex((value) => Math.max(0, value - 1))} aria-label="Previous favourites"><ChevronLeft /></button><div className="hs-new-favourite-grid"><AnimatePresence initial={false} mode="popLayout">{favouriteProducts.map((product, index) => <motion.article key={product.id} className="hs-new-favourite-card" initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -24 }} transition={{ delay: index * 0.06 }}><Link href={`/store/${product.slug || product.id}`}><div className="hs-new-favourite-image">{product.imageUrl ? <img src={product.imageUrl} alt={product.name} loading="lazy" /> : <ImageIcon />}<span>Studio edit</span></div><div className="hs-new-favourite-info"><small>{product.category?.name || "HAVESTORY edition"}</small><h3>{product.name}</h3><strong>{product.price ? `Rs. ${Number(product.price).toLocaleString()}` : "Quote on request"}</strong><span>View edition <ArrowRight size={14} /></span></div></Link></motion.article>)}</AnimatePresence></div><button type="button" className="hs-new-carousel-button" onClick={() => setFavouriteIndex((value) => value + 1)} aria-label="Next favourites"><ChevronRight /></button></div> : <ComingSoon eyebrow="Collection in progress" title="New pieces are on the way." description="The shop is being prepared, but custom orders are open now." href="/custom-project" cta="Start a custom order" />}
+      {benefitsVisible && <section className="studio-assurances" aria-label="Studio promises">{benefits.map((benefit, index) => { const Icon = BENEFIT_ICONS[benefit.icon] || Sparkles; return <article key={`${benefit.title}-${index}`}><Icon size={22} strokeWidth={1.4} aria-hidden="true" /><div><h2>{benefit.title}</h2><p>{benefit.copy}</p></div></article>; })}</section>}
+
+      <section className="studio-story studio-section" aria-labelledby="studio-story-title">
+        <div className="studio-story-art"><img src={portfolioList[0]?.imageUrl || DEFAULT_IMAGES[1]} alt="Thoughtfully framed memories" loading="lazy" /><span>THE HAVESTORY WAY</span></div>
+        <div className="studio-story-copy"><span className="studio-kicker">01 — OUR STORY</span><h2 id="studio-story-title">A home for the moments that matter.</h2><p>We bring photographs into the spaces you call home. From the first conversation to the final finish, each piece is considered, crafted and made to feel like yours.</p><Link href="/about" className="studio-inline-link">Discover our story <ArrowRight size={17} /></Link></div>
       </section>
 
-      <section className="hs-new-process"><div className="hs-new-process-intro"><span>03 / The studio process</span><h2>Your photo.<br /><em>Our craft.</em></h2><p>No confusing specifications. Send the memory and we will guide the material, crop, finish and size.</p><Link href="/custom-project" className="hs-new-button hs-new-button-gold">Start with an idea <ArrowRight size={17} /></Link></div><div className="hs-new-process-list">{process.map(([number, title, copy]) => <div key={number}><span>{number}</span><div><h3>{title}</h3><p>{copy}</p></div><ArrowRight size={18} /></div>)}</div></section>
+      <section className="studio-section studio-collections" aria-labelledby="studio-collections-title">
+        <Heading eyebrow="02 — COLLECTIONS" title="A beautiful place for every story." copy="Explore the craft, materials and pieces that make a memory feel at home." />
+        <div className="studio-collection-grid">{categories.map((item, index) => <Link key={`${item.title}-${index}`} href={safeSiteHref(item.href, "/store")} className={`studio-collection-card studio-collection-card-${index + 1}`}><img src={item.image} alt="" loading="lazy" decoding="async" /><div><span>0{index + 1} / COLLECTION</span><h3>{item.title}</h3><p>{item.copy}</p><strong>Explore collection <ArrowRight size={17} /></strong></div></Link>)}</div>
+      </section>
 
-      {portfolioList.length > 0 && <section className="hs-new-section hs-new-work"><Heading eyebrow="04 / Created at HAVESTORY" title="Recent studio work." copy="Frames, prints and personal pieces made for real homes and real stories." href="/gallery" link="Open gallery" /><div className="hs-new-work-grid">{portfolioList.map((item, index) => <motion.div key={item.id} className={`hs-new-work-item hs-new-work-${index + 1}`} whileHover={{ y: -7 }}><Link href="/gallery">{item.imageUrl ? <img src={item.imageUrl} alt={item.title || "HAVESTORY studio work"} loading="lazy" /> : <ImageIcon />}<span><b>{item.title || `Studio story ${index + 1}`}</b><i>View project <ArrowRight size={14} /></i></span></Link></motion.div>)}</div></section>}
+      <section className="studio-why studio-section"><div><span className="studio-kicker">03 — WHY HAVESTORY</span><h2>Details make the difference.</h2></div><p>We care about how your story is printed, framed and delivered. Our studio helps you choose with confidence at every step.</p><Link href="/services" className="studio-inline-link">Meet the studio <ArrowRight size={17} /></Link></section>
 
-      {serviceList.length > 0 && <section className="hs-new-section hs-new-services"><Heading eyebrow="05 / More ways to make it yours" title="Studio services." href="/services" link="View all services" /><div>{serviceList.map((service, index) => <Link href="/services" key={service.id}><span>0{index + 1}</span><div><h3>{service.name}</h3><p>{service.description || "Designed and finished with the HAVESTORY studio."}</p></div><ArrowRight /></Link>)}</div></section>}
+      <section className="studio-section studio-products">
+        <Heading eyebrow="04 — THE STUDIO EDIT" title="Pieces worth keeping." copy="Selected from the collection for homes, gifts and everyday memories." href="/store" link="Shop all pieces" />
+        {favouriteProducts.length ? <div className="studio-product-grid">{favouriteProducts.map(product => <Link href={`/store/${product.slug || product.id}`} key={product.id} className="studio-product-card"><div>{product.imageUrl ? <img src={product.imageUrl} alt={product.name} loading="lazy" /> : <ImageIcon />}</div><span>{product.category?.name || "HAVESTORY edition"}</span><h3>{product.name}</h3><p>{product.price ? `Rs. ${Number(product.price).toLocaleString()}` : "Quote on request"}</p></Link>)}</div> : <ComingSoon eyebrow="Collection in progress" title="New pieces are on the way." description="The shop is being prepared, but custom orders are open now." href="/custom-project" cta="Start a custom order" />}
+      </section>
 
-      {reviewList.length > 0 && <section className="hs-new-section hs-new-reviews"><Heading eyebrow="06 / Loved by our clients" title="Stories from happy walls." /><div>{reviewList.map((review) => <blockquote key={review.id}><Quote size={24} /><p>“{review.comment}”</p><footer><strong>{review.customerName}</strong><span>{"★".repeat(Math.min(5, review.rating || 5))}</span></footer></blockquote>)}</div></section>}
+      {portfolioList.length > 0 && <section className="studio-section studio-gallery"><Heading eyebrow="05 — RECENT STORIES" title="Made in our studio." copy="A few moments brought into focus." href="/gallery" link="Explore the gallery" /><div className="studio-gallery-grid">{portfolioList.map((item, index) => <Link key={item.id} href="/gallery" className={`studio-gallery-item studio-gallery-item-${index + 1}`}>{item.imageUrl ? <img src={item.imageUrl} alt={item.title || "HAVESTORY studio work"} loading="lazy" /> : <ImageIcon />}<span>{item.title || `Studio story ${index + 1}`} <ArrowRight size={16} /></span></Link>)}</div></section>}
 
-      <section className="hs-new-final"><div><motion.span initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: false, amount: .8 }} transition={{ duration: .55 }}>Have a photograph in mind?</motion.span><motion.h2 initial="hidden" whileInView="visible" viewport={{ once: false, amount: .65 }} variants={{ hidden: {}, visible: { transition: { staggerChildren: .045 } } }}><span className="hs-final-animated-line">{"Make something".split("").map((letter, index) => <motion.i key={`make-${index}`} variants={{ hidden: { opacity: 0, y: 34, rotateX: -70, filter: "blur(7px)" }, visible: { opacity: 1, y: 0, rotateX: 0, filter: "blur(0px)", transition: { duration: .55, ease: [0.22, 1, 0.36, 1] } } }}>{letter === " " ? "\u00a0" : letter}</motion.i>)}</span><br /><motion.em variants={{ hidden: { opacity: 0, scale: .88, letterSpacing: ".02em" }, visible: { opacity: 1, scale: 1, letterSpacing: "-.055em", transition: { duration: .8, delay: .12, ease: [0.22, 1, 0.36, 1] } } }}>worth keeping.</motion.em></motion.h2><motion.p initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: false, amount: .8 }} transition={{ duration: .55, delay: .65 }}>Tell us the idea. We will help with the rest.</motion.p></div></section>
+      <section className="studio-process"><div className="studio-process-intro"><span className="studio-kicker">06 — THE PROCESS</span><h2>From your idea to a piece of your story.</h2><p>Tell us what you are imagining. We will guide the size, materials and finish, then make it with care.</p><Link href="/custom-project" className="studio-action-primary">Start your project <ArrowRight size={18} /></Link></div><ol>{process.map(([number, title, copy]) => <li key={number}><span>{number}</span><div><h3>{title}</h3><p>{copy}</p></div></li>)}</ol></section>
+
+      {serviceList.length > 0 && <section className="studio-section studio-services"><Heading eyebrow="07 — BEYOND THE FRAME" title="More from the studio." href="/services" link="Explore services" /><div>{serviceList.map((service, index) => <Link href="/services" key={service.id}><span>0{index + 1}</span><div><h3>{service.name}</h3><p>{service.description || "Designed and finished with the HAVESTORY studio."}</p></div><ArrowRight size={20} /></Link>)}</div></section>}
+
+      {reviewList.length > 0 && <section className="studio-section studio-reviews"><Heading eyebrow="08 — KIND WORDS" title="Stories from our clients." /><div>{reviewList.map(review => <blockquote key={review.id}><p>“{review.comment}”</p><footer><strong>{review.customerName}</strong><span aria-label={`${review.rating || 5} out of 5 stars`}>{"★".repeat(Math.min(5, review.rating || 5))}</span></footer></blockquote>)}</div></section>}
+
+      <section className="studio-closing"><span className="studio-kicker">LET'S MAKE IT PERSONAL</span><h2>Your story deserves to be seen.</h2><p>Share a photograph or an idea. We will help with the rest.</p><Link href="/custom-project" className="studio-action-primary">Create your piece <ArrowRight size={18} /></Link></section>
     </main>
   );
 }

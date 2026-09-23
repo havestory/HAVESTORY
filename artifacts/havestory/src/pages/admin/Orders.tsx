@@ -575,27 +575,27 @@ export default function Orders() {
   const isCreating = createOrder.isPending || createInvoice.isPending || createClient.isPending;
 
   return (
-    <div className="space-y-6 pb-10 animate-in fade-in slide-in-from-bottom-4">
+    <div className="space-y-6 pb-10">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-admin-ink">All Orders</h1>
           <p className="mt-1 text-sm text-admin-muted">{stats.total} orders total</p>
         </div>
-        <Button type="button" onClick={openCreate} className="h-11 rounded-full bg-admin-brand px-6 font-bold text-white shadow-[0_10px_24px_rgba(184,49,214,0.22)] hover:">
+        <Button type="button" onClick={openCreate} className="h-11 rounded-sm bg-primary px-6 font-bold text-primary-foreground hover:bg-admin-muted">
           <span className="mr-2 text-lg">+</span> New Order
         </Button>
       </div>
 
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
         {[['total', stats.total, 'Total Orders', 'text-admin-brand-ink'], ['pending', stats.pending, 'Pending', 'text-admin-warning'], ['processing', stats.processing, 'Processing', 'text-admin-brand-ink'], ['completed', stats.completed, 'Completed', 'text-admin-success']].map(([key, value, label, color]) => (
-          <button type="button" key={String(key)} onClick={() => { setStatusFilter(key === 'total' ? 'all' : key === 'processing' ? 'processing' : key === 'completed' ? 'completed' : 'pending'); setOrderPage(1); }} className="rounded-2xl border border-admin-border bg-admin-surface p-5 text-left shadow-[0_8px_22px_rgba(40,20,80,0.05)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(40,20,80,0.08)]">
+          <button type="button" key={String(key)} onClick={() => { setStatusFilter(key === 'total' ? 'all' : key === 'processing' ? 'processing' : key === 'completed' ? 'completed' : 'pending'); setOrderPage(1); }} className="rounded-sm border border-admin-border bg-admin-surface p-5 text-left transition-colors hover:bg-admin-brand-soft">
             <div className={`text-3xl font-bold ${color}`}>{String(value)}</div>
             <div className="mt-1 text-sm text-admin-muted">{String(label)}</div>
           </button>
         ))}
       </div>
 
-      <Card className="overflow-hidden rounded-3xl border border-admin-border bg-admin-surface shadow-[0_12px_35px_rgba(40,20,80,0.05)]">
+      <Card className="overflow-hidden rounded-sm border border-admin-border bg-admin-surface">
         <CardContent className="p-0">
           <div className="flex flex-col gap-4 border-b border-admin-border p-5 lg:flex-row lg:items-center">
             <div className="relative flex-1">
@@ -604,7 +604,7 @@ export default function Orders() {
             </div>
             <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0">
               {['all', 'pending', 'confirmed', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'].map((status) => (
-                <button type="button" key={status} onClick={() => { setStatusFilter(status); setOrderPage(1); }} className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${statusFilter === status ? 'bg-admin-brand text-white shadow-md' : 'text-admin-muted hover:bg-admin-surface'}`}>
+                <button type="button" key={status} onClick={() => { setStatusFilter(status); setOrderPage(1); }} className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${statusFilter === status ? 'bg-primary text-primary-foreground' : 'text-admin-muted hover:bg-admin-surface'}`}>
                   {status === 'all' ? 'All' : statusLabel(status)}
                 </button>
               ))}
@@ -633,7 +633,7 @@ export default function Orders() {
                     <TableCell className="px-6 py-5"><div className="flex items-center justify-end gap-2">
                       <Button type="button" variant="outline" size="icon" title="Create shipping label" onClick={() => window.open(`/admin/shipping-labels?orderId=${encodeURIComponent(order.orderId)}`, '_blank', 'noopener,noreferrer')} className="h-9 w-9 rounded-full border-admin-brand-line text-admin-brand-ink hover:bg-admin-brand-soft"><Printer className="h-4 w-4" /></Button>
                       <Button type="button" variant="outline" size="icon" title="WhatsApp customer" onClick={() => window.open(`https://wa.me/${String(order.customerPhone || '').replace(/[^0-9]/g, '')}`, '_blank')} className="h-9 w-9 rounded-full border-admin-border text-admin-muted hover:bg-admin-success-soft hover:text-admin-success"><MessageCircle className="h-4 w-4" /></Button>
-                      <Button type="button" onClick={() => openManage(order)} className="h-9 rounded-full bg-admin-brand px-4 text-xs font-bold text-white hover:">Manage</Button>
+                      <Button type="button" onClick={() => openManage(order)} className="h-9 rounded-sm bg-primary px-4 text-xs font-bold text-primary-foreground hover:bg-admin-muted">Manage</Button>
                       <Button type="button" variant="outline" size="icon" title="Delete order" onClick={() => handleDelete(order.id)} className="h-9 w-9 rounded-full border-admin-danger-line text-admin-danger hover:bg-admin-danger-soft"><Trash2 className="h-4 w-4" /></Button>
                     </div></TableCell>
                   </TableRow>;
@@ -687,7 +687,7 @@ export default function Orders() {
               <div className="space-y-2"><Label className="text-[11px] font-bold uppercase tracking-wide text-admin-muted">Notes</Label><Textarea value={createForm.notes} onChange={(event) => setCreateForm((form) => ({ ...form, notes: event.target.value }))} placeholder="Internal notes..." rows={3} className="resize-none rounded-2xl border-admin-border" /></div>
               <div className="grid grid-cols-2 gap-3"><div className="space-y-2"><Label className="text-xs text-admin-muted">Order type</Label><select value={createForm.orderType} onChange={(event) => setCreateForm((form) => ({ ...form, orderType: event.target.value }))} className="h-11 w-full rounded-full border border-admin-border bg-admin-surface px-4 text-sm text-admin-ink"><option value="standard">Standard</option><option value="custom">Custom</option><option value="bulk">Bulk</option></select></div><div className="space-y-2"><Label className="text-xs text-admin-muted">Due date</Label><Input type="date" value={createForm.dueDate} onChange={(event) => setCreateForm((form) => ({ ...form, dueDate: event.target.value }))} className="h-11 rounded-full border-admin-border" /></div></div>
             </div>
-            <DialogFooter className="mt-6 gap-3 border-t border-admin-border pt-5 sm:justify-end"><Button type="button" variant="outline" onClick={() => setCreateOpen(false)} disabled={isCreating} className="h-11 rounded-full border-admin-border px-8 text-admin-muted">Cancel</Button><Button type="submit" disabled={isCreating} className="h-11 rounded-full bg-admin-brand px-8 font-bold text-white hover:">{isCreating ? 'Creating…' : 'Create Order'}</Button></DialogFooter>
+            <DialogFooter className="mt-6 gap-3 border-t border-admin-border pt-5 sm:justify-end"><Button type="button" variant="outline" onClick={() => setCreateOpen(false)} disabled={isCreating} className="h-11 rounded-full border-admin-border px-8 text-admin-muted">Cancel</Button><Button type="submit" disabled={isCreating} className="h-11 rounded-sm bg-primary px-8 font-bold text-primary-foreground hover:bg-admin-muted">{isCreating ? 'Creating…' : 'Create Order'}</Button></DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
@@ -790,7 +790,7 @@ export default function Orders() {
               </div>
             </SectionCard>
           </div>}
-          <DialogFooter className="sticky bottom-0 z-10 gap-3 border-t border-admin-border bg-admin-surface px-6 py-4 sm:justify-end"><Button type="button" variant="outline" onClick={() => setManageOpen(false)} disabled={updateOrder.isPending} className="h-11 rounded-full border-admin-border px-8 text-admin-muted">Cancel</Button><Button type="button" onClick={saveManageOrder} disabled={updateOrder.isPending || !manageOrder} className="h-11 rounded-full bg-admin-brand px-8 font-bold text-white hover:">{updateOrder.isPending ? 'Saving…' : 'Save Changes'}</Button></DialogFooter>
+          <DialogFooter className="sticky bottom-0 z-10 gap-3 border-t border-admin-border bg-admin-surface px-6 py-4 sm:justify-end"><Button type="button" variant="outline" onClick={() => setManageOpen(false)} disabled={updateOrder.isPending} className="h-11 rounded-full border-admin-border px-8 text-admin-muted">Cancel</Button><Button type="button" onClick={saveManageOrder} disabled={updateOrder.isPending || !manageOrder} className="h-11 rounded-sm bg-primary px-8 font-bold text-primary-foreground hover:bg-admin-muted">{updateOrder.isPending ? 'Saving…' : 'Save Changes'}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

@@ -237,12 +237,11 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     return location.startsWith(href);
   };
 
-  // The visual state is handled by the single Glass Gallery shell layer.
-  // Keeping the state semantic prevents legacy Tailwind background utilities from winning in the cascade.
+  // Keep the navigation state semantic so the studio shell owns its layout.
   const navBg = scrolled ? 'public-nav-scrolled' : 'public-nav-idle';
 
   return (
-    <div data-public-site="" data-public-theme={publicThemePreset} className="atelier-shell glass-gallery-shell min-h-[100dvh] flex flex-col bg-[hsl(var(--background))] relative overflow-x-clip">
+    <div data-public-site="" data-public-theme={publicThemePreset} className="atelier-shell min-h-[100dvh] flex flex-col bg-[hsl(var(--background))] relative overflow-x-clip">
 
       <div className="hs-scroll-progress" aria-hidden="true"><span style={{ transform: `scaleX(${scrollProgress / 100})` }} /></div>
 
@@ -261,6 +260,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="hsx-shell-actions">
+            {!mobileNav && <Link href="/custom-project" className="hsx-shell-project">Start a project <ArrowRight size={15} /></Link>}
             {mobileNav && <button
               type="button"
               className="hsx-mobile-menu-button"
