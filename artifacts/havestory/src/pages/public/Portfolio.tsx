@@ -33,19 +33,19 @@ export default function Portfolio() {
   return (
     <div className="hs-gallery-page">
       <header className="hs-gallery-hero">
-        <div><span>THE HAVESTORY ARCHIVE</span><h1>Stories in their<br /><em>finished form.</em></h1></div>
-        <p>A growing collection of frames, prints and studio work. Move across an image to reveal its story, or open it for a closer look.</p>
+        <div><span>GALLERY</span><h1>Selected studio<br /><em>work.</em></h1></div>
+        <p>Browse finished frames, prints and projects from HAVESTORY.</p>
       </header>
 
       <main className="hs-gallery-content">
-        <div className="hs-gallery-intro"><span>SELECTED WORK / {new Date().getFullYear()}</span><p>{portfolioItems.length ? `${portfolioItems.length} studio ${portfolioItems.length === 1 ? 'story' : 'stories'}` : 'The archive is being prepared'}</p></div>
+        {portfolioItems.length > 0 && <div className="hs-gallery-intro"><span>GALLERY</span><p>{portfolioItems.length} {portfolioItems.length === 1 ? 'project' : 'projects'}</p></div>}
         {isLoading ? (
           <div className="hs-gallery-loading" role="status" aria-live="polite">
             <LoaderCircle className="hs-gallery-loading-icon" aria-hidden="true" />
-            <span>Preparing the archive…</span>
+            <span>Loading gallery…</span>
           </div>
         ) : portfolioItems.length === 0 ? (
-          <ComingSoon eyebrow="The gallery is still developing" title="Our work is coming soon." description="We are preparing a considered gallery of frames, prints and client stories." href="/custom-project" cta="Create your project" />
+          <ComingSoon eyebrow="Gallery" title="No projects published yet." description="Ask us about a frame or print made for your photograph." href="/custom-project" cta="Request a custom frame" />
         ) : (
           <div className="hs-gallery-grid">
             {portfolioItems.map((item, index) => (

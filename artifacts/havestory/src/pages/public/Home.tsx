@@ -120,8 +120,14 @@ export default function Home() {
     { title: "Personal Gifts", copy: "Meaningful pieces for every occasion.", href: "/custom-project", tone: "rose", image: portfolioList[0]?.imageUrl || DEFAULT_IMAGES[0] },
     { title: "Studio Sessions", copy: "Portrait and product photography with a gallery finish.", href: "/services", tone: "sage", image: portfolioList[1]?.imageUrl || DEFAULT_IMAGES[1] },
   ];
-  const categories = categoryFallbacks.map((fallback, index) => ({ ...fallback, ...(featureCards[index] || {}), image: featureCards[index]?.image || fallback.image }));
+  const categories = featureCards.length ? categoryFallbacks.map((fallback, index) => ({ ...fallback, ...(featureCards[index] || {}), image: featureCards[index]?.image || fallback.image })) : [];
   const favouriteWindow = Math.min(4, favouritePool.length);
+  const primaryHeroHref = safeSiteHref(cfg?.heroCtaLink, "/store");
+  const primaryIsCustom = primaryHeroHref === "/custom-project";
+  const configuredHeroCta = String(cfg?.heroCtaText || '').trim();
+  const primaryHeroLabel = primaryIsCustom && /find your frame|explore frames|browse frames/i.test(configuredHeroCta)
+    ? 'Request a custom frame'
+    : configuredHeroCta || (primaryIsCustom ? 'Request a custom frame' : 'Browse frames');
   const favouriteProducts = favouriteWindow ? Array.from({ length: favouriteWindow }, (_, index) => favouritePool[index]) : [];
   const process = [
     ["01", "Share your idea", "Upload the photo and tell us where it will live."],
@@ -149,14 +155,13 @@ export default function Home() {
           <h1 id="studio-title">{heroTitle}</h1>
           <p>{heroSubtitle}</p>
           <div className="studio-actions">
-            <Link href={safeSiteHref(cfg?.heroCtaLink, "/store")} className="studio-action-primary">{cfg?.heroCtaText || "Explore the collection"}<ArrowRight size={18} /></Link>
-            <Link href="/custom-project" className="studio-action-text">Create a custom piece <ArrowRight size={17} /></Link>
+            <Link href={primaryHeroHref} className="studio-action-primary">{primaryHeroLabel}<ArrowRight size={18} /></Link>
+            <Link href={primaryIsCustom ? "/store" : "/custom-project"} className="studio-action-text">{primaryIsCustom ? "Browse frames" : "Request a custom frame"} <ArrowRight size={17} /></Link>
           </div>
-          <div className="studio-opening-note"><span>01 / 04</span><span>Made thoughtfully. Kept for a lifetime.</span></div>
         </div>
         <div className="studio-opening-art">
           <img src={heroImage} alt="A framed piece from the HAVESTORY studio" fetchPriority="high" decoding="async" />
-          <div className="studio-opening-caption"><span>The art of keeping moments</span><span>EST. SRI LANKA</span></div>
+
           {heroSlides.length > 1 && <div className="studio-slide-controls" aria-label="Hero images">{heroSlides.map((_, index) => <button key={index} type="button" aria-label={`Show image ${index + 1}`} aria-current={index === safeHeroIndex} onClick={() => setHeroIndex(index)} />)}</div>}
         </div>
       </section>
@@ -165,30 +170,28 @@ export default function Home() {
 
       <section className="studio-story studio-section" aria-labelledby="studio-story-title">
         <div className="studio-story-art"><img src={portfolioList[0]?.imageUrl || DEFAULT_IMAGES[1]} alt="Thoughtfully framed memories" loading="lazy" /><span>THE HAVESTORY WAY</span></div>
-        <div className="studio-story-copy"><span className="studio-kicker">01 — OUR STORY</span><h2 id="studio-story-title">A home for the moments that matter.</h2><p>We bring photographs into the spaces you call home. From the first conversation to the final finish, each piece is considered, crafted and made to feel like yours.</p><Link href="/about" className="studio-inline-link">Discover our story <ArrowRight size={17} /></Link></div>
+        <div className="studio-story-copy"><span className="studio-kicker">OUR STORY</span><h2 id="studio-story-title">A home for the moments that matter.</h2><p>We bring photographs into the spaces you call home. From the first conversation to the final finish, each piece is considered, crafted and made to feel like yours.</p><Link href="/about" className="studio-inline-link">Discover our story <ArrowRight size={17} /></Link></div>
       </section>
 
-      <section className="studio-section studio-collections" aria-labelledby="studio-collections-title">
-        <Heading eyebrow="02 — COLLECTIONS" title="A beautiful place for every story." copy="Explore the craft, materials and pieces that make a memory feel at home." />
+      {categories.length > 0 && <section className="studio-section studio-collections" aria-labelledby="studio-collections-title">
+        <Heading eyebrow="COLLECTIONS" title="A beautiful place for every story." copy="Explore the craft, materials and pieces that make a memory feel at home." />
         <div className="studio-collection-grid">{categories.map((item, index) => <Link key={`${item.title}-${index}`} href={safeSiteHref(item.href, "/store")} className={`studio-collection-card studio-collection-card-${index + 1}`}><img src={item.image} alt="" loading="lazy" decoding="async" /><div><span>0{index + 1} / COLLECTION</span><h3>{item.title}</h3><p>{item.copy}</p><strong>Explore collection <ArrowRight size={17} /></strong></div></Link>)}</div>
-      </section>
-
-      <section className="studio-why studio-section"><div><span className="studio-kicker">03 — WHY HAVESTORY</span><h2>Details make the difference.</h2></div><p>We care about how your story is printed, framed and delivered. Our studio helps you choose with confidence at every step.</p><Link href="/services" className="studio-inline-link">Meet the studio <ArrowRight size={17} /></Link></section>
+      </section>}
 
       <section className="studio-section studio-products">
-        <Heading eyebrow="04 — THE STUDIO EDIT" title="Pieces worth keeping." copy="Selected from the collection for homes, gifts and everyday memories." href="/store" link="Shop all pieces" />
+        <Heading eyebrow="FRAMES & PRINTS" title="Pieces worth keeping." copy="Selected from the collection for homes, gifts and everyday memories." href="/store" link="Shop all pieces" />
         {favouriteProducts.length ? <div className="studio-product-grid">{favouriteProducts.map(product => <Link href={`/store/${product.slug || product.id}`} key={product.id} className="studio-product-card"><div>{product.imageUrl ? <img src={product.imageUrl} alt={product.name} loading="lazy" /> : <ImageIcon />}</div><span>{product.category?.name || "HAVESTORY edition"}</span><h3>{product.name}</h3><p>{product.price ? `Rs. ${Number(product.price).toLocaleString()}` : "Quote on request"}</p></Link>)}</div> : <ComingSoon eyebrow="Collection in progress" title="New pieces are on the way." description="The shop is being prepared, but custom orders are open now." href="/custom-project" cta="Start a custom order" />}
       </section>
 
-      {portfolioList.length > 0 && <section className="studio-section studio-gallery"><Heading eyebrow="05 — RECENT STORIES" title="Made in our studio." copy="A few moments brought into focus." href="/gallery" link="Explore the gallery" /><div className="studio-gallery-grid">{portfolioList.map((item, index) => <Link key={item.id} href="/gallery" className={`studio-gallery-item studio-gallery-item-${index + 1}`}>{item.imageUrl ? <img src={item.imageUrl} alt={item.title || "HAVESTORY studio work"} loading="lazy" /> : <ImageIcon />}<span>{item.title || `Studio story ${index + 1}`} <ArrowRight size={16} /></span></Link>)}</div></section>}
+      {portfolioList.length > 0 && <section className="studio-section studio-gallery"><Heading eyebrow="RECENT WORK" title="Made in our studio." copy="A few moments brought into focus." href="/gallery" link="Explore the gallery" /><div className="studio-gallery-grid">{portfolioList.map((item, index) => <Link key={item.id} href="/gallery" className={`studio-gallery-item studio-gallery-item-${index + 1}`}>{item.imageUrl ? <img src={item.imageUrl} alt={item.title || "HAVESTORY studio work"} loading="lazy" /> : <ImageIcon />}<span>{item.title || `Studio story ${index + 1}`} <ArrowRight size={16} /></span></Link>)}</div></section>}
 
-      <section className="studio-process"><div className="studio-process-intro"><span className="studio-kicker">06 — THE PROCESS</span><h2>From your idea to a piece of your story.</h2><p>Tell us what you are imagining. We will guide the size, materials and finish, then make it with care.</p><Link href="/custom-project" className="studio-action-primary">Start your project <ArrowRight size={18} /></Link></div><ol>{process.map(([number, title, copy]) => <li key={number}><span>{number}</span><div><h3>{title}</h3><p>{copy}</p></div></li>)}</ol></section>
+      <section className="studio-process"><div className="studio-process-intro"><span className="studio-kicker">HOW IT WORKS</span><h2>From your idea to a piece of your story.</h2><p>Tell us what you are imagining. We will guide the size, materials and finish, then make it with care.</p><Link href="/custom-project" className="studio-action-primary">Start your project <ArrowRight size={18} /></Link></div><ol>{process.map(([number, title, copy]) => <li key={number}><span>{number}</span><div><h3>{title}</h3><p>{copy}</p></div></li>)}</ol></section>
 
-      {serviceList.length > 0 && <section className="studio-section studio-services"><Heading eyebrow="07 — BEYOND THE FRAME" title="More from the studio." href="/services" link="Explore services" /><div>{serviceList.map((service, index) => <Link href="/services" key={service.id}><span>0{index + 1}</span><div><h3>{service.name}</h3><p>{service.description || "Designed and finished with the HAVESTORY studio."}</p></div><ArrowRight size={20} /></Link>)}</div></section>}
+      {serviceList.length > 0 && <section className="studio-section studio-services"><Heading eyebrow="STUDIO SERVICES" title="More from the studio." href="/services" link="Explore services" /><div>{serviceList.map((service, index) => <Link href="/services" key={service.id}><span>0{index + 1}</span><div><h3>{service.name}</h3><p>{service.description || "Designed and finished with the HAVESTORY studio."}</p></div><ArrowRight size={20} /></Link>)}</div></section>}
 
-      {reviewList.length > 0 && <section className="studio-section studio-reviews"><Heading eyebrow="08 — KIND WORDS" title="Stories from our clients." /><div>{reviewList.map(review => <blockquote key={review.id}><p>“{review.comment}”</p><footer><strong>{review.customerName}</strong><span aria-label={`${review.rating || 5} out of 5 stars`}>{"★".repeat(Math.min(5, review.rating || 5))}</span></footer></blockquote>)}</div></section>}
+      {reviewList.length > 0 && <section className="studio-section studio-reviews"><Heading eyebrow="CLIENT REVIEWS" title="Stories from our clients." /><div>{reviewList.map(review => <blockquote key={review.id}><p>“{review.comment}”</p><footer><strong>{review.customerName}</strong><span aria-label={`${review.rating || 5} out of 5 stars`}>{"★".repeat(Math.min(5, review.rating || 5))}</span></footer></blockquote>)}</div></section>}
 
-      <section className="studio-closing"><span className="studio-kicker">LET'S MAKE IT PERSONAL</span><h2>Your story deserves to be seen.</h2><p>Share a photograph or an idea. We will help with the rest.</p><Link href="/custom-project" className="studio-action-primary">Create your piece <ArrowRight size={18} /></Link></section>
+      <section className="studio-closing"><span className="studio-kicker">CUSTOM FRAMING</span><h2>Need a different size or finish?</h2><p>Tell us what you need and we will send a quote.</p><Link href="/custom-project" className="studio-action-primary">Request a custom frame <ArrowRight size={18} /></Link></section>
     </main>
   );
 }

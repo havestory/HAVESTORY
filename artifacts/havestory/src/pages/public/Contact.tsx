@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { MapPin, Phone, Mail, Clock, Send, MessageCircle, ArrowRight } from 'lucide-react';
+import { MapPin, Phone, Mail, Send, MessageCircle, ArrowRight } from 'lucide-react';
 import { Link } from 'wouter';
 
 const contactSchema = z.object({
@@ -71,10 +71,6 @@ export default function Contact() {
               <MapPin aria-hidden="true" />
               <div><span>Workshop</span><p>{address}</p></div>
             </div>
-            <div className="hsx-contact-detail-row">
-              <Clock aria-hidden="true" />
-              <div><span>Hours</span><p>Mon – Fri · 9:00 AM – 6:00 PM<br />Sat · 9:00 AM – 1:00 PM</p></div>
-            </div>
           </section>
 
           <section className="hsx-contact-block hsx-contact-reach">
@@ -102,7 +98,7 @@ export default function Contact() {
           <div className="hsx-contact-form-heading">
             <span>Start a conversation</span>
             <h2>Send an Inquiry</h2>
-            <p>Share a few details about your project and our team will get back to you within 24 hours.</p>
+            <p>Share a few details and we will get back to you.</p>
           </div>
 
           <Form {...form}>

@@ -260,7 +260,6 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="hsx-shell-actions">
-            {!mobileNav && <Link href="/custom-project" className="hsx-shell-project">Start a project <ArrowRight size={15} /></Link>}
             {mobileNav && <button
               type="button"
               className="hsx-mobile-menu-button"

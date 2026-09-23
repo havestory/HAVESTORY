@@ -174,7 +174,6 @@ export default function TrackOrder() {
           <form onSubmit={handleSearch} className="hs-track-form">
             <label className="hs-track-field" htmlFor="public-order-id">
               <Search aria-hidden="true" />
-              <span className="sr-only">Order ID</span>
               <Input id="public-order-id" value={orderId} onChange={(e) => { setOrderId(e.target.value.toUpperCase()); setSearchError(null); }} placeholder="HS-SEPXXXXXXXXXX" aria-label="Order ID" className="hs-track-input" />
             </label>
             <Button type="submit" className="hs-track-submit">
