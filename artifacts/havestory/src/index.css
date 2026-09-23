@@ -6802,6 +6802,16 @@ body {
   box-shadow: 0 18px 44px rgba(44,33,27, .08) !important;
   animation: hs-gallery-loading-in 180ms cubic-bezier(.23, 1, .32, 1) both;
 }
+.coming-soon-card { padding: clamp(32px,5vw,64px); border: 1px solid rgba(96,73,54,.18); background: #fffdf8; }
+.coming-soon-card.is-compact { padding: 28px; }
+.coming-soon-content { max-width: 620px; margin: 0 auto; text-align: center; }
+.coming-soon-icon { width: 42px; height: 42px; margin: 0 auto 18px; display: grid; place-items: center; color: #604936; }
+.coming-soon-icon svg { width: 23px; height: 23px; }
+.coming-soon-content .section-label { margin-bottom: 12px; }
+.coming-soon-content h2 { color: #2c211b; font-family: 'Cormorant Garamond',Georgia,serif; font-size: clamp(32px,4vw,44px); line-height: 1.1; }
+.coming-soon-content > p:not(.section-label) { margin: 14px auto 0; color: #604936; font-size: 14px; line-height: 1.6; }
+.coming-soon-action { display: inline-flex; align-items: center; gap: 8px; margin-top: 24px; padding: 12px 20px; background: #2c211b; color: #fffdf8; font-size: 12px; font-weight: 700; text-decoration: none; }
+.coming-soon-action:hover { background: #604936; color: #fffdf8; }
 @keyframes hs-gallery-loading-in {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
