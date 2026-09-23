@@ -2,7 +2,6 @@ import { type ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useGetSettings } from '@workspace/api-client-react';
 import { Menu, X, Phone, Mail, MapPin, Instagram, Facebook, ArrowRight, ShoppingBag, Sparkles, MessageCircle, ChevronDown } from 'lucide-react';
-import './public-mobile-menu.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import { applyThemeVars } from '@/lib/theme-utils';
 import { useShopCart } from '@/lib/shop-cart';
@@ -94,7 +93,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   }, [menuOpen]);
 
   useEffect(() => {
-    const mobile = window.matchMedia('(max-width: 780px)');
+    const mobile = window.matchMedia('(max-width: 900px)');
     const syncNavigationMode = (event: MediaQueryListEvent | MediaQueryList) => {
       setMobileNav(event.matches);
       if (!event.matches) {
@@ -138,6 +137,11 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   // this fixed prevents an old saved preset from producing mixed page styles.
   const publicThemePreset = 'atelier-light';
   const isLightTheme = true;
+
+  useEffect(() => {
+    document.documentElement.dataset.hsPublicTheme = 'heritage';
+    return () => { delete document.documentElement.dataset.hsPublicTheme; };
+  }, []);
 
   useEffect(() => {
     if (!settings) return;
@@ -185,10 +189,10 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     return (
       <main data-public-site="" className="min-h-[100dvh] bg-[hsl(var(--background))] text-[hsl(var(--foreground))] flex items-center justify-center px-6">
         <div className="max-w-md rounded-[28px] border border-[hsl(var(--border))] bg-white/70 p-8 text-center shadow-[0_20px_60px_rgba(53,25,67,.08)] backdrop-blur-xl">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6d3f86]">HAVESTORY</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#604936]">HAVESTORY</p>
           <h1 className="mt-3 font-serif text-3xl font-semibold">The studio is taking a moment.</h1>
           <p className="mt-3 text-sm text-[hsl(var(--muted-foreground))]">Please refresh to load the latest studio details.</p>
-          <button type="button" onClick={() => void refetchSettings()} className="mt-6 rounded-full bg-[#29153d] px-5 py-3 text-xs font-bold uppercase tracking-[0.16em] text-white transition-transform active:scale-95">Try again</button>
+          <button type="button" onClick={() => void refetchSettings()} className="mt-6 rounded-full bg-[#2C211B] px-5 py-3 text-xs font-bold uppercase tracking-[0.16em] text-white transition-transform active:scale-95">Try again</button>
         </div>
       </main>
     );
@@ -197,13 +201,13 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   if (settings?.siteClosedEnabled) {
     return (
       <main data-public-site="" className="min-h-[100dvh] bg-[#0A0907] text-white flex items-center justify-center px-6">
-        <div className="max-w-xl text-center border border-[#C9A84C]/25 bg-[#C9A84C]/5 p-10 sm:p-14">
-          <div className="w-12 h-px bg-[#C9A84C] mx-auto mb-8" />
-          <p className="text-[#C9A84C] text-[10px] font-bold uppercase tracking-[0.24em] mb-4">Studio Notice</p>
+        <div className="max-w-xl text-center border border-[#B28A50]/25 bg-[#B28A50]/5 p-10 sm:p-14">
+          <div className="w-12 h-px bg-[#B28A50] mx-auto mb-8" />
+          <p className="text-[#B28A50] text-[10px] font-bold uppercase tracking-[0.24em] mb-4">Studio Notice</p>
           <h1 className="font-serif text-4xl sm:text-5xl font-semibold">{settings.businessName || 'HAVESTORY'}</h1>
           <p className="text-white/60 leading-relaxed mt-6">{settings.siteClosedMessage || 'Our website is temporarily unavailable. Please check back soon.'}</p>
           {settings.whatsappNumber && (
-            <a href={`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`} className="inline-flex mt-8 bg-[#C9A84C] text-[#0A0907] px-6 py-3 text-xs font-bold uppercase tracking-widest">
+            <a href={`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}`} className="inline-flex mt-8 bg-[#B28A50] text-[#0A0907] px-6 py-3 text-xs font-bold uppercase tracking-widest">
               Contact on WhatsApp
             </a>
           )}
@@ -221,7 +225,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     { href: '/services',     label: 'Studio Services' },
     { href: '/gallery',      label: 'Gallery' },
     { href: '/track-order',  label: 'Track Order' },
-    { href: '/about',        label: 'About' },
+    { href: '/about',        label: 'Our Story' },
     { href: '/contact',      label: 'Contact' },
   ];
 
@@ -298,7 +302,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             >
               <div className={`flex items-center justify-between px-6 py-6 border-b ${isLightTheme ? 'border-[hsl(var(--border))]' : 'border-[#1E1A14]'}`}>
                 <span className="font-serif font-bold text-xl text-[hsl(var(--foreground))]">{settings?.businessName || 'HAVESTORY'}</span>
-                <button onClick={() => setMenuOpen(false)} className="text-[hsl(var(--muted-foreground))] hover:text-[#C9A84C] transition-colors">
+                <button onClick={() => setMenuOpen(false)} className="text-[hsl(var(--muted-foreground))] hover:text-[#B28A50] transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -313,7 +317,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                     <Link
                       href={l.href}
                       className={`atelier-mobile-link block py-4 font-serif text-2xl font-semibold border-b transition-colors ${
-                        isActive(l.href) ? 'text-[#C9A84C]' : 'text-[hsl(var(--foreground)/0.75)] hover:text-[hsl(var(--foreground))]'
+                        isActive(l.href) ? 'text-[#B28A50]' : 'text-[hsl(var(--foreground)/0.75)] hover:text-[hsl(var(--foreground))]'
                       }`}
                     >
                       {l.label}
@@ -328,11 +332,11 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               </nav>
               <div className="px-6 pb-8 space-y-3">
                 {settings?.phone && (
-                  <a href={`tel:${settings.phone}`} className="flex items-center gap-2 text-sm text-[hsl(var(--muted-foreground))] hover:text-[#C9A84C] transition-colors">
+                  <a href={`tel:${settings.phone}`} className="flex items-center gap-2 text-sm text-[hsl(var(--muted-foreground))] hover:text-[#B28A50] transition-colors">
                     <Phone className="w-4 h-4" />{settings.phone}
                   </a>
                 )}
-                <Link href="/contact" className="block w-full text-center bg-[#C9A84C] text-[#0A0907] text-xs font-bold uppercase tracking-widest px-4 py-3 hover:bg-[#D4B55E] transition-colors">
+                <Link href="/contact" className="block w-full text-center bg-[#B28A50] text-[#0A0907] text-xs font-bold uppercase tracking-widest px-4 py-3 hover:bg-[#B28A50] transition-colors">
                   Get a Quote
                 </Link>
               </div>

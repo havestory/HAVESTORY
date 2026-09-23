@@ -28,21 +28,21 @@
 }
 html[data-hs-admin-theme] {
   --admin-on-solid: 0 0% 100%;
-  --admin-brand-ink: 276 37% 35%;
+  --admin-brand-ink: 24 24% 14%;
   --admin-success-solid: 158 62% 26%;
   --admin-warning-solid: 32 85% 29%;
   --admin-danger-solid: 350 62% 38%;
   --admin-font: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
-  --admin-canvas: 270 14% 97%;
-  --admin-surface: 0 0% 100%;
-  --admin-subtle: 270 16% 95%;
-  --admin-ink: 270 18% 16%;
-  --admin-muted: 270 9% 40%;
-  --admin-border: 270 14% 86%;
-  --admin-inverse: 270 22% 19%;
-  --admin-brand: 276 37% 35%;
-  --admin-brand-soft: 276 38% 95%;
-  --admin-brand-line: 276 24% 78%;
+  --admin-canvas: 40 48% 94%;
+  --admin-surface: 45 100% 99%;
+  --admin-subtle: 35 29% 86%;
+  --admin-ink: 24 24% 14%;
+  --admin-muted: 30 22% 35%;
+  --admin-border: 35 29% 80%;
+  --admin-inverse: 24 24% 14%;
+  --admin-brand: 24 24% 14%;
+  --admin-brand-soft: 40 48% 94%;
+  --admin-brand-line: 35 29% 72%;
   --admin-success: 158 62% 26%;
   --admin-success-soft: 152 44% 95%;
   --admin-success-line: 156 31% 75%;
@@ -55,16 +55,16 @@ html[data-hs-admin-theme] {
   --admin-chart-info: 211 54% 38%;
 }
 html[data-hs-admin-theme='dark'] {
-  --admin-brand-ink: 276 50% 78%;
-  --admin-canvas: 270 16% 9%;
-  --admin-surface: 270 15% 13%;
-  --admin-subtle: 270 13% 18%;
-  --admin-ink: 270 15% 94%;
-  --admin-muted: 270 10% 73%;
-  --admin-border: 270 12% 29%;
-  --admin-brand: 276 37% 42%;
-  --admin-brand-soft: 276 22% 22%;
-  --admin-brand-line: 276 22% 47%;
+  --admin-brand-ink: 37 34% 74%;
+  --admin-canvas: 24 19% 9%;
+  --admin-surface: 24 16% 13%;
+  --admin-subtle: 27 15% 18%;
+  --admin-ink: 40 48% 94%;
+  --admin-muted: 35 20% 73%;
+  --admin-border: 29 16% 29%;
+  --admin-brand: 29 29% 29%;
+  --admin-brand-soft: 29 18% 22%;
+  --admin-brand-line: 35 27% 47%;
   --admin-success: 158 42% 62%;
   --admin-success-soft: 158 29% 17%;
   --admin-success-line: 158 30% 36%;
@@ -100,11 +100,11 @@ html[data-hs-admin-theme='dark'] {
   --destructive: var(--admin-danger-solid);
   --destructive-foreground: 0 0% 100%;
   --sidebar: var(--admin-inverse);
-  --sidebar-foreground: 270 18% 88%;
-  --sidebar-primary: 276 48% 76%;
+  --sidebar-foreground: 40 36% 88%;
+  --sidebar-primary: 35 34% 72%;
   --sidebar-primary-foreground: var(--admin-inverse);
-  --sidebar-border: 270 17% 29%;
-  --sidebar-accent: 270 19% 25%;
+  --sidebar-border: 29 17% 29%;
+  --sidebar-accent: 29 19% 25%;
   --sidebar-accent-foreground: 0 0% 100%;
   --sidebar-ring: var(--admin-brand-line);
   --app-font-sans: var(--admin-font);

@@ -240,6 +240,12 @@ export default function ProductDetail() {
           <div className="hs-product-assurance"><p><ShieldCheck /> Secure packaging</p><p><Truck /> Island-wide delivery</p>{config.productionTime && <p><Check /> Ready in {config.productionTime}</p>}</div>
         </section>
       </div>
+      <div className="hs-product-mobile-order" aria-label="Quick order">
+        <div><span>Selected price</span><strong>{formatMoney(unitPrice)}</strong></div>
+        <button type="button" onClick={() => putInCart(true)} disabled={!hasRequiredSelections}>
+          {hasRequiredSelections ? 'Order now' : 'Choose options'} <ArrowRight size={17} />
+        </button>
+      </div>
     </main>
   );
 }
