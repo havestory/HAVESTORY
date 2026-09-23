@@ -7497,7 +7497,7 @@ body {
 [data-public-site] .hs-gallery-page { background: transparent; }
 [data-public-site] .hs-gallery-hero { min-height: 430px; padding: 160px max(5vw, 22px) 80px; background: linear-gradient(135deg, #2c211b, #604936 57%, #b28a50); color: #fff; }
 [data-public-site] .hs-gallery-hero h1 { color: #fff; font-size: clamp(54px, 8vw, 112px); line-height: .88; letter-spacing: -.07em; }
-[data-public-site] .hs-gallery-hero h1 em { color: #ddd0bc; }
+[data-public-site] .hs-gallery-hero h1 em { color: #806743; }
 [data-public-site] .hs-gallery-hero p { max-width: 430px; color: rgba(255,255,255,.74); }
 [data-public-site] .hs-gallery-content { width: min(100%, 1500px); margin: -36px auto 0; padding: 0 max(3vw, 18px) 110px; position: relative; z-index: 2; }
 [data-public-site] .hs-gallery-intro { margin-bottom: 18px; padding: 18px 20px; border: 1px solid var(--hs-glass-line); border-radius: 16px; background: rgba(255,255,255,.76); box-shadow: 0 12px 35px rgba(44,33,27,.08); backdrop-filter: blur(16px); }
@@ -8032,81 +8032,56 @@ body {
   isolation: isolate;
 }
 .hs-studio-loader-overlay {
-  background:
-    radial-gradient(circle at 50% 42%, rgba(178,138,80,.16), transparent 22rem),
-    linear-gradient(135deg, #f7f1ff 0%, #fffdf8 48%, #f7f2e8 100%);
+  background: #f7f2e8;
 }
 .hs-studio-loader {
   display: flex;
-  min-width: min(82vw, 320px);
+  min-width: 180px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 14px;
   color: #2c211b;
   text-align: center;
-  animation: none;
 }
-.hs-studio-loader-rings {
-  position: relative;
-  width: clamp(132px, 18vw, 184px);
-  height: clamp(132px, 18vw, 184px);
-}
-.hs-studio-loader-ring {
-  position: absolute;
-  inset: 0;
-  border: 1px solid rgba(96,73,54,.24);
-  border-radius: 50%;
-  box-shadow: 0 0 0 1px rgba(255,255,255,.55) inset, 0 16px 34px rgba(96,73,54,.09);
-}
-.hs-studio-loader-ring-one {
-  border-top: 3px solid #604936;
-  animation: hs-loader-spin 2.8s linear infinite;
-}
-.hs-studio-loader-ring-two {
-  inset: 13%;
-  border-right: 3px solid #b28a50;
-  animation: hs-loader-spin-reverse 2.1s linear infinite;
-}
-.hs-studio-loader-ring-three {
-  inset: 26%;
-  border-bottom: 3px solid #b28a50;
-  animation: hs-loader-spin 1.45s linear infinite;
-}
-.hs-studio-loader-core {
-  position: absolute;
-  inset: 39%;
+.hs-studio-loader-mark {
+  width: 52px;
+  height: 52px;
   display: grid;
   place-items: center;
-  border-radius: 50%;
+  border-radius: 10px;
   background: #2c211b;
   color: #fffaf2;
-  font-size: 12px;
-  font-weight: 950;
+  font-family: Georgia, serif;
+  font-size: 18px;
+  font-weight: 700;
   letter-spacing: .08em;
-  box-shadow: 0 8px 24px rgba(44,33,27,.24);
 }
-.hs-studio-loader-brand {
-  margin-top: 28px;
-  color: #2c211b;
-  font-size: clamp(18px, 3vw, 26px);
-  font-weight: 950;
-  letter-spacing: .24em;
-  line-height: 1;
+.hs-studio-loader-mark img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
 }
-.hs-studio-loader-caption {
-  margin-top: 12px;
-  color: rgba(44,33,27,.58);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: .18em;
+.hs-studio-loader-name {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .22em;
   text-transform: uppercase;
 }
-@keyframes hs-loader-spin { to { transform: rotate(360deg); } }
-@keyframes hs-loader-spin-reverse { to { transform: rotate(-360deg); } }
-@keyframes hs-loader-reveal {
-  from { opacity: 0; transform: translateY(12px) scale(.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+.hs-studio-loader-progress {
+  width: 96px;
+  height: 2px;
+  overflow: hidden;
+  background: #ddd0bc;
 }
+.hs-studio-loader-progress i {
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: #604936;
+  animation: hs-loader-progress 1.25s ease-in-out infinite;
+}
+@keyframes hs-loader-progress { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
 
 /* Keep alternate loading artwork static without overriding shared Tailwind
    animation utilities used by interactive components. */
@@ -8121,8 +8096,7 @@ body {
   animation: none !important;
 }
 @media (prefers-reduced-motion: reduce) {
-  .hs-studio-loader,
-  .hs-studio-loader-ring { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+  .hs-studio-loader-progress i { animation: none; width: 100%; }
 }
 
 /* Home hero note: minimal animated studio signature ----------------------- */
@@ -8130,12 +8104,7 @@ body {
 @keyframes hs-hero-sparkle { 0%,100% { transform: rotate(0deg) scale(1); opacity: .75; } 50% { transform: rotate(12deg) scale(1.08); opacity: 1; } }
 @keyframes hs-hero-gradient-shift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 
-/* Final loader authority: legacy splash rules must not create a second dark layer */
-.hs-studio-loader-overlay {
-  background:
-    radial-gradient(circle at 50% 42%, rgba(178,138,80,.16), transparent 22rem),
-    linear-gradient(135deg, #f7f1ff 0%, #fffdf8 48%, #f7f2e8 100%) !important;
-}
+/* Legacy splash decorations stay hidden. */
 .hs-studio-loader-overlay::before,
 .hs-studio-loader-overlay::after {
   display: none !important;
@@ -8385,15 +8354,6 @@ body {
 }
 
 /* Final HAVESTORY branding and tracking feedback authority. */
-.hs-studio-loader-core img {
-  display: block;
-  width: 72%;
-  height: 72%;
-  object-fit: contain;
-  border-radius: 50%;
-  background: #fffaf2;
-  padding: 3px;
-}
 [data-public-site] .hsx-footer-signature {
   display: flex;
   align-items: center;

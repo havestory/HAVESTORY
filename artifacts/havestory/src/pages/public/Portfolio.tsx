@@ -34,7 +34,7 @@ export default function Portfolio() {
     <div className="hs-gallery-page">
       <header className="hs-gallery-hero">
         <div><span>GALLERY</span><h1>Selected studio<br /><em>work.</em></h1></div>
-        <p>Browse finished frames, prints and projects from HAVESTORY.</p>
+        {portfolioItems.length > 0 && <p>Browse finished frames, prints and projects from HAVESTORY.</p>}
       </header>
 
       <main className="hs-gallery-content">
