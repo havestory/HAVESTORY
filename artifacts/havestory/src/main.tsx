@@ -6,7 +6,6 @@ import { applyThemeVars } from '@/lib/theme-utils';
 
 import './index.css';
 import './public-spacing.css';
-import './home-benefits.css';
 import './design-refresh.css';
 import './admin-search.css';
 import './pos-unified.css';
