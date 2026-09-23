@@ -49,6 +49,9 @@
   --hs-plum: var(--hs-brown);
   --hs-plum-deep: var(--hs-espresso);
   --hs-cream: var(--hs-ivory);
+  --glass-ink: var(--hs-espresso);
+  --glass-clay: var(--hs-brown);
+  --glass-saffron: var(--hs-gold);
   color: var(--hs-espresso) !important;
   background: var(--hs-ivory) !important;
   font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
