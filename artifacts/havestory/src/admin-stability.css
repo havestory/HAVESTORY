@@ -1,48 +1,21 @@
-/* Admin theme: single source for palette and typography.
-   Component layout belongs to its component; Tailwind utilities consume these tokens. */
-@theme inline {
-  --color-admin-canvas: hsl(var(--admin-canvas));
-  --color-admin-surface: hsl(var(--admin-surface));
-  --color-admin-subtle: hsl(var(--admin-subtle));
-  --color-admin-ink: hsl(var(--admin-ink));
-  --color-admin-muted: hsl(var(--admin-muted));
-  --color-admin-border: hsl(var(--admin-border));
-  --color-admin-inverse: hsl(var(--admin-inverse));
-  --color-admin-brand-ink: hsl(var(--admin-brand-ink));
-  --color-admin-success-solid: hsl(var(--admin-success-solid));
-  --color-admin-warning-solid: hsl(var(--admin-warning-solid));
-  --color-admin-danger-solid: hsl(var(--admin-danger-solid));
-  --color-admin-brand: hsl(var(--admin-brand));
-  --color-admin-brand-soft: hsl(var(--admin-brand-soft));
-  --color-admin-brand-line: hsl(var(--admin-brand-line));
-  --color-admin-success: hsl(var(--admin-success));
-  --color-admin-success-soft: hsl(var(--admin-success-soft));
-  --color-admin-success-line: hsl(var(--admin-success-line));
-  --color-admin-warning: hsl(var(--admin-warning));
-  --color-admin-warning-soft: hsl(var(--admin-warning-soft));
-  --color-admin-warning-line: hsl(var(--admin-warning-line));
-  --color-admin-danger: hsl(var(--admin-danger));
-  --color-admin-danger-soft: hsl(var(--admin-danger-soft));
-  --color-admin-danger-line: hsl(var(--admin-danger-line));
-  --color-admin-shadow: hsl(var(--admin-ink) / .07);
-}
+/* Admin palette. Tailwind utility aliases live in the index.css entrypoint. */
 html[data-hs-admin-theme] {
   --admin-on-solid: 0 0% 100%;
-  --admin-brand-ink: 34 40% 34%;
+  --admin-brand-ink: 220 18% 22%;
   --admin-success-solid: 158 62% 26%;
   --admin-warning-solid: 32 85% 29%;
   --admin-danger-solid: 350 62% 38%;
   --admin-font: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
-  --admin-canvas: 40 48% 94%;
-  --admin-surface: 45 100% 99%;
-  --admin-subtle: 35 29% 86%;
-  --admin-ink: 24 24% 14%;
-  --admin-muted: 30 22% 35%;
-  --admin-border: 35 29% 80%;
-  --admin-inverse: 155 32% 17%;
-  --admin-brand: 34 40% 34%;
-  --admin-brand-soft: 40 48% 94%;
-  --admin-brand-line: 35 29% 72%;
+  --admin-canvas: 220 14% 97%;
+  --admin-surface: 0 0% 100%;
+  --admin-subtle: 220 13% 93%;
+  --admin-ink: 220 18% 13%;
+  --admin-muted: 220 10% 36%;
+  --admin-border: 220 14% 82%;
+  --admin-inverse: 220 18% 17%;
+  --admin-brand: 220 18% 22%;
+  --admin-brand-soft: 220 14% 94%;
+  --admin-brand-line: 220 12% 70%;
   --admin-success: 158 62% 26%;
   --admin-success-soft: 152 44% 95%;
   --admin-success-line: 156 31% 75%;
@@ -55,17 +28,17 @@ html[data-hs-admin-theme] {
   --admin-chart-info: 211 54% 38%;
 }
 html[data-hs-admin-theme='dark'] {
-  --admin-brand-ink: 38 42% 72%;
-  --admin-inverse: 155 32% 12%;
-  --admin-canvas: 24 19% 9%;
-  --admin-surface: 24 16% 13%;
-  --admin-subtle: 27 15% 18%;
-  --admin-ink: 40 48% 94%;
-  --admin-muted: 35 20% 73%;
-  --admin-border: 29 16% 29%;
-  --admin-brand: 29 29% 29%;
-  --admin-brand-soft: 29 18% 22%;
-  --admin-brand-line: 35 27% 47%;
+  --admin-brand-ink: 220 18% 78%;
+  --admin-inverse: 220 18% 9%;
+  --admin-canvas: 220 15% 10%;
+  --admin-surface: 220 14% 14%;
+  --admin-subtle: 220 12% 21%;
+  --admin-ink: 0 0% 96%;
+  --admin-muted: 220 12% 73%;
+  --admin-border: 220 10% 32%;
+  --admin-brand: 220 18% 28%;
+  --admin-brand-soft: 220 14% 23%;
+  --admin-brand-line: 220 12% 47%;
   --admin-success: 158 42% 62%;
   --admin-success-soft: 158 29% 17%;
   --admin-success-line: 158 30% 36%;
@@ -101,11 +74,11 @@ html[data-hs-admin-theme='dark'] {
   --destructive: var(--admin-danger-solid);
   --destructive-foreground: 0 0% 100%;
   --sidebar: var(--admin-inverse);
-  --sidebar-foreground: 40 36% 88%;
-  --sidebar-primary: 35 34% 72%;
+  --sidebar-foreground: 220 15% 88%;
+  --sidebar-primary: 220 10% 72%;
   --sidebar-primary-foreground: var(--admin-inverse);
-  --sidebar-border: 155 20% 31%;
-  --sidebar-accent: 154 22% 26%;
+  --sidebar-border: 220 13% 32%;
+  --sidebar-accent: 220 12% 27%;
   --sidebar-accent-foreground: 0 0% 100%;
   --sidebar-ring: var(--admin-brand-line);
   --app-font-sans: var(--admin-font);
