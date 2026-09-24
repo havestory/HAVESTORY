@@ -1,5 +1,5 @@
 import { visibleBanks } from "@workspace/api-zod";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { listProducts, useCreateOrder, useGetSettings } from "@workspace/api-client-react";
 import { ArrowLeft, ArrowRight, Banknote, Check, CheckCircle2, ChevronRight, ClipboardCheck, CreditCard, Loader2, MapPin, Package, ShieldCheck, Sparkles, Trash2, Truck, Wallet } from "lucide-react";
 import { motion } from "framer-motion";
@@ -100,6 +100,8 @@ export default function Checkout() {
   const [submittedOrderId, setSubmittedOrderId] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isPreparingOrder, setIsPreparingOrder] = useState(false);
+  // React state updates after the event; a ref closes the double-click gap.
+  const submissionInFlight = useRef(false);
 
   const bankTransferEnabled = settingEnabled(settings.checkoutBankTransferEnabled, true);
   const depositAmount = Number(settings.checkoutDepositAmount) || 500;
@@ -254,6 +256,7 @@ export default function Checkout() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (submissionInFlight.current || createOrder.isPending) return;
     setSubmitError(null);
     if (items.length === 0) {
       toast({ title: "Your cart is empty", description: "Add a piece from the collection before checking out.", variant: "destructive" });
@@ -268,6 +271,7 @@ export default function Checkout() {
       return;
     }
 
+    submissionInFlight.current = true;
     setIsPreparingOrder(true);
     try {
       const catalog = await listProducts();
@@ -277,6 +281,7 @@ export default function Checkout() {
         return !Number.isFinite(productId) || !activeIds.has(productId);
       });
       if (staleItem) {
+        submissionInFlight.current = false;
         const staleName = staleItem.product?.name || "one item";
         const message = `${staleName} is no longer available in the current collection. Remove it and choose an active item before checking out.`;
         setSubmitError(message);
@@ -284,6 +289,7 @@ export default function Checkout() {
         return;
       }
     } catch {
+      submissionInFlight.current = false;
       const message = "We could not verify the collection right now. Please refresh the page and try again.";
       setSubmitError(message);
       toast({ title: "Checkout needs a quick refresh", description: message, variant: "destructive" });
@@ -320,6 +326,7 @@ export default function Checkout() {
       },
     }, {
       onSuccess: (order: any) => {
+        submissionInFlight.current = false;
         const orderId = String(order?.orderId || order?.id || "");
         window.sessionStorage.setItem('havestory-tracking-token', String(order?.trackingToken || ''));
         clear();
@@ -328,6 +335,7 @@ export default function Checkout() {
         toast({ title: "Order received", description: orderId ? `Your tracking number is ${orderId}.` : "Your order has been received by the studio.", className: "hs-order-received-toast" });
       },
       onError: (error: any) => {
+        submissionInFlight.current = false;
         let message = "Please check your details and try again.";
         const payload = error?.data ?? error?.response?.data;
         if (payload) {
