@@ -122,7 +122,6 @@ export default function Dashboard() {
       <header className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
           <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-admin-brand-ink">Business overview</div>
-          <h1 className="mt-1 font-sans text-3xl font-bold text-foreground sm:text-4xl">HAVESTORY Dashboard</h1>
           <p className="mt-1 text-sm text-muted-foreground">Orders, earnings, costs and studio activity in one view.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
