@@ -6,7 +6,6 @@ import {
   Users,
   FileText,
   Package,
-  Image as ImageIcon,
   MessageSquare,
   Settings,
   LogOut,
@@ -207,7 +206,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             </div>
             <div className="flex flex-col truncate">
               <span className="text-sm text-sidebar-foreground font-medium truncate">{admin?.username || 'Admin'}</span>
-              <span className="text-[10px] font-semibold text-sidebar-foreground/70 uppercase tracking-widest">Workshop Manager</span>
+              <span className="text-[10px] font-semibold text-sidebar-foreground/70 uppercase tracking-widest">{admin?.role || 'Staff'}</span>
             </div>
           </div>
 
