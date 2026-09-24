@@ -5,6 +5,9 @@ const css = fs.readFileSync(new URL('../artifacts/havestory/src/admin-stability.
 test('Tailwind is loaded before the shared theme and admin utility classes', () => {
   const entry = fs.readFileSync(new URL('../artifacts/havestory/src/index.css', import.meta.url), 'utf8');
   assert.match(entry, /^@import ["']tailwindcss["'];\s*@theme inline/);
+  for (const utility of ['surface', 'brand', 'ink', 'border', 'canvas', 'muted']) {
+    assert.match(entry, new RegExp(`--color-admin-${utility}: hsl\\(var\\(--admin-${utility}\\)\\)`));
+  }
   const main = fs.readFileSync(new URL('../artifacts/havestory/src/main.tsx', import.meta.url), 'utf8');
   assert.match(main, /import '\.\/index\.css';/);
 });
