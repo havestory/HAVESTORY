@@ -1,6 +1,30 @@
 @import "tailwindcss";
 
 @theme inline {
+  --color-admin-canvas: hsl(var(--admin-canvas));
+  --color-admin-surface: hsl(var(--admin-surface));
+  --color-admin-subtle: hsl(var(--admin-subtle));
+  --color-admin-ink: hsl(var(--admin-ink));
+  --color-admin-muted: hsl(var(--admin-muted));
+  --color-admin-border: hsl(var(--admin-border));
+  --color-admin-inverse: hsl(var(--admin-inverse));
+  --color-admin-brand-ink: hsl(var(--admin-brand-ink));
+  --color-admin-success-solid: hsl(var(--admin-success-solid));
+  --color-admin-warning-solid: hsl(var(--admin-warning-solid));
+  --color-admin-danger-solid: hsl(var(--admin-danger-solid));
+  --color-admin-brand: hsl(var(--admin-brand));
+  --color-admin-brand-soft: hsl(var(--admin-brand-soft));
+  --color-admin-brand-line: hsl(var(--admin-brand-line));
+  --color-admin-success: hsl(var(--admin-success));
+  --color-admin-success-soft: hsl(var(--admin-success-soft));
+  --color-admin-success-line: hsl(var(--admin-success-line));
+  --color-admin-warning: hsl(var(--admin-warning));
+  --color-admin-warning-soft: hsl(var(--admin-warning-soft));
+  --color-admin-warning-line: hsl(var(--admin-warning-line));
+  --color-admin-danger: hsl(var(--admin-danger));
+  --color-admin-danger-soft: hsl(var(--admin-danger-soft));
+  --color-admin-danger-line: hsl(var(--admin-danger-line));
+  --color-admin-shadow: hsl(var(--admin-ink) / .07);
   --color-background:   hsl(var(--background));
   --color-foreground:   hsl(var(--foreground));
   --color-border:       hsl(var(--border));
