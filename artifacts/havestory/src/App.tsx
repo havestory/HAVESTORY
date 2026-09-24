@@ -1,4 +1,4 @@
-import { type ComponentType, type ReactNode, useState, useCallback, lazy, Suspense } from 'react';
+import { type ComponentType, lazy, Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary, type ErrorFallbackProps } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
@@ -8,7 +8,6 @@ import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 import { PublicLayout }   from './components/layout/PublicLayout';
 import { AdminLayout }    from './components/layout/AdminLayout';
 import { AuthGuard }      from './components/layout/AuthGuard';
-import { SplashScreen }   from './components/SplashScreen';
 import { ShopCartProvider } from './lib/shop-cart';
 import { StudioLoader } from './components/StudioLoader';
 
@@ -218,20 +217,10 @@ function Router() {
 }
 
 function App() {
-  const [showSplash, setShowSplash] = useState(() => {
-    if (window.location.pathname.startsWith('/admin')) return false;
-    try { return sessionStorage.getItem('hs:splash-seen') !== '1'; } catch { return true; }
-  });
-  const handleSplashDone = useCallback(() => {
-    try { sessionStorage.setItem('hs:splash-seen', '1'); } catch {}
-    setShowSplash(false);
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-          {showSplash && <SplashScreen onDone={handleSplashDone} />}
           <ShopCartProvider><Router /></ShopCartProvider>
         </WouterRouter>
         <Toaster />
