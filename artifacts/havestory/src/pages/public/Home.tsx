@@ -120,7 +120,7 @@ export default function Home() {
     { title: "Personal Gifts", copy: "Meaningful pieces for every occasion.", href: "/custom-project", tone: "rose", image: portfolioList[0]?.imageUrl || DEFAULT_IMAGES[0] },
     { title: "Studio Sessions", copy: "Portrait and product photography with a gallery finish.", href: "/services", tone: "sage", image: portfolioList[1]?.imageUrl || DEFAULT_IMAGES[1] },
   ];
-  const categories = featureCards.length ? categoryFallbacks.map((fallback, index) => ({ ...fallback, ...(featureCards[index] || {}), image: featureCards[index]?.image || fallback.image })) : [];
+  const categories = categoryFallbacks.map((fallback, index) => ({ ...fallback, ...(featureCards[index] || {}), image: featureCards[index]?.image || fallback.image }));
   const favouriteWindow = Math.min(4, favouritePool.length);
   const primaryHeroHref = safeSiteHref(cfg?.heroCtaLink, "/store");
   const primaryIsCustom = primaryHeroHref === "/custom-project";
