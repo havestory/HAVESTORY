@@ -8,11 +8,11 @@ import './index.css';
 import './admin-stability.css';
 import './public-spacing.css';
 import './design-refresh.css';
-import './reference-refresh.css';
 import './admin-search.css';
 import './pos-unified.css';
 import './pos-interface.css';
 import './invoice-product-picker.css';
+import './reference-refresh.css';
 import './invoice-product-picker';
 
 applyThemeVars('havestory-gallery');
