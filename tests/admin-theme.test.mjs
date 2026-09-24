@@ -2,6 +2,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const css = fs.readFileSync(new URL('../artifacts/havestory/src/admin-stability.css', import.meta.url), 'utf8');
+test('Tailwind is loaded before the shared theme and admin utility classes', () => {
+  const entry = fs.readFileSync(new URL('../artifacts/havestory/src/index.css', import.meta.url), 'utf8');
+  assert.match(entry, /^@import ["']tailwindcss["'];\s*@theme inline/);
+  const main = fs.readFileSync(new URL('../artifacts/havestory/src/main.tsx', import.meta.url), 'utf8');
+  assert.match(main, /import '\.\/index\.css';/);
+});
 function palette(selector) {
   const body = css.slice(css.indexOf(selector) + selector.length).split('}')[0];
   return Object.fromEntries([...body.matchAll(/--admin-([\w-]+):\s*([\d.]+)\s+([\d.]+)%\s+([\d.]+)%/g)].map(([,name,...values]) => [name, values.map(Number)]));
