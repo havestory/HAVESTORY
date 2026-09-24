@@ -100,20 +100,6 @@
   outline: 3px solid var(--hs-antique-gold);
   outline-offset: 4px;
 }
-/* Shared visual language for the existing admin features, including night mode. */
-[data-admin-panel] .admin-sidebar { background: #1e3a2f; }
-[data-admin-panel] .admin-sidebar .admin-nav-item { border-radius: 9px; }
-[data-admin-panel] .admin-sidebar .admin-nav-active {
-  background: rgba(255,250,242,.14);
-  box-shadow: inset 2px 0 #c7a36f;
-}
-[data-admin-panel] .admin-workspace-header { border-bottom-color: hsl(var(--admin-border)); }
-[data-admin-panel] .admin-workspace-title { font-size: clamp(1.9rem,2.5vw,2.5rem); }
-[data-admin-panel] .admin-workspace-content { background: hsl(var(--admin-canvas)); }
-[data-admin-panel] :is(button,a,input,select,textarea):focus-visible {
-  outline: 2px solid #a9824b;
-  outline-offset: 2px;
-}
 .hs-studio-loader-overlay { background: #f7f2e8; }
 .hs-studio-loader-mark { animation: hs-mark-enter .7s cubic-bezier(.22,1,.36,1) both; }
 .hs-studio-loader-progress i { background: #a9824b; }

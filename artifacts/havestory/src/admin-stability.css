@@ -28,7 +28,7 @@
 }
 html[data-hs-admin-theme] {
   --admin-on-solid: 0 0% 100%;
-  --admin-brand-ink: 24 24% 14%;
+  --admin-brand-ink: 34 40% 34%;
   --admin-success-solid: 158 62% 26%;
   --admin-warning-solid: 32 85% 29%;
   --admin-danger-solid: 350 62% 38%;
@@ -39,8 +39,8 @@ html[data-hs-admin-theme] {
   --admin-ink: 24 24% 14%;
   --admin-muted: 30 22% 35%;
   --admin-border: 35 29% 80%;
-  --admin-inverse: 24 24% 14%;
-  --admin-brand: 24 24% 14%;
+  --admin-inverse: 155 32% 17%;
+  --admin-brand: 34 40% 34%;
   --admin-brand-soft: 40 48% 94%;
   --admin-brand-line: 35 29% 72%;
   --admin-success: 158 62% 26%;
@@ -55,7 +55,8 @@ html[data-hs-admin-theme] {
   --admin-chart-info: 211 54% 38%;
 }
 html[data-hs-admin-theme='dark'] {
-  --admin-brand-ink: 37 34% 74%;
+  --admin-brand-ink: 38 42% 72%;
+  --admin-inverse: 155 32% 12%;
   --admin-canvas: 24 19% 9%;
   --admin-surface: 24 16% 13%;
   --admin-subtle: 27 15% 18%;
@@ -103,8 +104,8 @@ html[data-hs-admin-theme='dark'] {
   --sidebar-foreground: 40 36% 88%;
   --sidebar-primary: 35 34% 72%;
   --sidebar-primary-foreground: var(--admin-inverse);
-  --sidebar-border: 29 17% 29%;
-  --sidebar-accent: 29 19% 25%;
+  --sidebar-border: 155 20% 31%;
+  --sidebar-accent: 154 22% 26%;
   --sidebar-accent-foreground: 0 0% 100%;
   --sidebar-ring: var(--admin-brand-line);
   --app-font-sans: var(--admin-font);
@@ -308,19 +309,214 @@ html[data-hs-admin-theme='dark'] {
 @media (max-width: 639px) {
   [data-admin-panel] .invoice-modal-section .grid.grid-cols-2 { grid-template-columns: 1fr; }
 }
-/* Workspace frame. Page components retain their own form and data behavior. */
-[data-admin-panel] .admin-sidebar{width:16.5rem;background:hsl(var(--admin-inverse));border-right:1px solid hsl(var(--sidebar-border))}
-[data-admin-panel] .admin-sidebar-brand{min-width:0}
-[data-admin-panel] .admin-sidebar-monogram{border:1px solid hsl(var(--sidebar-primary) / .55);background:transparent;color:hsl(var(--sidebar-primary));border-radius:0}
-[data-admin-panel] .admin-sidebar-wordmark{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.55rem;letter-spacing:.075em;font-weight:600}
-[data-admin-panel] .admin-sidebar-subtitle{font-size:8px;letter-spacing:.17em;color:hsl(var(--sidebar-primary))}
-[data-admin-panel] .admin-nav-item{min-height:43px;border-radius:0;color:hsl(var(--sidebar-foreground) / .83);font-weight:500}
-[data-admin-panel] .admin-nav-item:hover{background:hsl(var(--sidebar-accent));color:hsl(var(--sidebar-accent-foreground))}
-[data-admin-panel] .admin-nav-active{background:hsl(var(--sidebar-accent));color:hsl(var(--sidebar-accent-foreground));font-weight:700}
-[data-admin-panel] .admin-nav-marker{background:hsl(var(--sidebar-primary))}
-[data-admin-panel] .admin-workspace-header{background:hsl(var(--admin-surface));border-color:hsl(var(--admin-border))}
-[data-admin-panel] .admin-workspace-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;line-height:1;letter-spacing:-.035em}
-[data-admin-panel] .admin-workspace-content{background:hsl(var(--admin-canvas));max-width:100%;scrollbar-gutter:stable}
-[data-admin-panel] .admin-new-order{border-radius:0;box-shadow:none}
-[data-admin-panel] .admin-new-order:hover{background:hsl(var(--admin-muted));color:white}
-@media(max-width:1023px){[data-admin-panel] .admin-sidebar{width:min(18rem,86vw)}[data-admin-panel] .admin-workspace-content{scrollbar-gutter:auto}}
+/* The workspace shell uses explicit layout styles so it does not depend on
+   utility generation or competing page styles. */
+[data-admin-panel].admin-frame {
+  display: flex;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: hsl(var(--admin-canvas));
+  color: hsl(var(--admin-ink));
+}
+[data-admin-panel] .admin-sidebar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex: 0 0 270px;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  background: hsl(var(--admin-inverse));
+  color: hsl(var(--sidebar-foreground));
+  border-right: 1px solid hsl(var(--sidebar-border));
+  z-index: 50;
+}
+[data-admin-panel] .admin-sidebar-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 86px;
+  padding: 18px 21px;
+  border-bottom: 1px solid hsl(var(--sidebar-border));
+}
+[data-admin-panel] .admin-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+[data-admin-panel] .admin-sidebar-monogram {
+  display: grid;
+  flex: 0 0 43px;
+  width: 43px;
+  height: 43px;
+  place-items: center;
+  border: 1px solid hsl(var(--sidebar-primary) / .7);
+  border-radius: 50%;
+  color: hsl(var(--sidebar-primary));
+  font-family: Georgia, serif;
+  font-size: 20px;
+}
+[data-admin-panel] .admin-sidebar-brand-copy { display: flex; min-width: 0; flex-direction: column; }
+[data-admin-panel] .admin-sidebar-wordmark {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 25px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: .075em;
+}
+[data-admin-panel] .admin-sidebar-subtitle {
+  margin-top: 6px;
+  color: hsl(var(--sidebar-primary));
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .18em;
+}
+[data-admin-panel] .admin-sidebar-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+[data-admin-panel] .admin-sidebar-nav { display: grid; gap: 22px; padding: 18px 12px 28px; }
+[data-admin-panel] .admin-sidebar-nav > div { display: grid; gap: 3px; }
+[data-admin-panel] .admin-sidebar-nav p {
+  margin: 0 0 5px;
+  padding: 6px 13px;
+  color: hsl(var(--sidebar-foreground) / .62);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+[data-admin-panel] .admin-nav-item {
+  display: flex;
+  min-height: 43px;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 13px;
+  border-radius: 9px;
+  color: hsl(var(--sidebar-foreground) / .86);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background .18s ease, color .18s ease;
+}
+[data-admin-panel] .admin-nav-item:hover,
+[data-admin-panel] .admin-nav-active {
+  background: hsl(var(--sidebar-accent));
+  color: hsl(var(--sidebar-accent-foreground));
+}
+[data-admin-panel] .admin-nav-active { box-shadow: inset 3px 0 hsl(var(--sidebar-primary)); }
+[data-admin-panel] .admin-nav-chevron { margin-left: auto; color: hsl(var(--sidebar-primary)); }
+[data-admin-panel] .admin-sidebar > div:last-child {
+  min-height: 70px;
+  background: hsl(var(--admin-inverse));
+  border-color: hsl(var(--sidebar-border));
+}
+[data-admin-panel] .admin-main { display: flex; flex: 1; flex-direction: column; min-width: 0; min-height: 100dvh; }
+[data-admin-panel] .admin-workspace-header {
+  display: flex;
+  min-height: 92px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px clamp(20px, 3vw, 42px);
+  border-bottom: 1px solid hsl(var(--admin-border));
+  background: hsl(var(--admin-surface));
+}
+[data-admin-panel] .admin-header-copy { min-width: 0; }
+[data-admin-panel] .admin-header-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: hsl(var(--admin-muted));
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .17em;
+}
+[data-admin-panel] .admin-workspace-title {
+  margin: 2px 0 0;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(27px, 2.5vw, 37px);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -.025em;
+}
+[data-admin-panel] .admin-header-actions { display: flex; align-items: center; gap: 12px; }
+[data-admin-panel] .admin-header-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: hsl(var(--admin-muted));
+  font-size: 12px;
+  white-space: nowrap;
+}
+[data-admin-panel] .admin-new-order {
+  display: inline-flex;
+  min-height: 39px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: hsl(var(--admin-brand));
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+[data-admin-panel] .admin-new-order:hover { background: hsl(var(--admin-ink)); }
+[data-admin-panel] .admin-workspace-content {
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  padding: clamp(18px, 3vw, 42px);
+  overflow-x: auto;
+  background: hsl(var(--admin-canvas));
+}
+[data-admin-panel] .admin-menu-button,
+[data-admin-panel] .admin-sidebar-close,
+[data-admin-panel] .admin-sidebar-overlay { display: none; }
+@media (max-width: 1023px) {
+  [data-admin-panel] .admin-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(300px, 86vw);
+    height: 100dvh;
+    transform: translateX(-102%);
+    transition: transform .22s ease;
+  }
+  [data-admin-panel] .admin-sidebar-open { transform: translateX(0); }
+  [data-admin-panel] .admin-sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: hsl(var(--admin-inverse) / .55);
+    z-index: 40;
+  }
+  [data-admin-panel] .admin-menu-button,
+  [data-admin-panel] .admin-sidebar-close {
+    display: grid;
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border: 1px solid hsl(var(--admin-border));
+    border-radius: 9px;
+    background: transparent;
+    color: inherit;
+  }
+  [data-admin-panel] .admin-sidebar-close { border-color: hsl(var(--sidebar-border)); }
+  [data-admin-panel] .admin-workspace-header { justify-content: flex-start; min-height: 76px; }
+  [data-admin-panel] .admin-header-actions { margin-left: auto; }
+  [data-admin-panel] .admin-header-date { display: none; }
+  [data-admin-panel] .admin-workspace-content { padding: 18px; }
+}
+@media (max-width: 430px) {
+  [data-admin-panel] .admin-header-eyebrow { display: none; }
+  [data-admin-panel] .admin-new-order { padding: 0 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-admin-panel] .admin-sidebar,
+  [data-admin-panel] .admin-nav-item { transition: none; }
+}

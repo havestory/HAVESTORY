@@ -6,7 +6,6 @@ import {
   Users,
   FileText,
   Package,
-  Image as ImageIcon,
   MessageSquare,
   Settings,
   LogOut,
@@ -28,15 +27,12 @@ import {
   PanelTop,
   Factory,
   FolderKanban,
-  Circle,
   PlusCircle,
   ChevronRight,
   Clock3,
   BadgeDollarSign,
 } from 'lucide-react';
 import { useAdminLogout, useGetAdminMe } from '@workspace/api-client-react';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 type AdminTheme = 'light' | 'dark';
 const THEME_KEY = 'hs_admin_theme';
@@ -58,6 +54,14 @@ export function AdminLayout({ children }: { children: ReactNode }) {
     document.documentElement.dataset.hsAdminTheme = theme;
     return () => { delete document.documentElement.dataset.hsAdminTheme; };
   }, [theme]);
+
+  useEffect(() => { setSidebarOpen(false); }, [location]);
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const close = (event: KeyboardEvent) => { if (event.key === 'Escape') setSidebarOpen(false); };
+    window.addEventListener('keydown', close);
+    return () => window.removeEventListener('keydown', close);
+  }, [sidebarOpen]);
 
   const routeTitles = [
     ['/admin/crm-projects', 'CRM Projects'],
@@ -86,17 +90,10 @@ export function AdminLayout({ children }: { children: ReactNode }) {
     if (!canAccess(permission)) return null;
     const isActive = location === href || (href !== '/admin' && location.startsWith(href));
     return (
-      <Link href={href}>
-          <div className={`admin-nav-item group relative flex items-center gap-3 px-3.5 py-2.5 transition-colors cursor-pointer
-          ${isActive
-            ? 'admin-nav-active font-bold'
-            : 'text-sidebar-foreground font-semibold hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'}`}
-        >
-          {isActive && <span className="admin-nav-marker absolute -left-3 h-7 w-0.5 bg-sidebar-primary" />}
-          <Icon className={`w-[17px] h-[17px] shrink-0 transition-transform group-hover:scale-105 ${isActive ? 'text-sidebar-primary' : 'text-sidebar-foreground/70'}`} />
-          <span className="text-[13px] tracking-[0.01em]">{label}</span>
-          {isActive && <ChevronRight className="ml-auto h-3.5 w-3.5 text-sidebar-primary" />}
-        </div>
+      <Link href={href} className={`admin-nav-item${isActive ? ' admin-nav-active' : ''}`} aria-current={isActive ? 'page' : undefined}>
+        <Icon size={18} aria-hidden="true" />
+        <span>{label}</span>
+        {isActive && <ChevronRight size={15} className="admin-nav-chevron" aria-hidden="true" />}
       </Link>
     );
   };
@@ -105,40 +102,37 @@ export function AdminLayout({ children }: { children: ReactNode }) {
     <div
       data-admin-panel=""
       data-admin-theme={theme}
-      className="min-h-screen flex bg-background text-foreground selection:bg-secondary/20"
+      className="admin-frame"
     >
       {/* Mobile overlay */}
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-admin-inverse/40 z-40 lg:hidden"
+        <button
+          type="button"
+          aria-label="Close navigation"
+          className="admin-sidebar-overlay"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* ── Sidebar ─────────────────────────────────────────────── */}
-      <aside className={`admin-sidebar fixed inset-y-0 left-0 z-50 w-72 flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border
-        transition-transform duration-300 lg:translate-x-0 lg:static lg:flex
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
-      >
+      <aside id="admin-navigation" className={`admin-sidebar${sidebarOpen ? ' admin-sidebar-open' : ''}`}>
         {/* Logo header */}
-        <div className="h-[4.75rem] flex items-center justify-between px-5 border-b border-sidebar-border shrink-0 bg-admin-brand">
-          <Link href="/admin" className="admin-sidebar-brand flex items-center gap-3">
-            <div className="admin-sidebar-monogram relative flex h-10 w-10 items-center justify-center font-serif font-bold text-xl bg-sidebar-accent text-sidebar-foreground">
-              HS<span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-sidebar bg-admin-success-solid" />
-            </div>
-            <div className="flex flex-col">
-              <span className="admin-sidebar-wordmark font-sans font-bold text-lg leading-tight tracking-wide">HAVESTORY</span>
-              <span className="admin-sidebar-subtitle font-bold text-[9px] uppercase tracking-[0.24em] leading-tight">The studio workspace</span>
-            </div>
+        <div className="admin-sidebar-heading">
+          <Link href="/admin" className="admin-sidebar-brand">
+            <span className="admin-sidebar-monogram">HS</span>
+            <span className="admin-sidebar-brand-copy">
+              <span className="admin-sidebar-wordmark">HAVESTORY</span>
+              <span className="admin-sidebar-subtitle">STUDIO WORKSPACE</span>
+            </span>
           </Link>
-          <button className="lg:hidden text-sidebar-foreground/60 hover:text-sidebar-foreground" onClick={() => setSidebarOpen(false)}>
-            <X className="w-5 h-5" />
+          <button type="button" className="admin-sidebar-close" aria-label="Close menu" onClick={() => setSidebarOpen(false)}>
+            <X size={20} />
           </button>
         </div>
 
         {/* Nav */}
-        <ScrollArea className="flex-1">
-          <nav className="px-3 py-4 space-y-5">
+        <div className="admin-sidebar-scroll">
+          <nav className="admin-sidebar-nav" aria-label="Admin navigation">
             <div>
               <NavItem href="/admin" label="Dashboard" icon={LayoutDashboard} permission="dashboard" />
             </div>
@@ -156,7 +150,6 @@ export function AdminLayout({ children }: { children: ReactNode }) {
               <p className="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/70">Catalogue</p>
               <NavItem href="/admin/products"      label="Products"  icon={Package} permission="products_view" />
               <NavItem href="/admin/services"      label="Services"  icon={Layers} permission="catalog" />
-              <NavItem href="/admin/portfolio"     label="Portfolio" icon={ImageIcon} permission="website" />
               <NavItem href="/admin/raw-materials" label="Inventory" icon={Box} permission="inventory" />
             </div>
 
@@ -202,7 +195,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
               <NavItem href="/admin/settings" label="Settings" icon={Settings} permission="owner" />
             </div>
           </nav>
-        </ScrollArea>
+        </div>
 
         {/* Footer — user + controls */}
         <div className="border-t border-sidebar-border px-4 py-4 flex items-center gap-2 bg-admin-brand shrink-0">
@@ -213,14 +206,16 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             </div>
             <div className="flex flex-col truncate">
               <span className="text-sm text-sidebar-foreground font-medium truncate">{admin?.username || 'Admin'}</span>
-              <span className="text-[10px] font-semibold text-sidebar-foreground/70 uppercase tracking-widest">Workshop Manager</span>
+              <span className="text-[10px] font-semibold text-sidebar-foreground/70 uppercase tracking-widest">{admin?.role || 'Staff'}</span>
             </div>
           </div>
 
-          {/* Night mode toggle */}
+          {/* The theme control lives here for both desktop and mobile. */}
           <button
+            type="button"
             onClick={toggleTheme}
-            title={theme === 'light' ? 'Switch to Night Mode' : 'Switch to Day Mode'}
+            title={theme === 'light' ? 'Switch to night mode' : 'Switch to day mode'}
+            aria-label={theme === 'light' ? 'Switch to night mode' : 'Switch to day mode'}
             className="w-8 h-8 flex items-center justify-center rounded-sm text-sidebar-foreground/75 hover:text-sidebar-primary hover:bg-sidebar-accent transition-colors shrink-0"
           >
             {theme === 'light'
@@ -231,8 +226,11 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
           {/* Logout */}
           <button
+            type="button"
             onClick={handleLogout}
             title="Log out"
+            aria-label="Log out"
+            disabled={logout.isPending}
             className="w-8 h-8 flex items-center justify-center rounded-sm text-sidebar-foreground/75 hover:text-destructive hover:bg-sidebar-accent transition-colors shrink-0"
           >
             <LogOut className="w-4 h-4" />
@@ -241,40 +239,22 @@ export function AdminLayout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* ── Main content ─────────────────────────────────────────── */}
-      <main className="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
-        {/* Mobile topbar */}
-        <header className="admin-mobile-topbar h-14 flex items-center justify-between px-4 bg-sidebar text-sidebar-foreground border-b border-sidebar-border lg:hidden shrink-0">
-          <button onClick={() => setSidebarOpen(true)} className="text-sidebar-foreground">
-            <Menu className="w-5 h-5" strokeWidth={2.7} />
+      <main className="admin-main">
+        <header className="admin-workspace-header">
+          <button type="button" className="admin-menu-button" aria-label="Open menu" aria-controls="admin-navigation" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(true)}>
+            <Menu size={22} />
           </button>
-          <span className="font-sans font-semibold text-base text-sidebar-foreground">HAVESTORY</span>
-          {/* Night mode toggle on mobile topbar */}
-          <button
-            onClick={toggleTheme}
-            className="text-sidebar-foreground/75 hover:text-sidebar-primary transition-colors"
-            title={theme === 'light' ? 'Night mode' : 'Day mode'}
-          >
-            {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-          </button>
-        </header>
-
-        {/* Desktop workspace bar */}
-        <header className="admin-workspace-header hidden min-h-24 shrink-0 items-center justify-between gap-6 border-b border-border px-8 lg:flex">
-          <div className="flex items-center gap-4">
-                        <div>
-              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground"><span>HAVESTORY STUDIO</span><ChevronRight size={11}/><span className="text-admin-brand-ink">WORKSPACE</span></div>
-              <div className="admin-workspace-title mt-1 text-2xl font-semibold tracking-tight text-foreground">{currentTitle}</div>
-            </div>
+          <div className="admin-header-copy">
+            <div className="admin-header-eyebrow">HAVESTORY STUDIO <ChevronRight size={12} aria-hidden="true" /> WORKSPACE</div>
+            <h1 className="admin-workspace-title">{currentTitle}</h1>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="hidden items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground xl:flex"><Clock3 size={13} className="text-admin-brand-ink" /> {new Intl.DateTimeFormat('en-LK', { weekday: 'short', day: '2-digit', month: 'short' }).format(new Date())}</div>
-            <div className="hidden items-center gap-1.5 rounded-full border border-admin-success-line bg-admin-success-soft px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-admin-success xl:flex"><Circle size={7} fill="currentColor" /> System online</div>
-            {canAccess('orders') && <Link href="/admin/orders" className="admin-new-order inline-flex items-center gap-2 bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground transition-colors"><PlusCircle size={15}/> New order</Link>}
-            <button onClick={toggleTheme} className="flex h-10 w-10 items-center justify-center border border-border bg-card text-muted-foreground hover:text-admin-brand-ink hover:border-secondary/50" title={theme === 'light' ? 'Night mode' : 'Day mode'}>{theme === 'light' ? <Moon size={16}/> : <Sun size={16}/>}</button>
+          <div className="admin-header-actions">
+            <time className="admin-header-date" dateTime={new Date().toISOString().slice(0, 10)}><Clock3 size={15} aria-hidden="true" /> {new Intl.DateTimeFormat('en-LK', { weekday: 'short', day: '2-digit', month: 'short' }).format(new Date())}</time>
+            {canAccess('orders') && <Link href="/admin/orders" className="admin-new-order"><PlusCircle size={17} aria-hidden="true" /> Orders</Link>}
           </div>
         </header>
 
-        <div className="admin-workspace-content flex-1 overflow-auto p-4 sm:p-6 lg:p-10">
+        <div className="admin-workspace-content">
           {children}
         </div>
       </main>
