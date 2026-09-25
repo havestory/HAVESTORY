@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   List, Plus, Trash2, Edit2, Copy, Link2, MoreHorizontal,
-  ExternalLink, RefreshCw, ToggleLeft, ToggleRight, PlusCircle, X
+  ExternalLink, RefreshCw, ToggleLeft, ToggleRight, PlusCircle, X,
+  GripVertical, Eye, EyeOff, ArrowLeft, ArrowRight, ArrowUp, ArrowDown
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,7 +25,27 @@ interface PriceListSection {
   id: string;
   title: string;
   columns: string[];
+  visibleColumns?: boolean[];
   rows: Array<{ id: string; cells: string[] }>;
+}
+
+function moveItem<T>(items: T[], from: number, to: number): T[] {
+  if (from < 0 || from >= items.length || to < 0 || to >= items.length || from === to) return items;
+  const next = [...items];
+  next.splice(to, 0, next.splice(from, 1)[0]);
+  return next;
+}
+
+type DragItem = { kind: 'section' | 'column' | 'row'; sectionId: string; index: number };
+function readDrag(event: React.DragEvent): DragItem | null {
+  try {
+    const item = JSON.parse(event.dataTransfer.getData('application/x-havestory-price-list'));
+    return ['section', 'column', 'row'].includes(item.kind) && Number.isInteger(item.index) ? item : null;
+  } catch { return null; }
+}
+function startDrag(event: React.DragEvent, item: DragItem) {
+  event.dataTransfer.effectAllowed = 'move';
+  event.dataTransfer.setData('application/x-havestory-price-list', JSON.stringify(item));
 }
 
 interface PriceList {
@@ -61,6 +82,7 @@ function newSection(index: number): PriceListSection {
     id: editorId('section'),
     title: `Price Table ${index + 1}`,
     columns: ['Item', 'Size', 'Price'],
+    visibleColumns: [true, true, true],
     rows: [{ id: editorId('row'), cells: ['', '', ''] }],
   };
 }
@@ -71,21 +93,40 @@ function cloneSection(section: PriceListSection, titleSuffix = ''): PriceListSec
     id: editorId('section'),
     title: titleSuffix ? `${section.title} ${titleSuffix}` : section.title,
     columns: [...section.columns],
+    visibleColumns: [...(section.visibleColumns || section.columns.map(() => true))],
     rows: section.rows.map(row => ({ ...row, id: editorId('row'), cells: [...row.cells] })),
   };
 }
 
-function SectionEditor({ section, onChange, onRemove, onDuplicate }: {
+function SectionEditor({ section, index, onChange, onRemove, onDuplicate, onMove, onDropSection }: {
   section: PriceListSection;
+  index: number;
   onChange: (s: PriceListSection) => void;
   onRemove: () => void;
   onDuplicate: () => void;
+  onMove: (direction: number) => void;
+  onDropSection: (source: DragItem) => void;
 }) {
+  const visibility = section.columns.map((_, i) => section.visibleColumns?.[i] !== false);
+  function moveColumn(from: number, to: number) {
+    onChange({ ...section, columns: moveItem(section.columns, from, to),
+      visibleColumns: moveItem(visibility, from, to),
+      rows: section.rows.map(row => ({ ...row, cells: moveItem(row.cells, from, to) })) });
+  }
+  function moveRow(from: number, to: number) {
+    onChange({ ...section, rows: moveItem(section.rows, from, to) });
+  }
+  function toggleColumn(ci: number) {
+    const next = [...visibility];
+    next[ci] = !next[ci];
+    onChange({ ...section, visibleColumns: next });
+  }
   function addColumn() {
     const col = `Column ${section.columns.length + 1}`;
     onChange({
       ...section,
       columns: [...section.columns, col],
+      visibleColumns: [...visibility, true],
       rows: section.rows.map(r => ({ ...r, cells: [...r.cells, ''] })),
     });
   }
@@ -99,6 +140,7 @@ function SectionEditor({ section, onChange, onRemove, onDuplicate }: {
         `${source} Copy`,
         ...section.columns.slice(ci + 1),
       ],
+      visibleColumns: [...visibility.slice(0, ci + 1), visibility[ci], ...visibility.slice(ci + 1)],
       rows: section.rows.map(row => ({
         ...row,
         cells: [
@@ -115,6 +157,7 @@ function SectionEditor({ section, onChange, onRemove, onDuplicate }: {
     onChange({
       ...section,
       columns: section.columns.filter((_, i) => i !== ci),
+      visibleColumns: visibility.filter((_, i) => i !== ci),
       rows: section.rows.map(r => ({ ...r, cells: r.cells.filter((_, i) => i !== ci) })),
     });
   }
@@ -159,9 +202,13 @@ function SectionEditor({ section, onChange, onRemove, onDuplicate }: {
   const cellClass = 'h-8 text-xs rounded-none border border-border/50 bg-background px-2 focus-visible:ring-0 focus-visible:border-secondary';
 
   return (
-    <div className="border border-border rounded-none mb-4">
+    <div className="border border-border rounded-xl mb-4 bg-card overflow-hidden"
+      onDragOver={event => event.preventDefault()}
+      onDrop={event => { const source = readDrag(event); if (source?.kind === 'section') { event.preventDefault(); onDropSection(source); } }}>
       {/* Section header */}
       <div className="flex items-center gap-3 p-3 bg-muted/50 border-b border-border">
+        <button type="button" draggable onDragStart={event => startDrag(event, { kind: 'section', sectionId: section.id, index })}
+          className="cursor-grab touch-none text-muted-foreground" title="Drag table to reorder" aria-label={`Drag ${section.title} table`}><GripVertical className="w-4 h-4" /></button>
         <Input
           value={section.title}
           onChange={e => onChange({ ...section, title: e.target.value })}
@@ -172,6 +219,8 @@ function SectionEditor({ section, onChange, onRemove, onDuplicate }: {
           {section.columns.length} columns · {section.rows.length} rows
         </span>
         <div className="flex items-center gap-1 shrink-0">
+          <Button type="button" variant="ghost" size="icon" onClick={() => onMove(-1)} className="h-7 w-7" aria-label={`Move ${section.title} up`}><ArrowUp className="w-3.5 h-3.5" /></Button>
+          <Button type="button" variant="ghost" size="icon" onClick={() => onMove(1)} className="h-7 w-7" aria-label={`Move ${section.title} down`}><ArrowDown className="w-3.5 h-3.5" /></Button>
           <Button type="button" variant="ghost" size="icon" onClick={onDuplicate} className="h-7 w-7 text-muted-foreground hover:text-foreground rounded-none" title="Duplicate section" aria-label="Duplicate section">
             <Copy className="w-3.5 h-3.5" />
           </Button>
@@ -187,8 +236,11 @@ function SectionEditor({ section, onChange, onRemove, onDuplicate }: {
           <thead>
             <tr>
               {section.columns.map((col, ci) => (
-                <th key={ci} className="p-1">
-                  <div className="flex items-center gap-1">
+                <th key={ci} className="p-1 min-w-32" onDragOver={event => event.preventDefault()}
+                  onDrop={event => { event.stopPropagation(); const source = readDrag(event); if (source?.kind === 'column' && source.sectionId === section.id) moveColumn(source.index, ci); }}>
+                  <div className={`flex items-center gap-1 ${visibility[ci] ? '' : 'opacity-55'}`}>
+                    <button type="button" draggable onDragStart={event => startDrag(event, { kind: 'column', sectionId: section.id, index: ci })}
+                      className="cursor-grab touch-none text-muted-foreground shrink-0" title="Drag column" aria-label={`Drag ${col} column`}><GripVertical className="w-3.5 h-3.5" /></button>
                     <Input
                       value={col}
                       onChange={e => updateColumn(ci, e.target.value)}
@@ -197,6 +249,11 @@ function SectionEditor({ section, onChange, onRemove, onDuplicate }: {
                     <button type="button" onClick={() => duplicateColumn(ci)} className="text-muted-foreground hover:text-foreground shrink-0" title="Duplicate column" aria-label={`Duplicate ${col} column`}>
                       <Copy className="w-3 h-3" />
                     </button>
+                    <button type="button" onClick={() => toggleColumn(ci)} className="text-muted-foreground hover:text-foreground shrink-0" title={visibility[ci] ? 'Hide from shared list' : 'Show on shared list'} aria-label={`${visibility[ci] ? 'Hide' : 'Show'} ${col} column`}>
+                      {visibility[ci] ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                    </button>
+                    <button type="button" onClick={() => moveColumn(ci, ci - 1)} disabled={ci === 0} className="text-muted-foreground disabled:opacity-30" title="Move column left" aria-label={`Move ${col} left`}><ArrowLeft className="w-3 h-3" /></button>
+                    <button type="button" onClick={() => moveColumn(ci, ci + 1)} disabled={ci === section.columns.length - 1} className="text-muted-foreground disabled:opacity-30" title="Move column right" aria-label={`Move ${col} right`}><ArrowRight className="w-3 h-3" /></button>
                     {section.columns.length > 1 && (
                       <button type="button" onClick={() => removeColumn(ci)} className="text-muted-foreground hover:text-destructive shrink-0" title="Remove column" aria-label={`Remove ${col} column`}>
                         <X className="w-3 h-3" />
@@ -210,7 +267,8 @@ function SectionEditor({ section, onChange, onRemove, onDuplicate }: {
           </thead>
           <tbody>
             {section.rows.map((row, ri) => (
-              <tr key={row.id}>
+              <tr key={row.id} onDragOver={event => event.preventDefault()}
+                onDrop={event => { event.stopPropagation(); const source = readDrag(event); if (source?.kind === 'row' && source.sectionId === section.id) moveRow(source.index, ri); }}>
                 {row.cells.map((cell, ci) => (
                   <td key={ci} className="p-1">
                     <Input
@@ -223,6 +281,10 @@ function SectionEditor({ section, onChange, onRemove, onDuplicate }: {
                 ))}
                 <td className="p-1 w-14">
                   <div className="flex items-center justify-end gap-1">
+                    <button type="button" draggable onDragStart={event => startDrag(event, { kind: 'row', sectionId: section.id, index: ri })}
+                      className="cursor-grab touch-none text-muted-foreground" title="Drag row" aria-label={`Drag row ${ri + 1}`}><GripVertical className="w-3.5 h-3.5" /></button>
+                    <button type="button" onClick={() => moveRow(ri, ri - 1)} disabled={ri === 0} className="text-muted-foreground disabled:opacity-30" title="Move row up" aria-label={`Move row ${ri + 1} up`}><ArrowUp className="w-3 h-3" /></button>
+                    <button type="button" onClick={() => moveRow(ri, ri + 1)} disabled={ri === section.rows.length - 1} className="text-muted-foreground disabled:opacity-30" title="Move row down" aria-label={`Move row ${ri + 1} down`}><ArrowDown className="w-3 h-3" /></button>
                     <button type="button" onClick={() => duplicateRow(ri)} className="text-muted-foreground hover:text-foreground" title="Duplicate row" aria-label="Duplicate row">
                       <Copy className="w-3 h-3" />
                     </button>
@@ -471,6 +533,20 @@ export default function PriceLists() {
 
           <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {editing && <div className="rounded-xl border border-admin-border bg-admin-subtle p-4 space-y-2">
+                <Label className={labelClass}>Customer share link</Label>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Input readOnly aria-label="Customer share link" value={`${window.location.origin}/price-list/${editing.publicId}`} className="min-w-0 flex-1 text-xs" />
+                  <Button type="button" variant="outline" size="sm" onClick={() => copyShareLink(editing)}><Copy className="w-3.5 h-3.5 mr-1" /> Copy</Button>
+                  <Button type="button" variant="outline" size="sm" onClick={() => openShareLink(editing)}><ExternalLink className="w-3.5 h-3.5 mr-1" /> Preview</Button>
+                  <Button type="button" variant="outline" size="sm" disabled={regenMut.isPending} onClick={() => {
+                    if (window.confirm('Create a new link? The old customer link will stop working.')) {
+                      regenMut.mutate(editing.id, { onSuccess: (updated: any) => setEditing(updated) });
+                    }
+                  }}><RefreshCw className="w-3.5 h-3.5 mr-1" /> New link</Button>
+                </div>
+                <p className="text-xs text-muted-foreground">Save table changes before previewing or replacing the link.</p>
+              </div>}
               {/* Basic info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -523,7 +599,10 @@ export default function PriceLists() {
                   <SectionEditor
                     key={section.id}
                     section={section}
+                    index={i}
                     onChange={s => setForm(f => ({ ...f, sections: f.sections.map((sec, idx) => idx === i ? s : sec) }))}
+                    onMove={direction => setForm(f => ({ ...f, sections: moveItem(f.sections, i, i + direction) }))}
+                    onDropSection={source => setForm(f => ({ ...f, sections: source.sectionId === f.sections[source.index]?.id ? moveItem(f.sections, source.index, i) : f.sections }))}
                     onDuplicate={() => setForm(f => {
                       const copy = cloneSection(section, 'Copy');
                       return { ...f, sections: [...f.sections.slice(0, i + 1), copy, ...f.sections.slice(i + 1)] };
