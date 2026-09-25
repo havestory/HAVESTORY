@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { AdminTableError, AdminTableLoading } from '@/components/admin/AdminPageState';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import {
@@ -212,6 +213,7 @@ export default function Orders() {
   const [invoiceMenuOpen, setInvoiceMenuOpen] = useState(false);
   const [createForm, setCreateForm] = useState<CreateForm>(EMPTY_CREATE_FORM);
   const [createError, setCreateError] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<OrderRecord | null>(null);
   const [manageOrder, setManageOrder] = useState<OrderRecord | null>(null);
   const [manageOpen, setManageOpen] = useState(false);
   const [manageForm, setManageForm] = useState<ManageForm>(EMPTY_MANAGE_FORM);
@@ -322,10 +324,10 @@ export default function Orders() {
     });
   };
 
-  const handleDelete = (orderId: number) => {
-    if (!confirm('Are you sure you want to delete this order? This cannot be undone.')) return;
-    deleteOrder.mutate({ id: String(orderId) }, {
-      onSuccess: () => { toast({ title: 'Order deleted' }); void refetch(); },
+  const handleDelete = () => {
+    if (!deleteTarget || deleteOrder.isPending) return;
+    deleteOrder.mutate({ id: String(deleteTarget.id) }, {
+      onSuccess: () => { toast({ title: 'Order deleted' }); setDeleteTarget(null); void refetch(); },
       onError: () => toast({ title: 'Delete failed', description: 'Could not delete this order.', variant: 'destructive' }),
     });
   };
@@ -650,7 +652,7 @@ export default function Orders() {
                       <Button type="button" variant="outline" size="icon" title="Create shipping label" onClick={() => window.open(`/admin/shipping-labels?orderId=${encodeURIComponent(order.orderId)}`, '_blank', 'noopener,noreferrer')} className="h-9 w-9 rounded-full border-admin-brand-line text-admin-brand-ink hover:bg-admin-brand-soft"><Printer className="h-4 w-4" /></Button>
                       <Button type="button" variant="outline" size="icon" title="WhatsApp customer" onClick={() => window.open(`https://wa.me/${String(order.customerPhone || '').replace(/[^0-9]/g, '')}`, '_blank')} className="h-9 w-9 rounded-full border-admin-border text-admin-muted hover:bg-admin-success-soft hover:text-admin-success"><MessageCircle className="h-4 w-4" /></Button>
                       <Button type="button" onClick={() => openManage(order)} className="h-9 rounded-sm bg-primary px-4 text-xs font-bold text-primary-foreground hover:bg-admin-muted">Manage</Button>
-                      <Button type="button" variant="outline" size="icon" title="Delete order" onClick={() => handleDelete(order.id)} className="h-9 w-9 rounded-full border-admin-danger-line text-admin-danger hover:bg-admin-danger-soft"><Trash2 className="h-4 w-4" /></Button>
+                      <Button type="button" variant="outline" size="icon" title="Delete order" onClick={() => setDeleteTarget(order)} className="h-9 w-9 rounded-full border-admin-danger-line text-admin-danger hover:bg-admin-danger-soft"><Trash2 className="h-4 w-4" /></Button>
                     </div></TableCell>
                   </TableRow>;
                 })}
@@ -660,6 +662,8 @@ export default function Orders() {
           {orderTotalPages > 1 && <div className="flex items-center justify-center gap-3 border-t border-admin-border px-5 py-4"><Button type="button" variant="outline" size="sm" disabled={orderPage <= 1} onClick={() => setOrderPage(value => Math.max(1, value - 1))} className="rounded-full">Previous</Button><span className="text-xs font-semibold text-admin-muted">Page {orderPage} of {orderTotalPages} · {visibleOrders.length} orders</span><Button type="button" variant="outline" size="sm" disabled={orderPage >= orderTotalPages} onClick={() => setOrderPage(value => Math.min(orderTotalPages, value + 1))} className="rounded-full">Next</Button></div>}
         </CardContent>
       </Card>
+
+      <ConfirmDialog open={!!deleteTarget} title="Delete Order" message={deleteTarget ? `Delete ${deleteTarget.orderId} for ${deleteTarget.customerName}? Its linked invoice will also be removed from the active list.` : ''} confirmLabel={deleteOrder.isPending ? 'Deleting…' : 'Delete Order'} onConfirm={handleDelete} onCancel={() => { if (!deleteOrder.isPending) setDeleteTarget(null); }} />
 
       <Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) resetCreateForm(); }}>
         <DialogContent className="max-w-[570px] overflow-hidden rounded-[26px] border-0 bg-admin-surface p-0 shadow-2xl">
