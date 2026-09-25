@@ -493,3 +493,19 @@ html[data-hs-admin-theme='dark'] {
   [data-admin-panel] .admin-sidebar,
   [data-admin-panel] .admin-nav-item { transition: none; }
 }
+
+/* Keep the order editor's header and actions visible while its sections scroll. */
+html[data-hs-admin-theme] .order-manage-dialog {
+  display: flex;
+  flex-direction: column;
+  max-height: min(92dvh, 900px);
+  min-height: 0;
+}
+html[data-hs-admin-theme] .order-manage-dialog > :first-child,
+html[data-hs-admin-theme] .order-manage-dialog > :nth-last-child(2) { flex-shrink: 0; }
+html[data-hs-admin-theme] .order-manage-scroll {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
