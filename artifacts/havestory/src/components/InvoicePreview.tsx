@@ -67,9 +67,11 @@ const PN_AFTER_HEADER = PAGE_CONTENT_H - H_SMALL_HEADER - H_DIVIDER;
 
 function itemsHeight(items: LineItem[]) {
   return H_TBL_HEADER + items.reduce((height, item) => {
-    const selectionRows = Array.isArray(item.selectedOptions) ? item.selectedOptions.length : 0;
-    const noteRows = item.notes?.trim() ? 1 : 0;
-    return height + H_ITEM_ROW + Math.min(4, selectionRows + noteRows) * 13;
+    const descriptionRows = Math.max(1, Math.ceil(item.description.length / 42));
+    const selectionRows = Array.isArray(item.selectedOptions)
+      ? item.selectedOptions.reduce((count, option) => count + Math.max(1, Math.ceil(`${option.groupTitle}: ${option.choiceName}`.length / 55)), 0) : 0;
+    const noteRows = item.notes?.trim() ? Math.ceil(item.notes.length / 55) : 0;
+    return height + H_ITEM_ROW + (descriptionRows - 1) * 19 + (selectionRows + noteRows) * 14;
   }, 0);
 }
 
@@ -335,12 +337,17 @@ export function InvoicePreview({
   const validItems = items.filter(it => it.description.trim());
 
   /* Build item page chunks */
-  const chunks: LineItem[][] = [];
-  for (let i = 0; i < Math.max(validItems.length, 1); i += ITEMS_PER_PAGE) {
-    chunks.push(validItems.slice(i, i + ITEMS_PER_PAGE));
+  const chunks: LineItem[][] = [[]];
+  for (const item of validItems) {
+    let chunk = chunks[chunks.length - 1];
+    const allowance = chunks.length === 1 ? P1_AFTER_HEADER : PN_AFTER_HEADER - H_CONTINUED;
+    if (chunk.length && (chunk.length >= ITEMS_PER_PAGE || itemsHeight([...chunk, item]) > allowance)) {
+      chunk = [];
+      chunks.push(chunk);
+    }
+    chunk.push(item);
   }
   const itemPageCount = chunks.length;
-  const totalPages    = itemPageCount + 1; // +1 for the always-separate legal/banking page
 
   /* Verify summary fits on last item page; if not, warn via overflow-x indicator */
   const lastChunk = chunks[chunks.length - 1] ?? [];
@@ -349,9 +356,8 @@ export function InvoicePreview({
     ? P1_AFTER_HEADER - itemsHeight(lastChunk)
     : PN_AFTER_HEADER - H_CONTINUED - itemsHeight(lastChunk);
   const summaryFitsOnLastPage = availableOnLastPage >= H_SUMMARY;
-  // If it doesn't fit, we still render it there — the container uses overflow: hidden
-  // and the PDF captures the visible region. 10 items + summary should always fit
-  // (estimated usage < 700px out of ~850px available on page 1 after header).
+  const summaryPageCount = summaryFitsOnLastPage ? 0 : 1;
+  const totalPages = itemPageCount + summaryPageCount + 1;
 
   const badgeKey = (status || "pending").toLowerCase();
   const badge    = STATUS_BADGE[badgeKey] || STATUS_BADGE.pending;
@@ -376,6 +382,10 @@ export function InvoicePreview({
    *    canvas serializable for PDF/JPG downloads.
    */
   const capturePageIsolated = async (el: HTMLElement): Promise<HTMLCanvasElement> => {
+    const content = el.firstElementChild as HTMLElement | null;
+    if (content && content.scrollHeight > content.clientHeight + 2) {
+      throw new Error("Invoice content exceeds an A4 page. The export was stopped to prevent cropped data.");
+    }
     const raw = await captureElement(el, {
       width: A4_W,
       height: A4_H,
@@ -533,7 +543,7 @@ export function InvoicePreview({
     const pages = pageRefs.current.slice(0, totalPages).filter(Boolean) as HTMLElement[];
     setGeneratingPDF(true);
     try {
-      if (pages.length === 0) throw new Error("Invoice pages are not ready yet.");
+      if (pages.length !== totalPages) throw new Error("Invoice pages are not ready yet.");
 
       const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", compress: true });
       const pdfW = pdf.internal.pageSize.getWidth();
@@ -551,7 +561,7 @@ export function InvoicePreview({
       pdf.save(`Invoice-${invoiceNo}.pdf`);
     } catch (error) {
       console.error("Invoice visual PDF export failed", error);
-      window.alert("The original invoice preview could not be exported. Please refresh the page and try again.");
+      window.alert(error instanceof Error ? error.message : "The invoice could not be exported. Please try again.");
     } finally {
       setGeneratingPDF(false);
     }
@@ -565,6 +575,7 @@ export function InvoicePreview({
     const pages = pageRefs.current.slice(0, totalPages).filter(Boolean) as HTMLElement[];
     setDownloadingZip(true);
     try {
+      if (pages.length !== totalPages) throw new Error("Invoice pages are not ready yet.");
       const zip = new JSZip();
       for (let i = 0; i < pages.length; i++) {
         const canvas = await capturePageIsolated(pages[i]);
@@ -575,7 +586,7 @@ export function InvoicePreview({
       triggerDownload(URL.createObjectURL(content), `Invoice-${invoiceNo}.zip`);
     } catch (error) {
       console.error("Invoice JPG export failed", error);
-      window.alert("The invoice images could not be downloaded. Please wait for the preview to finish loading and try again.");
+      window.alert(error instanceof Error ? error.message : "The invoice images could not be downloaded. Please try again.");
     } finally { setDownloadingZip(false); }
   };
 
@@ -700,7 +711,7 @@ export function InvoicePreview({
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
                 {!summaryFitsOnLastPage && (
-                  <span className="text-[10px] text-amber-600 bg-amber-50 border border-amber-200 rounded px-2 py-0.5 font-semibold hidden sm:inline">Clipped</span>
+                  <span className="text-[10px] text-amber-600 bg-amber-50 border border-amber-200 rounded px-2 py-0.5 font-semibold hidden sm:inline">Summary on next page</span>
                 )}
                 <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-lg"><X size={16} className="text-gray-400" /></button>
               </div>
@@ -799,7 +810,7 @@ export function InvoicePreview({
                 const isFirst       = pageIdx === 0;
                 const isLastItems   = pageIdx === chunks.length - 1;
                 const pageNum       = pageIdx + 1;
-                const chunkStart    = pageIdx * ITEMS_PER_PAGE;
+                const chunkStart    = chunks.slice(0, pageIdx).reduce((count, previous) => count + previous.length, 0);
 
                 return (
                   <div key={pageIdx} style={{ width: A4_W * pageScale, height: A4_H * pageScale, flexShrink: 0 }}>
@@ -813,7 +824,7 @@ export function InvoicePreview({
                           <SmallHeader />
                           <Divider />
                           <div style={{ fontSize: 11, color: "#423a47", fontWeight: 600, marginBottom: 10 }}>
-                            Continued · Items {chunkStart + 1}–{Math.min(chunkStart + ITEMS_PER_PAGE, validItems.length)} of {validItems.length}
+                            Continued · Items {chunkStart + 1}–{chunkStart + chunk.length} of {validItems.length}
                           </div>
                         </>
                       )}
@@ -822,7 +833,7 @@ export function InvoicePreview({
                       <ItemsTable chunk={chunk} startIdx={chunkStart} />
 
                       {/* Invoice Summary — ONLY on the last item page, never on the legal page */}
-                      {isLastItems && (
+                      {isLastItems && summaryFitsOnLastPage && (
                         <SummaryBlock
                           subtotal={subtotal}
                           shippingAmt={shippingAmt}
@@ -840,12 +851,25 @@ export function InvoicePreview({
                 );
               })}
 
+              {!summaryFitsOnLastPage && (
+                <div style={{ width: A4_W * pageScale, height: A4_H * pageScale, flexShrink: 0 }}>
+                  <div ref={el => { pageRefs.current[itemPageCount] = el; }} style={{ ...pageShell, transform: `scale(${pageScale})`, transformOrigin: "top left" }} className="inv-page">
+                    <div style={contentArea}>
+                      <SmallHeader />
+                      <Divider />
+                      <SummaryBlock subtotal={subtotal} shippingAmt={shippingAmt} advance={advance} grandTotal={grandTotal} shippingLabel={shippingLabels[shipping]} notes={form.additionalNotes} status={status} />
+                    </div>
+                    <InvFooter page={itemPageCount + 1} total={totalPages} website={website} biz={biz} />
+                  </div>
+                </div>
+              )}
+
               {/* ── LEGAL / BANKING PAGE ──
                   Rule: Bank Details + Terms & Conditions ALWAYS on a brand-new separate last page.
                   This page NEVER contains any item rows or the Invoice Summary.
               */}
               <div style={{ width: A4_W * pageScale, height: A4_H * pageScale, flexShrink: 0 }}>
-              <div ref={el => { pageRefs.current[itemPageCount] = el; }} style={{ ...pageShell, transform: `scale(${pageScale})`, transformOrigin: "top left" }} className="inv-page">
+              <div ref={el => { pageRefs.current[totalPages - 1] = el; }} style={{ ...pageShell, transform: `scale(${pageScale})`, transformOrigin: "top left" }} className="inv-page">
                 <div style={contentArea}>
                   <SmallHeader />
                   <Divider />

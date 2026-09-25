@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { useGetAdminMe } from '@workspace/api-client-react';
+import { A4PrintPortal, useA4Print } from '@/components/A4PrintPortal';
 
 // ─── types ──────────────────────────────────────────────────────────────────
 
@@ -385,6 +386,7 @@ function CalendarView({ records, month, staffList, staffFilter }: {
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
 export default function Attendance() {
+  const { active: printActive, print: printA4 } = useA4Print();
   const { toast } = useToast();
   const qc = useQueryClient();
   const { data: me } = useGetAdminMe();
@@ -443,7 +445,7 @@ export default function Attendance() {
   }, {});
 
   function handlePrint() {
-    window.print();
+    printA4();
   }
 
   return (
@@ -757,6 +759,18 @@ export default function Attendance() {
         onClose={() => setCheckoutTarget(null)}
         onDone={refetch}
       />
+      <A4PrintPortal active={printActive}>
+        <article className="pb-print-flow text-black">
+          <header className="mb-5 border-b border-stone-400 pb-3">
+            <h1 className="text-xl font-bold">HAVESTORY · Attendance report</h1>
+            <p className="text-sm">{monthLabel(month)} · {staffFilter === 'all' ? 'All staff' : staffList.find(staff => String(staff.id) === staffFilter)?.name || 'Staff'}</p>
+          </header>
+          <table className="w-full border-collapse text-[9pt]">
+            <thead><tr className="border-b border-stone-500 text-left"><th className="p-2">Staff</th><th className="p-2">Date</th><th className="p-2">Check in</th><th className="p-2">Check out</th><th className="p-2">Hours</th><th className="p-2">Status</th></tr></thead>
+            <tbody>{records.filter(record => staffFilter === 'all' || String(record.staff_id) === staffFilter).map(record => <tr key={record.id} className="border-b border-stone-200"><td className="p-2">{record.staff_name}</td><td className="p-2">{fmtDate(record.attendance_date)}</td><td className="p-2">{fmtTime(record.check_in_at)}</td><td className="p-2">{fmtTime(record.check_out_at)}</td><td className="p-2">{minutesToHours(record.duration_minutes)}</td><td className="p-2">{record.status}</td></tr>)}</tbody>
+          </table>
+        </article>
+      </A4PrintPortal>
     </div>
   );
 }

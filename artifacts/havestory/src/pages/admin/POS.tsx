@@ -377,92 +377,86 @@ export default function POS() {
   };
   const downloadReport = () => {
     if (!day) return;
-    const pdf = new jsPDF({ unit: "mm", format: "a4" });
-    const perPage = 24;
-    const pages = Math.max(1, Math.ceil(day.sales.length / perPage));
-    for (let page = 0; page < pages; page++) {
-      if (page) pdf.addPage();
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(17);
-      pdf.text("HAVESTORY — COUNTER SALES", 105, 18, { align: "center" });
-      pdf.setFontSize(10);
-      pdf.text(
-        `Day-end report · ${day.date} · Page ${page + 1} of ${pages}`,
-        105,
-        25,
-        { align: "center" },
-      );
-      pdf.line(15, 30, 195, 30);
-      let y = 39;
+    const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+    let y = 0;
+    const header = () => {
+      pdf.setTextColor(36, 30, 25);
+      pdf.setFont('helvetica', 'bold'); pdf.setFontSize(16);
+      pdf.text('HAVESTORY — COUNTER SALES', 105, 18, { align: 'center' });
+      pdf.setFontSize(9); pdf.text(`Day-end report · ${day.date}`, 105, 25, { align: 'center' });
+      pdf.setDrawColor(180, 170, 160); pdf.line(15, 30, 195, 30);
       pdf.setFontSize(8);
-      pdf.text("TIME", 15, y);
-      pdf.text("RECEIPT / INVOICE", 36, y);
-      pdf.text("CUSTOMER", 82, y);
-      pdf.text("METHOD", 145, y);
-      pdf.text("TOTAL", 190, y, { align: "right" });
-      pdf.line(15, y + 2, 195, y + 2);
-      y += 8;
-      for (const sale of day.sales.slice(
-        page * perPage,
-        (page + 1) * perPage,
-      )) {
-        pdf.setFont("helvetica", "normal");
-        pdf.text(
-          new Date(sale.sold_at).toLocaleTimeString("en-LK", {
-            timeZone: "Asia/Colombo",
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          15,
-          y,
-        );
-        pdf.text(String(sale.receipt_number).slice(0, 22), 36, y);
-        pdf.text(String(sale.customer_name || "").slice(0, 30), 82, y);
-        pdf.text(String(sale.payment_method).toUpperCase(), 145, y);
-        pdf.text(rs(Number(sale.total)), 190, y, { align: "right" });
-        y += 9;
-      }
-      pdf.line(15, 270, 195, 270);
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(9);
-      pdf.text(
-        `Opening float: ${rs(Number(day.session?.opening_float || 0))}   Sales: ${rs(day.summary.sales)}   Expected cash: ${rs(day.summary.expectedCash)}`,
-        105,
-        278,
-        { align: "center" },
-      );
+      pdf.text('TIME', 15, 38); pdf.text('RECEIPT / INVOICE', 36, 38);
+      pdf.text('CUSTOMER', 82, 38); pdf.text('METHOD', 135, 38);
+      pdf.text('TOTAL', 195, 38, { align: 'right' });
+      pdf.line(15, 41, 195, 41);
+      y = 48;
+    };
+    header();
+    for (const sale of day.sales) {
+      pdf.setFont('helvetica', 'normal'); pdf.setFontSize(8);
+      const receipt = pdf.splitTextToSize(String(sale.receipt_number), 44);
+      const customer = pdf.splitTextToSize(String(sale.customer_name || ''), 50);
+      const method = pdf.splitTextToSize(String(sale.payment_method).toUpperCase(), 27);
+      const height = Math.max(9, Math.max(receipt.length, customer.length, method.length) * 3.6 + 3);
+      if (y + height > 264) { pdf.addPage(); header(); }
+      pdf.text(new Date(sale.sold_at).toLocaleTimeString('en-LK', { timeZone: 'Asia/Colombo', hour: '2-digit', minute: '2-digit' }), 15, y);
+      pdf.text(receipt, 36, y); pdf.text(customer, 82, y);
+      pdf.text(method, 135, y); pdf.text(rs(Number(sale.total)), 195, y, { align: 'right' });
+      pdf.setDrawColor(235, 230, 225); pdf.line(15, y + height - 3, 195, y + height - 3);
+      y += height;
+    }
+    const count = pdf.getNumberOfPages();
+    for (let page = 1; page <= count; page++) {
+      pdf.setPage(page); pdf.setDrawColor(180, 170, 160); pdf.line(15, 270, 195, 270);
+      pdf.setFont('helvetica', 'bold'); pdf.setFontSize(8);
+      pdf.text(`Opening: ${rs(Number(day.session?.opening_float || 0))}  ·  Sales: ${rs(day.summary.sales)}  ·  Expected cash: ${rs(day.summary.expectedCash)}`, 15, 278);
+      pdf.text(`${page} / ${count}`, 195, 278, { align: 'right' });
     }
     pdf.save(`HAVESTORY-POS-${day.date}.pdf`);
   };
   const downloadMonthReport = () => {
     if (!monthData) return;
-    const pdf = new jsPDF({ unit: "mm", format: "a4" });
-    const perPage = 23;
-    const pages = Math.max(1, Math.ceil(monthData.sales.length / perPage));
-    for (let page = 0; page < pages; page++) {
-      if (page) pdf.addPage();
-      pdf.setFont("helvetica", "bold"); pdf.setFontSize(17);
-      pdf.text("HAVESTORY — MONTHLY COUNTER SALES", 105, 17, { align: "center" });
-      pdf.setFontSize(9); pdf.setFont("helvetica", "normal");
-      pdf.text(`${monthData.month} · Page ${page + 1} of ${pages}`, 105, 24, { align: "center" });
-      pdf.line(14, 29, 196, 29);
-      pdf.setFont("helvetica", "bold"); pdf.setFontSize(9);
+    const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+    let y = 0;
+    const header = () => {
+      pdf.setTextColor(36, 30, 25);
+      pdf.setFont('helvetica', 'bold'); pdf.setFontSize(15);
+      pdf.text('HAVESTORY — MONTHLY COUNTER SALES', 105, 17, { align: 'center' });
+      pdf.setFontSize(9); pdf.text(monthData.month, 105, 24, { align: 'center' });
+      pdf.setDrawColor(180, 170, 160); pdf.line(14, 29, 196, 29);
+      pdf.setFontSize(8);
       pdf.text(`Bills: ${monthData.summary.count}`, 15, 36);
       pdf.text(`Cash: ${rs(monthData.summary.cash)}`, 48, 36);
       pdf.text(`Card: ${rs(monthData.summary.card)}`, 98, 36);
       pdf.text(`Transfer: ${rs(monthData.summary.transfer)}`, 145, 36);
-      pdf.setFillColor(47, 22, 56); pdf.rect(14, 41, 182, 11, "F"); pdf.setTextColor(255, 255, 255);
-      pdf.text("DATE / TIME", 17, 48); pdf.text("RECEIPT / INVOICE", 48, 48); pdf.text("CUSTOMER", 101, 48); pdf.text("METHOD", 158, 48); pdf.text("TOTAL", 192, 48, { align: "right" });
-      pdf.setTextColor(20, 20, 20); let y = 59;
-      for (const sale of monthData.sales.slice(page * perPage, (page + 1) * perPage)) {
-        pdf.setFont("helvetica", "normal"); pdf.setFontSize(8);
-        const when = new Date(sale.sold_at).toLocaleString("en-LK", { timeZone: "Asia/Colombo", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
-        pdf.text(when, 17, y); pdf.text(String(sale.receipt_number).slice(0, 24), 48, y); pdf.text(String(sale.customer_name || "").slice(0, 30), 101, y); pdf.text(String(sale.payment_method).toUpperCase(), 158, y); pdf.text(rs(Number(sale.total)), 192, y, { align: "right" });
-        pdf.setDrawColor(225, 225, 225); pdf.line(14, y + 3, 196, y + 3); y += 9;
-      }
-      pdf.setDrawColor(20, 20, 20); pdf.line(14, 274, 196, 274); pdf.setFont("helvetica", "bold"); pdf.setFontSize(10);
-      pdf.text(`MONTH TOTAL  ${rs(monthData.summary.total)}`, 192, 282, { align: "right" });
-      pdf.setFont("helvetica", "normal"); pdf.setFontSize(7); pdf.text(`Generated ${new Date().toLocaleString("en-LK", { timeZone: "Asia/Colombo" })} · HAVESTORY`, 15, 282);
+      pdf.setFillColor(54, 43, 34); pdf.rect(14, 41, 182, 11, 'F'); pdf.setTextColor(255, 255, 255);
+      pdf.text('DATE / TIME', 17, 48); pdf.text('RECEIPT / INVOICE', 48, 48);
+      pdf.text('CUSTOMER', 101, 48); pdf.text('METHOD', 147, 48);
+      pdf.text('TOTAL', 192, 48, { align: 'right' });
+      pdf.setTextColor(36, 30, 25); y = 59;
+    };
+    header();
+    for (const sale of monthData.sales) {
+      pdf.setFont('helvetica', 'normal'); pdf.setFontSize(8);
+      const receipt = pdf.splitTextToSize(String(sale.receipt_number), 50);
+      const customer = pdf.splitTextToSize(String(sale.customer_name || ''), 43);
+      const method = pdf.splitTextToSize(String(sale.payment_method).toUpperCase(), 22);
+      const height = Math.max(9, Math.max(receipt.length, customer.length, method.length) * 3.6 + 3);
+      if (y + height > 265) { pdf.addPage(); header(); }
+      const when = new Date(sale.sold_at).toLocaleString('en-LK', { timeZone: 'Asia/Colombo', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+      pdf.text(when, 17, y); pdf.text(receipt, 48, y); pdf.text(customer, 101, y);
+      pdf.text(method, 147, y); pdf.text(rs(Number(sale.total)), 192, y, { align: 'right' });
+      pdf.setDrawColor(235, 230, 225); pdf.line(14, y + height - 3, 196, y + height - 3);
+      y += height;
+    }
+    const count = pdf.getNumberOfPages();
+    for (let page = 1; page <= count; page++) {
+      pdf.setPage(page); pdf.setDrawColor(180, 170, 160); pdf.line(14, 274, 196, 274);
+      pdf.setFont('helvetica', 'bold'); pdf.setFontSize(9);
+      pdf.text(`MONTH TOTAL  ${rs(monthData.summary.total)}`, 192, 282, { align: 'right' });
+      pdf.setFont('helvetica', 'normal'); pdf.setFontSize(7);
+      pdf.text(`Generated ${new Date().toLocaleString('en-LK', { timeZone: 'Asia/Colombo' })} · ${page} / ${count}`, 15, 282);
     }
     pdf.save(`HAVESTORY-POS-MONTH-${monthData.month}.pdf`);
   };

@@ -46,7 +46,7 @@
 .procurement-document.procurement-document.is-capturing table input,
 .procurement-document.procurement-document.is-capturing table textarea { display: none !important; }
 .procurement-document.procurement-document.is-capturing .no-print-capture { display: none !important; }
-.procurement-document.procurement-document.is-capturing .procurement-capture-value { display: block !important; font-weight: 400; padding: 6px 2px; }
+.procurement-document.procurement-document.is-capturing .procurement-capture-value { display: block !important; font-weight: 400; padding: 6px 2px; white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
 .procurement-document.procurement-document.is-capturing .procurement-capture-value--numeric { white-space: pre-wrap; overflow-wrap: anywhere; }
 @media (max-width: 700px) {
   .procurement-page .procurement-editor { grid-template-columns: minmax(0, 1fr); }

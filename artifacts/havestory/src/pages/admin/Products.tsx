@@ -252,7 +252,7 @@ function MPBoardCard({ board, index, total, onChange, onRemove, onMoveUp, onMove
           <div className="p-3 bg-admin-surface rounded-xl border border-admin-border">
             <div className="flex justify-between items-center mb-2">
               <p className="text-xs font-bold text-admin-ink">③ Laminations</p>
-              <button type="button" onClick={() => onChange({ ...board, laminations: [...board.laminations, emptyMPLamination()] })} className="text-[10px] font-bold px-2 py-1 bg-admin-subtle text-white rounded-lg hover:bg-admin-inverse">+ Add Option</button>
+              <button type="button" onClick={() => onChange({ ...board, laminations: [...board.laminations, emptyMPLamination()] })} className="text-[10px] font-bold px-2 py-1 bg-admin-subtle text-admin-ink rounded-lg hover:bg-admin-brand-soft">+ Add Option</button>
             </div>
             {board.laminations.length === 0 && <p className="text-[11px] text-admin-muted text-center py-2">No lamination options. Click "+ Add Option".</p>}
             {board.laminations.map((lam, i) => <MPLaminationCard key={lam.id} lam={lam} onChange={u => setLamination(i, u)} onRemove={() => removeLamination(i)} />)}
@@ -906,7 +906,7 @@ export default function AdminProducts() {
                     )}
                     <div className="absolute top-2 left-2 flex gap-1.5">
                       {p.featured && <span className="px-2 py-0.5 bg-admin-warning-solid text-white text-[10px] font-bold rounded-full">⭐ Featured</span>}
-                      {isCustom && <span className="px-2 py-0.5 bg-admin-subtle text-white text-[10px] font-bold rounded-full">Custom Print</span>}
+                      {isCustom && <span className="px-2 py-0.5 bg-admin-subtle text-admin-ink text-[10px] font-bold rounded-full">Custom Print</span>}
                       {isMultiSize && <span className="px-2 py-0.5 bg-admin-brand text-white text-[10px] font-bold rounded-full">Multi-Size</span>}
                       {isMultiPrints && <span className="px-2 py-0.5 bg-admin-brand text-white text-[10px] font-bold rounded-full">Multi Prints</span>}
                     </div>

@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useGetSettings } from '@workspace/api-client-react';
 import { captureElement } from '@/lib/html2canvas-capture';
 import JSZip from 'jszip';
+import { jsPDF } from 'jspdf';
 
 interface OrderItem {
   id: string;
@@ -214,7 +215,7 @@ export default function Procurement() {
     return sum + val;
   }, 0);
 
-  const downloadJPG = async () => {
+  const downloadDocument = async (kind: 'jpg' | 'pdf') => {
     const documentElement = printRef.current;
     if (!documentElement || exporting) return;
     setExporting(true);
@@ -263,7 +264,7 @@ export default function Procurement() {
     });
 
     try {
-      toast({ title: "Generating Image", description: "Please wait while we prepare your order request..." });
+      toast({ title: "Generating document", description: "Please wait while we prepare your order request..." });
 
       // Collapse all UI-only elements before is-capturing so their space
       // is gone before scrollHeight is measured and the clone is made.
@@ -303,34 +304,51 @@ export default function Procurement() {
       if (!canvas.width || !canvas.height) throw new Error('The generated canvas is empty.');
 
       const scaleFactor = canvas.width / width;
-      const pageHeight = Math.max(1, Math.round(baseHeight * scaleFactor));
-      const pageCount = Math.max(1, Math.ceil(canvas.height / pageHeight));
+      const pageHeight = Math.round(baseHeight * scaleFactor);
       const safeName = `${orderInfo.orderNo}_${(supplier.name || 'Order').replace(/[^a-z0-9_-]+/gi, '_')}`;
-
-      if (pageCount === 1) {
-        downloadBlob(await canvasToJpg(canvas), `${safeName}.jpg`);
-        toast({ title: "Success", description: "Order request downloaded as JPG." });
+      const rootTop = documentElement.getBoundingClientRect().top;
+      const rows = Array.from(documentElement.querySelectorAll('tr')).map(row => ({
+        top: Math.round((row.getBoundingClientRect().top - rootTop) * scaleFactor),
+        bottom: Math.round((row.getBoundingClientRect().bottom - rootTop) * scaleFactor),
+      }));
+      const pages: HTMLCanvasElement[] = [];
+      let start = 0;
+      while (start < canvas.height) {
+        let end = Math.min(canvas.height, start + pageHeight);
+        if (end < canvas.height) {
+          const crossing = rows.find(row => row.top < end && row.bottom > end && row.top > start + Math.round(32 * scaleFactor));
+          if (crossing) end = crossing.top;
+        }
+        if (end <= start) end = Math.min(canvas.height, start + pageHeight);
+        const pageCanvas = document.createElement('canvas');
+        pageCanvas.width = canvas.width;
+        pageCanvas.height = pageHeight;
+        const context = pageCanvas.getContext('2d');
+        if (!context) throw new Error('The browser could not prepare a page canvas.');
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+        context.drawImage(canvas, 0, start, canvas.width, end - start, 0, 0, canvas.width, end - start);
+        pages.push(pageCanvas);
+        start = end;
+      }
+      if (kind === 'pdf') {
+        const pdf = new jsPDF({ unit: 'mm', format: format.toLowerCase() as 'a4' | 'a5', compress: true });
+        pages.forEach((page, index) => {
+          if (index) pdf.addPage();
+          pdf.addImage(page.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight());
+        });
+        pdf.save(`${safeName}_${format}.pdf`);
+      } else if (pages.length === 1) {
+        downloadBlob(await canvasToJpg(pages[0]), `${safeName}_${format}.jpg`);
       } else {
         const zip = new JSZip();
-        for (let pageIndex = 0; pageIndex < pageCount; pageIndex += 1) {
-          const pageCanvas = document.createElement('canvas');
-          pageCanvas.width = canvas.width;
-          pageCanvas.height = pageHeight;
-          const pageContext = pageCanvas.getContext('2d');
-          if (!pageContext) throw new Error('The browser could not prepare a page canvas.');
-          pageContext.fillStyle = '#ffffff';
-          pageContext.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
-          pageContext.drawImage(canvas, 0, -pageIndex * pageHeight);
-          const pageBlob = await canvasToJpg(pageCanvas);
-          zip.file(`${safeName}_page_${pageIndex + 1}.jpg`, pageBlob);
-        }
-        const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
-        downloadBlob(zipBlob, `${safeName}_${format}_${pageCount}_pages.zip`);
-        toast({ title: "Success", description: `Long order downloaded as a ZIP with ${pageCount} ${format} JPG pages.` });
+        for (let index = 0; index < pages.length; index++) zip.file(`${safeName}_page_${index + 1}.jpg`, await canvasToJpg(pages[index]));
+        downloadBlob(await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' }), `${safeName}_${format}_${pages.length}_pages.zip`);
       }
+      toast({ title: 'Success', description: `${pages.length} ${format} page${pages.length === 1 ? '' : 's'} exported without splitting table rows.` });
     } catch (error) {
-      console.error('JPG generation failed:', error);
-      toast({ title: "Error", description: "Failed to generate image. Please try again.", variant: "destructive" });
+      console.error('Document generation failed:', error);
+      toast({ title: "Error", description: "Failed to generate document. Please try again.", variant: "destructive" });
     } finally {
       documentElement.classList.remove('is-capturing');
       restoreNoPrint();
@@ -378,8 +396,11 @@ export default function Procurement() {
               A5 Format
             </Button>
           </div>
-          <Button disabled={exporting} onClick={downloadJPG} className="procurement-primary rounded-none bg-primary text-primary-foreground hover:bg-primary/90 h-10 font-bold uppercase tracking-widest text-xs px-6 gap-2">
+          <Button disabled={exporting} onClick={() => downloadDocument('jpg')} className="procurement-primary rounded-none bg-primary text-primary-foreground hover:bg-primary/90 h-10 font-bold uppercase tracking-widest text-xs px-6 gap-2">
             <Download className="w-4 h-4" /> {exporting ? "Preparing JPG…" : "Download JPG"}
+          </Button>
+          <Button disabled={exporting} onClick={() => downloadDocument('pdf')} className="procurement-secondary h-10 px-5 gap-2">
+            <FileText className="w-4 h-4" /> Download PDF
           </Button>
         </div>
       </div>
@@ -816,3 +837,4 @@ export default function Procurement() {
     </div>
   );
 }
+
