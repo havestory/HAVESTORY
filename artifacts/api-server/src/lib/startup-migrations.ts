@@ -233,7 +233,9 @@ export async function runStartupMigrations(
     `);
     await client.query(`
       ALTER TABLE clients
-        ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT NOW();
+        ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        ADD COLUMN IF NOT EXISTS premium_price_list_id INTEGER;
+      CREATE INDEX IF NOT EXISTS clients_premium_price_list_idx ON clients(premium_price_list_id);
     `);
     await client.query(`
       ALTER TABLE invoices
