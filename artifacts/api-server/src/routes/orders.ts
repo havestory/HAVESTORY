@@ -10,6 +10,7 @@ import { normalizeCreateOrderBody } from "../lib/order-validation";
 import { randomBytes, randomUUID } from "node:crypto";
 import { sendOrderNotificationEmail, sendCustomerConfirmationEmail, sendOrderCompletionEmail } from "../lib/mailer";
 import { syncInvoiceFinance } from "./finance-inventory";
+import { generateInvoiceNumber } from "../lib/invoice-number";
 
 const router = Router();
 
@@ -260,15 +261,6 @@ router.get("/", requireAdmin, async (req, res) => {
     res.status(500).json({ error: "Failed to fetch orders" });
   }
 });
-
-function generateInvoiceNumber(): string {
-  const now = new Date();
-  const yyyyMMdd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
-  // A six-character suffix gives hundreds of millions of combinations while
-  // avoiding the old 1–8 sequential uniqueness queries on every checkout.
-  // The invoiceNumber unique constraint remains the final safeguard.
-  return `HS-INV-${yyyyMMdd}-${randomSuffix(6)}`;
-}
 
 router.post("/", async (req, res) => {
   try {
