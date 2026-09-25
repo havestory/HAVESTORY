@@ -129,12 +129,6 @@ export default function Home() {
     ? 'Request a custom frame'
     : configuredHeroCta || (primaryIsCustom ? 'Request a custom frame' : 'Browse frames');
   const favouriteProducts = favouriteWindow ? Array.from({ length: favouriteWindow }, (_, index) => favouritePool[index]) : [];
-  const process = [
-    ["01", "Share your idea", "Upload the photo and tell us where it will live."],
-    ["02", "Choose together", "We help select size, paper, finish and frame."],
-    ["03", "Approve the details", "Receive a clear quote before production begins."],
-    ["04", "Receive it safely", "We finish, check, pack and deliver your piece."],
-  ];
   const heroTitle = cfg?.heroTitle || "Frame the moments that become your story.";
   const heroSubtitle = cfg?.heroSubtitle || "Made with care in Sri Lanka. Thoughtful frames, beautiful prints and a studio for the memories you want to keep.";
 
@@ -168,11 +162,6 @@ export default function Home() {
 
       {benefitsVisible && <section className="studio-assurances" aria-label="Studio promises">{benefits.map((benefit, index) => { const Icon = BENEFIT_ICONS[benefit.icon] || Sparkles; return <article key={`${benefit.title}-${index}`}><Icon size={22} strokeWidth={1.4} aria-hidden="true" /><div><h2>{benefit.title}</h2><p>{benefit.copy}</p></div></article>; })}</section>}
 
-      <section className="studio-story studio-section" aria-labelledby="studio-story-title">
-        <div className="studio-story-art"><img src={portfolioList[0]?.imageUrl || DEFAULT_IMAGES[1]} alt="Thoughtfully framed memories" loading="lazy" /><span>THE HAVESTORY WAY</span></div>
-        <div className="studio-story-copy"><span className="studio-kicker">OUR STORY</span><h2 id="studio-story-title">A home for the moments that matter.</h2><p>We bring photographs into the spaces you call home. From the first conversation to the final finish, each piece is considered, crafted and made to feel like yours.</p><Link href="/about" className="studio-inline-link">Discover our story <ArrowRight size={17} /></Link></div>
-      </section>
-
       {categories.length > 0 && <section className="studio-section studio-collections" aria-labelledby="studio-collections-title">
         <Heading eyebrow="COLLECTIONS" title="A beautiful place for every story." copy="Explore the craft, materials and pieces that make a memory feel at home." />
         <div className="studio-collection-grid">{categories.map((item, index) => <Link key={`${item.title}-${index}`} href={safeSiteHref(item.href, "/store")} className={`studio-collection-card studio-collection-card-${index + 1}`}><img src={item.image} alt="" loading="lazy" decoding="async" /><div><span>0{index + 1} / COLLECTION</span><h3>{item.title}</h3><p>{item.copy}</p><strong>Explore collection <ArrowRight size={17} /></strong></div></Link>)}</div>
@@ -184,8 +173,6 @@ export default function Home() {
       </section>
 
       {portfolioList.length > 0 && <section className="studio-section studio-gallery"><Heading eyebrow="RECENT WORK" title="Made in our studio." copy="A few moments brought into focus." href="/gallery" link="Explore the gallery" /><div className="studio-gallery-grid">{portfolioList.map((item, index) => <Link key={item.id} href="/gallery" className={`studio-gallery-item studio-gallery-item-${index + 1}`}>{item.imageUrl ? <img src={item.imageUrl} alt={item.title || "HAVESTORY studio work"} loading="lazy" /> : <ImageIcon />}<span>{item.title || `Studio story ${index + 1}`} <ArrowRight size={16} /></span></Link>)}</div></section>}
-
-      <section className="studio-process"><div className="studio-process-intro"><span className="studio-kicker">HOW IT WORKS</span><h2>From your idea to a piece of your story.</h2><p>Tell us what you are imagining. We will guide the size, materials and finish, then make it with care.</p><Link href="/custom-project" className="studio-action-primary">Start your project <ArrowRight size={18} /></Link></div><ol>{process.map(([number, title, copy]) => <li key={number}><span>{number}</span><div><h3>{title}</h3><p>{copy}</p></div></li>)}</ol></section>
 
       {serviceList.length > 0 && <section className="studio-section studio-services"><Heading eyebrow="STUDIO SERVICES" title="More from the studio." href="/services" link="Explore services" /><div>{serviceList.map((service, index) => <Link href="/services" key={service.id}><span>0{index + 1}</span><div><h3>{service.name}</h3><p>{service.description || "Designed and finished with the HAVESTORY studio."}</p></div><ArrowRight size={20} /></Link>)}</div></section>}
 
