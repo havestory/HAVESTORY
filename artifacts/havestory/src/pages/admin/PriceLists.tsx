@@ -117,6 +117,7 @@ function SectionEditor({ section, index, onChange, onRemove, onDuplicate, onMove
     onChange({ ...section, rows: moveItem(section.rows, from, to) });
   }
   function toggleColumn(ci: number) {
+    if (visibility[ci] && visibility.filter(Boolean).length === 1) return;
     const next = [...visibility];
     next[ci] = !next[ci];
     onChange({ ...section, visibleColumns: next });
@@ -249,7 +250,7 @@ function SectionEditor({ section, index, onChange, onRemove, onDuplicate, onMove
                     <button type="button" onClick={() => duplicateColumn(ci)} className="text-muted-foreground hover:text-foreground shrink-0" title="Duplicate column" aria-label={`Duplicate ${col} column`}>
                       <Copy className="w-3 h-3" />
                     </button>
-                    <button type="button" onClick={() => toggleColumn(ci)} className="text-muted-foreground hover:text-foreground shrink-0" title={visibility[ci] ? 'Hide from shared list' : 'Show on shared list'} aria-label={`${visibility[ci] ? 'Hide' : 'Show'} ${col} column`}>
+                    <button type="button" onClick={() => toggleColumn(ci)} disabled={visibility[ci] && visibility.filter(Boolean).length === 1} className="text-muted-foreground hover:text-foreground disabled:opacity-30 shrink-0" title={visibility[ci] ? 'Hide from shared list' : 'Show on shared list'} aria-label={`${visibility[ci] ? 'Hide' : 'Show'} ${col} column`}>
                       {visibility[ci] ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
                     </button>
                     <button type="button" onClick={() => moveColumn(ci, ci - 1)} disabled={ci === 0} className="text-muted-foreground disabled:opacity-30" title="Move column left" aria-label={`Move ${col} left`}><ArrowLeft className="w-3 h-3" /></button>
