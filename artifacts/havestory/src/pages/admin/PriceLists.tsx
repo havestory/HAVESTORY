@@ -54,7 +54,8 @@ interface PriceList {
   title: string;
   subtitle: string;
   note: string;
-  offerPercent: number;
+  requirements: string;
+  premiumItems: Array<{ id: string; name: string; size: string; unitPrice: number; minQuantity: number }>;
   sections: PriceListSection[];
   active: boolean;
   staffVisible: boolean;
@@ -317,7 +318,8 @@ const EMPTY_FORM = {
   title: '',
   subtitle: '',
   note: '',
-  offerPercent: 0,
+  requirements: '',
+  premiumItems: [] as PriceList['premiumItems'],
   active: true,
   staffVisible: true,
   expiresAt: '',
@@ -377,7 +379,8 @@ export default function PriceLists() {
       title: pl.title,
       subtitle: pl.subtitle,
       note: pl.note,
-      offerPercent: pl.offerPercent || 0,
+      requirements: pl.requirements || '',
+      premiumItems: (pl.premiumItems || []).map(item => ({ ...item })),
       active: pl.active,
       staffVisible: pl.staffVisible,
       expiresAt: pl.expiresAt ? pl.expiresAt.slice(0, 10) : '',
@@ -392,7 +395,8 @@ export default function PriceLists() {
       title: `${pl.title} (Copy)`,
       subtitle: pl.subtitle,
       note: pl.note,
-      offerPercent: pl.offerPercent || 0,
+      requirements: pl.requirements || '',
+      premiumItems: (pl.premiumItems || []).map(item => ({ ...item, id: editorId('premium') })),
       active: pl.active,
       staffVisible: pl.staffVisible,
       expiresAt: pl.expiresAt ? pl.expiresAt.slice(0, 10) : '',
@@ -407,7 +411,8 @@ export default function PriceLists() {
       title: form.title || 'Untitled Price List',
       subtitle: form.subtitle,
       note: form.note,
-      offerPercent: form.offerPercent,
+      requirements: form.requirements,
+      premiumItems: form.premiumItems,
       sections: form.sections,
       active: form.active,
       staffVisible: form.staffVisible,
@@ -587,12 +592,24 @@ export default function PriceLists() {
                 <Input value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} placeholder="Prices valid until end of quarter. Minimum order Rs. 5,000." className={inputClass} />
               </div>
 
-              <div className="space-y-2 rounded-xl border border-admin-border bg-admin-subtle p-4">
-                <Label className={labelClass}>Premium customer offer (%)</Label>
-                <Input type="number" min="0" max="100" step="0.01" value={form.offerPercent}
-                  onChange={e => setForm(f => ({ ...f, offerPercent: Number(e.target.value) }))}
-                  className="w-32 rounded-lg bg-admin-surface" />
-                <p className="text-xs text-admin-muted">Applied automatically to admin orders for clients linked to this active price list. Individual table prices remain for reference.</p>
+              <div className="space-y-3 rounded-xl border-2 border-admin-brand-line bg-admin-brand-soft p-4">
+                <Label className="text-sm font-bold text-admin-brand-ink">Customer requirements</Label>
+                <textarea value={form.requirements} onChange={e => setForm(f => ({ ...f, requirements: e.target.value }))}
+                  rows={3} maxLength={4000} placeholder="e.g. Minimum monthly order, editing included, advance payment, turnaround time..."
+                  className="w-full rounded-lg border border-admin-brand-line bg-admin-surface p-3 text-sm text-admin-ink" />
+                <p className="text-xs text-admin-brand-ink">Highlighted on the customer price list and shown when staff add premium items to an invoice.</p>
+              </div>
+
+              <div className="space-y-3 rounded-xl border border-admin-border bg-admin-surface p-4">
+                <div className="flex items-center justify-between gap-2"><div><Label className="text-sm font-bold text-admin-ink">Premium customer products</Label><p className="text-xs text-admin-muted">Each item has its own size, unit price and minimum invoice quantity.</p></div>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setForm(f => ({ ...f, premiumItems: [...f.premiumItems, { id: editorId('premium'), name: '', size: '', unitPrice: 0, minQuantity: 1 }] }))}><Plus className="w-3.5 h-3.5 mr-1" /> Item</Button></div>
+                <div className="space-y-2">{form.premiumItems.map((item, index) => <div key={item.id} className="grid grid-cols-2 gap-2 rounded-lg border border-admin-border bg-admin-subtle p-2 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_110px_95px_32px]">
+                  <Input aria-label={`Item ${index + 1} name`} placeholder="Product name" value={item.name} onChange={e => setForm(f => ({ ...f, premiumItems: f.premiumItems.map((entry, i) => i === index ? { ...entry, name: e.target.value } : entry) }))} />
+                  <Input aria-label={`Item ${index + 1} size`} placeholder="Size, e.g. 8 × 12" value={item.size} onChange={e => setForm(f => ({ ...f, premiumItems: f.premiumItems.map((entry, i) => i === index ? { ...entry, size: e.target.value } : entry) }))} />
+                  <Input aria-label={`Item ${index + 1} unit price`} type="number" min="0" step="0.01" placeholder="Unit price" value={item.unitPrice} onChange={e => setForm(f => ({ ...f, premiumItems: f.premiumItems.map((entry, i) => i === index ? { ...entry, unitPrice: Number(e.target.value) } : entry) }))} />
+                  <Input aria-label={`Item ${index + 1} minimum quantity`} type="number" min="1" step="1" placeholder="Min qty" value={item.minQuantity} onChange={e => setForm(f => ({ ...f, premiumItems: f.premiumItems.map((entry, i) => i === index ? { ...entry, minQuantity: Number(e.target.value) } : entry) }))} />
+                  <Button type="button" variant="ghost" size="icon" aria-label={`Remove item ${index + 1}`} onClick={() => setForm(f => ({ ...f, premiumItems: f.premiumItems.filter((_, i) => i !== index) }))}><Trash2 className="w-4 h-4" /></Button>
+                </div>)}</div>
               </div>
 
               {/* Sections */}
