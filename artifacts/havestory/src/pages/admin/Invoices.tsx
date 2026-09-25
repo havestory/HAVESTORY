@@ -40,7 +40,8 @@ function invoiceDateMatches(raw: string | Date | null | undefined, range: Invoic
 }
 
 type CostComponent = { id: string; type: "inventory" | "production"; refId: number; name: string; unit: string; unitCost: string; quantity: string; wasteQuantity?: string };
-type LineItem = { id: string; description: string; qty: number; unitPrice: string; notes: string; costPrice?: string; costComponents?: CostComponent[]; deductStock?: boolean };
+type LineItem = { id: string; description: string; qty: number; unitPrice: string; notes: string; costPrice?: string; costComponents?: CostComponent[]; deductStock?: boolean; premiumPriceListId?: number; premiumItemId?: string; premiumMinQuantity?: number };
+type PremiumList = { id: number; title: string; requirements?: string; premiumItems: Array<{ id: string; name: string; size: string; unitPrice: number; minQuantity: number }> };
 type CatalogInvoiceItem = { key: string; name: string; price: string; kind: "Product" | "Service"; category?: string };
 type ShippingOption = "none" | "standard" | "express" | "weight" | "custom";
 
@@ -155,6 +156,12 @@ export default function AdminInvoices() {
   // the typed client to the Clients DB so the new invoice ends up linked.
   const [saveManualAsClient, setSaveManualAsClient] = useState(false);
   const [clientCreateError, setClientCreateError]   = useState("");
+  const { data: premiumList, isFetching: premiumLoading, error: premiumError } = useQuery<PremiumList | null>({
+    queryKey: ["client-premium-price-list", form.clientId],
+    queryFn: async () => { const response = await fetch(`/api/price-lists/for-client/${form.clientId}`, { credentials: "include", cache: "no-store" }); if (!response.ok) throw new Error("Could not load the linked price list"); return response.json(); },
+    enabled: showManual && !!form.clientId,
+    staleTime: 0,
+  });
   const [allowDuplicateCustomer, setAllowDuplicateCustomer] = useState(false);
 
   useEffect(() => {
@@ -360,11 +367,29 @@ export default function AdminInvoices() {
     setItems(current => current.length === 1 && !current[0].description.trim() && !current[0].unitPrice ? [selected] : [...current, selected]);
     setCatalogSearch(""); setShowCatalogDropdown(false);
   };
+  const addPremiumItem = (item: PremiumList["premiumItems"][number]) => {
+    if (!premiumList) return;
+    const selected: LineItem = { ...newItem(), description: `${item.name}${item.size ? ` · ${item.size}` : ""}`, qty: item.minQuantity, unitPrice: String(item.unitPrice), notes: `Premium customer product · ${premiumList.title}`, premiumPriceListId: premiumList.id, premiumItemId: item.id, premiumMinQuantity: item.minQuantity };
+    setItems(current => current.length === 1 && !current[0].description.trim() && !current[0].unitPrice ? [selected] : [...current, selected]);
+  };
 
   const handleSave = async () => {
     if (!form.clientName.trim()) return;
     setClientCreateError("");
     setAllowDuplicateCustomer(false);
+    const premiumLines = items.filter(item => item.premiumItemId);
+    if (premiumLines.length) {
+      if (!form.clientId) { setClientCreateError("Select the linked premium customer before saving these products."); return; }
+      try {
+        const response = await fetch(`/api/price-lists/for-client/${form.clientId}`, { credentials: "include", cache: "no-store" });
+        if (!response.ok) throw new Error("Could not verify premium prices. Please retry.");
+        const latest: PremiumList | null = await response.json();
+        for (const line of premiumLines) {
+          const current = latest && latest.id === line.premiumPriceListId && latest.premiumItems.find(item => item.id === line.premiumItemId);
+          if (!current || line.qty < current.minQuantity || !Number.isInteger(line.qty) || num(line.unitPrice) !== Number(current.unitPrice)) throw new Error("Premium price list changed or minimum quantity was not met. Refresh the customer and add the item again.");
+        }
+      } catch (error) { setClientCreateError(error instanceof Error ? error.message : "Could not verify premium prices."); return; }
+    }
 
     // If the owner typed a new client manually and opted in to save it, create
     // the Clients DB record first so we can link the invoice on the same call.
@@ -1106,6 +1131,14 @@ export default function AdminInvoices() {
                     <div className="w-6 h-6 rounded-lg bg-admin-subtle flex items-center justify-center"><ListOrdered size={13} className="text-admin-muted" /></div>
                     <span className="text-sm font-bold text-admin-ink">Line Items</span>
                   </div>
+                  {!!form.clientId && (premiumLoading || premiumError || premiumList) && <div className="mb-3 rounded-2xl border-2 border-amber-600 bg-amber-50 p-4 text-stone-900">
+                    <h3 className="text-sm font-bold">Premium customer products</h3>
+                    {premiumLoading ? <p className="text-xs">Loading linked price list…</p> : premiumError ? <p className="text-xs text-red-700">Could not load the linked price list. Retry by selecting the customer again.</p> : premiumList && <>
+                      <p className="mb-2 text-xs">{premiumList.title}</p>
+                      {premiumList.requirements && <p className="mb-3 whitespace-pre-line rounded-lg border border-amber-400 bg-white p-3 text-xs"><strong>Requirements &amp; terms</strong><br/>{premiumList.requirements}</p>}
+                      <div className="space-y-2">{premiumList.premiumItems.map(item => <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-white p-2 text-xs"><span className="font-semibold">{item.name} {item.size && <span className="text-stone-600">· {item.size}</span>}<span className="block font-normal">Minimum {item.minQuantity} · {rs(item.unitPrice)} each</span></span><button type="button" onClick={() => addPremiumItem(item)} className="rounded-lg bg-stone-800 px-3 py-2 font-bold text-white">Add item</button></div>)}</div>
+                    </>}
+                  </div>}
                   <div className="invoice-catalog-panel relative mb-3 rounded-2xl border border-admin-border bg-admin-surface/60 p-3">
                     <div className="mb-2 flex items-center justify-between"><div><div className="text-xs font-bold text-admin-ink">Add from Products & Services</div><div className="text-[10px] text-admin-muted">Search the catalog, or continue with manual line items below.</div></div><span className="rounded-full bg-admin-surface px-2 py-1 text-[10px] font-bold text-admin-muted">{catalogItems.length} items</span></div>
                     <div className="relative">
@@ -1158,7 +1191,7 @@ export default function AdminInvoices() {
                                   const v = e.target.value.replace(/[^\d]/g, "");
                                   updateItem(it.id, "qty", v === "" ? 0 : parseInt(v));
                                 }}
-                                onBlur={e => { if (!e.target.value || parseInt(e.target.value) < 1) updateItem(it.id, "qty", 1); }}
+                                onBlur={e => { if (!e.target.value || parseInt(e.target.value) < (it.premiumMinQuantity || 1)) updateItem(it.id, "qty", it.premiumMinQuantity || 1); }}
                                 placeholder="Qty"
                                 aria-label="Quantity"
                                 className="input-field text-center text-sm font-semibold"
@@ -1169,6 +1202,7 @@ export default function AdminInvoices() {
                                   type="text"
                                   inputMode="decimal"
                                   value={it.unitPrice}
+                                  readOnly={!!it.premiumItemId}
                                   onChange={e => {
                                     const v = e.target.value.replace(/[^\d.]/g, "");
                                     updateItem(it.id, "unitPrice", v);
@@ -1198,7 +1232,7 @@ export default function AdminInvoices() {
                                 const v = e.target.value.replace(/[^\d]/g, "");
                                 updateItem(it.id, "qty", v === "" ? 0 : parseInt(v));
                               }}
-                              onBlur={e => { if (!e.target.value || parseInt(e.target.value) < 1) updateItem(it.id, "qty", 1); }}
+                              onBlur={e => { if (!e.target.value || parseInt(e.target.value) < (it.premiumMinQuantity || 1)) updateItem(it.id, "qty", it.premiumMinQuantity || 1); }}
                               placeholder="1"
                               className="input-field text-center text-base font-semibold"
                             />
@@ -1208,6 +1242,7 @@ export default function AdminInvoices() {
                                 type="text"
                                 inputMode="decimal"
                                 value={it.unitPrice}
+                                readOnly={!!it.premiumItemId}
                                 onChange={e => {
                                   const v = e.target.value.replace(/[^\d.]/g, "");
                                   updateItem(it.id, "unitPrice", v);

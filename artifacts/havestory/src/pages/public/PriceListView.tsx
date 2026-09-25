@@ -17,6 +17,8 @@ interface PriceList {
   subtitle: string;
   note: string;
   sections: PriceListSection[];
+  requirements?: string;
+  premiumItems?: Array<{ id: string; name: string; size: string; unitPrice: number; minQuantity: number }>;
   active: boolean;
   expiresAt: string | null;
   createdAt: string;
@@ -100,6 +102,13 @@ export default function PriceListView() {
       </div>
 
       <div className="max-w-4xl mx-auto px-6 py-10 space-y-8 price-list-content">
+        {pl.premiumItems && pl.premiumItems.length > 0 && <section className="space-y-3">
+          <h2 className="text-xl font-bold text-foreground">Premium customer products</h2>
+          <div className="overflow-x-auto rounded-xl border border-border"><table className="w-full min-w-[460px] text-left text-sm">
+            <thead className="bg-muted"><tr><th className="p-3">Product</th><th className="p-3">Size</th><th className="p-3 text-right">Unit price</th><th className="p-3 text-right">Min. quantity</th></tr></thead>
+            <tbody>{pl.premiumItems.map(item => <tr key={item.id} className="border-t border-border"><td className="p-3 font-semibold">{item.name}</td><td className="p-3">{item.size || '—'}</td><td className="p-3 text-right">Rs. {Number(item.unitPrice).toLocaleString('en-IN')}</td><td className="p-3 text-right">{item.minQuantity}</td></tr>)}</tbody>
+          </table></div>
+        </section>}
         {/* Validity notice */}
         {pl.expiresAt && (
           <div className={`flex items-center gap-3 p-4 border ${isExpired ? 'border-destructive/40 bg-destructive/10 text-destructive' : 'border-secondary/30 bg-secondary/10 text-secondary'}`}>
@@ -143,6 +152,10 @@ export default function PriceListView() {
           </div>
         ))}
 
+        {pl.requirements && <section className="rounded-xl border-2 border-amber-500 bg-amber-50 p-5 text-stone-900" aria-label="Customer requirements">
+          <h2 className="mb-2 text-lg font-bold">Requirements &amp; terms</h2>
+          <p className="whitespace-pre-line text-sm leading-relaxed">{pl.requirements}</p>
+        </section>}
         {/* Notes */}
         {pl.note && (
           <div className="border border-border bg-muted/30 p-5">

@@ -9,7 +9,6 @@ const MAX_LINKS = 50;
 const MAX_TAGS = 30;
 
 export type NormalizedCreateOrderBody = {
-  clientId?: number | null;
   customerName: string;
   customerPhone: string;
   customerEmail?: string | null;
@@ -131,7 +130,6 @@ export function normalizeCreateOrderBody(body: unknown, isAdmin: boolean): Norma
     : "bank_transfer";
 
   return {
-    clientId: isAdmin ? positiveId(input.clientId, "Client ID") : null,
     customerName,
     customerPhone,
     customerEmail,
