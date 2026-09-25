@@ -1,5 +1,4 @@
 import { FormEvent, ReactNode, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import {
   useCreateClient,
   useCreateInvoice,
@@ -251,17 +250,9 @@ export default function Orders() {
   }), [orders]);
 
   const selectedClient = clients.find((client) => client.id === createForm.clientId);
-  const { data: premiumPriceLists = [] } = useQuery<Array<{ id: number; title: string; offerPercent: number; active: boolean; expiresAt: string | null }>>({
-    queryKey: ['price-lists', 'order-offers'],
-    queryFn: async () => { const response = await fetch('/api/price-lists', { credentials: 'include' }); return response.ok ? response.json() : []; },
-  });
-  const selectedPriceList = premiumPriceLists.find(list => list.id === (selectedClient as any)?.premiumPriceListId && list.active && (!list.expiresAt || new Date(list.expiresAt) > new Date()));
   const selectedInvoice = invoices.find((invoice) => String(invoice.id) === createForm.invoiceId);
   const quantity = Math.max(1, Number.parseInt(createForm.quantity, 10) || 1);
-  const grossTotal = Math.max(0, Number.parseFloat(createForm.price) || 0) * quantity;
-  const premiumDiscount = selectedPriceList && selectedClient?.phone && createForm.customerPhone.replace(/\D/g, '').slice(-9) === selectedClient.phone.split(',')[0].replace(/\D/g, '').slice(-9)
-    ? Math.round(grossTotal * Math.min(100, Math.max(0, Number(selectedPriceList.offerPercent) || 0)) / 100) : 0;
-  const orderTotal = Math.max(0, grossTotal - premiumDiscount);
+  const orderTotal = Math.max(0, Number.parseFloat(createForm.price) || 0) * quantity;
 
   const filteredClients = useMemo(() => {
     const query = clientSearch.trim().toLowerCase();
@@ -396,7 +387,6 @@ export default function Orders() {
 
     createOrder.mutate({ data: {
       customerName,
-      clientId: createForm.clientId,
       customerPhone,
       customerEmail: createForm.customerEmail.trim() || null,
       customerAddress: createForm.customerAddress.trim() || '',
@@ -686,7 +676,7 @@ export default function Orders() {
               </div>}
 
               <div className="grid grid-cols-[1fr_0.7fr] gap-3"><div className="space-y-2"><Label className="text-xs text-admin-muted">Product / print type <span className="text-admin-brand-ink">*</span></Label><Input value={createForm.productName} onChange={(event) => setCreateForm((form) => ({ ...form, productName: event.target.value }))} placeholder="e.g. Event Banners, Business Cards..." className="h-11 rounded-full border-admin-border" /></div><div className="space-y-2"><Label className="text-xs text-admin-muted">Price (Rs.)</Label><Input type="number" min="0" step="1" value={createForm.price} onChange={(event) => setCreateForm((form) => ({ ...form, price: event.target.value }))} placeholder="0" className="h-11 rounded-full border-admin-border" /></div></div>
-              <div className="grid grid-cols-2 gap-3"><div className="space-y-2"><Label className="text-xs text-admin-muted">Quantity</Label><Input type="number" min="1" step="1" value={createForm.quantity} onChange={(event) => setCreateForm((form) => ({ ...form, quantity: event.target.value }))} className="h-11 rounded-full border-admin-border" /></div><div className="flex flex-col items-end justify-end pb-2 text-sm font-bold text-admin-muted">{selectedPriceList && <span className="text-xs text-admin-brand-ink">{(selectedClient as any)?.premiumNumber || `HS-P${String(selectedClient?.id).padStart(6, '0')}`} · {selectedPriceList.title} · {selectedPriceList.offerPercent}% off</span>}{premiumDiscount > 0 && <span className="text-xs">Offer: −{money(premiumDiscount)}</span>}<span>Order total: <strong className="ml-1 text-admin-brand-ink">{money(orderTotal)}</strong></span></div></div>
+              <div className="grid grid-cols-2 gap-3"><div className="space-y-2"><Label className="text-xs text-admin-muted">Quantity</Label><Input type="number" min="1" step="1" value={createForm.quantity} onChange={(event) => setCreateForm((form) => ({ ...form, quantity: event.target.value }))} className="h-11 rounded-full border-admin-border" /></div><div className="flex items-end justify-end pb-2 text-sm font-bold text-admin-muted">Order total: <span className="ml-1 text-admin-brand-ink">{money(orderTotal)}</span></div></div>
 
               <div className="space-y-3"><Label className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-admin-muted"><FileText className="h-3.5 w-3.5" /> Invoice</Label>
                 {[['none', 'No invoice yet', 'Create the order on its own. You can attach an invoice later from Invoices.'], ['link', 'Link to an existing invoice', 'Search by invoice number, client name, phone, or amount.'], ['create', 'Create a new invoice now', 'Build an invoice record and automatically link it to this order.']].map(([mode, title, description]) => <button type="button" key={mode} onClick={() => setCreateForm((form) => ({ ...form, invoiceMode: mode as InvoiceMode }))} className={`flex w-full items-start gap-3 rounded-2xl border p-3 text-left transition ${createForm.invoiceMode === mode ? 'border-admin-brand-line bg-admin-brand-soft/50 shadow-[0_4px_14px_rgba(236,72,153,0.08)]' : 'border-admin-border hover:border-admin-brand-line hover:bg-admin-brand-soft/30'}`}><span className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${createForm.invoiceMode === mode ? 'border-admin-brand-line bg-admin-brand' : 'border-admin-border'}`}>{createForm.invoiceMode === mode && <span className="h-1.5 w-1.5 rounded-full bg-admin-surface" />}</span><span><span className="block text-sm font-semibold text-admin-ink">{title}</span><span className="mt-0.5 block text-xs leading-4 text-admin-muted">{description}</span></span></button>)}
