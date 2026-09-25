@@ -6,12 +6,12 @@ html[data-hs-admin-theme] {
   --admin-warning-solid: 32 85% 29%;
   --admin-danger-solid: 350 62% 38%;
   --admin-font: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
-  --admin-canvas: 36 24% 98%;
+  --admin-canvas: 0 0% 100%;
   --admin-surface: 0 0% 100%;
-  --admin-subtle: 35 19% 95%;
+  --admin-subtle: 35 19% 94%;
   --admin-ink: 27 19% 14%;
   --admin-muted: 28 11% 35%;
-  --admin-border: 32 17% 82%;
+  --admin-border: 32 15% 70%;
   --admin-inverse: 155 25% 17%;
   --admin-brand: 32 27% 29%;
   --admin-brand-soft: 36 27% 93%;
