@@ -82,3 +82,47 @@
   }
   [data-public-site] .studio-closing { text-align: center; }
 }
+
+/* A compact studio motif and a calmer display face for the tracking hero. */
+[data-public-site] .hs-track-hero-icon {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 18px;
+  border: 1px solid rgba(130, 92, 50, .32);
+  border-radius: 19px;
+  background: #f7f0e5;
+  color: #78562f;
+  box-shadow: 0 10px 26px rgba(60, 42, 25, .08);
+  animation: hs-track-icon-arrive .7s ease-out both;
+}
+[data-public-site] .hs-track-hero-icon svg {
+  width: 27px;
+  height: 27px;
+  stroke-width: 1.6;
+  animation: hs-track-icon-float 4s ease-in-out .7s infinite;
+}
+[data-public-site] .hs-track-hero h1 {
+  font-family: Georgia, 'Times New Roman', serif !important;
+  font-size: clamp(2.8rem, 5vw, 4.35rem) !important;
+  font-weight: 700 !important;
+  line-height: 1.05 !important;
+  letter-spacing: -.045em !important;
+}
+@keyframes hs-track-icon-arrive {
+  from { opacity: 0; transform: translateY(8px) scale(.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes hs-track-icon-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+@media (max-width: 650px) {
+  [data-public-site] .hs-track-hero h1 { font-size: clamp(2.45rem, 9vw, 3.25rem) !important; }
+  [data-public-site] .hs-track-hero-icon { width: 52px; height: 52px; margin-bottom: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-public-site] .hs-track-hero-icon,
+  [data-public-site] .hs-track-hero-icon svg { animation: none; }
+}
