@@ -5,6 +5,7 @@ import { eq, isNull, or, and, desc, sql } from "drizzle-orm";
 import { getAdminAuth, hasPermission, requireAdmin, requireOwner } from "../lib/auth-cookie";
 import { parseIdParam } from "../lib/parse-id";
 import { DuplicateClientPhoneError, findClientIdByPhone, replaceClientPhoneClaims } from "../lib/client-dedupe";
+import { ensurePriceListsTable } from "./price-lists";
 
 const router = Router();
 
@@ -18,6 +19,19 @@ async function findActiveClientByPhone(phone: unknown) {
 async function activeClientById(id: number) {
   const [client] = await db.select().from(clientsTable).where(eq(clientsTable.id, id)).limit(1);
   return client && !client.deletedAt ? client : null;
+}
+
+function premiumNumber(id: number, priceListId: number | null) {
+  return priceListId ? `HS-P${String(id).padStart(6, "0")}` : null;
+}
+
+async function validPriceListId(value: unknown, client: { query: (sql: string, params: unknown[]) => Promise<any> }): Promise<number | null> {
+  if (value == null || value === "") return null;
+  const id = Number(value);
+  if (!Number.isSafeInteger(id) || id <= 0) throw new Error("Invalid premium price list");
+  const result = await client.query("SELECT id FROM price_lists WHERE id=$1", [id]);
+  if (!result.rows[0]) throw new Error("Premium price list does not exist");
+  return id;
 }
 
 // Every client (CRM) route is admin-only.
@@ -45,12 +59,12 @@ router.get("/summary", async (req, res) => {
     const searchPattern = `%${search.replace(/[\\%_]/g, "\\$&")}%`;
     const offset = (page - 1) * pageSize;
     const whereSearch = search
-      ? `AND (c.name ILIKE $1 ESCAPE '\\' OR COALESCE(c.business_name,'') ILIKE $1 ESCAPE '\\' OR COALESCE(c.email,'') ILIKE $1 ESCAPE '\\' OR COALESCE(c.phone,'') ILIKE $1 ESCAPE '\\' OR ('C' || LPAD(c.id::text,4,'0')) ILIKE $1 ESCAPE '\\')`
+      ? `AND (c.name ILIKE $1 ESCAPE '\\' OR COALESCE(c.business_name,'') ILIKE $1 ESCAPE '\\' OR COALESCE(c.email,'') ILIKE $1 ESCAPE '\\' OR COALESCE(c.phone,'') ILIKE $1 ESCAPE '\\' OR ('C' || LPAD(c.id::text,4,'0')) ILIKE $1 ESCAPE '\\' OR (CASE WHEN c.premium_price_list_id IS NOT NULL THEN 'HS-P' || LPAD(c.id::text,6,'0') ELSE '' END) ILIKE $1 ESCAPE '\\')`
       : "";
 
     const [pageResult, countResult, statsResult] = await Promise.all([
       pool.query(`
-      SELECT c.id,c.name,c.business_name,c.email,c.phone,c.address,c.notes,c.approved,c.created_at,c.updated_at,
+      SELECT c.id,c.name,c.business_name,c.email,c.phone,c.address,c.notes,c.approved,c.created_at,c.updated_at,c.premium_price_list_id,
         COALESCE(p.project_count,0)::int AS project_count,
         COALESCE(i.invoice_count,0)::int AS invoice_count,
         COALESCE(i.invoiced,0)::numeric AS invoiced,
@@ -103,6 +117,8 @@ router.get("/summary", async (req, res) => {
       approved: row.approved,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
+      premiumPriceListId: row.premium_price_list_id,
+      premiumNumber: premiumNumber(row.id, row.premium_price_list_id),
       projectCount: Number(row.project_count) || 0,
       invoiceCount: Number(row.invoice_count) || 0,
       invoiced: Number(row.invoiced) || 0,
@@ -207,24 +223,28 @@ router.get("/lookup", async (req, res) => {
 router.post("/", async (req, res) => {
   const client = await pool.connect();
   try {
-    const { name, businessName, email, phone, address, approved = true, notes } = req.body;
+    const { name, businessName, email, phone, address, approved = true, notes, premiumPriceListId } = req.body;
     if (!String(name || "").trim()) return res.status(400).json({ error: "Client name is required" });
+    if (premiumPriceListId != null && getAdminAuth(req)?.role !== "owner") return res.status(403).json({ error: "Only the owner can assign premium pricing" });
+    if (premiumPriceListId != null) await ensurePriceListsTable();
     await client.query("BEGIN");
+    const linkedPriceListId = await validPriceListId(premiumPriceListId, client);
     if (phone && String(phone).trim()) {
       const existingId = await findClientIdByPhone(phone, client);
       if (existingId) throw new DuplicateClientPhoneError(existingId);
     }
-    const inserted = await client.query(`INSERT INTO clients(name,business_name,email,phone,address,approved,notes)
-      VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING id`, [
-      String(name).trim(), businessName || null, email || null, phone || null, address || null, approved !== false, notes || null,
+    const inserted = await client.query(`INSERT INTO clients(name,business_name,email,phone,address,approved,notes,premium_price_list_id)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id`, [
+      String(name).trim(), businessName || null, email || null, phone || null, address || null, approved !== false, notes || null, linkedPriceListId,
     ]);
     const id = Number(inserted.rows[0].id);
     await replaceClientPhoneClaims(client, id, phone);
     await client.query("COMMIT");
     const created = await activeClientById(id);
-    return res.status(201).json(created);
+    return res.status(201).json({ ...created, premiumNumber: premiumNumber(id, linkedPriceListId) });
   } catch (err: any) {
     await client.query("ROLLBACK").catch(() => {});
+    if (err.message === "Invalid premium price list" || err.message === "Premium price list does not exist") return res.status(400).json({ error: err.message });
     if (err instanceof DuplicateClientPhoneError) {
       const existing = await activeClientById(err.existingClientId);
       return res.status(409).json({ error: "This phone number is already linked to an existing client. Duplicate profiles are not allowed.", existingClient: existing });
@@ -281,7 +301,9 @@ router.put("/:id", async (req, res) => {
   try {
     const id = parseIdParam(req, res);
     if (id === null) return;
-    const { name, businessName, email, phone, address, approved, notes } = req.body;
+    const { name, businessName, email, phone, address, approved, notes, premiumPriceListId } = req.body;
+    if (premiumPriceListId !== undefined && getAdminAuth(req)?.role !== "owner") return res.status(403).json({ error: "Only the owner can assign premium pricing" });
+    if (premiumPriceListId != null) await ensurePriceListsTable();
     await client.query("BEGIN");
     const locked = await client.query("SELECT * FROM clients WHERE id=$1 AND deleted_at IS NULL FOR UPDATE", [id]);
     const existing = locked.rows[0];
@@ -296,13 +318,15 @@ router.put("/:id", async (req, res) => {
       notes: notes !== undefined ? (String(notes || "").trim() || null) : existing.notes,
     };
     if (!next.name) { await client.query("ROLLBACK"); return res.status(400).json({ error: "Client name is required" }); }
+    const linkedPriceListId = premiumPriceListId === undefined ? existing.premium_price_list_id : await validPriceListId(premiumPriceListId, client);
     await replaceClientPhoneClaims(client, id, next.phone);
-    await client.query(`UPDATE clients SET name=$2,business_name=$3,email=$4,phone=$5,address=$6,approved=$7,notes=$8,updated_at=NOW()
-      WHERE id=$1`, [id,next.name,next.businessName,next.email,next.phone,next.address,next.approved,next.notes]);
+    await client.query(`UPDATE clients SET name=$2,business_name=$3,email=$4,phone=$5,address=$6,approved=$7,notes=$8,premium_price_list_id=$9,updated_at=NOW()
+      WHERE id=$1`, [id,next.name,next.businessName,next.email,next.phone,next.address,next.approved,next.notes,linkedPriceListId]);
     await client.query("COMMIT");
-    return res.json(await activeClientById(id));
+    return res.json({ ...await activeClientById(id), premiumNumber: premiumNumber(id, linkedPriceListId) });
   } catch (err: any) {
     await client.query("ROLLBACK").catch(() => {});
+    if (err.message === "Invalid premium price list" || err.message === "Premium price list does not exist") return res.status(400).json({ error: err.message });
     if (err instanceof DuplicateClientPhoneError) {
       const existing = await activeClientById(err.existingClientId);
       return res.status(409).json({ error: "This phone number is already linked to another client. Duplicate profiles are not allowed.", existingClient: existing });
