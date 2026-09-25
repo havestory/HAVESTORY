@@ -121,7 +121,8 @@ router.get("/public/:publicId", async (req, res) => {
       [String(req.params.publicId || "").slice(0, 80)]
     );
     if (!rows[0]) return res.status(404).json({ error: "Price list not found or no longer available" });
-    res.json(serialize(rows[0]));
+    const { premiumItems: _invoiceOnlyItems, ...publicPriceList } = serialize(rows[0]);
+    res.json(publicPriceList);
   } catch (error) {
     req.log.error(error);
     res.status(500).json({ error: "Failed to load price list" });
