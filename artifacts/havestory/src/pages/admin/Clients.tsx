@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useMemo, useDeferredValue } from "react";
 import { useLocation } from "wouter";
+import JSZip from "jszip";
 import { useCreateClient, useUpdateClient, useDeleteClient, useGetAdminMe, useGetSettings } from "@workspace/api-client-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -553,30 +554,30 @@ export default function AdminClients() {
     } } as any);
   };
 
-  const exportCsv = async () => {
-    const response = await fetch("/api/clients/export", { credentials: "include" });
-    if (!response.ok) return;
-    const exportClients = await response.json() as Client[];
-    const header = ["Client ID", "Full Name", "Business Name", "Phones", "Email", "Address", "Notes", "Added"];
-    const rows = [header, ...exportClients.map(c => [
-      clientCode(c),
-      c.name,
-      c.businessName || "",
-      c.phone || "",
-      c.email || "",
-      c.address || "",
-      c.notes || "",
-      c.createdAt ? format(new Date(c.createdAt), "yyyy-MM-dd") : "",
-    ])];
-    const csvSafe = (value: unknown) => {
-      const text = String(value ?? "");
-      return /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
-    };
-    const csv = rows.map(r => r.map(v => `"${csvSafe(v).replace(/"/g, '""')}"`).join(",")).join("\n");
-    const a = document.createElement("a");
-    a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
-    a.download = "clients.csv";
-    a.click();
+  const exportClientsXlsx = async () => {
+    try {
+      const response = await fetch("/api/clients/export", { credentials: "include" });
+      if (!response.ok) throw new Error("Could not export clients");
+      const exportClients = await response.json() as Client[];
+      const rows = [
+        ["Client ID", "Full Name", "Business Name", "Phones", "Email", "Address", "Notes", "Added"],
+        ...exportClients.map(c => [clientCode(c), c.name, c.businessName || "", c.phone || "", c.email || "", c.address || "", c.notes || "", c.createdAt ? format(new Date(c.createdAt), "yyyy-MM-dd") : ""]),
+      ];
+      const xml = (value: unknown) => String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, "");
+      const sheet = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><cols>${[14, 28, 28, 24, 32, 38, 44, 18].map((width, index) => `<col min="${index + 1}" max="${index + 1}" width="${width}" customWidth="1"/>`).join("")}</cols><sheetData>${rows.map((row, index) => `<row r="${index + 1}">${row.map((value, col) => `<c r="${String.fromCharCode(65 + col)}${index + 1}" t="inlineStr"><is><t xml:space="preserve">${xml(value)}</t></is></c>`).join("")}</row>`).join("")}</sheetData></worksheet>`;
+      const zip = new JSZip();
+      zip.file("[Content_Types].xml", '<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>');
+      zip.file("_rels/.rels", '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>');
+      zip.file("xl/workbook.xml", '<?xml version="1.0" encoding="UTF-8"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Clients" sheetId="1" r:id="rId1"/></sheets></workbook>');
+      zip.file("xl/_rels/workbook.xml.rels", '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>');
+      zip.file("xl/worksheets/sheet1.xml", sheet);
+      const blob = await zip.generateAsync({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a"); link.href = url; link.download = "clients.xlsx"; document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : "Could not export clients");
+    }
   };
 
   const filtered = clients;
@@ -607,8 +608,8 @@ export default function AdminClients() {
             <RefreshCw size={14} className={isSpinning ? "animate-spin" : ""} />
             <span className="hidden sm:inline">Refresh</span>
           </button>
-          <button onClick={exportCsv} className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-admin-border text-sm text-admin-muted hover:bg-admin-surface transition-colors">
-            <Download size={13} /><span className="hidden sm:inline">Export CSV</span><span className="sm:hidden">CSV</span>
+          <button onClick={exportClientsXlsx} className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-admin-border text-sm text-admin-muted hover:bg-admin-surface transition-colors">
+            <Download size={13} /><span className="hidden sm:inline">Export Excel</span><span className="sm:hidden">Excel</span>
           </button>
           <button onClick={openAdd} className="flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-sm font-semibold hover:bg-admin-muted transition-colors whitespace-nowrap">
             <Plus size={14} /> New Client
