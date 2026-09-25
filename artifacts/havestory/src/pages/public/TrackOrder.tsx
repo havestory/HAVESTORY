@@ -169,6 +169,9 @@ export default function TrackOrder() {
     <div className="hs-track-page">
       <section className="hs-track-hero">
         <div className="hs-track-hero-inner">
+          <div className="hs-track-hero-icon" aria-hidden="true">
+            <Package />
+          </div>
           <span>ORDER JOURNEY</span>
           <h1>Track your order.</h1>
           <p>
