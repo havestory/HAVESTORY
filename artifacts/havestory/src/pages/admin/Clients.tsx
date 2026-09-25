@@ -374,6 +374,8 @@ export default function AdminClients() {
     data: clientPage,
     refetch,
     isFetching,
+    isError: clientsError,
+    error: clientsLoadError,
   } = useQuery<ClientSummaryPage>({
     queryKey: ["/api/clients/summary", page, deferredSearch],
     queryFn: async () => {
@@ -470,7 +472,7 @@ export default function AdminClients() {
     queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
   };
 
-  const { mutate: createClient, isPending: isCreating } = useCreateClient({ mutation: { onSuccess: () => { invalidate(); setShowAdd(false); setForm(EMPTY_FORM); } } });
+  const { mutate: createClient, isPending: isCreating } = useCreateClient({ mutation: { onSuccess: () => { invalidate(); setShowAdd(false); setForm(EMPTY_FORM); }, onError: (error: any) => { window.alert(error?.response?.data?.error || error?.message || "Could not save client. Please try again."); } } });
   const { mutate: updateClient, isPending: isUpdating } = useUpdateClient({ mutation: { onSuccess: () => { invalidate(); setEditingClient(null); setForm(EMPTY_FORM); } } });
   const { mutate: deleteClient } = useDeleteClient({ mutation: { onSuccess: () => invalidate() } });
 
@@ -614,6 +616,8 @@ export default function AdminClients() {
         </div>
       </div>
 
+      {clientsError && <div role="alert" className="mb-4 rounded-xl border border-admin-danger-line bg-admin-danger-soft p-4 text-sm text-admin-danger"><strong>Clients could not be loaded.</strong> {clientsLoadError instanceof Error ? clientsLoadError.message : 'Please retry.'} <button type="button" onClick={() => void refetch()} className="ml-2 font-bold underline">Retry</button></div>}
+
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
@@ -649,7 +653,7 @@ export default function AdminClients() {
       </div>
 
       {/* Client Cards Grid */}
-      {filtered.length === 0 ? (
+      {clientsError ? null : filtered.length === 0 ? (
         <div className="bg-admin-surface border border-admin-border rounded-2xl shadow-sm py-20 text-center">
           <Users size={40} className="mx-auto mb-3 text-admin-muted" />
           <p className="font-medium text-admin-muted">{search ? "No clients match your search" : "No clients yet"}</p>
