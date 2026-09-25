@@ -211,6 +211,7 @@ export default function Orders() {
   const [invoiceSearch, setInvoiceSearch] = useState('');
   const [invoiceMenuOpen, setInvoiceMenuOpen] = useState(false);
   const [createForm, setCreateForm] = useState<CreateForm>(EMPTY_CREATE_FORM);
+  const [createError, setCreateError] = useState("");
   const [manageOrder, setManageOrder] = useState<OrderRecord | null>(null);
   const [manageOpen, setManageOpen] = useState(false);
   const [manageForm, setManageForm] = useState<ManageForm>(EMPTY_MANAGE_FORM);
@@ -270,6 +271,7 @@ export default function Orders() {
 
   const resetCreateForm = () => {
     setCreateForm({ ...EMPTY_CREATE_FORM });
+    setCreateError("");
     setClientSearch('');
     setInvoiceSearch('');
     setCustomerMenuOpen(false);
@@ -376,14 +378,18 @@ export default function Orders() {
 
   const handleCreateOrder = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (createOrder.isPending || createInvoice.isPending || createClient.isPending) return;
+    setCreateError("");
     const customerName = createForm.customerName.trim();
     const customerPhone = createForm.customerPhone.trim();
     const productName = createForm.productName.trim();
     if (!customerName || !customerPhone || !productName || quantity < 1) {
+      setCreateError('Select a customer with a phone number, add a product, and enter a valid quantity.');
       toast({ title: 'Missing order details', description: 'Select a customer, add a print type, and enter a valid quantity.', variant: 'destructive' });
       return;
     }
     if (createForm.invoiceMode === 'link' && !createForm.invoiceId) {
+      setCreateError('Select an available invoice before creating the order.');
       toast({ title: 'Select an invoice', description: 'Choose an available invoice before linking it to this order.', variant: 'destructive' });
       return;
     }
@@ -394,7 +400,7 @@ export default function Orders() {
       customerEmail: createForm.customerEmail.trim() || null,
       customerAddress: createForm.customerAddress.trim() || '',
       orderType: createForm.orderType,
-      items: [{ productId: null, productName, quantity, notes: createForm.notes.trim() || null, price: createForm.price || '0' } as any],
+      items: [{ productId: null, productName, quantity, notes: createForm.notes.trim() || null, unitPrice: Math.max(0, Number(createForm.price) || 0) } as any],
       designLinks: [],
       attachments: [],
       notes: createForm.notes.trim() || null,
@@ -408,7 +414,11 @@ export default function Orders() {
       linkInvoiceId: createForm.invoiceMode === 'link' ? Number(createForm.invoiceId) : undefined,
     } as any }, {
       onSuccess: finishOrderCreation,
-      onError: (error) => toast({ title: 'Order creation failed', description: error instanceof Error ? error.message : 'The server could not create this order.', variant: 'destructive' }),
+      onError: (error) => {
+        const message = error instanceof Error ? error.message : 'The server could not create this order.';
+        setCreateError(message);
+        toast({ title: 'Order creation failed', description: message, variant: 'destructive' });
+      },
     });
   };
 
@@ -693,7 +703,8 @@ export default function Orders() {
               <div className="space-y-2"><Label className="text-[11px] font-bold uppercase tracking-wide text-admin-muted">Notes</Label><Textarea value={createForm.notes} onChange={(event) => setCreateForm((form) => ({ ...form, notes: event.target.value }))} placeholder="Internal notes..." rows={3} className="resize-none rounded-2xl border-admin-border" /></div>
               <div className="grid grid-cols-2 gap-3"><div className="space-y-2"><Label className="text-xs text-admin-muted">Order type</Label><select value={createForm.orderType} onChange={(event) => setCreateForm((form) => ({ ...form, orderType: event.target.value }))} className="h-11 w-full rounded-full border border-admin-border bg-admin-surface px-4 text-sm text-admin-ink"><option value="standard">Standard</option><option value="custom">Custom</option><option value="bulk">Bulk</option></select></div><div className="space-y-2"><Label className="text-xs text-admin-muted">Due date</Label><Input type="date" value={createForm.dueDate} onChange={(event) => setCreateForm((form) => ({ ...form, dueDate: event.target.value }))} className="h-11 rounded-full border-admin-border" /></div></div>
             </div>
-            <DialogFooter className="mt-6 gap-3 border-t border-admin-border pt-5 sm:justify-end"><Button type="button" variant="outline" onClick={() => setCreateOpen(false)} disabled={isCreating} className="h-11 rounded-full border-admin-border px-8 text-admin-muted">Cancel</Button><Button type="submit" disabled={isCreating} className="h-11 rounded-sm bg-primary px-8 font-bold text-primary-foreground hover:bg-admin-muted">{isCreating ? 'Creating…' : 'Create Order'}</Button></DialogFooter>
+            {createError && <p role="alert" className="mt-5 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-medium text-red-800">{createError}</p>}
+            <DialogFooter className="mt-6 gap-3 border-t border-admin-border pt-5 sm:justify-end"><Button type="button" variant="outline" onClick={() => setCreateOpen(false)} disabled={isCreating} className="h-11 rounded-full border-admin-border px-8 text-admin-muted">Cancel</Button><Button type="submit" disabled={isCreating} className="h-11 rounded-sm bg-admin-brand px-8 font-bold text-white hover:bg-admin-brand-ink">{isCreating ? 'Creating…' : 'Create Order'}</Button></DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
