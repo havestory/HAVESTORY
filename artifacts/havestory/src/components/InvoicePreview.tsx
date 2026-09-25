@@ -43,9 +43,9 @@ const PAD  = 40;    // horizontal + top padding
 const FOOT = 50;    // footer bar height
 const ITEMS_PER_PAGE = 10;
 
-const PINK   = "#6b2f7b";
-const PURPLE = "#2f1638";
-const GRAD   = "linear-gradient(90deg,#6b2f7b,#c5963f)";
+const PINK   = "#705332";
+const PURPLE = "#20382d";
+const GRAD   = "linear-gradient(90deg,#20382d,#806039)";
 
 /* ─── Rough height estimates (px) used for pagination decisions ─── */
 const H_FULL_HEADER  = 78;   // logo + address block
@@ -282,8 +282,8 @@ export function InvoicePreview({
   const now  = (createdAtOverride instanceof Date && !isNaN(createdAtOverride.getTime()))
     ? createdAtOverride
     : new Date();
-  const genNo = useRef(`INV-${format(now, "yyyyMMdd")}-${Math.floor(Math.random() * 900 + 100)}`);
-  const invoiceNo = invoiceNumberOverride || genNo.current;
+  const invoiceNo = invoiceNumberOverride || "Assigned on save";
+  const bankReference = /^INV-\d{6}-(\d{4})$/.exec(invoiceNo)?.[1];
 
   const dueDays  = Number(s?.paymentDueDays ?? 7);
   const dueDate  = addDays(now, dueDays);
@@ -419,7 +419,7 @@ export function InvoicePreview({
     let y = 18;
 
     const addHeader = () => {
-      pdf.setTextColor(47, 22, 56);
+      pdf.setTextColor(32, 56, 45);
       pdf.setFont("helvetica", "bold");
       pdf.setFontSize(17);
       pdf.text(biz || "HAVESTORY", left, y);
@@ -427,7 +427,7 @@ export function InvoicePreview({
       pdf.setTextColor(100, 100, 100);
       const businessLine = [bizAddr, bizPhone, bizEmail].filter(Boolean).join(" | ");
       if (businessLine) pdf.text(pdf.splitTextToSize(businessLine, 112), left, y + 5);
-      pdf.setTextColor(107, 47, 123);
+      pdf.setTextColor(112, 83, 50);
       pdf.setFontSize(20);
       pdf.text("INVOICE", right, y, { align: "right" });
       pdf.setFontSize(8);
@@ -435,7 +435,7 @@ export function InvoicePreview({
       pdf.text(`No: ${invoiceNo}`, right, y + 5, { align: "right" });
       pdf.text(`Date: ${format(now, "dd MMM yyyy")}`, right, y + 9, { align: "right" });
       y += 20;
-      pdf.setDrawColor(107, 47, 123);
+      pdf.setDrawColor(112, 83, 50);
       pdf.setLineWidth(.6);
       pdf.line(left, y, right, y);
       y += 8;
@@ -450,7 +450,7 @@ export function InvoicePreview({
     addHeader();
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(8);
-    pdf.setTextColor(107, 47, 123);
+    pdf.setTextColor(112, 83, 50);
     pdf.text("BILL TO", left, y);
     y += 5;
     pdf.setTextColor(25, 25, 25);
@@ -463,7 +463,7 @@ export function InvoicePreview({
     y += 9;
 
     const drawTableHeader = () => {
-      pdf.setFillColor(47, 22, 56);
+      pdf.setFillColor(32, 56, 45);
       pdf.rect(left, y - 4, right - left, 7, "F");
       pdf.setTextColor(255, 255, 255);
       pdf.setFont("helvetica", "bold");
@@ -527,6 +527,12 @@ export function InvoicePreview({
       pdf.setFontSize(8);
       pdf.setTextColor(80, 80, 80);
       pdf.text(pdf.splitTextToSize(`Note: ${form.additionalNotes}`, right - left), left, y);
+    }
+    if (bankReference) {
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(9);
+      pdf.setTextColor(112, 83, 50);
+      pdf.text(`Bank transfer remark: ${bankReference} (use these four digits only)`, left, pageH - 20);
     }
     pdf.setFontSize(7.5);
     pdf.setTextColor(110, 110, 110);
@@ -620,7 +626,7 @@ export function InvoicePreview({
     receipt.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Invoice ${escapeReceipt(invoiceNo)}</title>
 <style>
 @page{size:${widthMm}mm auto;margin:0}*{box-sizing:border-box}html,body{width:${widthMm}mm;min-width:${widthMm}mm;margin:0;padding:0;background:#fff;color:#000}body{font-family:Arial,Helvetica,sans-serif;font-size:${thermalWidth === "58" ? 10 : 11}px;line-height:1.35;font-variant-numeric:tabular-nums}.receipt{width:${widthMm}mm;padding:${thermalWidth === "58" ? 3 : 4}mm;overflow:hidden}.center{text-align:center}.brand{font-size:${thermalWidth === "58" ? 16 : 19}px;font-weight:900;letter-spacing:.5px;overflow-wrap:anywhere}.tagline{margin-top:1mm;font-size:.92em}.meta{margin-top:2mm}.rule{border-top:1px dashed #000;margin:2.5mm 0}.section-title{margin-bottom:1mm;font-weight:800;text-transform:uppercase;letter-spacing:.7px}.customer-name{font-size:1.15em;font-weight:800;overflow-wrap:anywhere}.wrap{overflow-wrap:anywhere;word-break:break-word}table{width:100%;border-collapse:collapse;table-layout:fixed}td{vertical-align:top;padding:1.4mm 0;border-bottom:1px dotted #aaa}td.item{width:68%;padding-right:2mm;overflow-wrap:anywhere}td.amount{width:32%;text-align:right;white-space:nowrap;font-weight:700}.muted{color:#333;font-size:.88em;font-weight:400}.summary{margin-top:2mm}.summary-row{display:flex;justify-content:space-between;gap:2mm;padding:.7mm 0}.summary-row.total{border-top:1px solid #000;margin-top:1mm;padding-top:1.5mm;font-size:1.12em}.summary-row.balance{border:1.5px solid #000;margin-top:1.5mm;padding:1.5mm;font-size:1.12em}.status{display:inline-block;margin-top:2mm;border:1px solid #000;padding:1mm 2mm;font-weight:800}.footer{margin-top:3mm;font-size:.9em}@media print{html,body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
-</style></head><body><main class="receipt"><header class="center"><div class="brand">${escapeReceipt(biz)}</div><div class="tagline wrap">${escapeReceipt(receiptTagline)}</div><div class="meta wrap">${[bizAddr, bizPhone, bizEmail, website].filter(Boolean).map(value => escapeReceipt(value)).join("<br>")}</div></header><div class="rule"></div><div class="center"><strong>INVOICE</strong><br>${escapeReceipt(invoiceNo)}<br>${escapeReceipt(format(now, "dd MMM yyyy, hh:mm a"))}</div>${linkedOrderId ? `<div class="center muted wrap">Order: ${escapeReceipt(linkedOrderId)}</div>` : ""}<div class="rule"></div><section><div class="section-title">Bill to</div><div class="customer-name">${escapeReceipt(form.clientName || "Walk-in customer")}</div>${customerLines}</section><div class="rule"></div><table><tbody>${itemRows || `<tr><td>No line items</td><td></td></tr>`}</tbody></table><section class="summary">${summaryRow("Subtotal", subtotal)}${shippingAmt > 0 ? summaryRow(`Shipping${shippingLabels[shipping] ? ` (${shippingLabels[shipping]})` : ""}`, shippingAmt) : ""}${paidAdvance > 0 ? summaryRow("Advance paid", -paidAdvance) : ""}${summaryRow("Grand total", grandTotal, "total")}${summaryRow(isPaid ? "Balance (PAID)" : "Balance due", balance, "balance")}</section><div class="center"><span class="status">${escapeReceipt(badge.label)}</span></div>${form.additionalNotes ? `<div class="rule"></div><div class="wrap"><strong>Note:</strong> ${escapeReceipt(form.additionalNotes)}</div>` : ""}<footer class="footer center"><div class="rule"></div>${issuer ? `Issued by Mr. ${escapeReceipt(issuer)}<br>` : ""}Thank you for choosing ${escapeReceipt(biz)}.</footer></main></body></html>`);
+</style></head><body><main class="receipt"><header class="center"><div class="brand">${escapeReceipt(biz)}</div><div class="tagline wrap">${escapeReceipt(receiptTagline)}</div><div class="meta wrap">${[bizAddr, bizPhone, bizEmail, website].filter(Boolean).map(value => escapeReceipt(value)).join("<br>")}</div></header><div class="rule"></div><div class="center"><strong>INVOICE</strong><br>${escapeReceipt(invoiceNo)}<br>${escapeReceipt(format(now, "dd MMM yyyy, hh:mm a"))}</div>${linkedOrderId ? `<div class="center muted wrap">Order: ${escapeReceipt(linkedOrderId)}</div>` : ""}<div class="rule"></div><section><div class="section-title">Bill to</div><div class="customer-name">${escapeReceipt(form.clientName || "Walk-in customer")}</div>${customerLines}</section><div class="rule"></div><table><tbody>${itemRows || `<tr><td>No line items</td><td></td></tr>`}</tbody></table><section class="summary">${summaryRow("Subtotal", subtotal)}${shippingAmt > 0 ? summaryRow(`Shipping${shippingLabels[shipping] ? ` (${shippingLabels[shipping]})` : ""}`, shippingAmt) : ""}${paidAdvance > 0 ? summaryRow("Advance paid", -paidAdvance) : ""}${summaryRow("Grand total", grandTotal, "total")}${summaryRow(isPaid ? "Balance (PAID)" : "Balance due", balance, "balance")}</section>${bankReference ? `<div class="center wrap"><strong>Bank transfer remark: ${escapeReceipt(bankReference)}</strong> (four digits only)</div>` : ""}<div class="center"><span class="status">${escapeReceipt(badge.label)}</span></div>${form.additionalNotes ? `<div class="rule"></div><div class="wrap"><strong>Note:</strong> ${escapeReceipt(form.additionalNotes)}</div>` : ""}<footer class="footer center"><div class="rule"></div>${issuer ? `Issued by Mr. ${escapeReceipt(issuer)}<br>` : ""}Thank you for choosing ${escapeReceipt(biz)}.</footer></main></body></html>`);
     receipt.document.close();
     receipt.focus();
     window.setTimeout(() => {
@@ -698,7 +704,7 @@ export function InvoicePreview({
   return (
     <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm overflow-y-auto">
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className="bg-[#fffdf9] rounded-[28px] border border-[#dfcfe4] shadow-2xl w-full max-w-[860px] flex flex-col" style={{ maxHeight: "calc(100vh - 32px)" }}>
+        <div className="bg-[#fffdf9] rounded-[28px] border border-[#dfd1bf] shadow-2xl w-full max-w-[860px] flex flex-col" style={{ maxHeight: "calc(100vh - 32px)" }}>
 
           {/* ── Toolbar ── */}
           <div className="px-4 py-3 border-b border-gray-100 flex-shrink-0 space-y-2">
@@ -724,34 +730,34 @@ export function InvoicePreview({
                   {isSaving ? "Saving…" : "Save Invoice"}
                 </button>
               )}
-              <button onClick={printInvoice} disabled={generatingPDF || downloadingZip}
+              <button onClick={printInvoice} disabled={!invoiceNumberOverride || generatingPDF || downloadingZip}
                 className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-500 to-stone-600 text-white text-xs font-bold rounded-xl hover:opacity-90 disabled:opacity-60 whitespace-nowrap shrink-0">
                 <Printer size={13} /> {generatingPDF ? "Generating…" : "PDF"}
               </button>
-              <button onClick={downloadJPGZip} disabled={downloadingZip}
+              <button onClick={downloadJPGZip} disabled={!invoiceNumberOverride || downloadingZip}
                 className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold rounded-xl disabled:opacity-60 hover:opacity-90 whitespace-nowrap shrink-0">
                 <ImageDown size={13} /> {downloadingZip ? "Zipping…" : "JPG ZIP"}
               </button>
             </div>
             {/* Dedicated receipt-printer controls; admin-only and separate from A4 exports. */}
-            {allowThermalPrint && <div className="rounded-xl border border-violet-200 bg-violet-50 px-3 py-2.5 sm:flex sm:items-center sm:justify-between sm:gap-3">
+            {allowThermalPrint && invoiceNumberOverride && <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 sm:flex sm:items-center sm:justify-between sm:gap-3">
               <div className="flex items-start gap-2 min-w-0">
-                <Printer size={15} className="mt-0.5 text-violet-700 shrink-0" />
+                <Printer size={15} className="mt-0.5 text-amber-800 shrink-0" />
                 <div>
-                  <div className="text-xs font-extrabold text-violet-950">Thermal / Bill Printer</div>
-                  <p className="text-[10px] leading-4 text-violet-800">Compact invoice automatically fits the selected paper width.</p>
+                  <div className="text-xs font-extrabold text-stone-900">Thermal / Bill Printer</div>
+                  <p className="text-[10px] leading-4 text-stone-700">Compact invoice automatically fits the selected paper width.</p>
                 </div>
               </div>
               <div className="mt-2 sm:mt-0 flex items-center gap-2 shrink-0">
                 <label htmlFor="thermal-paper-width" className="sr-only">Thermal paper width</label>
-                <select id="thermal-paper-width" value={thermalWidth} onChange={event => setThermalWidth(event.target.value as ThermalWidth)} className="h-9 rounded-lg border border-violet-300 bg-white px-2.5 text-xs font-bold text-violet-950 outline-none focus:ring-2 focus:ring-violet-300">
+                <select id="thermal-paper-width" value={thermalWidth} onChange={event => setThermalWidth(event.target.value as ThermalWidth)} className="h-9 rounded-lg border border-amber-300 bg-white px-2.5 text-xs font-bold text-stone-900 outline-none focus:ring-2 focus:ring-amber-300">
                   <option value="80">80 mm</option><option value="58">58 mm</option>
                 </select>
-                <button onClick={printThermalInvoice} className="h-9 flex items-center gap-1.5 rounded-lg bg-violet-950 px-3 text-xs font-bold text-white hover:bg-violet-900">
+                <button onClick={printThermalInvoice} className="h-9 flex items-center gap-1.5 rounded-lg bg-stone-800 px-3 text-xs font-bold text-white hover:bg-stone-700">
                   <Printer size={13} /> Print receipt
                 </button>
                 {invoiceNumberOverride && status !== "paid" && (
-                  <button onClick={() => { window.location.href = `/admin/pos?invoice=${encodeURIComponent(invoiceNo)}`; }} className="h-9 rounded-lg border border-violet-300 bg-white px-3 text-xs font-bold text-violet-950 hover:bg-violet-100">
+                  <button onClick={() => { window.location.href = `/admin/pos?invoice=${encodeURIComponent(invoiceNo)}`; }} className="h-9 rounded-lg border border-amber-300 bg-white px-3 text-xs font-bold text-stone-900 hover:bg-amber-100">
                     Collect via POS
                   </button>
                 )}
@@ -898,7 +904,7 @@ export function InvoicePreview({
                             </div>
                           </div>
                           <div style={{ background: "#fffbeb", padding: "8px 16px", borderTop: "1px solid #d6b98c" }}>
-                            <span style={{ display: "block", fontSize: 11, color: PINK, fontWeight: 600, overflowWrap: "anywhere", wordBreak: "break-word" }}>Please include invoice number <strong>{invoiceNo}</strong> as the payment reference.</span>
+                            <span style={{ display: "block", fontSize: 11, color: PINK, fontWeight: 600, overflowWrap: "anywhere", wordBreak: "break-word" }}>Bank transfer remark: <strong style={{ fontSize: 18, letterSpacing: 2 }}>{bankReference || "Available after saving"}</strong>. Use only these four digits; do not enter the order ID.</span>
                           </div>
                         </div>
                       ))}
