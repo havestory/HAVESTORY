@@ -6,6 +6,7 @@ interface PriceListSection {
   id: string;
   title: string;
   columns: string[];
+  visibleColumns?: boolean[];
   rows: Array<{ id: string; cells: string[] }>;
 }
 
@@ -119,7 +120,7 @@ export default function PriceListView() {
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="bg-muted/60 border border-border">
-                    {section.columns.map((col, i) => (
+                    {section.columns.map((col, i) => section.visibleColumns?.[i] !== false && (
                       <th key={i} className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border">
                         {col}
                       </th>
@@ -129,7 +130,7 @@ export default function PriceListView() {
                 <tbody>
                   {section.rows.map((row, ri) => (
                     <tr key={row.id} className={`border-b border-border ${ri % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
-                      {row.cells.map((cell, ci) => (
+                      {row.cells.map((cell, ci) => section.visibleColumns?.[ci] !== false && (
                         <td key={ci} className="px-4 py-3 text-sm text-foreground">
                           {cell || '—'}
                         </td>

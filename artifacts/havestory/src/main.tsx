@@ -13,6 +13,7 @@ import './pos-unified.css';
 import './pos-interface.css';
 import './invoice-product-picker.css';
 import './reference-refresh.css';
+import './public-typography.css';
 import './invoice-product-picker';
 
 applyThemeVars('havestory-gallery');

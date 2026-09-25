@@ -9,6 +9,7 @@ type PriceListSection = {
   id: string;
   title: string;
   columns: string[];
+  visibleColumns?: boolean[];
   rows: Array<{ id: string; cells: string[] }>;
 };
 
@@ -58,6 +59,7 @@ function cleanSections(value: unknown): PriceListSection[] {
       id: String(section?.id || `section-${sectionIndex + 1}`).slice(0, 80),
       title: String(section?.title || `Price Table ${sectionIndex + 1}`).trim().slice(0, 140),
       columns,
+      visibleColumns: columns.map((_column: string, index: number) => section?.visibleColumns?.[index] !== false),
       rows: (Array.isArray(section?.rows) ? section.rows : []).slice(0, 200).map((row: any, rowIndex: number) => ({
         id: String(row?.id || `row-${rowIndex + 1}`).slice(0, 80),
         cells: columns.map((_column: string, columnIndex: number) => String(row?.cells?.[columnIndex] ?? "").trim().slice(0, 200)),
