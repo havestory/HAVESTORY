@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useGetSettings } from '@workspace/api-client-react';
+import { A4PrintPortal, useA4Print } from '@/components/A4PrintPortal';
 
 // ─── types ──────────────────────────────────────────────────────────────────
 
@@ -359,6 +360,7 @@ function TagInput({ tags, onChange, placeholder }: { tags: string[]; onChange: (
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
 export default function StaffProfile() {
+  const { active: printActive, print: printA4 } = useA4Print();
   const [, params] = useRoute('/admin/team/:id/profile');
   const staffId = Number(params?.id);
   const { toast } = useToast();
@@ -464,7 +466,7 @@ export default function StaffProfile() {
           <Button
             variant="outline"
             className="rounded-none gap-1.5 text-xs uppercase tracking-wider"
-            onClick={() => window.print()}
+            onClick={printA4}
           >
             <Printer className="w-3.5 h-3.5" /> Print CV
           </Button>
@@ -742,6 +744,9 @@ export default function StaffProfile() {
           </Button>
         </div>
       )}
+      <A4PrintPortal active={printActive}>
+        <PrintView staff={staff} profile={profile} bizName={bizName} />
+      </A4PrintPortal>
     </div>
   );
 }
