@@ -1,6 +1,6 @@
 import { pool } from "@workspace/db";
 
-const SCHEMA_VERSION = "2026-08-31-secure-tracking-tokens-v8";
+const SCHEMA_VERSION = "2026-09-25-premium-clients-v9";
 let runtimeSchemaReady: Promise<void> | null = null;
 
 function runtimeSlugify(value: unknown): string {
@@ -147,7 +147,8 @@ async function applyRuntimeSchema(): Promise<void> {
         ADD COLUMN IF NOT EXISTS notes TEXT,
         ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW(),
         ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-        ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+        ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP,
+        ADD COLUMN IF NOT EXISTS premium_price_list_id INTEGER;
 
       CREATE TABLE IF NOT EXISTS orders (
         id SERIAL PRIMARY KEY, order_id TEXT NOT NULL UNIQUE, tracking_token TEXT NOT NULL UNIQUE, customer_name TEXT NOT NULL,
@@ -535,3 +536,4 @@ export function ensureRuntimeSchema(): Promise<void> {
   }
   return runtimeSchemaReady;
 }
+

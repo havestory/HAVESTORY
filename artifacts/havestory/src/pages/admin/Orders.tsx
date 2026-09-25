@@ -84,6 +84,7 @@ type ManageForm = {
   dueDate: string;
   approvalPaymentType: 'advance' | 'full' | 'custom';
   approvalPaymentAmount: string;
+  manualPaymentReason: string;
 };
 
 const EMPTY_CREATE_FORM: CreateForm = {
@@ -120,6 +121,7 @@ const EMPTY_MANAGE_FORM: ManageForm = {
   dueDate: '',
   approvalPaymentType: 'advance',
   approvalPaymentAmount: '',
+  manualPaymentReason: '',
 };
 
 const STATUS_OPTIONS = ['pending', 'confirmed', 'processing', 'ready', 'shipped', 'delivered', 'completed', 'cancelled', 'reviewing', 'submitted'];
@@ -302,6 +304,7 @@ export default function Orders() {
       dueDate: order.dueDate || '',
       approvalPaymentType: submittedType,
       approvalPaymentAmount: submittedAmount > 0 ? String(submittedAmount) : String(orderTotalForRow(order) || ''),
+      manualPaymentReason: '',
     });
     setSections({ status: true, customer: false, project: false, files: false, payment: false, delivery: false });
     setManageOpen(true);
@@ -539,6 +542,7 @@ export default function Orders() {
     if (!manageOrder) return;
     const reason = action === 'reject' ? window.prompt('Reason for rejecting this payment proof:', 'Please upload a clearer payment slip.') : '';
     if (action === 'reject' && reason === null) return;
+    if (action === 'approve' && !manageOrder.paymentProofUrl && manageForm.manualPaymentReason.trim().length < 8) { toast({ title: 'Verification reason required', description: 'Enter how you confirmed payment before marking this order paid.', variant: 'destructive' }); return; }
     setPaymentReviewLoading(action);
     try {
       const response = await fetch(`/api/orders/${manageOrder.id}/payment-review`, {
@@ -549,6 +553,8 @@ export default function Orders() {
           reason: reason || undefined,
           paymentType: action === 'approve' ? manageForm.approvalPaymentType : undefined,
           approvedAmount: action === 'approve' ? Number(manageForm.approvalPaymentAmount) : undefined,
+          manual: action === 'approve' && !manageOrder.paymentProofUrl,
+          manualReason: action === 'approve' && !manageOrder.paymentProofUrl ? manageForm.manualPaymentReason.trim() : undefined,
         }),
       });
       const payload = await response.json().catch(() => null);
@@ -757,16 +763,17 @@ export default function Orders() {
                   <div className="rounded-2xl bg-admin-surface p-3"><div className="text-[10px] font-bold uppercase tracking-wide text-admin-muted">Proof</div><div className="mt-1 text-sm font-bold text-admin-ink">{String(manageOrder.paymentProofStatus || 'not uploaded').replace('_', ' ')}</div></div>
                   <div className="rounded-2xl bg-admin-surface p-3"><div className="text-[10px] font-bold uppercase tracking-wide text-admin-muted">Amount</div><div className="mt-1 text-sm font-bold text-admin-ink">{money(manageOrder.paymentAmount || orderTotalForRow(manageOrder))}</div></div>
                 </div>
-                {manageOrder.paymentProofUrl && manageOrder.paymentProofStatus !== 'approved' && (
+                {manageOrder.paymentStatus !== 'paid' && (
                   <div className="rounded-2xl border border-admin-brand-line bg-admin-brand p-4 shadow-sm">
-                    <div className="mb-3"><p className="text-sm font-bold text-admin-ink">Confirm received payment</p><p className="mt-1 text-xs leading-5 text-admin-muted">Choose what this proof represents and verify the exact amount before approving.</p></div>
+                    <div className="mb-3"><p className="text-sm font-bold text-admin-ink">Confirm received payment</p><p className="mt-1 text-xs leading-5 text-admin-muted">Choose the payment type and verify the exact amount received.</p></div>
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase tracking-wide text-admin-muted">Payment type</Label><select value={manageForm.approvalPaymentType} onChange={(event) => setManageForm((form) => ({ ...form, approvalPaymentType: event.target.value as ManageForm['approvalPaymentType'], ...(event.target.value === 'full' ? { approvalPaymentAmount: String(orderTotalForRow(manageOrder)) } : {}) }))} className="h-11 w-full rounded-xl border border-white bg-admin-surface/90 px-4 text-sm font-semibold text-admin-ink shadow-sm outline-none transition focus:border-admin-brand-line focus:ring-2 focus:ring-admin-brand"><option value="advance">Advance payment</option><option value="full">Full payment</option><option value="custom">Custom amount</option></select></div>
                       <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase tracking-wide text-admin-muted">Approved amount (Rs.)</Label><Input type="number" min="0.01" step="0.01" value={manageForm.approvalPaymentAmount} onChange={(event) => setManageForm((form) => ({ ...form, approvalPaymentAmount: event.target.value }))} className="h-11 rounded-xl border-white bg-admin-surface/90 text-sm font-semibold shadow-sm" placeholder="Enter exact amount" /></div>
                     </div>
                   </div>
                 )}
-                {manageOrder.paymentProofUrl ? <div className="flex flex-col gap-3 rounded-2xl border border-admin-brand-line bg-admin-brand-soft/50 p-4 sm:flex-row sm:items-center sm:justify-between"><div><a href={manageOrder.paymentProofUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 font-semibold text-admin-brand-ink hover:underline"><ExternalLink className="h-4 w-4" /> View customer payment proof</a>{manageOrder.paymentProofExpiresAt && <div className="mt-1 text-xs text-admin-brand-ink">Proof retention ends {safeDate(manageOrder.paymentProofExpiresAt)}.</div>}</div><div className="flex gap-2"><Button type="button" onClick={() => void reviewPayment('reject')} disabled={paymentReviewLoading !== null} variant="outline" className="h-9 rounded-full border-admin-danger-line px-4 text-xs font-bold text-admin-danger">{paymentReviewLoading === 'reject' ? 'Rejecting…' : 'Reject'}</Button><Button type="button" onClick={() => void reviewPayment('approve')} disabled={paymentReviewLoading !== null} className="h-9 rounded-full bg-admin-success-solid px-4 text-xs font-bold text-white hover:bg-admin-success-solid">{paymentReviewLoading === 'approve' ? 'Approving…' : 'Approve & Process'}</Button></div></div> : <div className="rounded-2xl border border-dashed border-admin-border bg-admin-surface px-4 py-8 text-center text-sm text-admin-muted"><CreditCard className="mx-auto mb-2 h-6 w-6 text-admin-muted" />No customer payment proof yet. The customer must upload a slip from the tracking link.</div>}
+                {!manageOrder.paymentProofUrl && manageOrder.paymentStatus !== 'paid' && <div className="space-y-2 rounded-2xl border border-admin-warning-line bg-admin-warning-soft p-4"><Label className="text-xs font-bold text-admin-ink">Manual payment verification (no slip)</Label><Textarea value={manageForm.manualPaymentReason} onChange={(event) => setManageForm((form) => ({ ...form, manualPaymentReason: event.target.value }))} placeholder="How did you confirm payment? e.g. bank statement reference, cash received in studio" maxLength={500} className="bg-admin-surface" /><Button type="button" onClick={() => void reviewPayment('approve')} disabled={paymentReviewLoading !== null || manageForm.manualPaymentReason.trim().length < 8} className="rounded-full bg-admin-success-solid text-white">{paymentReviewLoading === 'approve' ? 'Saving…' : 'Mark payment received'}</Button></div>}
+                {manageOrder.paymentProofUrl ? <div className="flex flex-col gap-3 rounded-2xl border border-admin-brand-line bg-admin-brand-soft/50 p-4 sm:flex-row sm:items-center sm:justify-between"><div><a href={manageOrder.paymentProofUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 font-semibold text-admin-brand-ink hover:underline"><ExternalLink className="h-4 w-4" /> View customer payment proof</a>{manageOrder.paymentProofExpiresAt && <div className="mt-1 text-xs text-admin-brand-ink">Proof retention ends {safeDate(manageOrder.paymentProofExpiresAt)}.</div>}</div><div className="flex gap-2"><Button type="button" onClick={() => void reviewPayment('reject')} disabled={paymentReviewLoading !== null} variant="outline" className="h-9 rounded-full border-admin-danger-line px-4 text-xs font-bold text-admin-danger">{paymentReviewLoading === 'reject' ? 'Rejecting…' : 'Reject'}</Button><Button type="button" onClick={() => void reviewPayment('approve')} disabled={paymentReviewLoading !== null} className="h-9 rounded-full bg-admin-success-solid px-4 text-xs font-bold text-white hover:bg-admin-success-solid">{paymentReviewLoading === 'approve' ? 'Approving…' : 'Approve & Process'}</Button></div></div> : <div className="rounded-2xl border border-dashed border-admin-border bg-admin-surface px-4 py-8 text-center text-sm text-admin-muted"><CreditCard className="mx-auto mb-2 h-6 w-6 text-admin-muted" />No customer payment slip uploaded. You can verify the transfer or cash payment manually above.</div>}
               </div>
             </SectionCard>
 

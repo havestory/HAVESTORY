@@ -1050,6 +1050,9 @@ router.post("/:id/payment-review", requireAdmin, async (req, res) => {
     const id = String(req.params.id);
     const action = String(req.body?.action || "");
     if (!["approve", "reject"].includes(action)) return res.status(400).json({ error: "Action must be approve or reject" });
+    const manual = req.body?.manual === true;
+    const manualReason = String(req.body?.manualReason || "").trim().slice(0, 500);
+    if (action === "approve" && manual && manualReason.length < 8) return res.status(400).json({ error: "Explain how this payment was verified (at least 8 characters)" });
     const paymentType = String(req.body?.paymentType || "").toLowerCase();
     const approvedAmount = Number(req.body?.approvedAmount);
     if (action === "approve" && !["advance", "full", "custom"].includes(paymentType)) {
@@ -1063,6 +1066,7 @@ router.post("/:id/payment-review", requireAdmin, async (req, res) => {
       ? await db.select().from(ordersTable).where(eq(ordersTable.orderId, id))
       : await db.select().from(ordersTable).where(eq(ordersTable.id, idNum));
     if (!order) return res.status(404).json({ error: "Order not found" });
+    if (action === "approve" && !order.paymentProofUrl && !manual) return res.status(400).json({ error: "Upload a payment slip or use manual verification with a reason" });
 
     let linkedInvoice: any = null;
     let invoiceTotal = Math.max(0, Number(order.paymentAmount || 0) || 0);
@@ -1075,10 +1079,11 @@ router.post("/:id/payment-review", requireAdmin, async (req, res) => {
     }
 
     const updateData: any = {
-      paymentProofStatus: action === "approve" ? "approved" : "rejected",
-      paymentStatus: action === "approve" ? "paid" : "payment_action_required",
+      paymentProofStatus: action === "approve" ? (order.paymentProofUrl ? "approved" : "not_uploaded") : "rejected",
+      paymentStatus: action === "approve" ? (invoiceTotal > 0 && approvedAmount < invoiceTotal ? "partial" : "paid") : "payment_action_required",
       paymentApprovedAt: action === "approve" ? new Date() : null,
       paymentRejectionReason: action === "reject" ? String(req.body?.reason || "Payment proof needs review") : null,
+      ...(manual && action === "approve" ? { adminNotes: `${order.adminNotes || ""}\nPayment manually verified by ${getAdminAuth(req)?.username || "admin"} at ${new Date().toISOString()}: ${manualReason}`.trim() } : {}),
       ...(action === "approve" ? { paymentType, paymentSubmittedAmount: Math.round(approvedAmount) } : {}),
       updatedAt: new Date(),
     };
@@ -1089,6 +1094,7 @@ router.post("/:id/payment-review", requireAdmin, async (req, res) => {
       try { metadata = JSON.parse(linkedInvoice.metadata || "{}"); } catch { metadata = {}; }
       const received = Math.min(approvedAmount, invoiceTotal || approvedAmount);
       const invoiceStatus = invoiceTotal > 0 && received >= invoiceTotal ? "paid" : "partial";
+      if (manual) metadata.manualPaymentVerification = { reason: manualReason, by: getAdminAuth(req)?.username || "admin", at: new Date().toISOString() };
       metadata.advance = Number(received.toFixed(2));
       metadata.paymentType = paymentType;
       metadata.paymentReceivedDate = new Intl.DateTimeFormat("en-CA", {
