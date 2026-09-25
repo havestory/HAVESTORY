@@ -10,6 +10,7 @@ import { normalizeCreateOrderBody } from "../lib/order-validation";
 import { randomBytes, randomUUID } from "node:crypto";
 import { sendOrderNotificationEmail, sendCustomerConfirmationEmail, sendOrderCompletionEmail } from "../lib/mailer";
 import { syncInvoiceFinance } from "./finance-inventory";
+import { ensurePriceListsTable } from "./price-lists";
 
 const router = Router();
 
@@ -282,6 +283,7 @@ router.post("/", async (req, res) => {
     }
 
     const {
+      clientId,
       customerName, customerPhone, customerEmail, customerAddress,
       orderType, items, designLinks, attachments,
       notes, shippingMethod, serviceTypeId,
@@ -414,10 +416,27 @@ router.post("/", async (req, res) => {
     // concurrent requests.  If the claim fails the transaction is rolled back
     // and the order is never created.
     let discountAmount = Math.max(0, Math.round(productOfferDiscount));
+    if (adminAuth?.role === "owner" && clientId) await ensurePriceListsTable();
 
     let order: typeof ordersTable.$inferSelect;
     try {
       [order] = await db.transaction(async (tx) => {
+        let premiumDiscount = 0;
+        if (adminAuth?.role === "owner" && clientId) {
+          const result = await tx.execute(sql`
+            SELECT c.phone, p.offer_percent FROM clients c
+            JOIN price_lists p ON p.id = c.premium_price_list_id
+            WHERE c.id = ${clientId} AND c.deleted_at IS NULL AND c.approved = TRUE
+              AND p.active = 1 AND (p.expires_at IS NULL OR p.expires_at > NOW())
+          `);
+          const membership = result.rows[0] as any;
+          const memberPhone = String(membership?.phone || "").split(",")[0].replace(/\D/g, "");
+          const enteredPhone = String(customerPhone || "").replace(/\D/g, "");
+          if (memberPhone.length >= 9 && enteredPhone.length >= 9 && memberPhone.slice(-9) === enteredPhone.slice(-9)) {
+            const percent = Number(membership.offer_percent);
+            if (Number.isFinite(percent) && percent > 0 && percent <= 100) premiumDiscount = Math.round(itemTotalForCoupon * percent / 100);
+          }
+        }
         if (couponCode) {
           const code = String(couponCode).toUpperCase().trim().slice(0, 100);
           // Single conditional UPDATE: claim the coupon slot atomically.
@@ -454,7 +473,9 @@ router.post("/", async (req, res) => {
           discountAmount = Math.min(itemTotalForCoupon, Math.max(0, discountAmount + rawDiscount));
         } else if (adminAuth && Number.isFinite(Number(clientDiscountAmount))) {
           // Admin-created orders may supply a manual discount — still bounded
-          discountAmount = Math.max(0, Math.round(Number(clientDiscountAmount)));
+          discountAmount = Math.min(itemTotalForCoupon, Math.max(0, premiumDiscount + Math.round(Number(clientDiscountAmount))));
+        } else if (adminAuth) {
+          discountAmount = Math.min(itemTotalForCoupon, premiumDiscount);
         }
 
         return tx.insert(ordersTable).values({

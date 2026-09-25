@@ -27,6 +27,7 @@ async function initializeTable() {
       title TEXT NOT NULL,
       subtitle TEXT NOT NULL DEFAULT '',
       note TEXT NOT NULL DEFAULT '',
+      offer_percent NUMERIC(5,2) NOT NULL DEFAULT 0,
       sections TEXT NOT NULL DEFAULT '[]',
       active INTEGER NOT NULL DEFAULT 1,
       staff_visible INTEGER NOT NULL DEFAULT 1,
@@ -36,6 +37,7 @@ async function initializeTable() {
     )
   `);
   await pool.query("ALTER TABLE price_lists ADD COLUMN IF NOT EXISTS staff_visible INTEGER NOT NULL DEFAULT 1");
+  await pool.query("ALTER TABLE price_lists ADD COLUMN IF NOT EXISTS offer_percent NUMERIC(5,2) NOT NULL DEFAULT 0");
   await pool.query("CREATE INDEX IF NOT EXISTS price_lists_public_id_idx ON price_lists(public_id)");
 }
 
@@ -48,6 +50,7 @@ function ensureTable(): Promise<void> {
   }
   return tableReady;
 }
+export { ensureTable as ensurePriceListsTable };
 
 function cleanSections(value: unknown): PriceListSection[] {
   if (!Array.isArray(value)) return [];
@@ -77,6 +80,7 @@ function serialize(row: any) {
     title: row.title,
     subtitle: row.subtitle || "",
     note: row.note || "",
+    offerPercent: Number(row.offer_percent) || 0,
     sections,
     active: row.active === 1,
     staffVisible: row.staff_visible !== 0,
@@ -127,15 +131,17 @@ router.post("/", requireOwner, async (req, res) => {
     const title = String(req.body?.title || "Untitled Price List").trim().slice(0, 160);
     const subtitle = String(req.body?.subtitle || "").trim().slice(0, 300);
     const note = String(req.body?.note || "").trim().slice(0, 1000);
+    const offerPercent = Number(req.body?.offerPercent ?? 0);
+    if (!Number.isFinite(offerPercent) || offerPercent < 0 || offerPercent > 100) return res.status(400).json({ error: "Offer percent must be between 0 and 100" });
     const sections = cleanSections(req.body?.sections);
     const active = req.body?.active === false ? 0 : 1;
     const staffVisible = req.body?.staffVisible === false ? 0 : 1;
     const expiresAt = req.body?.expiresAt ? new Date(req.body.expiresAt) : null;
     const { rows } = await pool.query(
-      `INSERT INTO price_lists (public_id, title, subtitle, note, sections, active, staff_visible, expires_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO price_lists (public_id, title, subtitle, note, sections, active, staff_visible, expires_at, offer_percent)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
-      [publicId(), title, subtitle, note, JSON.stringify(sections), active, staffVisible, expiresAt && !Number.isNaN(expiresAt.getTime()) ? expiresAt : null]
+      [publicId(), title, subtitle, note, JSON.stringify(sections), active, staffVisible, expiresAt && !Number.isNaN(expiresAt.getTime()) ? expiresAt : null, offerPercent]
     );
     res.status(201).json(serialize(rows[0]));
   } catch (error) {
@@ -152,6 +158,8 @@ router.put("/:id", requireOwner, async (req, res) => {
     const title = String(req.body?.title || "Untitled Price List").trim().slice(0, 160);
     const subtitle = String(req.body?.subtitle || "").trim().slice(0, 300);
     const note = String(req.body?.note || "").trim().slice(0, 1000);
+    const offerPercent = Number(req.body?.offerPercent ?? 0);
+    if (!Number.isFinite(offerPercent) || offerPercent < 0 || offerPercent > 100) return res.status(400).json({ error: "Offer percent must be between 0 and 100" });
     const sections = cleanSections(req.body?.sections);
     const active = req.body?.active === false ? 0 : 1;
     const staffVisible = req.body?.staffVisible === false ? 0 : 1;
@@ -159,9 +167,9 @@ router.put("/:id", requireOwner, async (req, res) => {
     const { rows } = await pool.query(
       `UPDATE price_lists
        SET title = $2, subtitle = $3, note = $4, sections = $5, active = $6,
-           staff_visible = $7, expires_at = $8, updated_at = NOW()
+           staff_visible = $7, expires_at = $8, offer_percent = $9, updated_at = NOW()
        WHERE id = $1 RETURNING *`,
-      [id, title, subtitle, note, JSON.stringify(sections), active, staffVisible, expiresAt && !Number.isNaN(expiresAt.getTime()) ? expiresAt : null]
+      [id, title, subtitle, note, JSON.stringify(sections), active, staffVisible, expiresAt && !Number.isNaN(expiresAt.getTime()) ? expiresAt : null, offerPercent]
     );
     if (!rows[0]) return res.status(404).json({ error: "Price list not found" });
     res.json(serialize(rows[0]));
@@ -190,7 +198,15 @@ router.post("/:id/regenerate-link", requireOwner, async (req, res) => {
 router.delete("/:id", requireOwner, async (req, res) => {
   try {
     await ensureTable();
-    const result = await pool.query("DELETE FROM price_lists WHERE id = $1", [Number(req.params.id)]);
+    const client = await pool.connect();
+    let result;
+    try {
+      await client.query("BEGIN");
+      await client.query("UPDATE clients SET premium_price_list_id=NULL WHERE premium_price_list_id=$1", [Number(req.params.id)]);
+      result = await client.query("DELETE FROM price_lists WHERE id = $1", [Number(req.params.id)]);
+      await client.query("COMMIT");
+    } catch (error) { await client.query("ROLLBACK"); throw error; }
+    finally { client.release(); }
     if (!result.rowCount) return res.status(404).json({ error: "Price list not found" });
     res.status(204).send();
   } catch (error) {

@@ -17,6 +17,8 @@ type Client = {
   phone?: string | null;
   address?: string | null;
   notes?: string | null;
+  premiumPriceListId?: number | null;
+  premiumNumber?: string | null;
   approved?: boolean;
   createdAt?: string | null;
   updatedAt?: string | null;
@@ -70,6 +72,7 @@ type FormState = {
   email: string;
   address: string;
   notes: string;
+  premiumPriceListId: number | null;
 };
 
 const rs = (v: number) => `LKR ${Math.round(v).toLocaleString("en-IN")}`;
@@ -130,7 +133,7 @@ By signing electronically, the signer confirms authority to accept these terms a
   ];
 };
 
-const EMPTY_FORM: FormState = { name: "", businessName: "", phones: [""], email: "", address: "", notes: "" };
+const EMPTY_FORM: FormState = { name: "", businessName: "", phones: [""], email: "", address: "", notes: "", premiumPriceListId: null };
 
 const splitPhones = (raw?: string | null): string[] => {
   if (!raw) return [""];
@@ -147,6 +150,8 @@ function ClientFormModal({
   onSubmit,
   onClose,
   isSaving,
+  priceLists,
+  isOwner,
 }: {
   title: string;
   form: FormState;
@@ -154,6 +159,8 @@ function ClientFormModal({
   onSubmit: () => void;
   onClose: () => void;
   isSaving: boolean;
+  priceLists: Array<{ id: number; title: string; offerPercent: number; active: boolean }>;
+  isOwner: boolean;
 }) {
   const updatePhone = (index: number, value: string) => {
     setForm(prev => {
@@ -267,6 +274,16 @@ function ClientFormModal({
                 className="w-full border border-admin-border rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-admin-warning-line transition-colors resize-none"
               />
             </div>
+            {isOwner && <div className="rounded-xl border border-admin-border bg-admin-subtle p-3 space-y-2">
+              <label htmlFor="client-premium-list" className="text-xs font-semibold text-admin-ink">Premium price list</label>
+              <select id="client-premium-list" value={form.premiumPriceListId ?? ""}
+                onChange={e => setForm(p => ({ ...p, premiumPriceListId: e.target.value ? Number(e.target.value) : null }))}
+                className="w-full rounded-lg border border-admin-border bg-admin-surface px-3 py-2.5 text-sm text-admin-ink">
+                <option value="">Standard customer</option>
+                {priceLists.map(list => <option key={list.id} value={list.id}>{list.title} · {list.offerPercent || 0}% offer{list.active ? "" : " (inactive)"}</option>)}
+              </select>
+              <p className="text-xs text-admin-muted">Assign a list to generate a premium customer number and apply its offer to admin orders.</p>
+            </div>}
             <button
               onClick={onSubmit}
               disabled={isSaving || !form.name.trim()}
@@ -348,6 +365,11 @@ export default function AdminClients() {
 
   const { data: admin } = useGetAdminMe({ query: { staleTime: 5 * 60_000, retry: false, refetchOnWindowFocus: false } as any });
   const isOwner = Boolean(admin && admin.role !== "staff");
+  const { data: premiumPriceLists = [] } = useQuery<Array<{ id: number; title: string; offerPercent: number; active: boolean }>>({
+    queryKey: ["/api/price-lists", "client-assignment"],
+    queryFn: async () => { const response = await fetch("/api/price-lists", { credentials: "include" }); if (!response.ok) throw new Error("Could not load price lists"); return response.json(); },
+    enabled: isOwner,
+  });
   const {
     data: clientPage,
     refetch,
@@ -480,6 +502,7 @@ export default function AdminClients() {
       email: c.email || "",
       address: c.address || "",
       notes: c.notes || "",
+      premiumPriceListId: c.premiumPriceListId || null,
     });
     setEditingClient(c);
   };
@@ -510,6 +533,7 @@ export default function AdminClients() {
       email: blank(form.email),
       address: blank(form.address),
       notes: blank(form.notes),
+      ...(isOwner ? { premiumPriceListId: form.premiumPriceListId } : {}),
     } } as any);
   };
 
@@ -523,6 +547,7 @@ export default function AdminClients() {
       email: blank(form.email),
       address: blank(form.address),
       notes: blank(form.notes),
+      ...(isOwner ? { premiumPriceListId: form.premiumPriceListId } : {}),
     } } as any);
   };
 
@@ -658,7 +683,7 @@ export default function AdminClients() {
                     </div>
                     <div className="min-w-0">
                       <div className="font-semibold text-admin-ink text-[13px] sm:text-sm leading-snug truncate">{client.name}</div>
-                      <div className="text-[10px] sm:text-xs text-admin-muted font-medium mt-0.5">{code}</div>
+                      <div className="text-[10px] sm:text-xs text-admin-muted font-medium mt-0.5">{client.premiumPriceListId ? `HS-P${String(client.id).padStart(6, "0")} · Premium` : code}</div>
                     </div>
                   </div>
                   <div onClick={e => e.stopPropagation()}>
@@ -770,6 +795,7 @@ export default function AdminClients() {
       {viewingClient && (() => {
         const c = viewingClient;
         const code = clientCode(c);
+        const premiumList = premiumPriceLists.find(list => list.id === c.premiumPriceListId);
         const stats = statsFor(c);
         const sortedProjects = [...stats.projects].sort((a, b) => {
           const ad = new Date(a.createdAt || 0).getTime();
@@ -795,7 +821,8 @@ export default function AdminClients() {
                   </div>
                   <div className="min-w-0">
                     <div className="font-semibold text-admin-ink text-[15px] sm:text-base leading-snug truncate">{c.name}</div>
-                    <div className="text-[11px] sm:text-xs text-admin-muted font-medium mt-0.5">{code}{c.businessName ? ` · ${c.businessName}` : ""}</div>
+                    <div className="text-[11px] sm:text-xs text-admin-muted font-medium mt-0.5">{c.premiumPriceListId ? `HS-P${String(c.id).padStart(6, "0")}` : code}{c.businessName ? ` · ${c.businessName}` : ""}</div>
+                    {c.premiumPriceListId && <div className="mt-1 text-xs font-semibold text-admin-brand-ink">Premium · {premiumList?.title || "Linked price list"}{premiumList?.active ? ` · ${premiumList.offerPercent || 0}% offer` : ""}</div>}
                   </div>
                 </div>
                 <button onClick={() => setViewingClient(null)} aria-label="Close" className="text-admin-muted hover:text-admin-muted shrink-0 p-1 -mr-1">
@@ -1019,6 +1046,8 @@ export default function AdminClients() {
           onSubmit={handleCreate}
           onClose={() => { setShowAdd(false); setForm(EMPTY_FORM); }}
           isSaving={isCreating}
+          priceLists={premiumPriceLists}
+          isOwner={isOwner}
         />
       )}
 
@@ -1031,6 +1060,8 @@ export default function AdminClients() {
           onSubmit={handleUpdate}
           onClose={() => { setEditingClient(null); setForm(EMPTY_FORM); }}
           isSaving={isUpdating}
+          priceLists={premiumPriceLists}
+          isOwner={isOwner}
         />
       )}
 

@@ -54,6 +54,7 @@ interface PriceList {
   title: string;
   subtitle: string;
   note: string;
+  offerPercent: number;
   sections: PriceListSection[];
   active: boolean;
   staffVisible: boolean;
@@ -316,6 +317,7 @@ const EMPTY_FORM = {
   title: '',
   subtitle: '',
   note: '',
+  offerPercent: 0,
   active: true,
   staffVisible: true,
   expiresAt: '',
@@ -375,6 +377,7 @@ export default function PriceLists() {
       title: pl.title,
       subtitle: pl.subtitle,
       note: pl.note,
+      offerPercent: pl.offerPercent || 0,
       active: pl.active,
       staffVisible: pl.staffVisible,
       expiresAt: pl.expiresAt ? pl.expiresAt.slice(0, 10) : '',
@@ -389,6 +392,7 @@ export default function PriceLists() {
       title: `${pl.title} (Copy)`,
       subtitle: pl.subtitle,
       note: pl.note,
+      offerPercent: pl.offerPercent || 0,
       active: pl.active,
       staffVisible: pl.staffVisible,
       expiresAt: pl.expiresAt ? pl.expiresAt.slice(0, 10) : '',
@@ -403,6 +407,7 @@ export default function PriceLists() {
       title: form.title || 'Untitled Price List',
       subtitle: form.subtitle,
       note: form.note,
+      offerPercent: form.offerPercent,
       sections: form.sections,
       active: form.active,
       staffVisible: form.staffVisible,
@@ -580,6 +585,14 @@ export default function PriceLists() {
               <div className="space-y-2">
                 <Label className={labelClass}>Notes / Footer Message</Label>
                 <Input value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} placeholder="Prices valid until end of quarter. Minimum order Rs. 5,000." className={inputClass} />
+              </div>
+
+              <div className="space-y-2 rounded-xl border border-admin-border bg-admin-subtle p-4">
+                <Label className={labelClass}>Premium customer offer (%)</Label>
+                <Input type="number" min="0" max="100" step="0.01" value={form.offerPercent}
+                  onChange={e => setForm(f => ({ ...f, offerPercent: Number(e.target.value) }))}
+                  className="w-32 rounded-lg bg-admin-surface" />
+                <p className="text-xs text-admin-muted">Applied automatically to admin orders for clients linked to this active price list. Individual table prices remain for reference.</p>
               </div>
 
               {/* Sections */}
