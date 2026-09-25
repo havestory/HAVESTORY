@@ -123,7 +123,9 @@ export function normalizeCreateOrderBody(body: unknown, isAdmin: boolean): Norma
   const customerPhone = text(input.customerPhone, "Customer phone", MAX_PHONE, true);
   const customerEmail = optionalText(input.customerEmail, "Customer email", MAX_EMAIL);
   if (customerEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) throw new Error("Customer email is not valid.");
-  const customerAddress = text(input.customerAddress, "Customer address", MAX_ADDRESS, true);
+  // Manual studio orders can be collected in person, so an address is optional
+  // for an authenticated admin. Checkout still requires a delivery address.
+  const customerAddress = text(input.customerAddress, "Customer address", MAX_ADDRESS, !isAdmin);
   const orderType = text(input.orderType ?? "standard", "Order type", 80, true);
   const paymentMethod = ["bank_transfer", "full_payment", "cod"].includes(String(input.paymentMethod ?? "bank_transfer"))
     ? String(input.paymentMethod ?? "bank_transfer") as NormalizedCreateOrderBody["paymentMethod"]
