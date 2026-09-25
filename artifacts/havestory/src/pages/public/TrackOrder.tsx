@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useTrackOrder } from '@workspace/api-client-react';
+import { useGetSettings, useTrackOrder } from '@workspace/api-client-react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,9 +8,13 @@ import { AlertCircle, CheckCircle, CheckCircle2, Clock, CreditCard, Download, Ex
 import { format } from 'date-fns';
 import { InvoicePreview } from '@/components/InvoicePreview';
 import { num } from '@/lib/invoiceTypes';
+import { visibleBanks } from '@workspace/api-zod';
+import { Copy } from 'lucide-react';
 
 export default function TrackOrder() {
   const { toast } = useToast();
+  const { data: settings } = useGetSettings();
+  const websiteBanks = visibleBanks(settings, 'website');
   const [orderId, setOrderId] = useState('');
   const [searchId, setSearchId] = useState('');
   const [proofFile, setProofFile] = useState<File | null>(null);
@@ -346,6 +350,9 @@ export default function TrackOrder() {
               const invoiceTotal = Number(String(payment.invoice?.amount ?? payment.paymentAmount ?? 0).replace(/[^0-9.-]/g, '')) || 0;
               const paidAmount = Number(payment.paymentSubmittedAmount ?? 0) || 0;
               const balanceDue = Math.max(0, invoiceTotal - paidAmount);
+              const invoice = payment.invoice;
+              const bankRemark = /^INV-\d{6}-(\d{4})$/.exec(String(invoice?.invoiceNumber || ''))?.[1];
+              const showPaymentInstructions = balanceDue > 0 && invoice?.status !== 'paid' && paymentStatus !== 'approved';
               return requiresPayment ? (
                 <Card className="hs-track-card mb-6">
                   <CardContent className="p-6">
@@ -363,6 +370,15 @@ export default function TrackOrder() {
                       <div className="flex justify-between gap-4"><span className="text-muted-foreground">Payment status</span><strong className="capitalize">{paymentStatus.replaceAll('_', ' ')}</strong></div>
                       <div className="flex justify-between gap-4"><span className="text-muted-foreground">Proof status</span><strong className="capitalize">{proofStatus.replaceAll('_', ' ')}</strong></div>
                     </div>
+                    {showPaymentInstructions && <div className="mb-5 space-y-4">
+                      <div className="rounded-2xl border border-amber-400 bg-amber-50 p-4 sm:p-5">
+                        <p className="text-xs font-bold uppercase tracking-wider text-red-700">Required bank remark / payment reference</p>
+                        {bankRemark ? <div className="mt-2 flex items-center justify-between gap-3"><strong className="font-mono text-2xl tracking-[0.18em] text-red-700">{bankRemark}</strong><Button type="button" variant="outline" size="sm" className="rounded-full" onClick={async () => { try { await navigator.clipboard.writeText(bankRemark); toast({ title: 'Bank remark copied' }); } catch { toast({ title: 'Could not copy remark', description: 'Please enter the four digits shown.', variant: 'destructive' }); } }}><Copy className="mr-1.5 h-4 w-4" /> Copy</Button></div> : <p className="mt-2 text-sm font-semibold text-amber-900">Bank remark will appear when an invoice with a four-digit reference is attached. Contact the studio before transferring.</p>}
+                        {bankRemark && <><p className="mt-3 text-sm font-semibold text-red-800">බැංකු ගෙවීමේ Remark / Reference ලෙස {bankRemark} පමණක් ඇතුළත් කරන්න.</p><p className="mt-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-800">මෙම අංකය Remark එකට ඇතුළත් නොකළහොත් ගෙවීම තහවුරු කිරීමට පැය 1 සිට පැය 24 දක්වා ගත විය හැක.</p></>}
+                      </div>
+                      {websiteBanks.length > 0 && <div className="grid gap-3 sm:grid-cols-2">{websiteBanks.map((bank, index) => <div key={`${bank.bankName}-${bank.accountNumber}-${index}`} className="rounded-2xl border border-border bg-background p-4 text-sm"><strong className="block text-foreground">{bank.bankName}</strong><p className="mt-1 text-muted-foreground">{bank.accountHolder}</p><p className="mt-1 font-semibold">A/C {bank.accountNumber}</p>{bank.branch && <p className="text-muted-foreground">{bank.branch}</p>}</div>)}</div>}
+                      {typeof (settings as any)?.paymentQrUrl === 'string' && /^(https:\/\/|\/)/.test((settings as any).paymentQrUrl) && <img src={(settings as any).paymentQrUrl} alt="Bank payment QR code" loading="lazy" className="h-40 w-40 rounded-xl border border-border bg-white object-contain p-2" />}
+                    </div>}
                     <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 mb-5">
                       <div className="flex gap-2"><AlertCircle className="h-4 w-4 mt-0.5 shrink-0" /><p>After payment, upload a JPG, PNG, or PDF proof and press confirm payment. Uploaded proof is retained for 14 days and then permanently deleted.</p></div>
                     </div>
@@ -431,7 +447,7 @@ export default function TrackOrder() {
                           </span>
                         </div>
                       </div>
-                      <Button type="button" className="w-full gap-2 rounded-xl bg-gradient-to-r from-[#6b2f7b] to-[#2f1638] text-white" onClick={() => setShowInvoice(true)}>
+                      <Button type="button" className="w-full gap-2 rounded-xl bg-[#20382d] hover:bg-[#2e4c3d] text-white" onClick={() => setShowInvoice(true)}>
                         <Eye className="h-4 w-4" /> View / Download PDF
                       </Button>
                     </CardContent>
@@ -470,3 +486,4 @@ export default function TrackOrder() {
     </div>
   );
 }
+
