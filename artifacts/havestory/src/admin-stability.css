@@ -1,21 +1,21 @@
 /* Admin palette. Tailwind utility aliases live in the index.css entrypoint. */
 html[data-hs-admin-theme] {
   --admin-on-solid: 0 0% 100%;
-  --admin-brand-ink: 220 18% 22%;
+  --admin-brand-ink: 32 28% 25%;
   --admin-success-solid: 158 62% 26%;
   --admin-warning-solid: 32 85% 29%;
   --admin-danger-solid: 350 62% 38%;
   --admin-font: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
-  --admin-canvas: 220 14% 97%;
+  --admin-canvas: 36 24% 98%;
   --admin-surface: 0 0% 100%;
-  --admin-subtle: 220 13% 93%;
-  --admin-ink: 220 18% 13%;
-  --admin-muted: 220 10% 36%;
-  --admin-border: 220 14% 82%;
-  --admin-inverse: 220 18% 17%;
-  --admin-brand: 220 18% 22%;
-  --admin-brand-soft: 220 14% 94%;
-  --admin-brand-line: 220 12% 70%;
+  --admin-subtle: 35 19% 95%;
+  --admin-ink: 27 19% 14%;
+  --admin-muted: 28 11% 35%;
+  --admin-border: 32 17% 82%;
+  --admin-inverse: 155 25% 17%;
+  --admin-brand: 32 27% 29%;
+  --admin-brand-soft: 36 27% 93%;
+  --admin-brand-line: 33 24% 62%;
   --admin-success: 158 62% 26%;
   --admin-success-soft: 152 44% 95%;
   --admin-success-line: 156 31% 75%;
@@ -28,17 +28,17 @@ html[data-hs-admin-theme] {
   --admin-chart-info: 211 54% 38%;
 }
 html[data-hs-admin-theme='dark'] {
-  --admin-brand-ink: 220 18% 78%;
-  --admin-inverse: 220 18% 9%;
-  --admin-canvas: 220 15% 10%;
-  --admin-surface: 220 14% 14%;
-  --admin-subtle: 220 12% 21%;
-  --admin-ink: 0 0% 96%;
-  --admin-muted: 220 12% 73%;
-  --admin-border: 220 10% 32%;
-  --admin-brand: 220 18% 28%;
-  --admin-brand-soft: 220 14% 23%;
-  --admin-brand-line: 220 12% 47%;
+  --admin-brand-ink: 38 38% 80%;
+  --admin-inverse: 155 25% 9%;
+  --admin-canvas: 30 12% 10%;
+  --admin-surface: 30 10% 15%;
+  --admin-subtle: 30 9% 21%;
+  --admin-ink: 38 22% 95%;
+  --admin-muted: 34 12% 74%;
+  --admin-border: 30 9% 34%;
+  --admin-brand: 32 24% 31%;
+  --admin-brand-soft: 32 13% 23%;
+  --admin-brand-line: 35 22% 55%;
   --admin-success: 158 42% 62%;
   --admin-success-soft: 158 29% 17%;
   --admin-success-line: 158 30% 36%;
@@ -61,7 +61,7 @@ html[data-hs-admin-theme='dark'] {
   --popover-foreground: var(--admin-ink);
   --popover-border: var(--admin-border);
   --border: var(--admin-border);
-  --input: var(--admin-border);
+  --input: var(--admin-surface);
   --primary: var(--admin-brand);
   --primary-foreground: 0 0% 100%;
   --secondary: var(--admin-brand);
