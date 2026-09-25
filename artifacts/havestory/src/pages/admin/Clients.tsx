@@ -159,7 +159,7 @@ function ClientFormModal({
   onSubmit: () => void;
   onClose: () => void;
   isSaving: boolean;
-  priceLists: Array<{ id: number; title: string; offerPercent: number; active: boolean }>;
+  priceLists: Array<{ id: number; title: string; premiumItems: Array<{ id: string }>; active: boolean }>;
   isOwner: boolean;
 }) {
   const updatePhone = (index: number, value: string) => {
@@ -280,7 +280,7 @@ function ClientFormModal({
                 onChange={e => setForm(p => ({ ...p, premiumPriceListId: e.target.value ? Number(e.target.value) : null }))}
                 className="w-full rounded-lg border border-admin-border bg-admin-surface px-3 py-2.5 text-sm text-admin-ink">
                 <option value="">Standard customer</option>
-                {priceLists.map(list => <option key={list.id} value={list.id}>{list.title} · {list.offerPercent || 0}% offer{list.active ? "" : " (inactive)"}</option>)}
+                {priceLists.map(list => <option key={list.id} value={list.id}>{list.title} · {list.premiumItems?.length || 0} items{list.active ? "" : " (inactive)"}</option>)}
               </select>
               <p className="text-xs text-admin-muted">Assign a list to generate a premium customer number and apply its offer to admin orders.</p>
             </div>}
@@ -365,7 +365,7 @@ export default function AdminClients() {
 
   const { data: admin } = useGetAdminMe({ query: { staleTime: 5 * 60_000, retry: false, refetchOnWindowFocus: false } as any });
   const isOwner = Boolean(admin && admin.role !== "staff");
-  const { data: premiumPriceLists = [] } = useQuery<Array<{ id: number; title: string; offerPercent: number; active: boolean }>>({
+  const { data: premiumPriceLists = [] } = useQuery<Array<{ id: number; title: string; premiumItems: Array<{ id: string }>; active: boolean }>>({
     queryKey: ["/api/price-lists", "client-assignment"],
     queryFn: async () => { const response = await fetch("/api/price-lists", { credentials: "include" }); if (!response.ok) throw new Error("Could not load price lists"); return response.json(); },
     enabled: isOwner,
@@ -822,7 +822,7 @@ export default function AdminClients() {
                   <div className="min-w-0">
                     <div className="font-semibold text-admin-ink text-[15px] sm:text-base leading-snug truncate">{c.name}</div>
                     <div className="text-[11px] sm:text-xs text-admin-muted font-medium mt-0.5">{c.premiumPriceListId ? `HS-P${String(c.id).padStart(6, "0")}` : code}{c.businessName ? ` · ${c.businessName}` : ""}</div>
-                    {c.premiumPriceListId && <div className="mt-1 text-xs font-semibold text-admin-brand-ink">Premium · {premiumList?.title || "Linked price list"}{premiumList?.active ? ` · ${premiumList.offerPercent || 0}% offer` : ""}</div>}
+                    {c.premiumPriceListId && <div className="mt-1 text-xs font-semibold text-admin-brand-ink">Premium · {premiumList?.title || "Linked price list"}{premiumList?.active ? ` · ${premiumList.premiumItems.length} products` : ""}</div>}
                   </div>
                 </div>
                 <button onClick={() => setViewingClient(null)} aria-label="Close" className="text-admin-muted hover:text-admin-muted shrink-0 p-1 -mr-1">
