@@ -66,7 +66,6 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileNav, setMobileNav] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [showWa,   setShowWa]   = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [waFaqOpen, setWaFaqOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -74,7 +73,6 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 40);
-      setShowWa(window.scrollY > 200);
       const available = document.documentElement.scrollHeight - window.innerHeight;
       setScrollProgress(available > 0 ? Math.min(100, (window.scrollY / available) * 100) : 0);
     };
@@ -114,10 +112,6 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     window.addEventListener('keydown', closeOnEscape);
     return () => window.removeEventListener('keydown', closeOnEscape);
   }, [waFaqOpen]);
-
-  useEffect(() => {
-    if (!showWa) setWaFaqOpen(false);
-  }, [showWa]);
 
   useEffect(() => {
     const refreshSettings = () => { void refetchSettings(); };
@@ -354,11 +348,10 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           <div className="hsx-footer-signature">
             {settings?.logoUrl && <img src={settings.logoUrl} alt={settings.businessName || 'HAVESTORY'} />}
             <div>
-              <span>THE COLOUR &amp; FRAME STUDIO</span>
               <h2>{settings?.businessName || 'HAVESTORY'}</h2>
             </div>
           </div>
-          <p>{settings?.tagline || 'Photographs made tangible. Stories made to stay.'}</p>
+          {settings?.tagline && <p>{settings.tagline}</p>}
         </div>
         <div className="hsx-footer-grid">
           <div>
@@ -396,9 +389,8 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       {whatsappHref && (
         <motion.div
           initial={false}
-          animate={{ opacity: showWa ? 1 : 0, y: showWa ? 0 : 12, scale: showWa ? 1 : 0.86 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-          style={{ pointerEvents: showWa ? 'auto' : 'none' }}
           className="fixed bottom-24 right-4 z-50 flex flex-col items-end gap-3 sm:right-5"
         >
           <AnimatePresence>
