@@ -1,12 +1,11 @@
-import { FormEvent, ReactNode, useMemo, useState } from 'react';
+import { FormEvent, ReactNode, useDeferredValue, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   useCreateClient,
   useCreateInvoice,
   useCreateOrder,
   useDeleteOrder,
-  useListClients,
   useListInvoices,
-  useListOrders,
   useUpdateOrder,
 } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
@@ -205,14 +204,16 @@ function SectionCard({
 export default function Orders() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const deferredSearch = useDeferredValue(searchTerm.trim());
   const [orderPage, setOrderPage] = useState(1);
   const [createOpen, setCreateOpen] = useState(false);
   const [customerMenuOpen, setCustomerMenuOpen] = useState(false);
   const [clientSearch, setClientSearch] = useState('');
+  const deferredClientSearch = useDeferredValue(clientSearch.trim());
   const [invoiceSearch, setInvoiceSearch] = useState('');
   const [invoiceMenuOpen, setInvoiceMenuOpen] = useState(false);
   const [createForm, setCreateForm] = useState<CreateForm>(EMPTY_CREATE_FORM);
-  const [createError, setCreateError] = useState("");
+  const [createError, setCreateError] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<OrderRecord | null>(null);
   const [manageOrder, setManageOrder] = useState<OrderRecord | null>(null);
   const [manageOpen, setManageOpen] = useState(false);
@@ -220,12 +221,28 @@ export default function Orders() {
   const [sections, setSections] = useState({ status: true, customer: true, project: true, files: true, payment: true, delivery: true });
   const [paymentReviewLoading, setPaymentReviewLoading] = useState<'approve' | 'reject' | null>(null);
 
-  const { data: orders, isLoading, isError, refetch } = useListOrders(
-    statusFilter !== 'all' ? { status: statusFilter } : {},
-    { query: { staleTime: 15_000, gcTime: 5 * 60_000, refetchOnWindowFocus: false } as any },
-  );
-  const { data: clients = [], isLoading: clientsLoading } = useListClients({
-    query: { enabled: createOpen, staleTime: 30_000, gcTime: 5 * 60_000, refetchOnWindowFocus: false } as any,
+  const { data: orderPageData, isLoading, isError, refetch } = useQuery<{
+    items: OrderRecord[]; total: number; totalPages: number;
+    stats: { total: number; pending: number; processing: number; completed: number };
+  }>({
+    queryKey: ['/api/orders/admin-page', orderPage, statusFilter, deferredSearch],
+    queryFn: async ({ signal }) => {
+      const params = new URLSearchParams({ page: String(orderPage), pageSize: '40', status: statusFilter });
+      if (deferredSearch) params.set('search', deferredSearch);
+      const response = await fetch(`/api/orders/admin-page?${params}`, { credentials: 'include', signal });
+      if (!response.ok) throw new Error('Could not load orders');
+      return response.json();
+    },
+    staleTime: 15_000, gcTime: 5 * 60_000, refetchOnWindowFocus: false,
+  });
+  const { data: clients = [], isLoading: clientsLoading } = useQuery<any[]>({
+    queryKey: ['/api/clients/search', deferredClientSearch],
+    queryFn: async ({ signal }) => {
+      const response = await fetch(`/api/clients/search?q=${encodeURIComponent(deferredClientSearch)}`, { credentials: 'include', signal });
+      if (!response.ok) throw new Error('Could not search clients');
+      return response.json();
+    },
+    enabled: createOpen && deferredClientSearch.length >= 2, staleTime: 30_000, gcTime: 5 * 60_000,
   });
   const { data: invoices = [], isLoading: invoicesLoading } = useListInvoices({
     query: { enabled: createOpen, staleTime: 30_000, gcTime: 5 * 60_000, refetchOnWindowFocus: false } as any,
@@ -237,33 +254,16 @@ export default function Orders() {
   const deleteOrder = useDeleteOrder();
   const { toast } = useToast();
 
-  const visibleOrders = useMemo(() => {
-    const query = searchTerm.trim().toLowerCase();
-    if (!query) return orders || [];
-    return (orders || []).filter((order) => [order.orderId, order.customerName, order.customerPhone, order.customerEmail]
-      .some((value) => String(value || '').toLowerCase().includes(query)));
-  }, [orders, searchTerm]);
-  const orderPageSize = 40;
-  const orderTotalPages = Math.max(1, Math.ceil(visibleOrders.length / orderPageSize));
-  const pagedOrders = visibleOrders.slice((orderPage - 1) * orderPageSize, orderPage * orderPageSize);
+  const pagedOrders = orderPageData?.items || [];
+  const orderTotalPages = orderPageData?.totalPages || 1;
+  const stats = orderPageData?.stats || { total: 0, pending: 0, processing: 0, completed: 0 };
 
-  const stats = useMemo(() => ({
-    total: orders?.length || 0,
-    pending: orders?.filter((order) => ['pending', 'submitted', 'reviewing'].includes(String(order.status).toLowerCase())).length || 0,
-    processing: orders?.filter((order) => ['processing', 'confirmed', 'ready'].includes(String(order.status).toLowerCase())).length || 0,
-    completed: orders?.filter((order) => ['completed', 'delivered'].includes(String(order.status).toLowerCase())).length || 0,
-  }), [orders]);
-
-  const selectedClient = clients.find((client) => client.id === createForm.clientId);
+  const selectedClient = createForm.clientId ? { id: createForm.clientId, name: createForm.customerName, phone: createForm.customerPhone, email: createForm.customerEmail } : null;
   const selectedInvoice = invoices.find((invoice) => String(invoice.id) === createForm.invoiceId);
   const quantity = Math.max(1, Number.parseInt(createForm.quantity, 10) || 1);
   const orderTotal = Math.max(0, Number.parseFloat(createForm.price) || 0) * quantity;
 
-  const filteredClients = useMemo(() => {
-    const query = clientSearch.trim().toLowerCase();
-    return clients.filter((client) => !query || [client.name, client.businessName, client.email, client.phone]
-      .some((value) => String(value || '').toLowerCase().includes(query))).slice(0, 7);
-  }, [clients, clientSearch]);
+  const filteredClients = clients;
 
   const availableInvoices = useMemo(() => {
     const query = invoiceSearch.trim().toLowerCase();
@@ -273,7 +273,7 @@ export default function Orders() {
 
   const resetCreateForm = () => {
     setCreateForm({ ...EMPTY_CREATE_FORM });
-    setCreateError("");
+    setCreateError('');
     setClientSearch('');
     setInvoiceSearch('');
     setCustomerMenuOpen(false);
@@ -381,7 +381,7 @@ export default function Orders() {
   const handleCreateOrder = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (createOrder.isPending || createInvoice.isPending || createClient.isPending) return;
-    setCreateError("");
+    setCreateError('');
     const customerName = createForm.customerName.trim();
     const customerPhone = createForm.customerPhone.trim();
     const productName = createForm.productName.trim();
@@ -636,7 +636,7 @@ export default function Orders() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isLoading ? <AdminTableLoading columns={7} /> : isError ? <AdminTableError columns={7} onRetry={() => void refetch()} /> : visibleOrders.length === 0 ? (
+                {isLoading ? <AdminTableLoading columns={7} /> : isError ? <AdminTableError columns={7} onRetry={() => void refetch()} /> : pagedOrders.length === 0 ? (
                   <TableRow><TableCell colSpan={7} className="py-16 text-center"><AlertTriangle className="mx-auto mb-3 h-8 w-8 text-admin-muted" /><p className="text-admin-muted">No orders found.</p></TableCell></TableRow>
                 ) : pagedOrders.map((order) => {
                   const item = orderItem(order);
@@ -659,20 +659,20 @@ export default function Orders() {
               </TableBody>
             </Table>
           </div>
-          {orderTotalPages > 1 && <div className="flex items-center justify-center gap-3 border-t border-admin-border px-5 py-4"><Button type="button" variant="outline" size="sm" disabled={orderPage <= 1} onClick={() => setOrderPage(value => Math.max(1, value - 1))} className="rounded-full">Previous</Button><span className="text-xs font-semibold text-admin-muted">Page {orderPage} of {orderTotalPages} · {visibleOrders.length} orders</span><Button type="button" variant="outline" size="sm" disabled={orderPage >= orderTotalPages} onClick={() => setOrderPage(value => Math.min(orderTotalPages, value + 1))} className="rounded-full">Next</Button></div>}
+          {orderTotalPages > 1 && <div className="flex items-center justify-center gap-3 border-t border-admin-border px-5 py-4"><Button type="button" variant="outline" size="sm" disabled={orderPage <= 1} onClick={() => setOrderPage(value => Math.max(1, value - 1))} className="rounded-full">Previous</Button><span className="text-xs font-semibold text-admin-muted">Page {orderPage} of {orderTotalPages} · {orderPageData?.total || 0} matching orders</span><Button type="button" variant="outline" size="sm" disabled={orderPage >= orderTotalPages} onClick={() => setOrderPage(value => Math.min(orderTotalPages, value + 1))} className="rounded-full">Next</Button></div>}
         </CardContent>
       </Card>
 
       <ConfirmDialog open={!!deleteTarget} title="Delete Order" message={deleteTarget ? `Delete ${deleteTarget.orderId} for ${deleteTarget.customerName}? Its linked invoice will also be removed from the active list.` : ''} confirmLabel={deleteOrder.isPending ? 'Deleting…' : 'Delete Order'} onConfirm={handleDelete} onCancel={() => { if (!deleteOrder.isPending) setDeleteTarget(null); }} />
 
       <Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) resetCreateForm(); }}>
-        <DialogContent className="flex max-h-[calc(100dvh-24px)] w-[calc(100vw-24px)] max-w-[570px] flex-col gap-0 overflow-hidden rounded-[26px] border-0 bg-admin-surface p-0 shadow-2xl">
-          <DialogHeader className="shrink-0 border-b border-admin-border px-6 py-5 text-left">
+        <DialogContent className="max-w-[570px] overflow-hidden rounded-[26px] border-0 bg-admin-surface p-0 shadow-2xl">
+          <DialogHeader className="border-b border-admin-border px-6 py-5 text-left">
             <DialogTitle className="text-lg font-bold text-admin-ink">New Order</DialogTitle>
             <DialogDescription className="text-xs text-admin-muted">Create a manual order</DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleCreateOrder} className="flex min-h-0 flex-1 flex-col px-4 sm:px-6">
-            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto py-5 pr-1">
+          <form onSubmit={handleCreateOrder} className="max-h-[78vh] overflow-y-auto px-6 py-5">
+            <div className="space-y-5">
               <div className="relative space-y-2">
                 <Label className="text-[11px] font-bold uppercase tracking-wide text-admin-muted">Customer <span className="text-admin-brand-ink">*</span></Label>
                 <div className="relative">
@@ -682,8 +682,8 @@ export default function Orders() {
                 </div>
                 {selectedClient && <div className="mt-2 flex items-center justify-between rounded-xl bg-admin-brand-soft px-3 py-2 text-xs text-admin-brand-ink"><span className="flex items-center gap-2"><Check className="h-3.5 w-3.5" /> Saved client selected</span><span>{selectedClient.phone || selectedClient.email || 'Profile'}</span></div>}
                 {customerMenuOpen && !selectedClient && <div className="absolute left-0 right-0 top-[68px] z-20 overflow-hidden rounded-2xl border border-admin-border bg-admin-surface shadow-xl">
-                  <div className="px-4 py-3 text-[11px] italic text-admin-muted">{clientsLoading ? 'Loading saved clients…' : `Type to search name, phone, email, business, or PB-code · ${clients.length} saved`}</div>
-                  <div className="max-h-52 overflow-y-auto">{filteredClients.map((client) => <button type="button" key={client.id} onClick={() => { setCreateForm((form) => ({ ...form, clientId: client.id, isNewClient: false, customerName: client.name, customerPhone: client.phone || '', customerEmail: client.email || '', customerAddress: client.address || '' })); setClientSearch(''); setCustomerMenuOpen(false); }} className="flex w-full items-center justify-between border-t border-admin-border px-4 py-3 text-left hover:bg-admin-brand-soft"><span><span className="block text-sm font-semibold text-admin-ink">{client.name}</span><span className="block text-xs text-admin-muted">{client.phone || client.email || client.businessName || 'Saved client'}</span></span><UserRound className="h-4 w-4 text-admin-brand-ink" /></button>)}{!clientsLoading && filteredClients.length === 0 && <div className="px-4 py-3 text-sm text-admin-muted">No matching saved clients.</div>}</div>
+                  <div className="px-4 py-3 text-[11px] italic text-admin-muted">{deferredClientSearch.length < 2 ? 'Type at least 2 characters to search saved clients' : clientsLoading ? 'Searching saved clients…' : `${clients.length} matching clients`}</div>
+                  <div className="max-h-52 overflow-y-auto">{filteredClients.map((client) => <button type="button" key={client.id} onClick={() => { setCreateForm((form) => ({ ...form, clientId: client.id, isNewClient: false, customerName: client.name, customerPhone: client.phone || '', customerEmail: client.email || '', customerAddress: client.address || '' })); setClientSearch(''); setCustomerMenuOpen(false); }} className="flex w-full items-center justify-between border-t border-admin-border px-4 py-3 text-left hover:bg-admin-brand-soft"><span><span className="block text-sm font-semibold text-admin-ink">{client.name}</span><span className="block text-xs text-admin-muted">{client.phone || client.email || client.businessName || 'Saved client'}</span></span><UserRound className="h-4 w-4 text-admin-brand-ink" /></button>)}{deferredClientSearch.length >= 2 && !clientsLoading && filteredClients.length === 0 && <div className="px-4 py-3 text-sm text-admin-muted">No matching saved clients.</div>}</div>
                   <button type="button" onClick={() => { setCreateForm((form) => ({ ...form, clientId: null, isNewClient: true, customerName: clientSearch || form.customerName })); setCustomerMenuOpen(false); }} className="flex w-full items-center gap-2 border-t border-admin-brand-line bg-admin-brand px-4 py-3 text-left text-sm font-bold text-white hover:opacity-90"><UserRoundPlus className="h-4 w-4" /> + Add a new client</button>
                 </div>}
               </div>
@@ -702,14 +702,13 @@ export default function Orders() {
                 {[['none', 'No invoice yet', 'Create the order on its own. You can attach an invoice later from Invoices.'], ['link', 'Link to an existing invoice', 'Search by invoice number, client name, phone, or amount.'], ['create', 'Create a new invoice now', 'Build an invoice record and automatically link it to this order.']].map(([mode, title, description]) => <button type="button" key={mode} onClick={() => setCreateForm((form) => ({ ...form, invoiceMode: mode as InvoiceMode }))} className={`flex w-full items-start gap-3 rounded-2xl border p-3 text-left transition ${createForm.invoiceMode === mode ? 'border-admin-brand-line bg-admin-brand-soft/50 shadow-[0_4px_14px_rgba(236,72,153,0.08)]' : 'border-admin-border hover:border-admin-brand-line hover:bg-admin-brand-soft/30'}`}><span className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${createForm.invoiceMode === mode ? 'border-admin-brand-line bg-admin-brand' : 'border-admin-border'}`}>{createForm.invoiceMode === mode && <span className="h-1.5 w-1.5 rounded-full bg-admin-surface" />}</span><span><span className="block text-sm font-semibold text-admin-ink">{title}</span><span className="mt-0.5 block text-xs leading-4 text-admin-muted">{description}</span></span></button>)}
                 {createForm.invoiceMode === 'link' && <div className="relative"><Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-admin-muted" /><Input value={selectedInvoice ? `${selectedInvoice.invoiceNumber} · ${selectedInvoice.clientName}` : invoiceSearch} onFocus={() => setInvoiceMenuOpen(true)} onChange={(event) => { setCreateForm((form) => ({ ...form, invoiceId: '' })); setInvoiceSearch(event.target.value); setInvoiceMenuOpen(true); }} placeholder="Search by invoice number, client, phone, or amount..." className="h-11 rounded-full border-admin-brand-line pl-10" />{invoiceMenuOpen && !selectedInvoice && <div className="absolute left-0 right-0 top-12 z-20 overflow-hidden rounded-2xl border border-admin-border bg-admin-surface shadow-xl"><div className="max-h-48 overflow-y-auto">{invoicesLoading ? <div className="p-4 text-sm text-admin-muted">Loading invoices…</div> : availableInvoices.map((invoice) => <button type="button" key={invoice.id} onClick={() => { setCreateForm((form) => ({ ...form, invoiceId: String(invoice.id) })); setInvoiceSearch(''); setInvoiceMenuOpen(false); }} className="flex w-full items-center justify-between border-b border-admin-border px-4 py-3 text-left hover:bg-admin-brand-soft"><span><span className="block text-sm font-semibold text-admin-ink">{invoice.invoiceNumber}</span><span className="block text-xs text-admin-muted">{invoice.clientName} · {money(invoice.amount)}</span></span><Link2 className="h-4 w-4 text-admin-brand-ink" /></button>)}{!invoicesLoading && availableInvoices.length === 0 && <div className="p-4 text-sm text-admin-muted">No unlinked invoices found.</div>}</div></div>}</div>}
                 {selectedInvoice && <div className="flex items-center justify-between rounded-xl bg-admin-brand-soft px-3 py-2 text-xs text-admin-brand-ink"><span className="flex items-center gap-2"><Link2 className="h-3.5 w-3.5" /> {selectedInvoice.invoiceNumber} · {money(selectedInvoice.amount)}</span><button type="button" onClick={() => setCreateForm((form) => ({ ...form, invoiceId: '' }))}><X className="h-3.5 w-3.5" /></button></div>}
-                {createForm.invoiceMode === 'create' && <div className="rounded-xl border border-admin-brand-line bg-admin-brand-soft/50 px-4 py-3 text-sm text-admin-ink"><p className="font-semibold">Invoice total: {money(orderTotal)}</p><p className="mt-1 text-xs leading-5 text-admin-muted">The invoice is saved and linked when you select Create Order &amp; Invoice below. The due date and notes are included.</p></div>}
               </div>
 
               <div className="space-y-2"><Label className="text-[11px] font-bold uppercase tracking-wide text-admin-muted">Notes</Label><Textarea value={createForm.notes} onChange={(event) => setCreateForm((form) => ({ ...form, notes: event.target.value }))} placeholder="Internal notes..." rows={3} className="resize-none rounded-2xl border-admin-border" /></div>
               <div className="grid grid-cols-2 gap-3"><div className="space-y-2"><Label className="text-xs text-admin-muted">Order type</Label><select value={createForm.orderType} onChange={(event) => setCreateForm((form) => ({ ...form, orderType: event.target.value }))} className="h-11 w-full rounded-full border border-admin-border bg-admin-surface px-4 text-sm text-admin-ink"><option value="standard">Standard</option><option value="custom">Custom</option><option value="bulk">Bulk</option></select></div><div className="space-y-2"><Label className="text-xs text-admin-muted">Due date</Label><Input type="date" value={createForm.dueDate} onChange={(event) => setCreateForm((form) => ({ ...form, dueDate: event.target.value }))} className="h-11 rounded-full border-admin-border" /></div></div>
             </div>
-            {createError && <p role="alert" className="mt-2 shrink-0 rounded-xl border border-red-300 bg-red-50 px-4 py-2 text-sm font-medium text-red-800">{createError}</p>}
-            <DialogFooter className="shrink-0 gap-3 border-t border-admin-border py-4 sm:justify-end"><Button type="button" variant="outline" onClick={() => setCreateOpen(false)} disabled={isCreating} className="h-11 rounded-full border-admin-border px-8 text-admin-muted">Cancel</Button><Button type="submit" disabled={isCreating} className="h-11 rounded-sm bg-admin-brand px-8 font-bold text-white hover:bg-admin-brand-ink">{isCreating ? 'Creating…' : createForm.invoiceMode === 'create' ? 'Create Order & Invoice' : 'Create Order'}</Button></DialogFooter>
+            {createError && <p role="alert" className="mt-5 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-medium text-red-800">{createError}</p>}
+            <DialogFooter className="mt-6 gap-3 border-t border-admin-border pt-5 sm:justify-end"><Button type="button" variant="outline" onClick={() => setCreateOpen(false)} disabled={isCreating} className="h-11 rounded-full border-admin-border px-8 text-admin-muted">Cancel</Button><Button type="submit" disabled={isCreating} className="h-11 rounded-sm bg-admin-brand px-8 font-bold text-white hover:bg-admin-brand-ink">{isCreating ? 'Creating…' : 'Create Order'}</Button></DialogFooter>
           </form>
         </DialogContent>
       </Dialog>

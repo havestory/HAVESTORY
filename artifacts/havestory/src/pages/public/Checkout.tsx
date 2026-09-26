@@ -1,6 +1,6 @@
 import { visibleBanks } from "@workspace/api-zod";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { listProducts, useCreateOrder, useGetSettings } from "@workspace/api-client-react";
+import { useCreateOrder, useGetSettings } from "@workspace/api-client-react";
 import { ArrowLeft, ArrowRight, Banknote, Check, CheckCircle2, ChevronRight, ClipboardCheck, CreditCard, Loader2, MapPin, Package, ShieldCheck, Sparkles, Trash2, Truck, Wallet } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link, useLocation } from "wouter";
@@ -99,7 +99,6 @@ export default function Checkout() {
   const [couponLoading, setCouponLoading] = useState(false);
   const [submittedOrderId, setSubmittedOrderId] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [isPreparingOrder, setIsPreparingOrder] = useState(false);
   // React state updates after the event; a ref closes the double-click gap.
   const submissionInFlight = useRef(false);
 
@@ -272,32 +271,6 @@ export default function Checkout() {
     }
 
     submissionInFlight.current = true;
-    setIsPreparingOrder(true);
-    try {
-      const catalog = await listProducts();
-      const activeIds = new Set(catalog.map((product: any) => Number(product.id)).filter(Number.isFinite));
-      const staleItem = items.find(item => {
-        const productId = Number(item.product?.id);
-        return !Number.isFinite(productId) || !activeIds.has(productId);
-      });
-      if (staleItem) {
-        submissionInFlight.current = false;
-        const staleName = staleItem.product?.name || "one item";
-        const message = `${staleName} is no longer available in the current collection. Remove it and choose an active item before checking out.`;
-        setSubmitError(message);
-        toast({ title: "Please refresh your selection", description: message, variant: "destructive" });
-        return;
-      }
-    } catch {
-      submissionInFlight.current = false;
-      const message = "We could not verify the collection right now. Please refresh the page and try again.";
-      setSubmitError(message);
-      toast({ title: "Checkout needs a quick refresh", description: message, variant: "destructive" });
-      return;
-    } finally {
-      setIsPreparingOrder(false);
-    }
-
     const itemSummary = items.map(item => `${item.quantity}× ${item.product?.name || "HAVESTORY item"}${item.selections?.length ? ` (${item.selections.map(selection => `${selection.groupTitle}: ${selection.choiceName}`).join(", ")})` : ""}`).join("\n");
     const notes = [
       orderNotes.trim() ? `Customer request: ${orderNotes.trim()}` : "",
@@ -430,7 +403,7 @@ export default function Checkout() {
 
             <div className="flex items-start gap-3 px-1 text-xs leading-relaxed text-[rgba(44,33,27,0.6)]"><ShieldCheck className="mt-0.5 shrink-0 text-[var(--glass-clay)]" size={17} /><p>Your order is created securely. For bank transfer and full payment, you can upload a JPG, PNG or PDF payment proof from the tracking page after paying.</p></div>
             {submitError && <div role="alert" className="rounded-2xl border border-red-200 bg-red-50/80 px-4 py-3 text-sm leading-relaxed text-red-900"><strong className="block text-xs font-black uppercase tracking-[0.12em]">Order not submitted</strong><span className="mt-1 block">{submitError}</span></div>}
-            <Button type="submit" disabled={createOrder.isPending || isPreparingOrder || paymentOptions.length === 0} className="group h-14 w-full rounded-full bg-[var(--glass-ink)] px-7 text-xs font-black uppercase tracking-[0.16em] text-white shadow-[0_16px_36px_rgba(44,33,27,0.2)] hover:bg-[var(--glass-clay)]">{isPreparingOrder ? <><Loader2 className="mr-2 animate-spin" size={16} /> Checking availability</> : createOrder.isPending ? <><Loader2 className="mr-2 animate-spin" size={16} /> Creating your order</> : <>Place secure order <ArrowRight className="ml-2 transition-transform group-hover:translate-x-1" size={16} /></>}</Button>
+            <Button type="submit" disabled={createOrder.isPending || paymentOptions.length === 0} className="group h-14 w-full rounded-full bg-[var(--glass-ink)] px-7 text-xs font-black uppercase tracking-[0.16em] text-white shadow-[0_16px_36px_rgba(44,33,27,0.2)] hover:bg-[var(--glass-clay)]">{createOrder.isPending ? <><Loader2 className="mr-2 animate-spin" size={16} /> Creating your order</> : <>Place secure order <ArrowRight className="ml-2 transition-transform group-hover:translate-x-1" size={16} /></>}</Button>
           </motion.form>
 
           <motion.aside initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} className="lg:sticky lg:top-8">
