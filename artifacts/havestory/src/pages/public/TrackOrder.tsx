@@ -127,7 +127,7 @@ export default function TrackOrder() {
       const response = await fetch(`/api/orders/track/${encodeURIComponent((tracking as any).orderId || searchId)}/payment-confirm`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paymentType, paymentAmount: amount }) });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Could not confirm payment');
-      setPaymentMessage('Payment confirmation sent. Your order will move forward after studio approval.');
+      setPaymentMessage('Payment reported. The studio will verify the transfer manually before marking it paid. You can upload a proof if available.');
       await refetch();
     } catch (error) {
       setPaymentMessage(error instanceof Error ? error.message : 'Could not confirm payment');
@@ -351,8 +351,9 @@ export default function TrackOrder() {
               const proofStatus = String(payment.paymentProofStatus || 'pending');
               const paymentStatus = String(payment.paymentStatus || 'pending');
               const invoiceTotal = Number(String(payment.invoice?.amount ?? payment.paymentAmount ?? 0).replace(/[^0-9.-]/g, '')) || 0;
-              const paidAmount = Number(payment.paymentSubmittedAmount ?? 0) || 0;
-              const balanceDue = Math.max(0, invoiceTotal - paidAmount);
+              const reportedAmount = Number(payment.paymentSubmittedAmount ?? 0) || 0;
+              const verifiedAmount = ['paid', 'partial', 'approved'].includes(paymentStatus) ? reportedAmount : 0;
+              const balanceDue = Math.max(0, invoiceTotal - verifiedAmount);
               const invoice = payment.invoice;
               const bankRemark = /^INV-\d{6}-(\d{4})$/.exec(String(invoice?.invoiceNumber || ''))?.[1];
               const showPaymentInstructions = balanceDue > 0 && invoice?.status !== 'paid' && paymentStatus !== 'approved';
@@ -368,7 +369,7 @@ export default function TrackOrder() {
                     </div>
                     <div className="grid gap-2 text-sm mb-5">
                       <div className="flex justify-between gap-4"><span className="text-muted-foreground">Invoice total</span><strong>Rs. {invoiceTotal.toLocaleString('en-LK')}</strong></div>
-                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Amount paid</span><strong className="text-emerald-700">Rs. {paidAmount.toLocaleString('en-LK')}</strong></div>
+                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">{verifiedAmount > 0 ? 'Amount verified' : 'Amount reported'}</span><strong className={verifiedAmount > 0 ? 'text-emerald-700' : 'text-amber-700'}>Rs. {reportedAmount.toLocaleString('en-LK')}</strong></div>
                       <div className="flex justify-between gap-4"><span className="text-muted-foreground">Balance due</span><strong className={balanceDue > 0 ? 'text-amber-700' : 'text-emerald-700'}>Rs. {balanceDue.toLocaleString('en-LK')}</strong></div>
                       <div className="flex justify-between gap-4"><span className="text-muted-foreground">Payment status</span><strong className="capitalize">{paymentStatus.replaceAll('_', ' ')}</strong></div>
                       <div className="flex justify-between gap-4"><span className="text-muted-foreground">Proof status</span><strong className="capitalize">{proofStatus.replaceAll('_', ' ')}</strong></div>
@@ -383,13 +384,13 @@ export default function TrackOrder() {
                       {typeof (settings as any)?.paymentQrUrl === 'string' && /^(https:\/\/|\/)/.test((settings as any).paymentQrUrl) && <img src={(settings as any).paymentQrUrl} alt="Bank payment QR code" loading="lazy" className="h-40 w-40 rounded-xl border border-border bg-white object-contain p-2" />}
                     </div>}
                     <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 mb-5">
-                      <div className="flex gap-2"><AlertCircle className="h-4 w-4 mt-0.5 shrink-0" /><p>After payment, upload a JPG, PNG, or PDF proof and press confirm payment. Uploaded proof is retained for 14 days and then permanently deleted.</p></div>
+                      <div className="flex gap-2"><AlertCircle className="h-4 w-4 mt-0.5 shrink-0" /><p>After payment, enter the amount and press confirm payment. A JPG, PNG, or PDF proof is optional; without one, the studio verifies your transfer manually. Uploaded proof is retained for 14 days.</p></div>
                     </div>
                     <div className="mb-4 rounded-2xl border border-primary/10 bg-primary/5 p-4">
                       <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">What are you paying?</p>
                       <div className="grid gap-3 sm:grid-cols-2">
                         <label className="space-y-1.5 text-xs font-semibold text-muted-foreground">Payment type<select value={paymentType} onChange={(event) => { const next = event.target.value as typeof paymentType; setPaymentType(next); if (next === 'full') setPaymentAmount(String(invoiceTotal)); }} className="mt-1 h-11 w-full rounded-xl border border-border bg-background px-3 text-sm font-semibold text-foreground"><option value="advance">Advance payment</option><option value="full">Full payment</option><option value="custom">Custom amount</option></select></label>
-                        <label className="space-y-1.5 text-xs font-semibold text-muted-foreground">Amount paid (Rs.)<Input type="number" min="0.01" step="0.01" value={paymentAmount} onChange={(event) => setPaymentAmount(event.target.value)} placeholder="Enter exact amount" className="mt-1 h-11 rounded-xl bg-background text-sm font-semibold" /></label>
+                        <label className="space-y-1.5 text-xs font-semibold text-muted-foreground">Amount paid (Rs.)<Input type="number" min="1" step="1" value={paymentAmount} onChange={(event) => setPaymentAmount(event.target.value)} placeholder="Enter whole rupee amount" className="mt-1 h-11 rounded-xl bg-background text-sm font-semibold" /></label>
                       </div>
                     </div>
                     <div className="grid gap-3 sm:grid-cols-2">
@@ -489,4 +490,3 @@ export default function TrackOrder() {
     </div>
   );
 }
-
