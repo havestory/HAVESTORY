@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { captureElement } from '@/lib/html2canvas-capture';
 import { CalendarDays, CheckCircle2, Download, FileImage, FileText, Package2, Printer, RotateCcw, Save, Search, Globe2, Truck, Upload, User, X, Zap } from 'lucide-react';
-import { useGetSettings, useListOrders } from '@workspace/api-client-react';
+import { useGetSettings } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -86,10 +86,10 @@ function Field({ label, children, className = '' }: { label: string; children: R
 export default function ShippingLabels() {
   const { toast } = useToast();
   const { data: siteSettings } = useGetSettings();
-  const { data: orders = [], isLoading: ordersLoading } = useListOrders({}, { query: { staleTime: 15_000, refetchOnWindowFocus: false } as any });
   const [form, setForm] = useState<LabelForm>(EMPTY_FORM);
   const [lookupPhone, setLookupPhone] = useState('');
   const [orderQuery, setOrderQuery] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [orderMenuOpen, setOrderMenuOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const qrUrl = websiteQrUrl((siteSettings as any)?.website);
@@ -106,8 +106,14 @@ export default function ShippingLabels() {
   });
 
   useEffect(() => { if (settings) { setLabelSettings((current) => ({ ...current, ...settings })); setForm((current) => ({ ...current, labelSize: settings.defaultSize || 'standard' })); } }, [settings]);
-  const orderList = Array.isArray(orders) ? orders as any[] : [];
-  const filteredOrders = useMemo(() => { const query = orderQuery.trim().toLowerCase(); return orderList.filter((order) => !query || [order.orderId, order.customerName, order.customerPhone].some((value) => String(value || '').toLowerCase().includes(query))).slice(0, 8); }, [orderList, orderQuery]);
+  useEffect(() => { const timeout = window.setTimeout(() => setSearchTerm(orderQuery.trim()), 250); return () => window.clearTimeout(timeout); }, [orderQuery]);
+  const { data: orderPage, isLoading: ordersLoading } = useQuery<{ items: any[] }>({
+    queryKey: ['/api/orders/admin-page', 'shipping-label', searchTerm],
+    queryFn: () => apiFetch(`/api/orders/admin-page?pageSize=10&search=${encodeURIComponent(searchTerm)}`),
+    enabled: orderMenuOpen,
+    staleTime: 15_000,
+  });
+  const filteredOrders = (orderPage?.items || []).slice(0, 8);
   const sender = {
     name: labelSettings.senderName || (siteSettings as any)?.ownerName || (siteSettings as any)?.businessName || 'HAVESTORY',
     phone: labelSettings.senderPhone || (siteSettings as any)?.phone || '',
@@ -141,12 +147,18 @@ export default function ShippingLabels() {
     toast({ title: 'Order linked', description: `${orderId} details loaded into the label.` });
   };
   useEffect(() => {
-    if (autoLoaded.current || !orderList.length) return;
+    if (autoLoaded.current) return;
     const requested = new URLSearchParams(window.location.search).get('orderId');
     if (!requested) return;
-    const order = orderList.find((item) => String(item.orderId) === requested || String(item.id) === requested);
-    if (order) { autoLoaded.current = true; applyOrder(order); }
-  }, [orderList.length]);
+    autoLoaded.current = true;
+    void apiFetch<{ items: any[] }>(`/api/orders/admin-page?pageSize=10&search=${encodeURIComponent(requested)}`)
+      .then((result) => {
+        const match = result.items.find((item) => String(item.orderId) === requested || String(item.id) === requested);
+        if (!match) throw new Error('Order not found');
+        applyOrder(match);
+      })
+      .catch(() => { autoLoaded.current = false; toast({ title: 'Order not found', description: 'Search for the order to create its shipping label.', variant: 'destructive' }); });
+  }, []);
 
   const missingRequired = !form.recipientName.trim() || !form.phone.trim() || !form.address.trim();
   const ensureReady = () => { if (!missingRequired) return true; toast({ title: 'Complete delivery details', description: 'Recipient name, phone number and address are required.', variant: 'destructive' }); return false; };
