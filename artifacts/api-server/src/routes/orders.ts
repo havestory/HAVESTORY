@@ -968,6 +968,7 @@ router.post("/track/:orderId/payment-proof", requireOrderAccess, upload.single("
     if (!["advance", "full", "custom"].includes(paymentType) || !Number.isFinite(paymentAmount) || paymentAmount <= 0) {
       return res.status(400).json({ error: "Choose a payment type and enter a valid payment amount" });
     }
+    if (!Number.isSafeInteger(paymentAmount)) return res.status(400).json({ error: "Enter a whole rupee payment amount" });
     const [linkedInvoice] = await db.select({ amount: invoicesTable.amount }).from(invoicesTable).where(eq(invoicesTable.orderId, orderId)).limit(1);
     const invoiceTotal = Number(String(linkedInvoice?.amount || order.paymentAmount || 0).replace(/[^0-9.-]/g, "")) || 0;
     if (invoiceTotal > 0 && paymentAmount > invoiceTotal) {
@@ -1014,6 +1015,9 @@ router.post("/track/:orderId/payment-confirm", requireOrderAccess, async (req: a
     if (!Number.isFinite(paymentAmount) || paymentAmount <= 0) {
       return res.status(400).json({ error: "Enter a valid payment amount" });
     }
+    if (!Number.isSafeInteger(paymentAmount)) {
+      return res.status(400).json({ error: "Enter a whole rupee payment amount" });
+    }
     const [linkedInvoice] = await db.select({ amount: invoicesTable.amount }).from(invoicesTable).where(eq(invoicesTable.orderId, orderId)).limit(1);
     const invoiceTotal = Number(String(linkedInvoice?.amount || order.paymentAmount || 0).replace(/[^0-9.-]/g, "")) || 0;
     if (invoiceTotal > 0 && paymentAmount > invoiceTotal) {
@@ -1022,7 +1026,7 @@ router.post("/track/:orderId/payment-confirm", requireOrderAccess, async (req: a
     const [updated] = await db.update(ordersTable).set({
       paymentStatus: "customer_confirmed",
       paymentType,
-      paymentSubmittedAmount: paymentAmount.toFixed(2),
+      paymentSubmittedAmount: paymentAmount,
       customerPaymentConfirmedAt: new Date(),
       paymentProofStatus: order.paymentProofUrl ? "uploaded" : order.paymentProofStatus,
       updatedAt: new Date(),
