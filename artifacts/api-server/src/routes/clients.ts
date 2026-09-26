@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db, pool } from "@workspace/db";
 import { clientsTable, crmProjectsTable, invoicesTable } from "@workspace/db/schema";
-import { eq, isNull, or, and, desc, sql } from "drizzle-orm";
+import { eq, isNull, or, and, desc, sql, ilike } from "drizzle-orm";
 import { getAdminAuth, hasPermission, requireAdmin, requireOwner } from "../lib/auth-cookie";
 import { parseIdParam } from "../lib/parse-id";
 import { DuplicateClientPhoneError, findClientIdByPhone, replaceClientPhoneClaims } from "../lib/client-dedupe";
@@ -45,6 +45,25 @@ router.get("/", async (req, res) => {
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to fetch clients" });
+  }
+});
+
+router.get("/search", async (req, res) => {
+  try {
+    const term = String(req.query.q || "").trim().slice(0, 100);
+    if (term.length < 2) return res.json([]);
+    const pattern = `%${term.replace(/[\\%_]/g, "\\$&")}%`;
+    const matches = await db.select().from(clientsTable).where(and(isNull(clientsTable.deletedAt), or(
+      ilike(clientsTable.name, pattern), ilike(clientsTable.phone, pattern),
+      ilike(clientsTable.email, pattern), ilike(clientsTable.businessName, pattern),
+      sql`('C' || LPAD(${clientsTable.id}::text, 4, '0')) ILIKE ${pattern}`,
+      sql`('HS-P' || LPAD(${clientsTable.id}::text, 6, '0')) ILIKE ${pattern}`,
+    ))).orderBy(desc(clientsTable.createdAt)).limit(7);
+    res.setHeader("Cache-Control", "private, max-age=15");
+    res.json(matches);
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to search clients" });
   }
 });
 
