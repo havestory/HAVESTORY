@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db, pool } from "@workspace/db";
 import { ordersTable, settingsTable, productsTable, clientsTable, couponsTable } from "@workspace/db/schema";
 import { invoicesTable } from "@workspace/db/schema";
-import { eq, and, desc, isNull, inArray, sql } from "drizzle-orm";
+import { eq, and, desc, isNull, inArray, sql, ilike, or } from "drizzle-orm";
 import { getAdminAuth, requireAdmin } from "../lib/auth-cookie";
 import { uploadToCloudinary } from "../lib/cloudinary";
 import { safeUpload, validateUploadedFile, validateUploadedFiles } from "../lib/upload-policy";
@@ -262,6 +262,55 @@ router.get("/", requireAdmin, async (req, res) => {
   }
 });
 
+// Bounded admin listing. Search runs in PostgreSQL so matches on older pages
+// remain discoverable without transferring the complete order history.
+router.get("/admin-page", requireAdmin, async (req, res) => {
+  try {
+    const page = Math.max(1, Math.min(100000, Math.floor(Number(req.query.page) || 1)));
+    const pageSize = Math.max(10, Math.min(50, Math.floor(Number(req.query.pageSize) || 40)));
+    const search = String(req.query.search || "").trim().slice(0, 100);
+    const status = String(req.query.status || "all").trim().toLowerCase();
+    const groups: Record<string, string[]> = {
+      pending: ["pending", "submitted", "reviewing"],
+      processing: ["processing", "confirmed", "ready"],
+      completed: ["completed", "delivered"],
+    };
+    const statuses = status === "all" ? [] : groups[status] || [status];
+    const conditions = [isNull(ordersTable.deletedAt)];
+    if (statuses.length) conditions.push(inArray(ordersTable.status, statuses));
+    if (search) {
+      const pattern = `%${search.replace(/[\\%_]/g, "\\$&")}%`;
+      conditions.push(or(
+        ilike(ordersTable.orderId, pattern), ilike(ordersTable.customerName, pattern),
+        ilike(ordersTable.customerPhone, pattern), ilike(ordersTable.customerEmail, pattern),
+      )!);
+    }
+    const where = and(...conditions);
+    const [orders, [{ total }], statsRows] = await Promise.all([
+      db.select().from(ordersTable).where(where).orderBy(desc(ordersTable.createdAt), desc(ordersTable.id)).limit(pageSize).offset((page - 1) * pageSize),
+      db.select({ total: sql<number>`count(*)::int` }).from(ordersTable).where(where),
+      db.select({ status: ordersTable.status, count: sql<number>`count(*)::int` }).from(ordersTable)
+        .where(isNull(ordersTable.deletedAt)).groupBy(ordersTable.status),
+    ]);
+    const invoiceRows = orders.length ? await db.select({ orderId: invoicesTable.orderId, invoiceNumber: invoicesTable.invoiceNumber })
+      .from(invoicesTable).where(and(isNull(invoicesTable.deletedAt), inArray(invoicesTable.orderId, orders.map(order => order.orderId)))) : [];
+    const invoiceByOrder = new Map(invoiceRows.map(row => [row.orderId, row.invoiceNumber]));
+    const stats = { total: 0, pending: 0, processing: 0, completed: 0 };
+    for (const row of statsRows) {
+      const count = Number(row.count) || 0;
+      stats.total += count;
+      const group = Object.entries(groups).find(([, values]) => values.includes(String(row.status).toLowerCase()))?.[0] as keyof typeof stats | undefined;
+      if (group) stats[group] += count;
+    }
+    res.setHeader("Cache-Control", "private, max-age=15, stale-while-revalidate=30");
+    res.json({ items: orders.map(order => ({ ...serializeOrder(order), invoiceNumber: invoiceByOrder.get(order.orderId) || null })),
+      total: Number(total) || 0, page, pageSize, totalPages: Math.max(1, Math.ceil((Number(total) || 0) / pageSize)), stats });
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Failed to fetch orders" });
+  }
+});
+
 router.post("/", async (req, res) => {
   try {
     const adminAuth = getAdminAuth(req);
@@ -305,6 +354,11 @@ router.post("/", async (req, res) => {
     if (!adminAuth && requestedItems.length > 0) {
       const dbProducts = await dbProductsPromise;
       productMap = new Map(dbProducts.map(product => [product.id, product]));
+
+      if (requestedItems.some((item: any) => {
+        const product = productMap.get(Number(item.productId));
+        return !product || !product.active;
+      })) return res.status(400).json({ error: "One or more products in your cart are no longer available. Please refresh your cart." });
 
       trustedItems = requestedItems.map((item: any) => {
         const product = productMap.get(Number(item.productId));
