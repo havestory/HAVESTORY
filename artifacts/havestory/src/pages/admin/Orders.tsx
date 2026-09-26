@@ -825,8 +825,10 @@ function safeDate(value: unknown) {
 }
 
 function orderTotalForRow(order: OrderRecord) {
-  const item = orderItem(order);
+  const invoiceAmount = Number(String(order.invoiceAmount ?? '').replace(/[^0-9.-]/g, ''));
+  if (Number.isFinite(invoiceAmount) && invoiceAmount > 0) return invoiceAmount;
   const itemTotal = Array.isArray(order.items) ? order.items.reduce((sum: number, current: any) => sum + (Number(current.price ?? current.unitPrice ?? 0) || 0) * (Number(current.quantity ?? 1) || 1), 0) : 0;
+  if (order.shippingMethod && Number(order.paymentAmount) > 0) return Number(order.paymentAmount);
   if (itemTotal > 0) return itemTotal;
   return Number(order.totalAmount ?? order.amount ?? 0) || 0;
 }

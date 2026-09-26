@@ -292,9 +292,9 @@ router.get("/admin-page", requireAdmin, async (req, res) => {
       db.select({ status: ordersTable.status, count: sql<number>`count(*)::int` }).from(ordersTable)
         .where(isNull(ordersTable.deletedAt)).groupBy(ordersTable.status),
     ]);
-    const invoiceRows = orders.length ? await db.select({ orderId: invoicesTable.orderId, invoiceNumber: invoicesTable.invoiceNumber })
+    const invoiceRows = orders.length ? await db.select({ orderId: invoicesTable.orderId, invoiceNumber: invoicesTable.invoiceNumber, amount: invoicesTable.amount })
       .from(invoicesTable).where(and(isNull(invoicesTable.deletedAt), inArray(invoicesTable.orderId, orders.map(order => order.orderId)))) : [];
-    const invoiceByOrder = new Map(invoiceRows.map(row => [row.orderId, row.invoiceNumber]));
+    const invoiceByOrder = new Map(invoiceRows.map(row => [row.orderId, row]));
     const stats = { total: 0, pending: 0, processing: 0, completed: 0 };
     for (const row of statsRows) {
       const count = Number(row.count) || 0;
@@ -303,7 +303,8 @@ router.get("/admin-page", requireAdmin, async (req, res) => {
       if (group) stats[group] += count;
     }
     res.setHeader("Cache-Control", "private, max-age=15, stale-while-revalidate=30");
-    res.json({ items: orders.map(order => ({ ...serializeOrder(order), invoiceNumber: invoiceByOrder.get(order.orderId) || null })),
+    res.json({ items: orders.map(order => ({ ...serializeOrder(order), invoiceNumber: invoiceByOrder.get(order.orderId)?.invoiceNumber || null,
+      invoiceAmount: invoiceByOrder.get(order.orderId)?.amount || null })),
       total: Number(total) || 0, page, pageSize, totalPages: Math.max(1, Math.ceil((Number(total) || 0) / pageSize)), stats });
   } catch (err) {
     req.log.error(err);
