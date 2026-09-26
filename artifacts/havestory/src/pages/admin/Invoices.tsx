@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { useListInvoices, useCreateInvoice, useUpdateInvoice, useDeleteInvoice, useListClients, useGetSettings } from "@workspace/api-client-react";
+import { useState, useRef, useEffect, useDeferredValue } from "react";
+import { useListInvoices, useCreateInvoice, useUpdateInvoice, useDeleteInvoice, useGetSettings } from "@workspace/api-client-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { InvoicePreview } from "@/components/InvoicePreview";
@@ -96,6 +96,7 @@ export default function AdminInvoices() {
   const [showManual, setShowManual] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [clientSearch, setClientSearch] = useState("");
+  const deferredClientSearch = useDeferredValue(clientSearch.trim());
   const [showClientDropdown, setShowClientDropdown] = useState(false);
   // Entry mode for new invoice: 'existing' = pick from CRM, 'manual' = type details directly
   const [entryMode, setEntryMode] = useState<"existing" | "manual">("existing");
@@ -136,8 +137,26 @@ export default function AdminInvoices() {
   const { data: invoices } = useListInvoices({
     query: { staleTime: 30_000, gcTime: 5 * 60_000, refetchOnWindowFocus: false } as any,
   });
-  const { data: crmClients, refetch: refetchClients } = useListClients({
-    query: { enabled: showManual, staleTime: 30_000, gcTime: 5 * 60_000, refetchOnWindowFocus: false } as any,
+  const { data: crmClients = [], refetch: refetchClients, isFetching: searchingClients } = useQuery<any[]>({
+    queryKey: ['/api/clients/search', deferredClientSearch],
+    queryFn: async ({ signal }) => {
+      const response = await fetch(`/api/clients/search?q=${encodeURIComponent(deferredClientSearch)}`, { credentials: 'include', signal });
+      if (!response.ok) throw new Error('Could not search clients');
+      return response.json();
+    },
+    enabled: showManual && entryMode === 'existing' && deferredClientSearch.length >= 2,
+    staleTime: 30_000,
+  });
+  const normalizedManualPhone = normalizePhone(form.phone);
+  const { data: duplicatePhoneClient = null } = useQuery<any | null>({
+    queryKey: ['/api/clients/lookup', normalizedManualPhone],
+    queryFn: async ({ signal }) => {
+      const response = await fetch(`/api/clients/lookup?phone=${encodeURIComponent(form.phone)}`, { credentials: 'include', signal });
+      if (!response.ok) throw new Error('Could not check client phone');
+      return response.json();
+    },
+    enabled: showManual && entryMode === 'manual' && !form.clientId && normalizedManualPhone.length >= 9,
+    staleTime: 30_000,
   });
   const { data: settings } = useGetSettings();
   const queryClient = useQueryClient();
@@ -270,11 +289,7 @@ export default function AdminInvoices() {
     setAllowDuplicateCustomer(false);
   };
 
-  const filteredClients = (crmClients ?? []).filter((c: any) =>
-    clientSearch.length < 1 ||
-    c.name.toLowerCase().includes(clientSearch.toLowerCase()) ||
-    (c.phone || "").includes(clientSearch)
-  );
+  const filteredClients = crmClients;
 
   const selectClient = (c: any) => {
     setForm(f => ({ ...f, clientId: c.id ?? null, clientName: c.name, phone: c.phone || "", email: c.email || "", address: c.address || "", businessName: c.businessName || "" }));
@@ -311,12 +326,7 @@ export default function AdminInvoices() {
   const trimmedClientSearch = clientSearch.trim().toLowerCase();
   const hasExactClientMatch = trimmedClientSearch.length > 0 &&
     (crmClients ?? []).some((c: any) => c.name.trim().toLowerCase() === trimmedClientSearch);
-  const showAddNewClient = trimmedClientSearch.length > 0 && !hasExactClientMatch;
-  const duplicatePhoneClient = entryMode === "manual" && !form.clientId && normalizePhone(form.phone)
-    ? (crmClients ?? []).find((client: any) =>
-        normalizePhone(client.phone) === normalizePhone(form.phone),
-      ) ?? null
-    : null;
+  const showAddNewClient = trimmedClientSearch.length > 0 && deferredClientSearch.toLowerCase() === trimmedClientSearch && !searchingClients && !hasExactClientMatch;
 
   // Calculations
   const subtotal = items.reduce((s, it) => s + it.qty * num(it.unitPrice), 0);
@@ -1011,7 +1021,7 @@ export default function AdminInvoices() {
                             ))
                           ) : (
                             !showAddNewClient && (
-                              <div className="px-4 py-3 text-sm text-admin-muted italic">No clients found. Type a name to add a new one, or switch to Manual.</div>
+                              <div className="px-4 py-3 text-sm text-admin-muted italic">{deferredClientSearch.length < 2 ? 'Type at least 2 characters to search clients.' : searchingClients ? 'Searching clients…' : 'No clients found. Type a name to add a new one, or switch to Manual.'}</div>
                             )
                           )}
                           {showAddNewClient && (
