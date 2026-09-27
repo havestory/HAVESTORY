@@ -57,6 +57,7 @@ type Sale = {
   client_id?: number | null;
   items: CartItem[];
   total: string;
+  paid_amount?: string;
   subtotal?: string;
   amount_tendered: string;
   change_due: string;
@@ -82,6 +83,8 @@ type MonthData = {
   daily: Array<{ date: string; bills: number; total: number }>;
   summary: { count: number; total: number; cash: number; card: number; transfer: number };
 };
+type OutstandingSale = { id: number; receipt_number: string; total: string; paid_amount: string; sold_at: string; items: Array<{ name: string; qty: number; price: number }> };
+type Outstanding = { client: { id: number; name: string; phone: string }; sales: OutstandingSale[] };
 const rs = (value: number) =>
   `Rs. ${Number(value || 0).toLocaleString("en-LK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const today = () =>
@@ -134,8 +137,10 @@ function printReceipt(sale: Sale, width: "58" | "80", brand: ReceiptBrand, prepa
     .filter(Boolean)
     .map(esc)
     .join("<br>");
+  const due = Math.max(0, Number(sale.total) - Number(sale.paid_amount ?? sale.total));
+  const printedPayment = due > 0 ? 'NOT PAID' : sale.payment_method === 'unpaid' ? 'SETTLED' : sale.payment_method.toUpperCase();
   win.document.write(
-    `<!doctype html><html><head><meta charset="utf-8"><title>${esc(sale.receipt_number)}</title><style>@page{size:${mm}mm auto;margin:0}*{box-sizing:border-box}html,body{width:${mm}mm;min-width:${mm}mm;margin:0;padding:0;background:#fff;color:#000}body{font-family:Arial,Helvetica,sans-serif;font-size:${width === "58" ? 10 : 11}px;line-height:1.35;font-variant-numeric:tabular-nums}.r{width:${mm}mm;padding:${width === "58" ? 3 : 4}mm;overflow:hidden}.c,.center{text-align:center}.brand{font-size:${width === "58" ? 16 : 19}px;font-weight:900;letter-spacing:.5px;overflow-wrap:anywhere}.tagline{margin-top:1mm;font-size:.92em}.meta{margin-top:2mm;overflow-wrap:anywhere}.rule{border-top:1px dashed #000;margin:2.5mm 0}.row{display:flex;justify-content:space-between;gap:2mm;padding:1mm 0}.item{border-bottom:1px dotted #aaa}.item span:first-child{max-width:68%;overflow-wrap:anywhere}.total{font-size:1.2em;font-weight:900;border-top:1px solid #000;margin-top:1mm;padding-top:1.5mm}.change{border:1.5px solid #000;padding:1.5mm;font-size:1.15em}.small{font-size:.88em}.bold{font-weight:800}.footer{margin-top:3mm;font-size:.9em}@media print{html,body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style></head><body><main class="r"><header class="center"><div class="brand">${esc(businessName)}</div><div class="tagline">THE COLOUR &amp; FRAME STUDIO</div><div class="meta small">${contactLines}</div></header><div class="rule"></div><div class="center bold">POS RECEIPT</div><div class="center">${esc(sale.receipt_number)}</div>${sale.invoice_number ? `<div class="center small">Invoice: ${esc(sale.invoice_number)}</div>` : ""}<div class="center small">${esc(new Date(sale.sold_at).toLocaleString("en-LK", { timeZone: "Asia/Colombo" }))}</div><div class="rule"></div><div class="bold">${esc(sale.customer_name || "Walk-in customer")}</div>${sale.customer_phone ? `<div class="small">${esc(sale.customer_phone)}</div>` : ""}<div class="rule"></div>${items.map((i) => `<div class="row item"><span><b>${esc(i.name)}</b><br><span class="small">${i.qty}${i.unitLabel ? ` ${esc(i.unitLabel)}` : ""} × ${rs(Number(i.price))}${i.code ? ` · ${esc(i.code)}` : ""}</span></span><b>${rs(Number(i.price) * Number(i.qty))}</b></div>`).join("")}${discount > 0 ? `<div class="row"><span>Subtotal</span><span>${rs(Number(sale.subtotal))}</span></div><div class="row"><span>Discount</span><span>−${rs(discount)}</span></div>` : ""}<div class="row total"><span>Total</span><span>${rs(Number(sale.total))}</span></div><div class="row"><span>Received</span><b>${rs(Number(sale.amount_tendered))}</b></div><div class="row change"><span>Balance / Change</span><b>${rs(Number(sale.change_due))}</b></div><div class="row small"><span>Payment</span><b>${esc(sale.payment_method.toUpperCase())}</b></div>${bankPrintHTML(brand.bank)}<footer class="footer center"><div class="rule"></div>Issued by Mr. ${esc(sale.sold_by)}<br>Thank you for choosing ${esc(businessName)}.</footer></main></body></html>`,
+    `<!doctype html><html><head><meta charset="utf-8"><title>${esc(sale.receipt_number)}</title><style>@page{size:${mm}mm auto;margin:0}*{box-sizing:border-box}html,body{width:${mm}mm;min-width:${mm}mm;margin:0;padding:0;background:#fff;color:#000}body{font-family:Arial,Helvetica,sans-serif;font-size:${width === "58" ? 10 : 11}px;line-height:1.35;font-variant-numeric:tabular-nums}.r{width:${mm}mm;padding:${width === "58" ? 3 : 4}mm;overflow:hidden}.c,.center{text-align:center}.brand{font-size:${width === "58" ? 16 : 19}px;font-weight:900;letter-spacing:.5px;overflow-wrap:anywhere}.tagline{margin-top:1mm;font-size:.92em}.meta{margin-top:2mm;overflow-wrap:anywhere}.rule{border-top:1px dashed #000;margin:2.5mm 0}.row{display:flex;justify-content:space-between;gap:2mm;padding:1mm 0}.item{border-bottom:1px dotted #aaa}.item span:first-child{max-width:68%;overflow-wrap:anywhere}.total{font-size:1.2em;font-weight:900;border-top:1px solid #000;margin-top:1mm;padding-top:1.5mm}.change{border:1.5px solid #000;padding:1.5mm;font-size:1.15em}.small{font-size:.88em}.bold{font-weight:800}.footer{margin-top:3mm;font-size:.9em}@media print{html,body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style></head><body><main class="r"><header class="center"><div class="brand">${esc(businessName)}</div><div class="tagline">THE COLOUR &amp; FRAME STUDIO</div><div class="meta small">${contactLines}</div></header><div class="rule"></div><div class="center bold">${due > 0 ? "PAYMENT DUE" : "POS RECEIPT"}</div><div class="center">${esc(sale.receipt_number)}</div>${sale.invoice_number ? `<div class="center small">Invoice: ${esc(sale.invoice_number)}</div>` : ""}<div class="center small">${esc(new Date(sale.sold_at).toLocaleString("en-LK", { timeZone: "Asia/Colombo" }))}</div><div class="rule"></div><div class="bold">${esc(sale.customer_name || "Walk-in customer")}</div>${sale.customer_phone ? `<div class="small">${esc(sale.customer_phone)}</div>` : ""}<div class="rule"></div>${items.map((i) => `<div class="row item"><span><b>${esc(i.name)}</b><br><span class="small">${i.qty}${i.unitLabel ? ` ${esc(i.unitLabel)}` : ""} × ${rs(Number(i.price))}${i.code ? ` · ${esc(i.code)}` : ""}</span></span><b>${rs(Number(i.price) * Number(i.qty))}</b></div>`).join("")}${discount > 0 ? `<div class="row"><span>Subtotal</span><span>${rs(Number(sale.subtotal))}</span></div><div class="row"><span>Discount</span><span>−${rs(discount)}</span></div>` : ""}<div class="row total"><span>Total</span><span>${rs(Number(sale.total))}</span></div>${sale.payment_method === "unpaid" ? `<div class="row"><span>Paid to date</span><b>${rs(Number(sale.paid_amount || 0))}</b></div><div class="row change"><span>Outstanding</span><b>${rs(due)}</b></div>` : `<div class="row"><span>Received</span><b>${rs(Number(sale.amount_tendered))}</b></div><div class="row change"><span>Balance / Change</span><b>${rs(Number(sale.change_due))}</b></div>`}<div class="row small"><span>Payment</span><b>${esc(printedPayment)}</b></div>${bankPrintHTML(brand.bank)}<footer class="footer center"><div class="rule"></div>Issued by Mr. ${esc(sale.sold_by)}<br>Thank you for choosing ${esc(businessName)}.</footer></main></body></html>`,
   );
   win.document.close();
   win.focus();
@@ -144,6 +149,17 @@ function printReceipt(sale: Sale, width: "58" | "80", brand: ReceiptBrand, prepa
       win.print();
     }
   }, 250);
+}
+
+function printStatement(data: Outstanding, selected: OutstandingSale[], width: "58" | "80", brand: ReceiptBrand, settlement?: { receiptNumber: string; amount: number; remaining: number; allocations: Array<{ saleId: number; applied: number }> }, prepared?: Window | null) {
+  const win = prepared === undefined ? window.open('', '_blank', 'popup=yes,width=500,height=760') : prepared;
+  if (!win) return window.alert('Please allow pop-ups to print the statement.');
+  const mm = Number(width);
+  const paid = new Map(settlement?.allocations.map(a => [a.saleId, a.applied]) || []);
+  const totalDue = selected.reduce((sum, sale) => sum + Number(sale.total) - Number(sale.paid_amount), 0);
+  win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(settlement?.receiptNumber || 'Outstanding bills')}</title><style>@page{size:${mm}mm auto;margin:0}*{box-sizing:border-box}body{width:${mm}mm;margin:0;padding:4mm;background:white;color:#111;font:11px/1.4 Arial,sans-serif}.center{text-align:center}.brand{font-size:17px;font-weight:800}.row{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px dashed #bbb}.row span{overflow-wrap:anywhere}.strong{font-weight:800}.total{font-size:14px;border-top:2px solid #111;margin-top:8px}.muted{font-size:10px}h2{font-size:13px;margin:12px 0 5px}@media print{body{print-color-adjust:exact}}</style></head><body><div class="center brand">${esc(brand.businessName)}</div><div class="center muted">${esc(brand.phone)}</div><h2 class="center">${settlement ? 'PAYMENT & BALANCE STATEMENT' : 'OUTSTANDING BILLS'}</h2><div class="center muted">${esc(settlement?.receiptNumber || new Date().toLocaleString('en-LK', { timeZone: 'Asia/Colombo' }))}</div><p class="strong">${esc(data.client.name)}<br>${esc(data.client.phone || '')}</p>${selected.map(s => { const due = Number(s.total) - Number(s.paid_amount); return `<div class="row"><span>${esc(s.receipt_number)}<br><small>${esc(new Date(s.sold_at).toLocaleDateString('en-LK'))} · ${esc(s.items?.map(i => `${i.name} ×${i.qty}`).join(', ') || '')}</small></span><span class="strong">${rs(due)}${settlement ? `<br><small>Paid ${rs(paid.get(s.id) || 0)} · Left ${rs(due - (paid.get(s.id) || 0))}</small>` : ''}</span></div>`; }).join('')}<div class="row total"><span>Selected balance</span><b>${rs(totalDue)}</b></div>${settlement ? `<div class="row"><span>Received (${esc(settlement.receiptNumber)})</span><b>${rs(settlement.amount)}</b></div><div class="row total"><span>Balance to carry forward</span><b>${rs(settlement.remaining)}</b></div>` : '<p class="muted">This statement records amounts due. No payment has been recorded.</p>'}<p class="center muted">Thank you for choosing ${esc(brand.businessName)}.</p></body></html>`);
+  win.document.close(); win.focus();
+  window.setTimeout(() => { if (!win.closed) win.print(); }, 250);
 }
 
 export default function POS() {
@@ -179,9 +195,19 @@ export default function POS() {
   const [phoneLookupPending, setPhoneLookupPending] = useState(false);
   const [showPhoneReminder, setShowPhoneReminder] = useState(false);
   const [method, setMethod] = useState("cash");
+  const [onAccount, setOnAccount] = useState(false);
+  const [accountPhone, setAccountPhone] = useState("");
+  const [accountClient, setAccountClient] = useState<{ id: number; name: string } | null>(null);
+  const [outstanding, setOutstanding] = useState<Outstanding | null>(null);
+  const [selectedBills, setSelectedBills] = useState<number[]>([]);
+  const [settleAmount, setSettleAmount] = useState("");
+  const [settleMethod, setSettleMethod] = useState("cash");
+  const [settling, setSettling] = useState(false);
+  const settlementRequestId = useRef<string | null>(null);
   const [width, setWidth] = useState<"58" | "80">("80");
   const [saving, setSaving] = useState(false);
   const saleLock = useRef(false);
+  const saleRequestId = useRef<string | null>(null);
   const [invoiceQuery, setInvoiceQuery] = useState("");
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -248,6 +274,44 @@ export default function POS() {
     }, 300);
     return () => { clearTimeout(timer); controller.abort(); };
   }, [customerPhone, selectedInvoice]);
+  useEffect(() => {
+    setAccountClient(null); setOutstanding(null); setSelectedBills([]);
+    if (accountPhone.replace(/\D/g, '').length < 7) return;
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      request(`/api/clients/lookup?phone=${encodeURIComponent(accountPhone.trim())}`, { signal: controller.signal })
+        .then((client) => { if (!controller.signal.aborted) setAccountClient(client ? { id: client.id, name: client.name } : null); })
+        .catch(() => { if (!controller.signal.aborted) setAccountClient(null); });
+    }, 300);
+    return () => { window.clearTimeout(timer); controller.abort(); };
+  }, [accountPhone]);
+  useEffect(() => {
+    if (!accountClient) return;
+    const controller = new AbortController();
+    request(`/api/pos/outstanding?clientId=${accountClient.id}`, { signal: controller.signal })
+      .then((data) => { if (!controller.signal.aborted) setOutstanding(data); })
+      .catch((e) => { if (!controller.signal.aborted) toast({ title: 'Outstanding bills could not load', description: e.message, variant: 'destructive' }); });
+    return () => controller.abort();
+  }, [accountClient]);
+  const chosenBills = outstanding?.sales.filter(s => selectedBills.includes(s.id)) || [];
+  const chosenDue = Math.round(chosenBills.reduce((sum, s) => sum + Number(s.total) - Number(s.paid_amount), 0) * 100) / 100;
+  const settleSelected = async () => {
+    const amount = Number(settleAmount);
+    if (!outstanding || !chosenBills.length || settling || !day?.session || day.session.closed_at || !Number.isFinite(amount) || amount <= 0 || amount > chosenDue) return;
+    const prepared = window.open('', '_blank', 'popup=yes,width=500,height=760');
+    settlementRequestId.current ||= crypto.randomUUID();
+    setSettling(true);
+    try {
+      const result = await request('/api/pos/settlements', { method: 'POST', body: JSON.stringify({ clientId: outstanding.client.id, saleIds: chosenBills.map(s => s.id), amount, paymentMethod: settleMethod, requestId: settlementRequestId.current }) });
+      try { printStatement(outstanding, chosenBills, width, receiptBrand, result, prepared); } catch { prepared?.close(); }
+      toast({ title: 'Payment recorded', description: `${result.receiptNumber} · remaining ${rs(result.remaining)}` });
+      setSelectedBills([]); setSettleAmount('');
+      try { setOutstanding(await request(`/api/pos/outstanding?clientId=${outstanding.client.id}`)); await load(); }
+      catch { toast({ title: 'Payment saved; refresh the page to see the updated balance' }); }
+      settlementRequestId.current = null;
+    } catch (e: any) { prepared?.close(); toast({ title: 'Check payment status', description: e.message, variant: 'destructive' }); }
+    finally { setSettling(false); }
+  };
   const subtotal = selectedInvoice
     ? selectedInvoice.balance
     : cart.reduce((sum, item) => sum + Math.round(item.price * item.qty * 100), 0) / 100;
@@ -351,10 +415,12 @@ export default function POS() {
     }
   };
   const complete = async (continueWithoutPhone = false) => {
-    if (saleLock.current || saving || day?.session?.closed_at || invalidDiscount || invalidPhone || total <= 0 || !Number.isFinite(received) || received < total) return;
-    if (!selectedInvoice && !customerPhone.trim() && !continueWithoutPhone) { setShowPhoneReminder(true); return; }
+    if (saleLock.current || saving || day?.session?.closed_at || invalidDiscount || invalidPhone || total <= 0 || (!(onAccount && !selectedInvoice) && (!Number.isFinite(received) || received < total))) return;
+    if (onAccount && !selectedInvoice && (!matchedClient || phoneLookupPending)) { toast({ title: 'Existing client required', description: 'Enter the phone number linked to a client card.', variant: 'destructive' }); return; }
+    if (!onAccount && !selectedInvoice && !customerPhone.trim() && !continueWithoutPhone) { setShowPhoneReminder(true); return; }
     setShowPhoneReminder(false);
     saleLock.current = true;
+    saleRequestId.current ||= crypto.randomUUID();
     setSaving(true);
     const printWindow = window.open("", "_blank", "popup=yes,width=500,height=760");
     try {
@@ -367,6 +433,8 @@ export default function POS() {
           customerPhone: customerPhone.trim(),
           amountTendered: received,
           paymentMethod: method,
+          onAccount: onAccount && !selectedInvoice,
+          requestId: saleRequestId.current,
           discountType,
           discountValue: selectedInvoice ? 0 : rawDiscount,
         }),
@@ -378,7 +446,7 @@ export default function POS() {
         else printMessage = 'Use the print button in today’s issued bills to print your receipt.';
       } catch { printMessage = 'Use the print button in today’s issued bills to retry printing.'; }
       toast({
-        title: "Payment collected",
+        title: onAccount && !selectedInvoice ? "Unpaid bill issued" : "Payment collected",
         description: `${sale.receipt_number} · ${printMessage}`,
       });
       setCart([]);
@@ -386,6 +454,8 @@ export default function POS() {
       setCustomer("");
       setCustomerPhone("");
       setTendered("");
+      setOnAccount(false);
+      saleRequestId.current = null;
       setInvoiceQuery("");
       await load();
     } catch (e: any) {
@@ -830,7 +900,7 @@ export default function POS() {
                       <button
                         key={inv.id}
                         onClick={() => {
-                          setSelectedInvoice(inv); setDiscountValue("");
+                          setSelectedInvoice(inv); setOnAccount(false); setDiscountValue("");
                           setCart([]);
                           setCustomer(inv.clientName);
                           setCustomerPhone("");
@@ -923,7 +993,9 @@ export default function POS() {
                 <span>Total</span>
                 <span>{rs(total)}</span>
               </div>
-              <div className="mt-4 grid grid-cols-2 gap-2">
+              {!selectedInvoice && <label className="mt-4 flex items-center gap-3 rounded-xl border border-admin-border p-3 text-sm font-semibold"><input type="checkbox" checked={onAccount} onChange={e => setOnAccount(e.target.checked)} /> Issue as Not paid (existing client only)</label>}
+              {onAccount && !selectedInvoice && <p className="mt-2 text-xs text-admin-muted">The bill will be saved under the matched client card. No payment or income is recorded now.</p>}
+              {!onAccount && <div className="mt-4 grid grid-cols-2 gap-2">
                 <label className="text-[10px] font-bold uppercase text-admin-muted">
                   Payment
                   <select
@@ -946,14 +1018,14 @@ export default function POS() {
                     className={`${input} mt-1.5`}
                   />
                 </label>
-              </div>
-              <div className="mt-3 flex justify-between rounded-xl border border-admin-success-line bg-admin-success-soft p-3 text-sm font-bold text-admin-success">
+              </div>}
+              {!onAccount && <div className="mt-3 flex justify-between rounded-xl border border-admin-success-line bg-admin-success-soft p-3 text-sm font-bold text-admin-success">
                 <span>Balance / Change</span>
                 <span>{rs(change)}</span>
-              </div>
+              </div>}
               <button
                 onClick={() => void complete()}
-                disabled={saving || invalidDiscount || invalidPhone || !Number.isFinite(received) || !!day.session.closed_at || total <= 0 || received < total}
+                disabled={saving || invalidDiscount || invalidPhone || !!day.session.closed_at || total <= 0 || (onAccount && !selectedInvoice ? !matchedClient || phoneLookupPending : !Number.isFinite(received) || received < total)}
                 className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-admin-brand font-bold text-white disabled:opacity-40"
               >
                 {saving ? (
@@ -961,13 +1033,24 @@ export default function POS() {
                 ) : (
                   <Printer size={17} />
                 )}{" "}
-                Collect payment &amp; print bill
+                {onAccount && !selectedInvoice ? 'Issue Not paid bill' : 'Collect payment & print bill'}
               </button>
               <p className="mt-2 text-center text-[10px] text-admin-muted">
-                The sale is recorded only after payment is confirmed here.
+                {onAccount && !selectedInvoice ? 'Saved to the existing client account as an outstanding bill.' : 'The sale is recorded only after payment is confirmed here.'}
               </p>
             </aside>
           </div>
+          <section className="rounded-[26px] border border-admin-border bg-admin-surface p-5 shadow-sm">
+            <h2 className="text-lg font-bold">Unpaid client bills</h2>
+            <p className="mt-1 text-xs text-admin-muted">Find an existing client by phone, select their unpaid bills, then print one balance statement or record a payment. Payments settle the oldest selected bill first.</p>
+            <label className="mt-4 block max-w-md text-xs font-bold">Client phone number<input type="tel" value={accountPhone} onChange={e => setAccountPhone(e.target.value)} placeholder="Search existing client by phone" className={`${input} mt-1.5`} /></label>
+            {accountPhone && !accountClient && <p className="mt-2 text-xs text-admin-muted">No matching client card found yet.</p>}
+            {outstanding && <div className="mt-4">
+              <div className="flex flex-wrap items-center justify-between gap-3"><b>{outstanding.client.name} · {outstanding.sales.length} unpaid bill(s)</b><button type="button" className="pos-secondary" onClick={() => setSelectedBills(outstanding.sales.map(s => s.id))}>Select all</button></div>
+              {outstanding.sales.length === 0 ? <p className="mt-4 text-sm text-admin-muted">This client has no unpaid POS bills.</p> : <div className="mt-3 max-h-72 space-y-2 overflow-y-auto">{outstanding.sales.map(s => <label key={s.id} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-admin-border p-3 text-sm"><span className="flex items-center gap-3"><input type="checkbox" checked={selectedBills.includes(s.id)} onChange={e => setSelectedBills(old => e.target.checked ? [...old,s.id] : old.filter(id => id !== s.id))} /><span><b>{s.receipt_number}</b><small className="block text-admin-muted">{new Date(s.sold_at).toLocaleDateString('en-LK')} · {s.items?.map(i => i.name).join(', ')}</small></span></span><b>{rs(Number(s.total)-Number(s.paid_amount))}</b></label>)}</div>}
+              {chosenBills.length > 0 && <div className="mt-4 rounded-xl border border-admin-brand-line bg-admin-brand-soft p-4"><div className="flex justify-between font-bold"><span>{chosenBills.length} selected · balance due</span><span>{rs(chosenDue)}</span></div><div className="mt-3 flex flex-wrap gap-2"><button type="button" className="pos-secondary" onClick={() => printStatement(outstanding, chosenBills, width, receiptBrand)}><Printer size={16} /> Print combined bill</button><label className="text-xs font-bold">Payment amount<input type="number" min="0.01" max={chosenDue} step="0.01" value={settleAmount} onChange={e => setSettleAmount(e.target.value)} className={`${input} mt-1 w-40`} /></label><label className="text-xs font-bold">Method<select value={settleMethod} onChange={e => setSettleMethod(e.target.value)} className={`${input} mt-1 w-36`}><option value="cash">Cash</option><option value="card">Card</option><option value="transfer">Transfer</option></select></label><button type="button" onClick={() => void settleSelected()} disabled={settling || !!day.session.closed_at || !Number(settleAmount) || Number(settleAmount) > chosenDue} className="pos-primary self-end disabled:opacity-40">{settling ? 'Recording…' : 'Record payment & print balance'}</button></div><p className="mt-2 text-xs text-admin-muted">Full payment marks all selected bills settled. Partial payment leaves the remaining bill balance for the next statement.</p></div>}
+            </div>}
+          </section>
           <POSHistory date={day.date} revision={`${day.sales.length}:${day.session?.closed_at || ''}`} />
           <section className="rounded-[26px] border border-admin-border bg-admin-surface p-5 shadow-sm">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -990,6 +1073,7 @@ export default function POS() {
                       "Customer",
                       "Payment",
                       "Total",
+                      "Due",
                       "Print",
                     ].map((h) => (
                       <th key={h} className="px-3 py-3">
@@ -1011,8 +1095,9 @@ export default function POS() {
                       <td className="px-3 font-bold">{s.receipt_number}</td>
                       <td className="px-3">{s.invoice_number || "—"}</td>
                       <td className="px-3">{s.customer_name}</td>
-                      <td className="px-3 uppercase">{s.payment_method}</td>
+                      <td className="px-3 uppercase">{s.payment_method === 'unpaid' ? Number(s.paid_amount) >= Number(s.total) ? 'Settled' : 'Not paid' : s.payment_method}</td>
                       <td className="px-3 font-bold">{rs(Number(s.total))}</td>
+                      <td className="px-3 font-bold">{rs(Math.max(0, Number(s.total) - Number(s.paid_amount ?? s.total)))}</td>
                       <td className="px-3">
                         <button
                           onClick={() => printReceipt(s, width, receiptBrand)}

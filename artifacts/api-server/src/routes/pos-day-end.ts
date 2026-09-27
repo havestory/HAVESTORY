@@ -104,7 +104,12 @@ router.post("/close", async (req, res) => {
     );
     const totals = totalsResult.rows[0];
     const openingFloat = Number(session.opening_float || 0);
-    const cashSales = Number(totals.cash_sales || 0);
+    const settlementTotals = await client.query(`SELECT
+      COALESCE(SUM(CASE WHEN payment_method='cash' THEN amount ELSE 0 END),0) AS cash,
+      COALESCE(SUM(CASE WHEN payment_method='card' THEN amount ELSE 0 END),0) AS card,
+      COALESCE(SUM(CASE WHEN payment_method='transfer' THEN amount ELSE 0 END),0) AS transfer
+      FROM pos_settlements WHERE session_id=$1`, [session.id]);
+    const cashSales = Number(totals.cash_sales || 0) + Number(settlementTotals.rows[0]?.cash || 0);
     const expectedCash = Math.round((openingFloat + cashSales) * 100) / 100;
     const difference = Math.round((countedCash - expectedCash) * 100) / 100;
 
@@ -164,8 +169,8 @@ router.post("/close", async (req, res) => {
         bills: Number(totals.bill_count || 0),
         totalSales: Number(totals.total_sales || 0),
         cashSales,
-        cardSales: Number(totals.card_sales || 0),
-        transferSales: Number(totals.transfer_sales || 0),
+        cardSales: Number(totals.card_sales || 0) + Number(settlementTotals.rows[0]?.card || 0),
+        transferSales: Number(totals.transfer_sales || 0) + Number(settlementTotals.rows[0]?.transfer || 0),
         openingFloat,
         expectedCash,
         countedCash,

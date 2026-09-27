@@ -6,6 +6,7 @@ import { pool } from "@workspace/db";
 import { getAdminAuth, hasPermission, requireAdmin, requireOwner } from "../lib/auth-cookie";
 import { ensureFinanceStorage } from "./finance-inventory";
 import { clientPhoneKeys, findClientIdByPhone } from "../lib/client-dedupe";
+import { allocatePosPayment } from "../lib/pos-settlement";
 
 const router = Router();
 router.use(requireAdmin);
@@ -102,6 +103,26 @@ async function initialize() {
     CREATE UNIQUE INDEX IF NOT EXISTS pos_sales_invoice_uidx ON pos_sales(invoice_id) WHERE invoice_id IS NOT NULL;
     ALTER TABLE pos_sales ADD COLUMN IF NOT EXISTS customer_phone TEXT;
     ALTER TABLE pos_sales ADD COLUMN IF NOT EXISTS client_id INTEGER REFERENCES clients(id) ON DELETE SET NULL;
+    ALTER TABLE pos_sales ADD COLUMN IF NOT EXISTS paid_amount NUMERIC(14,2);
+    ALTER TABLE pos_sales ADD COLUMN IF NOT EXISTS request_id TEXT UNIQUE;
+    UPDATE pos_sales SET paid_amount=total WHERE paid_amount IS NULL;
+    ALTER TABLE pos_sales ALTER COLUMN paid_amount SET DEFAULT 0;
+    ALTER TABLE pos_sales ALTER COLUMN paid_amount SET NOT NULL;
+    CREATE INDEX IF NOT EXISTS pos_sales_outstanding_idx ON pos_sales(client_id,sold_at,id) WHERE paid_amount < total;
+    CREATE TABLE IF NOT EXISTS pos_settlements (
+      id BIGSERIAL PRIMARY KEY,
+      receipt_number TEXT NOT NULL UNIQUE,
+      request_id TEXT UNIQUE,
+      client_id INTEGER NOT NULL REFERENCES clients(id) ON DELETE RESTRICT,
+      session_id INTEGER REFERENCES pos_sessions(id) ON DELETE RESTRICT,
+      amount NUMERIC(14,2) NOT NULL CHECK(amount > 0),
+      payment_method TEXT NOT NULL CHECK(payment_method IN ('cash','card','transfer')),
+      allocations JSONB NOT NULL,
+      created_by TEXT NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    );
+    ALTER TABLE pos_settlements ADD COLUMN IF NOT EXISTS session_id INTEGER REFERENCES pos_sessions(id) ON DELETE RESTRICT;
+    ALTER TABLE pos_settlements ADD COLUMN IF NOT EXISTS request_id TEXT UNIQUE;
     CREATE INDEX IF NOT EXISTS pos_sales_client_sold_idx ON pos_sales(client_id,sold_at DESC) WHERE client_id IS NOT NULL;
     CREATE INDEX IF NOT EXISTS pos_sales_session_idx ON pos_sales(session_id);
     CREATE INDEX IF NOT EXISTS pos_sales_sold_at_idx ON pos_sales(sold_at);
@@ -258,7 +279,7 @@ router.get("/day", async (req, res) => {
       [date],
     );
     const sales = await pool.query(
-      `SELECT id,receipt_number,invoice_number,customer_name,customer_phone,client_id,items,subtotal,total,amount_tendered,change_due,payment_method,sold_by,sold_at
+      `SELECT id,receipt_number,invoice_number,customer_name,customer_phone,client_id,items,subtotal,total,paid_amount,amount_tendered,change_due,payment_method,sold_by,sold_at
       FROM pos_sales WHERE session_id=$1 ORDER BY sold_at DESC`,
       [session.rows[0]?.id || -1],
     );
@@ -266,6 +287,7 @@ router.get("/day", async (req, res) => {
     const cashSales = sales.rows
       .filter((sale) => sale.payment_method === "cash")
       .reduce((sum, sale) => sum + Number(sale.total), 0);
+    const settlementCash = await pool.query("SELECT COALESCE(SUM(amount),0) AS total FROM pos_settlements WHERE session_id=$1 AND payment_method='cash'", [session.rows[0]?.id || -1]);
     const auth = getAdminAuth(req)!;
     const reopenRequest = session.rows[0]?.closed_at
       ? await pool.query(
@@ -284,8 +306,8 @@ router.get("/day", async (req, res) => {
       summary: {
         count: sales.rows.length,
         sales: total,
-        cashSales,
-        expectedCash: Number(session.rows[0]?.opening_float || 0) + cashSales,
+        cashSales: cashSales + Number(settlementCash.rows[0]?.total || 0),
+        expectedCash: Number(session.rows[0]?.opening_float || 0) + cashSales + Number(settlementCash.rows[0]?.total || 0),
       },
     });
   } catch (error) {
@@ -314,6 +336,15 @@ router.get("/month", async (req, res) => {
       const date = String(row.business_date).slice(0, 10);
       const current = daily.get(date) || { date, bills: 0, total: 0 };
       current.bills += 1; current.total += total; daily.set(date, current);
+    }
+    const settlements = await pool.query(`SELECT p.payment_method,COALESCE(SUM(p.amount),0) AS amount
+      FROM pos_settlements p JOIN pos_sessions s ON s.id=p.session_id
+      WHERE s.business_date >= to_date($1 || '-01','YYYY-MM-DD')
+      AND s.business_date < to_date($1 || '-01','YYYY-MM-DD') + INTERVAL '1 month'
+      GROUP BY p.payment_method`, [month]);
+    for (const row of settlements.rows) {
+      const method = row.payment_method as keyof typeof paymentTotals;
+      if (method in paymentTotals) paymentTotals[method] += Number(row.amount);
     }
     res.json({ month, sales: rows, daily: [...daily.values()], summary: { count: rows.length, total: rows.reduce((sum, row) => sum + Number(row.total || 0), 0), ...paymentTotals } });
   } catch (error) {
@@ -361,6 +392,12 @@ router.post("/sales", async (req, res) => {
         .status(409)
         .json({ error: "Start today's POS session before making a sale" });
     }
+    const requestId = clean(req.body?.requestId, 80);
+    if (requestId && !/^[0-9a-f-]{36}$/i.test(requestId)) throw new Error("Invalid sale request identifier");
+    if (requestId) {
+      const existing = await client.query("SELECT * FROM pos_sales WHERE request_id=$1", [requestId]);
+      if (existing.rows[0]) { await client.query("COMMIT"); return res.json(existing.rows[0]); }
+    }
 
     const invoiceId = Number(req.body?.invoiceId) || null;
     let items: any[] = [];
@@ -389,6 +426,9 @@ router.post("/sales", async (req, res) => {
     if (customerPhone && (clientPhoneKeys(customerPhone).length !== 1 || customerPhone.replace(/\D/g, "").length > 15))
       throw new Error("Enter one valid customer phone number or leave it blank");
     let linkedClientId = customerPhone ? await findClientIdByPhone(customerPhone, client) : null;
+    const onAccount = req.body?.onAccount === true;
+    if (onAccount && invoiceId) throw new Error("Invoice settlement cannot be issued on account");
+    if (onAccount && !linkedClientId) throw new Error("Select an existing client phone number before issuing an unpaid bill");
     if (linkedClientId && customerName === "Walk-in customer") {
       const linked = await client.query("SELECT name FROM clients WHERE id=$1 AND deleted_at IS NULL", [linkedClientId]);
       customerName = linked.rows[0]?.name || customerName;
@@ -452,9 +492,9 @@ router.post("/sales", async (req, res) => {
     total = discounted.total;
     if (total <= 0) throw new Error("Sale total after discount must be greater than zero");
     const tendered = money(req.body?.amountTendered);
-    if (tendered < total)
+    if (!onAccount && tendered < total)
       throw new Error("Customer payment is less than the amount due");
-    const change = Math.round((tendered - total) * 100) / 100;
+    const change = onAccount ? 0 : Math.round((tendered - total) * 100) / 100;
     const paymentMethod = ["cash", "card", "transfer"].includes(
       req.body?.paymentMethod,
     )
@@ -462,10 +502,11 @@ router.post("/sales", async (req, res) => {
       : "cash";
     const soldBy = await issuerFirstName(auth);
     const inserted = await client.query(
-      `INSERT INTO pos_sales(receipt_number,session_id,invoice_id,invoice_number,customer_name,customer_phone,client_id,items,subtotal,total,amount_tendered,change_due,payment_method,sold_by)
-      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
+      `INSERT INTO pos_sales(receipt_number,request_id,session_id,invoice_id,invoice_number,customer_name,customer_phone,client_id,items,subtotal,total,paid_amount,amount_tendered,change_due,payment_method,sold_by)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,
       [
         receiptNumber,
+        requestId || null,
         session.id,
         invoiceId,
         invoiceNumber,
@@ -475,13 +516,14 @@ router.post("/sales", async (req, res) => {
         JSON.stringify(items),
         subtotal,
         total,
-        tendered,
+        onAccount ? 0 : total,
+        onAccount ? 0 : tendered,
         change,
-        paymentMethod,
+        onAccount ? "unpaid" : paymentMethod,
         soldBy,
       ],
     );
-    await client.query(
+    if (!onAccount) await client.query(
       `INSERT INTO finance_transactions(type,category,description,amount,transaction_date,invoice_id,source,source_ref)
       VALUES('income','shop_sales',$1,$2,$3,$4,'pos_sale',$5)`,
       [
@@ -503,6 +545,65 @@ router.post("/sales", async (req, res) => {
   } finally {
     client.release();
   }
+});
+
+router.get("/outstanding", async (req, res) => {
+  try {
+    await ensurePos();
+    const id = Number(req.query.clientId);
+    if (!Number.isSafeInteger(id) || id <= 0) return res.status(400).json({ error: "Select an existing client" });
+    const client = await pool.query("SELECT id,name,phone FROM clients WHERE id=$1 AND deleted_at IS NULL", [id]);
+    if (!client.rows[0]) return res.status(404).json({ error: "Client not found" });
+    const sales = await pool.query(`SELECT id,receipt_number,items,total,paid_amount,sold_at FROM pos_sales
+      WHERE client_id=$1 AND paid_amount < total ORDER BY sold_at,id LIMIT 100`, [id]);
+    res.json({ client: client.rows[0], sales: sales.rows });
+  } catch (error) {
+    req.log.error(error);
+    res.status(500).json({ error: "Outstanding POS bills could not load" });
+  }
+});
+
+router.post("/settlements", async (req, res) => {
+  await ensurePos();
+  const id = Number(req.body?.clientId);
+  const ids = req.body?.saleIds;
+  const amount = Number(req.body?.amount);
+  const paymentMethod = req.body?.paymentMethod;
+  const requestId = clean(req.body?.requestId, 80);
+  if (!Number.isSafeInteger(id) || id <= 0 || !Array.isArray(ids) || !ids.length || ids.length > 100 ||
+      new Set(ids).size !== ids.length || ids.some((n: unknown) => !Number.isSafeInteger(n) || Number(n) <= 0) ||
+      !Number.isFinite(amount) || amount <= 0 || Math.abs(Math.round(amount * 100) - amount * 100) > 1e-6 ||
+      !["cash", "card", "transfer"].includes(paymentMethod) || !/^[0-9a-f-]{36}$/i.test(requestId)) {
+    return res.status(400).json({ error: "Choose valid bills, payment amount and method" });
+  }
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const session = await client.query("SELECT id FROM pos_sessions WHERE business_date=$1 AND closed_at IS NULL FOR UPDATE", [lkDate()]);
+    if (!session.rows[0]) throw new Error("Open today's POS session before recording payment");
+    const prior = await client.query("SELECT receipt_number FROM pos_settlements WHERE request_id=$1", [requestId]);
+    if (prior.rows[0]) throw new Error(`This payment was already recorded as ${prior.rows[0].receipt_number}. Refresh the client bills.`);
+    const customer = await client.query("SELECT id,name,phone FROM clients WHERE id=$1 AND deleted_at IS NULL FOR UPDATE", [id]);
+    if (!customer.rows[0]) throw new Error("Client not found");
+    const sales = await client.query(`SELECT id,receipt_number,total,paid_amount,sold_at FROM pos_sales
+      WHERE client_id=$1 AND id=ANY($2::int[]) ORDER BY sold_at,id FOR UPDATE`, [id, ids]);
+    if (sales.rows.length !== ids.length || sales.rows.some((s) => Number(s.paid_amount) >= Number(s.total)))
+      throw new Error("Bills changed; refresh outstanding bills before collecting payment");
+    const { allocations, remaining } = allocatePosPayment(sales.rows, amount);
+    for (const allocation of allocations)
+      await client.query("UPDATE pos_sales SET paid_amount=paid_amount+$1 WHERE id=$2", [allocation.applied, allocation.saleId]);
+    const receiptNumber = `POS-PAY-${lkDate().replace(/-/g, "")}-${randomUUID().replace(/-/g, "").slice(0, 6).toUpperCase()}`;
+    await client.query(`INSERT INTO pos_settlements(receipt_number,request_id,client_id,session_id,amount,payment_method,allocations,created_by)
+      VALUES($1,$2,$3,$4,$5,$6,$7::jsonb,$8)`, [receiptNumber, requestId, id, session.rows[0].id, amount, paymentMethod, JSON.stringify(allocations), await issuerFirstName(getAdminAuth(req))]);
+    await client.query(`INSERT INTO finance_transactions(type,category,description,amount,transaction_date,source,source_ref)
+      VALUES('income','shop_sales',$1,$2,$3,'pos_settlement',$4)`, [`Counter settlement · ${receiptNumber}`, amount, lkDate(), receiptNumber]);
+    await client.query("COMMIT");
+    res.status(201).json({ receiptNumber, client: customer.rows[0], amount, paymentMethod, allocations, remaining });
+  } catch (error: any) {
+    await client.query("ROLLBACK").catch(() => {});
+    req.log.error(error);
+    res.status(409).json({ error: error.message || "Payment could not be recorded" });
+  } finally { client.release(); }
 });
 
 router.post("/close-day", async (req, res) => {
