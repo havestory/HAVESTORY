@@ -113,6 +113,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('keydown', closeOnEscape);
   }, [waFaqOpen]);
 
+
   useEffect(() => {
     const refreshSettings = () => { void refetchSettings(); };
     const onAdminSave = () => refreshSettings();
@@ -246,7 +247,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               ? <img src={settings.logoUrl} alt={settings.businessName || 'HAVESTORY'} />
               : <span className="hsx-shell-monogram">HS</span>
             }
-            {settings?.showNameWithLogo !== false && <strong>{settings?.businessName || 'HAVESTORY'}</strong>}
+            {settings?.showNameWithLogo !== false && <span className="hsx-brand-copy"><strong className="hsx-brand-wordmark">{settings?.businessName || 'HAVESTORY'}</strong>{settings?.taglineEnabled !== false && settings?.tagline && <small className="hsx-brand-tagline">{settings.tagline}</small>}</span>}
           </Link>
           <nav className="hsx-shell-links">
             {navLinks.map(l => (
@@ -294,7 +295,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               onClick={e => e.stopPropagation()}
             >
               <div className={`flex items-center justify-between px-6 py-6 border-b ${isLightTheme ? 'border-[hsl(var(--border))]' : 'border-[#1E1A14]'}`}>
-                <span className="font-serif font-bold text-xl text-[hsl(var(--foreground))]">{settings?.businessName || 'HAVESTORY'}</span>
+                <span className="hsx-brand-copy"><strong className="hsx-brand-wordmark">{settings?.businessName || 'HAVESTORY'}</strong>{settings?.taglineEnabled !== false && settings?.tagline && <small className="hsx-brand-tagline">{settings.tagline}</small>}</span>
                 <button onClick={() => setMenuOpen(false)} className="text-[hsl(var(--muted-foreground))] hover:text-[#B28A50] transition-colors">
                   <X className="w-5 h-5" />
                 </button>
@@ -349,9 +350,9 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             {settings?.logoUrl && <img src={settings.logoUrl} alt={settings.businessName || 'HAVESTORY'} />}
             <div>
               <h2>{settings?.businessName || 'HAVESTORY'}</h2>
+              {settings?.tagline && <p className="hsx-footer-tagline">{settings.tagline}</p>}
             </div>
           </div>
-          {settings?.tagline && <p>{settings.tagline}</p>}
         </div>
         <div className="hsx-footer-grid">
           <div>
