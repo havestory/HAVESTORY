@@ -26,29 +26,52 @@ export class DuplicateClientPhoneError extends Error {
 }
 
 export async function ensureClientPhoneRegistry(client: any = pool): Promise<void> {
-  await client.query(`
-    CREATE TABLE IF NOT EXISTS client_phone_keys (
-      phone_key TEXT PRIMARY KEY,
-      client_id INTEGER NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
-      created_at TIMESTAMP NOT NULL DEFAULT NOW()
-    );
-    CREATE INDEX IF NOT EXISTS client_phone_keys_client_idx ON client_phone_keys(client_id);
-  `);
-  const { rows } = await client.query("SELECT id,phone FROM clients WHERE deleted_at IS NULL ORDER BY id");
-  for (const row of rows) {
-    for (const key of clientPhoneKeys(row.phone)) {
-      await client.query(
-        "INSERT INTO client_phone_keys(phone_key,client_id) VALUES($1,$2) ON CONFLICT(phone_key) DO NOTHING",
-        [key, row.id],
+  const own = client === pool;
+  const connection = own ? await pool.connect() : client;
+  try {
+    if (own) await connection.query("BEGIN");
+    // Serialize the legacy backfill with client writes; the marker commits atomically with the keys.
+    await connection.query("SELECT pg_advisory_xact_lock(196683, 1)");
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS client_phone_keys (
+        phone_key TEXT PRIMARY KEY,
+        client_id INTEGER NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
       );
+      CREATE INDEX IF NOT EXISTS client_phone_keys_client_idx ON client_phone_keys(client_id);
+      CREATE TABLE IF NOT EXISTS client_phone_registry_state (
+        id INTEGER PRIMARY KEY CHECK (id=1), initialized_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+    `);
+    const { rows: state } = await connection.query("SELECT id FROM client_phone_registry_state WHERE id=1");
+    if (!state.length) {
+      const { rows } = await connection.query("SELECT id,phone FROM clients WHERE deleted_at IS NULL ORDER BY id");
+      for (const row of rows) {
+        for (const key of clientPhoneKeys(row.phone)) {
+          await connection.query(
+            "INSERT INTO client_phone_keys(phone_key,client_id) VALUES($1,$2) ON CONFLICT(phone_key) DO NOTHING",
+            [key, row.id],
+          );
+        }
+      }
+      await connection.query("INSERT INTO client_phone_registry_state(id) VALUES(1)");
     }
+    if (own) await connection.query("COMMIT");
+  } catch (error) {
+    if (own) await connection.query("ROLLBACK").catch(() => {});
+    throw error;
+  } finally {
+    if (own) connection.release();
   }
 }
+
+let registryReady: Promise<void> | null = null;
 
 export async function findClientIdByPhone(value: unknown, client: any = pool): Promise<number | null> {
   const keys = clientPhoneKeys(value);
   if (!keys.length) return null;
-  await ensureClientPhoneRegistry(client);
+  if (client === pool) await (registryReady ||= ensureClientPhoneRegistry().catch(error => { registryReady = null; throw error; }));
+  else await ensureClientPhoneRegistry(client);
   const { rows } = await client.query(
     `SELECT k.client_id
        FROM client_phone_keys k
@@ -86,3 +109,4 @@ export async function replaceClientPhoneClaims(client: any, clientId: number, va
     }
   }
 }
+
