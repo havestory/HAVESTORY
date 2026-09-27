@@ -1425,10 +1425,9 @@ export default function WebsiteEditor() {
                   HERO SLIDESHOW IMAGES
                 </label>
                 <p className="text-[10px] text-admin-muted mb-3">
-                  Add up to 10 images. The homepage pins this story and
-                  transitions between each frame as visitors scroll; after the
-                  final frame, the page continues naturally into the store
-                  sections. Ideal size: <strong>800 × 1000 px</strong>{" "}
+                  Add at least two published images for the homepage carousel
+                  (up to 10). Images change automatically and visitors can select
+                  a slide using the dots. Ideal size: <strong>800 × 1000 px</strong>{" "}
                   (portrait, 4:5 ratio). Use frame, print, studio or gallery
                   photography for best results.
                 </p>
