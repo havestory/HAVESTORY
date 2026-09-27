@@ -212,7 +212,7 @@ router.get("/:id/activity", async (req, res) => {
           and(isNull(invoicesTable.clientId), sql`LOWER(BTRIM(${invoicesTable.clientName}))=LOWER(BTRIM(${client.name}))`),
         )))
         .orderBy(desc(invoicesTable.createdAt)),
-      canSeeCounterSales ? pool.query(`SELECT receipt_number,invoice_number,customer_name,customer_phone,total,payment_method,sold_at
+      canSeeCounterSales ? pool.query(`SELECT receipt_number,invoice_number,customer_name,customer_phone,total,paid_amount,payment_method,sold_at
         FROM pos_sales WHERE client_id=$1 ORDER BY sold_at DESC LIMIT 50`, [id])
         .then(result => result.rows)
         .catch((error: any) => { if (error?.code === "42P01" || error?.code === "42703") return []; throw error; }) : Promise.resolve([]),
