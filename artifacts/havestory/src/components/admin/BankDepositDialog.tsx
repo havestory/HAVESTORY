@@ -39,7 +39,7 @@ export function BankDepositDialog({
   );
   const [deposit, setDeposit] = useState(amount);
   const [reference, setReference] = useState(
-    remark || `P${date.slice(8, 10)}${date.slice(5, 7)}${date.slice(2, 4)}`,
+    remark || `${date.slice(2, 4)}${date.slice(5, 7)}${date.slice(8, 10)}`,
   );
   const [error, setError] = useState("");
   const bank = banks[account];
@@ -161,3 +161,4 @@ export function BankDepositDialog({
     </Dialog>
   );
 }
+
