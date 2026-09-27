@@ -169,7 +169,7 @@ async function initialize() {
     ALTER TABLE pos_items ADD COLUMN IF NOT EXISTS custom_config JSONB NOT NULL DEFAULT '{}'::jsonb;
   `);
 }
-const ensurePos = () =>
+export const ensurePos = () =>
   (ready ||= initialize().catch((error) => {
     ready = null;
     throw error;
