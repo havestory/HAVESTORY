@@ -36,7 +36,7 @@ router.get("/range", async (req, res) => {
 
     const { rows } = await pool.query(
       `SELECT ps.id, ps.receipt_number, ps.invoice_number, ps.customer_name,
-              ps.items, ps.subtotal, ps.total, ps.amount_tendered, ps.change_due,
+              ps.items, ps.subtotal, ps.total, ps.paid_amount, ps.amount_tendered, ps.change_due,
               ps.payment_method, ps.sold_by, ps.sold_at,
               to_char(s.business_date, 'YYYY-MM-DD') AS business_date
        FROM pos_sales ps
