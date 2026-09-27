@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { pool } from "@workspace/db";
+import { bankRemark, depositDue } from "../lib/pos-deposit";
 import { getAdminAuth, hasPermission, requireAdmin } from "../lib/auth-cookie";
 
 const router = Router();
@@ -20,11 +21,6 @@ const lkDate = () =>
     month: "2-digit",
     day: "2-digit",
   }).format(new Date());
-
-const depositRemarkFor = (date: string) => {
-  const [year, month, day] = date.split("-");
-  return `${year.slice(-2)}${month}${day}`;
-};
 
 const clean = (value: unknown, max = 300) =>
   String(value ?? "").trim().slice(0, max);
@@ -74,7 +70,7 @@ router.post("/close", async (req, res) => {
 
     await ensureDayEndColumns();
     const date = lkDate();
-    const depositRemark = depositRemarkFor(date);
+    const depositRemark = bankRemark(date);
     const countedCash = Number(req.body?.closingCash);
     const nextDayFloat = Number(req.body?.nextDayFloat);
     const bankSlipReference = clean(req.body?.bankSlipReference, 160);
@@ -93,7 +89,7 @@ router.post("/close", async (req, res) => {
       return res.status(400).json({ error: "Deposit proof URL must start with http:// or https://" });
     }
 
-    const depositAmount = Math.round((countedCash - nextDayFloat) * 100) / 100;
+    const depositAmount = depositDue(countedCash, nextDayFloat);
     if (!depositTomorrow && depositAmount > 0 && !bankSlipReference) return res.status(400).json({ error: "Enter a bank transaction reference or choose Deposit Later" });
     await client.query("BEGIN");
     const sessionResult = await client.query(
