@@ -40,6 +40,7 @@ type ClientSummaryPage = {
   totalPages: number;
   stats: { total: number; withBusiness: number; withEmail: number; withPhone: number };
 };
+type PosSale = { receipt_number: string; invoice_number?: string | null; customer_name: string; customer_phone?: string | null; total: string | number; payment_method: string; sold_at: string };
 
 type CrmProject = {
   id: number;
@@ -394,7 +395,7 @@ export default function AdminClients() {
   const clients = clientPage?.items || [];
   useEffect(() => { setPage(1); }, [deferredSearch]);
 
-  const { data: activityData, isFetching: activityLoading } = useQuery<{ projects: CrmProject[]; invoices: InvoiceLite[] }>({
+  const { data: activityData, isFetching: activityLoading } = useQuery<{ projects: CrmProject[]; invoices: InvoiceLite[]; posSales: PosSale[] }>({
     queryKey: ["/api/clients", viewingClient?.id, "activity"],
     queryFn: async () => {
       const response = await fetch(`/api/clients/${viewingClient!.id}/activity`, { credentials: "include" });
@@ -964,6 +965,13 @@ export default function AdminClients() {
                       })}
                     </div>
                   )}
+                </div>
+
+                {/* Only sales with an explicit client link appear here. */}
+                <div>
+                  <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-admin-muted"><Receipt size={13} /> Counter sales ({activityData?.posSales?.length || 0})</div>
+                  {!activityData?.posSales?.length ? <div className="rounded-xl bg-admin-surface py-5 text-center text-xs text-admin-muted">No linked counter sales</div> :
+                    <div className="space-y-1.5">{activityData.posSales.map(sale => <div key={sale.receipt_number} className="flex items-center justify-between gap-3 rounded-xl border border-admin-border bg-admin-surface px-3 py-2.5 text-xs"><div className="min-w-0"><div className="font-mono font-bold text-admin-ink">{sale.receipt_number}</div><div className="text-admin-muted">{new Date(sale.sold_at).toLocaleDateString('en-LK')} · {sale.payment_method}{sale.invoice_number ? ` · ${sale.invoice_number}` : ''}</div></div><strong className="shrink-0 text-admin-ink">{rs(num(sale.total))}</strong></div>)}</div>}
                 </div>
 
                 {/* Invoices */}
