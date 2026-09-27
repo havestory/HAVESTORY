@@ -55,3 +55,79 @@ html[data-hs-admin-theme] :is([role='dialog'],[role='alertdialog'],[role='menu']
   [data-admin-panel] .rounded-none,
   [data-admin-panel] .rounded-sm { border-radius: 0 !important; }
 }
+
+/* Reference wordmark: restrained Roman capitals with a clear studio line. */
+[data-public-site] .hsx-brand-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 3px;
+}
+[data-public-site] .hsx-shell-brand .hsx-brand-wordmark,
+[data-public-site] .atelier-drawer .hsx-brand-wordmark {
+  display: block;
+  font-family: 'Cinzel', Georgia, serif !important;
+  font-size: clamp(13px, 1.25vw, 19px) !important;
+  font-weight: 600 !important;
+  letter-spacing: .1em !important;
+  line-height: 1.15 !important;
+  color: #2c211b !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+[data-public-site] .hsx-brand-tagline {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  color: #72593c;
+  font-family: var(--app-font-sans), system-ui, sans-serif;
+  font-size: clamp(6px, .55vw, 8px);
+  font-weight: 700;
+  letter-spacing: .12em;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+[data-public-site] .hsx-footer-signature > div {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 7px;
+}
+[data-public-site] .hsx-footer-top h2 {
+  font-family: 'Cinzel', Georgia, serif !important;
+  font-weight: 600 !important;
+  letter-spacing: .11em !important;
+  line-height: 1.15 !important;
+}
+[data-public-site] .hsx-footer-tagline {
+  margin: 0;
+  color: #e1d8cb;
+  font-family: var(--app-font-sans), system-ui, sans-serif;
+  font-size: clamp(9px, 1vw, 12px);
+  font-weight: 700;
+  letter-spacing: .2em;
+  line-height: 1.45;
+  text-align: center;
+  text-transform: uppercase;
+}
+[data-admin-panel] .admin-sidebar-wordmark {
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: clamp(17px, 1.3vw, 22px);
+  font-weight: 600;
+  letter-spacing: .08em;
+  white-space: nowrap;
+}
+[data-admin-panel] .admin-sidebar-subtitle {
+  font-size: 8px;
+  letter-spacing: .08em;
+  line-height: 1.3;
+}
+@media (max-width: 780px) {
+  [data-public-site] .hsx-shell-brand .hsx-brand-wordmark { font-size: 12px !important; letter-spacing: .07em !important; }
+  [data-public-site] .hsx-brand-tagline { font-size: 6px; letter-spacing: .045em; }
+  [data-public-site] .hsx-footer-top h2 { font-size: clamp(25px, 7.2vw, 42px) !important; letter-spacing: .07em !important; overflow-wrap: normal !important; }
+  [data-public-site] .hsx-footer-tagline { font-size: 9px; letter-spacing: .1em; }
+}
