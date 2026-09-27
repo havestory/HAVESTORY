@@ -40,7 +40,7 @@ type ClientSummaryPage = {
   totalPages: number;
   stats: { total: number; withBusiness: number; withEmail: number; withPhone: number };
 };
-type PosSale = { receipt_number: string; invoice_number?: string | null; customer_name: string; customer_phone?: string | null; total: string | number; paid_amount?: string | number; payment_method: string; sold_at: string };
+type PosSale = { id: number; items?: Array<{ name: string; qty: number; price: number }>; voided_at?: string | null; void_reason?: string | null; edited_at?: string | null; receipt_number: string; invoice_number?: string | null; customer_name: string; customer_phone?: string | null; total: string | number; paid_amount?: string | number; payment_method: string; sold_at: string };
 
 type CrmProject = {
   id: number;
@@ -967,11 +967,38 @@ export default function AdminClients() {
                   )}
                 </div>
 
-                {/* Only sales with an explicit client link appear here. */}
+                {/* Linked POS bills retain their payment and edit history. */}
                 <div>
-                  <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-admin-muted"><Receipt size={13} /> Counter sales ({activityData?.posSales?.length || 0})</div>
-                  {!activityData?.posSales?.length ? <div className="rounded-xl bg-admin-surface py-5 text-center text-xs text-admin-muted">No linked counter sales</div> :
-                    <div className="space-y-1.5">{activityData.posSales.map(sale => { const due = Math.max(0, num(sale.total) - num(sale.paid_amount ?? sale.total)); return <div key={sale.receipt_number} className="flex items-center justify-between gap-3 rounded-xl border border-admin-border bg-admin-surface px-3 py-2.5 text-xs"><div className="min-w-0"><div className="font-mono font-bold text-admin-ink">{sale.receipt_number}</div><div className="text-admin-muted">{new Date(sale.sold_at).toLocaleDateString('en-LK')} · {due > 0 ? 'Not paid' : sale.payment_method === 'unpaid' ? 'Settled' : sale.payment_method}{sale.invoice_number ? ` · ${sale.invoice_number}` : ''}</div></div><div className="shrink-0 text-right"><strong className="text-admin-ink">{rs(num(sale.total))}</strong>{due > 0 && <div className="font-bold text-admin-warning">Due {rs(due)}</div>}</div></div>; })}</div>}
+                  <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-admin-muted"><Receipt size={13} /> POS Bills ({activityData?.posSales?.length || 0})</div>
+                  {activityData && <div className="mb-3 grid gap-2 sm:grid-cols-2"><div className="rounded-xl bg-admin-surface p-3 text-xs">Invoice total <b className="block text-base">{rs(activityData.invoices.reduce((n,i) => n + num(i.amount), 0))}</b></div><div className="rounded-xl bg-admin-surface p-3 text-xs">Invoice paid <b className="block text-base">{rs(activityData.invoices.reduce((n,i) => n + getInvoicePaidAmount(i as any), 0))}</b></div></div>}
+                  {!!activityData?.posSales?.length && <div className="mb-3 grid gap-2 sm:grid-cols-3">
+                    <div className="rounded-xl bg-admin-surface p-3 text-xs">POS sales <b className="block text-base">{activityData.posSales.filter(s => !s.voided_at).length}</b></div>
+                    <div className="rounded-xl bg-admin-surface p-3 text-xs">POS total <b className="block text-base">{rs(activityData.posSales.filter(s => !s.voided_at).reduce((n,s) => n + num(s.total), 0))}</b></div>
+                    <div className="rounded-xl bg-admin-surface p-3 text-xs">POS paid <b className="block text-base">{rs(activityData.posSales.filter(s => !s.voided_at).reduce((n,s) => n + num(s.paid_amount), 0))}</b></div>
+                  </div>}
+                  {!activityData?.posSales?.length ? <div className="rounded-xl bg-admin-surface py-5 text-center text-xs text-admin-muted">No linked POS bills</div> :
+                    <div className="space-y-2">{activityData.posSales.map(sale => { const due = sale.voided_at ? 0 : Math.max(0, num(sale.total) - num(sale.paid_amount ?? sale.total)); const status = sale.voided_at ? 'Void' : due === 0 ? 'Paid' : num(sale.paid_amount) > 0 ? 'Partial' : 'Unpaid'; return <div key={sale.receipt_number} className="rounded-xl border border-admin-border bg-admin-surface p-3 text-xs">
+                      <div className="flex flex-wrap justify-between gap-3"><div><b className="font-mono text-admin-ink">{sale.receipt_number}</b><span className="ml-2 rounded-full bg-admin-subtle px-2 py-1 font-bold">{status}</span>{sale.edited_at && <span className="ml-2">Edited</span>}<div className="mt-2 text-admin-muted">{new Date(sale.sold_at).toLocaleString('en-LK')} · {sale.payment_method}{sale.invoice_number ? ` · ${sale.invoice_number}` : ''}</div></div><div className="text-right"><b>Total {rs(num(sale.total))}</b><div>Paid {rs(num(sale.paid_amount))}</div><strong>Due {rs(due)}</strong></div></div>
+                      <div className="mt-2 text-admin-muted">{sale.items?.map(i => `${i.name} × ${i.qty} · ${rs(num(i.price) * num(i.qty))}`).join(' / ') || 'No item breakdown'}</div>
+                      {sale.void_reason && <p className="mt-2 font-semibold text-admin-warning">Void reason: {sale.void_reason}</p>}
+                      {isOwner && <div className="mt-3 flex flex-wrap gap-2"><button className="rounded-lg border border-admin-border px-3 py-1.5" onClick={() => {
+                        const win = window.open('', '_blank', 'width=480,height=720'); if (!win) return;
+                        const esc = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch] || ch));
+                        win.document.write(`<html><head><title>${esc(sale.receipt_number)}</title><style>body{font:14px Arial;padding:18px;max-width:320px}h1{font-size:18px}.row{display:flex;justify-content:space-between;border-bottom:1px dashed #aaa;padding:8px 0}</style></head><body><h1>HAVESTORY · ${esc(status)}</h1><p>${esc(sale.receipt_number)}<br>${esc(new Date(sale.sold_at).toLocaleString('en-LK'))}</p><p>${esc(sale.customer_name)} · ${esc(sale.customer_phone)}</p>${(sale.items || []).map(i => `<div class="row"><span>${esc(i.name)} × ${esc(i.qty)}</span><b>${esc(rs(num(i.price) * num(i.qty)))}</b></div>`).join('')}<div class="row">Total <b>${esc(rs(num(sale.total)))}</b></div><div class="row">Paid <b>${esc(rs(num(sale.paid_amount)))}</b></div><div class="row">BALANCE DUE <b>${esc(rs(due))}</b></div></body></html>`);win.document.close();win.print();
+                      }}>Print</button><button className="rounded-lg border border-admin-border px-3 py-1.5" disabled={!!sale.voided_at} onClick={async () => {
+                        const customerName = window.prompt('Customer name', sale.customer_name); if (customerName == null) return;
+                        const customerPhone = window.prompt('Customer phone', sale.customer_phone || ''); if (customerPhone == null) return;
+                        const paymentMethod = window.prompt('Payment method: cash, card, transfer or unpaid', sale.payment_method); if (!paymentMethod) return;
+                        const response = await fetch(`/api/pos/sales/${sale.id}`, { method:'PATCH',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({customerName,customerPhone,paymentMethod}) });
+                        if (!response.ok) { window.alert((await response.json()).error || 'Edit failed'); return; }
+                        await queryClient.invalidateQueries({queryKey:['/api/clients',c.id,'activity']});
+                      }}>Edit</button><button className="rounded-lg border border-admin-border px-3 py-1.5" disabled={!!sale.voided_at || !!sale.invoice_number || num(sale.paid_amount) > 0} onClick={async () => {
+                        const reason = window.prompt('Reason for voiding this unpaid bill (minimum 5 characters)'); if (!reason) return;
+                        const response = await fetch(`/api/pos/sales/${sale.id}/void`,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({reason})});
+                        if (!response.ok) { window.alert((await response.json()).error || 'Void failed'); return; }
+                        await queryClient.invalidateQueries({queryKey:['/api/clients',c.id,'activity']});
+                      }}>Void</button></div>}
+                    </div>; })}</div>}
                 </div>
 
                 {/* Invoices */}
