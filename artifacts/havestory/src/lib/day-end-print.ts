@@ -26,6 +26,7 @@ export function writeDayEndReceipt(
     <div class="row"><span>Expected cash</span><b>${esc(money(s.expectedCash))}</b></div>
     <div class="row"><span>Counted cash</span><b>${esc(money(s.countedCash))}</b></div>
     <div class="row"><span>Difference</span><b>${esc(money(s.difference))}</b></div>
+    <div class="row"><span>Keep for next day</span><b>${esc(money(s.nextDayFloat ?? session.next_day_float))}</b></div>
     <div class="box"><div class="bold">BANK DEPOSIT</div><div class="row"><span>Deposit amount</span><b>${esc(money(result.depositAmount ?? session.deposit_amount ?? 0))}</b></div><div class="c remark">${esc(result.depositRemark || session.deposit_remark || "")}</div></div>
     ${bankPrintHTML(defaultPOSBank(settings))}
     ${session.bank_slip_reference ? `<div class="box small"><b>Transaction / slip</b><br>${esc(session.bank_slip_reference)}</div>` : ""}
@@ -39,3 +40,4 @@ export function writeDayEndReceipt(
     if (!win.closed) win.print();
   }, 300);
 }
+

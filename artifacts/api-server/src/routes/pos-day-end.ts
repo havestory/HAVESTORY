@@ -23,7 +23,7 @@ const lkDate = () =>
 
 const depositRemarkFor = (date: string) => {
   const [year, month, day] = date.split("-");
-  return `P${day}${month}${year.slice(-2)}`;
+  return `${year.slice(-2)}${month}${day}`;
 };
 
 const clean = (value: unknown, max = 300) =>
@@ -45,6 +45,22 @@ async function ensureDayEndColumns() {
     ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS closing_remark TEXT;
     ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS closing_expected_cash NUMERIC(14,2);
     ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS closing_difference NUMERIC(14,2);
+    ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS next_day_float NUMERIC(14,2);
+    CREATE TABLE IF NOT EXISTS pos_bank_deposits (
+      id BIGSERIAL PRIMARY KEY,
+      session_id INTEGER NOT NULL UNIQUE REFERENCES pos_sessions(id) ON DELETE RESTRICT,
+      internal_reference TEXT NOT NULL UNIQUE,
+      business_date DATE NOT NULL,
+      bank_remark TEXT NOT NULL,
+      amount NUMERIC(14,2) NOT NULL CHECK(amount > 0),
+      status TEXT NOT NULL CHECK(status IN ('pending','deposited')),
+      bank_transaction TEXT,
+      proof_url TEXT,
+      confirmed_at TIMESTAMP,
+      confirmed_by TEXT,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS pos_bank_deposits_pending_idx ON pos_bank_deposits(business_date DESC) WHERE status='pending';
   `);
 }
 
@@ -60,7 +76,7 @@ router.post("/close", async (req, res) => {
     const date = lkDate();
     const depositRemark = depositRemarkFor(date);
     const countedCash = Number(req.body?.closingCash);
-    const depositAmount = Number(req.body?.depositAmount);
+    const nextDayFloat = Number(req.body?.nextDayFloat);
     const bankSlipReference = clean(req.body?.bankSlipReference, 160);
     const depositProofUrl = clean(req.body?.depositProofUrl, 500);
     const depositTomorrow = Boolean(req.body?.depositTomorrow);
@@ -68,16 +84,17 @@ router.post("/close", async (req, res) => {
     if (req.body?.closingCash === "" || req.body?.closingCash == null) {
       return res.status(400).json({ error: "Counted cash is required" });
     }
-    if (req.body?.depositAmount === "" || req.body?.depositAmount == null) {
-      return res.status(400).json({ error: "Bank deposit amount is required" });
-    }
-    if (![countedCash, depositAmount].every(value => Number.isFinite(value) && value >= 0 && value <= 999999999999.99)) {
-      return res.status(400).json({ error: "Cash and deposit amounts must be valid non-negative amounts." });
+    if (req.body?.nextDayFloat === "" || req.body?.nextDayFloat == null) return res.status(400).json({ error: "Next-day float is required" });
+    if (![countedCash, nextDayFloat].every(value => Number.isFinite(value) && value >= 0 && value <= 999999999999.99) || nextDayFloat > countedCash ||
+        [countedCash,nextDayFloat].some(value => Math.abs(value * 100 - Math.round(value * 100)) > 1e-6)) {
+      return res.status(400).json({ error: "Counted cash and next-day float must be valid amounts; float cannot exceed cash." });
     }
     if (depositProofUrl && !/^https?:\/\//i.test(depositProofUrl)) {
       return res.status(400).json({ error: "Deposit proof URL must start with http:// or https://" });
     }
 
+    const depositAmount = Math.round((countedCash - nextDayFloat) * 100) / 100;
+    if (!depositTomorrow && depositAmount > 0 && !bankSlipReference) return res.status(400).json({ error: "Enter a bank transaction reference or choose Deposit Later" });
     await client.query("BEGIN");
     const sessionResult = await client.query(
       `SELECT * FROM pos_sessions
@@ -99,7 +116,7 @@ router.post("/close", async (req, res) => {
          COALESCE(SUM(CASE WHEN payment_method='card' THEN total ELSE 0 END),0)::numeric AS card_sales,
          COALESCE(SUM(CASE WHEN payment_method='transfer' THEN total ELSE 0 END),0)::numeric AS transfer_sales
        FROM pos_sales
-       WHERE session_id=$1`,
+       WHERE session_id=$1 AND voided_at IS NULL`,
       [session.id],
     );
     const totals = totalsResult.rows[0];
@@ -135,6 +152,7 @@ router.post("/close", async (req, res) => {
            closing_remark=$7,
            closing_expected_cash=$8,
            closing_difference=$9,
+           next_day_float=$12,
            closed_at=NOW(),
            closed_by=$10
        WHERE id=$11 AND closed_at IS NULL
@@ -151,6 +169,7 @@ router.post("/close", async (req, res) => {
         difference,
         auth.username,
         session.id,
+        nextDayFloat,
       ],
     );
 
@@ -159,6 +178,15 @@ router.post("/close", async (req, res) => {
       return res.status(409).json({ error: "POS day was already closed" });
     }
 
+    if (depositAmount > 0) await client.query(`INSERT INTO pos_bank_deposits
+      (session_id,internal_reference,business_date,bank_remark,amount,status,bank_transaction,proof_url,confirmed_at,confirmed_by)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      ON CONFLICT(session_id) DO UPDATE SET amount=EXCLUDED.amount,status=EXCLUDED.status,
+      bank_transaction=EXCLUDED.bank_transaction,proof_url=EXCLUDED.proof_url,
+      confirmed_at=EXCLUDED.confirmed_at,confirmed_by=EXCLUDED.confirmed_by`,
+      [session.id, `POS-DEP-${date.replace(/-/g, "")}-${session.id}`, date, depositRemark, depositAmount,
+       depositTomorrow ? 'pending' : 'deposited', bankSlipReference || null, depositProofUrl || null,
+       depositTomorrow ? null : new Date(), depositTomorrow ? null : auth.username]);
     await client.query("COMMIT");
     res.json({
       date,
@@ -174,6 +202,8 @@ router.post("/close", async (req, res) => {
         openingFloat,
         expectedCash,
         countedCash,
+        nextDayFloat,
+        depositAmount,
         difference,
       },
       remark,
@@ -185,6 +215,36 @@ router.post("/close", async (req, res) => {
   } finally {
     client.release();
   }
+});
+
+
+router.get("/deposits", async (req, res) => {
+  try {
+    if (getAdminAuth(req)?.role !== "owner") return res.status(403).json({ error: "Owner access required" });
+    await ensureDayEndColumns();
+    const { rows } = await pool.query(`SELECT id,internal_reference,to_char(business_date,'YYYY-MM-DD') AS business_date,
+      bank_remark,amount,status,bank_transaction,proof_url,confirmed_at,confirmed_by
+      FROM pos_bank_deposits ORDER BY (status='pending') DESC,business_date DESC,id DESC LIMIT 100`);
+    res.json(rows);
+  } catch (error) { req.log.error(error); res.status(500).json({ error: "Could not load deposits" }); }
+});
+
+router.post("/deposits/:id/confirm", async (req, res) => {
+  if (getAdminAuth(req)?.role !== "owner") return res.status(403).json({ error: "Owner access required" });
+  const id = Number(req.params.id);
+  const bankTransaction = clean(req.body?.bankTransaction, 160);
+  const proofUrl = clean(req.body?.proofUrl, 500);
+  if (!Number.isSafeInteger(id) || id <= 0 || !bankTransaction || (proofUrl && !/^https?:\/\//i.test(proofUrl)))
+    return res.status(400).json({ error: "Enter a valid bank transaction number and optional proof URL" });
+  try {
+    await ensureDayEndColumns();
+    const { rows } = await pool.query(`UPDATE pos_bank_deposits
+      SET status='deposited',bank_transaction=$2,proof_url=$3,confirmed_at=NOW(),confirmed_by=$4
+      WHERE id=$1 AND status='pending' RETURNING *`, [id,bankTransaction,proofUrl || null,getAdminAuth(req)!.username]);
+    if (!rows[0]) return res.status(409).json({ error: "Deposit already confirmed or not found" });
+    // Moving cash to a bank is not income; no finance income row is created here.
+    res.json(rows[0]);
+  } catch (error) { req.log.error(error); res.status(500).json({ error: "Could not confirm deposit" }); }
 });
 
 export default router;

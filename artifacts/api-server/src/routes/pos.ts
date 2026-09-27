@@ -71,6 +71,23 @@ async function initialize() {
     ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS closed_by TEXT;
     ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS reopened_at TIMESTAMP;
     ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS reopened_by TEXT;
+    ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS deposit_tomorrow BOOLEAN NOT NULL DEFAULT FALSE;
+    ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS deposit_amount NUMERIC(14,2);
+    ALTER TABLE pos_sessions ADD COLUMN IF NOT EXISTS next_day_float NUMERIC(14,2);
+    CREATE TABLE IF NOT EXISTS pos_bank_deposits (
+      id BIGSERIAL PRIMARY KEY,
+      session_id INTEGER NOT NULL UNIQUE REFERENCES pos_sessions(id) ON DELETE RESTRICT,
+      internal_reference TEXT NOT NULL UNIQUE,
+      business_date DATE NOT NULL,
+      bank_remark TEXT NOT NULL,
+      amount NUMERIC(14,2) NOT NULL CHECK(amount > 0),
+      status TEXT NOT NULL CHECK(status IN ('pending','deposited')),
+      bank_transaction TEXT,
+      proof_url TEXT,
+      confirmed_at TIMESTAMP,
+      confirmed_by TEXT,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    );
     CREATE TABLE IF NOT EXISTS pos_reopen_requests (
       id BIGSERIAL PRIMARY KEY,
       session_id INTEGER NOT NULL REFERENCES pos_sessions(id) ON DELETE CASCADE,
@@ -105,10 +122,25 @@ async function initialize() {
     ALTER TABLE pos_sales ADD COLUMN IF NOT EXISTS client_id INTEGER REFERENCES clients(id) ON DELETE SET NULL;
     ALTER TABLE pos_sales ADD COLUMN IF NOT EXISTS paid_amount NUMERIC(14,2);
     ALTER TABLE pos_sales ADD COLUMN IF NOT EXISTS request_id TEXT UNIQUE;
+    ALTER TABLE pos_sales ADD COLUMN IF NOT EXISTS voided_at TIMESTAMP;
+    ALTER TABLE pos_sales ADD COLUMN IF NOT EXISTS voided_by TEXT;
+    ALTER TABLE pos_sales ADD COLUMN IF NOT EXISTS void_reason TEXT;
+    ALTER TABLE pos_sales ADD COLUMN IF NOT EXISTS edited_at TIMESTAMP;
+    ALTER TABLE pos_sales ADD COLUMN IF NOT EXISTS edited_by TEXT;
     UPDATE pos_sales SET paid_amount=total WHERE paid_amount IS NULL;
     ALTER TABLE pos_sales ALTER COLUMN paid_amount SET DEFAULT 0;
     ALTER TABLE pos_sales ALTER COLUMN paid_amount SET NOT NULL;
-    CREATE INDEX IF NOT EXISTS pos_sales_outstanding_idx ON pos_sales(client_id,sold_at,id) WHERE paid_amount < total;
+    CREATE INDEX IF NOT EXISTS pos_sales_outstanding_idx ON pos_sales(client_id,sold_at,id) WHERE paid_amount < total AND voided_at IS NULL;
+    CREATE TABLE IF NOT EXISTS pos_sale_audit (
+      id BIGSERIAL PRIMARY KEY,
+      sale_id INTEGER NOT NULL REFERENCES pos_sales(id) ON DELETE RESTRICT,
+      action TEXT NOT NULL CHECK(action IN ('edit','void')),
+      before_value JSONB NOT NULL,
+      after_value JSONB NOT NULL,
+      actor TEXT NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS pos_sale_audit_sale_idx ON pos_sale_audit(sale_id,created_at DESC);
     CREATE TABLE IF NOT EXISTS pos_settlements (
       id BIGSERIAL PRIMARY KEY,
       receipt_number TEXT NOT NULL UNIQUE,
@@ -279,12 +311,13 @@ router.get("/day", async (req, res) => {
       [date],
     );
     const sales = await pool.query(
-      `SELECT id,receipt_number,invoice_number,customer_name,customer_phone,client_id,items,subtotal,total,paid_amount,amount_tendered,change_due,payment_method,sold_by,sold_at
+      `SELECT id,receipt_number,invoice_number,customer_name,customer_phone,client_id,items,subtotal,total,paid_amount,amount_tendered,change_due,payment_method,sold_by,sold_at,voided_at,voided_by,void_reason,edited_at,edited_by
       FROM pos_sales WHERE session_id=$1 ORDER BY sold_at DESC`,
       [session.rows[0]?.id || -1],
     );
-    const total = sales.rows.reduce((sum, sale) => sum + Number(sale.total), 0);
-    const cashSales = sales.rows
+    const activeSales = sales.rows.filter(sale => !sale.voided_at);
+    const total = activeSales.reduce((sum, sale) => sum + Number(sale.total), 0);
+    const cashSales = activeSales
       .filter((sale) => sale.payment_method === "cash")
       .reduce((sum, sale) => sum + Number(sale.total), 0);
     const settlementCash = await pool.query("SELECT COALESCE(SUM(amount),0) AS total FROM pos_settlements WHERE session_id=$1 AND payment_method='cash'", [session.rows[0]?.id || -1]);
@@ -304,7 +337,7 @@ router.get("/day", async (req, res) => {
       reopenRequest: reopenRequest.rows[0] || null,
       sales: sales.rows,
       summary: {
-        count: sales.rows.length,
+        count: activeSales.length,
         sales: total,
         cashSales: cashSales + Number(settlementCash.rows[0]?.total || 0),
         expectedCash: Number(session.rows[0]?.opening_float || 0) + cashSales + Number(settlementCash.rows[0]?.total || 0),
@@ -324,7 +357,7 @@ router.get("/month", async (req, res) => {
       : lkDate().slice(0, 7);
     const { rows } = await pool.query(`SELECT ps.receipt_number,ps.invoice_number,ps.customer_name,ps.total,ps.amount_tendered,ps.change_due,ps.payment_method,ps.sold_by,ps.sold_at,to_char(s.business_date,'YYYY-MM-DD') AS business_date
       FROM pos_sales ps JOIN pos_sessions s ON s.id=ps.session_id
-      WHERE s.business_date >= to_date($1 || '-01','YYYY-MM-DD')
+      WHERE ps.voided_at IS NULL AND s.business_date >= to_date($1 || '-01','YYYY-MM-DD')
         AND s.business_date < to_date($1 || '-01','YYYY-MM-DD') + INTERVAL '1 month'
       ORDER BY ps.sold_at`, [month]);
     const paymentTotals = { cash: 0, card: 0, transfer: 0 };
@@ -359,7 +392,9 @@ router.post("/start-day", async (req, res) => {
     const auth = getAdminAuth(req)!;
     if (!hasPermission(auth, "pos_day_start"))
       return res.status(403).json({ error: "POS day-start permission required" });
-    const opening = money(req.body?.openingFloat);
+    const opening = Number(req.body?.openingFloat);
+    if (req.body?.openingFloat === '' || !Number.isFinite(opening) || opening < 0 || opening > 999999999999.99)
+      return res.status(400).json({ error: "Enter a valid opening float" });
     const { rows } = await pool.query(
       `INSERT INTO pos_sessions(business_date,opening_float,opened_by) VALUES($1,$2,$3)
       ON CONFLICT(business_date) DO UPDATE SET opening_float=CASE WHEN pos_sessions.closed_at IS NULL THEN EXCLUDED.opening_float ELSE pos_sessions.opening_float END
@@ -421,7 +456,7 @@ router.post("/sales", async (req, res) => {
           qty: Number(item.qty), price: quote.price, unitLabel: quote.unitLabel });
       }
     }
-    let customerName = clean(req.body?.customerName, 160) || "Walk-in customer";
+    let customerName = clean(req.body?.customerName, 160) || "Counter Sale";
     const customerPhone = clean(req.body?.customerPhone, 40);
     if (customerPhone && (clientPhoneKeys(customerPhone).length !== 1 || customerPhone.replace(/\D/g, "").length > 15))
       throw new Error("Enter one valid customer phone number or leave it blank");
@@ -429,7 +464,7 @@ router.post("/sales", async (req, res) => {
     const onAccount = req.body?.onAccount === true;
     if (onAccount && invoiceId) throw new Error("Invoice settlement cannot be issued on account");
     if (onAccount && !linkedClientId) throw new Error("Select an existing client phone number before issuing an unpaid bill");
-    if (linkedClientId && customerName === "Walk-in customer") {
+    if (linkedClientId && customerName === "Counter Sale") {
       const linked = await client.query("SELECT name FROM clients WHERE id=$1 AND deleted_at IS NULL", [linkedClientId]);
       customerName = linked.rows[0]?.name || customerName;
     }
@@ -555,7 +590,7 @@ router.get("/outstanding", async (req, res) => {
     const client = await pool.query("SELECT id,name,phone FROM clients WHERE id=$1 AND deleted_at IS NULL", [id]);
     if (!client.rows[0]) return res.status(404).json({ error: "Client not found" });
     const sales = await pool.query(`SELECT id,receipt_number,items,total,paid_amount,sold_at FROM pos_sales
-      WHERE client_id=$1 AND paid_amount < total ORDER BY sold_at,id LIMIT 100`, [id]);
+      WHERE client_id=$1 AND paid_amount < total AND voided_at IS NULL ORDER BY sold_at,id LIMIT 100`, [id]);
     res.json({ client: client.rows[0], sales: sales.rows });
   } catch (error) {
     req.log.error(error);
@@ -586,7 +621,7 @@ router.post("/settlements", async (req, res) => {
     const customer = await client.query("SELECT id,name,phone FROM clients WHERE id=$1 AND deleted_at IS NULL FOR UPDATE", [id]);
     if (!customer.rows[0]) throw new Error("Client not found");
     const sales = await client.query(`SELECT id,receipt_number,total,paid_amount,sold_at FROM pos_sales
-      WHERE client_id=$1 AND id=ANY($2::int[]) ORDER BY sold_at,id FOR UPDATE`, [id, ids]);
+      WHERE client_id=$1 AND id=ANY($2::int[]) AND voided_at IS NULL ORDER BY sold_at,id FOR UPDATE`, [id, ids]);
     if (sales.rows.length !== ids.length || sales.rows.some((s) => Number(s.paid_amount) >= Number(s.total)))
       throw new Error("Bills changed; refresh outstanding bills before collecting payment");
     const { allocations, remaining } = allocatePosPayment(sales.rows, amount);
@@ -606,24 +641,82 @@ router.post("/settlements", async (req, res) => {
   } finally { client.release(); }
 });
 
-router.post("/close-day", async (req, res) => {
+router.get("/outstanding-summary", async (req, res) => {
   try {
     await ensurePos();
-    const auth = getAdminAuth(req)!;
-    if (!hasPermission(auth, "pos_day_close"))
-      return res.status(403).json({ error: "POS day-close permission required" });
-    const amount = money(req.body?.closingCash);
-    const { rows } = await pool.query(
-      "UPDATE pos_sessions SET closing_cash=$1,closed_at=NOW(),closed_by=$2 WHERE business_date=$3 AND closed_at IS NULL RETURNING *",
-      [amount, auth.username, lkDate()],
-    );
-    if (!rows[0])
-      return res.status(409).json({ error: "No open POS session found" });
-    res.json(rows[0]);
-  } catch (error) {
-    req.log.error(error);
-    res.status(500).json({ error: "Could not close POS day" });
-  }
+    const phone = clean(req.query.phone, 40);
+    const id = await findClientIdByPhone(phone);
+    if (!id) return res.json({ client: null, count: 0, balance: 0 });
+    const { rows } = await pool.query(`SELECT COUNT(*)::int AS count,
+      COALESCE(SUM(total-paid_amount),0) AS balance FROM pos_sales
+      WHERE client_id=$1 AND paid_amount < total AND voided_at IS NULL`, [id]);
+    res.json({ clientId: id, count: rows[0].count, balance: Number(rows[0].balance) });
+  } catch (error) { req.log.error(error); res.status(500).json({ error: "Could not check outstanding bills" }); }
+});
+
+router.get("/opening-context", async (req, res) => {
+  try {
+    await ensurePos();
+    const { rows } = await pool.query(`SELECT opening_float,next_day_float FROM pos_sessions
+      WHERE closed_at IS NOT NULL ORDER BY business_date DESC LIMIT 1`);
+    const pending = await pool.query(`SELECT COALESCE(SUM(deposit_amount),0) AS amount FROM pos_sessions s
+      WHERE s.closed_at IS NOT NULL AND s.deposit_tomorrow=true
+      AND NOT EXISTS (SELECT 1 FROM pos_bank_deposits d WHERE d.session_id=s.id AND d.status='deposited')`);
+    res.json({ suggestedFloat: Number(rows[0]?.next_day_float ?? rows[0]?.opening_float ?? 5000), pendingDeposit: Number(pending.rows[0]?.amount || 0) });
+  } catch (error) { req.log.error(error); res.status(500).json({ error: "Opening context could not load" }); }
+});
+
+router.patch("/sales/:id", requireOwner, async (req, res) => {
+  await ensurePos();
+  const id = Number(req.params.id);
+  const name = clean(req.body?.customerName, 160) || "Counter Sale";
+  const phone = clean(req.body?.customerPhone, 40);
+  const method = clean(req.body?.paymentMethod, 16);
+  if (!Number.isSafeInteger(id) || id <= 0 || (phone && clientPhoneKeys(phone).length !== 1) || !['cash','card','transfer','unpaid'].includes(method))
+    return res.status(400).json({ error: "Enter a valid customer and payment method" });
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const { rows } = await client.query(`SELECT ps.* FROM pos_sales ps JOIN pos_sessions s ON s.id=ps.session_id
+      WHERE ps.id=$1 AND s.closed_at IS NULL AND ps.voided_at IS NULL FOR UPDATE OF ps`, [id]);
+    const sale = rows[0];
+    if (!sale) throw new Error('Bill is unavailable or the POS day is closed');
+    const settled = await client.query(`SELECT 1 FROM pos_settlements WHERE allocations @> $1::jsonb LIMIT 1`, [JSON.stringify([{ saleId:id }])]);
+    if (settled.rows.length) throw new Error('A settled bill cannot be edited');
+    if (method === 'unpaid' && Number(sale.paid_amount) > 0 || method !== 'unpaid' && Number(sale.paid_amount) === 0)
+      throw new Error('Payment method cannot change between paid and unpaid');
+    const linked = phone ? await findClientIdByPhone(phone, client) : null;
+    if (method === 'unpaid' && !linked) throw new Error('Unpaid bills require an existing client phone');
+    const changed = await client.query(`UPDATE pos_sales SET customer_name=$2,customer_phone=$3,client_id=$4,
+      payment_method=$5,edited_at=NOW(),edited_by=$6 WHERE id=$1 RETURNING *`,
+      [id,name,phone || null,linked,method,getAdminAuth(req)!.username]);
+    await client.query(`INSERT INTO pos_sale_audit(sale_id,action,before_value,after_value,actor)
+      VALUES($1,'edit',$2::jsonb,$3::jsonb,$4)`, [id, JSON.stringify(sale), JSON.stringify(changed.rows[0]), getAdminAuth(req)!.username]);
+    await client.query('COMMIT'); res.json(changed.rows[0]);
+  } catch (error: any) { await client.query('ROLLBACK').catch(() => {}); res.status(409).json({ error: error.message || 'Could not edit bill' }); }
+  finally { client.release(); }
+});
+
+router.post("/sales/:id/void", requireOwner, async (req, res) => {
+  await ensurePos();
+  const id = Number(req.params.id);
+  const reason = clean(req.body?.reason, 300);
+  if (!Number.isSafeInteger(id) || id <= 0 || reason.length < 5) return res.status(400).json({ error: 'Enter a void reason of at least five characters' });
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const { rows } = await client.query(`SELECT ps.* FROM pos_sales ps JOIN pos_sessions s ON s.id=ps.session_id
+      WHERE ps.id=$1 AND s.closed_at IS NULL AND ps.voided_at IS NULL FOR UPDATE OF ps`, [id]);
+    const sale = rows[0];
+    if (!sale) throw new Error('Bill is unavailable or the POS day is closed');
+    if (sale.invoice_id || Number(sale.paid_amount) > 0) throw new Error('Only unpaid bills without an invoice or payment can be voided');
+    const changed = await client.query(`UPDATE pos_sales SET voided_at=NOW(),voided_by=$2,void_reason=$3 WHERE id=$1 RETURNING *`,
+      [id,getAdminAuth(req)!.username,reason]);
+    await client.query(`INSERT INTO pos_sale_audit(sale_id,action,before_value,after_value,actor)
+      VALUES($1,'void',$2::jsonb,$3::jsonb,$4)`, [id, JSON.stringify(sale), JSON.stringify(changed.rows[0]), getAdminAuth(req)!.username]);
+    await client.query('COMMIT'); res.json(changed.rows[0]);
+  } catch (error: any) { await client.query('ROLLBACK').catch(() => {}); res.status(409).json({ error: error.message || 'Could not void bill' }); }
+  finally { client.release(); }
 });
 
 router.post("/request-reopen", async (req, res) => {
@@ -670,6 +763,9 @@ router.post("/reopen-day", requireOwner, async (req, res) => {
       await client.query("ROLLBACK");
       return res.status(409).json({ error: "Today's POS day is not closed" });
     }
+    const confirmed = await client.query("SELECT 1 FROM pos_bank_deposits WHERE session_id=$1 AND status='deposited'", [rows[0].id]);
+    if (confirmed.rows.length) throw new Error("A deposited day cannot be reopened without bank reconciliation");
+    await client.query("DELETE FROM pos_bank_deposits WHERE session_id=$1 AND status='pending'", [rows[0].id]);
     await client.query(
       `UPDATE pos_reopen_requests SET status='approved',decided_by=$1,decided_at=NOW()
        WHERE session_id=$2 AND status='pending'`,

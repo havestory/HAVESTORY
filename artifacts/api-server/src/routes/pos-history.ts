@@ -37,7 +37,7 @@ router.get("/range", async (req, res) => {
     const { rows } = await pool.query(
       `SELECT ps.id, ps.receipt_number, ps.invoice_number, ps.customer_name,
               ps.items, ps.subtotal, ps.total, ps.paid_amount, ps.amount_tendered, ps.change_due,
-              ps.payment_method, ps.sold_by, ps.sold_at,
+              ps.payment_method, ps.sold_by, ps.sold_at, ps.voided_at, ps.void_reason, ps.edited_at,
               to_char(s.business_date, 'YYYY-MM-DD') AS business_date
        FROM pos_sales ps
        JOIN pos_sessions s ON s.id = ps.session_id
@@ -49,6 +49,7 @@ router.get("/range", async (req, res) => {
     const summary = rows.reduce(
       (acc, row) => {
         const total = Number(row.total || 0);
+        if (row.voided_at) return acc;
         acc.count += 1;
         acc.total += total;
         if (row.payment_method === "cash") acc.cash += total;
