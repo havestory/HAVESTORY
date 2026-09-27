@@ -640,7 +640,7 @@ export default function POS() {
                 POS / Counter Sales
               </h1>
               <p className="mt-1 text-sm text-admin-muted">
-                Collect payment first, then issue a 58 mm or 80 mm thermal bill.
+                Collect payment now or issue a Not paid bill to an existing client. Print on 58 mm or 80 mm paper.
               </p>
             </div>
           </div>
@@ -1040,17 +1040,6 @@ export default function POS() {
               </p>
             </aside>
           </div>
-          <section className="rounded-[26px] border border-admin-border bg-admin-surface p-5 shadow-sm">
-            <h2 className="text-lg font-bold">Unpaid client bills</h2>
-            <p className="mt-1 text-xs text-admin-muted">Find an existing client by phone, select their unpaid bills, then print one balance statement or record a payment. Payments settle the oldest selected bill first.</p>
-            <label className="mt-4 block max-w-md text-xs font-bold">Client phone number<input type="tel" value={accountPhone} onChange={e => setAccountPhone(e.target.value)} placeholder="Search existing client by phone" className={`${input} mt-1.5`} /></label>
-            {accountPhone && !accountClient && <p className="mt-2 text-xs text-admin-muted">No matching client card found yet.</p>}
-            {outstanding && <div className="mt-4">
-              <div className="flex flex-wrap items-center justify-between gap-3"><b>{outstanding.client.name} · {outstanding.sales.length} unpaid bill(s)</b><button type="button" className="pos-secondary" onClick={() => setSelectedBills(outstanding.sales.map(s => s.id))}>Select all</button></div>
-              {outstanding.sales.length === 0 ? <p className="mt-4 text-sm text-admin-muted">This client has no unpaid POS bills.</p> : <div className="mt-3 max-h-72 space-y-2 overflow-y-auto">{outstanding.sales.map(s => <label key={s.id} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-admin-border p-3 text-sm"><span className="flex items-center gap-3"><input type="checkbox" checked={selectedBills.includes(s.id)} onChange={e => setSelectedBills(old => e.target.checked ? [...old,s.id] : old.filter(id => id !== s.id))} /><span><b>{s.receipt_number}</b><small className="block text-admin-muted">{new Date(s.sold_at).toLocaleDateString('en-LK')} · {s.items?.map(i => i.name).join(', ')}</small></span></span><b>{rs(Number(s.total)-Number(s.paid_amount))}</b></label>)}</div>}
-              {chosenBills.length > 0 && <div className="mt-4 rounded-xl border border-admin-brand-line bg-admin-brand-soft p-4"><div className="flex justify-between font-bold"><span>{chosenBills.length} selected · balance due</span><span>{rs(chosenDue)}</span></div><div className="mt-3 flex flex-wrap gap-2"><button type="button" className="pos-secondary" onClick={() => printStatement(outstanding, chosenBills, width, receiptBrand)}><Printer size={16} /> Print combined bill</button><label className="text-xs font-bold">Payment amount<input type="number" min="0.01" max={chosenDue} step="0.01" value={settleAmount} onChange={e => setSettleAmount(e.target.value)} className={`${input} mt-1 w-40`} /></label><label className="text-xs font-bold">Method<select value={settleMethod} onChange={e => setSettleMethod(e.target.value)} className={`${input} mt-1 w-36`}><option value="cash">Cash</option><option value="card">Card</option><option value="transfer">Transfer</option></select></label><button type="button" onClick={() => void settleSelected()} disabled={settling || !!day.session.closed_at || !Number(settleAmount) || Number(settleAmount) > chosenDue} className="pos-primary self-end disabled:opacity-40">{settling ? 'Recording…' : 'Record payment & print balance'}</button></div><p className="mt-2 text-xs text-admin-muted">Full payment marks all selected bills settled. Partial payment leaves the remaining bill balance for the next statement.</p></div>}
-            </div>}
-          </section>
           <POSHistory date={day.date} revision={`${day.sales.length}:${day.session?.closed_at || ''}`} />
           <section className="rounded-[26px] border border-admin-border bg-admin-surface p-5 shadow-sm">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -1119,6 +1108,17 @@ export default function POS() {
           </section>
         </>
       )}
+          <section className="rounded-[26px] border border-admin-border bg-admin-surface p-5 shadow-sm">
+            <h2 className="text-lg font-bold">Unpaid client bills</h2>
+            <p className="mt-1 text-xs text-admin-muted">Find an existing client by phone, select their unpaid bills, then print one balance statement or record a payment. Payments settle the oldest selected bill first.</p>
+            <label className="mt-4 block max-w-md text-xs font-bold">Client phone number<input type="tel" value={accountPhone} onChange={e => setAccountPhone(e.target.value)} placeholder="Search existing client by phone" className={`${input} mt-1.5`} /></label>
+            {accountPhone && !accountClient && <p className="mt-2 text-xs text-admin-muted">No matching client card found yet.</p>}
+            {outstanding && <div className="mt-4">
+              <div className="flex flex-wrap items-center justify-between gap-3"><b>{outstanding.client.name} · {outstanding.sales.length} unpaid bill(s)</b><button type="button" className="pos-secondary" onClick={() => setSelectedBills(outstanding.sales.map(s => s.id))}>Select all</button></div>
+              {outstanding.sales.length === 0 ? <p className="mt-4 text-sm text-admin-muted">This client has no unpaid POS bills.</p> : <div className="mt-3 max-h-72 space-y-2 overflow-y-auto">{outstanding.sales.map(s => <label key={s.id} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-admin-border p-3 text-sm"><span className="flex items-center gap-3"><input type="checkbox" checked={selectedBills.includes(s.id)} onChange={e => setSelectedBills(old => e.target.checked ? [...old,s.id] : old.filter(id => id !== s.id))} /><span><b>{s.receipt_number}</b><small className="block text-admin-muted">{new Date(s.sold_at).toLocaleDateString('en-LK')} · {s.items?.map(i => i.name).join(', ')}</small></span></span><b>{rs(Number(s.total)-Number(s.paid_amount))}</b></label>)}</div>}
+              {chosenBills.length > 0 && <div className="mt-4 rounded-xl border border-admin-brand-line bg-admin-brand-soft p-4"><div className="flex justify-between font-bold"><span>{chosenBills.length} selected · balance due</span><span>{rs(chosenDue)}</span></div><div className="mt-3 flex flex-wrap gap-2"><button type="button" className="pos-secondary" onClick={() => printStatement(outstanding, chosenBills, width, receiptBrand)}><Printer size={16} /> Print combined bill</button><label className="text-xs font-bold">Payment amount<input type="number" min="0.01" max={chosenDue} step="0.01" value={settleAmount} onChange={e => setSettleAmount(e.target.value)} className={`${input} mt-1 w-40`} /></label><label className="text-xs font-bold">Method<select value={settleMethod} onChange={e => setSettleMethod(e.target.value)} className={`${input} mt-1 w-36`}><option value="cash">Cash</option><option value="card">Card</option><option value="transfer">Transfer</option></select></label><button type="button" onClick={() => void settleSelected()} disabled={settling || !!day.session.closed_at || !Number(settleAmount) || Number(settleAmount) > chosenDue} className="pos-primary self-end disabled:opacity-40">{settling ? 'Recording…' : 'Record payment & print balance'}</button></div><p className="mt-2 text-xs text-admin-muted">Full payment marks all selected bills settled. Partial payment leaves the remaining bill balance for the next statement.</p></div>}
+            </div>}
+          </section>
     </div>
   );
 }
