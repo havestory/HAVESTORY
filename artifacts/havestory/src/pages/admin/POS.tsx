@@ -53,6 +53,8 @@ type Sale = {
   receipt_number: string;
   invoice_number?: string;
   customer_name: string;
+  customer_phone?: string | null;
+  client_id?: number | null;
   items: CartItem[];
   total: string;
   subtotal?: string;
@@ -133,7 +135,7 @@ function printReceipt(sale: Sale, width: "58" | "80", brand: ReceiptBrand, prepa
     .map(esc)
     .join("<br>");
   win.document.write(
-    `<!doctype html><html><head><meta charset="utf-8"><title>${esc(sale.receipt_number)}</title><style>@page{size:${mm}mm auto;margin:0}*{box-sizing:border-box}html,body{width:${mm}mm;min-width:${mm}mm;margin:0;padding:0;background:#fff;color:#000}body{font-family:Arial,Helvetica,sans-serif;font-size:${width === "58" ? 10 : 11}px;line-height:1.35;font-variant-numeric:tabular-nums}.r{width:${mm}mm;padding:${width === "58" ? 3 : 4}mm;overflow:hidden}.c,.center{text-align:center}.brand{font-size:${width === "58" ? 16 : 19}px;font-weight:900;letter-spacing:.5px;overflow-wrap:anywhere}.tagline{margin-top:1mm;font-size:.92em}.meta{margin-top:2mm;overflow-wrap:anywhere}.rule{border-top:1px dashed #000;margin:2.5mm 0}.row{display:flex;justify-content:space-between;gap:2mm;padding:1mm 0}.item{border-bottom:1px dotted #aaa}.item span:first-child{max-width:68%;overflow-wrap:anywhere}.total{font-size:1.2em;font-weight:900;border-top:1px solid #000;margin-top:1mm;padding-top:1.5mm}.change{border:1.5px solid #000;padding:1.5mm;font-size:1.15em}.small{font-size:.88em}.bold{font-weight:800}.footer{margin-top:3mm;font-size:.9em}@media print{html,body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style></head><body><main class="r"><header class="center"><div class="brand">${esc(businessName)}</div><div class="tagline">THE COLOUR &amp; FRAME STUDIO</div><div class="meta small">${contactLines}</div></header><div class="rule"></div><div class="center bold">POS RECEIPT</div><div class="center">${esc(sale.receipt_number)}</div>${sale.invoice_number ? `<div class="center small">Invoice: ${esc(sale.invoice_number)}</div>` : ""}<div class="center small">${esc(new Date(sale.sold_at).toLocaleString("en-LK", { timeZone: "Asia/Colombo" }))}</div><div class="rule"></div><div class="bold">${esc(sale.customer_name || "Walk-in customer")}</div><div class="rule"></div>${items.map((i) => `<div class="row item"><span><b>${esc(i.name)}</b><br><span class="small">${i.qty}${i.unitLabel ? ` ${esc(i.unitLabel)}` : ""} × ${rs(Number(i.price))}${i.code ? ` · ${esc(i.code)}` : ""}</span></span><b>${rs(Number(i.price) * Number(i.qty))}</b></div>`).join("")}${discount > 0 ? `<div class="row"><span>Subtotal</span><span>${rs(Number(sale.subtotal))}</span></div><div class="row"><span>Discount</span><span>−${rs(discount)}</span></div>` : ""}<div class="row total"><span>Total</span><span>${rs(Number(sale.total))}</span></div><div class="row"><span>Received</span><b>${rs(Number(sale.amount_tendered))}</b></div><div class="row change"><span>Balance / Change</span><b>${rs(Number(sale.change_due))}</b></div><div class="row small"><span>Payment</span><b>${esc(sale.payment_method.toUpperCase())}</b></div>${bankPrintHTML(brand.bank)}<footer class="footer center"><div class="rule"></div>Issued by Mr. ${esc(sale.sold_by)}<br>Thank you for choosing ${esc(businessName)}.</footer></main></body></html>`,
+    `<!doctype html><html><head><meta charset="utf-8"><title>${esc(sale.receipt_number)}</title><style>@page{size:${mm}mm auto;margin:0}*{box-sizing:border-box}html,body{width:${mm}mm;min-width:${mm}mm;margin:0;padding:0;background:#fff;color:#000}body{font-family:Arial,Helvetica,sans-serif;font-size:${width === "58" ? 10 : 11}px;line-height:1.35;font-variant-numeric:tabular-nums}.r{width:${mm}mm;padding:${width === "58" ? 3 : 4}mm;overflow:hidden}.c,.center{text-align:center}.brand{font-size:${width === "58" ? 16 : 19}px;font-weight:900;letter-spacing:.5px;overflow-wrap:anywhere}.tagline{margin-top:1mm;font-size:.92em}.meta{margin-top:2mm;overflow-wrap:anywhere}.rule{border-top:1px dashed #000;margin:2.5mm 0}.row{display:flex;justify-content:space-between;gap:2mm;padding:1mm 0}.item{border-bottom:1px dotted #aaa}.item span:first-child{max-width:68%;overflow-wrap:anywhere}.total{font-size:1.2em;font-weight:900;border-top:1px solid #000;margin-top:1mm;padding-top:1.5mm}.change{border:1.5px solid #000;padding:1.5mm;font-size:1.15em}.small{font-size:.88em}.bold{font-weight:800}.footer{margin-top:3mm;font-size:.9em}@media print{html,body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style></head><body><main class="r"><header class="center"><div class="brand">${esc(businessName)}</div><div class="tagline">THE COLOUR &amp; FRAME STUDIO</div><div class="meta small">${contactLines}</div></header><div class="rule"></div><div class="center bold">POS RECEIPT</div><div class="center">${esc(sale.receipt_number)}</div>${sale.invoice_number ? `<div class="center small">Invoice: ${esc(sale.invoice_number)}</div>` : ""}<div class="center small">${esc(new Date(sale.sold_at).toLocaleString("en-LK", { timeZone: "Asia/Colombo" }))}</div><div class="rule"></div><div class="bold">${esc(sale.customer_name || "Walk-in customer")}</div>${sale.customer_phone ? `<div class="small">${esc(sale.customer_phone)}</div>` : ""}<div class="rule"></div>${items.map((i) => `<div class="row item"><span><b>${esc(i.name)}</b><br><span class="small">${i.qty}${i.unitLabel ? ` ${esc(i.unitLabel)}` : ""} × ${rs(Number(i.price))}${i.code ? ` · ${esc(i.code)}` : ""}</span></span><b>${rs(Number(i.price) * Number(i.qty))}</b></div>`).join("")}${discount > 0 ? `<div class="row"><span>Subtotal</span><span>${rs(Number(sale.subtotal))}</span></div><div class="row"><span>Discount</span><span>−${rs(discount)}</span></div>` : ""}<div class="row total"><span>Total</span><span>${rs(Number(sale.total))}</span></div><div class="row"><span>Received</span><b>${rs(Number(sale.amount_tendered))}</b></div><div class="row change"><span>Balance / Change</span><b>${rs(Number(sale.change_due))}</b></div><div class="row small"><span>Payment</span><b>${esc(sale.payment_method.toUpperCase())}</b></div>${bankPrintHTML(brand.bank)}<footer class="footer center"><div class="rule"></div>Issued by Mr. ${esc(sale.sold_by)}<br>Thank you for choosing ${esc(businessName)}.</footer></main></body></html>`,
   );
   win.document.close();
   win.focus();
@@ -172,6 +174,10 @@ export default function POS() {
   const [opening, setOpening] = useState("5000");
   const [tendered, setTendered] = useState("");
   const [customer, setCustomer] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [matchedClient, setMatchedClient] = useState<{ id: number; name: string } | null>(null);
+  const [phoneLookupPending, setPhoneLookupPending] = useState(false);
+  const [showPhoneReminder, setShowPhoneReminder] = useState(false);
   const [method, setMethod] = useState("cash");
   const [width, setWidth] = useState<"58" | "80">("80");
   const [saving, setSaving] = useState(false);
@@ -229,6 +235,19 @@ export default function POS() {
       .then(setMonthData)
       .catch(() => setMonthData(null));
   }, [reportMonth]);
+  useEffect(() => {
+    setMatchedClient(null);
+    if (selectedInvoice || customerPhone.replace(/\D/g, '').length < 7) { setPhoneLookupPending(false); return; }
+    const controller = new AbortController();
+    setPhoneLookupPending(true);
+    const timer = setTimeout(() => {
+      request(`/api/clients/lookup?phone=${encodeURIComponent(customerPhone.trim())}`, { signal: controller.signal })
+        .then((result) => { if (!controller.signal.aborted) setMatchedClient(result ? { id: result.id, name: result.name } : null); })
+        .catch(() => { if (!controller.signal.aborted) setMatchedClient(null); })
+        .finally(() => { if (!controller.signal.aborted) setPhoneLookupPending(false); });
+    }, 300);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [customerPhone, selectedInvoice]);
   const subtotal = selectedInvoice
     ? selectedInvoice.balance
     : cart.reduce((sum, item) => sum + Math.round(item.price * item.qty * 100), 0) / 100;
@@ -238,6 +257,8 @@ export default function POS() {
   const total = Math.round((subtotal - discount) * 100) / 100;
   const received = Number(tendered) || 0;
   const change = Math.max(0, received - total);
+  const phoneDigits = customerPhone.replace(/\D/g, '');
+  const invalidPhone = !!customerPhone.trim() && (phoneDigits.length < 7 || phoneDigits.length > 15 || /[,;|/]/.test(customerPhone));
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
     return products
@@ -329,8 +350,10 @@ export default function POS() {
       });
     }
   };
-  const complete = async () => {
-    if (saleLock.current || saving || day?.session?.closed_at || invalidDiscount || total <= 0 || !Number.isFinite(received) || received < total) return;
+  const complete = async (continueWithoutPhone = false) => {
+    if (saleLock.current || saving || day?.session?.closed_at || invalidDiscount || invalidPhone || total <= 0 || !Number.isFinite(received) || received < total) return;
+    if (!selectedInvoice && !customerPhone.trim() && !continueWithoutPhone) { setShowPhoneReminder(true); return; }
+    setShowPhoneReminder(false);
     saleLock.current = true;
     setSaving(true);
     const printWindow = window.open("", "_blank", "popup=yes,width=500,height=760");
@@ -341,6 +364,7 @@ export default function POS() {
           items: cart,
           invoiceId: selectedInvoice?.id,
           customerName: customer,
+          customerPhone: customerPhone.trim(),
           amountTendered: received,
           paymentMethod: method,
           discountType,
@@ -360,6 +384,7 @@ export default function POS() {
       setCart([]);
       setSelectedInvoice(null); setDiscountValue("");
       setCustomer("");
+      setCustomerPhone("");
       setTendered("");
       setInvoiceQuery("");
       await load();
@@ -493,6 +518,16 @@ export default function POS() {
   return (
     <div className="pos-workspace space-y-5 pb-10">
       {showDeposit && <BankDepositDialog settings={receiptSettings} width={width} date={day?.date || today()} amount={day?.session?.deposit_amount ? String(day.session.deposit_amount) : ''} remark={day?.session?.deposit_remark} onClose={() => setShowDeposit(false)} />}
+      <Dialog open={showPhoneReminder} onOpenChange={setShowPhoneReminder}>
+        <DialogContent className="max-w-md rounded-2xl border-admin-border bg-admin-surface text-admin-ink">
+          <DialogTitle>Customer number recommended</DialogTitle>
+          <DialogDescription>Add a phone number to link this sale to an existing client card. You can issue the bill without one; no new client card will be created.</DialogDescription>
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <button type="button" onClick={() => { setShowPhoneReminder(false); document.getElementById('pos-customer-phone')?.focus(); }} className="rounded-xl border border-admin-border px-4 py-2.5 text-sm font-bold">Add number</button>
+            <button type="button" onClick={() => void complete(true)} disabled={saving} className="rounded-xl bg-admin-brand px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50">Continue without number</button>
+          </div>
+        </DialogContent>
+      </Dialog>
       <Dialog open={!!configuring} onOpenChange={open => { if (!open) setConfiguring(null); }}>
         <DialogContent className="pos-dialog pos-config-dialog" onCloseAutoFocus={e => { e.preventDefault(); codeRef.current?.focus(); }}>
           <DialogTitle>{configuring?.name || 'Configure POS item'}</DialogTitle>
@@ -798,6 +833,7 @@ export default function POS() {
                           setSelectedInvoice(inv); setDiscountValue("");
                           setCart([]);
                           setCustomer(inv.clientName);
+                          setCustomerPhone("");
                           setInvoiceQuery(inv.invoiceNumber);
                           setInvoices([]);
                         }}
@@ -867,6 +903,13 @@ export default function POS() {
                   className={`${input} mt-1.5`}
                 />
               </label>
+              {!selectedInvoice && <div className="mt-3">
+                <label className="block text-[10px] font-bold uppercase text-admin-muted" htmlFor="pos-customer-phone">Customer phone number
+                  <input id="pos-customer-phone" type="tel" inputMode="tel" autoComplete="tel" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} placeholder="07XXXXXXXX (recommended)" className={`${input} mt-1.5`} />
+                </label>
+                {customerPhone.trim() && <p className="mt-1.5 text-xs text-admin-muted" aria-live="polite">{phoneLookupPending ? 'Checking existing client cards…' : matchedClient ? `Linked to ${matchedClient.name} · C${String(matchedClient.id).padStart(4, '0')}` : 'No existing client card found. This sale will not create one.'}</p>}
+                {invalidPhone && <p role="alert" className="mt-1 text-xs font-semibold text-admin-danger">Enter one valid phone number (7–15 digits), or clear the field to continue without one.</p>}
+              </div>}
               {!selectedInvoice && <div className="mt-4 space-y-3 rounded-xl border border-admin-brand-line bg-admin-brand-soft p-3">
                 <div className="flex justify-between text-sm"><span>Subtotal</span><b>{rs(subtotal)}</b></div>
                 <div className="flex items-center gap-2 text-sm font-semibold"><Percent size={16} /> Bill discount</div>
@@ -909,8 +952,8 @@ export default function POS() {
                 <span>{rs(change)}</span>
               </div>
               <button
-                onClick={complete}
-                disabled={saving || invalidDiscount || !Number.isFinite(received) || !!day.session.closed_at || total <= 0 || received < total}
+                onClick={() => void complete()}
+                disabled={saving || invalidDiscount || invalidPhone || !Number.isFinite(received) || !!day.session.closed_at || total <= 0 || received < total}
                 className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-admin-brand font-bold text-white disabled:opacity-40"
               >
                 {saving ? (

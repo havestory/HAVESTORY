@@ -198,7 +198,8 @@ router.get("/:id/activity", async (req, res) => {
       .from(clientsTable).where(and(eq(clientsTable.id, id), isNull(clientsTable.deletedAt))).limit(1);
     if (!client) return res.status(404).json({ error: "Client not found" });
 
-    const [projects, invoices] = await Promise.all([
+    const canSeeCounterSales = hasPermission(getAdminAuth(req), "pos_access");
+    const [projects, invoices, posSales] = await Promise.all([
       db.select().from(crmProjectsTable)
         .where(and(isNull(crmProjectsTable.deletedAt), or(
           eq(crmProjectsTable.clientId, id),
@@ -211,12 +212,16 @@ router.get("/:id/activity", async (req, res) => {
           and(isNull(invoicesTable.clientId), sql`LOWER(BTRIM(${invoicesTable.clientName}))=LOWER(BTRIM(${client.name}))`),
         )))
         .orderBy(desc(invoicesTable.createdAt)),
+      canSeeCounterSales ? pool.query(`SELECT receipt_number,invoice_number,customer_name,customer_phone,total,payment_method,sold_at
+        FROM pos_sales WHERE client_id=$1 ORDER BY sold_at DESC LIMIT 50`, [id])
+        .then(result => result.rows)
+        .catch((error: any) => { if (error?.code === "42P01" || error?.code === "42703") return []; throw error; }) : Promise.resolve([]),
     ]);
     const visibleInvoices = hasPermission(getAdminAuth(req), "finance")
       ? invoices
       : invoices.map(stripPrivateInvoiceFields);
     res.setHeader("Cache-Control", "private, max-age=15, stale-while-revalidate=30");
-    res.json({ projects, invoices: visibleInvoices });
+    res.json({ projects, invoices: visibleInvoices, posSales });
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Failed to fetch client activity" });

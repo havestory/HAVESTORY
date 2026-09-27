@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 import { pool } from "@workspace/db";
 import { getAdminAuth, hasPermission, requireAdmin, requireOwner } from "../lib/auth-cookie";
 import { ensureFinanceStorage } from "./finance-inventory";
+import { clientPhoneKeys, findClientIdByPhone } from "../lib/client-dedupe";
 
 const router = Router();
 router.use(requireAdmin);
@@ -99,6 +100,9 @@ async function initialize() {
       sold_at TIMESTAMP NOT NULL DEFAULT NOW()
     );
     CREATE UNIQUE INDEX IF NOT EXISTS pos_sales_invoice_uidx ON pos_sales(invoice_id) WHERE invoice_id IS NOT NULL;
+    ALTER TABLE pos_sales ADD COLUMN IF NOT EXISTS customer_phone TEXT;
+    ALTER TABLE pos_sales ADD COLUMN IF NOT EXISTS client_id INTEGER REFERENCES clients(id) ON DELETE SET NULL;
+    CREATE INDEX IF NOT EXISTS pos_sales_client_sold_idx ON pos_sales(client_id,sold_at DESC) WHERE client_id IS NOT NULL;
     CREATE INDEX IF NOT EXISTS pos_sales_session_idx ON pos_sales(session_id);
     CREATE INDEX IF NOT EXISTS pos_sales_sold_at_idx ON pos_sales(sold_at);
     CREATE TABLE IF NOT EXISTS pos_items (
@@ -254,7 +258,7 @@ router.get("/day", async (req, res) => {
       [date],
     );
     const sales = await pool.query(
-      `SELECT id,receipt_number,invoice_number,customer_name,items,subtotal,total,amount_tendered,change_due,payment_method,sold_by,sold_at
+      `SELECT id,receipt_number,invoice_number,customer_name,customer_phone,client_id,items,subtotal,total,amount_tendered,change_due,payment_method,sold_by,sold_at
       FROM pos_sales WHERE session_id=$1 ORDER BY sold_at DESC`,
       [session.rows[0]?.id || -1],
     );
@@ -381,6 +385,14 @@ router.post("/sales", async (req, res) => {
       }
     }
     let customerName = clean(req.body?.customerName, 160) || "Walk-in customer";
+    const customerPhone = clean(req.body?.customerPhone, 40);
+    if (customerPhone && (clientPhoneKeys(customerPhone).length !== 1 || customerPhone.replace(/\D/g, "").length > 15))
+      throw new Error("Enter one valid customer phone number or leave it blank");
+    let linkedClientId = customerPhone ? await findClientIdByPhone(customerPhone, client) : null;
+    if (linkedClientId && customerName === "Walk-in customer") {
+      const linked = await client.query("SELECT name FROM clients WHERE id=$1 AND deleted_at IS NULL", [linkedClientId]);
+      customerName = linked.rows[0]?.name || customerName;
+    }
     let invoiceNumber: string | null = null;
     let total = items.reduce(
       (sum: number, item: any) => sum + Math.round(item.qty * item.price * 100),
@@ -406,6 +418,7 @@ router.post("/sales", async (req, res) => {
         throw new Error("This invoice is already recorded in Counter Sales");
       invoiceNumber = invoice.invoice_number;
       customerName = invoice.client_name || customerName;
+      linkedClientId = invoice.client_id || linkedClientId;
       total = money(invoice.amount);
       try {
         const meta = JSON.parse(invoice.metadata || "{}");
@@ -449,14 +462,16 @@ router.post("/sales", async (req, res) => {
       : "cash";
     const soldBy = await issuerFirstName(auth);
     const inserted = await client.query(
-      `INSERT INTO pos_sales(receipt_number,session_id,invoice_id,invoice_number,customer_name,items,subtotal,total,amount_tendered,change_due,payment_method,sold_by)
-      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,
+      `INSERT INTO pos_sales(receipt_number,session_id,invoice_id,invoice_number,customer_name,customer_phone,client_id,items,subtotal,total,amount_tendered,change_due,payment_method,sold_by)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
       [
         receiptNumber,
         session.id,
         invoiceId,
         invoiceNumber,
         customerName,
+        customerPhone || null,
+        linkedClientId,
         JSON.stringify(items),
         subtotal,
         total,
