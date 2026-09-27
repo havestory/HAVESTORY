@@ -32,7 +32,7 @@ import {
   Clock3,
   BadgeDollarSign,
 } from 'lucide-react';
-import { useAdminLogout, useGetAdminMe } from '@workspace/api-client-react';
+import { useAdminLogout, useGetAdminMe, useGetSettings } from '@workspace/api-client-react';
 
 type AdminTheme = 'light' | 'dark';
 const THEME_KEY = 'hs_admin_theme';
@@ -45,6 +45,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
   const [location, setLocation] = useLocation();
   const logout = useAdminLogout();
   const { data: admin } = useGetAdminMe({ query: { staleTime: 5 * 60_000, retry: false, refetchOnWindowFocus: false } as any });
+  const { data: studioSettings } = useGetSettings({ query: { staleTime: 5 * 60_000, retry: false } as any });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [theme, setTheme] = useState<AdminTheme>(loadTheme);
   const permissions = Array.isArray(admin?.permissions) ? admin.permissions.map(String) : [];
@@ -121,8 +122,8 @@ export function AdminLayout({ children }: { children: ReactNode }) {
           <Link href="/admin" className="admin-sidebar-brand">
             <span className="admin-sidebar-monogram">HS</span>
             <span className="admin-sidebar-brand-copy">
-              <span className="admin-sidebar-wordmark">HAVESTORY</span>
-              <span className="admin-sidebar-subtitle">STUDIO WORKSPACE</span>
+              <span className="admin-sidebar-wordmark">{studioSettings?.businessName || 'HAVESTORY'}</span>
+              {studioSettings?.tagline && <span className="admin-sidebar-subtitle">{studioSettings.tagline}</span>}
             </span>
           </Link>
           <button type="button" className="admin-sidebar-close" aria-label="Close menu" onClick={() => setSidebarOpen(false)}>
