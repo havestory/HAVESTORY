@@ -1,3 +1,4 @@
+import { ensurePos } from "./pos";
 import { Router } from "express";
 import { db, pool } from "@workspace/db";
 import { clientsTable, crmProjectsTable, invoicesTable } from "@workspace/db/schema";
@@ -199,6 +200,7 @@ router.get("/:id/activity", async (req, res) => {
     if (!client) return res.status(404).json({ error: "Client not found" });
 
     const canSeeCounterSales = hasPermission(getAdminAuth(req), "pos_access");
+    if (canSeeCounterSales) await ensurePos();
     const [projects, invoices, posSales] = await Promise.all([
       db.select().from(crmProjectsTable)
         .where(and(isNull(crmProjectsTable.deletedAt), or(
