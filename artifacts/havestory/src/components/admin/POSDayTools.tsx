@@ -167,7 +167,7 @@ export function POSDayEnd({
   onClosed: () => Promise<void>;
 }) {
   const [cash, setCash] = useState(""),
-    [deposit, setDeposit] = useState(""),
+    [nextFloat, setNextFloat] = useState(""),
     [reference, setReference] = useState(""),
     [proof, setProof] = useState("");
   const [tomorrow, setTomorrow] = useState(false),
@@ -178,7 +178,7 @@ export function POSDayEnd({
   const session = day.session;
   const remark =
     session?.deposit_remark ||
-    `P${day.date.slice(8, 10)}${day.date.slice(5, 7)}${day.date.slice(2, 4)}`;
+    `${day.date.slice(2, 4)}${day.date.slice(5, 7)}${day.date.slice(8, 10)}`;
   const print = (result: any) => {
     const win = window.open("", "_blank", "popup=yes,width=520,height=780");
     if (!win) {
@@ -198,7 +198,7 @@ export function POSDayEnd({
         method: "POST",
         body: JSON.stringify({
           closingCash: cash,
-          depositAmount: deposit,
+          nextDayFloat: nextFloat,
           bankSlipReference: reference,
           depositProofUrl: proof,
           depositTomorrow: tomorrow,
@@ -232,7 +232,7 @@ export function POSDayEnd({
           <p>
             {session.closed_at
               ? session.closing_remark
-              : "Record counted cash and the amount you plan to deposit."}
+              : "Count cash, retain tomorrow’s drawer float, and reconcile the deposit."}
           </p>
         </div>
         <div className="u-pos-remark-preview">
@@ -257,7 +257,7 @@ export function POSDayEnd({
                 depositRemark: remark,
                 depositAmount: session.deposit_amount,
                 summary: {
-                  bills: day.sales.length,
+                  bills: day.summary.count,
                   totalSales: day.summary.sales,
                   cashSales: day.summary.cashSales,
                   cardSales: day.sales
@@ -285,13 +285,14 @@ export function POSDayEnd({
           onSubmit={(e) => {
             e.preventDefault();
             if (
-              ![cash, deposit].every(
+              ![cash, nextFloat].every(
                 (v) => v.trim() && Number.isFinite(Number(v)) && Number(v) >= 0,
               )
             ) {
-              setError("Enter valid cash and deposit amounts.");
+              setError("Enter valid cash and next-day float amounts.");
               return;
             }
+            if (Number(nextFloat) > Number(cash)) { setError("Next-day float cannot exceed counted cash."); return; }
             setConfirm(true);
           }}
         >
@@ -310,14 +311,14 @@ export function POSDayEnd({
                 />
               </label>
               <label>
-                Bank deposit amount
+                Keep for next day
                 <input
                   required
                   type="number"
                   min="0"
                   step="0.01"
-                  value={deposit}
-                  onChange={(e) => setDeposit(e.target.value)}
+                  value={nextFloat}
+                  onChange={(e) => setNextFloat(e.target.value)}
                   placeholder="0.00"
                 />
               </label>
@@ -346,9 +347,10 @@ export function POSDayEnd({
                   checked={tomorrow}
                   onChange={(e) => setTomorrow(e.target.checked)}
                 />{" "}
-                Deposit tomorrow
+                Deposit Later / Carry Forward
               </label>
             </div>
+            <div className="pos-quote" aria-live="polite"><span>Counted cash <strong>{money(cash)}</strong></span><span>Keep for next day <strong>{money(nextFloat)}</strong></span><span>Deposit due <strong>{money(Math.max(0, Number(cash || 0) - Number(nextFloat || 0)))}</strong></span></div>
             <div className="u-pos-close-actions">
               <span>Expected cash: {money(day.summary.expectedCash)}</span>
               <button disabled={busy}>Close & approve day</button>
@@ -381,7 +383,7 @@ export function POSDayEnd({
               Counted cash<strong>{money(cash)}</strong>
             </span>
             <span>
-              Bank deposit<strong>{money(deposit)}</strong>
+              Deposit due<strong>{money(Number(cash) - Number(nextFloat))}</strong>
             </span>
             <span>
               Cash difference
@@ -406,3 +408,4 @@ export function POSDayEnd({
     </div>
   );
 }
+
