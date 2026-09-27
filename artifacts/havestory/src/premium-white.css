@@ -1,0 +1,57 @@
+/* Final light surface treatment for the store and workspace. Keep dark admin
+   tokens intact; all overrides are scoped to the application surface. */
+:root { --radius: .75rem; }
+html:not([data-hs-admin-theme='dark']) body { background: #fff; }
+
+[data-public-site] {
+  --background: 0 0% 100%;
+  --card: 0 0% 100%;
+  --popover: 0 0% 100%;
+  --input: 0 0% 100%;
+  --hsc-paper: #fff;
+  --editorial-paper: #fff;
+  --studio-paper: #fff;
+  --radius: .75rem;
+  background: #fff !important;
+  background-image: none !important;
+}
+[data-public-site] :is(.hsx-main,.studio-home,.studio-closing) {
+  background: #fff !important;
+  background-image: none !important;
+}
+[data-public-site] :is(.hsx-shell-header,.studio-opening,.studio-opening-copy,.studio-assurances,.studio-reviews blockquote) {
+  background-color: #fff !important;
+}
+[data-public-site] :is(.studio-opening,.studio-assurances,.studio-collection-card,.studio-product-card,.studio-gallery-item,.hs-store-product,.hs-gallery-card,.hsx-contact-info,.hsx-contact-form) {
+  border-radius: 18px !important;
+}
+[data-public-site] :is(button,input,select,textarea,[role='button'],.studio-opening-caption):not(.rounded-full) {
+  border-radius: 12px;
+}
+
+html[data-hs-admin-theme='light'] {
+  --admin-canvas: 0 0% 100%;
+  --admin-surface: 0 0% 100%;
+  --background: 0 0% 100%;
+  --card: 0 0% 100%;
+  --popover: 0 0% 100%;
+}
+html[data-hs-admin-theme='light'] :is(.admin-frame,.admin-workspace-content,.admin-workspace-header) {
+  background: #fff;
+}
+[data-admin-panel] :is(button,input,select,textarea,[role='button'],[role='combobox']).rounded-none,
+[data-admin-panel] :is(button,input,select,textarea,[role='button'],[role='combobox']).rounded-sm,
+[data-admin-panel] :is(.rounded-none,.rounded-sm):where(.border,.shadow-sm,.bg-card,.bg-admin-surface),
+html[data-hs-admin-theme] :is([role='dialog'],[role='alertdialog'],[role='menu'],[role='listbox']).rounded-none,
+html[data-hs-admin-theme] :is([role='dialog'],[role='alertdialog'],[role='menu'],[role='listbox']).rounded-sm {
+  border-radius: 14px !important;
+}
+[data-admin-panel] .admin-nav-item { border-radius: 12px; }
+[data-admin-panel] .admin-menu-button,
+[data-admin-panel] .admin-sidebar-close { border-radius: 12px; }
+
+/* Printed reports and invoices retain their own page geometry. */
+@media print {
+  [data-admin-panel] .rounded-none,
+  [data-admin-panel] .rounded-sm { border-radius: 0 !important; }
+}
