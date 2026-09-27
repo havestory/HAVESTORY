@@ -140,7 +140,7 @@ function printReceipt(sale: Sale, width: "58" | "80", brand: ReceiptBrand, prepa
   const due = Math.max(0, Number(sale.total) - Number(sale.paid_amount ?? sale.total));
   const printedPayment = due > 0 ? 'NOT PAID' : sale.payment_method === 'unpaid' ? 'SETTLED' : sale.payment_method.toUpperCase();
   win.document.write(
-    `<!doctype html><html><head><meta charset="utf-8"><title>${esc(sale.receipt_number)}</title><style>@page{size:${mm}mm auto;margin:0}*{box-sizing:border-box}html,body{width:${mm}mm;min-width:${mm}mm;margin:0;padding:0;background:#fff;color:#000}body{font-family:Arial,Helvetica,sans-serif;font-size:${width === "58" ? 10 : 11}px;line-height:1.35;font-variant-numeric:tabular-nums}.r{width:${mm}mm;padding:${width === "58" ? 3 : 4}mm;overflow:hidden}.c,.center{text-align:center}.brand{font-size:${width === "58" ? 16 : 19}px;font-weight:900;letter-spacing:.5px;overflow-wrap:anywhere}.tagline{margin-top:1mm;font-size:.92em}.meta{margin-top:2mm;overflow-wrap:anywhere}.rule{border-top:1px dashed #000;margin:2.5mm 0}.row{display:flex;justify-content:space-between;gap:2mm;padding:1mm 0}.item{border-bottom:1px dotted #aaa}.item span:first-child{max-width:68%;overflow-wrap:anywhere}.total{font-size:1.2em;font-weight:900;border-top:1px solid #000;margin-top:1mm;padding-top:1.5mm}.change{border:1.5px solid #000;padding:1.5mm;font-size:1.15em}.small{font-size:.88em}.bold{font-weight:800}.footer{margin-top:3mm;font-size:.9em}@media print{html,body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style></head><body><main class="r"><header class="center"><div class="brand">${esc(businessName)}</div><div class="tagline">THE COLOUR &amp; FRAME STUDIO</div><div class="meta small">${contactLines}</div></header><div class="rule"></div><div class="center bold">${due > 0 ? "PAYMENT DUE" : "POS RECEIPT"}</div><div class="center">${esc(sale.receipt_number)}</div>${sale.invoice_number ? `<div class="center small">Invoice: ${esc(sale.invoice_number)}</div>` : ""}<div class="center small">${esc(new Date(sale.sold_at).toLocaleString("en-LK", { timeZone: "Asia/Colombo" }))}</div><div class="rule"></div><div class="bold">${esc(sale.customer_name || "Walk-in customer")}</div>${sale.customer_phone ? `<div class="small">${esc(sale.customer_phone)}</div>` : ""}<div class="rule"></div>${items.map((i) => `<div class="row item"><span><b>${esc(i.name)}</b><br><span class="small">${i.qty}${i.unitLabel ? ` ${esc(i.unitLabel)}` : ""} × ${rs(Number(i.price))}${i.code ? ` · ${esc(i.code)}` : ""}</span></span><b>${rs(Number(i.price) * Number(i.qty))}</b></div>`).join("")}${discount > 0 ? `<div class="row"><span>Subtotal</span><span>${rs(Number(sale.subtotal))}</span></div><div class="row"><span>Discount</span><span>−${rs(discount)}</span></div>` : ""}<div class="row total"><span>Total</span><span>${rs(Number(sale.total))}</span></div>${sale.payment_method === "unpaid" ? `<div class="row"><span>Paid to date</span><b>${rs(Number(sale.paid_amount || 0))}</b></div><div class="row change"><span>Outstanding</span><b>${rs(due)}</b></div>` : `<div class="row"><span>Received</span><b>${rs(Number(sale.amount_tendered))}</b></div><div class="row change"><span>Balance / Change</span><b>${rs(Number(sale.change_due))}</b></div>`}<div class="row small"><span>Payment</span><b>${esc(printedPayment)}</b></div>${bankPrintHTML(brand.bank)}<footer class="footer center"><div class="rule"></div>Issued by Mr. ${esc(sale.sold_by)}<br>Thank you for choosing ${esc(businessName)}.</footer></main></body></html>`,
+    `<!doctype html><html><head><meta charset="utf-8"><title>${esc(sale.receipt_number)}</title><style>@page{size:${mm}mm auto;margin:0}*{box-sizing:border-box}html,body{width:${mm}mm;min-width:${mm}mm;margin:0;padding:0;background:#fff;color:#000}body{font-family:Arial,Helvetica,sans-serif;font-size:${width === "58" ? 10 : 11}px;line-height:1.35;font-variant-numeric:tabular-nums}.r{width:${mm}mm;padding:${width === "58" ? 3 : 4}mm;overflow:hidden}.c,.center{text-align:center}.brand{font-size:${width === "58" ? 16 : 19}px;font-weight:900;letter-spacing:.5px;overflow-wrap:anywhere}.tagline{margin-top:1mm;font-size:.92em}.meta{margin-top:2mm;overflow-wrap:anywhere}.rule{border-top:1px dashed #000;margin:2.5mm 0}.row{display:flex;justify-content:space-between;gap:2mm;padding:1mm 0}.item{border-bottom:1px dotted #aaa}.item span:first-child{max-width:68%;overflow-wrap:anywhere}.total{font-size:1.2em;font-weight:900;border-top:1px solid #000;margin-top:1mm;padding-top:1.5mm}.change{border:1.5px solid #000;padding:1.5mm;font-size:1.15em}.small{font-size:.88em}.bold{font-weight:800}.footer{margin-top:3mm;font-size:.9em}@media print{html,body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style></head><body><main class="r"><header class="center"><div class="brand">${esc(businessName)}</div><div class="tagline">THE COLOUR &amp; FRAME STUDIO</div><div class="meta small">${contactLines}</div></header><div class="rule"></div><div class="center bold">${due > 0 ? "NOT PAID" : "POS RECEIPT"}</div><div class="center">${esc(sale.receipt_number)}</div>${sale.invoice_number ? `<div class="center small">Invoice: ${esc(sale.invoice_number)}</div>` : ""}<div class="center small">${esc(new Date(sale.sold_at).toLocaleString("en-LK", { timeZone: "Asia/Colombo" }))}</div><div class="rule"></div><div class="bold">${esc(sale.customer_name || "Counter Sale")}</div>${sale.customer_phone ? `<div class="small">${esc(sale.customer_phone)}</div>` : ""}<div class="rule"></div>${items.map((i) => `<div class="row item"><span><b>${esc(i.name)}</b><br><span class="small">${i.qty}${i.unitLabel ? ` ${esc(i.unitLabel)}` : ""} × ${rs(Number(i.price))}${i.code ? ` · ${esc(i.code)}` : ""}</span></span><b>${rs(Number(i.price) * Number(i.qty))}</b></div>`).join("")}${discount > 0 ? `<div class="row"><span>Subtotal</span><span>${rs(Number(sale.subtotal))}</span></div><div class="row"><span>Discount</span><span>−${rs(discount)}</span></div>` : ""}<div class="row total"><span>Total</span><span>${rs(Number(sale.total))}</span></div>${sale.payment_method === "unpaid" ? `<div class="row"><span>Paid to date</span><b>${rs(Number(sale.paid_amount || 0))}</b></div><div class="row change"><span>BALANCE DUE</span><b>${rs(due)}</b></div>` : `<div class="row"><span>Received</span><b>${rs(Number(sale.amount_tendered))}</b></div><div class="row change"><span>Balance / Change</span><b>${rs(Number(sale.change_due))}</b></div>`}<div class="row small"><span>Payment</span><b>${esc(printedPayment)}</b></div>${bankPrintHTML(brand.bank)}<footer class="footer center"><div class="rule"></div>Issued by Mr. ${esc(sale.sold_by)}<br>Thank you for choosing ${esc(businessName)}.</footer></main></body></html>`,
   );
   win.document.close();
   win.focus();
@@ -188,11 +188,15 @@ export default function POS() {
   const [query, setQuery] = useState("");
   const [code, setCode] = useState("");
   const [opening, setOpening] = useState("5000");
+  const [openingContext, setOpeningContext] = useState<{ suggestedFloat: number; pendingDeposit: number } | null>(null);
+  const [deposits, setDeposits] = useState<Array<{ id: number; business_date: string; bank_remark: string; amount: number; status: string; internal_reference: string }>>([]);
+  const [depositBusy, setDepositBusy] = useState<number | null>(null);
   const [tendered, setTendered] = useState("");
   const [customer, setCustomer] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [matchedClient, setMatchedClient] = useState<{ id: number; name: string } | null>(null);
   const [phoneLookupPending, setPhoneLookupPending] = useState(false);
+  const [priorDue, setPriorDue] = useState<{ count: number; balance: number } | null>(null);
   const [showPhoneReminder, setShowPhoneReminder] = useState(false);
   const [method, setMethod] = useState("cash");
   const [onAccount, setOnAccount] = useState(false);
@@ -238,8 +242,11 @@ export default function POS() {
       });
     }
   };
+  const loadDeposits = () => request('/api/pos-day-end/deposits').then(setDeposits).catch(() => {});
   useEffect(() => {
+    void loadDeposits();
     void load();
+    request('/api/pos/opening-context').then(context => { setOpeningContext(context); setOpening(String(context.suggestedFloat)); }).catch(() => {});
     const invoice = new URLSearchParams(window.location.search).get("invoice");
     if (invoice) setInvoiceQuery(invoice);
   }, []);
@@ -274,6 +281,17 @@ export default function POS() {
     }, 300);
     return () => { clearTimeout(timer); controller.abort(); };
   }, [customerPhone, selectedInvoice]);
+  useEffect(() => {
+    setPriorDue(null);
+    if (!customerPhone.trim() || !matchedClient || selectedInvoice) return;
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      request(`/api/pos/outstanding-summary?phone=${encodeURIComponent(customerPhone.trim())}`, { signal: controller.signal })
+        .then(result => { if (!controller.signal.aborted) setPriorDue(result); })
+        .catch(() => { if (!controller.signal.aborted) setPriorDue(null); });
+    }, 300);
+    return () => { window.clearTimeout(timer); controller.abort(); };
+  }, [customerPhone, matchedClient, selectedInvoice]);
   useEffect(() => {
     setAccountClient(null); setOutstanding(null); setSelectedBills([]);
     if (accountPhone.replace(/\D/g, '').length < 7) return;
@@ -488,7 +506,7 @@ export default function POS() {
       y = 48;
     };
     header();
-    for (const sale of day.sales) {
+    for (const sale of day.sales.filter(s => !(s as any).voided_at)) {
       pdf.setFont('helvetica', 'normal'); pdf.setFontSize(8);
       const receipt = pdf.splitTextToSize(String(sale.receipt_number), 44);
       const customer = pdf.splitTextToSize(String(sale.customer_name || ''), 50);
@@ -700,6 +718,24 @@ export default function POS() {
           </div>
         </section>
       )}
+      {me?.role === 'owner' && deposits.some(d => d.status === 'pending') && <section className="rounded-[26px] border border-admin-border bg-white p-5 shadow-sm sm:p-6">
+        <h2 className="text-xl font-bold text-admin-ink">Pending bank deposits</h2>
+        <p className="mt-1 text-sm text-admin-muted">Held cash is separate from tomorrow’s drawer float and sales income.</p>
+        <div className="mt-4 grid gap-3 md:grid-cols-2">{deposits.filter(d => d.status === 'pending').map(d => <div key={d.id} className="rounded-2xl border border-admin-border p-4">
+          <div className="flex flex-wrap justify-between gap-2"><b className="text-admin-ink">POS date {d.business_date}</b><span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-900">Pending</span></div>
+          <p className="mt-2 text-2xl font-bold text-admin-ink">{rs(d.amount)}</p><p className="text-sm">Bank remark <b className="tracking-widest">{d.bank_remark}</b></p>
+          <p className="mt-1 break-all text-xs text-admin-muted">Reference: {d.internal_reference}</p>
+          <button type="button" disabled={depositBusy === d.id} className="pos-primary mt-4 w-full disabled:opacity-50" onClick={async () => {
+            const bankTransaction = window.prompt('Bank transaction / slip number for this deposit');
+            if (!bankTransaction?.trim()) return;
+            const proofUrl = window.prompt('Optional proof URL (leave blank to skip)') || '';
+            setDepositBusy(d.id);
+            try { await request(`/api/pos-day-end/deposits/${d.id}/confirm`, { method: 'POST', body: JSON.stringify({ bankTransaction, proofUrl }) }); await loadDeposits(); toast({ title: 'Deposit confirmed', description: 'Cash transfer recorded without adding income.' }); }
+            catch (e: any) { toast({ title: 'Deposit could not be confirmed', description: e.message, variant: 'destructive' }); }
+            finally { setDepositBusy(null); }
+          }}>{depositBusy === d.id ? 'Confirming…' : 'Confirm Deposit'}</button>
+        </div>)}</div>
+      </section>}
       {!day.session ? (
         <section className="mx-auto max-w-xl rounded-[26px] border border-admin-warning-line bg-admin-warning-soft p-6">
           <Banknote className="text-admin-warning" />
@@ -709,6 +745,7 @@ export default function POS() {
           <p className="mt-1 text-sm text-admin-muted">
             Enter the cash placed in the drawer before the first sale.
           </p>
+          {openingContext && <div className="mt-4 grid gap-2 rounded-xl bg-white p-4 text-sm text-admin-ink sm:grid-cols-3"><span>Suggested drawer float <b className="block">{rs(openingContext.suggestedFloat)}</b></span><span>Pending deposit <b className="block">{rs(openingContext.pendingDeposit)}</b></span><span>Physical cash held <b className="block">{rs(openingContext.suggestedFloat + openingContext.pendingDeposit)}</b></span></div>}
           <label className="mt-5 block text-xs font-bold uppercase text-admin-muted">
             Day-start fund
             <input
@@ -969,7 +1006,7 @@ export default function POS() {
                   value={customer}
                   onChange={(e) => setCustomer(e.target.value)}
                   disabled={!!selectedInvoice}
-                  placeholder="Walk-in customer"
+                  placeholder="Counter Sale"
                   className={`${input} mt-1.5`}
                 />
               </label>
@@ -977,6 +1014,7 @@ export default function POS() {
                 <label className="block text-[10px] font-bold uppercase text-admin-muted" htmlFor="pos-customer-phone">Customer phone number
                   <input id="pos-customer-phone" type="tel" inputMode="tel" autoComplete="tel" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} placeholder="07XXXXXXXX (recommended)" className={`${input} mt-1.5`} />
                 </label>
+                {priorDue && priorDue.count > 0 && <p role="alert" className="mt-2 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm font-bold text-amber-950">Previous outstanding bills: {priorDue.count} · {rs(priorDue.balance)}</p>}
                 {customerPhone.trim() && <p className="mt-1.5 text-xs text-admin-muted" aria-live="polite">{phoneLookupPending ? 'Checking existing client cards…' : matchedClient ? `Linked to ${matchedClient.name} · C${String(matchedClient.id).padStart(4, '0')}` : 'No existing client card found. This sale will not create one.'}</p>}
                 {invalidPhone && <p role="alert" className="mt-1 text-xs font-semibold text-admin-danger">Enter one valid phone number (7–15 digits), or clear the field to continue without one.</p>}
               </div>}
@@ -1050,7 +1088,7 @@ export default function POS() {
                 </p>
               </div>
             </div>
-            <POSDayEnd day={day} settings={receiptSettings} width={width} canClose={me?.role === 'owner' || (me?.permissions || []).includes('pos_day_close')} onClosed={load} />
+            <POSDayEnd day={day} settings={receiptSettings} width={width} canClose={me?.role === 'owner' || (me?.permissions || []).includes('pos_day_close')} onClosed={async () => { await load(); await loadDeposits(); }} />
             <div className="mt-4 overflow-x-auto">
               <table className="w-full min-w-[700px] text-left text-xs">
                 <thead>
