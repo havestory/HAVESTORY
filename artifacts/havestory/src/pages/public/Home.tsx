@@ -1,6 +1,6 @@
 import "./studio-home.css";
 import { SiteNotices } from "@/components/public/SiteNotices";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import {
   ArrowRight,
@@ -82,6 +82,8 @@ export default function Home() {
   const { data: portfolio } = useListPortfolio();
   const { data: reviews } = useListReviews();
   const [heroIndex, setHeroIndex] = useState(0);
+  const [previousHeroImage, setPreviousHeroImage] = useState<string | null>(null);
+  const transitionTimer = useRef<number | null>(null);
 
   const allProducts = Array.isArray(products) ? products : [];
   const featuredProducts = allProducts.filter((item) => item.featured);
@@ -109,11 +111,7 @@ export default function Home() {
     slideEnabled = Array(10).fill(true);
   }
   const heroSlots = Array.from({ length: 10 }, (_, index) => cfg?.[`heroSlideImage${index + 1}`] as string | undefined);
-  const configuredSlides = heroSlots.filter((image, index): image is string => Boolean(image && slideEnabled[index]));
-  const heroSlides = configuredSlides.length ? configuredSlides : [cfg?.heroBgImage || DEFAULT_IMAGES[0]];
-  const heroKey = heroSlides.join("|");
-  const safeHeroIndex = heroIndex % heroSlides.length;
-  const heroImage = heroSlides[safeHeroIndex];
+  const configuredSlides = [...new Set(heroSlots.filter((image, index): image is string => Boolean(image?.trim() && slideEnabled[index])))];
   const categoryFallbacks = [
     { title: "Custom Frames", copy: "Made to your photograph and space.", href: "/store", tone: "violet", image: DEFAULT_IMAGES[1] },
     { title: "Fine Art Prints", copy: "Colour-managed, crisp and lasting.", href: "/store", tone: "gold", image: DEFAULT_IMAGES[2] },
@@ -121,6 +119,11 @@ export default function Home() {
     { title: "Studio Sessions", copy: "Portrait and product photography with a gallery finish.", href: "/services", tone: "sage", image: portfolioList[1]?.imageUrl || DEFAULT_IMAGES[1] },
   ];
   const categories = categoryFallbacks.map((fallback, index) => ({ ...fallback, ...(featureCards[index] || {}), image: featureCards[index]?.image || fallback.image }));
+  // Use existing collection imagery until the studio publishes its own hero slides.
+  const heroSlides = configuredSlides.length ? configuredSlides : [...new Set([cfg?.heroBgImage || DEFAULT_IMAGES[0], ...categories.map((item) => item.image).filter(Boolean)])].slice(0, 4);
+  const heroKey = heroSlides.join("|");
+  const safeHeroIndex = heroIndex % heroSlides.length;
+  const heroImage = heroSlides[safeHeroIndex];
   const favouriteWindow = Math.min(4, favouritePool.length);
   const primaryHeroHref = safeSiteHref(cfg?.heroCtaLink, "/store");
   const primaryIsCustom = primaryHeroHref === "/custom-project";
@@ -132,13 +135,35 @@ export default function Home() {
   const heroTitle = cfg?.heroTitle || "Frame the moments that become your story.";
   const heroSubtitle = cfg?.heroSubtitle || "Made with care in Sri Lanka. Thoughtful frames, beautiful prints and a studio for the memories you want to keep.";
 
-  useEffect(() => setHeroIndex(0), [heroKey]);
+  useEffect(() => {
+    setHeroIndex(0);
+    setPreviousHeroImage(null);
+  }, [heroKey]);
+  useEffect(() => () => {
+    if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
+  }, []);
+  useEffect(() => {
+    if (heroSlides.length < 2) return;
+    const nextImage = new Image();
+    nextImage.src = heroSlides[(safeHeroIndex + 1) % heroSlides.length];
+  }, [heroKey, safeHeroIndex]);
+  const showHeroSlide = (index: number) => {
+    if (index === safeHeroIndex || !heroSlides[index]) return;
+    if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setPreviousHeroImage(null);
+    } else {
+      setPreviousHeroImage(heroImage);
+      transitionTimer.current = window.setTimeout(() => setPreviousHeroImage(null), 850);
+    }
+    setHeroIndex(index);
+  };
   useEffect(() => {
     if (heroSlides.length < 2) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const timer = window.setInterval(() => setHeroIndex((value) => (value + 1) % heroSlides.length), 7500);
+    const timer = window.setTimeout(() => showHeroSlide((safeHeroIndex + 1) % heroSlides.length), 6500);
     return () => window.clearInterval(timer);
-  }, [heroSlides.length, heroKey]);
+  }, [heroKey, safeHeroIndex]);
 
   return (
     <main className="studio-home">
@@ -154,9 +179,10 @@ export default function Home() {
           </div>
         </div>
         <div className="studio-opening-art">
-          <img src={heroImage} alt="A framed piece from the HAVESTORY studio" fetchPriority="high" decoding="async" />
+          {previousHeroImage && <img className="studio-slide-previous" src={previousHeroImage} alt="" aria-hidden="true" decoding="async" />}
+          <img key={heroImage} className={previousHeroImage ? "studio-slide-enter" : ""} src={heroImage} alt="A framed piece from the HAVESTORY studio" fetchPriority={safeHeroIndex === 0 ? "high" : "auto"} decoding="async" />
 
-          {heroSlides.length > 1 && <div className="studio-slide-controls" aria-label="Hero images">{heroSlides.map((_, index) => <button key={index} type="button" aria-label={`Show image ${index + 1}`} aria-current={index === safeHeroIndex} onClick={() => setHeroIndex(index)} />)}</div>}
+          {heroSlides.length > 1 && <div className="studio-slide-controls" role="group" aria-label="Studio gallery images">{heroSlides.map((_, index) => <button key={index} type="button" aria-label={`Show image ${index + 1} of ${heroSlides.length}`} aria-current={index === safeHeroIndex ? "true" : undefined} onClick={() => showHeroSlide(index)}><span /></button>)}</div>}
         </div>
       </section>
 
