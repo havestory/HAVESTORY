@@ -80,7 +80,7 @@ function MetricCard({ label, value, change, icon: Icon, tone = "bronze", inverse
     red: "bg-admin-danger-soft text-admin-danger border-admin-danger-line",
   };
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+    <div className="admin-stat-card rounded-2xl border border-border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex items-start justify-between gap-4">
         <div className={`flex h-10 w-10 items-center justify-center rounded-xl border ${tones[tone]}`}><Icon size={19} /></div>
         {change !== undefined && <Change value={change} inverse={inverse} />}

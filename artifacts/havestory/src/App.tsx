@@ -10,6 +10,7 @@ import { AdminLayout }    from './components/layout/AdminLayout';
 import { AuthGuard }      from './components/layout/AuthGuard';
 import { ShopCartProvider } from './lib/shop-cart';
 import { StudioLoader } from './components/StudioLoader';
+import { ScrollToTop } from './components/ScrollToTop';
 
 // Public Pages
 import Home           from './pages/public/Home';
@@ -221,6 +222,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+          <ScrollToTop />
           <ShopCartProvider><Router /></ShopCartProvider>
         </WouterRouter>
         <Toaster />

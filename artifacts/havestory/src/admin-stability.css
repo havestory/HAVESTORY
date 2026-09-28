@@ -1,30 +1,31 @@
-/* Admin palette. Tailwind utility aliases live in the index.css entrypoint. */
+/* Admin palette · LIGHT creative theme (warm gallery neutrals + bronze).
+   Tailwind utility aliases live in the index.css entrypoint. */
 html[data-hs-admin-theme] {
   --admin-on-solid: 0 0% 100%;
-  --admin-brand-ink: 32 40% 30%;
+  --admin-brand-ink: 30 52% 30%;
   --admin-success-solid: 158 62% 26%;
   --admin-warning-solid: 32 85% 29%;
   --admin-danger-solid: 350 62% 38%;
   --admin-font: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
-  --admin-canvas: 0 0% 100%;
-  --admin-surface: 0 0% 100%;
-  --admin-subtle: 35 34% 94%;
-  --admin-ink: 27 19% 14%;
-  --admin-muted: 28 11% 35%;
-  --admin-border: 32 20% 70%;
+  --admin-canvas: 36 44% 96%;
+  --admin-surface: 40 50% 99%;
+  --admin-subtle: 36 42% 92%;
+  --admin-ink: 27 24% 14%;
+  --admin-muted: 28 14% 37%;
+  --admin-border: 33 26% 80%;
   --admin-inverse: 28 26% 13%;
-  --admin-brand: 32 45% 40%;
-  --admin-brand-soft: 34 45% 94%;
-  --admin-brand-line: 33 42% 62%;
+  --admin-brand: 32 55% 42%;
+  --admin-brand-soft: 35 60% 93%;
+  --admin-brand-line: 33 48% 66%;
   --admin-success: 158 62% 26%;
-  --admin-success-soft: 152 44% 95%;
-  --admin-success-line: 156 31% 75%;
+  --admin-success-soft: 152 48% 94%;
+  --admin-success-line: 156 32% 72%;
   --admin-warning: 32 85% 29%;
-  --admin-warning-soft: 40 80% 95%;
-  --admin-warning-line: 37 51% 73%;
+  --admin-warning-soft: 40 85% 94%;
+  --admin-warning-line: 37 55% 70%;
   --admin-danger: 350 62% 38%;
-  --admin-danger-soft: 350 65% 96%;
-  --admin-danger-line: 350 43% 79%;
+  --admin-danger-soft: 350 70% 96%;
+  --admin-danger-line: 350 45% 78%;
   --admin-chart-info: 211 54% 38%;
 }
 html[data-hs-admin-theme='dark'] {
@@ -508,4 +509,187 @@ html[data-hs-admin-theme] .order-manage-scroll {
   flex: 1 1 auto;
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LIGHT CREATIVE THEME · warm gallery shell for the admin workspace
+   Applies only to the light theme; the dark theme keeps its tokens.
+   Selector pattern `html[data-hs-admin-theme]:not([data-hs-admin-theme='dark'])`
+   outranks the zero-specificity `:where()` shared block above.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Light sidebar tokens — warm paper sidebar, espresso text, bronze accents */
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) :where([data-admin-panel]) {
+  --sidebar: 38 44% 95%;
+  --sidebar-foreground: 27 24% 20%;
+  --sidebar-primary: 32 55% 40%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-border: 33 26% 83%;
+  --sidebar-accent: 35 52% 89%;
+  --sidebar-accent-foreground: 27 24% 16%;
+  --sidebar-ring: 33 48% 62%;
+}
+
+/* Light sidebar shell — soft warm gradient instead of dark espresso */
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-sidebar {
+  background: linear-gradient(180deg, hsl(40 52% 98%) 0%, hsl(37 46% 94%) 55%, hsl(35 42% 91%) 100%);
+  box-shadow: 8px 0 32px -18px hsl(32 40% 35% / 0.35);
+}
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-sidebar-heading {
+  background: linear-gradient(180deg, hsl(36 55% 92% / 0.7), transparent);
+}
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-sidebar-monogram {
+  background: linear-gradient(135deg, hsl(36 60% 62%), hsl(30 52% 38%));
+  border-color: transparent;
+  color: #fffdf6;
+  box-shadow: 0 8px 20px -8px hsl(32 55% 40% / 0.7);
+}
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-sidebar-wordmark {
+  color: hsl(27 24% 16%);
+}
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-sidebar-subtitle {
+  color: hsl(32 52% 38%);
+}
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-nav-item:hover {
+  background: hsl(35 52% 89% / 0.8);
+}
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-nav-active {
+  background: linear-gradient(135deg, hsl(36 62% 91%), hsl(34 55% 87%));
+  color: hsl(27 26% 16%);
+  box-shadow: inset 3px 0 hsl(32 55% 40%), 0 6px 18px -10px hsl(32 55% 40% / 0.55);
+}
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-sidebar > div:last-child {
+  background: hsl(37 44% 93%);
+}
+
+/* Warm canvas with a soft bronze glow */
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel].admin-frame {
+  background:
+    radial-gradient(900px 420px at 88% -6%, hsl(33 60% 60% / 0.10), transparent 60%),
+    radial-gradient(720px 400px at -4% 104%, hsl(35 55% 55% / 0.08), transparent 60%),
+    hsl(var(--admin-canvas));
+}
+
+/* Workspace header — warm surface, bronze eyebrow accent */
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-workspace-header {
+  background: linear-gradient(180deg, hsl(40 52% 99%), hsl(38 46% 96%));
+  border-bottom: 1px solid hsl(33 26% 84%);
+  box-shadow: 0 10px 30px -22px hsl(32 40% 35% / 0.4);
+}
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-workspace-title {
+  background: linear-gradient(120deg, hsl(27 24% 14%) 30%, hsl(32 55% 34%));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-new-order {
+  background: linear-gradient(135deg, hsl(36 62% 55%), hsl(31 55% 38%));
+  box-shadow: 0 10px 24px -10px hsl(32 55% 40% / 0.7);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-new-order:hover {
+  background: linear-gradient(135deg, hsl(36 62% 50%), hsl(31 55% 34%));
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px -10px hsl(32 55% 40% / 0.75);
+}
+
+/* Cards — warm lift */
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-workspace-content .bg-card {
+  box-shadow: 0 1px 2px hsl(30 25% 25% / 0.05), 0 18px 44px -28px hsl(32 45% 35% / 0.35);
+  border-color: hsl(33 28% 84%);
+}
+
+/* Tables — clean warm rows, bronze header accents */
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-table thead th {
+  background: hsl(36 48% 94%);
+  color: hsl(30 40% 32%);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-bottom: 1px solid hsl(33 30% 80%);
+}
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-table thead th:first-child {
+  border-top-left-radius: 12px;
+}
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-table thead th:last-child {
+  border-top-right-radius: 12px;
+}
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-table tbody tr {
+  transition: background 0.15s ease;
+}
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-table tbody tr:hover {
+  background: hsl(36 55% 93%) !important;
+}
+
+/* Refined chips / badges */
+html[data-hs-admin-theme] [data-admin-panel] .admin-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+html[data-hs-admin-theme] [data-admin-panel] .admin-chip-bronze {
+  background: linear-gradient(135deg, hsl(36 62% 93%), hsl(33 58% 88%));
+  color: hsl(30 52% 30%);
+  border-color: hsl(33 48% 74%);
+}
+html[data-hs-admin-theme] [data-admin-panel] .admin-chip-success {
+  background: linear-gradient(135deg, hsl(152 52% 94%), hsl(150 48% 89%));
+  color: hsl(158 62% 24%);
+  border-color: hsl(156 34% 72%);
+}
+html[data-hs-admin-theme] [data-admin-panel] .admin-chip-warning {
+  background: linear-gradient(135deg, hsl(42 88% 94%), hsl(38 82% 89%));
+  color: hsl(32 85% 27%);
+  border-color: hsl(37 58% 70%);
+}
+html[data-hs-admin-theme] [data-admin-panel] .admin-chip-danger {
+  background: linear-gradient(135deg, hsl(350 72% 96%), hsl(348 68% 91%));
+  color: hsl(350 62% 36%);
+  border-color: hsl(350 48% 78%);
+}
+html[data-hs-admin-theme] [data-admin-panel] .admin-chip-neutral {
+  background: hsl(36 40% 93%);
+  color: hsl(28 14% 38%);
+  border-color: hsl(33 24% 82%);
+}
+
+/* Primary buttons — bronze gradient */
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .bg-primary {
+  background: linear-gradient(135deg, hsl(36 60% 52%), hsl(31 55% 38%));
+  box-shadow: 0 10px 22px -10px hsl(32 55% 40% / 0.65);
+}
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .bg-primary:hover {
+  filter: brightness(1.05);
+}
+
+/* Inputs — warm focus */
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] :is(input, select, textarea):focus-visible {
+  outline: none;
+  border-color: hsl(33 55% 55%);
+  box-shadow: 0 0 0 3px hsl(33 60% 55% / 0.16);
+}
+
+/* Stat tiles — subtle bronze top accent for dashboard cards */
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-stat-card {
+  position: relative;
+  overflow: hidden;
+}
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-stat-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, hsl(36 62% 58%), hsl(33 55% 70%), transparent);
+}
+
+/* Login page stays warm */
+html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) .hs-login-page {
+  background: linear-gradient(180deg, hsl(36 55% 93%) 0%, hsl(var(--admin-canvas)) 40%) !important;
 }
