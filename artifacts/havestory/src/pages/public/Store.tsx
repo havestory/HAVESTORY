@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { useListProducts, useListCategories } from '@workspace/api-client-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/hooks/use-toast';
-import { ShoppingCart, Search, ArrowRight, Sparkles, ArrowUpRight, SlidersHorizontal, Check } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { Link, useLocation } from 'wouter';
+import { motion } from 'framer-motion';
+import { Search, ArrowRight, ArrowUpRight, ShoppingCart, SlidersHorizontal, Check, X, Frame } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { useShopCart } from '@/lib/shop-cart';
+import { ComingSoon } from '@/components/public/ComingSoon';
+import { Reveal, Stagger, StaggerItem } from '@/components/public/Reveal';
 
 // Production can be deployed before the catalog is populated. Keep a real,
 // orderable inquiry path available without inventing a database product row.
@@ -22,6 +21,9 @@ const CUSTOM_INQUIRY_PRODUCT = {
   category: { name: 'Made to measure' },
   isCustomInquiry: true,
 };
+
+const SIZE_FILTERS = ['A4', 'A3', '12×18'];
+const MATERIAL_FILTERS = ['Wood', 'Metal', 'Acrylic'];
 
 export default function Store() {
   const { data: products, isLoading } = useListProducts();
@@ -91,191 +93,310 @@ export default function Store() {
     toast({ title: 'Added to cart', description: `${product.name} is ready for checkout.` });
   };
 
+  const hasActiveFilters =
+    selectedSizes.length > 0 || selectedMaterials.length > 0 || minPrice || maxPrice || activeCategory !== 'all' || searchQuery;
 
   return (
-    <div className="hs-store min-h-screen flex flex-col">
-      <section className="hs-store-search-stage" aria-labelledby="store-heading">
-        <motion.div
-          className="hs-store-search-heading"
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <span className="editorial-kicker">FRAMES & PRINTS</span>
-          <h1 id="store-heading">Frames &amp; <em>prints.</em></h1>
-          <p>Browse available products or search by name, size, and material.</p>
-        </motion.div>
-        <div className="hs-store-search-line" role="search">
-          <label className="hs-store-search" aria-label="Search frames and prints">
-            <Search aria-hidden="true" />
-            <Input
-              aria-label="Search frames and prints"
-              placeholder="Search frames and prints"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="hs-store-search-input"
-            />
-          </label>
+    <div className="hv-page flex min-h-screen flex-col">
+      {/* ── Page hero ─────────────────────────────────────────── */}
+      <section className="hv-page-hero" aria-labelledby="store-heading">
+        <div className="hv-container">
+          <Reveal>
+            <span className="hv-kicker">Frames &amp; Prints</span>
+            <h1 id="store-heading" className="hv-display hv-display-lg">
+              Frames &amp; <em>prints.</em>
+            </h1>
+            <p className="hv-lede">Browse available products or search by name, size, and material.</p>
+          </Reveal>
+          <Reveal delay={0.12}>
+            <div className="hv-search mt-8 max-w-xl" role="search">
+              <Search aria-hidden="true" />
+              <input
+                aria-label="Search frames and prints"
+                placeholder="Search frames and prints"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+          </Reveal>
+        </div>
+        <div className="hv-hero-ornament" aria-hidden="true" />
+      </section>
+
+      {/* ── Collection ────────────────────────────────────────── */}
+      <section className="hv-section" id="collection">
+        <div className="hv-container">
+          <div className="grid gap-12 lg:grid-cols-[272px_minmax(0,1fr)]">
+            {/* Sidebar */}
+            <aside aria-label="Browse products by category" className="self-start lg:sticky lg:top-24">
+              <Reveal>
+                <p className="hv-kicker">Browse by category</p>
+                <h2 className="hv-display hv-display-sm mt-3">Categories</h2>
+              </Reveal>
+
+              <button
+                type="button"
+                className="hv-btn hv-btn-ghost hv-btn-sm mt-6 w-full lg:hidden"
+                onClick={() => setFiltersOpen(value => !value)}
+                aria-expanded={filtersOpen}
+              >
+                <SlidersHorizontal /> Filters
+                <span aria-hidden="true">{filtersOpen ? '−' : '+'}</span>
+              </button>
+
+              <Reveal delay={0.06}>
+                <nav className="mt-6" aria-label="Categories">
+                  <button
+                    type="button"
+                    onClick={() => setActiveCategory('all')}
+                    aria-pressed={activeCategory === 'all'}
+                    className={`flex w-full items-center justify-between py-3.5 text-left transition-colors ${
+                      activeCategory === 'all' ? 'text-[#171310]' : 'text-[#6f6259] hover:text-[#171310]'
+                    }`}
+                    style={{ borderBottom: '1px solid var(--hv-line-soft)' }}
+                  >
+                    <span className={`text-[15px] ${activeCategory === 'all' ? 'font-bold' : 'font-medium'}`}>
+                      All products
+                    </span>
+                    <span className={`hv-badge ${activeCategory === 'all' ? 'hv-badge-ink' : 'hv-badge-ghost'}`}>
+                      {productList.length.toString().padStart(2, '0')}
+                    </span>
+                  </button>
+                  {categoryList.map((category) => {
+                    const count = productList.filter((product) => product.categoryId?.toString() === category.id.toString()).length;
+                    const isActive = activeCategory === category.id.toString();
+                    return (
+                      <button
+                        type="button"
+                        key={category.id}
+                        onClick={() => setActiveCategory(category.id.toString())}
+                        aria-pressed={isActive}
+                        className={`flex w-full items-center justify-between py-3.5 text-left transition-colors ${
+                          isActive ? 'text-[#171310]' : 'text-[#6f6259] hover:text-[#171310]'
+                        }`}
+                        style={{ borderBottom: '1px solid var(--hv-line-soft)' }}
+                      >
+                        <span className={`text-[15px] ${isActive ? 'font-bold' : 'font-medium'}`}>{category.name}</span>
+                        <span className={`hv-badge ${isActive ? 'hv-badge-ink' : 'hv-badge-ghost'}`}>
+                          {count.toString().padStart(2, '0')}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </nav>
+              </Reveal>
+
+              <div className={`${filtersOpen ? 'block' : 'hidden'} mt-8 lg:block`}>
+                <div>
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#6f6259]">Size</p>
+                  <div className="mt-3 flex flex-col gap-2.5">
+                    {SIZE_FILTERS.map(size => (
+                      <label key={size} className="flex cursor-pointer items-center gap-3 text-[14px] font-medium text-[#2b241e]">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 shrink-0 accent-[#b07c3a]"
+                          checked={selectedSizes.includes(size)}
+                          onChange={() => toggleFilter(size, selectedSizes, setSelectedSizes)}
+                        />
+                        {size}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div className="mt-7">
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#6f6259]">Material</p>
+                  <div className="mt-3 flex flex-col gap-2.5">
+                    {MATERIAL_FILTERS.map(material => (
+                      <label key={material} className="flex cursor-pointer items-center gap-3 text-[14px] font-medium text-[#2b241e]">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 shrink-0 accent-[#b07c3a]"
+                          checked={selectedMaterials.includes(material)}
+                          onChange={() => toggleFilter(material, selectedMaterials, setSelectedMaterials)}
+                        />
+                        {material}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div className="mt-7">
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#6f6259]">Price range</p>
+                  <div className="mt-3 grid grid-cols-2 gap-3">
+                    <input
+                      aria-label="Minimum price"
+                      inputMode="numeric"
+                      placeholder="Min"
+                      value={minPrice}
+                      onChange={event => setMinPrice(event.target.value.replace(/[^0-9]/g, ''))}
+                      className="hv-input"
+                    />
+                    <input
+                      aria-label="Maximum price"
+                      inputMode="numeric"
+                      placeholder="Max"
+                      value={maxPrice}
+                      onChange={event => setMaxPrice(event.target.value.replace(/[^0-9]/g, ''))}
+                      className="hv-input"
+                    />
+                  </div>
+                </div>
+                {hasActiveFilters && (
+                  <button type="button" className="hv-text-link mt-7" onClick={clearFilters}>
+                    <X /> Clear filters
+                  </button>
+                )}
+              </div>
+            </aside>
+
+            {/* Results */}
+            <main>
+              <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+                <p className="text-sm text-[#6f6259]">
+                  {isLoading ? 'Loading the collection…' : (
+                    <><strong className="font-bold text-[#171310]">{filteredProducts.length}</strong> {filteredProducts.length === 1 ? 'piece' : 'pieces'}</>
+                  )}
+                </p>
+                <div className="hv-chip-row" role="group" aria-label="Sort products">
+                  {([
+                    ['featured', 'Featured'],
+                    ['price-low', 'Price · low to high'],
+                    ['price-high', 'Price · high to low'],
+                  ] as const).map(([mode, label]) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => setSortMode(mode)}
+                      aria-pressed={sortMode === mode}
+                      className={`hv-chip ${sortMode === mode ? 'is-active' : ''}`}
+                    >
+                      {sortMode === mode && <Check size={13} />}
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {isLoading ? (
+                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="hv-card flex flex-col overflow-hidden">
+                      <div className="hv-skeleton aspect-[4/3]" style={{ borderRadius: 0 }} />
+                      <div className="flex flex-col gap-3 p-6">
+                        <div className="hv-skeleton h-5 w-1/3" />
+                        <div className="hv-skeleton h-7 w-3/4" />
+                        <div className="hv-skeleton h-4 w-full" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : productList.length === 0 ? (
+                <div className="flex flex-col items-center">
+                  <ComingSoon
+                    eyebrow="Made to measure"
+                    title="Start with your story."
+                    description="Our ready-to-order collection is being refreshed. You can still send a custom frame inquiry today and our studio will confirm the design, size, finish, and price with you."
+                    href="/custom-project"
+                    cta="Explore custom orders"
+                  />
+                  <button
+                    type="button"
+                    className="hv-btn hv-btn-bronze mt-8"
+                    onClick={() => { addToCart(CUSTOM_INQUIRY_PRODUCT); navigate('/checkout'); }}
+                  >
+                    Start custom inquiry <ArrowRight />
+                  </button>
+                </div>
+              ) : filteredProducts?.length === 0 ? (
+                <div className="hv-empty">
+                  <div className="hv-empty-icon"><Frame /></div>
+                  <span className="hv-kicker">Nothing matched</span>
+                  <h3 className="hv-display hv-display-sm mt-4">No frames found</h3>
+                  <p className="hv-lede mt-4 mx-auto">Try adjusting your category or search filters.</p>
+                  <button type="button" className="hv-btn hv-btn-ghost mt-8" onClick={clearFilters}>
+                    Clear filters <X />
+                  </button>
+                </div>
+              ) : (
+                <Stagger
+                  key={`${activeCategory}-${sortMode}`}
+                  className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3"
+                >
+                  {sortedProducts.map((product, i) => (
+                    <StaggerItem key={product.id} className="h-full">
+                      <Link
+                        href={`/store/${product.slug || product.id}`}
+                        aria-label={`View ${product.name}`}
+                        className="hv-card hv-card-hover group flex h-full flex-col overflow-hidden"
+                      >
+                        <div className="hv-img-frame aspect-[4/3]" style={{ borderRadius: 0 }}>
+                          <img
+                            src={product.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&q=75'}
+                            alt={product.name || 'HAVESTORY frame'}
+                            loading={i === 0 ? 'eager' : 'lazy'}
+                            decoding="async"
+                          />
+                        </div>
+                        <div className="flex flex-1 flex-col p-6">
+                          <span className="hv-badge hv-badge-ghost self-start">
+                            {product.category?.name || 'Handcrafted edit'}
+                          </span>
+                          <h3 className="hv-display mt-4 line-clamp-1 text-[24px] leading-tight">{product.name}</h3>
+                          <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-[#6f6259]">
+                            {product.description || ''}
+                          </p>
+                          <div className="mt-auto flex items-end justify-between pt-6">
+                            <div>
+                              <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#a89a8c]">From</p>
+                              <p className="hv-display mt-1 text-[22px]">Rs. {product.price}</p>
+                            </div>
+                            <span className="hv-text-link">View details <ArrowUpRight /></span>
+                          </div>
+                        </div>
+                      </Link>
+                    </StaggerItem>
+                  ))}
+                </Stagger>
+              )}
+            </main>
+          </div>
         </div>
       </section>
 
-      <div id="collection" className="hs-store-collection hs-store-collection-with-sidebar">
-        <aside className="hs-store-category-panel" aria-label="Browse products by category">
-          <div className="hs-store-category-intro">
-            <span>Browse by category</span>
-            <h2>Categories</h2>
-          </div>
-          <button type="button" className="hs-store-sidebar-filter-toggle" onClick={() => setFiltersOpen(value => !value)} aria-expanded={filtersOpen}>
-            <span><SlidersHorizontal size={14} /> Filters</span>
-            <span aria-hidden="true">{filtersOpen ? '−' : '+'}</span>
-          </button>
-          <div className="hs-store-category-list">
+      {/* ── Floating cart ─────────────────────────────────────── */}
+      {cart.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 48 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="fixed inset-x-0 bottom-5 z-40 px-4"
+        >
+          <div className="hv-card mx-auto flex max-w-xl items-center justify-between gap-4 rounded-full py-3 pl-4 pr-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <span
+                className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-white"
+                style={{ background: 'linear-gradient(135deg, var(--hv-gold), var(--hv-bronze-deep))' }}
+              >
+                <ShoppingCart size={18} />
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold text-[#171310]">
+                  {cartCount} {cartCount === 1 ? 'piece' : 'pieces'} in your cart
+                </p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#a89a8c]">
+                  Subtotal · {estimatedTotalLabel}
+                </p>
+              </div>
+            </div>
             <button
               type="button"
-              onClick={() => setActiveCategory('all')}
-              aria-pressed={activeCategory === 'all'}
-              className={activeCategory === 'all' ? 'is-active' : ''}
+              onClick={() => navigate('/checkout')}
+              className="hv-btn hv-btn-bronze hv-btn-sm shrink-0"
             >
-              <span>All products</span><small>{productList.length.toString().padStart(2, '0')}</small>
+              Checkout <ArrowRight />
             </button>
-            {categoryList.map((category) => {
-              const count = productList.filter((product) => product.categoryId?.toString() === category.id.toString()).length;
-              return (
-                <button
-                  type="button"
-                  key={category.id}
-                  onClick={() => setActiveCategory(category.id.toString())}
-                  aria-pressed={activeCategory === category.id.toString()}
-                  className={activeCategory === category.id.toString() ? 'is-active' : ''}
-                >
-                  <span>{category.name}</span><small>{count.toString().padStart(2, '0')}</small>
-                </button>
-              );
-            })}
           </div>
-          <div className={`hs-store-filter-panel ${filtersOpen ? 'is-open' : ''}`}>
-            <div className="hs-store-filter-group">
-              <p>Size</p>
-              {['A4', 'A3', '12×18'].map(size => (
-                <label key={size}><input type="checkbox" checked={selectedSizes.includes(size)} onChange={() => toggleFilter(size, selectedSizes, setSelectedSizes)} /><span className="hs-filter-check"><Check size={11} /></span>{size}</label>
-              ))}
-            </div>
-            <div className="hs-store-filter-group">
-              <p>Material</p>
-              {['Wood', 'Metal', 'Acrylic'].map(material => (
-                <label key={material}><input type="checkbox" checked={selectedMaterials.includes(material)} onChange={() => toggleFilter(material, selectedMaterials, setSelectedMaterials)} /><span className="hs-filter-check"><Check size={11} /></span>{material}</label>
-              ))}
-            </div>
-            <div className="hs-store-filter-group hs-store-price-filter">
-              <p>Price range</p>
-              <div className="hs-store-price-inputs">
-                <Input aria-label="Minimum price" inputMode="numeric" placeholder="Min" value={minPrice} onChange={event => setMinPrice(event.target.value.replace(/[^0-9]/g, ''))} />
-                <Input aria-label="Maximum price" inputMode="numeric" placeholder="Max" value={maxPrice} onChange={event => setMaxPrice(event.target.value.replace(/[^0-9]/g, ''))} />
-              </div>
-            </div>
-            {(selectedSizes.length > 0 || selectedMaterials.length > 0 || minPrice || maxPrice || activeCategory !== 'all' || searchQuery) && <button type="button" className="hs-store-clear-category" onClick={clearFilters}>Clear filters <ArrowRight size={13} /></button>}
-          </div>
-          {activeCategory !== 'all' && !filtersOpen && (
-            <button type="button" className="hs-store-clear-category" onClick={() => setActiveCategory('all')}>Show all products <ArrowRight size={13} /></button>
-          )}
-        </aside>
-        <main className="hs-store-results">
-
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="flex flex-col gap-4">
-                  <Skeleton className="aspect-[4/3] w-full rounded-[0.25rem]" />
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                </div>
-              ))}
-            </div>
-          ) : productList.length === 0 ? (
-            <div className="hs-store-empty overflow-hidden rounded-2xl border border-secondary/25 bg-primary px-6 py-16 text-center text-primary-foreground shadow-[0_18px_60px_rgba(0,0,0,0.12)] sm:px-12">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-secondary text-secondary-foreground"><Sparkles size={24} /></div>
-              <span className="editorial-kicker mt-7 block text-secondary">Made to measure</span>
-              <h3 className="editorial-display mt-4 text-4xl text-white sm:text-5xl">Start with your story.</h3>
-              <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-primary-foreground/70 sm:text-base">Our ready-to-order collection is being refreshed. You can still send a custom frame inquiry today and our studio will confirm the design, size, finish, and price with you.</p>
-              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                <Button
-                  type="button"
-                  onClick={() => { addToCart(CUSTOM_INQUIRY_PRODUCT); navigate('/checkout'); }}
-                  className="h-12 rounded-full bg-secondary px-6 text-xs font-black uppercase tracking-[0.14em] text-secondary-foreground hover:bg-secondary/90"
-                >
-                  Start custom inquiry <ArrowRight size={15} />
-                </Button>
-                <Link href="/custom-project" className="inline-flex h-12 items-center gap-2 rounded-full border border-white/20 px-6 text-xs font-bold uppercase tracking-[0.14em] text-white/80 transition-colors hover:border-secondary hover:text-secondary">
-                  Explore custom orders <ArrowUpRight size={14} />
-                </Link>
-              </div>
-            </div>
-          ) : filteredProducts?.length === 0 ? (
-            <div className="text-center py-32 border border-dashed border-border bg-muted/20 rounded-[0.25rem]">
-              <h3 className="font-serif text-2xl font-bold text-foreground mb-2">No frames found</h3>
-              <p className="text-muted-foreground text-sm">Try adjusting your category or search filters.</p>
-              <Button
-                variant="outline"
-                className="mt-6 border-primary text-primary hover:bg-primary/5 rounded-[0.25rem] font-semibold text-xs uppercase tracking-widest"
-                onClick={clearFilters}
-              >
-                Clear Filters
-              </Button>
-            </div>
-          ) : (
-            <div className={`hs-store-grid ${sortedProducts.length === 1 ? 'is-single' : ''}`}>
-              {sortedProducts.map((product, i) => (
-                <motion.div
-                  key={product.id}
-                  initial={{ opacity:0, y:32 }}
-                  whileInView={{ opacity:1, y:0 }}
-                  viewport={{ once:true }}
-                  transition={{ duration:0.7, delay: (i % 6) * 0.1 }}
-                  className="hs-store-product-wrap"
-                >
-                  <Link
-                    href={`/store/${product.slug || product.id}`}
-                    aria-label={`View ${product.name}`}
-                    className="hs-store-product store-product-card group flex h-full flex-col"
-                  >
-                    <div className="store-product-image aspect-[4/3]">
-                      <img
-                        src={product.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&q=75'}
-                        alt={product.name || 'HAVESTORY frame'}
-                        loading={i === 0 ? 'eager' : 'lazy'}
-                        decoding="async"
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <div className="hs-store-product-body">
-                      <div className="hs-store-product-meta">
-                        <span className="store-number">{product.category?.name || 'HANDCRAFTED EDIT'}</span>
-                      </div>
-                      <h3 className="editorial-display line-clamp-1 text-2xl font-bold text-foreground">{product.name}</h3>
-                      <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{product.description || ''}</p>
-                      <div className="hs-store-product-footer">
-                        <div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">From</p><p className="mt-1 text-lg font-black text-foreground">Rs. {product.price}</p></div>
-                        <span className="hs-store-view-details">View details <ArrowUpRight size={13} /></span>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </main>
-      </div>
-
-      {cart.length > 0 && (
-        <div className="hs-store-floating-cart animate-in slide-in-from-bottom-4">
-          <div>
-            <div className="flex min-w-0 items-center gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground"><ShoppingCart size={17} /></div><div className="min-w-0"><div className="truncate text-sm font-bold">{cartCount} {cartCount === 1 ? 'piece' : 'pieces'} in your cart</div><div className="text-[10px] uppercase tracking-[0.16em] text-primary-foreground/55">Subtotal {estimatedTotalLabel}</div></div></div>
-            <Button onClick={() => navigate('/checkout')} className="shrink-0 rounded-xl bg-secondary px-4 text-xs font-bold uppercase tracking-wider text-secondary-foreground hover:bg-secondary/90">Checkout <ArrowRight size={14} /></Button>
-          </div>
-        </div>
+        </motion.div>
       )}
-
-
     </div>
   );
 }

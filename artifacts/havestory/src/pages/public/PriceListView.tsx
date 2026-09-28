@@ -1,6 +1,7 @@
 import { useParams } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { Printer, Calendar, AlertCircle } from 'lucide-react';
+import { Reveal, Stagger, StaggerItem } from '@/components/public/Reveal';
 
 interface PriceListSection {
   id: string;
@@ -33,6 +34,9 @@ async function apiFetch<T>(path: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+const fmtDate = (d: string) =>
+  new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+
 export default function PriceListView() {
   const params = useParams<{ publicId: string }>();
   const publicId = params.publicId;
@@ -46,10 +50,10 @@ export default function PriceListView() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center animate-pulse">
-          <div className="w-12 h-12 rounded-full bg-secondary/20 mx-auto mb-4" />
-          <p className="text-muted-foreground text-sm">Loading price list...</p>
+      <div className="hv-page flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="hv-skeleton mx-auto mb-5 h-12 w-12 rounded-full" />
+          <p className="text-sm text-[#6f6259]">Loading price list...</p>
         </div>
       </div>
     );
@@ -57,11 +61,11 @@ export default function PriceListView() {
 
   if (error || !pl) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center max-w-sm px-6">
-          <AlertCircle className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
-          <h2 className="font-serif text-2xl font-bold mb-2">Price List Not Found</h2>
-          <p className="text-muted-foreground text-sm">
+      <div className="hv-page flex min-h-screen items-center justify-center px-6">
+        <div className="max-w-sm text-center">
+          <div className="hv-empty-icon mb-6"><AlertCircle /></div>
+          <h2 className="hv-display hv-display-sm mb-3">Price List Not Found</h2>
+          <p className="text-sm leading-7 text-[#6f6259]">
             This price list may have expired, been deactivated, or the link is incorrect.
           </p>
         </div>
@@ -72,100 +76,115 @@ export default function PriceListView() {
   const isExpired = pl.expiresAt && new Date(pl.expiresAt) < new Date();
 
   return (
-    <div className="hsc-price-list min-h-screen bg-background">
-      {/* Print styles */}
-      <style>{`
-        @media print {
-          .no-print { display: none !important; }
-          body { font-family: sans-serif; }
-          .price-list-content { padding: 0 !important; }
-        }
-      `}</style>
-
-      {/* Header */}
-      <div className="bg-primary py-12 text-white noise relative overflow-hidden no-print">
-        <div className="relative z-10 max-w-4xl mx-auto px-6 flex items-start justify-between">
-          <div>
-            <span className="text-[9px] uppercase tracking-widest font-bold text-primary-foreground/60 mb-2 block">Private Price List</span>
-            <h1 className="text-3xl lg:text-4xl font-serif font-bold text-white mb-2">{pl.title}</h1>
-            {pl.subtitle && <p className="text-primary-foreground/80 text-lg">{pl.subtitle}</p>}
-          </div>
-          <button
-            onClick={() => window.print()}
-            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 text-xs font-bold uppercase tracking-widest transition-colors shrink-0 mt-2"
-          >
-            <Printer className="w-4 h-4" />
-            Print
-          </button>
+    <div className="hv-page min-h-screen">
+      {/* Hero */}
+      <header className="hv-page-hero print:hidden">
+        <div className="hv-hero-ornament" aria-hidden="true" />
+        <div className="hv-container relative">
+          <Reveal>
+            <span className="hv-badge hv-badge-bronze mb-6">Private Price List</span>
+            <h1 className="hv-display hv-display-md">{pl.title}</h1>
+            {pl.subtitle && <p className="hv-lede">{pl.subtitle}</p>}
+            <button
+              onClick={() => window.print()}
+              className="hv-btn hv-btn-ghost hv-btn-sm mt-8"
+            >
+              <Printer />
+              Print
+            </button>
+          </Reveal>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-4xl mx-auto px-6 py-10 space-y-8 price-list-content">
-        {/* Validity notice */}
-        {pl.expiresAt && (
-          <div className={`flex items-center gap-3 p-4 border ${isExpired ? 'border-destructive/40 bg-destructive/10 text-destructive' : 'border-secondary/30 bg-secondary/10 text-secondary'}`}>
-            <Calendar className="w-4 h-4 shrink-0" />
-            <p className="text-sm font-medium">
-              {isExpired
-                ? `This price list expired on ${new Date(pl.expiresAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}.`
-                : `Valid until ${new Date(pl.expiresAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}.`}
-            </p>
-          </div>
-        )}
+      <main className="hv-section-tight print:py-0">
+        <div className="hv-container max-w-4xl">
+          {/* Validity notice */}
+          {pl.expiresAt && (
+            <Reveal className="mb-8 print:hidden">
+              <div className={`hv-card flex items-center gap-3 p-4 ${isExpired ? 'border-[rgba(180,60,50,0.35)]' : 'border-[rgba(176,124,58,0.35)]'}`}>
+                <Calendar className={`h-4 w-4 shrink-0 ${isExpired ? 'text-[#b43c32]' : 'text-[#b07c3a]'}`} />
+                <p className={`text-sm font-medium ${isExpired ? 'text-[#b43c32]' : 'text-[#8a5f28]'}`}>
+                  {isExpired
+                    ? `This price list expired on ${fmtDate(pl.expiresAt)}.`
+                    : `Valid until ${fmtDate(pl.expiresAt)}.`}
+                </p>
+              </div>
+            </Reveal>
+          )}
 
-        {/* Sections */}
-        {pl.sections.map((section) => (
-          <div key={section.id} className="space-y-3">
-            <h2 className="font-serif text-xl font-bold text-foreground border-b border-border pb-2">{section.title}</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-muted/60 border border-border">
-                    {section.columns.map((col, i) => section.visibleColumns?.[i] !== false && (
-                      <th key={i} className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border">
-                        {col}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {section.rows.map((row, ri) => (
-                    <tr key={row.id} className={`border-b border-border ${ri % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
-                      {row.cells.map((cell, ci) => section.visibleColumns?.[ci] !== false && (
-                        <td key={ci} className="px-4 py-3 text-sm text-foreground">
-                          {cell || '—'}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {/* Section anchors */}
+          {pl.sections.length > 1 && (
+            <div className="hv-chip-row mb-10 print:hidden">
+              {pl.sections.map((s, i) => (
+                <a key={s.id} href={`#pl-section-${i}`} className="hv-chip">{s.title}</a>
+              ))}
             </div>
-          </div>
-        ))}
+          )}
 
-        {pl.requirements && <section className="rounded-xl border-2 border-amber-500 bg-amber-50 p-5 text-stone-900" aria-label="Customer requirements">
-          <h2 className="mb-2 text-lg font-bold">Requirements &amp; terms</h2>
-          <p className="whitespace-pre-line text-sm leading-relaxed">{pl.requirements}</p>
-        </section>}
-        {/* Notes */}
-        {pl.note && (
-          <div className="border border-border bg-muted/30 p-5">
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Notes</p>
-            <p className="text-sm text-foreground leading-relaxed">{pl.note}</p>
-          </div>
-        )}
+          {/* Sections */}
+          <Stagger className="space-y-10">
+            {pl.sections.map((section, si) => (
+              <StaggerItem key={section.id}>
+                <section id={`pl-section-${si}`} className="hv-card scroll-mt-32 overflow-hidden">
+                  <div className="border-b border-[rgba(23,19,16,0.08)] px-6 py-5 md:px-8">
+                    <h2 className="hv-display text-[22px]">{section.title}</h2>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr>
+                          {section.columns.map((col, i) => section.visibleColumns?.[i] !== false && (
+                            <th key={i} className="border-b border-[rgba(23,19,16,0.08)] bg-[rgba(23,19,16,0.02)] px-6 py-3.5 text-left text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#6f6259] md:px-8">
+                              {col}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {section.rows.map((row) => (
+                          <tr key={row.id} className="border-b border-[rgba(23,19,16,0.06)] transition-colors last:border-0 hover:bg-[rgba(176,124,58,0.05)]">
+                            {row.cells.map((cell, ci) => section.visibleColumns?.[ci] !== false && (
+                              <td key={ci} className={`px-6 py-3.5 text-sm md:px-8 ${ci === 0 ? 'font-semibold text-[#171310]' : 'text-[#2b241e]'}`}>
+                                {cell || '—'}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              </StaggerItem>
+            ))}
+          </Stagger>
 
-        {/* Footer */}
-        <div className="pt-6 border-t border-border text-center no-print">
-          <p className="text-xs text-muted-foreground">
-            This is a private price list shared exclusively for your reference. Please do not distribute.
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Generated on {new Date(pl.createdAt).toLocaleDateString('en-GB')}
-          </p>
+          {/* Requirements */}
+          {pl.requirements && (
+            <section aria-label="Customer requirements" className="mt-10 rounded-[20px] border border-[rgba(176,124,58,0.35)] bg-[rgba(217,169,78,0.08)] p-6 md:p-8">
+              <h2 className="hv-display mb-3 text-[20px]">Requirements &amp; terms</h2>
+              <p className="whitespace-pre-line text-sm leading-7 text-[#2b241e]">{pl.requirements}</p>
+            </section>
+          )}
+
+          {/* Notes */}
+          {pl.note && (
+            <div className="mt-8 rounded-[20px] border border-[rgba(23,19,16,0.08)] bg-[#f1e9da] p-6 md:p-8">
+              <p className="mb-2 text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#8a5f28]">Notes</p>
+              <p className="text-sm leading-7 text-[#2b241e]">{pl.note}</p>
+            </div>
+          )}
+
+          {/* Footer */}
+          <footer className="mt-12 border-t border-[rgba(23,19,16,0.08)] pt-8 text-center print:hidden">
+            <p className="text-xs leading-6 text-[#a89a8c]">
+              This is a private price list shared exclusively for your reference. Please do not distribute.
+            </p>
+            <p className="mt-1 text-xs text-[#a89a8c]">
+              Generated on {new Date(pl.createdAt).toLocaleDateString('en-GB')}
+            </p>
+          </footer>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

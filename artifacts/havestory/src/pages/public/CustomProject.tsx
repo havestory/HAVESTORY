@@ -1,23 +1,26 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { useGetSettings } from '@workspace/api-client-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { PenTool, Upload, CheckCircle, ChevronRight } from 'lucide-react';
+import { PenTool, Upload, CheckCircle, ArrowRight } from 'lucide-react';
 import { Link } from 'wouter';
+import { Reveal, Stagger, StaggerItem, FadeIn } from '@/components/public/Reveal';
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
-const fadeUp = {
-  hidden:  { opacity: 0, y: 28 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.65 } },
-};
+const PROJECT_TYPES = [
+  'Custom Photo Frame',
+  'Collage / Multi-Panel',
+  'Large Format Print',
+  'Canvas Print',
+  'Story Collage',
+  'Studio Photography',
+  'Colour Lab Services',
+  'Other',
+];
+
+const STEP_BADGE =
+  'grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs font-extrabold bg-[rgba(176,124,58,0.12)] text-[#8a5f28]';
 
 export default function CustomProject() {
-  const { data: settings } = useGetSettings();
   const { toast } = useToast();
 
   const [submitted, setSubmitted] = useState(false);
@@ -39,10 +42,10 @@ export default function CustomProject() {
   });
   const [referenceFile, setReferenceFile] = useState<File | null>(null);
 
-  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+  const set = (k: keyof typeof form) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }));
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!form.customerName || !form.phone || !form.projectType || !form.description) {
       toast({ title: 'Missing fields', description: 'Please fill in the required fields.', variant: 'destructive' });
@@ -75,182 +78,192 @@ export default function CustomProject() {
 
   if (submitted) {
     return (
-      <div className="hsx-custom-success">
-        <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}>
-          <div className="w-20 h-20 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-10 h-10 text-secondary" />
+      <div className="hv-page">
+        <section className="hv-section">
+          <div className="hv-container max-w-2xl text-center">
+            <FadeIn>
+              <div className="hv-card mx-auto max-w-xl p-10 md:p-14">
+                <span className="mx-auto mb-8 grid h-20 w-20 place-items-center rounded-full bg-[rgba(176,124,58,0.12)] text-[#8a5f28]">
+                  <CheckCircle className="h-10 w-10" aria-hidden="true" />
+                </span>
+                <h2 className="hv-display hv-display-md">Request received!</h2>
+                <p className="hv-lede mx-auto mt-4 text-center">
+                  Thank you for reaching out. Our studio team will review your custom
+                  project request and get back to you shortly.
+                </p>
+                {projectReference && (
+                  <div className="hv-badge hv-badge-bronze mx-auto mt-8 w-fit">
+                    Reference · {projectReference}
+                  </div>
+                )}
+                <div className="mt-10 flex flex-wrap justify-center gap-4">
+                  <Link href="/" className="hv-btn hv-btn-solid">
+                    Back to Home
+                  </Link>
+                  <Link href="/track-order" className="hv-btn hv-btn-ghost">
+                    Track Order <ArrowRight aria-hidden="true" />
+                  </Link>
+                </div>
+              </div>
+            </FadeIn>
           </div>
-          <h2 className="font-serif text-4xl font-bold text-foreground mb-3">Request Received!</h2>
-          <p className="text-muted-foreground mb-8 leading-relaxed">
-            Thank you for reaching out. Our studio team will review your custom project request and get back to you shortly.
-          </p>
-          {projectReference && <div className="mx-auto mb-8 w-fit rounded-full border border-secondary/25 bg-secondary/10 px-5 py-2 text-xs font-black tracking-[.14em] text-secondary">REFERENCE · {projectReference}</div>}
-          <div className="flex gap-3 justify-center">
-            <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 btn-glow uppercase text-xs tracking-widest px-6">
-              <Link href="/">Back to Home</Link>
-            </Button>
-            <Button asChild variant="outline" className="uppercase text-xs tracking-widest px-6">
-              <Link href="/track-order">Track Order</Link>
-            </Button>
-          </div>
-        </motion.div>
+        </section>
       </div>
     );
   }
 
   return (
-    <div className="hsx-page hsx-custom-page">
+    <div className="hv-page">
       {/* Hero */}
-      <section className="hsx-custom-hero">
-        <div>
-          <div className="flex items-center gap-2 text-primary-foreground/50 text-xs tracking-widest uppercase mb-6">
-            <Link href="/" className="hover:text-secondary transition-colors">Home</Link>
-            <ChevronRight className="w-3 h-3" />
-            <span className="text-secondary">Custom Project</span>
-          </div>
-          <motion.div initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.08 } } }}>
-            <motion.p variants={fadeUp} className="section-label mb-3">Custom Studio Work</motion.p>
-            <motion.h1 variants={fadeUp} className="font-serif text-5xl md:text-7xl font-bold leading-none mb-6">
-              Request a<br />
-              <span className="italic">Custom Frame.</span>
-            </motion.h1>
-            <motion.p variants={fadeUp} className="text-primary-foreground/75 text-lg max-w-xl leading-relaxed">
-              Share your photo, preferred size and finish. We will review the details and prepare a quote.
-            </motion.p>
-          </motion.div>
+      <header className="hv-page-hero">
+        <div className="hv-container">
+          <span className="hv-kicker">Custom studio work</span>
+          <h1 className="hv-display hv-display-lg">
+            Request a <em>custom frame.</em>
+          </h1>
+          <p className="hv-lede">
+            Share your photo, preferred size and finish. We will review the details
+            and prepare a quote.
+          </p>
         </div>
-      </section>
+        <div className="hv-hero-ornament" aria-hidden="true" />
+      </header>
 
       {/* Form */}
-      <section className="hsx-custom-form-section">
-        <div>
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={{ visible: { transition: { staggerChildren: 0.07 } } }}>
+      <section className="hv-section">
+        <div className="hv-container max-w-4xl">
+          <Reveal className="mb-10">
+            <span className="hv-kicker">Project details</span>
+            <h2 className="hv-display hv-display-md mt-4">Tell us about your project</h2>
+            <p className="mt-3 text-[#6f6259]">
+              Fields marked <span className="font-bold text-[#a63d2f]">*</span> are required.
+            </p>
+          </Reveal>
 
-            <motion.div variants={fadeUp} className="mb-10">
-              <p className="section-label mb-2">Project Details</p>
-              <h2 className="font-serif text-3xl font-bold text-foreground">Tell us about your project</h2>
-              <p className="text-muted-foreground mt-3">Fields marked <span className="text-destructive">*</span> are required.</p>
-            </motion.div>
-
-            <form onSubmit={handleSubmit} className="space-y-0">
-              {/* Contact info */}
-              <motion.div variants={fadeUp} className="hsx-form-card">
-                <h3 className="font-serif text-xl font-semibold mb-5 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-secondary/10 text-secondary text-xs flex items-center justify-center font-bold font-sans">1</span>
-                  Contact Information
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div>
-                    <Label className="section-label mb-2 block">Full Name <span className="text-destructive">*</span></Label>
-                    <Input value={form.customerName} onChange={set('customerName')} placeholder="Your full name" className="border-0 border-b border-border rounded-none bg-transparent focus-visible:ring-0 focus-visible:border-secondary px-0" required />
-                  </div>
-                  <div>
-                    <Label className="section-label mb-2 block">Phone <span className="text-destructive">*</span></Label>
-                    <Input value={form.phone} onChange={set('phone')} placeholder="+94 77 000 0000" className="border-0 border-b border-border rounded-none bg-transparent focus-visible:ring-0 focus-visible:border-secondary px-0" required />
-                  </div>
-                  <div>
-                    <Label className="section-label mb-2 block">Email</Label>
-                    <Input type="email" value={form.email} onChange={set('email')} placeholder="your@email.com" className="border-0 border-b border-border rounded-none bg-transparent focus-visible:ring-0 focus-visible:border-secondary px-0" />
-                  </div>
-                  <div>
-                    <Label className="section-label mb-2 block">Business Name</Label>
-                    <Input value={form.businessName} onChange={set('businessName')} placeholder="Optional" className="border-0 border-b border-border rounded-none bg-transparent focus-visible:ring-0 focus-visible:border-secondary px-0" />
+          <form onSubmit={handleSubmit}>
+            <Stagger className="space-y-8">
+              {/* 1 — Contact */}
+              <StaggerItem>
+                <div className="hv-card p-8 md:p-10">
+                  <h3 className="hv-display hv-display-sm flex items-center gap-3">
+                    <span className={STEP_BADGE}>1</span>
+                    Contact information
+                  </h3>
+                  <div className="mt-8 grid gap-5 sm:grid-cols-2">
+                    <div className="hv-field">
+                      <label htmlFor="cp-name">Full Name *</label>
+                      <input id="cp-name" value={form.customerName} onChange={set('customerName')} placeholder="Your full name" className="hv-input" required />
+                    </div>
+                    <div className="hv-field">
+                      <label htmlFor="cp-phone">Phone *</label>
+                      <input id="cp-phone" value={form.phone} onChange={set('phone')} placeholder="+94 77 000 0000" className="hv-input" required />
+                    </div>
+                    <div className="hv-field">
+                      <label htmlFor="cp-email">Email</label>
+                      <input id="cp-email" type="email" value={form.email} onChange={set('email')} placeholder="your@email.com" className="hv-input" />
+                    </div>
+                    <div className="hv-field">
+                      <label htmlFor="cp-business">Business Name</label>
+                      <input id="cp-business" value={form.businessName} onChange={set('businessName')} placeholder="Optional" className="hv-input" />
+                    </div>
                   </div>
                 </div>
-              </motion.div>
+              </StaggerItem>
 
-              {/* Project details */}
-              <motion.div variants={fadeUp} className="hsx-form-card">
-                <h3 className="font-serif text-xl font-semibold mb-5 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-secondary/10 text-secondary text-xs flex items-center justify-center font-bold font-sans">2</span>
-                  Project Specifications
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div>
-                    <Label className="section-label mb-2 block">Project Type <span className="text-destructive">*</span></Label>
-                    <select
-                      value={form.projectType} onChange={set('projectType')}
-                      required
-                      className="w-full border-0 border-b border-border bg-transparent text-foreground text-sm py-2 focus:outline-none focus:border-secondary transition-colors"
-                    >
-                      <option value="">Select type...</option>
-                      <option>Custom Photo Frame</option>
-                      <option>Collage / Multi-Panel</option>
-                      <option>Large Format Print</option>
-                      <option>Canvas Print</option>
-                      <option>Story Collage</option>
-                      <option>Studio Photography</option>
-                      <option>Colour Lab Services</option>
-                      <option>Other</option>
-                    </select>
-                  </div>
-                  <div>
-                    <Label className="section-label mb-2 block">Required Size</Label>
-                    <Input value={form.requiredSize} onChange={set('requiredSize')} placeholder='e.g. 20" × 24" or A3' className="border-0 border-b border-border rounded-none bg-transparent focus-visible:ring-0 focus-visible:border-secondary px-0" />
-                  </div>
-                  <div>
-                    <Label className="section-label mb-2 block">Quantity</Label>
-                    <Input type="number" min="1" value={form.quantity} onChange={set('quantity')} placeholder="1" className="border-0 border-b border-border rounded-none bg-transparent focus-visible:ring-0 focus-visible:border-secondary px-0" />
-                  </div>
-                  <div>
-                    <Label className="section-label mb-2 block">Budget (LKR)</Label>
-                    <Input value={form.budget} onChange={set('budget')} placeholder="Your estimated budget" className="border-0 border-b border-border rounded-none bg-transparent focus-visible:ring-0 focus-visible:border-secondary px-0" />
-                  </div>
-                  <div className="md:col-span-2">
-                    <Label className="section-label mb-2 block">Deadline</Label>
-                    <Input type="date" value={form.deadline} onChange={set('deadline')} className="border-0 border-b border-border rounded-none bg-transparent focus-visible:ring-0 focus-visible:border-secondary px-0" />
+              {/* 2 — Specifications */}
+              <StaggerItem>
+                <div className="hv-card p-8 md:p-10">
+                  <h3 className="hv-display hv-display-sm flex items-center gap-3">
+                    <span className={STEP_BADGE}>2</span>
+                    Project specifications
+                  </h3>
+                  <div className="mt-8 grid gap-5 sm:grid-cols-2">
+                    <div className="hv-field">
+                      <label htmlFor="cp-type">Project Type *</label>
+                      <select id="cp-type" value={form.projectType} onChange={set('projectType')} required className="hv-select">
+                        <option value="">Select type…</option>
+                        {PROJECT_TYPES.map((t) => (
+                          <option key={t} value={t}>{t}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="hv-field">
+                      <label htmlFor="cp-size">Required Size</label>
+                      <input id="cp-size" value={form.requiredSize} onChange={set('requiredSize')} placeholder='e.g. 20" × 24" or A3' className="hv-input" />
+                    </div>
+                    <div className="hv-field">
+                      <label htmlFor="cp-qty">Quantity</label>
+                      <input id="cp-qty" type="number" min="1" value={form.quantity} onChange={set('quantity')} placeholder="1" className="hv-input" />
+                    </div>
+                    <div className="hv-field">
+                      <label htmlFor="cp-budget">Budget (LKR)</label>
+                      <input id="cp-budget" value={form.budget} onChange={set('budget')} placeholder="Your estimated budget" className="hv-input" />
+                    </div>
+                    <div className="hv-field sm:col-span-2">
+                      <label htmlFor="cp-deadline">Deadline</label>
+                      <input id="cp-deadline" type="date" value={form.deadline} onChange={set('deadline')} className="hv-input" />
+                    </div>
+                    <div className="hv-field sm:col-span-2">
+                      <label htmlFor="cp-description">Project Description *</label>
+                      <textarea
+                        id="cp-description"
+                        value={form.description}
+                        onChange={set('description')}
+                        placeholder="Describe your project in detail — what you need, any special requirements, inspiration…"
+                        rows={5}
+                        className="hv-textarea"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
-                <div className="mt-5">
-                  <Label className="section-label mb-2 block">Project Description <span className="text-destructive">*</span></Label>
-                  <Textarea value={form.description} onChange={set('description')} placeholder="Describe your project in detail — what you need, any special requirements, inspiration..." rows={5} className="border-0 border-b border-border rounded-none bg-transparent focus-visible:ring-0 focus-visible:border-secondary px-0 resize-none" required />
-                </div>
-              </motion.div>
+              </StaggerItem>
 
-              {/* Delivery + file */}
-              <motion.div variants={fadeUp} className="hsx-form-card">
-                <h3 className="font-serif text-xl font-semibold mb-5 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-secondary/10 text-secondary text-xs flex items-center justify-center font-bold font-sans">3</span>
-                  Reference & Delivery
-                </h3>
-                <div className="space-y-5">
-                  <div>
-                    <Label className="section-label mb-2 block">Delivery Address</Label>
-                    <Textarea value={form.deliveryAddress} onChange={set('deliveryAddress')} placeholder="Full delivery address" rows={3} className="border-0 border-b border-border rounded-none bg-transparent focus-visible:ring-0 focus-visible:border-secondary px-0 resize-none" />
-                  </div>
-                  <div>
-                    <Label className="section-label mb-2 block">Additional Notes</Label>
-                    <Textarea value={form.additionalNotes} onChange={set('additionalNotes')} placeholder="Anything else we should know..." rows={3} className="border-0 border-b border-border rounded-none bg-transparent focus-visible:ring-0 focus-visible:border-secondary px-0 resize-none" />
-                  </div>
-                  <div>
-                    <Label className="section-label mb-2 block">Reference Image / File</Label>
-                    <label className="flex flex-col items-center justify-center border-2 border-dashed border-border hover:border-secondary transition-colors cursor-pointer py-8 px-4 text-center gap-2">
-                      <Upload className="w-6 h-6 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">
-                        {referenceFile ? referenceFile.name : 'Click to upload a reference image or file'}
-                      </span>
-                      <span className="text-xs text-muted-foreground/60">PNG, JPG, PDF up to 10MB</span>
-                      <input type="file" className="hidden" accept="image/*,.pdf" onChange={e => setReferenceFile(e.target.files?.[0] || null)} />
-                    </label>
+              {/* 3 — Reference & delivery */}
+              <StaggerItem>
+                <div className="hv-card p-8 md:p-10">
+                  <h3 className="hv-display hv-display-sm flex items-center gap-3">
+                    <span className={STEP_BADGE}>3</span>
+                    Reference &amp; delivery
+                  </h3>
+                  <div className="mt-8 space-y-5">
+                    <div className="hv-field">
+                      <label htmlFor="cp-address">Delivery Address</label>
+                      <textarea id="cp-address" value={form.deliveryAddress} onChange={set('deliveryAddress')} placeholder="Full delivery address" rows={3} className="hv-textarea" />
+                    </div>
+                    <div className="hv-field">
+                      <label htmlFor="cp-notes">Additional Notes</label>
+                      <textarea id="cp-notes" value={form.additionalNotes} onChange={set('additionalNotes')} placeholder="Anything else we should know…" rows={3} className="hv-textarea" />
+                    </div>
+                    <div className="hv-field">
+                      <label>Reference Image / File</label>
+                      <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-[14px] border-2 border-dashed border-[rgba(23,19,16,0.18)] bg-[#fffdf9] px-4 py-10 text-center transition-colors hover:border-[#b07c3a]">
+                        <Upload className="h-6 w-6 text-[#a89a8c]" aria-hidden="true" />
+                        <span className="text-[15px] font-medium text-[#171310]">
+                          {referenceFile ? referenceFile.name : 'Click to upload a reference image or file'}
+                        </span>
+                        <span className="text-xs text-[#a89a8c]">PNG, JPG, PDF up to 10MB</span>
+                        <input type="file" className="hidden" accept="image/*,.pdf" onChange={e => setReferenceFile(e.target.files?.[0] || null)} />
+                      </label>
+                    </div>
                   </div>
                 </div>
-              </motion.div>
+              </StaggerItem>
 
-              <motion.div variants={fadeUp}>
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="hsx-custom-submit"
-                >
-                  {loading ? 'Submitting your request...' : 'Submit Custom Project Request'}
-                  {!loading && <PenTool className="w-4 h-4 ml-3" />}
-                </Button>
-                <p className="text-xs text-muted-foreground text-center mt-4">
-                  Our studio team will review your request and contact you within 24 hours.
-                </p>
-              </motion.div>
-            </form>
-          </motion.div>
+              {/* Submit */}
+              <StaggerItem>
+                <div className="pt-2 text-center">
+                  <button type="submit" disabled={loading} className="hv-btn hv-btn-bronze w-full sm:w-auto sm:min-w-[320px]">
+                    {loading ? 'Submitting your request…' : 'Submit custom project request'}
+                    {!loading && <PenTool aria-hidden="true" />}
+                  </button>
+                  <p className="mt-4 text-sm text-[#6f6259]">
+                    Our studio team will review your request and contact you within 24 hours.
+                  </p>
+                </div>
+              </StaggerItem>
+            </Stagger>
+          </form>
         </div>
       </section>
     </div>

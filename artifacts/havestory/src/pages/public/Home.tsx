@@ -1,7 +1,7 @@
-import "./studio-home.css";
 import { SiteNotices } from "@/components/public/SiteNotices";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
   BadgeCheck,
@@ -9,6 +9,7 @@ import {
   Image as ImageIcon,
   PackageCheck,
   Palette,
+  Quote,
   Ruler,
   ShoppingCart,
   Sparkles,
@@ -23,6 +24,7 @@ import {
   useListServices,
 } from "@workspace/api-client-react";
 import { ComingSoon } from "@/components/public/ComingSoon";
+import { Reveal, Stagger, StaggerItem } from "@/components/public/Reveal";
 
 const DEFAULT_IMAGES = [
   "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1600&q=76",
@@ -61,18 +63,25 @@ function readHomeBenefits(value: unknown): HomeBenefit[] {
   } catch { return DEFAULT_HOME_BENEFITS; }
 }
 
-function Heading({ eyebrow, title, copy, href, link }: { eyebrow: string; title: string; copy?: string; href?: string; link?: string }) {
+function SectionHead({ id, eyebrow, title, copy, href, link }: { id?: string; eyebrow: string; title: string; copy?: string; href?: string; link?: string }) {
   return (
-    <div className="studio-heading">
+    <Reveal className="hv-section-head">
       <div>
-        <span>{eyebrow}</span>
-        <h2>{title}</h2>
-        {copy && <p>{copy}</p>}
+        <span className="hv-kicker">{eyebrow}</span>
+        <h2 id={id} className="hv-display hv-display-md">{title}</h2>
+        {copy && <p className="hv-lede">{copy}</p>}
       </div>
-      {href && <Link href={href}>{link || "View all"}<ArrowRight size={16} /></Link>}
-    </div>
+      {href && (
+        <Link href={href} className="hv-text-link">
+          {link || "View all"} <ArrowRight size={15} aria-hidden="true" />
+        </Link>
+      )}
+    </Reveal>
   );
 }
+
+const MARQUEE_WORDS = ["Custom Framing", "Fine-Art Prints", "Gallery Finishes", "Handcrafted in Sri Lanka"];
+const COLLECTION_SPANS = ["lg:col-span-7", "lg:col-span-5", "lg:col-span-5", "lg:col-span-7"];
 
 export default function Home() {
   const { data: settings } = useGetSettings();
@@ -84,6 +93,7 @@ export default function Home() {
   const [heroIndex, setHeroIndex] = useState(0);
   const [previousHeroImage, setPreviousHeroImage] = useState<string | null>(null);
   const transitionTimer = useRef<number | null>(null);
+  const reduceMotion = useReducedMotion();
 
   const allProducts = Array.isArray(products) ? products : [];
   const featuredProducts = allProducts.filter((item) => item.featured);
@@ -165,46 +175,392 @@ export default function Home() {
     return () => window.clearInterval(timer);
   }, [heroKey, safeHeroIndex]);
 
+  const fadeUp = (delay: number) => ({
+    initial: reduceMotion ? { opacity: 0 } : { opacity: 0, y: 44 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.9, delay, ease: [0.22, 1, 0.36, 1] as const },
+  });
+
   return (
-    <main className="studio-home">
+    <main className="hv-page">
       <SiteNotices notices={Array.isArray(notices) ? notices : []} />
-      <section className="studio-opening" aria-labelledby="studio-title">
-        <div className="studio-opening-copy">
-          <span className="studio-kicker"><span className="studio-kicker-line" /> {cfg?.heroBadgeText || "HAVESTORY · Sri Lankan creative studio"}</span>
-          <h1 id="studio-title">{heroTitle}</h1>
-          <p>{heroSubtitle}</p>
-          <div className="studio-actions">
-            <Link href={primaryHeroHref} className="studio-action-primary">{primaryHeroLabel}<ArrowRight size={18} /></Link>
-            <Link href={primaryIsCustom ? "/store" : "/custom-project"} className="studio-action-text">{primaryIsCustom ? "Browse frames" : "Request a custom frame"} <ArrowRight size={17} /></Link>
+
+      {/* ── Hero · full-viewport editorial split ─────────────────── */}
+      <section aria-labelledby="studio-title" className="relative overflow-hidden" style={{ minHeight: "100svh", display: "flex", alignItems: "center", paddingTop: 96 }}>
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(1000px 520px at 84% 6%, rgba(217,169,78,0.20), transparent 60%), radial-gradient(720px 440px at 4% 100%, rgba(176,124,58,0.12), transparent 60%)",
+          }}
+        />
+        <div className="hv-container relative w-full">
+          <div className="grid items-center gap-12 lg:gap-20 lg:grid-cols-[1.02fr_0.98fr]" style={{ paddingBlock: "clamp(24px, 4vh, 56px)" }}>
+            <motion.div {...fadeUp(0.05)}>
+              <span className="hv-badge hv-badge-bronze">
+                <Sparkles size={13} aria-hidden="true" />
+                {cfg?.heroBadgeText || "HAVESTORY · Sri Lankan creative studio"}
+              </span>
+              <h1 id="studio-title" className="hv-display hv-display-xl" style={{ marginTop: 24 }}>
+                {heroTitle}
+              </h1>
+              <p className="hv-lede" style={{ marginTop: 24, maxWidth: "52ch" }}>
+                {heroSubtitle}
+              </p>
+              <div className="flex flex-wrap items-center" style={{ marginTop: 36, gap: "16px 36px" }}>
+                <Link href={primaryHeroHref} className="hv-btn hv-btn-bronze">
+                  {primaryHeroLabel} <ArrowRight size={16} aria-hidden="true" />
+                </Link>
+                <Link href={primaryIsCustom ? "/store" : "/custom-project"} className="hv-text-link">
+                  {primaryIsCustom ? "Browse frames" : "Request a custom frame"} <ArrowRight size={15} aria-hidden="true" />
+                </Link>
+              </div>
+            </motion.div>
+
+            <motion.div {...fadeUp(0.22)} className="relative">
+              <div
+                aria-hidden="true"
+                className="absolute pointer-events-none"
+                style={{ inset: 0, transform: "translate(20px, 20px)", borderRadius: "var(--hv-radius)", border: "1px solid rgba(176,124,58,0.4)" }}
+              />
+              <div className="hv-img-frame hv-frame-double relative" style={{ aspectRatio: "4/5", boxShadow: "var(--hv-shadow-lg)" }}>
+                {previousHeroImage && (
+                  <img
+                    src={previousHeroImage}
+                    alt=""
+                    aria-hidden="true"
+                    decoding="async"
+                    style={{ position: "absolute", inset: 0 }}
+                  />
+                )}
+                <motion.img
+                  key={heroImage}
+                  src={heroImage}
+                  alt="A framed piece from the HAVESTORY studio"
+                  fetchPriority={safeHeroIndex === 0 ? "high" : "auto"}
+                  decoding="async"
+                  style={{ position: "absolute", inset: 0 }}
+                  initial={reduceMotion || !previousHeroImage ? { opacity: 0 } : { opacity: 0, scale: 1.06 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                />
+              </div>
+              {heroSlides.length > 1 && (
+                <div role="group" aria-label="Studio gallery images" className="flex items-center justify-center" style={{ gap: 10, marginTop: 22 }}>
+                  {heroSlides.map((_, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      aria-label={`Show image ${index + 1} of ${heroSlides.length}`}
+                      aria-current={index === safeHeroIndex ? "true" : undefined}
+                      onClick={() => showHeroSlide(index)}
+                      className="rounded-full"
+                      style={{
+                        height: 8,
+                        width: index === safeHeroIndex ? 34 : 8,
+                        background: index === safeHeroIndex ? "var(--hv-bronze)" : "var(--hv-line)",
+                        transition: "all 0.5s var(--hv-ease)",
+                        cursor: "pointer",
+                        border: 0,
+                        padding: 0,
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+            </motion.div>
           </div>
         </div>
-        <div className="studio-opening-art">
-          {previousHeroImage && <img className="studio-slide-previous" src={previousHeroImage} alt="" aria-hidden="true" decoding="async" />}
-          <img key={heroImage} className={previousHeroImage ? "studio-slide-enter" : ""} src={heroImage} alt="A framed piece from the HAVESTORY studio" fetchPriority={safeHeroIndex === 0 ? "high" : "auto"} decoding="async" />
+      </section>
 
-          {heroSlides.length > 1 && <div className="studio-slide-controls" role="group" aria-label="Studio gallery images">{heroSlides.map((_, index) => <button key={index} type="button" aria-label={`Show image ${index + 1} of ${heroSlides.length}`} aria-current={index === safeHeroIndex ? "true" : undefined} onClick={() => showHeroSlide(index)}><span /></button>)}</div>}
+      {/* ── Benefits ─────────────────────────────────────────────── */}
+      {benefitsVisible && (
+        <section className="hv-section-tight" aria-label="Studio promises">
+          <div className="hv-container">
+            <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {benefits.map((benefit, index) => {
+                const Icon = BENEFIT_ICONS[benefit.icon] || Sparkles;
+                return (
+                  <StaggerItem key={`${benefit.title}-${index}`}>
+                    <article className="hv-card hv-card-hover h-full p-6">
+                      <span
+                        className="grid place-items-center rounded-full"
+                        style={{ width: 46, height: 46, background: "rgba(176,124,58,0.12)", color: "var(--hv-bronze-deep)" }}
+                      >
+                        <Icon size={21} strokeWidth={1.6} aria-hidden="true" />
+                      </span>
+                      <h2 className="text-[17px] font-bold tracking-tight" style={{ marginTop: 18 }}>
+                        {benefit.title}
+                      </h2>
+                      <p className="text-[14.5px] leading-relaxed" style={{ marginTop: 8, color: "var(--hv-muted)" }}>
+                        {benefit.copy}
+                      </p>
+                    </article>
+                  </StaggerItem>
+                );
+              })}
+            </Stagger>
+          </div>
+        </section>
+      )}
+
+      {/* ── Collections ──────────────────────────────────────────── */}
+      {categories.length > 0 && (
+        <section className="hv-section" aria-labelledby="studio-collections-title">
+          <div className="hv-container">
+            <SectionHead
+              id="studio-collections-title"
+              eyebrow="Collections"
+              title="A beautiful place for every story."
+              copy="Explore the craft, materials and pieces that make a memory feel at home."
+            />
+            <Stagger className="grid gap-6 md:grid-cols-2 lg:grid-cols-12">
+              {categories.map((item, index) => (
+                <StaggerItem key={`${item.title}-${index}`} className={COLLECTION_SPANS[index] || ""}>
+                  <Link href={safeSiteHref(item.href, "/store")} className="group block h-full">
+                    <div className="hv-img-frame" style={{ aspectRatio: "16/10", boxShadow: "var(--hv-shadow-md)" }}>
+                      <img src={item.image} alt="" loading="lazy" decoding="async" />
+                    </div>
+                    <div className="flex items-start justify-between gap-6" style={{ marginTop: 20 }}>
+                      <div>
+                        <span className="hv-kicker">0{index + 1} · Collection</span>
+                        <h3 className="hv-display hv-display-sm" style={{ marginTop: 10 }}>
+                          {item.title}
+                        </h3>
+                        <p className="text-[15px] leading-relaxed" style={{ marginTop: 8, color: "var(--hv-muted)" }}>
+                          {item.copy}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="hv-text-link" style={{ marginTop: 16 }}>
+                      Explore collection <ArrowRight size={15} aria-hidden="true" />
+                    </span>
+                  </Link>
+                </StaggerItem>
+              ))}
+            </Stagger>
+          </div>
+        </section>
+      )}
+
+      {/* ── Featured products ────────────────────────────────────── */}
+      <section className="hv-section" style={{ background: "var(--hv-cream)" }} aria-labelledby="studio-products-title">
+        <div className="hv-container">
+          <SectionHead
+            id="studio-products-title"
+            eyebrow="Frames & Prints"
+            title="Pieces worth keeping."
+            copy="Selected from the collection for homes, gifts and everyday memories."
+            href="/store"
+            link="Shop all pieces"
+          />
+          {favouriteProducts.length ? (
+            <Stagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {favouriteProducts.map((product) => (
+                <StaggerItem key={product.id}>
+                  <Link href={`/store/${product.slug || product.id}`} className="hv-card hv-card-hover block h-full p-3">
+                    <div className="hv-img-frame" style={{ aspectRatio: "1/1" }}>
+                      {product.imageUrl ? (
+                        <img src={product.imageUrl} alt={product.name} loading="lazy" decoding="async" />
+                      ) : (
+                        <span className="grid place-items-center w-full h-full" style={{ color: "var(--hv-faint)" }}>
+                          <ImageIcon size={40} strokeWidth={1.2} aria-hidden="true" />
+                        </span>
+                      )}
+                    </div>
+                    <div className="px-2 pt-4 pb-2">
+                      <span
+                        className="text-[10.5px] font-extrabold uppercase"
+                        style={{ letterSpacing: "0.16em", color: "var(--hv-bronze-deep)" }}
+                      >
+                        {product.category?.name || "HAVESTORY edition"}
+                      </span>
+                      <h3 className="text-[16.5px] font-bold tracking-tight leading-snug" style={{ marginTop: 6 }}>
+                        {product.name}
+                      </h3>
+                      <p className="hv-display text-[19px]" style={{ marginTop: 8, color: "var(--hv-bronze-deep)" }}>
+                        {product.price ? `Rs. ${Number(product.price).toLocaleString()}` : "Quote on request"}
+                      </p>
+                    </div>
+                  </Link>
+                </StaggerItem>
+              ))}
+            </Stagger>
+          ) : (
+            <ComingSoon
+              eyebrow="Collection in progress"
+              title="New pieces are on the way."
+              description="The shop is being prepared, but custom orders are open now."
+              href="/custom-project"
+              cta="Start a custom order"
+            />
+          )}
         </div>
       </section>
 
-      {benefitsVisible && <section className="studio-assurances" aria-label="Studio promises">{benefits.map((benefit, index) => { const Icon = BENEFIT_ICONS[benefit.icon] || Sparkles; return <article key={`${benefit.title}-${index}`}><Icon size={22} strokeWidth={1.4} aria-hidden="true" /><div><h2>{benefit.title}</h2><p>{benefit.copy}</p></div></article>; })}</section>}
+      {/* ── Portfolio · dark gallery band ────────────────────────── */}
+      {portfolioList.length > 0 && (
+        <section className="hv-dark hv-grain hv-section relative" aria-labelledby="studio-gallery-title">
+          <div className="hv-container relative">
+            <div className="hv-marquee" aria-hidden="true" style={{ marginBottom: "clamp(36px, 5vw, 64px)" }}>
+              <div className="hv-marquee-track">
+                {[...MARQUEE_WORDS, ...MARQUEE_WORDS].map((word, index) => (
+                  <span key={index} className="hv-display hv-display-md" style={{ fontStyle: "italic", color: "var(--hv-gold)" }}>
+                    {word}
+                    <span style={{ marginLeft: "clamp(32px, 5vw, 72px)", opacity: 0.5 }}>✦</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <SectionHead
+              id="studio-gallery-title"
+              eyebrow="Recent Work"
+              title="Made in our studio."
+              copy="A few moments brought into focus."
+              href="/gallery"
+              link="Explore the gallery"
+            />
+            <Stagger className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {portfolioList.map((item, index) => (
+                <StaggerItem key={item.id}>
+                  <Link
+                    href="/gallery"
+                    className="hv-img-frame group relative block"
+                    style={{ aspectRatio: index % 3 === 1 ? "3/4" : index % 3 === 0 ? "1/1" : "4/3" }}
+                    aria-label={item.title ? `View ${item.title} in the gallery` : "View work in the gallery"}
+                  >
+                    {item.imageUrl ? (
+                      <img src={item.imageUrl} alt={item.title || "HAVESTORY studio work"} loading="lazy" decoding="async" />
+                    ) : (
+                      <span className="grid place-items-center w-full h-full" style={{ color: "var(--hv-on-dark-muted)" }}>
+                        <ImageIcon size={36} strokeWidth={1.2} aria-hidden="true" />
+                      </span>
+                    )}
+                    <span
+                      className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 px-5 pb-4 pt-10 text-[13.5px] font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      style={{
+                        background: "linear-gradient(transparent, rgba(18,14,10,0.82))",
+                        color: "var(--hv-on-dark)",
+                      }}
+                    >
+                      <span className="truncate">{item.title || `Studio story ${index + 1}`}</span>
+                      <ArrowRight size={16} aria-hidden="true" style={{ flexShrink: 0 }} />
+                    </span>
+                  </Link>
+                </StaggerItem>
+              ))}
+            </Stagger>
+          </div>
+        </section>
+      )}
 
-      {categories.length > 0 && <section className="studio-section studio-collections" aria-labelledby="studio-collections-title">
-        <Heading eyebrow="COLLECTIONS" title="A beautiful place for every story." copy="Explore the craft, materials and pieces that make a memory feel at home." />
-        <div className="studio-collection-grid">{categories.map((item, index) => <Link key={`${item.title}-${index}`} href={safeSiteHref(item.href, "/store")} className={`studio-collection-card studio-collection-card-${index + 1}`}><img src={item.image} alt="" loading="lazy" decoding="async" /><div><span>0{index + 1} / COLLECTION</span><h3>{item.title}</h3><p>{item.copy}</p><strong>Explore collection <ArrowRight size={17} /></strong></div></Link>)}</div>
-      </section>}
+      {/* ── Services ─────────────────────────────────────────────── */}
+      {serviceList.length > 0 && (
+        <section className="hv-section" aria-labelledby="studio-services-title">
+          <div className="hv-container">
+            <SectionHead
+              id="studio-services-title"
+              eyebrow="Studio Services"
+              title="More from the studio."
+              href="/services"
+              link="Explore services"
+            />
+            <Reveal>
+              <div style={{ borderTop: "1px solid var(--hv-line)" }}>
+                {serviceList.map((service, index) => (
+                  <Link
+                    key={service.id}
+                    href="/services"
+                    className="group flex items-center gap-6 md:gap-10"
+                    style={{ paddingBlock: 28, borderBottom: "1px solid var(--hv-line-soft)" }}
+                  >
+                    <span className="hv-display hv-display-sm" style={{ color: "var(--hv-bronze)", minWidth: 56 }}>
+                      0{index + 1}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="hv-display hv-display-sm">{service.name}</h3>
+                      <p className="text-[15px] leading-relaxed" style={{ marginTop: 6, color: "var(--hv-muted)", maxWidth: "56ch" }}>
+                        {service.description || "Designed and finished with the HAVESTORY studio."}
+                      </p>
+                    </div>
+                    <span
+                      className="grid place-items-center rounded-full shrink-0 group-hover:bg-[var(--hv-ink)] group-hover:text-[#fdfaf4] group-hover:border-transparent"
+                      style={{
+                        width: 52,
+                        height: 52,
+                        border: "1px solid var(--hv-line)",
+                        transition: "all 0.35s var(--hv-ease)",
+                      }}
+                    >
+                      <ArrowRight size={20} aria-hidden="true" />
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </Reveal>
+          </div>
+        </section>
+      )}
 
-      <section className="studio-section studio-products">
-        <Heading eyebrow="FRAMES & PRINTS" title="Pieces worth keeping." copy="Selected from the collection for homes, gifts and everyday memories." href="/store" link="Shop all pieces" />
-        {favouriteProducts.length ? <div className="studio-product-grid">{favouriteProducts.map(product => <Link href={`/store/${product.slug || product.id}`} key={product.id} className="studio-product-card"><div>{product.imageUrl ? <img src={product.imageUrl} alt={product.name} loading="lazy" /> : <ImageIcon />}</div><span>{product.category?.name || "HAVESTORY edition"}</span><h3>{product.name}</h3><p>{product.price ? `Rs. ${Number(product.price).toLocaleString()}` : "Quote on request"}</p></Link>)}</div> : <ComingSoon eyebrow="Collection in progress" title="New pieces are on the way." description="The shop is being prepared, but custom orders are open now." href="/custom-project" cta="Start a custom order" />}
+      {/* ── Reviews ──────────────────────────────────────────────── */}
+      {reviewList.length > 0 && (
+        <section className="hv-section-tight" aria-labelledby="studio-reviews-title">
+          <div className="hv-container">
+            <SectionHead id="studio-reviews-title" eyebrow="Client Reviews" title="Stories from our clients." />
+            <Stagger className="grid gap-6 md:grid-cols-3">
+              {reviewList.map((review) => (
+                <StaggerItem key={review.id}>
+                  <blockquote className="hv-card h-full p-8 flex flex-col">
+                    <Quote size={28} aria-hidden="true" style={{ color: "var(--hv-bronze)" }} />
+                    <p className="hv-display text-[19px] leading-relaxed flex-1" style={{ marginTop: 20, fontWeight: 500 }}>
+                      “{review.comment}”
+                    </p>
+                    <footer className="flex items-center justify-between gap-4" style={{ marginTop: 24 }}>
+                      <strong className="text-[14.5px] font-bold">{review.customerName}</strong>
+                      <span aria-label={`${review.rating || 5} out of 5 stars`} style={{ color: "var(--hv-gold)", letterSpacing: 2 }}>
+                        {"★".repeat(Math.min(5, review.rating || 5))}
+                      </span>
+                    </footer>
+                  </blockquote>
+                </StaggerItem>
+              ))}
+            </Stagger>
+          </div>
+        </section>
+      )}
+
+      {/* ── Closing CTA ──────────────────────────────────────────── */}
+      <section className="hv-section" aria-labelledby="studio-closing-title">
+        <div className="hv-container">
+          <Reveal>
+            <div
+              className="hv-card text-center relative overflow-hidden"
+              style={{
+                padding: "clamp(48px, 7vw, 96px) clamp(24px, 6vw, 80px)",
+                background:
+                  "radial-gradient(700px 340px at 50% 0%, rgba(217,169,78,0.16), transparent 65%), var(--hv-card)",
+              }}
+            >
+              <span className="hv-kicker hv-kicker-center justify-center">Custom Framing</span>
+              <h2 id="studio-closing-title" className="hv-display hv-display-lg" style={{ marginTop: 18 }}>
+                Need a different size or finish?
+              </h2>
+              <p className="hv-lede" style={{ margin: "18px auto 0" }}>
+                Tell us what you need and we will send a quote.
+              </p>
+              <div style={{ marginTop: 34 }}>
+                <Link href="/custom-project" className="hv-btn hv-btn-bronze">
+                  Request a custom frame <ArrowRight size={16} aria-hidden="true" />
+                </Link>
+              </div>
+              <div className="hv-ornament" style={{ marginTop: 40 }} aria-hidden="true">
+                <Sparkles size={18} />
+              </div>
+            </div>
+          </Reveal>
+        </div>
       </section>
-
-      {portfolioList.length > 0 && <section className="studio-section studio-gallery"><Heading eyebrow="RECENT WORK" title="Made in our studio." copy="A few moments brought into focus." href="/gallery" link="Explore the gallery" /><div className="studio-gallery-grid">{portfolioList.map((item, index) => <Link key={item.id} href="/gallery" className={`studio-gallery-item studio-gallery-item-${index + 1}`}>{item.imageUrl ? <img src={item.imageUrl} alt={item.title || "HAVESTORY studio work"} loading="lazy" /> : <ImageIcon />}<span>{item.title || `Studio story ${index + 1}`} <ArrowRight size={16} /></span></Link>)}</div></section>}
-
-      {serviceList.length > 0 && <section className="studio-section studio-services"><Heading eyebrow="STUDIO SERVICES" title="More from the studio." href="/services" link="Explore services" /><div>{serviceList.map((service, index) => <Link href="/services" key={service.id}><span>0{index + 1}</span><div><h3>{service.name}</h3><p>{service.description || "Designed and finished with the HAVESTORY studio."}</p></div><ArrowRight size={20} /></Link>)}</div></section>}
-
-      {reviewList.length > 0 && <section className="studio-section studio-reviews"><Heading eyebrow="CLIENT REVIEWS" title="Stories from our clients." /><div>{reviewList.map(review => <blockquote key={review.id}><p>“{review.comment}”</p><footer><strong>{review.customerName}</strong><span aria-label={`${review.rating || 5} out of 5 stars`}>{"★".repeat(Math.min(5, review.rating || 5))}</span></footer></blockquote>)}</div></section>}
-
-      <section className="studio-closing"><span className="studio-kicker">CUSTOM FRAMING</span><h2>Need a different size or finish?</h2><p>Tell us what you need and we will send a quote.</p><Link href="/custom-project" className="studio-action-primary">Request a custom frame <ArrowRight size={18} /></Link></section>
     </main>
   );
 }

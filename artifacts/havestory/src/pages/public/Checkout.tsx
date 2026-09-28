@@ -4,8 +4,6 @@ import { useCreateOrder, useGetSettings } from "@workspace/api-client-react";
 import { ArrowLeft, ArrowRight, Banknote, Check, CheckCircle2, ChevronRight, ClipboardCheck, CreditCard, Loader2, MapPin, Package, ShieldCheck, Sparkles, Trash2, Truck, Wallet } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link, useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useShopCart } from "@/lib/shop-cart";
 import { parseProductConfig } from "@/lib/product-options";
@@ -327,96 +325,378 @@ export default function Checkout() {
 
   if (submittedOrderId) {
     return (
-      <main className="glass-gallery-main checkout-order-success min-h-[75vh] overflow-hidden px-4 pb-24 pt-8 sm:px-8 lg:px-12">
-        <div className="mx-auto flex min-h-[65vh] max-w-3xl items-center justify-center">
-          <motion.section initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="glass-panel-strong checkout-success-card w-full p-8 text-center sm:p-14">
-            <div className="checkout-success-icon mx-auto flex h-16 w-16 items-center justify-center rounded-full"><CheckCircle2 size={30} /></div>
-            <span className="editorial-kicker mt-8 block">THE NEXT MOMENT</span>
-            <h1 className="editorial-display mt-4 text-5xl leading-none text-[var(--glass-ink)] sm:text-7xl">Order received.</h1>
-            <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-[rgba(44,33,27,0.68)] sm:text-base">Thank you, {customerName || "friend"}. The HAVESTORY studio has your request. Use your tracking page to review the order and upload payment proof when your transfer is complete.</p>
-            <div className="mx-auto mt-8 max-w-sm rounded-2xl border border-[rgba(44,33,27,0.12)] bg-white/45 p-5 text-left">
-              <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[rgba(44,33,27,0.52)]">Tracking number</span>
-              <strong className="mt-2 block text-xl tracking-[0.08em] text-[var(--glass-ink)]">{submittedOrderId || "Created successfully"}</strong>
+      <div className="hv-page">
+        <div className="hv-container hv-section-tight">
+          <motion.section
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="hv-empty mx-auto max-w-2xl"
+          >
+            <div className="hv-empty-icon"><CheckCircle2 /></div>
+            <span className="hv-kicker hv-kicker-center mt-2">The next moment</span>
+            <h1 className="hv-display hv-display-lg mt-4">Order received.</h1>
+            <p className="hv-lede mx-auto mt-5 max-w-xl">
+              Thank you, {customerName || "friend"}. The HAVESTORY studio has your request.
+              Use your tracking page to review the order and upload payment proof when your transfer is complete.
+            </p>
+            <div className="hv-card mx-auto mt-8 max-w-sm p-5 text-left">
+              <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#6f6259]">Tracking number</span>
+              <strong className="hv-display hv-display-sm mt-2 block tracking-[0.06em]">{submittedOrderId || "Created successfully"}</strong>
             </div>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              {submittedOrderId && <Link href={`/track-order?id=${encodeURIComponent(submittedOrderId)}`} className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[var(--glass-saffron)] px-6 text-xs font-black uppercase tracking-[0.15em] text-[var(--glass-ink)] shadow-[0_12px_28px_rgba(178,138,80,0.24)]">Track &amp; confirm payment <ArrowRight size={15} /></Link>}
-              <Link href="/store" className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-[rgba(44,33,27,0.16)] bg-white/35 px-6 text-xs font-black uppercase tracking-[0.15em] text-[var(--glass-ink)]">Continue browsing</Link>
+              {submittedOrderId && (
+                <Link href={`/track-order?id=${encodeURIComponent(submittedOrderId)}`} className="hv-btn hv-btn-bronze">
+                  Track &amp; confirm payment <ArrowRight />
+                </Link>
+              )}
+              <Link href="/store" className="hv-btn hv-btn-ghost">
+                Continue browsing
+              </Link>
             </div>
           </motion.section>
         </div>
-      </main>
+      </div>
     );
   }
 
   if (items.length === 0) {
     return (
-      <main className="studio-empty-cart-wrap">
-        <section className="studio-empty-cart">
-          <Package aria-hidden="true" size={28} />
-          <h1>Your cart is empty.</h1>
-          <p>Choose a frame or print to continue to checkout.</p>
-          <Link href="/store">Browse frames &amp; prints <ArrowRight size={17} /></Link>
-        </section>
-      </main>
+      <div className="hv-page">
+        <div className="hv-container hv-section-tight">
+          <div className="hv-empty mx-auto max-w-xl">
+            <div className="hv-empty-icon"><Package /></div>
+            <h1 className="hv-display hv-display-md mt-2">Your cart is empty.</h1>
+            <p className="hv-lede mx-auto mt-4">Choose a frame or print to continue to checkout.</p>
+            <Link href="/store" className="hv-btn hv-btn-solid mt-8">
+              Browse frames &amp; prints <ArrowRight />
+            </Link>
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <main className="glass-gallery-main min-h-screen overflow-hidden px-4 pb-24 pt-6 sm:px-8 lg:px-12">
-      <div className="mx-auto max-w-[92rem]">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[rgba(44,33,27,0.1)] pb-6">
-          <Link href="/store" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-[rgba(44,33,27,0.65)] transition hover:text-[var(--glass-clay)]"><ArrowLeft size={15} /> Back to collection</Link>
-          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.16em] text-[rgba(44,33,27,0.52)]"><span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--glass-ink)] text-white">1</span><span>Details</span><ChevronRight size={13} /><span className="flex h-7 w-7 items-center justify-center rounded-full border border-[rgba(44,33,27,0.2)]">2</span><span>Payment</span></div>
+    <main className="hv-page min-h-screen">
+      <div className="hv-container hv-section-tight">
+        <Link href="/store" className="hv-text-link">
+          <ArrowLeft /> Back to collection
+        </Link>
+
+        <div className="mt-8 max-w-2xl">
+          <span className="hv-kicker">The final edit / 01</span>
+          <h1 className="hv-display hv-display-lg mt-4">
+            Make it <em>yours.</em>
+          </h1>
+          <p className="hv-lede mt-5">
+            A few considered details and your piece can begin its journey from our studio to your space.
+          </p>
+          <div className="mt-6 flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#6f6259]">
+            <span className="grid h-7 w-7 place-items-center rounded-full bg-[#171310] text-white">1</span>
+            <span>Details</span>
+            <ChevronRight size={13} />
+            <span className="grid h-7 w-7 place-items-center rounded-full border border-[rgba(23,19,16,0.2)]">2</span>
+            <span>Payment</span>
+          </div>
         </div>
 
-        <div className="grid gap-8 pt-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.72fr)] lg:items-start">
+        <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.72fr)] lg:items-start">
           <motion.form initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} onSubmit={handleSubmit} className="space-y-6">
-            <div className="mb-8 max-w-2xl">
-              <span className="editorial-kicker">THE FINAL EDIT / 01</span>
-              <h1 className="editorial-display mt-3 text-5xl leading-[0.92] text-[var(--glass-ink)] sm:text-7xl">Make it <em>yours.</em></h1>
-              <p className="mt-5 max-w-xl text-sm leading-relaxed text-[rgba(44,33,27,0.65)] sm:text-base">A few considered details and your piece can begin its journey from our studio to your space.</p>
+            {/* 01 — Customer details */}
+            <section className="hv-card p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <span className="hv-badge hv-badge-bronze">01 / Your details</span>
+                  <h2 className="hv-display hv-display-sm mt-3">Where should we reach you?</h2>
+                </div>
+                <MapPin className="mt-1 shrink-0 text-[#b07c3a]" size={22} />
+              </div>
+              <div className="mt-7 grid gap-5 sm:grid-cols-2">
+                <div className="hv-field">
+                  <label htmlFor="co-name">Full name *</label>
+                  <input id="co-name" required value={customerName} onChange={event => setCustomerName(event.target.value)} placeholder="Your name" className="hv-input" />
+                </div>
+                <div className="hv-field">
+                  <label htmlFor="co-phone">Phone number *</label>
+                  <input id="co-phone" required value={customerPhone} onChange={event => setCustomerPhone(event.target.value)} placeholder="077 123 4567" className="hv-input" />
+                </div>
+                <div className="hv-field sm:col-span-2">
+                  <label htmlFor="co-email">Email address <span className="normal-case tracking-normal text-[#a89a8c]">(for your receipt)</span></label>
+                  <input id="co-email" type="email" value={customerEmail} onChange={event => setCustomerEmail(event.target.value)} placeholder="hello@example.com" className="hv-input" />
+                </div>
+                <div className="hv-field sm:col-span-2">
+                  <label htmlFor="co-address">
+                    Delivery address {shippingAddressRequired ? "*" : <span className="normal-case tracking-normal text-[#a89a8c]">(optional for pickup)</span>}
+                  </label>
+                  <textarea
+                    id="co-address"
+                    required={shippingAddressRequired}
+                    value={customerAddress}
+                    onChange={event => setCustomerAddress(event.target.value)}
+                    placeholder={shippingAddressRequired ? "House number, street, city" : String(settings.checkoutPickupAddress || "Optional — studio pickup")}
+                    className="hv-textarea"
+                  />
+                </div>
+                <div className="hv-field sm:col-span-2">
+                  <label htmlFor="co-notes">A note for the studio <span className="normal-case tracking-normal text-[#a89a8c]">(optional)</span></label>
+                  <textarea
+                    id="co-notes"
+                    value={orderNotes}
+                    onChange={event => setOrderNotes(event.target.value)}
+                    placeholder="Any special instructions, colour notes or timing requests?"
+                    className="hv-textarea"
+                    style={{ minHeight: 92 }}
+                  />
+                </div>
+              </div>
+            </section>
+
+            {/* 02 — Delivery */}
+            <section className="hv-card p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <span className="hv-badge hv-badge-bronze">02 / Delivery</span>
+                  <h2 className="hv-display hv-display-sm mt-3">Choose the handoff.</h2>
+                </div>
+                <Truck className="mt-1 shrink-0 text-[#b07c3a]" size={22} />
+              </div>
+              {deliveryOptions.length > 0 ? (
+                <div className={`mt-7 grid gap-3 ${deliveryOptions.length === 1 ? "sm:grid-cols-1" : deliveryOptions.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3"}`}>
+                  {deliveryOptions.map(({ value, title, price, detail }) => {
+                    const selected = shippingMethod === value;
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setShippingMethod(value)}
+                        aria-pressed={selected}
+                        className="hv-card p-5 text-left"
+                        style={selected ? { borderColor: "#b07c3a", boxShadow: "0 0 0 3px rgba(176,124,58,0.16)" } : undefined}
+                      >
+                        <span className="flex items-center justify-between gap-3">
+                          <strong className="text-[15px]">{title}</strong>
+                          {selected && (
+                            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#b07c3a] text-white">
+                              <Check size={14} />
+                            </span>
+                          )}
+                        </span>
+                        <span className="mt-3 block text-sm font-extrabold">{price ? money(price) : "Free"}</span>
+                        <span className="mt-1 block text-sm leading-relaxed text-[#6f6259]">{detail}</span>
+                        {value === "pickup" && selected && (
+                          <span className="mt-3 block border-t border-[rgba(23,19,16,0.1)] pt-3 text-sm leading-relaxed text-[#6f6259]">
+                            {String(settings.checkoutPickupAddress || "Contact us for pickup details.")}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="mt-7 rounded-2xl border border-red-200 bg-red-50/70 p-4 text-sm leading-6 text-red-900">
+                  No delivery method is currently enabled. Please contact HAVESTORY before placing an order.
+                </div>
+              )}
+            </section>
+
+            {/* 03 — Payment */}
+            <section className="hv-card p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <span className="hv-badge hv-badge-bronze">03 / Payment</span>
+                  <h2 className="hv-display hv-display-sm mt-3">Choose your rhythm.</h2>
+                </div>
+                <CreditCard className="mt-1 shrink-0 text-[#b07c3a]" size={22} />
+              </div>
+              {paymentOptions.length > 0 ? (
+                <div className="mt-7 grid gap-3">
+                  {paymentOptions.map(option => {
+                    const Icon = option.icon;
+                    const selected = paymentMethod === option.value;
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setPaymentMethod(option.value)}
+                        aria-pressed={selected}
+                        className="hv-card w-full p-5 text-left"
+                        style={selected ? { borderColor: "#b07c3a", boxShadow: "0 0 0 3px rgba(176,124,58,0.16)" } : undefined}
+                      >
+                        <div className="flex items-start gap-4">
+                          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#f1e9da] text-[#2b241e]">
+                            <Icon size={20} />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="flex flex-wrap items-center gap-2">
+                              <strong className="block text-base">{option.title}</strong>
+                              <span className="hv-badge hv-badge-bronze">{option.eyebrow}</span>
+                            </span>
+                            <span className="mt-2 block text-xs leading-relaxed text-[#6f6259]">{option.description}</span>
+                          </span>
+                          <span className={`mt-1 grid h-5 w-5 shrink-0 place-items-center rounded-full border ${selected ? "border-[#b07c3a] bg-[#b07c3a] text-white" : "border-[rgba(23,19,16,0.22)]"}`}>
+                            {selected && <Check size={13} />}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="mt-7 rounded-2xl border border-red-200 bg-red-50/70 p-4 text-sm leading-6 text-red-900">
+                  No payment option is currently enabled. Please contact HAVESTORY before placing an order.
+                </div>
+              )}
+              {paymentMethod === "bank_transfer" && bankDetails.length > 0 && (
+                <div className="mt-4 grid gap-3 rounded-2xl border border-[rgba(23,19,16,0.08)] bg-[#faf7f1] p-4 sm:grid-cols-2">
+                  {bankDetails.slice(0, 4).map((bank: any, index: number) => (
+                    <div key={`${bank.bankName || "bank"}-${index}`}>
+                      <span className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#6f6259]">{bank.bankName || "Bank details"}</span>
+                      <p className="mt-1 text-sm font-bold">{bank.accountHolder || bank.accountNumber || bank.branch || "Details will be shared after order creation"}</p>
+                      {bank.accountNumber && (
+                        <p className="mt-1 text-xs text-[#6f6259]">A/C {bank.accountNumber}{bank.branch ? ` · ${bank.branch}` : ""}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <div className="flex items-start gap-3 px-1 text-xs leading-relaxed text-[#6f6259]">
+              <ShieldCheck className="mt-0.5 shrink-0 text-[#b07c3a]" size={17} />
+              <p>Your order is created securely. For bank transfer and full payment, you can upload a JPG, PNG or PDF payment proof from the tracking page after paying.</p>
             </div>
 
-            <section className="glass-panel p-6 sm:p-8">
-              <div className="flex items-start justify-between gap-4"><div><span className="glass-chip px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em]">01 / Your details</span><h2 className="editorial-display mt-4 text-3xl text-[var(--glass-ink)]">Where should we reach you?</h2></div><MapPin className="mt-1 shrink-0 text-[var(--glass-clay)]" size={22} /></div>
-              <div className="mt-7 grid gap-5 sm:grid-cols-2">
-                <label className="block"><span className="checkout-label">Full name *</span><Input required value={customerName} onChange={event => setCustomerName(event.target.value)} placeholder="Your name" className="checkout-input" /></label>
-                <label className="block"><span className="checkout-label">Phone number *</span><Input required value={customerPhone} onChange={event => setCustomerPhone(event.target.value)} placeholder="077 123 4567" className="checkout-input" /></label>
-                <label className="block sm:col-span-2"><span className="checkout-label">Email address <small>(for your receipt)</small></span><Input type="email" value={customerEmail} onChange={event => setCustomerEmail(event.target.value)} placeholder="hello@example.com" className="checkout-input" /></label>
-                <label className="block sm:col-span-2"><span className="checkout-label">Delivery address {shippingAddressRequired ? "*" : <small>(optional for pickup)</small>}</span><textarea required={shippingAddressRequired} value={customerAddress} onChange={event => setCustomerAddress(event.target.value)} placeholder={shippingAddressRequired ? "House number, street, city" : String(settings.checkoutPickupAddress || "Optional — studio pickup")} className="checkout-textarea" /></label>
-                <label className="block sm:col-span-2"><span className="checkout-label">A note for the studio <small>(optional)</small></span><textarea value={orderNotes} onChange={event => setOrderNotes(event.target.value)} placeholder="Any special instructions, colour notes or timing requests?" className="checkout-textarea min-h-[92px]" /></label>
+            {submitError && (
+              <div role="alert" className="rounded-2xl border border-red-200 bg-red-50/80 px-4 py-3 text-sm leading-relaxed text-red-900">
+                <strong className="block text-xs font-extrabold uppercase tracking-[0.12em]">Order not submitted</strong>
+                <span className="mt-1 block">{submitError}</span>
               </div>
-            </section>
+            )}
 
-            <section className="glass-panel p-6 sm:p-8">
-              <div className="flex items-start justify-between gap-4"><div><span className="glass-chip px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em]">02 / Delivery</span><h2 className="editorial-display mt-4 text-3xl text-[var(--glass-ink)]">Choose the handoff.</h2></div><Truck className="mt-1 shrink-0 text-[var(--glass-clay)]" size={22} /></div>
-              {deliveryOptions.length > 0 ? <div className={`mt-7 grid gap-3 ${deliveryOptions.length === 1 ? "sm:grid-cols-1" : deliveryOptions.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3"}`}>
-                {deliveryOptions.map(({ value, title, price, detail }) => <button key={value} type="button" onClick={() => setShippingMethod(value)} className={`checkout-choice text-left ${shippingMethod === value ? "is-selected" : ""}`}><span className="flex items-center justify-between gap-3"><strong>{title}</strong>{shippingMethod === value && <Check size={16} />}</span><span className="mt-3 block text-sm font-black">{price ? money(price) : "Free"}</span><small className="mt-1 block leading-relaxed">{detail}</small>{value === "pickup" && shippingMethod === value && <small className="mt-3 block border-t border-[rgba(44,33,27,0.12)] pt-3 leading-relaxed">{String(settings.checkoutPickupAddress || "Contact us for pickup details.")}</small>}</button>)}
-              </div> : <div className="mt-7 rounded-2xl border border-red-200 bg-red-50/60 p-4 text-sm text-red-800">No delivery method is currently enabled. Please contact HAVESTORY before placing an order.</div>}
-            </section>
-
-            <section className="glass-panel p-6 sm:p-8">
-              <div className="flex items-start justify-between gap-4"><div><span className="glass-chip px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em]">03 / Payment</span><h2 className="editorial-display mt-4 text-3xl text-[var(--glass-ink)]">Choose your rhythm.</h2></div><CreditCard className="mt-1 shrink-0 text-[var(--glass-clay)]" size={22} /></div>
-              {paymentOptions.length > 0 ? <div className="mt-7 grid gap-3">{paymentOptions.map(option => { const Icon = option.icon; return <button key={option.value} type="button" onClick={() => setPaymentMethod(option.value)} className={`checkout-payment text-left ${paymentMethod === option.value ? "is-selected" : ""}`}><div className="flex items-start gap-4"><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[rgba(221,208,188,0.42)] text-[var(--glass-ink)]"><Icon size={20} /></span><span className="min-w-0 flex-1"><span className="flex flex-wrap items-center gap-2"><strong className="block text-base">{option.title}</strong><small className="rounded-full bg-[rgba(178,138,80,0.28)] px-2 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-[var(--glass-ink)]">{option.eyebrow}</small></span><span className="mt-2 block text-xs leading-relaxed text-[rgba(44,33,27,0.64)]">{option.description}</span></span><span className={`mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${paymentMethod === option.value ? "border-[var(--glass-clay)] bg-[var(--glass-clay)] text-white" : "border-[rgba(44,33,27,0.22)]"}`}>{paymentMethod === option.value && <Check size={13} />}</span></div></button>; })}</div> : <div className="mt-7 rounded-2xl border border-red-200 bg-red-50/60 p-4 text-sm text-red-800">No payment option is currently enabled. Please contact HAVESTORY before placing an order.</div>}
-              {paymentMethod === "bank_transfer" && bankDetails.length > 0 && <div className="mt-4 grid gap-3 rounded-2xl border border-[rgba(44,33,27,0.1)] bg-white/35 p-4 sm:grid-cols-2">{bankDetails.slice(0, 4).map((bank: any, index: number) => <div key={`${bank.bankName || "bank"}-${index}`}><span className="checkout-label">{bank.bankName || "Bank details"}</span><p className="mt-1 text-sm font-bold text-[var(--glass-ink)]">{bank.accountHolder || bank.accountNumber || bank.branch || "Details will be shared after order creation"}</p>{bank.accountNumber && <p className="mt-1 text-xs text-[rgba(44,33,27,0.62)]">A/C {bank.accountNumber}{bank.branch ? ` · ${bank.branch}` : ""}</p>}</div>)}</div>}
-            </section>
-
-            <div className="flex items-start gap-3 px-1 text-xs leading-relaxed text-[rgba(44,33,27,0.6)]"><ShieldCheck className="mt-0.5 shrink-0 text-[var(--glass-clay)]" size={17} /><p>Your order is created securely. For bank transfer and full payment, you can upload a JPG, PNG or PDF payment proof from the tracking page after paying.</p></div>
-            {submitError && <div role="alert" className="rounded-2xl border border-red-200 bg-red-50/80 px-4 py-3 text-sm leading-relaxed text-red-900"><strong className="block text-xs font-black uppercase tracking-[0.12em]">Order not submitted</strong><span className="mt-1 block">{submitError}</span></div>}
-            <Button type="submit" disabled={createOrder.isPending || paymentOptions.length === 0} className="group h-14 w-full rounded-full bg-[var(--glass-ink)] px-7 text-xs font-black uppercase tracking-[0.16em] text-white shadow-[0_16px_36px_rgba(44,33,27,0.2)] hover:bg-[var(--glass-clay)]">{createOrder.isPending ? <><Loader2 className="mr-2 animate-spin" size={16} /> Creating your order</> : <>Place secure order <ArrowRight className="ml-2 transition-transform group-hover:translate-x-1" size={16} /></>}</Button>
+            <button
+              type="submit"
+              disabled={createOrder.isPending || paymentOptions.length === 0}
+              className="hv-btn hv-btn-solid w-full"
+              style={{ minHeight: 58 }}
+            >
+              {createOrder.isPending ? (
+                <><Loader2 className="animate-spin" /> Creating your order</>
+              ) : (
+                <>Place secure order <ArrowRight /></>
+              )}
+            </button>
           </motion.form>
 
-          <motion.aside initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} className="lg:sticky lg:top-8">
-            <section className="glass-frame overflow-hidden bg-[rgba(221,208,188,0.34)] p-2">
-              <div className="glass-panel-strong overflow-hidden rounded-[1.2rem] p-5 sm:p-6">
-                <div className="flex items-center justify-between gap-3"><span className="editorial-kicker">YOUR EDIT / {String(count).padStart(2, "0")}</span><Sparkles size={18} className="text-[var(--glass-saffron)]" /></div>
-                <div className="mt-6 space-y-4">{items.map(item => <div key={item.key} className="checkout-summary-item flex gap-3 border-b border-[rgba(44,33,27,0.1)] pb-4"><div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[rgba(221,208,188,0.45)]"><img src={item.imageUrl || item.product?.imageUrl || "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=300&q=80"} alt="" className="h-full w-full object-cover" /></div><div className="checkout-summary-item-info min-w-0 flex-1"><p className="truncate text-sm font-black text-[var(--glass-ink)]">{item.product?.name || "HAVESTORY piece"}</p><p className="mt-1 text-xs text-[rgba(44,33,27,0.58)]">{item.quantity} × {money(cartLineUnitPrice(item))}</p>{item.selections?.length ? <p className="mt-1 line-clamp-1 text-[10px] uppercase tracking-[0.08em] text-[rgba(44,33,27,0.5)]">{item.selections.map(selection => selection.choiceName).join(" · ")}</p> : null}<button type="button" className="checkout-remove-item" onClick={() => handleRemoveItem(item.key)} aria-label={`Remove ${item.product?.name || "item"} from checkout`} title="Remove item"><Trash2 size={13} /><span>Remove</span></button></div><span className="checkout-summary-item-total shrink-0 text-right text-sm font-black text-[var(--glass-ink)]">{money(cartLineUnitPrice(item) * item.quantity)}</span></div>)}</div>
-                        {isQuote && <div className="mt-4 rounded-xl bg-[rgba(178,138,80,0.22)] p-3 text-xs leading-relaxed text-[var(--glass-ink)]"><strong>Quote on request.</strong> This edit includes a custom piece without a stored price; the studio will confirm its final price with you.</div>}
-                <div className="mt-6 space-y-3 text-sm"><div className="flex justify-between gap-4"><span className="text-[rgba(44,33,27,0.6)]">Subtotal</span><strong>{money(calculatedSubtotal)}</strong></div>{couponDiscount > 0 && <div className="flex justify-between gap-4 text-[var(--glass-clay)]"><span>Coupon</span><strong>− {money(couponDiscount)}</strong></div>}<div className="flex justify-between gap-4"><span className="text-[rgba(44,33,27,0.6)]">Delivery</span><strong>{shippingCost ? money(shippingCost) : "Free"}</strong></div>{fullPaymentOffer > 0 && <div className="flex justify-between gap-4 text-[var(--glass-clay)]"><span>Full payment offer</span><strong>− {money(fullPaymentOffer)}</strong></div>}<div className="flex justify-between gap-4 border-t border-[rgba(44,33,27,0.14)] pt-4 text-lg"><span className="font-black text-[var(--glass-ink)]">Estimated total</span><strong className="text-[var(--glass-ink)]">{isQuote ? "Quote" : money(total)}</strong></div></div>
-                <div className="checkout-coupon-row mt-6"><Input value={couponCode} onChange={event => { setCouponCode(event.target.value.toUpperCase()); setCoupon(null); }} onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); applyCoupon(); } }} placeholder="Coupon code" className="checkout-input checkout-coupon-input" /><Button type="button" onClick={applyCoupon} disabled={!couponCode.trim() || couponLoading} variant="outline" className="checkout-coupon-apply">{couponLoading ? "..." : "Apply"}</Button></div>{coupon?.valid && <p className="checkout-coupon-success mt-2 text-xs font-bold text-[var(--glass-clay)]">{coupon.code} applied — you save {money(couponDiscount)}.</p>}
+          {/* Order summary */}
+          <motion.aside initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} className="lg:sticky lg:top-28">
+            <section className="hv-card p-5 sm:p-6">
+              <div className="flex items-center justify-between gap-3">
+                <span className="hv-kicker">Your edit / {String(count).padStart(2, "0")}</span>
+                <Sparkles size={18} className="text-[#b07c3a]" />
               </div>
+
+              <div className="mt-6">
+                {items.map(item => (
+                  <div key={item.key} className="flex gap-4 border-b border-[rgba(23,19,16,0.08)] pb-5 pt-5 first:pt-0">
+                    <div className="hv-img-frame h-16 w-16 shrink-0">
+                      <img src={item.imageUrl || item.product?.imageUrl || "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=300&q=80"} alt="" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-extrabold">{item.product?.name || "HAVESTORY piece"}</p>
+                      <p className="mt-1 text-xs text-[#6f6259]">{item.quantity} × {money(cartLineUnitPrice(item))}</p>
+                      {item.selections?.length ? (
+                        <p className="mt-1 line-clamp-1 text-[10px] uppercase tracking-[0.08em] text-[#a89a8c]">
+                          {item.selections.map(selection => selection.choiceName).join(" · ")}
+                        </p>
+                      ) : null}
+                      <button
+                        type="button"
+                        className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-[#8a5f28] transition hover:text-[#171310]"
+                        onClick={() => handleRemoveItem(item.key)}
+                        aria-label={`Remove ${item.product?.name || "item"} from checkout`}
+                        title="Remove item"
+                      >
+                        <Trash2 size={13} /><span>Remove</span>
+                      </button>
+                    </div>
+                    <span className="shrink-0 text-right text-sm font-extrabold">{money(cartLineUnitPrice(item) * item.quantity)}</span>
+                  </div>
+                ))}
+              </div>
+
+              {isQuote && (
+                <div className="mt-4 rounded-xl border border-[#b07c3a]/30 bg-[#b07c3a]/10 p-3 text-xs leading-relaxed">
+                  <strong>Quote on request.</strong> This edit includes a custom piece without a stored price; the studio will confirm its final price with you.
+                </div>
+              )}
+
+              <div className="mt-6 space-y-3 text-sm">
+                <div className="flex justify-between gap-4">
+                  <span className="text-[#6f6259]">Subtotal</span>
+                  <strong>{money(calculatedSubtotal)}</strong>
+                </div>
+                {couponDiscount > 0 && (
+                  <div className="flex justify-between gap-4 text-[#8a5f28]">
+                    <span>Coupon</span>
+                    <strong>− {money(couponDiscount)}</strong>
+                  </div>
+                )}
+                <div className="flex justify-between gap-4">
+                  <span className="text-[#6f6259]">Delivery</span>
+                  <strong>{shippingCost ? money(shippingCost) : "Free"}</strong>
+                </div>
+                {fullPaymentOffer > 0 && (
+                  <div className="flex justify-between gap-4 text-[#8a5f28]">
+                    <span>Full payment offer</span>
+                    <strong>− {money(fullPaymentOffer)}</strong>
+                  </div>
+                )}
+                <div className="flex justify-between gap-4 border-t border-[rgba(23,19,16,0.12)] pt-4 text-lg">
+                  <span className="font-extrabold">Estimated total</span>
+                  <strong>{isQuote ? "Quote" : money(total)}</strong>
+                </div>
+              </div>
+
+              <div className="mt-6 flex gap-2">
+                <input
+                  value={couponCode}
+                  onChange={event => { setCouponCode(event.target.value.toUpperCase()); setCoupon(null); }}
+                  onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); applyCoupon(); } }}
+                  placeholder="Coupon code"
+                  className="hv-input"
+                  aria-label="Coupon code"
+                />
+                <button
+                  type="button"
+                  onClick={applyCoupon}
+                  disabled={!couponCode.trim() || couponLoading}
+                  className="hv-btn hv-btn-ghost hv-btn-sm shrink-0"
+                >
+                  {couponLoading ? "..." : "Apply"}
+                </button>
+              </div>
+              {coupon?.valid && (
+                <p className="mt-2 text-xs font-bold text-[#8a5f28]">{coupon.code} applied — you save {money(couponDiscount)}.</p>
+              )}
             </section>
-            <div className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-1"><div className="glass-chip px-4 py-3 text-xs"><ClipboardCheck size={15} className="text-[var(--glass-clay)]" /><span><strong className="block text-[var(--glass-ink)]">Human checked</strong><small>Every order reviewed by the studio</small></span></div><div className="glass-chip px-4 py-3 text-xs"><ShieldCheck size={15} className="text-[var(--glass-clay)]" /><span><strong className="block text-[var(--glass-ink)]">Payment protected</strong><small>Proofs are automatically removed after 14 days</small></span></div></div>
+
+            <div className="mt-4 grid gap-3">
+              <div className="hv-card flex items-center gap-3 p-4">
+                <ClipboardCheck size={18} className="shrink-0 text-[#b07c3a]" />
+                <span className="text-xs leading-relaxed">
+                  <strong className="block">Human checked</strong>
+                  <span className="text-[#6f6259]">Every order reviewed by the studio</span>
+                </span>
+              </div>
+              <div className="hv-card flex items-center gap-3 p-4">
+                <ShieldCheck size={18} className="shrink-0 text-[#b07c3a]" />
+                <span className="text-xs leading-relaxed">
+                  <strong className="block">Payment protected</strong>
+                  <span className="text-[#6f6259]">Proofs are automatically removed after 14 days</span>
+                </span>
+              </div>
+            </div>
           </motion.aside>
         </div>
       </div>

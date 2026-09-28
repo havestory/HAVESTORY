@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useGetProduct } from "@workspace/api-client-react";
 import { Link, useLocation, useRoute } from "wouter";
+import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Check, ChevronLeft, ChevronRight, ExternalLink, Minus, Plus, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useShopCart, type CartSelection } from "@/lib/shop-cart";
-import { formatMoney, money, parseProductConfig } from "@/lib/product-options";
+import { formatMoney, money, parseProductConfig, type ProductChoice, type ProductOptionGroup } from "@/lib/product-options";
+import { Reveal } from "@/components/public/Reveal";
 
 function isFrameColourGroup(group: { title: string }) {
   return /\bframes?\b|frame\s*(colour|color)|\b(colour|color)\b/i.test(group.title);
@@ -54,7 +53,7 @@ export default function ProductDetail() {
   const minQuantity = Math.max(1, Number(activeSize?.minQty) || Number(config.minQuantity) || 1);
   const quantityStep = Math.max(1, Number(activeSize?.packSize) || Number(config.quantityStep) || 1);
   const sizeUnitPrice = getSizeUnitPrice(activeSize, Math.max(minQuantity, quantity));
-  const getChoicePrice = (choice: { price?: string | number; sizePrices?: { sizeId: string; price: string }[] }) => {
+  const getChoicePrice = (choice: ProductChoice) => {
     const sizeOverride = activeSize?.id
       ? choice.sizePrices?.find(override => String(override.sizeId) === String(activeSize.id))
       : undefined;
@@ -124,127 +123,343 @@ export default function ProductDetail() {
     if (buyNow) navigate("/checkout");
   };
 
+  /** Chip-row renderer for an option group; preserves default-selection + preview behaviour. */
+  const renderChipGroup = (group: ProductOptionGroup, subtitle: string) => {
+    const isColour = isFrameColourGroup(group);
+    const currentId = selected[group.id] || (isColour ? "" : group.choices[0]?.id || "");
+    const preview = selections.find(item => item.groupId === group.id);
+    return (
+      <fieldset className="mt-8" key={group.id}>
+        <legend className="mb-1 flex w-full items-baseline justify-between gap-4">
+          <span className="text-[12px] font-extrabold uppercase tracking-[0.16em] text-[#171310]">{group.title}</span>
+          <span className="text-right text-sm text-[#6f6259]">{preview?.choiceName || subtitle}</span>
+        </legend>
+        <div className="hv-chip-row mt-3">
+          {group.choices.map(choice => {
+            const isSelected = currentId === choice.id;
+            const choicePrice = getChoicePrice(choice);
+            return (
+              <button
+                key={choice.id}
+                type="button"
+                onClick={() => choose(group.id, choice.id, choice.imageUrl, choice.imageUrls)}
+                aria-pressed={isSelected}
+                className={`hv-chip ${isSelected ? "is-active" : ""}`}
+              >
+                {isSelected && <Check size={13} />}
+                {choice.name}{choicePrice > 0 ? ` + ${formatMoney(choicePrice)}` : ""}
+              </button>
+            );
+          })}
+        </div>
+        {preview?.imageUrl && (
+          <div className="mt-4 flex items-center gap-3">
+            <span className="hv-img-frame block h-14 w-14 shrink-0" style={{ borderRadius: 12 }}>
+              <img src={preview.imageUrl} alt="" />
+            </span>
+            <span className="text-sm text-[#6f6259]">Preview for {preview.choiceName}</span>
+          </div>
+        )}
+      </fieldset>
+    );
+  };
+
   if (isLoading) {
     return (
-      <main className="hs-product-detail hs-product-detail-clean">
-        <div className="hs-product-detail-grid">
-          <Skeleton className="aspect-[1.08/1] rounded-[26px]" />
-          <div className="space-y-5"><Skeleton className="h-5 w-36" /><Skeleton className="h-14 w-4/5" /><Skeleton className="h-28 w-full" /><Skeleton className="h-14 w-full" /></div>
+      <main className="hv-page min-h-screen">
+        <div className="hv-container pb-24 pt-32">
+          <div className="grid gap-12 lg:grid-cols-2">
+            <div className="hv-skeleton aspect-square" />
+            <div className="space-y-5">
+              <div className="hv-skeleton h-5 w-36" />
+              <div className="hv-skeleton h-14 w-4/5" />
+              <div className="hv-skeleton h-28 w-full" />
+              <div className="hv-skeleton h-14 w-full" />
+            </div>
+          </div>
         </div>
       </main>
     );
   }
 
   if (isError || !product || product.active === false) {
-    return <div className="hs-product-missing"><span>Product unavailable</span><h1>This piece is not in the collection.</h1><p>It may have been unpublished or moved. Browse the current frames and prints instead.</p><Link href="/store">Back to the shop <ArrowRight /></Link></div>;
+    return (
+      <main className="hv-page min-h-screen">
+        <div className="hv-container pb-24 pt-40">
+          <div className="hv-empty mx-auto max-w-2xl">
+            <div className="hv-empty-icon"><ShoppingBag /></div>
+            <span className="hv-kicker hv-kicker-center">Product unavailable</span>
+            <h1 className="hv-display hv-display-md mt-4">This piece is not in the collection.</h1>
+            <p className="hv-lede mx-auto mt-4">It may have been unpublished or moved. Browse the current frames and prints instead.</p>
+            <Link href="/store" className="hv-btn hv-btn-solid mt-8">Back to the shop <ArrowRight /></Link>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   return (
-    <main className="hs-product-detail hs-product-detail-clean">
-      <div className="hs-product-breadcrumb"><Link href="/store"><ArrowLeft /> Frames &amp; Prints</Link><span>/</span><strong>{product.name}</strong></div>
-
-      <div className="hs-product-detail-grid">
-        <section className="hs-product-gallery" aria-label={`${product.name} images`}>
-          <div className="hs-product-gallery-frame">
-            <div className="hs-product-gallery-toolbar"><span>HAVESTORY / EDITION</span><span>{String(currentImageIndex + 1).padStart(2, "0")} / {String(Math.max(gallery.length, 1)).padStart(2, "0")}</span></div>
-            <div className="hs-product-main-image">
-              <img key={displayImage} src={displayImage} alt={product.name} />
-              {gallery.length > 1 && (
-                <>
-                  <button type="button" className="hs-product-image-nav hs-product-image-nav-prev" onClick={() => showImage(-1)} aria-label="Previous product image"><ChevronLeft /></button>
-                  <button type="button" className="hs-product-image-nav hs-product-image-nav-next" onClick={() => showImage(1)} aria-label="Next product image"><ChevronRight /></button>
-                </>
-              )}
-            </div>
-          </div>
-          {gallery.length > 1 && <div className="hs-product-thumbnails">{gallery.map((image, index) => <button key={image} type="button" className={displayImage === image ? "is-active" : ""} onClick={() => setActiveImage(image)} aria-label={`View image ${index + 1}`}><img src={image} alt="" /></button>)}</div>}
-        </section>
-
-        <section className="hs-product-buybox">
-          <div className="hs-product-meta-line"><span className="hs-product-kicker">{categoryName}</span>{config.codEnabled === true && <span className="hs-product-availability"><Check /> Cash on Delivery Available</span>}</div>
-          <h1>{product.name}</h1>
-          <p className="hs-product-description">{product.description || "A carefully finished photo piece, prepared in our studio and securely packed for delivery."}</p>
-
-          {product.artworkGuideUrl && (
-            <a className="hs-product-guide-link" href={product.artworkGuideUrl} target="_blank" rel="noreferrer">
-              <span><span className="hs-product-guide-icon">↗</span><strong>{product.artworkGuideName || "Size & artwork guide"}</strong></span><ExternalLink />
-            </a>
-          )}
-
-          <div className="hs-product-price-block"><span>{activeSize ? `${config.sizeLabel || "Selected size"} price` : "Price"}</span><strong>{formatMoney(unitPrice)}</strong>{activeSize && <small>{formatMoney(sizeUnitPrice)} per {activeSize.unitLabel || "unit"}{optionPrice > 0 ? ` + ${formatMoney(optionPrice)} selected options` : ""}</small>}{!activeSize && optionPrice > 0 && <small>Includes {formatMoney(optionPrice)} selected options</small>}</div>
-
-          {sizeOptions.length > 0 && (
-            <fieldset className="hs-product-options hs-product-size-options hs-product-dropdown-section">
-              <legend>{config.sizeLabel || "Choose a size"}<span>{activeSize?.name || "Select one"}</span></legend>
-              <div className="hs-product-select-shell">
-                <Select value={selectedSizeId} onValueChange={value => { const next = sizeOptions.find(size => size.id === value); if (next) chooseSize(next); }}>
-                  <SelectTrigger aria-label={config.sizeLabel || "Choose a size"} className="hs-product-select-trigger"><SelectValue placeholder="Select a size" /></SelectTrigger>
-                  <SelectContent position="item-aligned" className="hs-product-select-content">
-                    {sizeOptions.map(size => <SelectItem key={size.id} value={size.id}>{size.name || "Unnamed size"} — {formatMoney(getSizeUnitPrice(size, Math.max(minQuantity, quantity)))} / {size.unitLabel || "unit"}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              {(activeSize?.imageUrls?.[0] || activeSize?.imageUrl) && <div className="hs-product-selection-preview"><img src={activeSize.imageUrls?.[0] || activeSize.imageUrl} alt="" /><span>Preview for {activeSize.name}</span></div>}
-            </fieldset>
-          )}
-
-          {frameColourGroups.map(group => (
-            <fieldset className="hs-product-options hs-product-dropdown-section" key={group.id}>
-              <legend>{group.title}<span>{selections.find(item => item.groupId === group.id)?.choiceName || "Select one"}</span></legend>
-              <div className="hs-product-select-shell">
-                <Select value={selected[group.id] || ""} onValueChange={value => { const choice = group.choices.find(item => item.id === value); if (choice) choose(group.id, choice.id, choice.imageUrl, choice.imageUrls); }}>
-                  <SelectTrigger aria-label={group.title} className="hs-product-select-trigger"><SelectValue placeholder={`Select ${group.title.toLowerCase()}`} /></SelectTrigger>
-                  <SelectContent position="item-aligned" className="hs-product-select-content">
-                    {group.choices.map(choice => { const choicePrice = getChoicePrice(choice); return <SelectItem key={choice.id} value={choice.id}>{choice.name}{choicePrice > 0 ? ` — + ${formatMoney(choicePrice)}` : ""}</SelectItem>; })}
-                  </SelectContent>
-                </Select>
-              </div>
-              {selections.find(item => item.groupId === group.id)?.imageUrl && <div className="hs-product-selection-preview"><img src={selections.find(item => item.groupId === group.id)?.imageUrl} alt="" /><span>Preview for {selections.find(item => item.groupId === group.id)?.choiceName}</span></div>}
-            </fieldset>
-          ))}
-
-          {addOnGroups.map(group => (
-            <fieldset className="hs-product-options hs-product-dropdown-section" key={group.id}>
-              <legend>{group.title}<span>{selections.find(item => item.groupId === group.id)?.choiceName || "Optional"}</span></legend>
-              <div className="hs-product-select-shell">
-                <Select value={selected[group.id] || ""} onValueChange={value => { const choice = group.choices.find(item => item.id === value); if (choice) choose(group.id, choice.id, choice.imageUrl, choice.imageUrls); }}>
-                  <SelectTrigger aria-label={group.title} className="hs-product-select-trigger"><SelectValue placeholder={`Select ${group.title.toLowerCase()}`} /></SelectTrigger>
-                  <SelectContent position="item-aligned" className="hs-product-select-content">
-                    {group.choices.map(choice => { const choicePrice = getChoicePrice(choice); return <SelectItem key={choice.id} value={choice.id}>{choice.name}{choicePrice > 0 ? ` — + ${formatMoney(choicePrice)}` : ""}</SelectItem>; })}
-                  </SelectContent>
-                </Select>
-              </div>
-              {selections.find(item => item.groupId === group.id)?.imageUrl && <div className="hs-product-selection-preview"><img src={selections.find(item => item.groupId === group.id)?.imageUrl} alt="" /><span>Preview for {selections.find(item => item.groupId === group.id)?.choiceName}</span></div>}
-            </fieldset>
-          ))}
-
-          {regularOptionGroups.map(group => (
-            <fieldset className="hs-product-options" key={group.id}>
-              <legend>{group.title}<span>{selections.find(item => item.groupId === group.id)?.choiceName}</span></legend>
-              <div>{group.choices.map(choice => {
-                const isSelected = (selected[group.id] || group.choices[0]?.id) === choice.id;
-                return <button key={choice.id} type="button" className={isSelected ? "is-selected" : ""} onClick={() => choose(group.id, choice.id, choice.imageUrl, choice.imageUrls)}>{(choice.imageUrls?.[0] || choice.imageUrl) && <img src={choice.imageUrls?.[0] || choice.imageUrl} alt="" />}<span>{choice.name}{getChoicePrice(choice) > 0 && <small>+ {formatMoney(getChoicePrice(choice))}</small>}</span>{isSelected && <Check />}</button>;
-              })}</div>
-            </fieldset>
-          ))}
-
-          <div className="hs-product-purchase-label">Quantity</div>
-          <div className="hs-product-purchase-row">
-            <div className="hs-product-quantity" aria-label="Quantity"><button type="button" onClick={() => setQuantity(value => Math.max(minQuantity, value - quantityStep))} aria-label="Decrease quantity"><Minus /></button><span>{Math.max(minQuantity, quantity)}</span><button type="button" onClick={() => setQuantity(value => Math.max(minQuantity, value) + quantityStep)} aria-label="Increase quantity"><Plus /></button></div>
-            <Button type="button" variant="ghost" onClick={() => putInCart(false)} disabled={!hasRequiredSelections} className="hs-product-add"><ShoppingBag /> Add to cart</Button>
-          </div>
-          <Button type="button" variant="ghost" onClick={() => putInCart(true)} disabled={!hasRequiredSelections} className="hs-product-buy-now">Buy now <ArrowRight /></Button>
-          {!hasRequiredSelections && <p className="hs-product-selection-hint">Select a size and frame colour to continue.</p>}
-
-          {config.offerEnabled && config.offerMessage && <div className="hs-product-offer"><span>Special offer</span><p>{config.offerMessage}</p>{config.offerMinAmount ? <small>Valid from {formatMoney(config.offerMinAmount)}</small> : null}</div>}
-          <div className="hs-product-assurance"><p><ShieldCheck /> Secure packaging</p><p><Truck /> Island-wide delivery</p>{config.productionTime && <p><Check /> Ready in {config.productionTime}</p>}</div>
-        </section>
+    <main className="hv-page min-h-screen">
+      {/* ── Breadcrumb ──────────────────────────────────────── */}
+      <div className="hv-container pb-8 pt-28">
+        <Reveal>
+          <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-3">
+            <Link href="/store" className="hv-text-link"><ArrowLeft /> Frames &amp; Prints</Link>
+            <span aria-hidden="true" className="text-[#a89a8c]">/</span>
+            <strong className="max-w-[60vw] truncate text-sm font-semibold text-[#6f6259]">{product.name}</strong>
+          </nav>
+        </Reveal>
       </div>
-      <div className="hs-product-mobile-order" aria-label="Quick order">
-        <div><span>Selected price</span><strong>{formatMoney(unitPrice)}</strong></div>
-        <button type="button" onClick={() => putInCart(true)} disabled={!hasRequiredSelections}>
-          {hasRequiredSelections ? 'Order now' : 'Choose options'} <ArrowRight size={17} />
-        </button>
+
+      <div className="hv-container pb-32 lg:pb-24">
+        <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+          {/* ── Gallery ─────────────────────────────────────── */}
+          <Reveal>
+            <section aria-label={`${product.name} images`}>
+              <div className="hv-img-frame hv-frame-double aspect-square">
+                <img key={displayImage} src={displayImage} alt={product.name} />
+                {gallery.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => showImage(-1)}
+                      aria-label="Previous product image"
+                      className="absolute left-4 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-[#171310] shadow-lg transition hover:bg-white"
+                    >
+                      <ChevronLeft size={18} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => showImage(1)}
+                      aria-label="Next product image"
+                      className="absolute right-4 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-[#171310] shadow-lg transition hover:bg-white"
+                    >
+                      <ChevronRight size={18} />
+                    </button>
+                    <span className="hv-badge hv-badge-ink absolute bottom-4 right-4">
+                      {String(currentImageIndex + 1).padStart(2, "0")} / {String(Math.max(gallery.length, 1)).padStart(2, "0")}
+                    </span>
+                  </>
+                )}
+              </div>
+              {gallery.length > 1 && (
+                <div className="mt-4 grid grid-cols-5 gap-3">
+                  {gallery.map((image, index) => (
+                    <button
+                      key={image}
+                      type="button"
+                      onClick={() => setActiveImage(image)}
+                      aria-label={`View image ${index + 1}`}
+                      className={`hv-img-frame aspect-square ${displayImage === image ? "" : "opacity-60 transition hover:opacity-100"}`}
+                      style={displayImage === image ? { outline: "2px solid var(--hv-bronze)", outlineOffset: 3 } : undefined}
+                    >
+                      <img src={image} alt="" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </section>
+          </Reveal>
+
+          {/* ── Buybox ──────────────────────────────────────── */}
+          <Reveal delay={0.1}>
+            <section>
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="hv-kicker">{categoryName}</span>
+                {config.codEnabled === true && (
+                  <span className="hv-badge hv-badge-bronze"><Check size={12} /> Cash on Delivery Available</span>
+                )}
+              </div>
+              <h1 className="hv-display hv-display-md mt-4">{product.name}</h1>
+              <p className="hv-lede mt-4">
+                {product.description || "A carefully finished photo piece, prepared in our studio and securely packed for delivery."}
+              </p>
+
+              {product.artworkGuideUrl && (
+                <a className="hv-text-link mt-5" href={product.artworkGuideUrl} target="_blank" rel="noreferrer">
+                  <ExternalLink /> {product.artworkGuideName || "Size & artwork guide"}
+                </a>
+              )}
+
+              {/* Price */}
+              <div className="mt-8 border-y py-6" style={{ borderColor: "var(--hv-line-soft)" }}>
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#a89a8c]">
+                  {activeSize ? `${config.sizeLabel || "Selected size"} price` : "Price"}
+                </p>
+                <p className="hv-display hv-display-md mt-2">{formatMoney(unitPrice)}</p>
+                {activeSize && (
+                  <p className="mt-2 text-sm text-[#6f6259]">
+                    {formatMoney(sizeUnitPrice)} per {activeSize.unitLabel || "unit"}
+                    {optionPrice > 0 ? ` + ${formatMoney(optionPrice)} selected options` : ""}
+                  </p>
+                )}
+                {!activeSize && optionPrice > 0 && (
+                  <p className="mt-2 text-sm text-[#6f6259]">Includes {formatMoney(optionPrice)} selected options</p>
+                )}
+              </div>
+
+              {/* Sizes */}
+              {sizeOptions.length > 0 && (
+                <fieldset className="mt-8">
+                  <legend className="mb-1 flex w-full items-baseline justify-between gap-4">
+                    <span className="text-[12px] font-extrabold uppercase tracking-[0.16em] text-[#171310]">
+                      {config.sizeLabel || "Choose a size"}
+                    </span>
+                    <span className="text-right text-sm text-[#6f6259]">{activeSize?.name || "Select one"}</span>
+                  </legend>
+                  <div className="hv-chip-row mt-3">
+                    {sizeOptions.map(size => (
+                      <button
+                        key={size.id}
+                        type="button"
+                        onClick={() => chooseSize(size)}
+                        aria-pressed={selectedSizeId === size.id}
+                        className={`hv-chip ${selectedSizeId === size.id ? "is-active" : ""}`}
+                      >
+                        {selectedSizeId === size.id && <Check size={13} />}
+                        {size.name || "Unnamed size"} · {formatMoney(getSizeUnitPrice(size, Math.max(minQuantity, quantity)))}
+                      </button>
+                    ))}
+                  </div>
+                  {(activeSize?.imageUrls?.[0] || activeSize?.imageUrl) && (
+                    <div className="mt-4 flex items-center gap-3">
+                      <span className="hv-img-frame block h-14 w-14 shrink-0" style={{ borderRadius: 12 }}>
+                        <img src={activeSize.imageUrls?.[0] || activeSize.imageUrl} alt="" />
+                      </span>
+                      <span className="text-sm text-[#6f6259]">Preview for {activeSize.name}</span>
+                    </div>
+                  )}
+                </fieldset>
+              )}
+
+              {/* Frame colours (required) */}
+              {frameColourGroups.map(group => renderChipGroup(group, "Select one"))}
+              {/* Add-ons (optional) */}
+              {addOnGroups.map(group => renderChipGroup(group, "Optional"))}
+              {/* Regular options (default: first choice) */}
+              {regularOptionGroups.map(group => renderChipGroup(group, group.choices[0]?.name || ""))}
+
+              {/* Quantity + purchase */}
+              <div className="mt-10">
+                <p className="text-[12px] font-extrabold uppercase tracking-[0.16em] text-[#171310]">Quantity</p>
+                <div className="mt-3 flex flex-wrap items-center gap-4">
+                  <div className="flex items-center rounded-full border" style={{ borderColor: "var(--hv-line)" }} aria-label="Quantity">
+                    <button
+                      type="button"
+                      onClick={() => setQuantity(value => Math.max(minQuantity, value - quantityStep))}
+                      aria-label="Decrease quantity"
+                      className="grid h-12 w-12 place-items-center rounded-full text-[#171310] transition hover:bg-black/5"
+                    >
+                      <Minus size={16} />
+                    </button>
+                    <span className="min-w-10 text-center text-[15px] font-bold tabular-nums text-[#171310]">
+                      {Math.max(minQuantity, quantity)}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity(value => Math.max(minQuantity, value) + quantityStep)}
+                      aria-label="Increase quantity"
+                      className="grid h-12 w-12 place-items-center rounded-full text-[#171310] transition hover:bg-black/5"
+                    >
+                      <Plus size={16} />
+                    </button>
+                  </div>
+                  <motion.button
+                    type="button"
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => putInCart(false)}
+                    disabled={!hasRequiredSelections}
+                    className="hv-btn hv-btn-bronze flex-1"
+                  >
+                    <ShoppingBag /> Add to cart
+                  </motion.button>
+                </div>
+                <motion.button
+                  type="button"
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => putInCart(true)}
+                  disabled={!hasRequiredSelections}
+                  className="hv-btn hv-btn-solid mt-3 w-full"
+                >
+                  Buy now <ArrowRight />
+                </motion.button>
+                {!hasRequiredSelections && (
+                  <p className="mt-3 text-sm font-medium text-[#8a5f28]">Select a size and frame colour to continue.</p>
+                )}
+              </div>
+
+              {/* Offer */}
+              {config.offerEnabled && config.offerMessage && (
+                <div className="hv-card mt-8 p-6" style={{ borderLeft: "3px solid var(--hv-bronze)" }}>
+                  <span className="hv-badge hv-badge-bronze">Special offer</span>
+                  <p className="mt-3 text-[15px] leading-relaxed text-[#2b241e]">{config.offerMessage}</p>
+                  {config.offerMinAmount ? (
+                    <p className="mt-2 text-sm text-[#6f6259]">Valid from {formatMoney(config.offerMinAmount)}</p>
+                  ) : null}
+                </div>
+              )}
+
+              {/* Trust badges */}
+              <div className="mt-8 flex flex-wrap gap-2.5">
+                <span className="hv-badge hv-badge-ghost"><ShieldCheck size={13} /> Secure packaging</span>
+                <span className="hv-badge hv-badge-ghost"><Truck size={13} /> Island-wide delivery</span>
+                {config.productionTime && (
+                  <span className="hv-badge hv-badge-ghost"><Check size={13} /> Ready in {config.productionTime}</span>
+                )}
+              </div>
+
+              {/* Accordion-ish details */}
+              <div
+                className="mt-10"
+                style={{ borderTop: "1px solid var(--hv-line-soft)", borderBottom: "1px solid var(--hv-line-soft)" }}
+              >
+                <details className="group py-5" style={{ borderBottom: "1px solid var(--hv-line-soft)" }}>
+                  <summary className="flex cursor-pointer list-none items-center justify-between text-[13px] font-extrabold uppercase tracking-[0.14em] text-[#171310] [&::-webkit-details-marker]:hidden">
+                    About this piece
+                    <Plus size={15} className="shrink-0 text-[#b07c3a] transition-transform duration-300 group-open:rotate-45" />
+                  </summary>
+                  <p className="mt-4 text-[15px] leading-relaxed text-[#6f6259]">
+                    {product.description || "A carefully finished photo piece, prepared in our studio and securely packed for delivery."}
+                  </p>
+                </details>
+                <details className="group py-5">
+                  <summary className="flex cursor-pointer list-none items-center justify-between text-[13px] font-extrabold uppercase tracking-[0.14em] text-[#171310] [&::-webkit-details-marker]:hidden">
+                    Delivery &amp; payment
+                    <Plus size={15} className="shrink-0 text-[#b07c3a] transition-transform duration-300 group-open:rotate-45" />
+                  </summary>
+                  <div className="mt-4 space-y-2 text-[15px] leading-relaxed text-[#6f6259]">
+                    <p>Each piece is finished and packed in our studio, then delivered island-wide.</p>
+                    {config.productionTime && <p>Production time: {config.productionTime}.</p>}
+                    {config.codEnabled === true && <p>Cash on delivery is available for this piece.</p>}
+                    {config.offerEnabled && config.offerMessage && <p>{config.offerMessage}</p>}
+                  </div>
+                </details>
+              </div>
+            </section>
+          </Reveal>
+        </div>
+      </div>
+
+      {/* ── Mobile quick order ──────────────────────────────── */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-40 border-t bg-[#faf7f1]/95 p-4 backdrop-blur lg:hidden"
+        style={{ borderColor: "var(--hv-line-soft)" }}
+      >
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#a89a8c]">Selected price</p>
+            <p className="hv-display text-xl">{formatMoney(unitPrice)}</p>
+          </div>
+          <motion.button
+            type="button"
+            whileTap={{ scale: 0.97 }}
+            onClick={() => putInCart(true)}
+            disabled={!hasRequiredSelections}
+            className="hv-btn hv-btn-bronze hv-btn-sm"
+          >
+            {hasRequiredSelections ? "Order now" : "Choose options"} <ArrowRight />
+          </motion.button>
+        </div>
       </div>
     </main>
   );
