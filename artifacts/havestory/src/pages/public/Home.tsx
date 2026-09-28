@@ -1,7 +1,7 @@
 import { SiteNotices } from "@/components/public/SiteNotices";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import {
   ArrowRight,
   BadgeCheck,
@@ -94,6 +94,14 @@ export default function Home() {
   const [previousHeroImage, setPreviousHeroImage] = useState<string | null>(null);
   const transitionTimer = useRef<number | null>(null);
   const reduceMotion = useReducedMotion();
+  const heroRef = useRef<HTMLDivElement | null>(null);
+  const { scrollYProgress: heroScrollProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const heroArchY = useTransform(heroScrollProgress, [0, 1], [0, 46]);
+  const heroOrbY = useTransform(heroScrollProgress, [0, 1], [0, 110]);
+  const heroRingY = useTransform(heroScrollProgress, [0, 1], [0, 60]);
 
   const allProducts = Array.isArray(products) ? products : [];
   const featuredProducts = allProducts.filter((item) => item.featured);
@@ -134,6 +142,8 @@ export default function Home() {
   const heroKey = heroSlides.join("|");
   const safeHeroIndex = heroIndex % heroSlides.length;
   const heroImage = heroSlides[safeHeroIndex];
+  const nextHeroImage = heroSlides[(safeHeroIndex + 1) % heroSlides.length];
+  const orbHeroImage = heroSlides[(safeHeroIndex + 2) % heroSlides.length];
   const favouriteWindow = Math.min(4, favouritePool.length);
   const primaryHeroHref = safeSiteHref(cfg?.heroCtaLink, "/store");
   const primaryIsCustom = primaryHeroHref === "/custom-project";
@@ -197,34 +207,45 @@ export default function Home() {
         />
         <div className="hv-container relative w-full">
           <div className="grid items-center gap-12 lg:gap-20 lg:grid-cols-[1.02fr_0.98fr]" style={{ paddingBlock: "clamp(24px, 4vh, 56px)" }}>
+            <div>
             <motion.div {...fadeUp(0.05)}>
               <span className="hv-badge hv-badge-bronze">
                 <Sparkles size={13} aria-hidden="true" />
                 {cfg?.heroBadgeText || "HAVESTORY · Sri Lankan creative studio"}
               </span>
-              <h1 id="studio-title" className="hv-display hv-display-xl" style={{ marginTop: 24 }}>
-                {heroTitle}
-              </h1>
-              <p className="hv-lede" style={{ marginTop: 24, maxWidth: "52ch" }}>
-                {heroSubtitle}
-              </p>
-              <div className="flex flex-wrap items-center" style={{ marginTop: 36, gap: "16px 36px" }}>
-                <Link href={primaryHeroHref} className="hv-btn hv-btn-bronze">
-                  {primaryHeroLabel} <ArrowRight size={16} aria-hidden="true" />
-                </Link>
-                <Link href={primaryIsCustom ? "/store" : "/custom-project"} className="hv-text-link">
-                  {primaryIsCustom ? "Browse frames" : "Request a custom frame"} <ArrowRight size={15} aria-hidden="true" />
-                </Link>
-              </div>
             </motion.div>
+            <motion.h1 id="studio-title" className="hv-display hv-display-xl" style={{ marginTop: 24 }} {...fadeUp(0.14)}>
+              {heroTitle}
+            </motion.h1>
+            <motion.p className="hv-lede" style={{ marginTop: 24, maxWidth: "52ch" }} {...fadeUp(0.22)}>
+              {heroSubtitle}
+            </motion.p>
+            <motion.div className="flex flex-wrap items-center" style={{ marginTop: 36, gap: "16px 36px" }} {...fadeUp(0.3)}>
+              <Link href={primaryHeroHref} className="hv-btn hv-btn-bronze">
+                {primaryHeroLabel} <ArrowRight size={16} aria-hidden="true" />
+              </Link>
+              <Link href={primaryIsCustom ? "/store" : "/custom-project"} className="hv-text-link">
+                {primaryIsCustom ? "Browse frames" : "Request a custom frame"} <ArrowRight size={15} aria-hidden="true" />
+              </Link>
+            </motion.div>
+          </div>
 
-            <motion.div {...fadeUp(0.22)} className="relative">
-              <div
+            <div className="hv-hero-composition" ref={heroRef}>
+              <motion.div
                 aria-hidden="true"
-                className="absolute pointer-events-none"
-                style={{ inset: 0, transform: "translate(20px, 20px)", borderRadius: "var(--hv-radius)", border: "1px solid rgba(176,124,58,0.4)" }}
+                className="hv-hero-ring hv-spin-slow"
+                style={{ y: heroRingY }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1.2, delay: 0.5 }}
               />
-              <div className="hv-img-frame hv-frame-double relative" style={{ aspectRatio: "4/5", boxShadow: "var(--hv-shadow-lg)" }}>
+              <motion.div
+                className="hv-hero-arch"
+                style={{ aspectRatio: "4/5", y: heroArchY }}
+                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 64, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 1.1, delay: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              >
                 {previousHeroImage && (
                   <img
                     src={previousHeroImage}
@@ -245,9 +266,45 @@ export default function Home() {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
                 />
-              </div>
+                <span aria-hidden="true" className="hv-hero-arch-frame" />
+              </motion.div>
+              <motion.span
+                className="hv-hero-pill"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.9, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <Sparkles size={14} aria-hidden="true" /> Hand-finished in Sri Lanka
+              </motion.span>
+              <motion.div
+                className="hv-hero-orb"
+                style={{ y: heroOrbY }}
+                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.6 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.9, delay: 0.62, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <img src={orbHeroImage} alt="Close detail of a HAVESTORY framed print" loading="lazy" decoding="async" />
+              </motion.div>
+              <motion.div
+                className="hv-hero-float-wrap"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.78 }}
+              >
+                <button
+                  type="button"
+                  className="hv-hero-float-card"
+                  onClick={() => showHeroSlide((safeHeroIndex + 1) % heroSlides.length)}
+                  aria-label="Show the next studio image"
+                >
+                  <img src={nextHeroImage} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                  <span className="hv-hero-float-cap">
+                    Next story <ArrowRight size={12} aria-hidden="true" />
+                  </span>
+                </button>
+              </motion.div>
               {heroSlides.length > 1 && (
-                <div role="group" aria-label="Studio gallery images" className="flex items-center justify-center" style={{ gap: 10, marginTop: 22 }}>
+                <div role="group" aria-label="Studio gallery images" className="hv-hero-dots">
                   {heroSlides.map((_, index) => (
                     <button
                       key={index}
@@ -255,21 +312,12 @@ export default function Home() {
                       aria-label={`Show image ${index + 1} of ${heroSlides.length}`}
                       aria-current={index === safeHeroIndex ? "true" : undefined}
                       onClick={() => showHeroSlide(index)}
-                      className="rounded-full"
-                      style={{
-                        height: 8,
-                        width: index === safeHeroIndex ? 34 : 8,
-                        background: index === safeHeroIndex ? "var(--hv-bronze)" : "var(--hv-line)",
-                        transition: "all 0.5s var(--hv-ease)",
-                        cursor: "pointer",
-                        border: 0,
-                        padding: 0,
-                      }}
+                      className={`hv-hero-dot${index === safeHeroIndex ? " is-active" : ""}`}
                     />
                   ))}
                 </div>
               )}
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -278,19 +326,16 @@ export default function Home() {
       {benefitsVisible && (
         <section className="hv-section-tight" aria-label="Studio promises">
           <div className="hv-container">
-            <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Stagger className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {benefits.map((benefit, index) => {
                 const Icon = BENEFIT_ICONS[benefit.icon] || Sparkles;
                 return (
                   <StaggerItem key={`${benefit.title}-${index}`}>
-                    <article className="hv-card hv-card-hover h-full p-6">
-                      <span
-                        className="grid place-items-center rounded-full"
-                        style={{ width: 46, height: 46, background: "rgba(176,124,58,0.12)", color: "var(--hv-bronze-deep)" }}
-                      >
-                        <Icon size={21} strokeWidth={1.6} aria-hidden="true" />
+                    <article className="hv-card hv-card-hover hv-benefit-card p-8">
+                      <span className="hv-benefit-icon">
+                        <Icon size={22} strokeWidth={1.6} aria-hidden="true" />
                       </span>
-                      <h2 className="text-[17px] font-bold tracking-tight" style={{ marginTop: 18 }}>
+                      <h2 className="text-[17px] font-bold tracking-tight" style={{ marginTop: 20 }}>
                         {benefit.title}
                       </h2>
                       <p className="text-[14.5px] leading-relaxed" style={{ marginTop: 8, color: "var(--hv-muted)" }}>
@@ -318,24 +363,28 @@ export default function Home() {
             <Stagger className="grid gap-6 md:grid-cols-2 lg:grid-cols-12">
               {categories.map((item, index) => (
                 <StaggerItem key={`${item.title}-${index}`} className={COLLECTION_SPANS[index] || ""}>
-                  <Link href={safeSiteHref(item.href, "/store")} className="group block h-full">
+                  <Link href={safeSiteHref(item.href, "/store")} className="group hv-collection-card">
                     <div className="hv-img-frame" style={{ aspectRatio: "16/10", boxShadow: "var(--hv-shadow-md)" }}>
                       <img src={item.image} alt="" loading="lazy" decoding="async" />
                     </div>
-                    <div className="flex items-start justify-between gap-6" style={{ marginTop: 20 }}>
-                      <div>
-                        <span className="hv-kicker">0{index + 1} · Collection</span>
-                        <h3 className="hv-display hv-display-sm" style={{ marginTop: 10 }}>
-                          {item.title}
-                        </h3>
-                        <p className="text-[15px] leading-relaxed" style={{ marginTop: 8, color: "var(--hv-muted)" }}>
-                          {item.copy}
-                        </p>
+                    <div className="hv-collection-body">
+                      <div className="flex items-start justify-between gap-6" style={{ marginTop: 22 }}>
+                        <div>
+                          <span className="hv-kicker">0{index + 1} · Collection</span>
+                          <h3 className="hv-display hv-display-sm" style={{ marginTop: 10 }}>
+                            {item.title}
+                          </h3>
+                          <p className="text-[15px] leading-relaxed" style={{ marginTop: 8, color: "var(--hv-muted)" }}>
+                            {item.copy}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="hv-collection-foot">
+                        <span className="hv-text-link">
+                          Explore collection <ArrowRight size={15} aria-hidden="true" />
+                        </span>
                       </div>
                     </div>
-                    <span className="hv-text-link" style={{ marginTop: 16 }}>
-                      Explore collection <ArrowRight size={15} aria-hidden="true" />
-                    </span>
                   </Link>
                 </StaggerItem>
               ))}
@@ -345,7 +394,7 @@ export default function Home() {
       )}
 
       {/* ── Featured products ────────────────────────────────────── */}
-      <section className="hv-section" style={{ background: "var(--hv-cream)" }} aria-labelledby="studio-products-title">
+      <section className="hv-section hv-band-blush" aria-labelledby="studio-products-title">
         <div className="hv-container">
           <SectionHead
             id="studio-products-title"
@@ -359,7 +408,7 @@ export default function Home() {
             <Stagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {favouriteProducts.map((product) => (
                 <StaggerItem key={product.id}>
-                  <Link href={`/store/${product.slug || product.id}`} className="hv-card hv-card-hover block h-full p-3">
+                  <Link href={`/store/${product.slug || product.id}`} className="hv-card hv-card-hover block h-full p-4">
                     <div className="hv-img-frame" style={{ aspectRatio: "1/1" }}>
                       {product.imageUrl ? (
                         <img src={product.imageUrl} alt={product.name} loading="lazy" decoding="async" />

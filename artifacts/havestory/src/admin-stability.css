@@ -1,21 +1,21 @@
 /* Admin palette. Tailwind utility aliases live in the index.css entrypoint. */
 html[data-hs-admin-theme] {
   --admin-on-solid: 0 0% 100%;
-  --admin-brand-ink: 32 28% 25%;
+  --admin-brand-ink: 32 40% 30%;
   --admin-success-solid: 158 62% 26%;
   --admin-warning-solid: 32 85% 29%;
   --admin-danger-solid: 350 62% 38%;
   --admin-font: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
   --admin-canvas: 0 0% 100%;
   --admin-surface: 0 0% 100%;
-  --admin-subtle: 35 19% 94%;
+  --admin-subtle: 35 34% 94%;
   --admin-ink: 27 19% 14%;
   --admin-muted: 28 11% 35%;
-  --admin-border: 32 15% 70%;
-  --admin-inverse: 155 25% 17%;
-  --admin-brand: 32 27% 29%;
-  --admin-brand-soft: 36 27% 93%;
-  --admin-brand-line: 33 24% 62%;
+  --admin-border: 32 20% 70%;
+  --admin-inverse: 28 26% 13%;
+  --admin-brand: 32 45% 40%;
+  --admin-brand-soft: 34 45% 94%;
+  --admin-brand-line: 33 42% 62%;
   --admin-success: 158 62% 26%;
   --admin-success-soft: 152 44% 95%;
   --admin-success-line: 156 31% 75%;
@@ -29,16 +29,16 @@ html[data-hs-admin-theme] {
 }
 html[data-hs-admin-theme='dark'] {
   --admin-brand-ink: 38 38% 80%;
-  --admin-inverse: 155 25% 9%;
+  --admin-inverse: 28 24% 8%;
   --admin-canvas: 30 12% 10%;
   --admin-surface: 30 10% 15%;
   --admin-subtle: 30 9% 21%;
   --admin-ink: 38 22% 95%;
   --admin-muted: 34 12% 74%;
   --admin-border: 30 9% 34%;
-  --admin-brand: 32 24% 31%;
-  --admin-brand-soft: 32 13% 23%;
-  --admin-brand-line: 35 22% 55%;
+  --admin-brand: 32 40% 38%;
+  --admin-brand-soft: 32 22% 22%;
+  --admin-brand-line: 35 38% 55%;
   --admin-success: 158 42% 62%;
   --admin-success-soft: 158 29% 17%;
   --admin-success-line: 158 30% 36%;
