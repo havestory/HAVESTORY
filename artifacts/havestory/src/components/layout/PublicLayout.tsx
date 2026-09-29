@@ -127,7 +127,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     };
   }, [refetchSettings]);
 
-  const publicThemePreset = 'atelier-light';
+  const publicThemePreset = 'studio-smart';
 
   useEffect(() => {
     document.documentElement.dataset.hsPublicTheme = 'heritage';

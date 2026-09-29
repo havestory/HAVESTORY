@@ -118,7 +118,7 @@ export default function Services() {
                         aria-hidden="true"
                         className="absolute left-6 top-5"
                         style={{
-                          fontFamily: '"Fraunces", Georgia, serif',
+                          fontFamily: '"Space Grotesk", "Inter", sans-serif',
                           fontSize: 30,
                           fontWeight: 700,
                           color: '#fffdf6',

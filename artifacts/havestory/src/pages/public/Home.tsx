@@ -99,9 +99,8 @@ export default function Home() {
     target: heroRef,
     offset: ["start start", "end start"],
   });
-  const heroArchY = useTransform(heroScrollProgress, [0, 1], [0, 46]);
-  const heroOrbY = useTransform(heroScrollProgress, [0, 1], [0, 110]);
-  const heroRingY = useTransform(heroScrollProgress, [0, 1], [0, 60]);
+  const heroArchY = useTransform(heroScrollProgress, [0, 1], [0, 40]);
+  const heroOrbY = useTransform(heroScrollProgress, [0, 1], [0, 90]);
 
   const allProducts = Array.isArray(products) ? products : [];
   const featuredProducts = allProducts.filter((item) => item.featured);
@@ -202,7 +201,7 @@ export default function Home() {
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(1000px 520px at 84% 6%, rgba(217,169,78,0.20), transparent 60%), radial-gradient(720px 440px at 4% 100%, rgba(176,124,58,0.12), transparent 60%)",
+              "radial-gradient(1000px 520px at 84% 6%, rgba(47,91,255,0.07), transparent 60%)",
           }}
         />
         <div className="hv-container relative w-full">
@@ -230,78 +229,63 @@ export default function Home() {
             </motion.div>
           </div>
 
-            <div className="hv-hero-composition" ref={heroRef}>
+            <div className="hv-hero-stage" ref={heroRef}>
               <motion.div
-                aria-hidden="true"
-                className="hv-hero-ring hv-spin-slow"
-                style={{ y: heroRingY }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 1.2, delay: 0.5 }}
-              />
-              <motion.div
-                className="hv-hero-arch"
-                style={{ aspectRatio: "4/5", y: heroArchY }}
-                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 64, scale: 0.97 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
+                className="hv-hero-panel"
+                style={{ y: heroArchY }}
+                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 64 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1.1, delay: 0.28, ease: [0.22, 1, 0.36, 1] }}
               >
-                {previousHeroImage && (
-                  <img
-                    src={previousHeroImage}
-                    alt=""
-                    aria-hidden="true"
-                    decoding="async"
-                    style={{ position: "absolute", inset: 0 }}
-                  />
-                )}
-                <motion.img
-                  key={heroImage}
-                  src={heroImage}
-                  alt="A framed piece from the HAVESTORY studio"
-                  fetchPriority={safeHeroIndex === 0 ? "high" : "auto"}
-                  decoding="async"
-                  style={{ position: "absolute", inset: 0 }}
-                  initial={reduceMotion || !previousHeroImage ? { opacity: 0 } : { opacity: 0, scale: 1.06 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                />
-                <span aria-hidden="true" className="hv-hero-arch-frame" />
-              </motion.div>
-              <motion.span
-                className="hv-hero-pill"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.9, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <Sparkles size={14} aria-hidden="true" /> Hand-finished in Sri Lanka
-              </motion.span>
-              <motion.div
-                className="hv-hero-orb"
-                style={{ y: heroOrbY }}
-                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.6 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.9, delay: 0.62, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <img src={orbHeroImage} alt="Close detail of a HAVESTORY framed print" loading="lazy" decoding="async" />
-              </motion.div>
-              <motion.div
-                className="hv-hero-float-wrap"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.78 }}
-              >
-                <button
-                  type="button"
-                  className="hv-hero-float-card"
-                  onClick={() => showHeroSlide((safeHeroIndex + 1) % heroSlides.length)}
-                  aria-label="Show the next studio image"
+                <div className="hv-hero-frame">
+                  <div className="hv-hero-frame-photo">
+                    {previousHeroImage && (
+                      <img
+                        src={previousHeroImage}
+                        alt=""
+                        aria-hidden="true"
+                        decoding="async"
+                        style={{ position: "absolute", inset: 0 }}
+                      />
+                    )}
+                    <motion.img
+                      key={heroImage}
+                      src={heroImage}
+                      alt="A framed piece from the HAVESTORY studio"
+                      fetchPriority={safeHeroIndex === 0 ? "high" : "auto"}
+                      decoding="async"
+                      style={{ position: "absolute", inset: 0 }}
+                      initial={reduceMotion || !previousHeroImage ? { opacity: 0 } : { opacity: 0, scale: 1.06 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                    />
+                  </div>
+                  <div className="hv-hero-frame-bar">
+                    <span className="hv-hero-frame-cap">
+                      <i aria-hidden="true" /> Live studio piece
+                    </span>
+                    <span className="hv-hero-frame-tag">A3 · Oak · Museum glass</span>
+                  </div>
+                </div>
+                <motion.div
+                  aria-hidden="true"
+                  className="hv-hero-frame-sm hv-hero-frame-sm-a"
+                  style={{ y: heroOrbY }}
+                  initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.7, rotate: 10 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                  transition={{ duration: 0.9, delay: 0.62, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  <img src={nextHeroImage} alt="" aria-hidden="true" loading="lazy" decoding="async" />
-                  <span className="hv-hero-float-cap">
-                    Next story <ArrowRight size={12} aria-hidden="true" />
-                  </span>
-                </button>
+                  <img src={orbHeroImage} alt="" loading="lazy" decoding="async" />
+                </motion.div>
+                <motion.div
+                  aria-hidden="true"
+                  className="hv-hero-frame-sm hv-hero-frame-sm-b hv-float"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.78 }}
+                >
+                  <img src={nextHeroImage} alt="" loading="lazy" decoding="async" />
+                </motion.div>
               </motion.div>
               {heroSlides.length > 1 && (
                 <div role="group" aria-label="Studio gallery images" className="hv-hero-dots">
@@ -588,7 +572,7 @@ export default function Home() {
               style={{
                 padding: "clamp(48px, 7vw, 96px) clamp(24px, 6vw, 80px)",
                 background:
-                  "radial-gradient(700px 340px at 50% 0%, rgba(217,169,78,0.16), transparent 65%), var(--hv-card)",
+                  "radial-gradient(700px 340px at 50% 0%, rgba(47,91,255,0.08), transparent 65%), var(--hv-card)",
               }}
             >
               <span className="hv-kicker hv-kicker-center justify-center">Custom Framing</span>

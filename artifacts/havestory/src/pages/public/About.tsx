@@ -109,7 +109,7 @@ export default function About() {
                     <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[rgba(176,124,58,0.12)] text-[#8a5f28]">
                       <v.icon className="h-5 w-5" aria-hidden="true" />
                     </span>
-                    <span className="font-[Fraunces] text-lg font-semibold text-[#a89a8c]">{v.num}</span>
+                    <span className="font-['Space_Grotesk'] text-lg font-semibold text-[#9aa3af]">{v.num}</span>
                   </div>
                   <h3 className="hv-display hv-display-sm mt-6">{v.title}</h3>
                   <p className="mt-3 leading-relaxed text-[#6f6259]">{v.copy}</p>

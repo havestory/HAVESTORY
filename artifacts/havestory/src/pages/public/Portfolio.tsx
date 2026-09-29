@@ -168,7 +168,7 @@ export default function Portfolio() {
                           </small>
                           <strong
                             style={{
-                              fontFamily: '"Fraunces", Georgia, serif',
+                              fontFamily: '"Space Grotesk", "Inter", sans-serif',
                               fontSize: 22,
                               fontWeight: 600,
                               color: '#fdfaf4',
@@ -267,7 +267,7 @@ export default function Portfolio() {
                   </span>
                   <strong
                     className="block"
-                    style={{ fontFamily: '"Fraunces", Georgia, serif', fontSize: 24, fontWeight: 600, marginTop: 6 }}
+                    style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif', fontSize: 24, fontWeight: 600, marginTop: 6 }}
                   >
                     {selected.title || `Story ${(selectedIndex || 0) + 1}`}
                   </strong>

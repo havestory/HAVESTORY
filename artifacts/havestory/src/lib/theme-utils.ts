@@ -7,6 +7,7 @@ type ThemeVars = {
 };
 
 export const THEME_VARS: Record<string, ThemeVars> = {
+  "studio-smart": { from: "#FFFFFF", to: "#101418", accent: "#2F5BFF", primary: "222 88% 56%", secondary: "222 70% 45%" },
   "atelier-light": { from: "#F7F2E8", to: "#2C211B", accent: "#B28A50", primary: "24 24% 14%", secondary: "34 28% 29%" },
   "light-premium": { from: "#F7F2E8", to: "#2C211B", accent: "#B28A50", primary: "24 24% 14%", secondary: "34 28% 29%" },
   "light-editorial": { from: "#F7F2E8", to: "#2C211B", accent: "#B28A50", primary: "24 24% 14%", secondary: "34 28% 29%" },

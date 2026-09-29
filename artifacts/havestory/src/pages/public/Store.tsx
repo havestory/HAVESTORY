@@ -374,7 +374,7 @@ export default function Store() {
             <div className="flex min-w-0 items-center gap-3">
               <span
                 className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-white"
-                style={{ background: 'linear-gradient(135deg, var(--hv-gold), var(--hv-bronze-deep))' }}
+                style={{ background: 'var(--hv-accent)' }}
               >
                 <ShoppingCart size={18} />
               </span>

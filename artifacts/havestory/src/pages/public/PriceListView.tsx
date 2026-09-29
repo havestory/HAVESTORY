@@ -160,7 +160,7 @@ export default function PriceListView() {
 
           {/* Requirements */}
           {pl.requirements && (
-            <section aria-label="Customer requirements" className="mt-10 rounded-[20px] border border-[rgba(176,124,58,0.35)] bg-[rgba(217,169,78,0.08)] p-6 md:p-8">
+            <section aria-label="Customer requirements" className="mt-10 rounded-[20px] border border-[rgba(47,91,255,0.3)] bg-[rgba(47,91,255,0.06)] p-6 md:p-8">
               <h2 className="hv-display mb-3 text-[20px]">Requirements &amp; terms</h2>
               <p className="whitespace-pre-line text-sm leading-7 text-[#2b241e]">{pl.requirements}</p>
             </section>
