@@ -80,7 +80,7 @@ function SectionHead({ id, eyebrow, title, copy, href, link }: { id?: string; ey
   );
 }
 
-const MARQUEE_WORDS = ["Custom Framing", "Fine-Art Prints", "Gallery Finishes", "Handcrafted in Sri Lanka"];
+const MARQUEE_WORDS = ["Photo Frames", "Custom Framing", "Gifts & Keepsakes", "Personalised Designs", "Studio Services"];
 const COLLECTION_SPANS = ["lg:col-span-7", "lg:col-span-5", "lg:col-span-5", "lg:col-span-7"];
 
 export default function Home() {
@@ -130,10 +130,10 @@ export default function Home() {
   const heroSlots = Array.from({ length: 10 }, (_, index) => cfg?.[`heroSlideImage${index + 1}`] as string | undefined);
   const configuredSlides = [...new Set(heroSlots.filter((image, index): image is string => Boolean(image?.trim() && slideEnabled[index])))];
   const categoryFallbacks = [
-    { title: "Custom Frames", copy: "Made to your photograph and space.", href: "/store", tone: "violet", image: DEFAULT_IMAGES[1] },
-    { title: "Fine Art Prints", copy: "Colour-managed, crisp and lasting.", href: "/store", tone: "gold", image: DEFAULT_IMAGES[2] },
-    { title: "Personal Gifts", copy: "Meaningful pieces for every occasion.", href: "/custom-project", tone: "rose", image: portfolioList[0]?.imageUrl || DEFAULT_IMAGES[0] },
-    { title: "Studio Sessions", copy: "Portrait and product photography with a gallery finish.", href: "/services", tone: "sage", image: portfolioList[1]?.imageUrl || DEFAULT_IMAGES[1] },
+    { title: "Photo Frames", copy: "Handcrafted frames for the moments you keep.", href: "/store", tone: "gold", image: DEFAULT_IMAGES[1] },
+    { title: "Custom Framing", copy: "Made to your photograph and space.", href: "/custom-project", tone: "gold", image: DEFAULT_IMAGES[2] },
+    { title: "Gifts & Keepsakes", copy: "Meaningful pieces for every occasion.", href: "/store", tone: "gold", image: portfolioList[0]?.imageUrl || DEFAULT_IMAGES[0] },
+    { title: "Studio Services", copy: "Personalised designs and studio finishes.", href: "/services", tone: "gold", image: portfolioList[1]?.imageUrl || DEFAULT_IMAGES[1] },
   ];
   const categories = categoryFallbacks.map((fallback, index) => ({ ...fallback, ...(featureCards[index] || {}), image: featureCards[index]?.image || fallback.image }));
   // Use existing collection imagery until the studio publishes its own hero slides.
@@ -201,7 +201,7 @@ export default function Home() {
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(1000px 520px at 84% 6%, rgba(47,91,255,0.07), transparent 60%)",
+              "radial-gradient(1000px 520px at 84% 6%, rgba(184,137,74,0.10), transparent 60%)",
           }}
         />
         <div className="hv-container relative w-full">
@@ -432,6 +432,25 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Brand heritage strip · official HAVESTORY artwork ───────── */}
+      <section className="hv-section-tight" aria-label="The HAVESTORY brand">
+        <div className="hv-container">
+          <Reveal>
+            <div className="hv-img-frame" style={{ borderRadius: 20, border: "1px solid rgba(184,137,74,0.35)" }}>
+              <img
+                src="/brand/havestory-banner.jpg"
+                alt="HAVESTORY — More than frames, a story for life. Photo frames, custom framing, gifts and keepsakes, personalised designs and studio services."
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <p className="hv-display text-center" style={{ marginTop: 22, fontSize: "clamp(19px, 2.4vw, 27px)", fontStyle: "italic", color: "var(--hv-ink)" }}>
+              More than frames, <span style={{ color: "var(--hv-accent-deep)" }}>a story for life.</span>
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
       {/* ── Portfolio · dark gallery band ────────────────────────── */}
       {portfolioList.length > 0 && (
         <section className="hv-dark hv-grain hv-section relative" aria-labelledby="studio-gallery-title">
@@ -572,7 +591,7 @@ export default function Home() {
               style={{
                 padding: "clamp(48px, 7vw, 96px) clamp(24px, 6vw, 80px)",
                 background:
-                  "radial-gradient(700px 340px at 50% 0%, rgba(47,91,255,0.08), transparent 65%), var(--hv-card)",
+                  "radial-gradient(700px 340px at 50% 0%, rgba(184,137,74,0.10), transparent 65%), var(--hv-card)",
               }}
             >
               <span className="hv-kicker hv-kicker-center justify-center">Custom Framing</span>

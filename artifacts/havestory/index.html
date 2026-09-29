@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-    <meta name="theme-color" content="#101418" />
+    <meta name="theme-color" content="#2a1d10" />
     <title>HAVESTORY — Premium Photo Frames & Story Galleries</title>
     <meta name="description" content="HAVESTORY — Premium custom photo frames, glass-look frames and story collages. Made in Sri Lanka." />
     <meta property="og:type" content="website" />
@@ -24,17 +24,17 @@
          Shows instantly before the JS bundle loads; removed by main.tsx
          (min display + window load, hard safety timeout — never blocks). -->
     <style>
-      #hs-boot{position:fixed;inset:0;z-index:10000;background:#fff;display:flex;align-items:center;justify-content:center;transition:opacity .45s ease}
+      #hs-boot{position:fixed;inset:0;z-index:10000;background:#f7f2e7;display:flex;align-items:center;justify-content:center;transition:opacity .45s ease}
       #hs-boot.is-done{opacity:0;pointer-events:none}
       .hs-boot-inner{display:flex;flex-direction:column;align-items:center;gap:18px}
       .hs-boot-svg{width:96px;height:96px;overflow:visible}
-      .hs-boot-rect{fill:none;stroke:#101418;stroke-width:4;stroke-dasharray:1;stroke-dashoffset:1;animation:hsBootDraw 1s cubic-bezier(.6,0,.2,1) .1s forwards}
+      .hs-boot-rect{fill:none;stroke:#2a1d10;stroke-width:4;stroke-dasharray:1;stroke-dashoffset:1;animation:hsBootDraw 1s cubic-bezier(.6,0,.2,1) .1s forwards}
       @keyframes hsBootDraw{to{stroke-dashoffset:0}}
       .hs-boot-photo{opacity:0;animation:hsBootPhoto 1s ease .8s forwards}
       @keyframes hsBootPhoto{from{opacity:0}to{opacity:1}}
-      .hs-boot-word{font-family:"Space Grotesk","Inter",system-ui,sans-serif;font-size:13px;font-weight:700;letter-spacing:.3em;text-indent:.3em;color:#101418}
-      .hs-boot-bar{width:120px;height:2px;border-radius:2px;background:rgba(16,20,24,.1);overflow:hidden}
-      .hs-boot-bar i{display:block;width:40%;height:100%;border-radius:2px;background:#2f5bff;animation:hsBootSlide 1.15s ease-in-out infinite}
+      .hs-boot-word{font-family:"Fraunces",Georgia,serif;font-size:13px;font-weight:700;letter-spacing:.3em;text-indent:.3em;color:#2a1d10}
+      .hs-boot-bar{width:120px;height:2px;border-radius:2px;background:rgba(42,29,16,.12);overflow:hidden}
+      .hs-boot-bar i{display:block;width:40%;height:100%;border-radius:2px;background:#b8894a;animation:hsBootSlide 1.15s ease-in-out infinite}
       @keyframes hsBootSlide{from{transform:translateX(-110%)}to{transform:translateX(280%)}}
       @media (prefers-reduced-motion:reduce){#hs-boot *{animation:none!important}.hs-boot-rect{stroke-dashoffset:0}.hs-boot-photo{opacity:1}}
     </style>
@@ -43,10 +43,10 @@
         <svg class="hs-boot-svg" viewBox="0 0 120 120">
           <defs>
             <linearGradient id="hsBootGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#dfe7ff"/><stop offset=".55" stop-color="#b9c9ff"/><stop offset="1" stop-color="#2f5bff"/>
+              <stop offset="0" stop-color="#f3e6c8"/><stop offset=".55" stop-color="#e3c88f"/><stop offset="1" stop-color="#b8894a"/>
             </linearGradient>
           </defs>
-          <g stroke="#101418" stroke-width="2" stroke-linecap="round">
+          <g stroke="#2a1d10" stroke-width="2" stroke-linecap="round">
             <path d="M14 26 V14 H26"/><path d="M94 14 H106 V26"/><path d="M14 94 V106 H26"/><path d="M94 106 H106 V94"/>
           </g>
           <rect x="20" y="20" width="80" height="80" rx="5" class="hs-boot-rect" pathLength="1"/>

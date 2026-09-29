@@ -223,6 +223,9 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   };
 
   const brandName = settings?.businessName || 'HAVESTORY';
+  /* Official brand monogram artwork — used when the studio hasn't uploaded a custom logo. */
+  const fallbackLogo = '/brand/hs-monogram.png';
+  const brandLogo = (typeof settings?.logoUrl === 'string' && settings.logoUrl.trim()) ? settings.logoUrl : fallbackLogo;
 
   return (
     <div data-public-site="" className="hv-page min-h-[100dvh] flex flex-col relative overflow-x-clip">
@@ -232,10 +235,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       <header className={`hv-header${scrolled ? ' is-scrolled' : ''}`}>
         <div className="hv-header-inner">
           <Link href="/" className="hv-brand" aria-label={`${brandName} home`}>
-            {settings?.logoUrl
-              ? <img src={settings.logoUrl} alt={brandName} />
-              : <span className="hv-brand-monogram">H</span>
-            }
+            <img src={brandLogo} alt={brandName} className="hv-brand-logo-img" />
             {settings?.showNameWithLogo !== false && (
               <span className="hv-brand-copy">
                 <strong>{brandName}</strong>
@@ -355,10 +355,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           <div className="hv-footer-grid">
             <div className="hv-footer-brand">
               <Link href="/" className="hv-brand" aria-label={`${brandName} home`}>
-                {settings?.logoUrl
-                  ? <img src={settings.logoUrl} alt={brandName} />
-                  : <span className="hv-brand-monogram">H</span>
-                }
+                <span className="hv-brand-emblem"><img src={brandLogo} alt={brandName} /></span>
                 <span className="hv-brand-copy">
                   <strong style={{ color: 'var(--hv-on-dark)' }}>{brandName}</strong>
                   {settings?.taglineEnabled !== false && settings?.tagline && <small>{settings.tagline}</small>}

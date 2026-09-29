@@ -8071,7 +8071,7 @@ body {
   isolation: isolate;
 }
 .hs-studio-loader-overlay {
-  background: #ffffff;
+  background: #f7f2e7;
 }
 .hs-studio-loader {
   display: flex;
@@ -8080,13 +8080,13 @@ body {
   align-items: center;
   justify-content: center;
   gap: 18px;
-  color: #101418;
+  color: #2a1d10;
   text-align: center;
 }
 .hs-dev-frame {
   width: 104px;
   height: 104px;
-  color: #101418;
+  color: #2a1d10;
 }
 .hs-dev-svg {
   width: 100%;
@@ -8100,7 +8100,7 @@ body {
 }
 .hs-dev-rect {
   fill: none;
-  stroke: #101418;
+  stroke: #2a1d10;
   stroke-width: 4;
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
@@ -8126,12 +8126,12 @@ body {
 .hs-dev-word {
   display: inline-flex;
   gap: 2px;
-  font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
+  font-family: "Fraunces", Georgia, serif;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.3em;
   text-indent: 0.3em;
-  color: #101418;
+  color: #2a1d10;
 }
 .hs-dev-word span {
   display: inline-block;
@@ -8145,14 +8145,14 @@ body {
   height: 2px;
   overflow: hidden;
   border-radius: 2px;
-  background: rgba(16, 20, 24, 0.1);
+  background: rgba(42, 29, 16, 0.12);
 }
 .hs-dev-bar i {
   display: block;
   width: 40%;
   height: 100%;
   border-radius: 2px;
-  background: #2f5bff;
+  background: #b8894a;
   animation: hs-dev-slide 1.15s ease-in-out infinite;
 }
 @keyframes hs-dev-slide { from { transform: translateX(-110%); } to { transform: translateX(280%); } }

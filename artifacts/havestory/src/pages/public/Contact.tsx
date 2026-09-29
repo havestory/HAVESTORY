@@ -38,9 +38,9 @@ export default function Contact() {
     });
   }
 
-  const address = settings?.address || '123 Printing Ave, Colombo, Sri Lanka';
-  const phone = settings?.phone || '+94 11 234 5678';
-  const email = settings?.email || 'hello@havestory.com';
+  const address = settings?.address || 'Kalugamuwa, Kurunegala, Sri Lanka';
+  const phone = settings?.phone || '077 400 5091';
+  const email = settings?.email || 'havestory.info@gmail.com';
 
   return (
     <div className="hv-page">

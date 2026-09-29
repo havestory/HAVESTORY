@@ -1,22 +1,22 @@
-/* Admin palette · SMART STUDIO light theme (crisp neutrals + cobalt accent).
+/* Admin palette · SMART HERITAGE light theme (cream + espresso + antique gold).
    Tailwind utility aliases live in the index.css entrypoint. */
 html[data-hs-admin-theme] {
   --admin-on-solid: 0 0% 100%;
-  --admin-brand-ink: 222 70% 42%;
+  --admin-brand-ink: 33 42% 30%;
   --admin-success-solid: 158 62% 26%;
   --admin-warning-solid: 32 85% 29%;
   --admin-danger-solid: 350 62% 38%;
   --admin-font: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
-  --admin-canvas: 220 18% 96%;
-  --admin-surface: 0 0% 100%;
-  --admin-subtle: 220 16% 93%;
-  --admin-ink: 222 18% 8%;
-  --admin-muted: 220 10% 38%;
-  --admin-border: 220 14% 86%;
-  --admin-inverse: 222 20% 9%;
-  --admin-brand: 222 88% 56%;
-  --admin-brand-soft: 222 90% 95%;
-  --admin-brand-line: 222 70% 72%;
+  --admin-canvas: 42 42% 94%;
+  --admin-surface: 42 55% 99%;
+  --admin-subtle: 40 38% 91%;
+  --admin-ink: 28 32% 12%;
+  --admin-muted: 32 14% 38%;
+  --admin-border: 36 22% 82%;
+  --admin-inverse: 28 32% 13%;
+  --admin-brand: 36 46% 44%;
+  --admin-brand-soft: 38 52% 92%;
+  --admin-brand-line: 36 46% 62%;
   --admin-success: 158 62% 26%;
   --admin-success-soft: 152 48% 94%;
   --admin-success-line: 156 32% 72%;
@@ -26,20 +26,20 @@ html[data-hs-admin-theme] {
   --admin-danger: 350 62% 38%;
   --admin-danger-soft: 350 70% 96%;
   --admin-danger-line: 350 45% 78%;
-  --admin-chart-info: 211 54% 38%;
+  --admin-chart-info: 36 46% 40%;
 }
 html[data-hs-admin-theme='dark'] {
-  --admin-brand-ink: 222 85% 78%;
-  --admin-inverse: 222 20% 6%;
-  --admin-canvas: 222 16% 9%;
-  --admin-surface: 222 14% 13%;
-  --admin-subtle: 222 12% 18%;
-  --admin-ink: 220 20% 95%;
-  --admin-muted: 220 10% 70%;
-  --admin-border: 222 12% 26%;
-  --admin-brand: 222 88% 62%;
-  --admin-brand-soft: 222 45% 20%;
-  --admin-brand-line: 222 70% 60%;
+  --admin-brand-ink: 38 58% 76%;
+  --admin-inverse: 28 30% 7%;
+  --admin-canvas: 28 28% 9%;
+  --admin-surface: 28 26% 12%;
+  --admin-subtle: 28 22% 16%;
+  --admin-ink: 42 35% 94%;
+  --admin-muted: 35 15% 68%;
+  --admin-border: 30 20% 24%;
+  --admin-brand: 36 52% 58%;
+  --admin-brand-soft: 36 35% 18%;
+  --admin-brand-line: 36 46% 58%;
   --admin-success: 158 42% 62%;
   --admin-success-soft: 158 29% 17%;
   --admin-success-line: 158 30% 36%;
@@ -49,7 +49,7 @@ html[data-hs-admin-theme='dark'] {
   --admin-danger: 350 65% 73%;
   --admin-danger-soft: 350 30% 20%;
   --admin-danger-line: 350 35% 42%;
-  --admin-chart-info: 211 65% 72%;
+  --admin-chart-info: 38 58% 70%;
 }
 /* Shared UI components and portalled menus inherit the same theme as pages. */
 :where([data-admin-panel], html[data-hs-admin-theme] [role='dialog'], html[data-hs-admin-theme] [role='alertdialog'], html[data-hs-admin-theme] [data-radix-popper-content-wrapper]) {
@@ -75,11 +75,11 @@ html[data-hs-admin-theme='dark'] {
   --destructive: var(--admin-danger-solid);
   --destructive-foreground: 0 0% 100%;
   --sidebar: var(--admin-inverse);
-  --sidebar-foreground: 220 15% 88%;
-  --sidebar-primary: 220 10% 72%;
+  --sidebar-foreground: 36 25% 88%;
+  --sidebar-primary: 36 32% 70%;
   --sidebar-primary-foreground: var(--admin-inverse);
-  --sidebar-border: 220 13% 32%;
-  --sidebar-accent: 220 12% 27%;
+  --sidebar-border: 30 20% 28%;
+  --sidebar-accent: 30 22% 24%;
   --sidebar-accent-foreground: 0 0% 100%;
   --sidebar-ring: var(--admin-brand-line);
   --app-font-sans: var(--admin-font);
@@ -117,7 +117,7 @@ html[data-hs-admin-theme='dark'] {
   min-width: 0;
   border: 1px solid hsl(var(--card-border));
   background: linear-gradient(145deg, hsl(var(--card) / 0.98), hsl(var(--background) / 0.96));
-  box-shadow: 0 30px 90px rgba(15, 23, 42, 0.24), 0 0 0 1px hsl(var(--secondary) / 0.08);
+  box-shadow: 0 30px 90px rgba(42, 29, 16, 0.24), 0 0 0 1px hsl(var(--secondary) / 0.08);
   backdrop-filter: blur(22px) saturate(1.16);
   -webkit-backdrop-filter: blur(22px) saturate(1.16);
 }
@@ -512,95 +512,94 @@ html[data-hs-admin-theme] .order-manage-scroll {
 }
 
 
-/* ═══════════════════════════════════════════════════════════════════
-   SMART STUDIO LIGHT THEME · crisp white shell for the admin workspace
+/* ═══════════════════════════════════════════════════════════════════   SMART HERITAGE LIGHT THEME · cream shell for the admin workspace
    Applies only to the light theme; the dark theme keeps its tokens.
    Selector pattern `html[data-hs-admin-theme]:not([data-hs-admin-theme='dark'])`
    outranks the zero-specificity `:where()` shared block above.
    ═══════════════════════════════════════════════════════════════════ */
 
-/* Light sidebar tokens — white sidebar, ink text, cobalt accents */
+/* Light sidebar tokens — cream sidebar, espresso text, antique gold accents */
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) :where([data-admin-panel]) {
   --sidebar: 0 0% 100%;
-  --sidebar-foreground: 222 18% 14%;
-  --sidebar-primary: 222 88% 56%;
+  --sidebar-foreground: 28 32% 14%;
+  --sidebar-primary: 36 46% 44%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-border: 220 14% 90%;
-  --sidebar-accent: 222 90% 95%;
-  --sidebar-accent-foreground: 222 70% 40%;
-  --sidebar-ring: 222 70% 72%;
+  --sidebar-border: 36 22% 84%;
+  --sidebar-accent: 38 52% 92%;
+  --sidebar-accent-foreground: 33 42% 30%;
+  --sidebar-ring: 36 46% 62%;
 }
 
-/* Light sidebar shell — clean white, hairline edge */
+/* Light sidebar shell — warm cream, hairline edge */
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-sidebar {
-  background: #ffffff;
-  box-shadow: 12px 0 32px -24px hsl(222 30% 20% / 0.25);
+  background: #fbf7ec;
+  box-shadow: 12px 0 32px -24px hsl(32 35% 22% / 0.25);
 }
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-sidebar-monogram {
-  background: hsl(222 18% 8%);
+  background: hsl(28 32% 12%);
   border-color: transparent;
   color: #fff;
-  font-family: 'Space Grotesk', 'DM Sans', sans-serif;
+  font-family: 'Fraunces', 'DM Sans', sans-serif;
   border-radius: 12px;
 }
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-sidebar-wordmark {
-  color: hsl(222 18% 10%);
+  color: hsl(28 32% 14%);
 }
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-sidebar-subtitle {
-  color: hsl(222 70% 45%);
+  color: hsl(36 46% 38%);
 }
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-nav-item:hover {
-  background: hsl(222 90% 96%);
+  background: hsl(38 52% 93%);
 }
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-nav-active {
-  background: hsl(222 90% 94%);
-  color: hsl(222 70% 38%);
-  box-shadow: inset 3px 0 hsl(222 88% 56%);
+  background: hsl(38 52% 92%);
+  color: hsl(33 42% 30%);
+  box-shadow: inset 3px 0 hsl(36 46% 44%);
 }
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-sidebar > div:last-child {
-  background: hsl(220 18% 97%);
+  background: hsl(40 40% 93%);
 }
 
-/* Canvas — flat light neutral, no warm glow */
+/* Canvas — warm cream canvas */
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel].admin-frame {
   background: hsl(var(--admin-canvas));
 }
 
-/* Workspace header — white, hairline border */
+/* Workspace header — warm cream, hairline border */
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-workspace-header {
-  background: #ffffff;
-  border-bottom: 1px solid hsl(220 14% 90%);
+  background: #fbf7ec;
+  border-bottom: 1px solid hsl(36 22% 84%);
   box-shadow: none;
 }
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-workspace-title {
-  color: hsl(222 18% 10%);
+  color: hsl(28 32% 14%);
 }
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-new-order {
-  background: hsl(222 88% 56%);
-  box-shadow: 0 8px 20px -10px hsl(222 88% 56% / 0.7);
+  background: hsl(36 46% 44%);
+  box-shadow: 0 8px 20px -10px hsl(36 46% 44% / 0.7);
   border-radius: 10px;
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-new-order:hover {
-  background: hsl(222 80% 48%);
+  background: hsl(36 44% 38%);
   transform: translateY(-1px);
-  box-shadow: 0 12px 26px -10px hsl(222 88% 56% / 0.75);
+  box-shadow: 0 12px 26px -10px hsl(36 46% 44% / 0.75);
 }
 
-/* Cards — crisp white, hairline border */
+/* Cards — crisp warm cream, hairline border */
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-workspace-content .bg-card {
-  box-shadow: 0 1px 2px hsl(222 25% 20% / 0.05), 0 16px 40px -28px hsl(222 30% 25% / 0.25);
-  border-color: hsl(220 14% 90%);
+  box-shadow: 0 1px 2px hsl(32 30% 20% / 0.05), 0 16px 40px -28px hsl(32 32% 25% / 0.25);
+  border-color: hsl(36 22% 84%);
 }
 
-/* Tables — clean neutral rows, cobalt header accents */
+/* Tables — warm rows, antique gold header accents */
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-table thead th {
-  background: hsl(220 18% 96%);
-  color: hsl(222 60% 38%);
+  background: hsl(40 40% 93%);
+  color: hsl(33 42% 32%);
   font-size: 10.5px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  border-bottom: 1px solid hsl(220 14% 88%);
+  border-bottom: 1px solid hsl(36 22% 82%);
 }
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-table thead th:first-child {
   border-top-left-radius: 12px;
@@ -612,7 +611,7 @@ html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .
   transition: background 0.15s ease;
 }
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-table tbody tr:hover {
-  background: hsl(222 60% 96%) !important;
+  background: hsl(38 50% 93%) !important;
 }
 
 /* Refined chips / badges */
@@ -628,11 +627,11 @@ html[data-hs-admin-theme] [data-admin-panel] .admin-chip {
   border: 1px solid transparent;
   white-space: nowrap;
 }
-/* legacy name kept — now the single cobalt accent */
+/* legacy name kept — now the single antique gold accent */
 html[data-hs-admin-theme] [data-admin-panel] .admin-chip-bronze {
-  background: hsl(222 90% 94%);
-  color: hsl(222 70% 38%);
-  border-color: hsl(222 70% 80%);
+  background: hsl(38 52% 92%);
+  color: hsl(33 42% 30%);
+  border-color: hsl(36 46% 72%);
 }
 html[data-hs-admin-theme] [data-admin-panel] .admin-chip-success {
   background: hsl(152 52% 94%);
@@ -650,28 +649,28 @@ html[data-hs-admin-theme] [data-admin-panel] .admin-chip-danger {
   border-color: hsl(350 48% 80%);
 }
 html[data-hs-admin-theme] [data-admin-panel] .admin-chip-neutral {
-  background: hsl(220 16% 94%);
-  color: hsl(220 10% 40%);
-  border-color: hsl(220 14% 86%);
+  background: hsl(40 30% 92%);
+  color: hsl(32 14% 38%);
+  border-color: hsl(36 22% 82%);
 }
 
-/* Primary buttons — flat cobalt */
+/* Primary buttons — flat antique gold */
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .bg-primary {
-  background: hsl(222 88% 56%);
-  box-shadow: 0 8px 20px -10px hsl(222 88% 56% / 0.65);
+  background: hsl(36 46% 44%);
+  box-shadow: 0 8px 20px -10px hsl(36 46% 44% / 0.65);
 }
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .bg-primary:hover {
-  background: hsl(222 80% 48%);
+  background: hsl(36 44% 38%);
 }
 
-/* Inputs — cobalt focus */
+/* Inputs — antique gold focus */
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] :is(input, select, textarea):focus-visible {
   outline: none;
-  border-color: hsl(222 88% 60%);
-  box-shadow: 0 0 0 3px hsl(222 88% 56% / 0.14);
+  border-color: hsl(36 46% 50%);
+  box-shadow: 0 0 0 3px hsl(36 46% 44% / 0.14);
 }
 
-/* Stat tiles — cobalt top accent for dashboard cards */
+/* Stat tiles — antique gold top accent for dashboard cards */
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .admin-stat-card {
   position: relative;
   overflow: hidden;
@@ -681,10 +680,17 @@ html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) [data-admin-panel] .
   position: absolute;
   inset: 0 0 auto;
   height: 3px;
-  background: hsl(222 88% 56%);
+  background: hsl(36 46% 44%);
 }
 
-/* Login page — clean light */
+/* Login page — warm cream */
 html[data-hs-admin-theme]:not([data-hs-admin-theme='dark']) .hs-login-page {
   background: hsl(var(--admin-canvas)) !important;
+}
+
+/* SMART HERITAGE · serif display for admin titles + wordmark */
+html[data-hs-admin-theme] [data-admin-panel] .admin-workspace-title,
+html[data-hs-admin-theme] [data-admin-panel] .admin-sidebar-wordmark {
+  font-family: "Fraunces", Georgia, serif;
+  letter-spacing: 0.01em;
 }

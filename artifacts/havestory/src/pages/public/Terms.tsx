@@ -22,7 +22,7 @@ const UL = 'mt-3 space-y-2.5 pl-6 text-[15px] leading-7 text-[#6f6259] list-disc
 export default function Terms() {
   const { data: settings } = useGetSettings();
   const biz = settings?.businessName || 'HAVESTORY';
-  const email = settings?.email || 'hello@havestory.lk';
+  const email = settings?.email || 'havestory.info@gmail.com';
   const custom = settings?.termsOfService;
 
   return (

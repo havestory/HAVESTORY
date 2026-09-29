@@ -78,6 +78,22 @@ export default function About() {
         </div>
       </section>
 
+      {/* Brand banner · official HAVESTORY artwork */}
+      <section className="hv-section-tight" aria-label="The HAVESTORY brand">
+        <div className="hv-container">
+          <Reveal>
+            <div className="hv-img-frame" style={{ borderRadius: 20, border: "1px solid rgba(184,137,74,0.35)" }}>
+              <img
+                src="/brand/havestory-banner.jpg"
+                alt="HAVESTORY — More than frames, a story for life. Handcrafted frames in Kalugamuwa, Kurunegala, Sri Lanka."
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
       {/* Stats band */}
       <section className="hv-section-tight border-y border-[rgba(23,19,16,0.07)] bg-[#f1e9da]">
         <div className="hv-container">

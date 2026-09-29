@@ -19,9 +19,9 @@ export function StudioLoader({ label = 'Preparing your studio experience', logoU
         <svg viewBox="0 0 120 120" className="hs-dev-svg">
           <defs>
             <linearGradient id="hs-dev-photo-grad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#dfe7ff" />
-              <stop offset="0.55" stopColor="#b9c9ff" />
-              <stop offset="1" stopColor="#2f5bff" />
+              <stop offset="0" stopColor="#f3e6c8" />
+              <stop offset="0.55" stopColor="#e3c88f" />
+              <stop offset="1" stopColor="#b8894a" />
             </linearGradient>
             <clipPath id="hs-dev-clip">
               <rect x="30" y="30" width="60" height="60" rx="2" />
