@@ -11,7 +11,7 @@
 .hv-page {
   --hv-ink: #2a1d10;
   --hv-ink-2: #3d2c1a;
-  --hv-paper: #f7f2e7;
+  --hv-paper: #ffffff;
   --hv-surface: #f3ecdb;
   --hv-accent: #b8894a;
   --hv-accent-deep: #8f6a34;
@@ -513,7 +513,7 @@
   gap: 24px;
 }
 .hv-header.is-scrolled {
-  background: rgba(247, 242, 231, 0.9);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(18px) saturate(1.3);
   -webkit-backdrop-filter: blur(18px) saturate(1.3);
   border-bottom-color: var(--hv-line-soft);

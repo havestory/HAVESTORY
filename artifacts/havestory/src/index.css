@@ -8071,7 +8071,7 @@ body {
   isolation: isolate;
 }
 .hs-studio-loader-overlay {
-  background: #f7f2e7;
+  background: #ffffff;
 }
 .hs-studio-loader {
   display: flex;
