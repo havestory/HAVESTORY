@@ -17,6 +17,7 @@ import './reference-refresh.css';
 import './public-typography.css';
 import './premium-white.css';
 import './hero-polish.css';
+import './hero-cinematic.css';
 import './invoice-product-picker';
 
 applyThemeVars('studio-smart');

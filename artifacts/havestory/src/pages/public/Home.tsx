@@ -5,6 +5,8 @@ import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion
 import {
   ArrowRight,
   BadgeCheck,
+  ChevronLeft,
+  ChevronRight,
   Headphones,
   Image as ImageIcon,
   PackageCheck,
@@ -80,7 +82,7 @@ function SectionHead({ id, eyebrow, title, copy, href, link }: { id?: string; ey
   );
 }
 
-const MARQUEE_WORDS = ["Photo Frames", "Custom Framing", "Gifts & Keepsakes", "Personalised Designs", "Studio Services"];
+const MARQUEE_WORDS = ["Handcrafted in Sri Lanka", "Solid Wood Frames", "Museum-Grade Glass", "Custom Sizes & Finishes", "Thoughtful Gifting"];
 const COLLECTION_SPANS = ["lg:col-span-7", "lg:col-span-5", "lg:col-span-5", "lg:col-span-7"];
 
 export default function Home() {
@@ -151,13 +153,25 @@ export default function Home() {
     ? 'Request a custom frame'
     : configuredHeroCta || (primaryIsCustom ? 'Request a custom frame' : 'Browse frames');
   const favouriteProducts = favouriteWindow ? Array.from({ length: favouriteWindow }, (_, index) => favouritePool[index]) : [];
-  const heroTitle = cfg?.heroTitle || "Frame the moments that become your story.";
-  const heroSubtitle = cfg?.heroSubtitle || "Made with care in Sri Lanka. Thoughtful frames, beautiful prints and a studio for the memories you want to keep.";
+  const heroTitle: string = cfg?.heroTitle || "Frame the moments that become your story.";
+  const heroSubtitle: string = cfg?.heroSubtitle || "Made with care in Sri Lanka. Thoughtful frames, beautiful prints and a studio for the memories you want to keep.";
+  const titleWords = heroTitle.split(/\s+/).filter(Boolean);
+  const MARQUEE_CAPTIONS = ["Studio piece", "Handcrafted frame", "Custom framing", "Gallery print"];
+  const marqueeImages = [...new Set([...heroSlides, ...categories.map((item) => item.image).filter(Boolean) as string[]])].slice(0, 8);
+  const marqueeFrames = marqueeImages.map((src, index) => ({ src, label: MARQUEE_CAPTIONS[index % MARQUEE_CAPTIONS.length] }));
 
   useEffect(() => {
     setHeroIndex(0);
     setPreviousHeroImage(null);
   }, [heroKey]);
+  useEffect(() => {
+    // The cinematic hero sits under the fixed site header; keep header
+    // text legible over the dark imagery until the page is scrolled.
+    document.body.dataset.hvHeroDark = "1";
+    return () => {
+      delete document.body.dataset.hvHeroDark;
+    };
+  }, []);
   useEffect(() => () => {
     if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
   }, []);
@@ -194,119 +208,153 @@ export default function Home() {
     <main className="hv-page">
       <SiteNotices notices={Array.isArray(notices) ? notices : []} />
 
-      {/* ── Hero · full-viewport editorial split ─────────────────── */}
-      <section aria-labelledby="studio-title" className="relative overflow-hidden" style={{ minHeight: "100svh", display: "flex", alignItems: "center", paddingTop: 96 }}>
-        <div
+            {/* ── Hero · Living Gallery cinematic ───────────────────────── */}
+      <section aria-labelledby="studio-title" className="hv-cine" ref={heroRef}>
+        {/* moving background slides · slow Ken Burns drift */}
+        <div className="hv-cine-bgwrap" aria-hidden="true">
+          {previousHeroImage && (
+            <img src={previousHeroImage} alt="" decoding="async" className="hv-cine-bg" />
+          )}
+          <motion.img
+            key={heroImage}
+            src={heroImage}
+            alt=""
+            fetchPriority={safeHeroIndex === 0 ? "high" : "auto"}
+            decoding="async"
+            className="hv-cine-bg"
+            initial={{ opacity: reduceMotion || !previousHeroImage ? 1 : 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+          />
+        </div>
+        <div className="hv-cine-veil" aria-hidden="true" />
+        <div className="hv-cine-dust" aria-hidden="true">
+          {Array.from({ length: 10 }, (_, index) => (
+            <i key={index} />
+          ))}
+        </div>
+
+        {/* drifting framed prints */}
+        <motion.div
           aria-hidden="true"
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(1000px 520px at 84% 6%, rgba(184,137,74,0.10), transparent 60%)",
-          }}
-        />
-        <div className="hv-container relative w-full">
-          <div className="grid items-center gap-12 lg:gap-20 lg:grid-cols-[1.02fr_0.98fr]" style={{ paddingBlock: "clamp(24px, 4vh, 56px)" }}>
-            <div>
+          className="hv-cine-float hv-cine-float-a"
+          style={{ y: heroOrbY }}
+          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.7, rotate: 10 }}
+          animate={reduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, rotate: 4 }}
+          transition={{ duration: 0.9, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <img src={orbHeroImage} alt="" loading="lazy" decoding="async" />
+        </motion.div>
+        <motion.div
+          aria-hidden="true"
+          className="hv-cine-float hv-cine-float-b"
+          style={{ y: heroArchY }}
+          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.7, rotate: -10 }}
+          animate={reduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, rotate: -5 }}
+          transition={{ duration: 0.9, delay: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <img src={nextHeroImage} alt="" loading="lazy" decoding="async" />
+        </motion.div>
+
+        {/* headline block */}
+        <div className="hv-container hv-cine-inner">
+          <div className="hv-cine-copy">
             <motion.div {...fadeUp(0.05)}>
-              <span className="hv-badge hv-badge-bronze">
-                <Sparkles size={13} aria-hidden="true" />
+              <span className="hv-cine-badge">
+                <span className="hv-cine-badge-dot">
+                  <Sparkles size={13} aria-hidden="true" />
+                </span>
                 {cfg?.heroBadgeText || "HAVESTORY · Sri Lankan creative studio"}
               </span>
             </motion.div>
-            <motion.h1 id="studio-title" className="hv-display hv-display-xl" style={{ marginTop: 24 }} {...fadeUp(0.14)}>
-              {heroTitle}
-            </motion.h1>
-            <motion.p className="hv-lede" style={{ marginTop: 24, maxWidth: "52ch" }} {...fadeUp(0.22)}>
+            <h1 id="studio-title" className="hv-cine-title" aria-label={heroTitle}>
+              {titleWords.map((word, index) => (
+                <span key={index} aria-hidden="true">
+                  <span className="hv-cine-wordmask">
+                    <motion.span
+                      className={`hv-cine-word${index === titleWords.length - 1 ? " hv-cine-accent" : ""}`}
+                      initial={reduceMotion ? { opacity: 0 } : { y: "112%" }}
+                      animate={reduceMotion ? { opacity: 1 } : { y: "0%" }}
+                      transition={{ duration: 0.85, delay: 0.12 + index * 0.055, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      {word}
+                    </motion.span>
+                  </span>
+                  {index < titleWords.length - 1 ? " " : ""}
+                </span>
+              ))}
+            </h1>
+            <motion.p className="hv-cine-lede" {...fadeUp(0.42)}>
               {heroSubtitle}
             </motion.p>
-            <motion.div className="flex flex-wrap items-center" style={{ marginTop: 36, gap: "16px 36px" }} {...fadeUp(0.3)}>
+            <motion.div className="hv-cine-cta" {...fadeUp(0.52)}>
               <Link href={primaryHeroHref} className="hv-btn hv-btn-bronze">
                 {primaryHeroLabel} <ArrowRight size={16} aria-hidden="true" />
               </Link>
-              <Link href={primaryIsCustom ? "/store" : "/custom-project"} className="hv-text-link">
+              <Link href={primaryIsCustom ? "/store" : "/custom-project"} className="hv-cine-btn-ghost">
                 {primaryIsCustom ? "Browse frames" : "Request a custom frame"} <ArrowRight size={15} aria-hidden="true" />
               </Link>
             </motion.div>
           </div>
+        </div>
 
-            <div className="hv-hero-stage" ref={heroRef}>
-              <motion.div
-                className="hv-hero-panel"
-                style={{ y: heroArchY }}
-                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 64 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1.1, delay: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <div className="hv-hero-frame">
-                  <div className="hv-hero-frame-photo">
-                    {previousHeroImage && (
-                      <img
-                        src={previousHeroImage}
-                        alt=""
-                        aria-hidden="true"
-                        decoding="async"
-                        style={{ position: "absolute", inset: 0 }}
-                      />
-                    )}
-                    <motion.img
-                      key={heroImage}
-                      src={heroImage}
-                      alt="A framed piece from the HAVESTORY studio"
-                      fetchPriority={safeHeroIndex === 0 ? "high" : "auto"}
-                      decoding="async"
-                      style={{ position: "absolute", inset: 0 }}
-                      initial={reduceMotion || !previousHeroImage ? { opacity: 0 } : { opacity: 0, scale: 1.06 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                    />
-                  </div>
-                  <div className="hv-hero-frame-bar">
-                    <span className="hv-hero-frame-cap">
-                      <i aria-hidden="true" /> Live studio piece
-                    </span>
-                    <span className="hv-hero-frame-tag">A3 · Oak · Museum glass</span>
-                  </div>
-                </div>
-                <motion.div
-                  aria-hidden="true"
-                  className="hv-hero-frame-sm hv-hero-frame-sm-a"
-                  style={{ y: heroOrbY }}
-                  initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.7, rotate: 10 }}
-                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                  transition={{ duration: 0.9, delay: 0.62, ease: [0.22, 1, 0.36, 1] }}
-                >
-                  <img src={orbHeroImage} alt="" loading="lazy" decoding="async" />
-                </motion.div>
-                <motion.div
-                  aria-hidden="true"
-                  className="hv-hero-frame-sm hv-hero-frame-sm-b hv-float"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.8, delay: 0.78 }}
-                >
-                  <img src={nextHeroImage} alt="" loading="lazy" decoding="async" />
-                </motion.div>
-              </motion.div>
-              {heroSlides.length > 1 && (
-                <div role="group" aria-label="Studio gallery images" className="hv-hero-dots">
-                  {heroSlides.map((_, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      aria-label={`Show image ${index + 1} of ${heroSlides.length}`}
-                      aria-current={index === safeHeroIndex ? "true" : undefined}
-                      onClick={() => showHeroSlide(index)}
-                      className={`hv-hero-dot${index === safeHeroIndex ? " is-active" : ""}`}
-                    />
-                  ))}
-                </div>
-              )}
+        {/* slide controls */}
+        {heroSlides.length > 1 && (
+          <div className="hv-cine-controls">
+            <span className="hv-cine-count" aria-hidden="true">
+              <strong>{String(safeHeroIndex + 1).padStart(2, "0")}</strong>
+              {" / "}
+              {String(heroSlides.length).padStart(2, "0")}
+            </span>
+            <button
+              type="button"
+              className="hv-cine-arrow"
+              aria-label="Previous studio image"
+              onClick={() => showHeroSlide((safeHeroIndex - 1 + heroSlides.length) % heroSlides.length)}
+            >
+              <ChevronLeft size={20} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              className="hv-cine-arrow"
+              aria-label="Next studio image"
+              onClick={() => showHeroSlide((safeHeroIndex + 1) % heroSlides.length)}
+            >
+              <ChevronRight size={20} aria-hidden="true" />
+            </button>
+          </div>
+        )}
+        {heroSlides.length > 1 && (
+          <div role="group" aria-label="Studio gallery images" className="hv-cine-dots">
+            {heroSlides.map((_, index) => (
+              <button
+                key={index}
+                type="button"
+                aria-label={`Show image ${index + 1} of ${heroSlides.length}`}
+                aria-current={index === safeHeroIndex ? "true" : undefined}
+                onClick={() => showHeroSlide(index)}
+                className={`hv-cine-dot${index === safeHeroIndex ? " is-active" : ""}`}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* infinite framed-image marquee */}
+        {marqueeFrames.length > 0 && (
+          <div className="hv-cine-marquee" aria-hidden="true">
+            <div className="hv-cine-track">
+              {[...marqueeFrames, ...marqueeFrames].map((frame, index) => (
+                <figure className="hv-cine-thumb" key={index}>
+                  <img src={frame.src} alt="" loading="lazy" decoding="async" />
+                  <figcaption>{frame.label}</figcaption>
+                </figure>
+              ))}
             </div>
           </div>
-        </div>
+        )}
       </section>
 
-      {/* ── Benefits ─────────────────────────────────────────────── */}
+{/* ── Benefits ─────────────────────────────────────────────── */}
       {benefitsVisible && (
         <section className="hv-section-tight" aria-label="Studio promises">
           <div className="hv-container">
@@ -429,25 +477,6 @@ export default function Home() {
               cta="Start a custom order"
             />
           )}
-        </div>
-      </section>
-
-      {/* ── Brand heritage strip · official HAVESTORY artwork ───────── */}
-      <section className="hv-section-tight" aria-label="The HAVESTORY brand">
-        <div className="hv-container">
-          <Reveal>
-            <div className="hv-img-frame" style={{ borderRadius: 20, border: "1px solid rgba(184,137,74,0.35)" }}>
-              <img
-                src="/brand/havestory-banner.jpg"
-                alt="HAVESTORY — More than frames, a story for life. Photo frames, custom framing, gifts and keepsakes, personalised designs and studio services."
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-            <p className="hv-display text-center" style={{ marginTop: 22, fontSize: "clamp(19px, 2.4vw, 27px)", fontStyle: "italic", color: "var(--hv-ink)" }}>
-              More than frames, <span style={{ color: "var(--hv-accent-deep)" }}>a story for life.</span>
-            </p>
-          </Reveal>
         </div>
       </section>
 
