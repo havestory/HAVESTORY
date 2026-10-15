@@ -43,6 +43,9 @@
   background: #fff;
   color: var(--hv-ink);
 }
+[data-public-site] :is(h1, h2, h3, .hv-display) {
+  font-family: var(--hv-font-display);
+}
 [data-public-site] .hv-display {
   font-weight: 750;
   letter-spacing: -0.035em;
@@ -163,7 +166,9 @@
   line-height: 1.8;
   letter-spacing: 0.14em;
 }
-.hv-light-hero-title {
+[data-public-site] .hv-light-hero-title {
+  font-family: var(--hv-font-display);
+  color: var(--hv-ink);
   font-size: clamp(2.4rem, 4.5vw, 4.4rem);
   line-height: 1.06;
   letter-spacing: -0.055em;
@@ -391,7 +396,7 @@
   .hv-light-hero-copy {
     padding: 0;
   }
-  .hv-light-hero-title {
+  [data-public-site] .hv-light-hero-title {
     font-size: clamp(2.35rem, 8vw, 3.75rem);
     max-width: 17ch;
   }
@@ -415,7 +420,7 @@
     justify-content: center;
     width: 100%;
   }
-  .hv-light-hero-title {
+  [data-public-site] .hv-light-hero-title {
     font-size: 2.35rem;
   }
   [data-public-site] .hv-header-inner {
@@ -442,3 +447,6 @@
 [data-public-site] .hv-menu-btn {
   background: #fff;
 }
+
+/* Cart and modal overlays must cover the support launcher. */
+[data-public-site] .hv-wa-float { z-index: 45; }

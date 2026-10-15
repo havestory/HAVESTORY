@@ -18,7 +18,7 @@ export function ShopCartDrawer({ trigger }: { trigger: ReactNode }) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent className="hv-page w-[min(26rem,calc(100vw-1rem))]! border-l border-[rgba(23,19,16,0.1)] p-0 flex flex-col gap-0">
+      <SheetContent data-public-site="" className="hv-page w-[min(26rem,calc(100vw-1rem))]! border-l border-[rgba(23,19,16,0.1)] p-0 flex flex-col gap-0">
         <div className="px-6 pt-6 pb-5 border-b border-[rgba(23,19,16,0.08)]">
           <span className="hv-kicker">Havestory shop</span>
           <SheetHeader className="text-left mt-2 p-0 space-y-0">
