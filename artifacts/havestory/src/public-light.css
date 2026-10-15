@@ -1,0 +1,444 @@
+/* Customer light theme. One scoped palette also covers legacy public pages. */
+[data-public-site],
+[data-public-site] .hv-page {
+  color-scheme: light;
+  --background: 0 0% 100%;
+  --foreground: 222 24% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 24% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 24% 12%;
+  --muted: 220 20% 97%;
+  --muted-foreground: 218 11% 38%;
+  --border: 220 14% 90%;
+  --input: 220 14% 86%;
+  --hv-paper: #fff;
+  --hv-card: #fff;
+  --hv-surface: #f6f7f8;
+  --hv-ink: #18212b;
+  --hv-ink-2: #293641;
+  --hv-muted: #56616c;
+  --hv-faint: #687581;
+  --hv-line: #dde2e7;
+  --hv-line-soft: #edf0f2;
+  --hv-accent: #926a36;
+  --hv-accent-deep: #785329;
+  --hv-accent-soft: #f7f4ef;
+  --hv-bronze: var(--hv-accent);
+  --hv-bronze-deep: var(--hv-accent-deep);
+  --hv-gold: var(--hv-accent);
+  --hv-cream: #f6f7f8;
+  --hv-blush: #fff;
+  --hv-font-display: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --hv-shadow-sm: 0 3px 14px -8px #18212b25;
+  --hv-shadow-md: 0 12px 35px -20px #18212b35;
+  --hs-ivory: #fff;
+  --hs-paper: #fff;
+  --hs-espresso: #18212b;
+  --studio-paper: #fff;
+  --studio-ink: #18212b;
+  --studio-muted: #56616c;
+  --hsc-paper: #fff;
+  --editorial-paper: #fff;
+  background: #fff;
+  color: var(--hv-ink);
+}
+[data-public-site] .hv-display {
+  font-weight: 750;
+  letter-spacing: -0.035em;
+  line-height: 1.16;
+}
+[data-public-site] .hv-display-lg {
+  font-size: clamp(2.1rem, 4vw, 3.5rem);
+}
+[data-public-site] .hv-display-md {
+  font-size: clamp(1.8rem, 3vw, 2.7rem);
+}
+[data-public-site] .hv-display-sm {
+  font-size: clamp(1.25rem, 2vw, 1.8rem);
+}
+[data-public-site] .hv-lede {
+  color: var(--hv-muted);
+  font-size: clamp(0.95rem, 1.4vw, 1.08rem);
+  line-height: 1.8;
+}
+[data-public-site] .hv-section {
+  padding-block: clamp(48px, 6vw, 84px);
+}
+[data-public-site] .hv-section-tight {
+  padding-block: clamp(28px, 4vw, 48px);
+}
+[data-public-site] .hv-band-blush {
+  background: #fff;
+  border-block: 1px solid var(--hv-line-soft);
+}
+[data-public-site] .hv-grain::after {
+  display: none;
+}
+[data-public-site] .hv-dark {
+  --hv-on-dark: var(--hv-ink);
+  --hv-on-dark-muted: var(--hv-muted);
+  background: #fff;
+  color: var(--hv-ink);
+}
+[data-public-site] .hv-dark :is(.hv-display, .hv-text-link, .hv-stat-num) {
+  color: var(--hv-ink);
+}
+[data-public-site] .hv-dark :is(.hv-lede, .hv-stat-label) {
+  color: var(--hv-muted);
+}
+[data-public-site] .hv-dark :is(.hv-kicker, .hv-display em) {
+  color: var(--hv-accent-deep);
+}
+[data-public-site] .hv-header {
+  background: #fff;
+  border-bottom: 1px solid var(--hv-line);
+}
+[data-public-site] .hv-header.is-scrolled {
+  background: #fff;
+  backdrop-filter: none;
+  box-shadow: var(--hv-shadow-sm);
+}
+[data-public-site] .hv-header-inner {
+  height: 76px;
+}
+[data-public-site] .hv-header.is-scrolled .hv-header-inner {
+  height: 76px;
+}
+[data-public-site]
+  :is(.hv-nav a, .hv-icon-btn, .hv-brand-wordmark, .hv-brand-tagline) {
+  color: var(--hv-ink);
+}
+[data-public-site] .hv-card {
+  background: #fff;
+  border: 1px solid var(--hv-line);
+  border-radius: 18px;
+  box-shadow: none;
+}
+[data-public-site] .hv-btn {
+  min-height: 46px;
+  border-radius: 12px;
+  font-weight: 750;
+  letter-spacing: 0;
+}
+[data-public-site] .hv-btn-solid {
+  background: var(--hv-ink);
+  color: #fff;
+}
+[data-public-site] .hv-btn-bronze {
+  background: var(--hv-accent-deep);
+  color: #fff;
+}
+[data-public-site] :is(.hv-btn-outline, .hv-btn-outline-light) {
+  color: var(--hv-ink);
+  border-color: var(--hv-line);
+  background: #fff;
+}
+[data-public-site] :is(input, select, textarea) {
+  color-scheme: light;
+}
+[data-public-site] :is(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid #926a36;
+  outline-offset: 4px;
+}
+[data-public-site] :is(a, button) {
+  -webkit-tap-highlight-color: transparent;
+}
+/* Light editorial hero: imagery carries the colour, copy remains readable. */
+.hv-light-hero {
+  padding: clamp(110px, 11vw, 144px) 0 36px;
+}
+.hv-light-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: clamp(28px, 5vw, 76px);
+}
+.hv-light-hero-copy {
+  padding-block: 24px;
+  min-width: 0;
+}
+.hv-light-hero-copy .hv-kicker {
+  font-size: 10px;
+  line-height: 1.8;
+  letter-spacing: 0.14em;
+}
+.hv-light-hero-title {
+  font-size: clamp(2.4rem, 4.5vw, 4.4rem);
+  line-height: 1.06;
+  letter-spacing: -0.055em;
+  font-weight: 800;
+  margin-block: 24px;
+  max-width: 12ch;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+.hv-light-word {
+  display: inline-block;
+  overflow: clip;
+  vertical-align: bottom;
+  padding-bottom: 0.09em;
+  margin-bottom: -0.09em;
+}
+.hv-light-word > span {
+  display: inline-block;
+}
+.hv-light-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+.hv-light-gallery {
+  min-width: 0;
+}
+.hv-light-image {
+  position: relative;
+  aspect-ratio: 1/1.06;
+  overflow: hidden;
+  border-radius: 26px;
+  background: #f6f7f8;
+  isolation: isolate;
+}
+.hv-light-slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.hv-light-slider-controls {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 4px 24px #18212b20;
+  padding: 5px;
+  color: #18212b;
+}
+.hv-light-slider-controls button {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.hv-light-slider-controls button:hover {
+  background: #f2f4f5;
+}
+.hv-light-slider-controls span {
+  min-width: 62px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.hv-light-thumbnails {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 12px 4px 5px;
+  scrollbar-width: thin;
+}
+.hv-light-thumbnails button {
+  flex: 0 0 66px;
+  padding: 3px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.hv-light-thumbnails button[aria-pressed="true"] {
+  border-color: var(--hv-accent);
+}
+.hv-light-thumbnails img {
+  width: 100%;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 7px;
+}
+[data-public-site] .hv-home-benefits .hv-card {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  column-gap: 12px;
+  padding: 16px 8px;
+  border: 0;
+  background: #fff;
+}
+[data-public-site] .hv-home-benefits .hv-benefit-icon {
+  grid-row: span 2;
+  width: 36px;
+  height: 36px;
+  margin-top: 3px;
+  background: var(--hv-accent-soft);
+  border-radius: 10px;
+}
+[data-public-site] .hv-home-benefits h2 {
+  margin-top: 0 !important;
+  font-size: 13px;
+  line-height: 1.5;
+}
+[data-public-site] .hv-home-benefits p {
+  margin-top: 4px !important;
+  font-size: 12px;
+  line-height: 1.6;
+}
+[data-public-site] .hv-collection-card .hv-collection-body {
+  padding: 0;
+}
+[data-public-site] .hv-collection-card h3 {
+  font-size: 20px;
+}
+[data-public-site] .hv-collection-card .hv-kicker {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+[data-public-site] .hv-collection-foot {
+  margin-top: 16px;
+  padding-top: 14px;
+}
+.hv-home-gallery .hv-img-frame {
+  aspect-ratio: 4/5 !important;
+}
+[data-public-site] .hv-footer {
+  background: #fff;
+  color: var(--hv-ink);
+  border-top: 1px solid var(--hv-line);
+}
+[data-public-site] .hv-footer::before {
+  display: none;
+}
+[data-public-site] .hv-footer :is(.hv-display, .hv-brand-wordmark) {
+  color: var(--hv-ink) !important;
+}
+[data-public-site] .hv-footer :is(h4, .hv-kicker) {
+  color: var(--hv-accent-deep);
+}
+[data-public-site]
+  .hv-footer
+  :is(
+    p,
+    .hv-footer-contact,
+    .hv-footer-grid a,
+    .hv-footer-base,
+    .hv-footer-base a,
+    .hv-brand-tagline
+  ) {
+  color: var(--hv-muted);
+}
+[data-public-site] .hv-footer a:hover {
+  color: var(--hv-accent-deep);
+}
+[data-public-site] :is(.hv-footer-cta, .hv-footer-base) {
+  border-color: var(--hv-line);
+}
+[data-public-site] .hv-footer-grid {
+  padding-block: 40px;
+}
+[data-public-site] .hv-footer-cta {
+  padding-block: 44px;
+}
+/* Small purposeful interactions across every customer route. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-public-site] :is(.hv-btn, .hv-icon-btn, .hv-card-hover, .hv-text-link) {
+    transition:
+      transform 0.25s var(--hv-ease),
+      background-color 0.2s,
+      color 0.2s,
+      box-shadow 0.25s;
+  }
+  [data-public-site] .hv-img-frame img {
+    transition: transform 0.6s var(--hv-ease);
+  }
+  [data-public-site] :is(.hv-btn, .hv-text-link) svg {
+    transition: transform 0.25s var(--hv-ease);
+  }
+  @media (hover: hover) {
+    [data-public-site] .hv-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--hv-shadow-md);
+    }
+    [data-public-site] .hv-card-hover:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--hv-shadow-md);
+    }
+    [data-public-site]
+      :is(.hv-card-hover, .hv-collection-card):hover
+      .hv-img-frame
+      img {
+      transform: scale(1.035);
+    }
+    [data-public-site] :is(.hv-btn, .hv-text-link):hover svg {
+      transform: translateX(3px);
+    }
+  }
+}
+@media (max-width: 800px) {
+  .hv-light-hero {
+    padding-top: 108px;
+  }
+  .hv-light-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .hv-light-hero-copy {
+    padding: 0;
+  }
+  .hv-light-hero-title {
+    font-size: clamp(2.35rem, 8vw, 3.75rem);
+    max-width: 17ch;
+  }
+  .hv-light-image {
+    aspect-ratio: 4/3;
+    border-radius: 20px;
+  }
+  .hv-light-gallery {
+    max-width: 100%;
+  }
+  [data-public-site] .hv-home-benefits .hv-card {
+    padding: 10px 0;
+  }
+}
+@media (max-width: 440px) {
+  .hv-light-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .hv-light-actions .hv-btn {
+    justify-content: center;
+    width: 100%;
+  }
+  .hv-light-hero-title {
+    font-size: 2.35rem;
+  }
+  [data-public-site] .hv-header-inner {
+    gap: 8px;
+    padding-inline: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-public-site] *,
+  [data-public-site] *::before,
+  [data-public-site] *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  [data-public-site] :is(.hv-btn, .hv-card-hover):hover {
+    transform: none;
+  }
+}
+
+[data-public-site] .hv-drawer {
+  background: #fff;
+}
+[data-public-site] .hv-menu-btn {
+  background: #fff;
+}
