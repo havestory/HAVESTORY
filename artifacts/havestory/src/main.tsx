@@ -16,8 +16,7 @@ import './invoice-product-picker.css';
 import './reference-refresh.css';
 import './public-typography.css';
 import './premium-white.css';
-import './hero-polish.css';
-import './hero-cinematic.css';
+import './public-light.css';
 import './invoice-product-picker';
 
 applyThemeVars('studio-smart');
@@ -33,12 +32,12 @@ createRoot(document.getElementById('root')!, {
 );
 
 /* Dismiss the static boot loader ("developing frame" in index.html).
-   Guarantees: minimum visible time so the animation reads, dismissal on
+   Guarantees: immediate dismissal when ready, dismissal on
    window load, and a hard safety timeout so a slow asset can never hang
    the page. Idempotent. */
 (function dismissBootLoader() {
   const startedAt = Date.now();
-  const MIN_MS = 950;
+  const MIN_MS = 0;
   const MAX_MS = 3200;
   let done = false;
   function dismiss() {
