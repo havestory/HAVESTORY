@@ -21,6 +21,7 @@ async function buildVercel() {
   await esbuild({
     entryPoints: [path.resolve(artifactDir, "src/vercel.ts")],
     platform: "node",
+    target: "node24",
     bundle: true,
     format: "esm",
     outdir: funcDir,
@@ -119,7 +120,7 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
   await writeFile(
     path.join(funcDir, ".vc-config.json"),
     JSON.stringify({
-      runtime: "nodejs20.x",
+      runtime: "nodejs24.x",
       handler: "vercel.mjs",
       launcherType: "Nodejs",
       shouldAddHelpers: true,
