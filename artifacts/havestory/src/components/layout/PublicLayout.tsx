@@ -2,7 +2,7 @@ import { type ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useGetSettings } from '@workspace/api-client-react';
 import { Menu, X, Phone, Mail, MapPin, Instagram, Facebook, ArrowRight, ArrowUpRight, ShoppingBag, Sparkles, MessageCircle, ChevronDown } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, MotionConfig, useReducedMotion } from 'framer-motion';
 import { applyThemeVars } from '@/lib/theme-utils';
 import { useShopCart } from '@/lib/shop-cart';
 import { ShopCartDrawer } from '@/components/shop/ShopCartDrawer';
@@ -63,6 +63,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   const [location]   = useLocation();
   const { data: settings, isLoading: settingsLoading, isError: settingsError, refetch: refetchSettings } = useGetSettings();
   const { count: cartCount } = useShopCart();
+  const reduceMotion = useReducedMotion();
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileNav, setMobileNav] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -334,9 +335,11 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       </AnimatePresence>
 
       {/* ── Page content ── */}
-      <div className="flex-1">
-        {children}
-      </div>
+      <MotionConfig reducedMotion="user">
+        <motion.div key={location} className="flex-1 hv-route-content" initial={reduceMotion ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .28, ease: [.22,1,.36,1] }}>
+          {children}
+        </motion.div>
+      </MotionConfig>
 
       <footer className="hv-footer hv-grain" aria-label="HAVESTORY studio footer">
         <div className="hv-container">
@@ -388,7 +391,6 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               <Link href="/about"><Sparkles /> Our story</Link>
             </div>
           </div>
-          <div className="hv-footer-word" aria-hidden="true">{brandName}</div>
           <div className="hv-footer-base">
             <span>{(settings as any)?.footerCopyrightText || `© ${new Date().getFullYear()} ${brandName}. All rights reserved.`}</span>
             <span className="flex gap-5">
@@ -480,3 +482,4 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     </div>
   );
 }
+
