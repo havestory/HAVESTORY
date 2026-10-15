@@ -482,4 +482,3 @@ export function PublicLayout({ children }: { children: ReactNode }) {
     </div>
   );
 }
-
