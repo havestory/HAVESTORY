@@ -447,3 +447,6 @@
 [data-public-site] .hv-menu-btn {
   background: #fff;
 }
+
+/* Cart and modal overlays must cover the support launcher. */
+[data-public-site] .hv-wa-float { z-index: 45; }
